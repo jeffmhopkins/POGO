@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POGO — Modulation Architecture</title>
+<style>
+  body { font-family: monospace; background: #0d0d0d; color: #c8c8c8; margin: 0; padding: 2rem; }
+  h1 { color: #e8e8e8; border-bottom: 2px solid #444; padding-bottom: .5rem; }
+  h2 { color: #aaa; border-bottom: 1px solid #333; padding-bottom: .3rem; margin-top: 2rem; }
+  h3 { color: #888; margin-top: 1.5rem; }
+  a { color: #7aacdc; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  pre { background: #1a1a1a; border: 1px solid #333; padding: 1rem; overflow-x: auto; line-height: 1.5; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th { background: #222; color: #aaa; text-align: left; padding: .5rem .8rem; border: 1px solid #444; }
+  td { padding: .4rem .8rem; border: 1px solid #333; }
+  tr:nth-child(even) { background: #141414; }
+  .nav { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 2rem; }
+  .nav a { background: #1e1e1e; border: 1px solid #444; padding: .3rem .7rem; border-radius: 3px; font-size: .85rem; }
+  .nav a.current { background: #2a3a4a; border-color: #7aacdc; color: #7aacdc; }
+  .note { background: #1a1400; border-left: 3px solid #665500; padding: .5rem 1rem; margin: 1rem 0; }
+  .status { display: inline-block; background: #0d2a0d; border: 1px solid #2a5a2a; color: #6abf6a; padding: .2rem .6rem; border-radius: 3px; font-size: .85rem; }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <a href="index.html">Overview</a>
+  <a href="block-A-input-buffer.html">Block A</a>
+  <a href="block-1-pregain.html">Block 1</a>
+  <a href="block-2-envelope-follower.html">Block 2</a>
+  <a href="block-3-apcf.html">Block 3</a>
+  <a href="block-4-distortion.html">Block 4</a>
+  <a href="block-5-lp1.html">Block 5</a>
+  <a href="block-6-lp2.html">Block 6</a>
+  <a href="block-7-hp.html">Block 7</a>
+  <a href="block-B-output-buffer.html">Block B</a>
+  <a href="mod-architecture.html" class="current">Mod Arch</a>
+</div>
+
+<h1>Modulation Architecture</h1>
+<span class="status">Phase 1 ✅ &nbsp; Phase 2 ✅ &nbsp; Phase 3 ✅ &nbsp; Phase 4 [ ]</span>
+
+<h2>1. Block Diagram</h2>
+<pre>
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ PRIMARY MOD SOURCE JACK                                                      │
+│   TS tip-switching jack                                                      │
+│   Unplugged: selected ENV OUT feeds mod bus (via MOD SOURCE SEL switch)     │
+│              SEL = L  → ENV OUT L (0–10 V from Block 2)                    │
+│              SEL = R  → ENV OUT R (0–10 V from Block 2)                    │
+│              SEL = LR → L+R averaged (0–10 V)                              │
+│   Plugged:   any external CV or audio overrides the envelope normalling     │
+└─────────────────────────────────────────────────────────────────────────────┘
+  │
+  ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ MOD BUS PROCESSOR (MB_PROC: 1× TL074)                                       │
+│                                                                              │
+│ V_source ──[R_src]──┬──(−in) MB_AMP ──(out)── V_modbus_inv                 │
+│ V_offset ──[R_off]──┘     (+in) = GND                                      │
+│                            (out)◄──[R_f]──(−in)                            │
+│              ↑                                                               │
+│   AMOUNT knob (0.2× – 5×): R_src is a pot varying gain                     │
+│   OFFSET knob (±5 V): R_off drives pot-derived DC voltage                  │
+│                                                                              │
+│ V_modbus_inv ──[R_inv]──(−in) MB_INV ──(out)── V_modbus  (restored polarity)│
+│                (+in) = GND; (out)◄──[R_inv]──(−in)                         │
+│                                                                              │
+│ V_modbus ──[unity buffer]──[1 kΩ series]──► MOD BUS OUT JACK               │
+└─────────────────────────────────────────────────────────────────────────────┘
+  │
+  V_modbus  (internal mod bus signal)
+  │
+  ├──────────────────────────────────────────────────────────────────── ×19
+  │
+  ▼ Per destination (repeated for each of the 19 destinations):
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ V_modbus ──[100 Ω]──[BAT54 clamp to ±12 V]──────────────────────────────┐ │
+│                                                                           │ │
+│ OVERRIDE JACK ──[100 Ω]──[BAT54 clamp]──[tip-switch logic]──────────────┘ │
+│   (tip-switching TS jack: when unplugged, mod bus feeds through;           │ │
+│    when cable inserted, override jack signal replaces mod bus)             │ │
+│                                                                           │ │
+│ V_att_in ──► ATTENUVERTER pot (−1× to +1×, center detent = 0)            │ │
+│              Wiper ──► CV summing node at destination parameter            │ │
+│                                                                            ││
+│ Bipolar pot wiring:                                                        ││
+│   CW end: +V_att_in                                                       ││
+│   CCW end: −V_att_in (via unity-gain inverter op-amp)                     ││
+│   Wiper sweeps: −V_att_in (full CCW) → 0 (center) → +V_att_in (full CW)  ││
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Formula:
+  V_modbus = AMOUNT × V_source + OFFSET
+
+Example (envelope 0–10 V, AMOUNT=0.5, OFFSET=−2.5 V):
+  Silence (V=0):   mod bus = 0 − 2.5 = −2.5 V
+  Full level (V=10): mod bus = 5 − 2.5 = +2.5 V
+  Result: mod bus swings −2.5 V to +2.5 V (centered around 0)
+</pre>
+
+<h2>2. Schematic</h2>
+<pre>
+Mod Bus Processor (MB_PROC: TL074CDT, SOIC-14, 4 halves):
+
+Half A: Inverting summer (MB_AMP)
+  V_source ──[R_src (AMOUNT pot)]──┬──(−in, pin 2) MB_AMP ──(out, pin 1)── V_modbus_inv
+  V_offset ──[R_off]───────────────┘     (+in, pin 3) = GND
+                                          (out)◄──[R_f]──(−in)
+  R_f / R_src controls AMOUNT gain (0.2× – 5×)
+  R_off and R_f control OFFSET range (±5 V)
+
+Half B: Inverter (MB_INV, restores signal polarity)
+  V_modbus_inv ──[R_inv]──(−in, pin 6) MB_INV ──(out, pin 7)── V_modbus
+                            (+in, pin 5) = GND
+                            (out)◄──[R_inv]──(−in)     (unity gain invert)
+
+Half C: Output buffer (unity gain → MOD BUS OUT jack)
+  V_modbus ──(+in, pin 9) MB_BUF ──(out, pin 8)──[1kΩ series]──► MOD BUS OUT jack
+                (−in, pin 10)◄────────────────────────────────────┘
+
+Half D: spare
+
+Trim pots on Mod Bus Processor:
+  RV_MB_ZERO:       zero offset null (output = 0V when source = 0V and OFFSET knob centered)
+  RV_MB_AMOUNT_MAX: AMOUNT maximum gain calibration (target: 5.0× at full CW)
+
+Per-Destination Attenuverter Circuit (×19, using 10× TL074 ICs total for all destinations):
+
+V_mod ──[100 Ω 0603]──[BAT54S SOT-23 clamp]────────────────────────────── V_att_in
+                                                                            │
+Override jack tip ──[100 Ω]──[BAT54S]──[tip-switch lug]───────────────────┘
+  (sleeve switching: when cable inserted, disconnects V_att_in from mod bus)
+
+V_att_in ──► ATTENUVERTER pot (9mm bipolar, center detent)
+  CW end: +V_att_in
+  CCW end: −V_att_in (inverter op-amp: TL074 half; gain = −1)
+  Wiper ──► CV summing node at parameter input
+
+Each bipolar pot requires 1 TL074 half for the inverter.
+19 destinations × 2 halves (buffer + inverter) = 38 halves → 10× TL074 ICs.
+</pre>
+
+<h2>3. Parts List</h2>
+<table>
+  <thead>
+    <tr><th>Reference</th><th>Part Number</th><th>Package</th><th>Qty</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>MB_PROC</td><td>TL074CDT</td><td>SOIC-14</td><td>1</td><td>Summer + inverter + output buffer + spare half</td></tr>
+    <tr><td>MB_ATT_x</td><td>TL074CDT</td><td>SOIC-14</td><td>10</td><td>Attenuverter inverter stages (19 destinations × ~2 halves / 4 per IC → 10 ICs)</td></tr>
+    <tr><td>D_clamp_x</td><td>BAT54S</td><td>SOT-23</td><td>21</td><td>Input clamp at each attenuverter input (19 destinations + 2 spares)</td></tr>
+    <tr><td>R_clamp_x</td><td>—</td><td>0603</td><td>100 Ω</td><td>19</td><td>Series resistors at each attenuverter input</td></tr>
+    <tr><td>RV_AMOUNT</td><td>Lin pot</td><td>9mm</td><td>1</td><td>Mod bus AMOUNT (0.2× – 5×)</td></tr>
+    <tr><td>RV_OFFSET</td><td>Lin pot</td><td>9mm</td><td>1</td><td>Mod bus OFFSET (±5 V)</td></tr>
+    <tr><td>RV_ATT_x</td><td>Bipolar pot</td><td>9mm</td><td>19</td><td>Attenuverters (one per destination; center-detent bipolar)</td></tr>
+    <tr><td>J_OVERRIDE_x</td><td>Thonkiconn PJ301M-12</td><td>Panel TH</td><td>19</td><td>Override jack per destination (tip-switching TS)</td></tr>
+    <tr><td>J_MOD_SRC</td><td>Thonkiconn PJ301M-12</td><td>Panel TH</td><td>1</td><td>PRIMARY MOD SOURCE jack (tip-switching TS)</td></tr>
+    <tr><td>J_MOD_OUT</td><td>Thonkiconn PJ301M-12</td><td>Panel TH</td><td>1</td><td>MOD BUS OUT jack (buffered output)</td></tr>
+    <tr><td>RV_MB_ZERO</td><td>Bourns 3224W</td><td>SMD</td><td>1</td><td>Mod bus zero offset null</td></tr>
+    <tr><td>RV_MB_AMOUNT_MAX</td><td>Bourns 3296W</td><td>TH multiturn</td><td>1</td><td>AMOUNT max gain calibration</td></tr>
+  </tbody>
+</table>
+
+<h2>4. Design Notes</h2>
+
+<h3>Phase 1 — Functional Specification</h3>
+
+<h4>Primary Mod Source</h4>
+<ul>
+  <li><strong>MOD SOURCE SEL switch</strong> (3-position, panel): selects which envelope signal normalizes into the PRIMARY MOD SOURCE jack (L / R / L+R averaged).</li>
+  <li><strong>PRIMARY MOD SOURCE jack</strong>: tip-switching TS jack. Unplugged → selected ENV signal is active. Plugged → any external CV or audio overrides the envelope.</li>
+</ul>
+
+<h4>Mod Bus Processor Controls</h4>
+<table>
+  <thead><tr><th>Name</th><th>Range</th><th>Default</th><th>Taper</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td>AMOUNT</td><td>0.2× – 5×</td><td>1×</td><td>Linear</td><td>Scales the mod source signal before adding offset</td></tr>
+    <tr><td>OFFSET</td><td>±5 V</td><td>0 V</td><td>Linear</td><td>DC offset added after scaling; shifts the mod signal up or down</td></tr>
+  </tbody>
+</table>
+
+<p><strong>Formula:</strong> <code>V_modbus = AMOUNT × V_source + OFFSET</code></p>
+
+<h4>Per-Destination Circuit</h4>
+<ol>
+  <li><strong>OVERRIDE JACK</strong>: tip-switching input jack. When empty, the mod bus signal feeds through. When a cable is inserted, the override jack signal replaces the mod bus for this destination.</li>
+  <li><strong>100 Ω + BAT54 clamp</strong>: standard input protection on the selected signal.</li>
+  <li><strong>ATTENUVERTER</strong>: bipolar pot (−1× to +1×, center detent at 0). Full CCW: inverts the mod signal. Center: cuts mod to zero. Full CW: passes mod signal at full scale.</li>
+  <li><strong>CV summing node</strong>: attenuverter output sums with the parameter's panel knob voltage at the filter/distortion/APF control input.</li>
+</ol>
+
+<h3>Phase 2 — Analog Behavior Model</h3>
+<pre>
+Mod Bus Processor:
+  V_modbus = AMOUNT × V_source + OFFSET
+  AMOUNT ∈ [0.2, 5.0] (pot position mapped linearly)
+  OFFSET ∈ [−5 V, +5 V] (pot position mapped linearly)
+
+Circuit: inverting summer op-amp + inverter to restore polarity:
+  V_modbus_inv = −(R_f/R_src × V_source + R_f/R_off × V_offset)
+  V_modbus = −V_modbus_inv  (unity inverter)
+
+Per-Destination Attenuverter:
+  V_dest_cv = ATTENUVERTER_gain × V_selected
+  ATTENUVERTER_gain ∈ [−1, +1]
+  Center (gain=0): V_dest_cv = 0 — mod bus is fully cut
+  Full CW (gain=+1): V_dest_cv = V_selected
+  Full CCW (gain=−1): V_dest_cv = −V_selected (inverted)
+</pre>
+
+<h3>Phase 3 — Circuit Notes</h3>
+<ul>
+  <li><strong>19 override jacks</strong>: all jacks must be TS type with sleeve-switching lug connected to the mod bus. Verify Thonkiconn footprint has switching lug accessible in PCB layout.</li>
+  <li><strong>Op-amp count</strong>: 1× TL074 for the mod bus processor + 10× TL074 for 19 attenuverter inverter stages = 11× TL074 for the entire modulation system. This is significant — plan power budget carefully.</li>
+  <li><strong>19 attenuverter pots</strong> is a very large number for a single module. Evaluate during panel layout whether all 19 can fit. If space is constrained, group modulation targets (e.g., a single APF attenuverter for all three APF freq destinations) and add sub-routing switches.</li>
+  <li><strong>MOD BUS OUT</strong>: buffered output of the mod bus signal. 1 kΩ series output resistor.</li>
+</ul>
+
+<h3>Modulation Destinations (all 19)</h3>
+<table>
+  <thead>
+    <tr><th>Destination</th><th>Block</th><th>CV Type</th><th>Override Jack</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Pre-Gain Level</td><td>1</td><td>0–10 V → 1×–5× gain</td><td>Yes</td></tr>
+    <tr><td>APF Freq 1</td><td>3</td><td>±5 V, 1V/oct</td><td>Yes</td></tr>
+    <tr><td>APF Freq 2</td><td>3</td><td>±5 V, 1V/oct</td><td>Yes</td></tr>
+    <tr><td>APF Freq 3</td><td>3</td><td>±5 V, 1V/oct</td><td>Yes</td></tr>
+    <tr><td>APF Feedback 1</td><td>3</td><td>0–10 V</td><td>Yes</td></tr>
+    <tr><td>APF Feedback 2</td><td>3</td><td>0–10 V</td><td>Yes</td></tr>
+    <tr><td>APF Feedback 3</td><td>3</td><td>0–10 V</td><td>Yes</td></tr>
+    <tr><td>APF Blend</td><td>3</td><td>0–10 V</td><td>Yes</td></tr>
+    <tr><td>APF Dry/Wet</td><td>3</td><td>0–10 V</td><td>Yes</td></tr>
+    <tr><td>Distortion Drive 1</td><td>4</td><td>0–10 V</td><td>Yes</td></tr>
+    <tr><td>Distortion Drive 2</td><td>4</td><td>0–10 V</td><td>Yes</td></tr>
+    <tr><td>Distortion Drive 3</td><td>4</td><td>0–10 V</td><td>Yes</td></tr>
+    <tr><td>LP1 Cutoff</td><td>5</td><td>±5 V, 1V/oct</td><td>Yes</td></tr>
+    <tr><td>LP1 Resonance</td><td>5</td><td>0–10 V</td><td>Yes</td></tr>
+    <tr><td>LP2 Cutoff</td><td>6</td><td>±5 V, 1V/oct</td><td>Yes</td></tr>
+    <tr><td>LP2 Resonance</td><td>6</td><td>0–10 V</td><td>Yes</td></tr>
+    <tr><td>HP Cutoff</td><td>7</td><td>±5 V, 1V/oct</td><td>Yes</td></tr>
+    <tr><td>HP Resonance</td><td>7</td><td>0–10 V</td><td>Yes</td></tr>
+  </tbody>
+</table>
+
+<h3>Trim Pots</h3>
+<table>
+  <thead><tr><th>Reference</th><th>Purpose</th><th>Adjustment</th></tr></thead>
+  <tbody>
+    <tr><td>RV_MB_ZERO</td><td>Mod bus zero offset null: output = 0V when source = 0V and OFFSET knob centered</td><td>Trim until V_modbus = 0V with V_source = 0V and OFFSET at center</td></tr>
+    <tr><td>RV_MB_AMOUNT_MAX</td><td>AMOUNT maximum gain calibration (target: 5.0×)</td><td>Set AMOUNT to max; input 1V; trim until output = 5V</td></tr>
+  </tbody>
+</table>
+
+<h3>Power</h3>
+<p>+12 V: ~40 mA &nbsp;|&nbsp; −12 V: ~40 mA &nbsp;(11× TL074 total for mod bus processor + 19 attenuverter stages)</p>
+
+</body>
+</html>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POGO — Block 3: Triple 6-Stage All-Pass Comb Filter</title>
+<style>
+  body { font-family: monospace; background: #0d0d0d; color: #c8c8c8; margin: 0; padding: 2rem; }
+  h1 { color: #e8e8e8; border-bottom: 2px solid #444; padding-bottom: .5rem; }
+  h2 { color: #aaa; border-bottom: 1px solid #333; padding-bottom: .3rem; margin-top: 2rem; }
+  h3 { color: #888; margin-top: 1.5rem; }
+  a { color: #7aacdc; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  pre { background: #1a1a1a; border: 1px solid #333; padding: 1rem; overflow-x: auto; line-height: 1.5; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th { background: #222; color: #aaa; text-align: left; padding: .5rem .8rem; border: 1px solid #444; }
+  td { padding: .4rem .8rem; border: 1px solid #333; }
+  tr:nth-child(even) { background: #141414; }
+  .nav { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 2rem; }
+  .nav a { background: #1e1e1e; border: 1px solid #444; padding: .3rem .7rem; border-radius: 3px; font-size: .85rem; }
+  .nav a.current { background: #2a3a4a; border-color: #7aacdc; color: #7aacdc; }
+  .note { background: #1a1400; border-left: 3px solid #665500; padding: .5rem 1rem; margin: 1rem 0; }
+  .warn { background: #1a0a00; border-left: 3px solid #883300; padding: .5rem 1rem; margin: 1rem 0; }
+  .status { display: inline-block; background: #0d2a0d; border: 1px solid #2a5a2a; color: #6abf6a; padding: .2rem .6rem; border-radius: 3px; font-size: .85rem; }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <a href="index.html">Overview</a>
+  <a href="block-A-input-buffer.html">Block A</a>
+  <a href="block-1-pregain.html">Block 1</a>
+  <a href="block-2-envelope-follower.html">Block 2</a>
+  <a href="block-3-apcf.html" class="current">Block 3</a>
+  <a href="block-4-distortion.html">Block 4</a>
+  <a href="block-5-lp1.html">Block 5</a>
+  <a href="block-6-lp2.html">Block 6</a>
+  <a href="block-7-hp.html">Block 7</a>
+  <a href="block-B-output-buffer.html">Block B</a>
+  <a href="mod-architecture.html">Mod Arch</a>
+</div>
+
+<h1>Block 3: Triple 6-Stage All-Pass Comb Filter (APCF)</h1>
+<span class="status">Phase 1 ✅ &nbsp; Phase 2 ✅ &nbsp; Phase 3 ✅ &nbsp; Phase 4 [ ]</span>
+
+<div class="warn">
+  ⚠️ Most complex and component-dense block in the module. Plan for 2–3 PCBs.
+  18× LM13700 + 18× TL072 + 5× TL074 + 3× THAT340 + 1× V2164 + 1× CD4053.
+</div>
+
+<h2>1. Block Diagram</h2>
+<pre>
+Audio L+R from Block 2 (±5 V)
+  │
+  ├──────────────────────────────────────────────────────────────────┐
+  │                                                                  │
+  ▼ (L channel — R channel is identical, with STEREO WIDTH offset)  │
+  │                                                                  │
+  ├──► Group 1 (low formant, 100 Hz–1 kHz)                          │
+  │    │                                                             │
+  │    ├── [APF stage 1] ─ [APF stage 2] ─ [APF stage 3]           │
+  │    │   [APF stage 4] ─ [APF stage 5] ─ [APF stage 6]           │
+  │    │   Each stage: 1× LM13700 OTA cell + 1× TL072 half          │
+  │    │   ω₀ = g_m / C_apf;  C_apf = 1.5 nF; expo ctrl from G1   │
+  │    │                                                             │
+  │    └──► Group 1 wet output ──────────────────────────────────┐  │
+  │                                  ▲                           │  │
+  │                  feedback loop ──┘                           │  │
+  │                                                              │  │
+  ├──► Group 2 (mid formant, 500 Hz–5 kHz)                       │  │
+  │    6× APF stages; C_apf = 300 pF; expo ctrl from G2          │  │
+  │    └──► Group 2 wet output ──────────────────────────────┐   │  │
+  │                                                           │   │  │
+  ├──► Group 3 (high formant, 2 kHz–20 kHz)                  │   │  │
+  │    6× APF stages; C_apf = 68–82 pF; expo ctrl from G3    │   │  │
+  │    └──► Group 3 wet output ──────────────────────────┐   │   │  │
+  │                                                       │   │   │  │
+  │                                                       ▼   ▼   ▼  │
+  │                                              ┌─────────────────┐ │
+  │                                              │ V2164 DRY/WET   │ │
+  │                                              │ crossfader      │ │
+  │                                              │ (2 cells: L dry │ │
+  │                                              │  + L wet)       │ │
+  │                                              └─────────────────┘ │
+  │                                                       │           │
+  └──────────────────────────────────────────────────────┘           │
+                                                          │           │
+  R channel (mirrored; STEREO WIDTH adds offset to R expo inputs)    │
+  └──────────────────────────────────────────────────────────────────┘
+
+Feedback path (per group, 3 stages):
+  ┌─[Stage 1: SOURCE selection]───────────────────────────────────┐
+  │  CD4053 mux:                                                  │
+  │  Internal:   V_apf_out only                                   │
+  │  Blend:      V_apf_out × (1-BLEND) + V_post_dist × BLEND     │
+  │  Post-Dist:  V_post_dist only (tap from Block 4 chain output) │
+  └────────────────────────────────────────────────────────────────┘
+       │
+  ┌─[Stage 2: POLARITY selection]──────────────────────────────────┐
+  │  3-position panel switch:                                      │
+  │  Positive → +V_fb_source (deepens notches)                    │
+  │  Off      → GND (cuts all feedback)                           │
+  │  Negative → −V_fb_source (turns notches into peaks)           │
+  └────────────────────────────────────────────────────────────────┘
+       │
+  ┌─[Stage 3: FEEDBACK amount × 3 (independent per group)]─────────┐
+  │  Each group: FEEDBACK knob + CV attenuverter                   │
+  │  g ∈ [0, 0.95] — end-stop resistor prevents g = 1             │
+  └────────────────────────────────────────────────────────────────┘
+
+Controls:
+  FREQ 1/2/3 (knobs + CV, 1V/oct)     SPREAD (knob)
+  FREQ OFFSET (knob)                   STEREO WIDTH (knob)
+  FEEDBACK 1/2/3 (knobs + CV)         BLEND (knob + CV)
+  SOURCE (3-pos switch, global)        POLARITY (3-pos switch, global)
+  DRY/WET (knob + CV)
+</pre>
+
+<h2>2. Schematic</h2>
+<pre>
+Single All-Pass Stage (per OTA cell × 18 total per channel):
+
+V_in ──┬──[R_ref]──(−in) TL072_half ──(out)── V_apf_out
+       │              (+in)◄─────────────────────────────────┐
+       └──[OTA current out]──[C_apf]──────────────────────────┘
+                │
+            LM13700 OTA cell:
+              (+in): V_in
+              (−in): virtual GND (via 1kΩ linearizing resistor)
+              (Iabc): from expo converter
+              (out): current into C_apf
+
+Expo Converter (per group, shared L+R):
+  V_freq_knob + V_cv_sum → summing amp → THAT340 matched NPN pair
+  → exponential I_abc → LM13700 Iabc pins
+
+  1V/oct: +1V → I_abc × 2 → ω₀ × 2 → f × 2 (one octave up)
+  Trim pot RV_1VOCT_Gn calibrates tracking accuracy.
+
+STEREO WIDTH offset:
+  WIDTH_V → added to R channel expo inputs only (not L)
+  Small summing op-amp before each R group expo converter
+
+Feedback (per group):
+  V_apf_out ──[R_a]──┬──(−in) BLEND_AMP ──(out)── V_fb_source
+  V_post_dist ─[R_b]──┘   (CD4053 routes inputs per SOURCE switch)
+
+  V_fb_source → POLARITY switch → V_fb_polar
+  V_fb_polar ──[R_fb_fixed]──(−in) FB_SUM_AMP ──(out)── V_fb_sum
+  FEEDBACK knob wiper + CV ──[R_fb_cv]──(−in) FB_SUM_AMP
+  End-stop resistor ensures g ≤ 0.95 at knob maximum
+
+DRY/WET Crossfader (V2164, 4 cells):
+  V2164 cell 1: L dry   V2164 cell 2: L wet
+  V2164 cell 3: R dry   V2164 cell 4: R wet
+  Complementary control voltages from DRY/WET knob + CV
+</pre>
+
+<h2>3. Parts List</h2>
+<table>
+  <thead>
+    <tr><th>Reference</th><th>Part Number</th><th>Package</th><th>Qty</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>OTA_x</td><td>LM13700M</td><td>SOIC-16</td><td>18</td><td>Dual OTA; 1 per 2 APF stages; 9 per channel</td></tr>
+    <tr><td>APF_AMP_x</td><td>TL072CDT</td><td>SOIC-8</td><td>18</td><td>Dual op-amp; 1 per 2 APF stages; 9 per channel</td></tr>
+    <tr><td>EXPO_x</td><td>THAT340 or LM394</td><td>SOIC-8</td><td>3</td><td>Matched NPN pair; 1 per group (shared L+R)</td></tr>
+    <tr><td>VCA_DW</td><td>V2164D</td><td>SOIC-16</td><td>1</td><td>Quad VCA; 4 cells for DRY/WET (L dry, L wet, R dry, R wet)</td></tr>
+    <tr><td>SW_SRC</td><td>CD4053</td><td>SOIC-16</td><td>1</td><td>Triple 2:1 mux for SOURCE selection (global)</td></tr>
+    <tr><td>FB_AMP_x</td><td>TL074CDT</td><td>SOIC-14</td><td>3</td><td>Per-group feedback summing amp + BLEND_AMP + POL_INV</td></tr>
+    <tr><td>MIX_AMP_x</td><td>TL074CDT</td><td>SOIC-14</td><td>2</td><td>Summing, width offset, general mixing ops</td></tr>
+    <tr><td>C_apf_G1</td><td>C0G/NP0</td><td>0603</td><td>12</td><td>1.5 nF (6 per channel × 2 channels) — Group 1</td></tr>
+    <tr><td>C_apf_G2</td><td>C0G/NP0</td><td>0603</td><td>12</td><td>300 pF — Group 2</td></tr>
+    <tr><td>C_apf_G3</td><td>C0G/NP0</td><td>0603</td><td>12</td><td>68–82 pF — Group 3</td></tr>
+    <tr><td>SW_POL</td><td>3-pos panel switch</td><td>Panel</td><td>1</td><td>POLARITY: Positive / Off / Negative</td></tr>
+    <tr><td>SW_SRC_MAN</td><td>3-pos panel switch</td><td>Panel</td><td>1</td><td>SOURCE: Internal / Blend / Post-Dist</td></tr>
+    <tr><td>RV_FREQ_1/2/3</td><td>Log-taper pot</td><td>9mm</td><td>3</td><td>FREQ center frequency per group</td></tr>
+    <tr><td>RV_SPREAD</td><td>Lin pot</td><td>9mm</td><td>1</td><td>Spread between groups</td></tr>
+    <tr><td>RV_OFFSET</td><td>Lin pot</td><td>9mm</td><td>1</td><td>Global FREQ OFFSET (master sweep)</td></tr>
+    <tr><td>RV_FB_1/2/3</td><td>Lin pot</td><td>9mm</td><td>3</td><td>FEEDBACK per group</td></tr>
+    <tr><td>RV_BLEND</td><td>Lin pot</td><td>9mm</td><td>1</td><td>BLEND ratio (active when SOURCE = Blend)</td></tr>
+    <tr><td>RV_WIDTH</td><td>Lin pot</td><td>9mm</td><td>1</td><td>STEREO WIDTH (R channel freq offset)</td></tr>
+    <tr><td>RV_DW</td><td>Lin pot</td><td>9mm</td><td>1</td><td>DRY/WET crossfade</td></tr>
+  </tbody>
+</table>
+
+<h2>4. Design Notes</h2>
+
+<h3>Phase 1 — Sonic Intent</h3>
+<p>
+  Three independent groups of 6 first-order all-pass stages cascaded in series per stereo channel — 18 all-pass stages
+  total per channel. Mixed with the dry signal, they create the classic phaser comb: a sweep of notches and peaks across
+  the frequency spectrum. With three independent groups tuned to different frequency ranges, the comb pattern spreads
+  across the full audio band, producing rich, formant-like resonances — like a vowel filter that breathes with modulation.
+</p>
+<ul>
+  <li><strong>Group 1</strong>: Low formant (~100 Hz – 1 kHz)</li>
+  <li><strong>Group 2</strong>: Mid formant (~500 Hz – 5 kHz)</li>
+  <li><strong>Group 3</strong>: High formant (~2 kHz – 20 kHz)</li>
+</ul>
+
+<h3>Phase 2 — Transfer Functions</h3>
+<pre>
+Single 1st-order APF stage:
+  H_APF(s) = (s − ω₀) / (s + ω₀)
+  Magnitude: |H_APF(jω)| = 1 for all ω (unity gain — all-pass)
+  Phase: φ(ω) = π − 2 arctan(ω / ω₀)
+
+Six cascaded stages (one group):
+  H_6(s) = [(s − ω₀) / (s + ω₀)]^6
+  Phase: φ_6(ω) = 6 × [π − 2 arctan(ω / ω₀)]
+
+Notch frequencies (at 50% DRY/WET):
+  ω_notch_n = ω₀ × tan((5 − 2n)π / 12)   for n = 0, 1, 2  → 3 notch pairs per group
+
+OTA voltage control:
+  ω₀ = g_m / C_apf
+  g_m = I_abc / (2 × V_T)   V_T ≈ 26 mV at room temp
+  1V/oct: +1V → I_abc × 2 → ω₀ × 2 → f × 2
+
+Capacitor values:
+  Group 1 (100 Hz–1 kHz):   C_apf = 1.5 nF
+  Group 2 (500 Hz–5 kHz):   C_apf = 300 pF
+  Group 3 (2 kHz–20 kHz):  C_apf = 68–82 pF
+
+Feedback transfer function (g = feedback gain, 0 ≤ g &lt; 1):
+  V_out = H_6(s) × V_in / (1 − g × POLARITY × H_6(s))
+  At g → 0.95: resonance approaching self-oscillation at notch frequencies
+</pre>
+
+<h3>Phase 3 — Circuit Notes</h3>
+<ul>
+  <li><strong>Expo converter matching</strong>: THAT340 or LM394 matched pair required for stable 1V/oct tracking across temperature. A single general-purpose transistor will drift. Calibrate at room temperature; verify at temperature extremes.</li>
+  <li><strong>HF oscillation risk</strong>: at high I_abc (high frequency), OTA stages can self-oscillate due to parasitic capacitance. Add 22 pF capacitors at each OTA output node and keep traces short.</li>
+  <li><strong>CD4053 series resistance</strong>: ~100 Ω at ±5 V supply. Buffer SW_SRC output with a unity-gain op-amp before the per-group feedback amp stages.</li>
+  <li><strong>POLARITY Off position</strong>: must connect cleanly to GND — a leaky switch contact causes audible bleed-through. Use a low-leakage panel switch or add a bleeder resistor to GND at the switch output.</li>
+  <li><strong>V_post_dist routing</strong>: distortion output (Block 4) must be routed to APF feedback without picking up noise. Use shielded wire or dedicated PCB trace with guard ring; keep away from OTA signal nodes.</li>
+  <li><strong>Crosstalk L/R</strong>: route L and R ground planes separately; do not route L signal adjacent to R signal on PCB.</li>
+  <li><strong>PCB count</strong>: 18× LM13700 + 18× TL072 is large. Plan for 2–3 stacked PCBs with ribbon cable interconnect.</li>
+</ul>
+
+<h3>Trim Pots</h3>
+<table>
+  <thead><tr><th>Reference</th><th>Range</th><th>Purpose</th><th>Adjustment Procedure</th></tr></thead>
+  <tbody>
+    <tr><td>RV_1VOCT_G1</td><td>±20%</td><td>Group 1 expo 1V/oct calibration</td><td>Sweep FREQ 1 CV by 1V; verify exact octave change in notch frequency</td></tr>
+    <tr><td>RV_1VOCT_G2</td><td>±20%</td><td>Group 2 expo 1V/oct calibration</td><td>Same procedure as G1</td></tr>
+    <tr><td>RV_1VOCT_G3</td><td>±20%</td><td>Group 3 expo 1V/oct calibration</td><td>Same procedure as G1</td></tr>
+    <tr><td>RV_FB_MAX_1</td><td>0.90–0.99</td><td>Max feedback limit, Group 1</td><td>Set so oscillation onset is just barely reachable at FEEDBACK max</td></tr>
+    <tr><td>RV_FB_MAX_2</td><td>0.90–0.99</td><td>Max feedback limit, Group 2</td><td>Same</td></tr>
+    <tr><td>RV_FB_MAX_3</td><td>0.90–0.99</td><td>Max feedback limit, Group 3</td><td>Same</td></tr>
+  </tbody>
+</table>
+
+<h3>Power</h3>
+<p>+12 V: ~55 mA &nbsp;|&nbsp; −12 V: ~55 mA &nbsp;(18× LM13700 dominant; most power-hungry block in module)</p>
+
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POGO — Block A: Input Buffers + Protection</title>
+<style>
+  body { font-family: monospace; background: #0d0d0d; color: #c8c8c8; margin: 0; padding: 2rem; }
+  h1 { color: #e8e8e8; border-bottom: 2px solid #444; padding-bottom: .5rem; }
+  h2 { color: #aaa; border-bottom: 1px solid #333; padding-bottom: .3rem; margin-top: 2rem; }
+  h3 { color: #888; margin-top: 1.5rem; }
+  a { color: #7aacdc; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  pre { background: #1a1a1a; border: 1px solid #333; padding: 1rem; overflow-x: auto; line-height: 1.5; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th { background: #222; color: #aaa; text-align: left; padding: .5rem .8rem; border: 1px solid #444; }
+  td { padding: .4rem .8rem; border: 1px solid #333; }
+  tr:nth-child(even) { background: #141414; }
+  .nav { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 2rem; }
+  .nav a { background: #1e1e1e; border: 1px solid #444; padding: .3rem .7rem; border-radius: 3px; font-size: .85rem; }
+  .nav a.current { background: #2a3a4a; border-color: #7aacdc; color: #7aacdc; }
+  .note { background: #1a1400; border-left: 3px solid #665500; padding: .5rem 1rem; margin: 1rem 0; }
+  .warn { background: #1a0a00; border-left: 3px solid #883300; padding: .5rem 1rem; margin: 1rem 0; }
+  .status { display: inline-block; background: #0d2a0d; border: 1px solid #2a5a2a; color: #6abf6a; padding: .2rem .6rem; border-radius: 3px; font-size: .85rem; }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <a href="index.html">Overview</a>
+  <a href="block-A-input-buffer.html" class="current">Block A</a>
+  <a href="block-1-pregain.html">Block 1</a>
+  <a href="block-2-envelope-follower.html">Block 2</a>
+  <a href="block-3-apcf.html">Block 3</a>
+  <a href="block-4-distortion.html">Block 4</a>
+  <a href="block-5-lp1.html">Block 5</a>
+  <a href="block-6-lp2.html">Block 6</a>
+  <a href="block-7-hp.html">Block 7</a>
+  <a href="block-B-output-buffer.html">Block B</a>
+  <a href="mod-architecture.html">Mod Arch</a>
+</div>
+
+<h1>Block A: Input Buffers + Protection</h1>
+<span class="status">Phase 1 ✅ &nbsp; Phase 2 ✅ &nbsp; Phase 3 ✅ &nbsp; Phase 4 [ ]</span>
+
+<h2>1. Block Diagram</h2>
+<pre>
+Eurorack Patch Cable (L)           Eurorack Patch Cable (R)
+  │                                   │
+  ▼                                   ▼
+Jack L tip                         Jack R tip
+  │                                   │
+  ├──[100 Ω]──────────────────────────┤
+  │                                   │
+  │    ┌────────────┐                 │    ┌────────────┐
+  │    │  BAT54S    │                 │    │  BAT54S    │
+  │    │ (SOT-23)   │                 │    │ (SOT-23)   │
+  │    │ +12V clamp │                 │    │ +12V clamp │
+  │    │ −12V clamp │                 │    │ −12V clamp │
+  │    └────────────┘                 │    └────────────┘
+  │                                   │
+  ▼                                   ▼
+TU1A (+in) ──(non-inv buffer)      TU1B (+in) ──(non-inv buffer)
+TU1A (−in) ◄── (out) feedback      TU1B (−in) ◄── (out) feedback
+  │                                   │
+  ▼                                   ▼
+L_buffered → Block 1 Pre-Gain      R_buffered → Block 1 Pre-Gain
+
+Signal levels:
+  Input (before clamp): up to ±12 V
+  Input (after 100 Ω + clamp): clamped to ±12 V
+  Output (after buffer): ±5 V nominal, ±10.5 V max (op-amp rail limit)
+</pre>
+
+<h2>2. Schematic</h2>
+<pre>
+                     TU1 (TL072CDT, SOIC-8)
+                     ┌──────────────────┐
+                     │  pin 4 = −12 V   │
+                     │  pin 8 = +12 V   │
+                     │  100 nF decoup   │
+                     │  at each rail    │
+                     └──────────────────┘
+
+Jack L tip ──[R_L_in 100Ω 0603]──┬──(+in, pin 3) TU1A ──(out, pin 1)── L_buffered
+                                  │               (−in, pin 2)◄──────────────────┘
+                                 BAT54S
+                               (SOT-23)
+                              ┌──┴──┐
+                            +12V  −12V
+
+Jack R tip ──[R_R_in 100Ω 0603]──┬──(+in, pin 5) TU1B ──(out, pin 7)── R_buffered
+                                  │               (−in, pin 6)◄──────────────────┘
+                                 BAT54S
+                               (SOT-23)
+                              ┌──┴──┐
+                            +12V  −12V
+
+Jack sleeve → GND (panel ground)
+</pre>
+
+<h2>3. Parts List</h2>
+<table>
+  <thead>
+    <tr><th>Reference</th><th>Part Number</th><th>Package</th><th>Value</th><th>Qty</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>TU1</td><td>TL072CDT</td><td>SOIC-8</td><td>—</td><td>1</td><td>Dual op-amp; TU1A = L channel, TU1B = R channel</td></tr>
+    <tr><td>R_L_in</td><td>—</td><td>0603</td><td>100 Ω</td><td>1</td><td>Series protection, L input</td></tr>
+    <tr><td>R_R_in</td><td>—</td><td>0603</td><td>100 Ω</td><td>1</td><td>Series protection, R input</td></tr>
+    <tr><td>D_L</td><td>BAT54S</td><td>SOT-23</td><td>—</td><td>1</td><td>Dual Schottky clamp; cathode +12 V, anode −12 V</td></tr>
+    <tr><td>D_R</td><td>BAT54S</td><td>SOT-23</td><td>—</td><td>1</td><td>Same as D_L</td></tr>
+    <tr><td>C_VCC</td><td>—</td><td>0603</td><td>100 nF</td><td>1</td><td>Decoupling at TU1 pin 8 (+12 V); place within 1 mm of pin</td></tr>
+    <tr><td>C_VEE</td><td>—</td><td>0603</td><td>100 nF</td><td>1</td><td>Decoupling at TU1 pin 4 (−12 V); place within 1 mm of pin</td></tr>
+  </tbody>
+</table>
+
+<h2>4. Design Notes</h2>
+
+<h3>Phase 1 — Sonic Intent</h3>
+<p>
+  Transparent, unity-gain buffering. This block is invisible to the audio signal — its sole job is to isolate
+  POGO's internal circuitry from whatever is plugged into the jacks, and to protect ICs from out-of-range voltages.
+  No coloration. No filtering.
+</p>
+
+<h3>Phase 2 — Transfer Function</h3>
+<pre>
+H(s) = 1   (unity gain, all frequencies, flat phase response)
+V_out = V_in   (voltage follower: non-inverting, gain = 1)
+</pre>
+<p>
+  Flat from DC to ~100 kHz. Op-amp output swings to within ~1.5 V of rails (TL072: ±10.5 V typical on ±12 V supply).
+  Input offset voltage: ~3 mV typical (TL072) — negligible DC offset at output.
+</p>
+
+<h3>Phase 3 — Circuit Notes</h3>
+<ul>
+  <li><strong>100 Ω series resistor</strong>: limits short-circuit current; protects source module from capacitive loading.</li>
+  <li><strong>BAT54S clamp diodes</strong>: clamp to ±12 V rails. Polarity-sensitive — verify cathode/anode orientation in layout.</li>
+  <li><strong>Voltage follower topology</strong>: output tied directly to inverting input (pin 2 or 6). No resistors needed — gain is exactly 1.</li>
+  <li><strong>TL072 not rail-to-rail</strong>: keep internal signal levels ≤ ±10 V to avoid clipping. Eurorack audio at ±5 V is well within range.</li>
+</ul>
+
+<h3>Trim Pots</h3>
+<p>None required. Unity gain is set by direct feedback topology.</p>
+
+<h3>Power</h3>
+<p>+12 V: ~2 mA &nbsp;|&nbsp; −12 V: ~2 mA</p>
+
+</body>
+</html>

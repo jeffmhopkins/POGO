@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POGO — Block 1: Pre-Gain Boost</title>
+<style>
+  body { font-family: monospace; background: #0d0d0d; color: #c8c8c8; margin: 0; padding: 2rem; }
+  h1 { color: #e8e8e8; border-bottom: 2px solid #444; padding-bottom: .5rem; }
+  h2 { color: #aaa; border-bottom: 1px solid #333; padding-bottom: .3rem; margin-top: 2rem; }
+  h3 { color: #888; margin-top: 1.5rem; }
+  a { color: #7aacdc; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  pre { background: #1a1a1a; border: 1px solid #333; padding: 1rem; overflow-x: auto; line-height: 1.5; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th { background: #222; color: #aaa; text-align: left; padding: .5rem .8rem; border: 1px solid #444; }
+  td { padding: .4rem .8rem; border: 1px solid #333; }
+  tr:nth-child(even) { background: #141414; }
+  .nav { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 2rem; }
+  .nav a { background: #1e1e1e; border: 1px solid #444; padding: .3rem .7rem; border-radius: 3px; font-size: .85rem; }
+  .nav a.current { background: #2a3a4a; border-color: #7aacdc; color: #7aacdc; }
+  .note { background: #1a1400; border-left: 3px solid #665500; padding: .5rem 1rem; margin: 1rem 0; }
+  .status { display: inline-block; background: #0d2a0d; border: 1px solid #2a5a2a; color: #6abf6a; padding: .2rem .6rem; border-radius: 3px; font-size: .85rem; }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <a href="index.html">Overview</a>
+  <a href="block-A-input-buffer.html">Block A</a>
+  <a href="block-1-pregain.html" class="current">Block 1</a>
+  <a href="block-2-envelope-follower.html">Block 2</a>
+  <a href="block-3-apcf.html">Block 3</a>
+  <a href="block-4-distortion.html">Block 4</a>
+  <a href="block-5-lp1.html">Block 5</a>
+  <a href="block-6-lp2.html">Block 6</a>
+  <a href="block-7-hp.html">Block 7</a>
+  <a href="block-B-output-buffer.html">Block B</a>
+  <a href="mod-architecture.html">Mod Arch</a>
+</div>
+
+<h1>Block 1: Pre-Gain Boost</h1>
+<span class="status">Phase 1 ✅ &nbsp; Phase 2 ✅ &nbsp; Phase 3 ✅ &nbsp; Phase 4 [ ]</span>
+
+<h2>1. Block Diagram</h2>
+<pre>
+L_buffered (±5 V from Block A)                R_buffered (±5 V from Block A)
+  │                                              │
+  ▼                                              ▼
+TG1A (non-inverting amp)                      TG1B (non-inverting amp)
+  │                                              │
+  └── SW1 (2PDT toggle panel switch) ────────────┘
+      │
+      ├── Position UNITY (OFF):  R_f = 0 Ω (wire), R_in = N/C
+      │     G = 1 + 0/∞ = 1×  (voltage follower)
+      │     Out: ±5 V
+      │
+      └── Position BOOST (ON):   R_f = 40.2 kΩ, R_in = 10 kΩ
+            G = 1 + 40.2k/10k = 5×  (~14 dB)
+            Out: ±25 V ideal → clamped to ±10.5 V by TL072 rails
+
+Signal levels:
+  Input:        ±5 V audio (from Block A)
+  Unity output: ±5 V
+  Boost output: up to ±10.5 V (op-amp rail clip — intentional saturation)
+
+Both L and R controlled simultaneously by single 2PDT toggle switch.
+</pre>
+
+<h2>2. Schematic</h2>
+<pre>
+                     TG1 (TL072CDT, SOIC-8)
+                     ┌──────────────────────────┐
+                     │  pin 8 = +12 V  │         │
+                     │  pin 4 = −12 V  │ 100 nF  │
+                     │                           │
+                     └──────────────────────────-┘
+
+                           ┌──────[R_f 40.2kΩ 0603]──────┐
+                           │                              │
+L_buffered ──(+in, pin 3) TG1A ──(out, pin 1)──────┬──── ──► L_boost → Block 2
+                           (−in, pin 2)◄────────────┤
+                                                    │
+SW1 pole A:                                        │
+  UNITY:  R_f bypassed (short from out to −in)    │
+  BOOST:  R_f = 40.2 kΩ in feedback;              │
+          R_in = 10 kΩ from pin 2 to GND          │
+
+                           ┌──────[R_f 40.2kΩ 0603]──────┐
+                           │                              │
+R_buffered ──(+in, pin 5) TG1B ──(out, pin 7)──────┬──── ──► R_boost → Block 2
+                           (−in, pin 6)◄────────────┤
+                                                    │
+SW1 pole B (mirrors pole A for R channel)
+
+Panel switch SW1 (2PDT toggle):
+  Labelled: UNITY | BOOST
+  One pole controls L feedback network, other pole controls R feedback network.
+</pre>
+
+<h2>3. Parts List</h2>
+<table>
+  <thead>
+    <tr><th>Reference</th><th>Part Number</th><th>Package</th><th>Value</th><th>Qty</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>TG1</td><td>TL072CDT</td><td>SOIC-8</td><td>—</td><td>1</td><td>Dual op-amp; TG1A = L, TG1B = R</td></tr>
+    <tr><td>R_f (×2)</td><td>—</td><td>0603</td><td>40.2 kΩ</td><td>2</td><td>E96 value; 1% tolerance; feedback resistors</td></tr>
+    <tr><td>R_in (×2)</td><td>—</td><td>0603</td><td>10.0 kΩ</td><td>2</td><td>1% tolerance; gain-setting input resistors</td></tr>
+    <tr><td>SW1</td><td>2PDT toggle</td><td>Panel mount</td><td>—</td><td>1</td><td>2-pole: one pole for L, one for R; UNITY | BOOST</td></tr>
+    <tr><td>C_VCC</td><td>—</td><td>0603</td><td>100 nF</td><td>1</td><td>Decoupling at TG1 pin 8</td></tr>
+    <tr><td>C_VEE</td><td>—</td><td>0603</td><td>100 nF</td><td>1</td><td>Decoupling at TG1 pin 4</td></tr>
+  </tbody>
+</table>
+
+<h2>4. Design Notes</h2>
+
+<h3>Phase 1 — Sonic Intent</h3>
+<p>
+  A switchable gain boost placed right at the input, before any filtering or distortion. At unity, the signal
+  passes through clean and transparent. At 5× (~14 dB), the input gain pushes quieter sources harder into
+  the comb filter and distortion stages downstream, adding apparent saturation without changing filter parameters.
+</p>
+<p>
+  The toggle switch feels intentional and definitive — "signal" vs "driven." No soft ramping. Instantaneous gain change.
+</p>
+
+<h3>Phase 2 — Transfer Function</h3>
+<pre>
+V_out = G × V_in
+
+where G = 1.0  (toggle UNITY)
+      G = 5.0  (toggle BOOST)
+
+Non-inverting topology:  G = 1 + R_f / R_in
+
+Unity:  G = 1  (direct feedback, R_f = 0, R_in = N/C — voltage follower)
+Boost:  G = 5  →  R_f / R_in = 4  →  R_f = 40.2 kΩ, R_in = 10 kΩ
+
+Saturation model (boost mode, TL072 on ±12 V supply):
+  V_out = clamp(5 × V_in, −10.5 V, +10.5 V)
+  Clipping onset: V_in ≥ ±2.1 V
+</pre>
+<p>
+  Clipping is intentional at BOOST with hot inputs — the TL072 soft-clips slightly before the hard rail limit,
+  adding gentle odd harmonics at onset. A clipped waveform feeding Block 2 (Envelope Follower) gives a very stable,
+  predictable envelope CV — useful for drums or sustained notes.
+</p>
+
+<h3>Phase 3 — Circuit Notes</h3>
+<ul>
+  <li><strong>Component values:</strong> R_f = 40.2 kΩ (E96 series, ≤0.5% error from 40 kΩ target), R_in = 10.0 kΩ (1%)</li>
+  <li><strong>2PDT toggle:</strong> one pole controls L feedback network, other pole controls R. Both switch simultaneously.</li>
+  <li><strong>Switch wiring:</strong> toggle physically selects between wire (G=1) and R_f/R_in network (G=5). Use break-before-make or make-before-make — either acceptable since stages are not sensitive to momentary float during switching.</li>
+  <li><strong>RF pickup:</strong> route toggle switch wires as short as possible to avoid RF pickup on the feedback node (high-impedance node).</li>
+</ul>
+
+<h3>Trim Pots</h3>
+<p>None required. Gain is set by 1% resistor ratios. Gain error &lt;2% with 1% components.</p>
+<div class="note">
+  Optional: if L/R gain matching better than 1 dB is needed, replace R_in per channel with 9.1 kΩ + 2 kΩ Bourns 3224W SMD trim pot in series.
+</div>
+
+<h3>Power</h3>
+<p>+12 V: ~3 mA &nbsp;|&nbsp; −12 V: ~3 mA</p>
+
+</body>
+</html>

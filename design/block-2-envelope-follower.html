@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POGO — Block 2: Envelope Follower</title>
+<style>
+  body { font-family: monospace; background: #0d0d0d; color: #c8c8c8; margin: 0; padding: 2rem; }
+  h1 { color: #e8e8e8; border-bottom: 2px solid #444; padding-bottom: .5rem; }
+  h2 { color: #aaa; border-bottom: 1px solid #333; padding-bottom: .3rem; margin-top: 2rem; }
+  h3 { color: #888; margin-top: 1.5rem; }
+  a { color: #7aacdc; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  pre { background: #1a1a1a; border: 1px solid #333; padding: 1rem; overflow-x: auto; line-height: 1.5; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th { background: #222; color: #aaa; text-align: left; padding: .5rem .8rem; border: 1px solid #444; }
+  td { padding: .4rem .8rem; border: 1px solid #333; }
+  tr:nth-child(even) { background: #141414; }
+  .nav { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 2rem; }
+  .nav a { background: #1e1e1e; border: 1px solid #444; padding: .3rem .7rem; border-radius: 3px; font-size: .85rem; }
+  .nav a.current { background: #2a3a4a; border-color: #7aacdc; color: #7aacdc; }
+  .note { background: #1a1400; border-left: 3px solid #665500; padding: .5rem 1rem; margin: 1rem 0; }
+  .status { display: inline-block; background: #0d2a0d; border: 1px solid #2a5a2a; color: #6abf6a; padding: .2rem .6rem; border-radius: 3px; font-size: .85rem; }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <a href="index.html">Overview</a>
+  <a href="block-A-input-buffer.html">Block A</a>
+  <a href="block-1-pregain.html">Block 1</a>
+  <a href="block-2-envelope-follower.html" class="current">Block 2</a>
+  <a href="block-3-apcf.html">Block 3</a>
+  <a href="block-4-distortion.html">Block 4</a>
+  <a href="block-5-lp1.html">Block 5</a>
+  <a href="block-6-lp2.html">Block 6</a>
+  <a href="block-7-hp.html">Block 7</a>
+  <a href="block-B-output-buffer.html">Block B</a>
+  <a href="mod-architecture.html">Mod Arch</a>
+</div>
+
+<h1>Block 2: Envelope Follower</h1>
+<span class="status">Phase 1 ✅ &nbsp; Phase 2 ✅ &nbsp; Phase 3 ✅ &nbsp; Phase 4 [ ]</span>
+
+<h2>1. Block Diagram</h2>
+<pre>
+L audio (±5 V from Block 1)           R audio (±5 V from Block 1)
+  │                                      │
+  ▼                                      ▼
+┌─────────────────────────┐           ┌─────────────────────────┐
+│ Full-wave precision      │           │ Full-wave precision      │
+│ rectifier (EF1, TL074)   │           │ rectifier (EF2, TL074)   │
+│ V_rect_L = |V_in_L|     │           │ V_rect_R = |V_in_R|     │
+└─────────────────────────┘           └─────────────────────────┘
+  │                                      │
+  ▼                                      ▼
+┌─────────────────────────┐           ┌─────────────────────────┐
+│ Peak detector (RC)       │           │ Peak detector (RC)       │
+│ Attack: τ = R_atk × C   │           │ Attack: τ = R_atk × C   │
+│ Release: τ = R_rel × C  │           │ Release: τ = R_rel × C  │
+│ C_hold = 2.2 µF film    │           │ C_hold = 2.2 µF film    │
+│ Shared ATTACK+RELEASE   │           │ Shared ATTACK+RELEASE   │
+│ knobs (both channels)   │           │ knobs (both channels)   │
+└─────────────────────────┘           └─────────────────────────┘
+  │                                      │
+  ▼                                      ▼
+┌─────────────────────────┐           ┌─────────────────────────┐
+│ Scaling amp G=2          │           │ Scaling amp G=2          │
+│ 0–5V peak → 0–10V CV    │           │ 0–5V peak → 0–10V CV    │
+│ Clamp: BZX84-C10 10V Z  │           │ Clamp: BZX84-C10 10V Z  │
+│ Trim: RV_ENV_SCALE_L    │           │ Trim: RV_ENV_SCALE_R    │
+└─────────────────────────┘           └─────────────────────────┘
+  │                                      │
+  ▼                                      ▼
+ENV OUT L jack (0–10 V)              ENV OUT R jack (0–10 V)
+  │                                      │
+  └────────► MOD SOURCE SEL switch ◄─────┘
+              3-position:
+              L   → ENV L feeds Mod Bus
+              R   → ENV R feeds Mod Bus
+              L+R → averaged sum feeds Mod Bus
+              │
+              ▼
+           PRIMARY MOD SOURCE JACK
+           (normalizes to SEL output when unplugged)
+</pre>
+
+<h2>2. Schematic</h2>
+<pre>
+Per channel (shown for L; R is identical using EF2):
+
+V_in_L ──┬──[D1: 1N4148WS]──K──A── (−in) EF1_A ──(out)── V_rect_half
+          │                         (+in)=GND
+          │                         (out)◄──[D2: 1N4148WS]──┘
+          │
+          └──(+in) EF1_B ──(out)──[R_sum1]──┬── V_rect_L (|V_in_L|)
+                   (−in)◄──────────────────  │
+                                        [R_sum2]──V_rect_half
+
+V_rect_L ──[D_atk: 1N4148WS]──┬──────────────────────────── V_peak_L
+                                │[R_atk_end 100Ω]──[RV_ATK wiper]
+                                │
+                          [D_rel: 1N4148WS, reversed]
+                                │
+                          [R_rel_end 2.4kΩ]──[RV_REL wiper]──GND
+                                │
+                               C_hold (2.2 µF film, low-leakage)
+                                │
+                               GND
+
+V_peak_L ──(+in) EF1_C ──(out)──[RV_ENV_SCALE_L 10kΩ trim]──┬── ENV_L
+            (−in)◄──[R_scale_f 10kΩ]◄────────────────────────┘
+                                  [R_scale_in 10kΩ from −in to GND]
+ENV_L ──[BZX84-C10 10V zener to GND]  (output clamp)
+ENV_L ──[R_out_L 1kΩ]──► ENV OUT L jack
+
+MOD SOURCE SEL switch (SW_SEL, 3-position):
+  Position L:   ENV_L → normalizing node of MOD SOURCE jack
+  Position R:   ENV_R → normalizing node of MOD SOURCE jack
+  Position L+R: ENV_L and ENV_R → two 20kΩ resistors → summing amp (EF1_D, G=1) → normalizing node
+
+IC EF1 (TL074CDT, SOIC-14, L channel):
+  Half A+B: full-wave precision rectifier
+  Half C:   scaling amplifier (G=2)
+  Half D:   L+R sum amp (for SEL = L+R position)
+
+IC EF2 (TL074CDT, SOIC-14, R channel):
+  Half A+B: full-wave precision rectifier
+  Half C:   scaling amplifier (G=2)
+  Half D:   spare
+</pre>
+
+<h2>3. Parts List</h2>
+<table>
+  <thead>
+    <tr><th>Reference</th><th>Part Number</th><th>Package</th><th>Value</th><th>Qty</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>EF1</td><td>TL074CDT</td><td>SOIC-14</td><td>—</td><td>1</td><td>L channel: rectifier + peak amp + sum amp</td></tr>
+    <tr><td>EF2</td><td>TL074CDT</td><td>SOIC-14</td><td>—</td><td>1</td><td>R channel: rectifier + peak amp + spare</td></tr>
+    <tr><td>D_atk_L, D_atk_R</td><td>1N4148WS</td><td>SOD-323</td><td>—</td><td>2</td><td>Attack charge diodes</td></tr>
+    <tr><td>D_rel_L, D_rel_R</td><td>1N4148WS</td><td>SOD-323</td><td>—</td><td>2</td><td>Release discharge diodes (reversed orientation)</td></tr>
+    <tr><td>D_rect (×4)</td><td>1N4148WS</td><td>SOD-323</td><td>—</td><td>4</td><td>Precision rectifier diodes (2 per channel)</td></tr>
+    <tr><td>C_hold_L, C_hold_R</td><td>—</td><td>5mm pitch TH</td><td>2.2 µF</td><td>2</td><td>Film cap (polyester/polypropylene); low leakage critical</td></tr>
+    <tr><td>RV_ATK</td><td>Log-taper pot</td><td>9mm PCB</td><td>100 kΩ</td><td>1</td><td>Attack time; shared L+R; ATTACK panel control</td></tr>
+    <tr><td>RV_REL</td><td>Log-taper pot</td><td>9mm PCB</td><td>1 MΩ</td><td>1</td><td>Release time; shared L+R; RELEASE panel control</td></tr>
+    <tr><td>R_atk_end (×2)</td><td>—</td><td>0603</td><td>100 Ω</td><td>2</td><td>Series end-stop on attack pot; sets minimum τ_a</td></tr>
+    <tr><td>R_rel_end (×2)</td><td>—</td><td>0603</td><td>2.4 kΩ</td><td>2</td><td>Series end-stop on release pot; sets minimum τ_r</td></tr>
+    <tr><td>R_scale (×4)</td><td>—</td><td>0603</td><td>10 kΩ</td><td>4</td><td>Gain-of-2 scaling amp feedback and input resistors</td></tr>
+    <tr><td>D_clamp_L, D_clamp_R</td><td>BZX84-C10</td><td>SOT-23</td><td>10 V</td><td>2</td><td>Output 10 V Zener clamp; one per channel</td></tr>
+    <tr><td>R_out_L, R_out_R</td><td>—</td><td>0603</td><td>1 kΩ</td><td>2</td><td>Output series resistor to ENV OUT jacks</td></tr>
+    <tr><td>RV_ENV_SCALE_L</td><td>Bourns 3224W</td><td>SMD trim</td><td>10 kΩ</td><td>1</td><td>L channel output level calibration</td></tr>
+    <tr><td>RV_ENV_SCALE_R</td><td>Bourns 3224W</td><td>SMD trim</td><td>10 kΩ</td><td>1</td><td>R channel output level calibration</td></tr>
+    <tr><td>SW_SEL</td><td>Sub-mini toggle</td><td>Panel</td><td>3-pos</td><td>1</td><td>MOD SOURCE SEL: L / L+R / R</td></tr>
+    <tr><td>C_VCC, C_VEE (×4)</td><td>—</td><td>0603</td><td>100 nF</td><td>4</td><td>Supply decoupling: 2 per TL074 IC</td></tr>
+  </tbody>
+</table>
+
+<h2>4. Design Notes</h2>
+
+<h3>Phase 1 — Sonic Intent</h3>
+<p>
+  Derives CV envelopes from the post-gain / pre-comb audio signal. Two independent followers — one per channel —
+  each producing a 0–10 V CV that tracks the amplitude of the audio in real time. These envelopes are the primary
+  modulation source for the entire module, creating filter sweeps, distortion changes, and formant shifts that are
+  tightly coupled to the dynamics of the input.
+</p>
+<ul>
+  <li><strong>Fast attack / fast release</strong>: percussive, tight CV that punches with every transient.</li>
+  <li><strong>Slow attack / slow release</strong>: smooth, sustained CV that swells with the overall level.</li>
+</ul>
+
+<h3>Phase 2 — Analog Behavior Model</h3>
+<pre>
+Stage 1: Full-wave precision rectifier
+  V_rect = |V_in|
+
+Stage 2: Peak detector with asymmetric RC
+  Rising edge  (V_rect > V_peak): τ_attack  = R_atk × C_hold
+  Falling edge (V_rect < V_peak): τ_release = R_rel × C_hold
+
+  C_hold = 2.2 µF (film)
+  Attack range:  τ = 0.1 ms (pot minimum) → 200 ms (pot maximum)
+    R_atk_min ≈ 100 Ω (end-stop)  → τ = 100Ω × 2.2µF ≈ 0.22 ms
+    R_atk_max ≈ 100 kΩ (pot + end) → τ = 100kΩ × 2.2µF ≈ 220 ms
+  Release range: τ = 5 ms → 2 s
+    R_rel_min ≈ 2.4 kΩ (end-stop)  → τ = 2.4kΩ × 2.2µF ≈ 5.3 ms
+    R_rel_max ≈ 1 MΩ (pot + end)   → τ = 1MΩ × 2.2µF ≈ 2.2 s
+
+Stage 3: Output scaling amplifier
+  V_env = 2 × V_peak   (G = 2 non-inverting)
+  Full-scale input ±5 V → V_peak = 5 V → V_env = 10 V
+  Output clamped to 0–10 V via 10 V Zener
+</pre>
+
+<h3>Phase 3 — Circuit Notes</h3>
+<ul>
+  <li><strong>Film capacitor for C_hold</strong>: ceramic caps have high dielectric absorption causing slow voltage droop; use polyester or polypropylene film (through-hole, 5mm or 7.5mm pitch).</li>
+  <li><strong>Log-taper pots</strong>: standard log pots concentrate most of the rotation range at the bottom decade. If attack feel is too cramped at slow times, use a linear pot with an RC shaping network for pseudo-log response.</li>
+  <li><strong>Diode leakage</strong>: at room temperature, 1N4148 leakage is negligible (~1–5 nA). At slow release settings with 2.2 µF, hold time is set by diode leakage. Acceptable for release times ≤ 2 s.</li>
+  <li><strong>DC blocking (optional)</strong>: if signal chain passes significant DC offset, populate a 10 µF series cap before the rectifier. Leave footprint unpopulated and bridged by default.</li>
+  <li><strong>MOD SOURCE SEL normalling</strong>: the selected ENV signal arrives at the sleeve switching lug of the PRIMARY MOD SOURCE jack (tip-switching Thonkiconn). When a cable is inserted, the tip disconnects the normalled ENV signal.</li>
+</ul>
+
+<h3>Trim Pots</h3>
+<table>
+  <thead><tr><th>Reference</th><th>Range</th><th>Purpose</th><th>Adjustment Procedure</th></tr></thead>
+  <tbody>
+    <tr><td>RV_ENV_SCALE_L</td><td>×0.9 – ×1.1</td><td>L channel output level calibration</td><td>Feed 1 kHz ±5 V sine; adjust until ENV OUT L reads 10 V peak</td></tr>
+    <tr><td>RV_ENV_SCALE_R</td><td>×0.9 – ×1.1</td><td>R channel output level calibration</td><td>Same as L</td></tr>
+  </tbody>
+</table>
+
+<h3>Power</h3>
+<p>+12 V: ~12 mA &nbsp;|&nbsp; −12 V: ~12 mA &nbsp;(2× TL074)</p>
+
+</body>
+</html>
