@@ -455,8 +455,9 @@ MOD BUS  →  100Ω + BAT54 clamp  →  ATTENUVERTER (−1× to +1×)  →  para
 | APF Feedback 3 | 3 | 0–10 V | Group 3 independent |
 | APF Blend | 3 | 0–10 V | feedback source crossfade; active when SOURCE = Blend |
 | APF Dry/Wet | 3 | 0–10 V | |
-| Distortion Drive | 4 | 0–10 V | |
-| Distortion Mode | 4 | 0–10 V | 0–3.3 V = mode 1, 3.3–6.6 V = mode 2, 6.6–10 V = mode 3 |
+| Distortion Drive 1 | 4 | 0–10 V | Group 1 chain |
+| Distortion Drive 2 | 4 | 0–10 V | Group 2 chain |
+| Distortion Drive 3 | 4 | 0–10 V | Group 3 chain |
 | LP1 Cutoff | 5 | ±5 V, 1V/oct | |
 | LP1 Resonance | 5 | 0–10 V | 10 V = self-oscillation |
 | LP2 Cutoff | 6 | ±5 V, 1V/oct | |

@@ -10,58 +10,64 @@
 ## Phase 1: Audio / Functional Specification
 
 ### Sonic Intent
-Three selectable distortion characters, each with its own DRIVE control, applied symmetrically
-to L and R channels. Placed after the comb filter, the distortion interacts with the harmonic
-peaks the APF section created — pushing those formants into saturation, spreading harmonics, or
-folding the waveform back on itself.
+Three independent distortion instances — one per APF group output — each with its own mode
+and drive level. Each instance processes the stereo (L+R) output of its APF chain equally.
+The three distorted group signals are summed after processing and passed to LP1.
 
-- **Mode 1 — Soft Clip**: Gentle, musical saturation. Adds warmth and odd harmonics. The signal
-  rounds off smoothly at the clip threshold. Sounds like a tube pre-amp at moderate drive; at
-  maximum drive approaches fuzz territory. Sweet spot: DRIVE at 30–60%.
-- **Mode 2 — Hard Clip**: Aggressive, transistor-style clipping. Signal hits a hard ceiling and
-  flattens. Adds strong odd harmonics and a rasping, buzzy quality. At maximum drive: nearly
-  square wave. Sweet spot: DRIVE at 20–50% for edge; higher for full fuzz.
-- **Mode 3 — Wavefold**: Buchla-style wavefolding. The signal folds back on itself each time it
-  exceeds the fold threshold. At low drive the effect is subtle (one fold); at high drive multiple
-  folds produce complex, metallic, east-coast synthesis textures. Sounds unlike clipping — the
-  waveform increases in harmonic complexity rather than limiting. Sweet spot: DRIVE at 40–75%.
+This per-chain arrangement means each formant band can be distorted differently:
+Group 1 (low) wavefolded for complex sub-harmonic content, Group 2 (mid) soft-clipped for
+warmth, Group 3 (high) hard-clipped for bright edge — or any combination. The distortion
+also feeds back into each group's APF feedback path when SOURCE = Post-Dist, creating a
+tight self-referential loop where the distorted formant drives its own resonance.
+
+- **Soft Clip**: Gentle, musical saturation. Adds warmth and odd harmonics. Sweet spot: 30–60%.
+- **Hard Clip**: Aggressive transistor-style clipping, strong odd harmonics. Sweet spot: 20–50%.
+- **Wavefold**: Buchla-style wavefolding. Increases harmonic complexity with drive. Sweet spot: 40–75%.
 
 ### Parameters
 
 | Name | Range | Default | Taper | Description |
 |---|---|---|---|---|
-| MODE | Switch: 1 / 2 / 3 | 1 | N/A | Selects distortion type: Soft Clip / Hard Clip / Wavefold |
-| DRIVE 1 | 0–100% | 30% | Logarithmic | Drive level for Soft Clip mode |
-| DRIVE 2 | 0–100% | 20% | Logarithmic | Drive level for Hard Clip mode |
-| DRIVE 3 | 0–100% | 40% | Logarithmic | Drive level for Wavefold mode |
-
-Each DRIVE knob is always accessible on the panel; only the active mode's drive is in the
-signal path. This allows presetting each mode and switching between them.
+| MODE 1 | Switch: SC / HC / WF | SC | N/A | Distortion type for APF Group 1: Soft Clip / Hard Clip / Wavefold |
+| MODE 2 | Switch: SC / HC / WF | SC | N/A | Distortion type for APF Group 2 |
+| MODE 3 | Switch: SC / HC / WF | SC | N/A | Distortion type for APF Group 3 |
+| DRIVE 1 | 0–100% | 30% | Logarithmic | Drive level for Group 1 distortion; applies equally to L and R |
+| DRIVE 2 | 0–100% | 30% | Logarithmic | Drive level for Group 2 distortion; applies equally to L and R |
+| DRIVE 3 | 0–100% | 30% | Logarithmic | Drive level for Group 3 distortion; applies equally to L and R |
 
 ### CV Modulation Targets
 
 | Target | CV Range | Attenuverter | Notes |
 |---|---|---|---|
-| DRIVE (active mode) | 0–10 V | Yes | Sweeps the active mode's drive amount; modulates the one currently selected |
-| MODE | 0–10 V | No | 0–3.3 V = Mode 1; 3.3–6.6 V = Mode 2; 6.6–10 V = Mode 3 |
+| DRIVE 1 | 0–10 V | Yes | Group 1 drive amount; independent of Groups 2 and 3 |
+| DRIVE 2 | 0–10 V | Yes | Group 2 drive amount |
+| DRIVE 3 | 0–10 V | Yes | Group 3 drive amount |
+| MODE 1/2/3 | — | None | Switch only; no CV |
 
 ### Signal Levels (I/O)
-- Input: ±5 V audio (from Block 3; APF section is unity gain so level is preserved)
-- Output: ±5 V audio at low drive; distortion stages clip internally to ±5 V range at output
-  - Output buffer (Block B) follows; keep output ≤ ±10 V at all drive settings
+- Input: three independent stereo signals, one per APF group (±5 V each; APF is unity gain)
+- Output: three distorted signals summed into one stereo signal → ±5 V nominal, up to ±10 V
+  at high drive from multiple chains; summing stage must not clip before LP1
 
 ### Stereo Behavior
-True stereo: L and R processed in parallel through identical circuits.
-MODE switch and each DRIVE knob apply equally to both L and R (shared panel controls).
-No independent L/R distortion controls.
+True stereo within each chain: L and R processed through identical circuits in parallel.
+Each MODE switch and DRIVE knob applies equally to L and R of that chain.
+No independent L/R controls. No cross-chain linking of MODE or DRIVE.
+
+### Signal Flow
+```
+APF Group 1 (L+R) ──► [Distortion Chain 1: MODE 1, DRIVE 1] ──► DST1 out (L+R) ──┐
+APF Group 2 (L+R) ──► [Distortion Chain 2: MODE 2, DRIVE 2] ──► DST2 out (L+R) ──┼──► sum ──► LP1
+APF Group 3 (L+R) ──► [Distortion Chain 3: MODE 3, DRIVE 3] ──► DST3 out (L+R) ──┘
+```
+Each chain's output also feeds back into its own APF group's feedback path when SOURCE = Post-Dist.
 
 ### Edge Cases
-- At DRIVE 100% (all modes): extreme harmonic generation; output may be near-clipped sine
-  (Mode 1), square wave (Mode 2), or complex folded waveform (Mode 3). Ensure downstream
-  filters (LP1, LP2, HP) can handle these waveforms without instability.
-- MODE switching (live, with audio): brief click possible during mechanical switching. Accept
-  this as a feature characteristic of analog switching. CV mode control is click-free.
-- Silence input: all modes produce silence output regardless of DRIVE setting.
+- All three chains at DRIVE 100%: combined sum can exceed ±10 V; attenuate in the summing
+  amp (gain ≈ 0.5 per chain into the sum) to keep combined output within ±10 V headroom.
+- MODE switching live: brief click possible from mechanical switching. Accepted behavior.
+- One chain's DRIVE at 0%: that group passes through clean; the other two are distorted.
+  Useful for selectively distorting high or low formants while preserving the other.
 
 ---
 
@@ -128,100 +134,96 @@ interest of this mode.
 ## Phase 3: Circuit Design
 
 ### Topology
-Three parallel signal paths, switched by the MODE control:
-- Each mode's circuit is always powered and idle when not selected
-- The MODE switch (mechanical or CV-controlled) routes the signal through the active path
-- CV mode control: comparator circuit with 3.3 V thresholds routes to one of three paths
+Three independent distortion instances (one per APF chain) followed by a summing stage.
+Each instance contains three parallel mode sub-circuits (Soft Clip, Hard Clip, Wavefold)
+switched by its own 3-position panel switch via a CD4053 analog mux.
 
-#### Mode 1: Soft Clip — Diode Feedback Op-amp
+No CV mode control — MODE switches are mechanical only.
 
+#### Per-Chain Circuit (×3 chains)
+
+**Soft Clip sub-circuit (1× TL072, L on half A, R on half B):**
 ```
-V_in ──[R_in]──(−) TL072A ──── V_out
-                 (+) = GND
-                 (out)◄──[D1+D2 anti-parallel]──(−)
-                 (out)◄──[R_f]──────────────────(−)
+V_in_L ──[R_in]──(−) TL072A ──(out)── V_sc_L
+                   (+)=GND
+                   (out)◄──[D1+D2 anti-parallel]──(−)
+                   (out)◄──[R_f]──────────────────(−)
+
+V_in_R: identical on TL072B
 ```
+DRIVE knob varies R_in; diodes are 1N4148WS anti-parallel pairs.
 
-- D1, D2: matched 1N4148 diodes in anti-parallel across feedback resistor R_f
-- At small signals: diodes do not conduct; gain = −R_f / R_in (linear amplifier)
-- At large signals: diodes conduct, reducing effective feedback impedance → gain decreases
-  → smooth saturation characteristic approximating tanh
-- Drive (DRIVE 1 knob): varies R_in (input resistor), changing the gain and onset level
-
-#### Mode 2: Hard Clip — Zener Clipping
-
+**Hard Clip sub-circuit (1× TL072, L on half A, R on half B):**
 ```
-V_in ──[R_drive]──(−) TL072B ──── V_out
-                   (+) = GND
-                   (out)◄──[R_f]──(−)
-                   (out)──[Z1+Z2 anti-parallel zeners]──GND
+V_in_L ──[R_drive]──(−) TL072A ──(out)── V_hc_L
+                      (+)=GND
+                      (out)◄──[R_f]──(−)
+                      (out)──[Z1+Z2 anti-parallel, 5.1 V]──GND
+
+V_in_R: identical on TL072B
 ```
+DRIVE knob varies R_drive; zeners are BZX84-C5V1 (SOT-23).
 
-- Z1, Z2: matched Zener diodes (BZX84-C5V1, 5.1 V, SOT-23) to set clip threshold at ~±5.1 V
-- Op-amp provides gain, zeners hard-clip the output
-- DRIVE 2 knob: varies input gain (R_drive), setting how much gain before the clip threshold
-- Threshold is fixed at ±5.1 V; increasing DRIVE pushes more signal into the clip region
-
-#### Mode 3: Wavefold — Cascaded Op-amp Folder
-
-Classic Buchla/Serge-inspired wavefolder. Each fold stage inverts the portion of the signal
-beyond the threshold:
-
+**Wavefold sub-circuit (1× TL074, 2 halves per channel):**
 ```
-Stage 1:
-V_in ──[R1]──(+) TL072 ──── V_fold1
-              (−)◄─────────────┘
-              compare to V_thresh via diodes D3, D4
-
-Stage 2: same topology, cascaded from V_fold1
-...
+V_in_L ──[gain stage]──► [fold stage 1]──► [fold stage 2]──► V_wf_L
+(2 op-amp halves per channel: L uses halves A+B, R uses halves C+D)
 ```
+DRIVE knob sets input gain before folding stages.
+Reference: MFOS Wavefolder / Buchla 259 topology.
 
-Practical implementation: use a triangle-wave shaper with cascaded reflection stages.
-Reference: MFOS Wavefolder / Buchla 259 wavefolder topology.
-Two fold stages (requiring ~4 op-amp halves) produce musically useful fold depths.
+**MODE switch and mux (1× CD4053 per chain):**
+- CD4053 triple SPDT routes V_sc / V_hc / V_wf to chain output based on MODE switch position
+- Panel switch directly drives CD4053 A/B select inputs (no comparator needed — mechanical only)
+- Unity-gain output buffer (spare TL072 half) isolates CD4053 series resistance from downstream
 
-DRIVE 3 knob: input gain before folding stages; higher drive = more folds active.
+#### Output Summing Stage
 
-#### MODE Switch and CV Mode Control
+Three chain outputs (L and R separately) summed into one stereo signal:
+```
+V_dst1_L ──[R_sum]──┐
+V_dst2_L ──[R_sum]──┼──(−) SUM_AMP_L ──(out)── V_combined_L → LP1
+V_dst3_L ──[R_sum]──┘
+```
+Gain of summing amp: G = R_f_sum / R_sum. Set G = 0.5 per chain (R_f_sum = R_sum/2) so that
+three chains at full drive give a combined output ≤ ±10 V.
+Same configuration for R channel using second TL072 or second half of the SUM_AMP TL074.
 
-**Mechanical switch**: 3-position rotary or sub-mini toggle (3-pos) routes V_in to one of
-the three mode inputs via analog switch IC (CD4053 triple 2:1 mux, SOIC-16) or 3-position switch.
-
-**CV Mode Control**: Voltage comparator chain:
-- Comparator A (threshold 3.3 V): V_cv > 3.3 V → Mode 2 or 3
-- Comparator B (threshold 6.6 V): V_cv > 6.6 V → Mode 3
-- Logic drives CD4053 select inputs
-- Use LM393 (dual comparator, SOIC-8) + basic logic
+1× TL074 serves as both L and R summing amps (halves A and B) plus two output buffers.
 
 ### IC / Component Selection
 
 | Reference | Part Number | Package | Qty | Notes |
 |---|---|---|---|---|
-| DST1_L, DST1_R | TL072CDT | SOIC-8 | 2 | Soft clip op-amp (1 half per channel) |
-| DST2_L, DST2_R | TL072CDT | SOIC-8 | 2 | Hard clip op-amp (1 half per channel) |
-| DST3 | TL074CDT | SOIC-14 | 2 | Wavefold stages (2 halves per channel × 2 channels) |
-| SW_MODE | CD4053 | SOIC-16 | 1 | Triple SPDT analog mux; routes signal to active mode |
-| CMP_MODE | LM393D | SOIC-8 | 1 | Dual comparator for CV mode control |
-| D1–D4 (Mode 1) | 1N4148WS | SOD-323 | 4 | Soft clip diodes (2 per channel: anti-parallel pair) |
-| Z1–Z4 (Mode 2) | BZX84-C5V1 | SOT-23 | 4 | 5.1 V zeners (2 per channel: anti-parallel) |
-| RV_DRV1_L/R | Log pot | 9mm | 1 | DRIVE 1 (shared L+R) |
-| RV_DRV2_L/R | Log pot | 9mm | 1 | DRIVE 2 (shared L+R) |
-| RV_DRV3_L/R | Log pot | 9mm | 1 | DRIVE 3 (shared L+R) |
-| SW1_MODE | 3-pos switch | Panel | 1 | Manual mode select |
+| SC_N (×3) | TL072CDT | SOIC-8 | 3 | Soft clip; 1 per chain; half A = L, half B = R |
+| HC_N (×3) | TL072CDT | SOIC-8 | 3 | Hard clip; 1 per chain; same split |
+| WF_N (×3) | TL074CDT | SOIC-14 | 3 | Wavefold; 1 per chain; A+B = L stages, C+D = R stages |
+| MUX_N (×3) | CD4053 | SOIC-16 | 3 | Mode mux; 1 per chain; mechanical switch drives select pins |
+| SUM_AMP | TL074CDT | SOIC-14 | 1 | L+R summing amps (halves A+B) + output buffers (halves C+D) |
+| D_sc (×6) | 1N4148WS | SOD-323 | 6 | Soft clip diodes; 2 per chain (1 anti-parallel pair per channel shared) |
+| Z_hc (×6) | BZX84-C5V1 | SOT-23 | 6 | Hard clip zeners; 2 per chain |
+| SW_MODE_N (×3) | 3-pos switch | Panel | 3 | MODE 1, MODE 2, MODE 3 (one per chain) |
+| RV_DRV_N (×3) | Log pot | 9mm | 3 | DRIVE 1, DRIVE 2, DRIVE 3 (one per chain, shared L+R) |
 
 ### Trim Pots
 
 | Reference | Range | Purpose | Adjustment |
 |---|---|---|---|
-| RV_THRESH_HC | ±1 V | Hard clip threshold fine-tune | Adjust until symmetrical clip at ±5 V |
-| RV_FOLD_GAIN | ×0.8–×1.2 | Wavefold input gain calibration | Adjust until fold onset is at DRIVE=50% |
+| RV_HC_THRESH_N (×3) | ±1 V | Hard clip threshold per chain | Adjust until symmetrical clip at ±5 V |
+| RV_WF_GAIN_N (×3) | ×0.8–×1.2 | Wavefold input gain per chain | Fold onset at DRIVE = 50% |
 
 ### Power Draw Estimate
-- 6× TL072 + 1× TL074 + support ICs: ~15 mA
-- +12 V: ~15 mA | −12 V: ~15 mA
+- 6× TL072 + 4× TL074 + 3× CD4053: ~25 mA
+- +12 V: ~25 mA | −12 V: ~25 mA
 
 ### Known Circuit Challenges
-- CD4053 signal routing: the analog switch introduces a small series resistance (~100 Ω on ±5 V supply) and some charge injection at mode switch. Feed a unity-gain buffer after the switch to isolate downstream.
-- Diode matching (Mode 1): 1N4148 diodes on the same tape reel are reasonably matched; use diodes from the same batch for L and R to minimize L/R asymmetry.
-- Wavefold op-amps must slew fast enough for high-frequency audio — TL072 slew rate (13 V/µs) is adequate for 20 kHz audio at ±10 V.
+- **Summing headroom**: three chains summed at high drive can exceed op-amp rail. Set summing
+  gain to 0.5× per chain (attenuate by half before summing) so worst-case sum is ±7.5 V.
+  Verify in VCV prototype that this gain doesn't reduce perceived loudness too much; adjust R_sum.
+- **CD4053 series resistance**: ~100 Ω at ±5 V supply. Buffer each CD4053 output with a
+  unity-gain op-amp half before the summing stage.
+- **Post-Dist feedback routing**: each chain's output (before the summing amp) must be tapped
+  and routed back to Block 3's SOURCE selector for that group. Label these tap points clearly
+  on the schematic; route as shielded traces to avoid inter-chain crosstalk.
+- **Diode and zener matching per chain**: use components from the same batch within each chain.
+  Cross-chain matching is less critical since the chains process different formant bands.
