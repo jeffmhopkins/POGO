@@ -404,13 +404,16 @@ Template:
 
 ### Envelope Follower (Block 2)
 
-Source: post-gain / pre-comb audio (L+R sum, or selectable)
+Source: post-gain / pre-comb audio — **two independent followers, one per channel**
 
 **Audio spec:**
 - Converts audio amplitude to a 0–10 V CV signal
-- ATTACK: 0.1 ms – 200 ms
-- RELEASE: 1 ms – 2 s
-- ENV OUT jack: buffered envelope, normalizes into Primary Mod Source jack
+- ATTACK: 0.1 ms – 200 ms (shared knob for L and R)
+- RELEASE: 5 ms – 2 s (shared knob for L and R)
+- ENV OUT L jack: buffered left-channel envelope (0–10 V)
+- ENV OUT R jack: buffered right-channel envelope (0–10 V)
+- MOD SOURCE SEL switch (3-position): selects which envelope normalizes into the mod bus
+  - L = ENV OUT L; R = ENV OUT R; LR = L+R averaged
 
 **Analog behavior:**
 - Full-wave precision rectifier → RC peak detector (separate attack/release diode paths)
@@ -418,17 +421,17 @@ Source: post-gain / pre-comb audio (L+R sum, or selectable)
 - Output amplifier scales rectified peak to 0–10 V
 
 **Circuit:**
-- Full-wave precision rectifier: TL072 + 1N4148 diodes
+- Full-wave precision rectifier: TL074 + 1N4148WS diodes (one TL074 per channel)
 - Attack RC via charge diode; release RC via discharge diode (independent time constants)
-- Trim pot: output level calibration (0 V = silence, 10 V = full-scale ±5 V Eurorack audio)
+- Trim pots: ENV SCALE L and ENV SCALE R (0 V = silence, 10 V = full-scale ±5 V Eurorack audio)
 
 ### Mod Bus Processor
 
-- PRIMARY MOD SOURCE jack normalizes to ENV OUT when unplugged
+- PRIMARY MOD SOURCE jack normalizes to the ENV selected by MOD SOURCE SEL when unplugged
 - AMOUNT knob: 0.2× – 5× gain
 - OFFSET knob: ±5 V added after scaling
 - MOD BUS OUT jack: buffered output available for external patching
-- Circuit: inverting summer op-amp (scaled mod signal + offset pot) + gain stage
+- Circuit: inverting summer op-amp (scaled mod signal + offset pot) + inverter + output buffer
 - Trim pot: zero-offset null (output = 0 V when AMOUNT = center and input = 0 V)
 
 ### Per-Destination Modulation Circuit
@@ -447,7 +450,7 @@ MOD BUS  →  100Ω + BAT54 clamp  →  ATTENUVERTER (−1× to +1×)  →  para
 | APF Chain 1 Freq | 3 | ±5 V, 1V/oct | |
 | APF Chain 2 Freq | 3 | ±5 V, 1V/oct | |
 | APF Chain 3 Freq | 3 | ±5 V, 1V/oct | |
-| APF Feedback | 3 | 0–10 V | comb depth |
+| APF Feedback (all groups) | 3 | 0–10 V | 1 CV destination controls all 3 group depths |
 | APF Dry/Wet | 3 | 0–10 V | |
 | Distortion Drive | 4 | 0–10 V | |
 | Distortion Mode | 4 | 0–10 V | 0–3.3 V = mode 1, 3.3–6.6 V = mode 2, 6.6–10 V = mode 3 |
