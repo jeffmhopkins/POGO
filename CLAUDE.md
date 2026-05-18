@@ -51,20 +51,21 @@ Each modulation destination receives:
 
 ## The Design-First Rule
 
-**No plugin code, no DSP code, and no C++ is written for a block until Phases 1, 2, and 3 are
-complete and documented for that block in `specs/`.**
+**No plugin code, no DSP code, and no C++ is written until all six phases are complete.**
+Per-block phases (1–3) gate per-block work. Module-level phases (4–5) gate all code.
 
 The workflow is a strict gate:
 
 ```
-Phase 1        Phase 2           Phase 3            Phase 4
-Audio Spec  ──► Analog Behavior ──► Circuit Design ──► VCV Rack Code
+Phase 1        Phase 2           Phase 3            Phase 4         Phase 5           Phase 6
+Audio Spec  ──► Analog Behavior ──► Circuit Design ──► Panel Design ──► Board Layout ──► VCV Rack Code
+                                     (per block)        (module)        (module)          (per block)
 ```
 
-Going backward to refine earlier phases is expected. Moving to Phase 4 without completing all
-prior phases is not permitted.
+Going backward to refine earlier phases is expected. No Phase 6 code begins until Phases 1–3
+are complete for every block AND Phase 4 (panel) and Phase 5 (layout) are complete.
 
-Check `specs/STATUS.md` to see which blocks are ready for coding.
+Check `specs/STATUS.md` to see which blocks are ready and whether module-level phases are cleared.
 
 ---
 
@@ -77,6 +78,11 @@ POGO/
 │   ├── STATUS.md                 ← Master phase-completion checklist (the gate document)
 │   ├── module-overview.md        ← Full signal chain, panel layout, power budget
 │   ├── mod-architecture.md       ← Modulation system spec (all phases 1–3)
+│   ├── panel-design/             ← Phase 4 deliverables (module-level)
+│   │   ├── panel-notes.md        ← HP width, control placement, board split decision, labels
+│   │   └── panel.svg             ← Panel layout SVG (source for VCV Rack + manufacturing)
+│   ├── board-layout/             ← Phase 5 deliverables (module-level)
+│   │   └── layout-notes.md       ← Board split, ground strategy, placement rules, connector pinout
 │   ├── block-A-input-buffer/
 │   │   ├── spec.md               ← Phase 1–3 documentation
 │   │   └── schematic.svg         ← Circuit schematic
@@ -293,15 +299,18 @@ Each HTML file must contain four sections:
 
 ## `specs/STATUS.md` — The Gate Document
 
-This is the single source of truth. No code is written for a block until all three phase columns
-show ✅.
+This is the single source of truth. No Phase 6 (code) work begins until:
+- All per-block rows show ✅ for Phases 1–3, **and**
+- The module-level Phase 4 (Panel) and Phase 5 (Layout) checkboxes are ✅.
 
 Template:
 
 ```markdown
 # POGO Design Status
 
-| Block                        | Phase 1: Audio Spec | Phase 2: Analog Model | Phase 3: Circuit | Phase 4: Code |
+## Per-Block Phases (1–3)
+
+| Block                        | Phase 1: Audio Spec | Phase 2: Analog Model | Phase 3: Circuit | Phase 6: Code |
 |------------------------------|---------------------|-----------------------|------------------|---------------|
 | Mod Architecture             | [ ]                 | [ ]                   | [ ]              | [ ]           |
 | Block A: Input Buffer        | [ ]                 | [ ]                   | [ ]              | [ ]           |
@@ -313,6 +322,17 @@ Template:
 | Block 6: LP Filter 2         | [ ]                 | [ ]                   | [ ]              | [ ]           |
 | Block 7: HP Filter           | [ ]                 | [ ]                   | [ ]              | [ ]           |
 | Block B: Output Buffer       | [ ]                 | [ ]                   | [ ]              | [ ]           |
+
+## Module-Level Phases (gate for all Phase 6 code)
+
+- [ ] **Phase 4: Panel Design** — HP width finalized, all controls placed, sub-panel
+      board decision made, silk-screen layout approved
+      → `specs/panel-design/panel-notes.md` + `specs/panel-design/panel.svg`
+- [ ] **Phase 5: Board Layout** — board split strategy decided, ground plane approach
+      defined, component placement rules documented, connector strategy finalized
+      → `specs/board-layout/layout-notes.md`
+
+Last updated: YYYY-MM-DD
 ```
 
 ---
@@ -546,9 +566,142 @@ Internal signal  →  1 kΩ series  →  Jack tip
 
 ---
 
-## Phase 4: DSP / VCV Rack Plugin Implementation
+## Phase 4: Panel Design
 
-Only begin after `specs/STATUS.md` shows ✅ for all three phases for the block being coded.
+Complete once — at the module level — after all per-block Phase 3 work is done for at least
+the majority of blocks, so control counts and positions are stable.
+
+Deliverables: `specs/panel-design/panel-notes.md` and `specs/panel-design/panel.svg`.
+
+### HP Width and Control Placement
+
+- Finalize the HP count (estimated 28–34 HP; 1 HP = 5.08 mm).
+- Lay out all front-panel elements: audio jacks, CV jacks, knobs, switches, LEDs.
+- Eurorack spacing rules:
+  - Jacks: minimum 8 mm center-to-center (Thonkiconn body = 8 mm wide, needs ≥ 1 mm gap).
+  - Pots: 9 mm PCB-mount body needs ≥ 11 mm center-to-center in a row.
+  - Switches: sub-mini toggle needs ≥ 8 mm center-to-center.
+  - Mounting holes: M3, 5.1 mm from top and bottom panel edges, centered in adjacent HP columns.
+- Group controls logically by block — a musician should be able to read the panel top-to-bottom
+  and recognize the signal flow.
+- Reserve space for silk-screen labels: every jack and knob needs a label; budget ~4 mm height
+  per label line above or below the control.
+- Document each control's panel position as (HP column, mm from top) in `panel-notes.md`.
+
+### Sub-Panel / Multi-Board Decision
+
+At POGO's complexity (28–34 HP, ~30 panel controls), a two-PCB approach is strongly preferred:
+
+**Control board (panel-mounted PCB):**
+- Mounts directly behind the panel using jack nuts and pot hardware.
+- Carries: all Thonkiconn jacks, all pots, all switches, all panel LEDs.
+- Thin board (1.0 mm or 1.2 mm) to minimize stack depth.
+- Connects to the audio board(s) via a right-angle 2.54 mm pin header or ribbon cable.
+
+**Audio board(s):**
+- Hangs behind the control board on standoffs.
+- Carries all ICs, passive components, CV processing, filter circuits.
+- No panel hardware — all through-hole items are on the control board.
+
+Single-board alternative (all components on one PCB):
+- Simpler assembly and fewer connectors, but the board must reach all panel controls.
+- Works for simpler modules (< 16 HP, < 12 controls); not recommended for POGO.
+- Pot and jack positions constrain IC and passive placement, leading to longer signal traces.
+
+Document the chosen approach with a block diagram showing board boundaries and the
+connector pinout between boards in `panel-notes.md`.
+
+### Labeling and Silk-Screen
+
+- Use a monospace or condensed sans-serif font — legibility at small sizes matters more
+  than aesthetics (standard: Eurorack modules use 1.5–2 mm cap height for labels).
+- Label conventions:
+  - ALL CAPS for control names (ATTACK, CUTOFF, DRIVE).
+  - Lowercase or mixed for units and qualifiers (ms, Hz, oct).
+  - Arrow symbols (▲ ▼) or +/− for attenuverter center-detent indication.
+  - Position indicator marks (dots or lines) on switch silk-screen to show positions.
+- Group labels visually by block; use a thin horizontal line or gap between blocks.
+- Color coding (anodized aluminum panels): standard POGO palette TBD. FR4 PCB panels
+  support white silk-screen on black or green solder mask — no anodize cost.
+- Panel file formats needed:
+  - `panel.svg` — authoritative source, used to generate VCV Rack panel and manufacturing files.
+  - DXF (from SVG): for CNC aluminum panel cutting (Schaeffer, Front Panel Express).
+  - Gerber (if FR4 panel): export from KiCad panel footprint for PCB panel manufacturing (JLCPCB, PCBWay).
+
+---
+
+## Phase 5: Board Layout
+
+Complete at the module level before any Phase 6 code is written. Layout decisions affect
+which signals need to be software-accessible (debug test points) and confirm power budget.
+
+Deliverables: `specs/board-layout/layout-notes.md`.
+
+### Single Board vs Multi-Board Split
+
+Document the chosen strategy (see Phase 4 sub-panel decision above) and define board boundaries:
+
+| Board | Contents | Approx size | Connects to |
+|---|---|---|---|
+| Control board | All jacks, pots, switches, LEDs | ~(HP × 5.08 mm) × 80 mm | Audio board via header |
+| Audio board | All ICs, passives, filter circuits | ~100 mm × 110 mm | Control board + Eurorack bus |
+
+If further splitting (e.g., separate LP/HP board): document split point and inter-board signals.
+
+### Ground Plane Strategy
+
+- **Single analog ground plane** on the audio board bottom layer — preferred for an all-analog module.
+- **Star ground** topology: all ground returns converge at a single point near the Eurorack power
+  connector. Do not daisy-chain ground through IC packages.
+- **Chassis ground**: connect panel ground (jack sleeves, pot chassis) to circuit ground at one
+  point only — typically a solder jumper near the power header. Chassis ≠ signal ground.
+- **No split digital/analog plane**: POGO is fully analog; a split plane is unnecessary and
+  can introduce discontinuities under traces that cross the split.
+- On the control board, use a ground fill on the bottom layer tied to the connector's GND pin;
+  it carries only return currents from panel controls, not audio signals.
+
+### Component Placement Rules
+
+Apply these rules in KiCad (or equivalent) before routing:
+
+1. **Decoupling caps within 1 mm of each IC supply pin** — place before routing power traces.
+2. **Ferrite beads and bulk caps at the power header** — place first; route power from there.
+3. **Envelope follower and high-gain stages away from power rails** — minimum 5 mm separation
+   between the ENV rectifier input traces and any switching supply or ferrite bead.
+4. **Filter IC pairs (LP1 + LP2, or each OTA bank) adjacent** — matched thermal environment
+   reduces cutoff frequency drift between matched stages.
+5. **CV input protection (100Ω + BAT54) placed immediately after the connector footprint** —
+   protection must be the first thing a signal encounters after entering the board.
+6. **Trim pots accessible without desoldering** — place on the top edge or a clearly reachable
+   area; document each trim pot location in `layout-notes.md` with an adjustment procedure.
+7. **No audio signal traces under power traces** — route audio on the bottom layer, power on
+   the top (or use separate copper pours); keep parallel runs < 5 mm.
+
+### Connector Strategy
+
+**Eurorack power header:**
+- 16-pin shrouded IDC header (or 10-pin if +5 V and gate bus are not needed).
+- Place at the top or bottom center of the audio board, within 20 mm of the board edge.
+- Red stripe (−12 V, pin 1) orientation: mark clearly on silk-screen with a triangle or arrow.
+- Ferrite bead on each rail in series between header and board power plane.
+
+**Control board ↔ Audio board connector:**
+- 2.54 mm right-angle pin header on the audio board; mating socket on control board.
+- Group signals by type: GND first, then +12 V / −12 V, then audio signals, then CV signals.
+- Keep connector ≤ 40 pins; if more signals are needed, use two connectors.
+- Document the full pinout in `layout-notes.md` — this becomes the integration test spec.
+
+**Jack-to-board:**
+- Use PCB-mount Thonkiconn (PJ301M-12) — direct solder to control board, no flying leads.
+- Pot PCB-mount variant (Alpha 9mm or equivalent) — solder direct to control board.
+- Sub-mini toggle switches: use PCB-mount right-angle variant to keep flush with the control board.
+
+---
+
+## Phase 6: DSP / VCV Rack Plugin Implementation
+
+Only begin after `specs/STATUS.md` shows ✅ for Phases 1–3 on all blocks **and** Phase 4 and
+Phase 5 are complete at the module level.
 
 ### Mapping analog model to digital
 
@@ -612,9 +765,14 @@ Docker image.
 ## Where to Start
 
 1. Read `specs/STATUS.md` — if empty, begin filling in `specs/module-overview.md` with the full
-   signal chain, estimated panel width, and power budget
-2. Work through blocks in signal-chain order: A → 1 → 2 → mod architecture → 3 → 4 → 5 → 6 → 7 → B
-3. For each block: complete Phase 1, then Phase 2, then Phase 3 in `specs/block-N-name/spec.md`
-   and `schematic.svg`, then create the HTML design doc in `design/`
-4. Only after STATUS.md shows ✅ for all three phases: create the corresponding `src/dsp/*.hpp`
-5. After all blocks are coded: integrate in `src/Pogo.cpp`, build, and test in VCV Rack
+   signal chain, estimated panel width, and power budget.
+2. Work through blocks in signal-chain order: A → 1 → 2 → mod architecture → 3 → 4 → 5 → 6 → 7 → B.
+   For each block: complete Phase 1 → Phase 2 → Phase 3 in `specs/block-N-name/spec.md` and
+   `schematic.svg`, then create the HTML design doc in `design/`.
+3. When all (or nearly all) per-block Phase 3 work is stable, begin **Phase 4: Panel Design**:
+   create `specs/panel-design/panel-notes.md` and `specs/panel-design/panel.svg`.
+4. After Phase 4 is complete, begin **Phase 5: Board Layout**:
+   create `specs/board-layout/layout-notes.md`.
+5. Only after STATUS.md shows ✅ for Phases 1–3 on all blocks AND Phase 4 AND Phase 5:
+   create `src/dsp/*.hpp` for each block (Phase 6).
+6. After all blocks are coded: integrate in `src/Pogo.cpp`, build, and test in VCV Rack.
