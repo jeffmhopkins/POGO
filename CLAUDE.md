@@ -450,7 +450,10 @@ MOD BUS  →  100Ω + BAT54 clamp  →  ATTENUVERTER (−1× to +1×)  →  para
 | APF Chain 1 Freq | 3 | ±5 V, 1V/oct | |
 | APF Chain 2 Freq | 3 | ±5 V, 1V/oct | |
 | APF Chain 3 Freq | 3 | ±5 V, 1V/oct | |
-| APF Feedback (all groups) | 3 | 0–10 V | 1 CV destination controls all 3 group depths |
+| APF Feedback 1 | 3 | 0–10 V | Group 1 independent |
+| APF Feedback 2 | 3 | 0–10 V | Group 2 independent |
+| APF Feedback 3 | 3 | 0–10 V | Group 3 independent |
+| APF Blend | 3 | 0–10 V | feedback source crossfade; active when SOURCE = Blend |
 | APF Dry/Wet | 3 | 0–10 V | |
 | Distortion Drive | 4 | 0–10 V | |
 | Distortion Mode | 4 | 0–10 V | 0–3.3 V = mode 1, 3.3–6.6 V = mode 2, 6.6–10 V = mode 3 |

@@ -166,8 +166,9 @@ Simpler approach: use a center-tapped pot connected between +V and −V rails:
 ```
 Where +V_att and −V_att come from the override jack or mod bus attenuated via a virtual ground.
 
-**IC requirement**: 14 attenuverters × (1 buffer + 1 inverter) = 28 op-amp halves for full
-isolation. Use TL074 (quad, 4 halves each): 7× TL074 for all 14 attenuverter circuits.
+**IC requirement**: 17 attenuverters × (1 buffer + 1 inverter) = 34 op-amp halves for full
+isolation. Use TL074 (quad, 4 halves each): 9× TL074 for all 17 attenuverter circuits.
+(Note: Distortion Mode and APF SOURCE/POLARITY have no attenuverter — switches only.)
 
 ### Modulation Destinations
 
@@ -176,7 +177,10 @@ isolation. Use TL074 (quad, 4 halves each): 7× TL074 for all 14 attenuverter ci
 | APF Freq 1 | 3 | ±5 V, 1V/oct | Yes |
 | APF Freq 2 | 3 | ±5 V, 1V/oct | Yes |
 | APF Freq 3 | 3 | ±5 V, 1V/oct | Yes |
-| APF Feedback (all groups) | 3 | 0–10 V | Yes |
+| APF Feedback 1 | 3 | 0–10 V | Yes |
+| APF Feedback 2 | 3 | 0–10 V | Yes |
+| APF Feedback 3 | 3 | 0–10 V | Yes |
+| APF Blend | 3 | 0–10 V | Yes |
 | APF Dry/Wet | 3 | 0–10 V | Yes |
 | Distortion Drive (active mode) | 4 | 0–10 V | Yes |
 | Distortion Mode | 4 | 0–10 V | No (comparator logic, no attenuverter) |

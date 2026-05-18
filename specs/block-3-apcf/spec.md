@@ -42,6 +42,9 @@ At mid DRY/WET: classic phaser blend — notches audible but dry content preserv
 | FEEDBACK 1 | 0 – 95% | 0% | Linear | Resonance depth of Group 1; >95% risks instability |
 | FEEDBACK 2 | 0 – 95% | 0% | Linear | Resonance depth of Group 2 |
 | FEEDBACK 3 | 0 – 95% | 0% | Linear | Resonance depth of Group 3 |
+| SOURCE | Switch: Internal / Blend / Post-Dist | Internal | N/A | Selects what signal feeds back: APF output only, crossfade mix, or Block 4 distortion output only |
+| BLEND | 0 – 100% | 50% | Linear | Crossfade ratio between APF output and Post-Dist signal; only active when SOURCE = Blend |
+| POLARITY | Switch: Positive / Off / Negative | Positive | N/A | Positive: standard notch deepening; Off: cuts all feedback regardless of FEEDBACK knobs; Negative: phase-inverts feedback, turning notches into peaks |
 | STEREO WIDTH | 0 – 100% | 0% | Linear | Frequency offset of R channel groups relative to L; 0% = mono, 100% = maximum stereo spread |
 | DRY/WET | 0 – 100% | 50% | Linear | Blend from fully dry to fully wet (phase-shifted) signal |
 
@@ -52,8 +55,13 @@ At mid DRY/WET: classic phaser blend — notches audible but dry content preserv
 | FREQ 1 | ±5 V (1V/oct) | Yes | Sweeps Group 1 center frequency exponentially |
 | FREQ 2 | ±5 V (1V/oct) | Yes | Sweeps Group 2 center frequency exponentially |
 | FREQ 3 | ±5 V (1V/oct) | Yes | Sweeps Group 3 center frequency exponentially |
-| FEEDBACK (all) | 0–10 V | Yes | Single CV controls all three feedback depths together |
+| FEEDBACK 1 | 0–10 V | Yes | Group 1 feedback depth independently |
+| FEEDBACK 2 | 0–10 V | Yes | Group 2 feedback depth independently |
+| FEEDBACK 3 | 0–10 V | Yes | Group 3 feedback depth independently |
+| BLEND | 0–10 V | Yes | Crossfade ratio; only active when SOURCE = Blend |
 | DRY/WET | 0–10 V | Yes | Sweeps blend from dry to wet |
+| SOURCE | — | None | Switch only; no CV |
+| POLARITY | — | None | Switch only; no CV |
 
 ### Signal Levels (I/O)
 - Input: ±5 V audio (from Block 2; up to ±10.5 V if Block 1 is in BOOST mode)
@@ -141,13 +149,31 @@ At WIDTH = 50%, approximately +2 semitones offset. At WIDTH = 100%, approximatel
 
 ### Feedback (Resonance) Model
 
-Each group has a feedback path with gain g (0 ≤ g < 1):
+Each group has an independent feedback path with gain g (0 ≤ g < 1):
 ```
-V_out_group = H_6(s) × [V_in + g × V_out_group]
-V_out_group = H_6(s) × V_in / (1 − g × H_6(s))
+V_fb_source = SOURCE_select(V_apf_out, V_post_dist, BLEND)
+V_fb_signal = POLARITY_select(V_fb_source)   [+1, 0, or −1 × V_fb_source]
+V_out_group = H_6(s) × [V_in + g × V_fb_signal]
+V_out_group = H_6(s) × V_in / (1 − g × POLARITY × H_6(s))
 ```
-The feedback boosts the resonance at the notch frequencies. At g → 1, the denominator approaches
-zero at the notch frequencies → self-oscillation. Circuit must limit g to ≤ 0.95 via resistor floor.
+
+**SOURCE selection:**
+```
+Internal:   V_fb_source = V_apf_out
+Blend:      V_fb_source = (1 − BLEND) × V_apf_out + BLEND × V_post_dist
+Post-Dist:  V_fb_source = V_post_dist
+```
+
+**POLARITY selection:**
+```
+Positive:   V_fb_signal = +V_fb_source   (standard, deepens notches)
+Off:        V_fb_signal = 0              (g effectively = 0 regardless of FEEDBACK knob)
+Negative:   V_fb_signal = −V_fb_source  (inverts feedback; notches become peaks)
+```
+
+At g → 1 with Positive polarity: self-oscillation at notch frequencies.
+At g → 1 with Negative polarity: self-oscillation at peak frequencies (inverse comb).
+Circuit must limit g ≤ 0.95 via resistor floor in the feedback summing network.
 
 ### Frequency Response (Combined Output)
 
@@ -228,16 +254,56 @@ V_freq (from knob + CV sum) → [expo transistor pair] → I_abc → LM13700 Iab
 - Trim pot for 1V/oct tracking calibration
 - Reference current: set by resistor from +12 V to expo transistor base
 
-#### Feedback Path (per group)
+#### Feedback Path (per group — updated for SOURCE + POLARITY)
+
+Each group's feedback circuit has three stages: source selection → polarity → amount.
+
+**Stage 1: Source selection (shared across all 3 groups via one SOURCE switch)**
 
 ```
-V_out_group_6 ──[R_fb_fixed]──┬──(−) summing amp ──► V_fb_sum → Group input
-                               │
-V_in ──[R_in_fixed]────────────┘
-
-FEEDBACK knob sets: R_fb_pot in parallel with R_fb_fixed → effective feedback ratio g
+V_apf_out ──[R_a]──┬──(−) BLEND_AMP ──(out)── V_fb_source
+V_post_dist ─[R_b]──┘
 ```
-Minimum feedback resistor (end-stop) ensures g never exceeds ~0.95.
+
+CD4053 triple analog mux (SOIC-16) routes to one of three configurations:
+- Internal: only V_apf_out active (R_b open)
+- Blend: both inputs active; BLEND knob sets R_a/R_b ratio via a pot-controlled summing network
+- Post-Dist: only V_post_dist active (R_a open)
+
+BLEND CV (0–10 V via attenuverter) adds to the BLEND knob voltage before the summing network,
+allowing CV control of the internal↔post-dist crossfade ratio.
+
+One CD4053 and one BLEND_AMP op-amp serve all three groups simultaneously (SOURCE is global).
+V_post_dist is tapped directly from Block 4's output stage; route as a shielded signal.
+
+**Stage 2: Polarity selection (shared across all 3 groups via one POLARITY switch)**
+
+```
+V_fb_source ──(+) POL_INV ──(out)── V_fb_pos   (unity gain buffer)
+V_fb_source ──(−) POL_INV ──(out)── V_fb_neg   (inverting, gain = −1)
+              [POLARITY switch selects: V_fb_pos / GND / V_fb_neg]
+```
+
+- Positive → routes V_fb_pos into per-group amount stage
+- Off → routes GND (no feedback signal regardless of FEEDBACK knob)
+- Negative → routes V_fb_neg (phase-inverted)
+
+One TL072 half as the inverter; the POLARITY switch is a 3-position panel switch routing
+the appropriate signal to all three per-group feedback amount stages.
+
+**Stage 3: Feedback amount (independent per group, ×3)**
+
+```
+V_fb_polar ──[R_fb_fixed]──┬──(−) summing amp ──► V_fb_sum → Group input
+                            │
+                        [FEEDBACK knob pot + CV attenuverter]
+                            │
+                           GND
+```
+
+FEEDBACK knob and CV attenuverter set the effective gain g in the feedback path.
+End-stop resistor (R_fb_min) in the pot circuit ensures g ≤ 0.95 at maximum setting.
+Three independent summing amps — one per group (using TL072 halves).
 
 #### DRY/WET Crossfader
 
@@ -262,11 +328,15 @@ A simple exponential offset applied to the R channel expo converter reference on
 | OTA_x | LM13700M | SOIC-16 | 18 | Dual OTA; 1 per 2 APF stages; 9 per channel |
 | APF_AMP_x | TL072CDT | SOIC-8 | 18 | Dual op-amp; 1 per 2 APF stages; 9 per channel |
 | EXPO_x | THAT340 or LM394 | SOIC-8 | 3 | Matched NPN pair for expo converter (1 per group) |
-| VCA_x | V2164D | SOIC-16 | 1 | Quad VCA for DRY/WET crossfader (L+R in one IC) |
-| MIX_AMP_x | TL074CDT | SOIC-14 | 2 | Quad op-amp for summing, feedback, width offset circuits |
+| VCA_DW | V2164D | SOIC-16 | 1 | Quad VCA for DRY/WET crossfader (L+R in one IC) |
+| SW_SRC | CD4053 | SOIC-16 | 1 | Triple 2:1 mux for SOURCE selection (global) |
+| FB_AMP_x | TL074CDT | SOIC-14 | 3 | Per-group feedback summing amp + BLEND_AMP + POL_INV (≈3 quads needed) |
+| MIX_AMP_x | TL074CDT | SOIC-14 | 2 | Summing, width offset, general purpose |
 | C_apf_G1 | C0G / NP0 | 0603 | 12 | 1.5 nF (6 per channel × 2 channels) for Group 1 |
 | C_apf_G2 | C0G / NP0 | 0603 | 12 | 300 pF for Group 2 |
 | C_apf_G3 | C0G / NP0 | 0603 | 12 | 68–82 pF for Group 3 |
+| SW_POL | 3-pos panel switch | Panel | 1 | POLARITY: Positive / Off / Negative (mechanical) |
+| SW_SRC_MAN | 3-pos panel switch | Panel | 1 | SOURCE: Internal / Blend / Post-Dist (mechanical) |
 
 ### Trim Pots
 
@@ -290,5 +360,8 @@ A simple exponential offset applied to the R channel expo converter reference on
 - **Expo converter matching**: THAT340 or LM394 matched pair required for stable 1V/oct tracking across temperature; a single transistor from a general-purpose part will drift.
 - **HF oscillation**: OTA stages at high Iabc (high frequency) can self-oscillate due to parasitic capacitance. Add small (22 pF) capacitors at each OTA output node and keep traces short.
 - **Crosstalk L/R**: L and R share the same group frequencies but have separate OTA signal paths. Route L and R ground planes separately; do not route L signal adjacent to R signal on PCB.
-- **Calibration burden**: 6 trim pots (3 expo converters + 3 feedback limits) must be calibrated per unit. Document the calibration procedure clearly in the assembly guide.
-- **Sallen-Key note**: This spec uses OTA all-pass stages (not Sallen-Key). Sallen-Key is not suitable for voltage-controlled all-pass — OTA is the correct topology here.
+- **V_post_dist routing**: the distortion output (Block 4) must be routed to the APF feedback section without picking up noise. Use a shielded wire or dedicated PCB trace with guard ring; keep away from OTA signal nodes.
+- **CD4053 SOURCE switch**: the CD4053 has a small series resistance (~100 Ω on ±5 V supply) and charge injection during switching. Buffer the output of SW_SRC with a unity-gain op-amp before the per-group feedback amp stages.
+- **POLARITY Off position**: when POLARITY = Off, GND must be cleanly connected to the feedback summing node — a leaky switch contact or ground bounce will cause audible bleed-through of the feedback signal. Use a low-leakage panel switch or add a small bleeder resistor to GND at the switch output.
+- **Negative feedback stability**: with POLARITY = Negative, the feedback becomes degenerative in the normal sense but regenerative at the complementary frequencies. At high g, the system may still self-oscillate but at different frequencies than positive feedback — verify stability across the full FEEDBACK range in simulation before PCB layout.
+- **Calibration burden**: 6 trim pots (3 expo + 3 feedback limits) plus 3 independent feedback CV attenuverters. Document calibration order clearly: expo converters first, then feedback limits.
