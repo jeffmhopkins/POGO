@@ -413,7 +413,9 @@ Source: post-gain / pre-comb audio — **two independent followers, one per chan
 - ENV OUT L jack: buffered left-channel envelope (0–10 V)
 - ENV OUT R jack: buffered right-channel envelope (0–10 V)
 - MOD SOURCE SEL switch (3-position): selects which envelope normalizes into the mod bus
-  - L = ENV OUT L; R = ENV OUT R; LR = L+R averaged
+  - L = ENV OUT L only
+  - max(L,R) = diode-OR (BAT54) of both envelopes, buffered — tracks the louder channel at any moment
+  - avg(L,R) = (ENV_L + ENV_R) / 2 via equal resistor divider into unity-gain buffer
 
 **Analog behavior:**
 - Full-wave precision rectifier → RC peak detector (separate attack/release diode paths)

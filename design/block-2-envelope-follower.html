@@ -160,9 +160,9 @@
   <text x="480" y="800" fill="#e8e8e8" font-family="monospace" font-size="13" font-weight="bold" text-anchor="middle">MOD SOURCE SEL</text>
   <text x="480" y="817" fill="#c8c8c8" font-family="monospace" font-size="12" text-anchor="middle">3-position sub-mini toggle</text>
   <line x1="318" y1="826" x2="642" y2="826" stroke="#555500" stroke-width="1"/>
-  <text x="390" y="843" fill="#aaaaaa" font-family="monospace" font-size="11" text-anchor="middle">L</text>
-  <text x="480" y="843" fill="#aaaaaa" font-family="monospace" font-size="11" text-anchor="middle">L+R avg</text>
-  <text x="570" y="843" fill="#aaaaaa" font-family="monospace" font-size="11" text-anchor="middle">R</text>
+  <text x="370" y="843" fill="#aaaaaa" font-family="monospace" font-size="11" text-anchor="middle">L</text>
+  <text x="480" y="843" fill="#aaaaaa" font-family="monospace" font-size="11" text-anchor="middle">max(L,R)</text>
+  <text x="590" y="843" fill="#aaaaaa" font-family="monospace" font-size="11" text-anchor="middle">avg(L,R)</text>
 
   <!-- Arrow down to PRIMARY MOD SOURCE -->
   <line x1="480" y1="854" x2="480" y2="874" stroke="#8ab4d4" stroke-width="1.5" marker-end="url(#arr)"/>
@@ -199,19 +199,24 @@ ENV_L ──[BZX84-C10 10V zener to GND]  (output clamp)
 ENV_L ──[R_out_L 1kΩ]──► ENV OUT L jack
 
 MOD SOURCE SEL switch (SW_SEL, 3-position):
-  Position L:   ENV_L → normalizing node of MOD SOURCE jack
-  Position R:   ENV_R → normalizing node of MOD SOURCE jack
-  Position L+R: ENV_L and ENV_R → two 20kΩ resistors → summing amp (EF1_D, G=1) → normalizing node
+  Position L:        ENV_L → normalizing node of MOD SOURCE jack
+  Position max(L,R): ENV_L → D_maxL (BAT54 A) → max_node ──► EF2_D (unity-gain buf) → normalizing node
+                     ENV_R → D_maxR (BAT54 B) → max_node ─┘
+                     BAT54 Vf ≈ 0.15 V; negligible on 0–10 V scale
+  Position avg(L,R): ENV_L → 20 kΩ → EF1_D (+in)
+                     ENV_R → 20 kΩ → EF1_D (+in)
+                     EF1_D (unity-gain buffer) → normalizing node
+                     Output = (ENV_L + ENV_R) / 2
 
 IC EF1 (TL074CDT, SOIC-14, L channel):
   Half A+B: full-wave precision rectifier
   Half C:   scaling amplifier (G=2)
-  Half D:   L+R sum amp (for SEL = L+R position)
+  Half D:   avg(L,R) buffer (20 kΩ + 20 kΩ resistor divider into unity-gain non-inv)
 
 IC EF2 (TL074CDT, SOIC-14, R channel):
   Half A+B: full-wave precision rectifier
   Half C:   scaling amplifier (G=2)
-  Half D:   spare
+  Half D:   max(L,R) buffer (BAT54 diode-OR output → unity-gain non-inv buffer)
 </pre>
 
 <h2>3. Parts List</h2>
@@ -220,8 +225,9 @@ IC EF2 (TL074CDT, SOIC-14, R channel):
     <tr><th>Reference</th><th>Part Number</th><th>Package</th><th>Value</th><th>Qty</th><th>Notes</th></tr>
   </thead>
   <tbody>
-    <tr><td>EF1</td><td>TL074CDT</td><td>SOIC-14</td><td>—</td><td>1</td><td>L channel: rectifier + peak amp + sum amp</td></tr>
-    <tr><td>EF2</td><td>TL074CDT</td><td>SOIC-14</td><td>—</td><td>1</td><td>R channel: rectifier + peak amp + spare</td></tr>
+    <tr><td>EF1</td><td>TL074CDT</td><td>SOIC-14</td><td>—</td><td>1</td><td>L channel: rectifier (A+B) + scale amp (C) + avg(L,R) buffer (D)</td></tr>
+    <tr><td>EF2</td><td>TL074CDT</td><td>SOIC-14</td><td>—</td><td>1</td><td>R channel: rectifier (A+B) + scale amp (C) + max(L,R) buffer (D)</td></tr>
+    <tr><td>D_max</td><td>BAT54</td><td>SOT-23</td><td>—</td><td>1</td><td>Dual Schottky; D_maxL + D_maxR for max(L,R) diode-OR selector</td></tr>
     <tr><td>D_atk_L, D_atk_R</td><td>1N4148WS</td><td>SOD-323</td><td>—</td><td>2</td><td>Attack charge diodes</td></tr>
     <tr><td>D_rel_L, D_rel_R</td><td>1N4148WS</td><td>SOD-323</td><td>—</td><td>2</td><td>Release discharge diodes (reversed orientation)</td></tr>
     <tr><td>D_rect (×4)</td><td>1N4148WS</td><td>SOD-323</td><td>—</td><td>4</td><td>Precision rectifier diodes (2 per channel)</td></tr>
@@ -235,7 +241,7 @@ IC EF2 (TL074CDT, SOIC-14, R channel):
     <tr><td>R_out_L, R_out_R</td><td>—</td><td>0603</td><td>1 kΩ</td><td>2</td><td>Output series resistor to ENV OUT jacks</td></tr>
     <tr><td>RV_ENV_SCALE_L</td><td>Bourns 3224W</td><td>SMD trim</td><td>10 kΩ</td><td>1</td><td>L channel output level calibration</td></tr>
     <tr><td>RV_ENV_SCALE_R</td><td>Bourns 3224W</td><td>SMD trim</td><td>10 kΩ</td><td>1</td><td>R channel output level calibration</td></tr>
-    <tr><td>SW_SEL</td><td>Sub-mini toggle</td><td>Panel</td><td>3-pos</td><td>1</td><td>MOD SOURCE SEL: L / L+R / R</td></tr>
+    <tr><td>SW_SEL</td><td>Sub-mini toggle</td><td>Panel</td><td>3-pos</td><td>1</td><td>MOD SOURCE SEL: L / max(L,R) / avg(L,R)</td></tr>
     <tr><td>C_VCC, C_VEE (×4)</td><td>—</td><td>0603</td><td>100 nF</td><td>4</td><td>Supply decoupling: 2 per TL074 IC</td></tr>
   </tbody>
 </table>
@@ -283,7 +289,14 @@ Stage 3: Output scaling amplifier
   <li><strong>Log-taper pots</strong>: standard log pots concentrate most of the rotation range at the bottom decade. If attack feel is too cramped at slow times, use a linear pot with an RC shaping network for pseudo-log response.</li>
   <li><strong>Diode leakage</strong>: at room temperature, 1N4148 leakage is negligible (~1–5 nA). At slow release settings with 2.2 µF, hold time is set by diode leakage. Acceptable for release times ≤ 2 s.</li>
   <li><strong>DC blocking (optional)</strong>: if signal chain passes significant DC offset, populate a 10 µF series cap before the rectifier. Leave footprint unpopulated and bridged by default.</li>
-  <li><strong>MOD SOURCE SEL normalling</strong>: the selected ENV signal arrives at the sleeve switching lug of the PRIMARY MOD SOURCE jack (tip-switching Thonkiconn). When a cable is inserted, the tip disconnects the normalled ENV signal.</li>
+  <li><strong>MOD SOURCE SEL — three positions</strong>:
+    <ul>
+      <li><strong>L</strong>: ENV_L routed directly. Best for mono-left input or when only the left channel matters.</li>
+      <li><strong>max(L,R)</strong>: BAT54 diode-OR of ENV_L and ENV_R, buffered by EF2_D. Tracks whichever channel is louder at any instant — catches transients from either side. BAT54 Vf ≈ 0.15 V; negligible relative to 0–10 V range.</li>
+      <li><strong>avg(L,R)</strong>: Two equal 20 kΩ resistors from ENV_L and ENV_R into the high-impedance (+in) of EF1_D, producing (ENV_L + ENV_R) / 2. Best for balanced stereo material where a smooth, stable CV is preferred over peak-tracking.</li>
+    </ul>
+    The selected signal arrives at the sleeve switching lug of the PRIMARY MOD SOURCE jack (tip-switching Thonkiconn). Inserting a cable disconnects the normalled ENV signal.
+  </li>
 </ul>
 
 <h3>Trim Pots</h3>

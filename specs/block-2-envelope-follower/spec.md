@@ -37,7 +37,7 @@ L and R envelope followers operate on their respective signals independently but
 | RELEASE | Pot | Shared release time for L and R followers |
 | ENV OUT L | Output jack | 0–10 V envelope CV from left channel |
 | ENV OUT R | Output jack | 0–10 V envelope CV from right channel |
-| MOD SOURCE SEL | 3-position switch | Selects which ENV feeds mod bus default: L / R / L+R sum |
+| MOD SOURCE SEL | 3-position switch | Selects which ENV feeds mod bus: L / max(L,R) / avg(L,R) |
 
 ### CV Modulation Targets
 None — envelope follower does not receive modulation. It is a CV source.
@@ -160,10 +160,21 @@ Output jack driven through 1 kΩ series resistor (standard Eurorack output prote
 #### MOD SOURCE SEL Switch
 
 3-position miniature switch (sub-mini toggle or right-angle PCB slide switch):
-- Position L: ENV OUT L jack normalizes to MOD SOURCE input
-- Position R: ENV OUT R jack normalizes to MOD SOURCE input
-- Position L+R: both ENV signals are summed via equal resistors (two 20 kΩ resistors into
-  a summing op-amp, gain = 1) then connected to MOD SOURCE normalizing node
+
+- **Position L**: ENV_L routed directly to MOD SOURCE normalizing node.
+  Use when the signal of interest is mono-left or when only the left channel envelope is wanted.
+
+- **Position max(L,R)**: diode-OR of ENV_L and ENV_R, buffered by EF2_D (unity-gain).
+  D_maxL and D_maxR are both halves of a single BAT54 dual Schottky (SOT-23).
+  The higher envelope voltage wins at any moment. BAT54 forward drop ≈ 0.15 V at low current —
+  negligible at 0–10 V scale; absorbed by the mod bus AMOUNT knob.
+  Use for full-stereo content where transients may appear in either channel.
+
+- **Position avg(L,R)**: ENV_L and ENV_R each through a 20 kΩ resistor into EF1_D (+in),
+  with EF1_D wired as a unity-gain non-inverting buffer. The resistor divider naturally
+  produces (ENV_L + ENV_R) / 2 at the high-impedance op-amp input.
+  Use for sustained, balanced stereo material (pads, reverb tails) where a smooth,
+  channel-averaged CV is preferred.
 
 The normalizing is done through tip-switching of the MOD SOURCE input jack (see shared/cv-input-protection.md).
 
@@ -171,8 +182,9 @@ The normalizing is done through tip-switching of the MOD SOURCE input jack (see 
 
 | Reference | Part Number | Package | Value | Qty | Notes |
 |---|---|---|---|---|---|
-| EF1 (L channel) | TL074CDT | SOIC-14 | — | 1 | Quad op-amp: rectifier (2 halves) + peak amp (1 half) + sum amp (1 half) |
-| EF2 (R channel) | TL074CDT | SOIC-14 | — | 1 | Same as EF1 for R channel |
+| EF1 (L channel) | TL074CDT | SOIC-14 | — | 1 | Quad op-amp: rectifier (2 halves) + scale amp (1 half) + avg(L,R) buffer (1 half) |
+| EF2 (R channel) | TL074CDT | SOIC-14 | — | 1 | Quad op-amp: rectifier (2 halves) + scale amp (1 half) + max(L,R) buffer (1 half) |
+| D_max | BAT54 | SOT-23 | — | 1 | Dual Schottky; D_maxL + D_maxR for max(L,R) diode-OR selector |
 | D_atk L/R (×2) | 1N4148WS | SOD-323 | — | 2 | Attack charge diodes |
 | D_rel L/R (×2) | 1N4148WS | SOD-323 | — | 2 | Release discharge diodes |
 | D_rect L/R (×4) | 1N4148WS | SOD-323 | — | 4 | Precision rectifier diodes |
@@ -185,7 +197,7 @@ The normalizing is done through tip-switching of the MOD SOURCE input jack (see 
 | D_clamp | BZX84-C10 | SOT-23 | 10 V | 2 | Output 10 V clamp zener, one per channel |
 | R_out L/R | — | 0603 | 1 kΩ | 2 | Output series resistor to jacks |
 | C_VCC, C_VEE | — | 0603 | 100 nF | 4 | Supply decoupling (2 per IC) |
-| SW_SEL | Sub-mini toggle | Panel | 3-pos | 1 | Mod source selection: L / L+R / R |
+| SW_SEL | Sub-mini toggle | Panel | 3-pos | 1 | Mod source selection: L / max(L,R) / avg(L,R) |
 
 ### Trim Pots
 
