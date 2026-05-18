@@ -3,7 +3,7 @@
 ## Status
 - Phase 1 (Audio Spec): [x] complete
 - Phase 2 (Analog Model): [x] complete
-- Phase 3 (Circuit Design): [ ] pending topology decision
+- Phase 3 (Circuit Design): [x] complete — SVF (OTA-C, LP output tapped)
 
 ---
 
@@ -94,111 +94,96 @@ Q_max → ∞ at self-oscillation; practical limit: Q ≈ 50 at RESONANCE = 95%
 
 ## Phase 3: Circuit Design
 
-### Topology Decision (pending VCV prototype testing)
+### Topology: State-Variable Filter (OTA-C), LP output tapped
 
-The 2-pole lowpass filter for this block has several viable voltage-controlled topologies.
-The VCV Rack prototype will be used to confirm the target sound before committing to hardware.
-Three candidate topologies are documented below.
-
----
-
-#### Topology A: OTA-Based Sallen-Key (recommended starting point)
-
-The standard Sallen-Key LP topology uses two RC stages and a gain element. Replacing the resistors
-with OTA transconductors gives voltage control over ω₀ via the OTA bias current.
+Two LM13700 OTA cells act as the integrators in the SVF core. The summing amplifier uses a
+TL074. Q (resonance) is controlled by a V2164 VCA cell in the BP feedback path, giving
+voltage-controlled resonance independently of cutoff. Tapping V_LP gives the 2-pole lowpass
+output. V_BP and V_HP are available as auxiliary output jacks.
 
 ```
-V_in ──[OTA1]──┬──[OTA2]──(+) op-amp ──(out)── V_out
-               │                  │
-              [C1]              ──┤─ (C2)
-               │                  │
-              GND                GND
+V_in ──[R_in]──(−) SUM_AMP ──(out)──[OTA1 integrator]──(out)── V_BP
+                  (+)=GND               │                          │
+                                        C1                         │
+                                        │                       [OTA2 integrator]──(out)── V_LP
+                                       GND                         │
+                                                                   C2
+                                                                   │
+                                                                  GND
 
-OTA bias current → I_abc = I_ref × e^(V_ctrl / V_T)   (expo converter)
-ω₀ = g_m / √(C1 × C2),  g_m = I_abc / (2 × V_T)
+V_HP = SUM_AMP output = V_in − V_LP − (1/Q) × V_BP
+
+Resonance feedback:
+V_BP ──[V2164 VCA cell, gain = 1/Q]──► (−) input of SUM_AMP
 ```
 
-**Pros:** Widely used in Eurorack; well-understood; integrates naturally with the APCF block
-(same LM13700 family); self-oscillation behavior is controllable.
+Higher V2164 gain = less feedback = lower Q (wider, flatter).
+RESONANCE knob wired so CW = more feedback = higher Q → self-oscillation.
 
-**Cons:** Requires expo converter (adds complexity and calibration); THD increases at high
-frequencies due to OTA linearity limits; needs matched OTA cells.
-
-**ICs:** 2× LM13700 halves (from shared IC with APCF), 1× TL072 op-amp, 1× expo transistor pair.
-**Component values (starting point):** C1 = C2 = 10 nF, g_m_nom = ω₀_nom × C = 2π×1kHz × 10nF = 63 µS,
-I_abc_nom = 63 µS × 2 × 26 mV = 3.3 µA.
-
----
-
-#### Topology B: State-Variable Filter (SVF) — LP output tapped
-
-The SVF uses two OTA-C integrators and a summing amplifier. Simultaneously produces LP, BP, and HP
-outputs. Tapping the LP output gives the desired 2-pole lowpass response.
+### Signal Flow and Transfer Functions
 
 ```
-V_in ──[sum amp]──(out)── V_BP via [OTA-integrator 1]── V_LP
-    ↑                         │
-    └── (resonance feedback) ◄┘
-              │
-              ▼
-           V_HP = V_in − V_BP × (1/Q) − V_LP
+H_LP(s) = ω₀² / (s² + ω₀/Q × s + ω₀²)    ← primary output
+H_BP(s) = ω₀ × s / (s² + ω₀/Q × s + ω₀²) ← aux jack (optional)
+H_HP(s) = s² / (s² + ω₀/Q × s + ω₀²)      ← aux jack (optional)
 ```
 
-Transfer functions:
+### Voltage Control of ω₀
+
 ```
-H_LP(s) = ω₀² / (s² + ω₀/Q × s + ω₀²)
-H_BP(s) = ω₀ × s / (s² + ω₀/Q × s + ω₀²)
-H_HP(s) = s² / (s² + ω₀/Q × s + ω₀²)
+ω₀ = g_m / C,   g_m = I_abc / (2 × V_T)
+I_abc = I_ref × e^(V_ctrl / V_T)    (expo converter, THAT340 matched pair)
 ```
 
-**Pros:** Inherently stable at high Q; self-oscillation is clean and controllable; BP and HP
-outputs available as bonus jacks; Resonance (Q) is controlled by one resistor — easy panel control.
-**Cons:** Requires two OTA integrators (same IC count as Topology A); output amplitude at self-
-oscillation requires limiting; more complex summing network.
+1V/oct: each +1 V on V_ctrl doubles I_abc → doubles g_m → doubles ω₀ → one octave up.
 
-**ICs:** 1× LM13700 (both OTA cells as integrators), 1× TL074 (summing amp + output buffers),
-expo converter.
+### Component Value Derivations
 
----
+Target range: 20 Hz – 20 kHz (10 octaves, ±5 V at 1V/oct → 2^10 = 1024×).
+Choose f_ref = 630 Hz at V_ctrl = 0 V so that −5 V gives ~20 Hz and +5 V gives ~20 kHz.
 
-#### Topology C: AS3320 / CEM3320 Dedicated Filter IC
+At nominal I_abc = 10 µA:
+```
+g_m = 10 µA / (2 × 26 mV) = 192 µS
+C = g_m / ω₀_ref = 192 µS / (2π × 630) = 48.5 nF → use 47 nF (C0G 0603)
+```
 
-The AS3320 (Alpha Semiconductor clone of the CEM3320) is a dedicated 4-pole LP filter with
-built-in resonance control and expo converter. Can be configured for 2-pole response.
+Both integrator capacitors C1 = C2 = 47 nF.
 
-**Pros:** Extremely clean, very low noise; built-in expo converter; resonance is a single pin;
-calibration is much simpler; classic Moog/Jupiter filter sound.
-**Cons:** Proprietary part; higher cost; 4-pole primary mode (2-pole requires tapping the midpoint);
-harder to source reliably.
+At maximum I_abc (≈10 mA for f = 20 kHz):
+```
+g_m_max = 10 mA / 52 mV = 192 mS
+ω₀_max = g_m_max / C = 192 mS / 47 nF = 4.09 Mrad/s → f ≈ 650 kHz
+```
+The OTA is capable well beyond 20 kHz; expo converter scaling limits the useful range.
 
-**ICs:** 1× AS3320 per channel (2 total), standard biasing resistors.
+### IC / Component Selection
 
----
+| Reference | Part Number | Package | Qty | Notes |
+|---|---|---|---|---|
+| LP1_OTA_L, LP1_OTA_R | LM13700M | SOIC-16 | 2 | Dual OTA; both cells = 2 integrators per channel |
+| LP1_SUM_L, LP1_SUM_R | TL074CDT | SOIC-14 | 2 | Summing amp + HP/BP/LP output buffers (1 per channel) |
+| LP1_VCA | V2164D | SOIC-16 | 1 | Quad VCA; 2 cells for L resonance + 2 cells for R resonance |
+| LP1_EXPO | THAT340 or LM394 | SOIC-8 | 1 | Matched NPN pair for expo converter (L+R share one expo) |
+| C1_L, C2_L, C1_R, C2_R | C0G/NP0 | 0603 | 4 | 47 nF integrator capacitors |
+| R_in_L, R_in_R | — | 0603 | 2 | 100 kΩ summing amp input resistor |
+| C_VCC, C_VEE | — | 0603 | 100 nF | 8 | Decoupling, 2 per IC × 4 ICs |
 
-### Topology to be confirmed during VCV Rack prototyping
-
-Implement all three in the VCV plugin with a test switch. Compare:
-- Frequency response accuracy
-- Resonance behavior and self-oscillation quality
-- Noise floor
-- Component count vs. performance trade-off
-
-Document the chosen topology here before starting PCB layout.
-
----
-
-### Trim Pots (common to all topology candidates)
+### Trim Pots
 
 | Reference | Range | Purpose | Adjustment |
 |---|---|---|---|
-| RV_CUTOFF_REF | f_ref ±20% | 1V/oct reference frequency calibration | Adjust until C4 (0 V) = target reference frequency |
-| RV_1VOCT | 1V/oct ±5% | Expo converter tracking | Play two notes 1 octave apart; adjust for exact octave |
-| RV_RESON_MAX | Q 10–100 | Maximum resonance / self-oscillation onset | Turn RESONANCE to max; verify clean self-oscillation |
+| RV_LP1_REF | f_ref ±20% | 1V/oct reference frequency | Adjust until C4 (0 V CV) = 630 Hz at LP1 output |
+| RV_LP1_1VOCT | 1V/oct ±5% | Expo converter tracking calibration | One-octave step: +1 V CV should double cutoff frequency |
+| RV_LP1_QMAX | Q 10–50 | Maximum resonance / self-oscillation onset | Turn RESONANCE to max; verify clean, stable sine output |
 
 ### Power Draw Estimate
-- +12 V: ~15 mA | −12 V: ~15 mA (varies by topology; AS3320 is most efficient)
+- 2× LM13700 + 2× TL074 + 1× V2164 (shared with LP2): ~15 mA
+- +12 V: ~15 mA | −12 V: ~15 mA
 
 ### Known Circuit Challenges
-- 1V/oct expo converter temperature drift: must use matched transistor pair (THAT340) for stable tracking. Validate across temperature range (10°C – 40°C) during prototype bring-up.
-- Self-oscillation amplitude: at Q → ∞, filter output grows unbounded in theory. Real circuit limits this by op-amp rail clipping. Add a soft-limiting circuit on the feedback path to prevent hard rail-to-rail clipping during self-oscillation.
-- L/R gain matching at high resonance: L and R filters need closely matched RESONANCE control (common pot). If L/R resonance differs by >2%, noticeable stereo imbalance at self-oscillation. Use 1% resistors in resonance feedback path.
+- **Expo converter temperature drift**: THAT340 matched pair required for stable 1V/oct tracking. Calibrate at room temperature; verify at 10°C and 40°C extremes during bring-up.
+- **Self-oscillation amplitude**: at Q → ∞, output amplitude is limited by OTA/op-amp rail clipping. Add a soft limiter (BAT54 anti-parallel diodes across feedback R in the SUM_AMP) to prevent hard clipping during self-oscillation.
+- **V2164 Q control law**: V2164 gain is exponential in its control voltage. The RESONANCE pot wiring should shape the control voltage so Q response feels approximately linear to the user.
+- **L/R resonance matching**: L and R use separate V2164 cells but the same control voltage from the RESONANCE pot. If cells are mismatched, stereo imbalance at high Q is audible. V2164 cells on the same die are well-matched; use adjacent cells (cells 1+2 for L, cells 3+4 for R).
+- **V2164 shared with LP2**: the one V2164 (quad) serves both LP1 and LP2 Q control (2 cells per filter pair). Verify this sharing does not create crosstalk between LP1 and LP2 resonance control.

@@ -3,7 +3,7 @@
 ## Status
 - Phase 1 (Audio Spec): [x] complete
 - Phase 2 (Analog Model): [x] complete
-- Phase 3 (Circuit Design): [ ] pending topology decision (mirrors LP Filter 1)
+- Phase 3 (Circuit Design): [x] complete — mirrors LP1 SVF topology
 
 ---
 
@@ -89,35 +89,49 @@ Default f_ref2: set slightly higher than f_ref1 so LP2 starts above LP1 by defau
 
 ## Phase 3: Circuit Design
 
-### Topology
-Mirror of LP Filter 1. Use the same topology as chosen for LP1 after VCV prototyping.
+### Topology: OTA-C State-Variable Filter (SVF) — identical to LP Filter 1
 
-Both LP1 and LP2 should use the same circuit topology and same PCB layout (possibly the
-same PCB with dual rows). This reduces the number of unique PCB designs and simplifies
-calibration (same procedure for both stages).
+LP2 uses the exact same circuit as LP1: two LM13700 OTA cells as integrators, TL074 as
+summing amplifier, V2164 VCA cell for voltage-controlled Q. See `specs/block-5-lp1/spec.md`
+Phase 3 for the full schematic description, signal flow, and component value derivations.
 
-**Key difference from LP1**: separate panel controls, separate CV inputs, separate modulation
-attenuverters — but identical underlying circuit.
+LP1 and LP2 are placed on the same PCB (dual-row layout). This gives one shared PCB for
+both stages, reducing the unique PCB count and simplifying assembly. LP1 and LP2 share one
+V2164 quad VCA (2 cells for LP1 L+R Q, 2 cells for LP2 L+R Q).
 
-If using AS3320 (Topology C from LP1 spec): each filter stage needs its own AS3320 IC pair
-(one per channel). LP1 and LP2 share a PCB with 4× AS3320 total.
+**Key differences from LP1:**
+- Separate panel controls: CUTOFF 2, RESONANCE 2
+- Separate CV inputs and mod attenuverters
+- Separate expo converter (THAT340 pair) — independently calibrated from LP1
+- Default f_ref2 set ~2 octaves above f_ref1 (≈ 2.5 kHz at 0 V) so LP2 starts above LP1
 
-If using OTA-C (Topology A or B): LP1 and LP2 each need their own LM13700 pair and expo converter.
+### IC / Component Selection
+
+Same as LP1. Per stereo pair (L+R):
+
+| Reference | Part Number | Package | Qty | Notes |
+|---|---|---|---|---|
+| LP2_OTA_L, LP2_OTA_R | LM13700M | SOIC-16 | 2 | Dual OTA; both cells = 2 integrators per channel |
+| LP2_SUM_L, LP2_SUM_R | TL074CDT | SOIC-14 | 2 | Summing amp + output buffers |
+| LP2_VCA (shared) | V2164D | SOIC-16 | — | Shared with LP1 quad VCA (cells 3+4 for LP2) |
+| LP2_EXPO | THAT340 or LM394 | SOIC-8 | 1 | Separate matched pair from LP1 expo |
+| C1/C2 per channel | C0G/NP0 | 0603 | 4 | 47 nF (same value as LP1) |
 
 ### Trim Pots
 
 | Reference | Range | Purpose | Adjustment |
 |---|---|---|---|
-| RV_CUTOFF_REF2 | f_ref2 ±20% | 1V/oct reference frequency for LP2 | Set independently from LP1 |
-| RV_1VOCT_LP2 | 1V/oct ±5% | Expo tracking for LP2 | Same procedure as LP1 |
-| RV_RESON_MAX2 | Q 10–100 | LP2 maximum resonance | Same procedure as LP1 |
+| RV_LP2_REF | f_ref2 ±20% | 1V/oct reference frequency for LP2 | Adjust until C4 (0 V CV) = ~2.5 kHz |
+| RV_LP2_1VOCT | 1V/oct ±5% | Expo converter tracking | Same one-octave step test as LP1 |
+| RV_LP2_QMAX | Q 10–50 | Maximum resonance / self-oscillation onset | Same procedure as LP1 |
 
 ### Power Draw Estimate
-Same as LP1: +12 V: ~15 mA | −12 V: ~15 mA
++12 V: ~15 mA | −12 V: ~15 mA (V2164 power shared with LP1 count)
 
 ### Known Circuit Challenges
-Same as LP1 (Block 5). Additionally:
-- Ensure LP1 and LP2 expo converters are independently calibrated — they share the same
-  panel CV inputs but must track independently.
-- Ground routing between LP1 and LP2 PCBs: use a single ground connection between boards;
-  avoid forming a ground loop through the signal cable between stages.
+All LP1 challenges apply. Additionally:
+- **Independent expo calibration**: LP1 and LP2 expo converters must be calibrated separately
+  even though they use the same circuit. A CV that tracks perfectly on LP1 may be slightly
+  off on LP2 if component tolerances differ — always calibrate each stage independently.
+- **Ground routing**: use a single ground wire between LP1 and LP2 sections of the PCB;
+  do not rely on copper pours alone between sections that carry different signal voltages.
