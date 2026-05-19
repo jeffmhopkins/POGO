@@ -41,9 +41,12 @@ Stereo Input (L + R)  ←  ±5 V audio
 [Block 7]  HP Filter  (stereo, 2-pole, self-oscillating)
            CUTOFF + RESONANCE + CV modulation
   ↓
-[Block B]  Output Buffers
-           1 kΩ series on every output jack
-Stereo Output (L + R)  →  ±5 V audio
+[Block B]  Output Buffers (6 jacks total)
+           LP2 AUX L / R  — tap at LP2 output (lowpass band, before HP)
+           HP AUX L / R   — tap at HP output (highpass/bandpass, after HP)
+           OUT L / R       — main stereo output (same tap as HP AUX, primary patch point)
+           1 kΩ series + unity-gain buffer on every jack
+Stereo Output (L + R)  →  ±5 V audio  (+ 4 aux bandpass outputs)
 
 ─────────────────────────────────────────────────────────────────────
 MODULATION SYSTEM

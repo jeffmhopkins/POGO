@@ -14,7 +14,7 @@
 </head>
 <body>
 <div class="wrap">
-<h1>POGO — 46 HP PANEL LAYOUT  ·  1 HP = 5.08 mm  ·  Step 1: Structure &amp; Labels</h1>
+<h1>POGO — 46 HP PANEL LAYOUT  ·  1 HP = 5.08 mm  ·  Step 1 rev2: Structure &amp; Labels</h1>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 233.68 133.35">
 
   <!-- ── PANEL BACKGROUND ─────────────────────────────────────────────────── -->
@@ -33,66 +33,61 @@
         font-weight="bold" text-anchor="middle" opacity="0.18">POGO</text>
 
   <!-- ── MAIN ZONE SEPARATOR LINES (cyan) ─────────────────────────────────── -->
-  <!-- Zone 0 | 1  at x = 25.4  (5 HP) -->
+  <!-- Zone 0 | 1  at x=25.4 -->
   <line x1="25.4"  y1="4.5" x2="25.4"  y2="128.85" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
-  <!-- Zone 1 | 2  at x = 60.96 (7 HP) -->
+  <!-- Zone 1 | 2  at x=60.96 -->
   <line x1="60.96" y1="4.5" x2="60.96" y2="128.85" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
-  <!-- Zone 2 | 3  at x = 152.4 (6+6+6 = 18 HP comb) -->
+  <!-- Zone 2 | 3  at x=152.4 -->
   <line x1="152.4" y1="4.5" x2="152.4" y2="128.85" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
-  <!-- Zone 3 | 4+5 at x = 177.8 (5 HP LP1) -->
+  <!-- Zone 3 | 4+5  at x=177.8 -->
   <line x1="177.8" y1="4.5" x2="177.8" y2="128.85" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
 
   <!-- ── COMB GROUP SUB-DIVIDERS (dim gray vertical) ──────────────────────── -->
-  <!-- Comb 1 | Comb 2 at x = 91.44 -->
   <line x1="91.44"  y1="4.5" x2="91.44"  y2="128.85" stroke="#2a2a2a" stroke-width="0.4"/>
-  <!-- Comb 2 | Comb 3 at x = 121.92 -->
   <line x1="121.92" y1="4.5" x2="121.92" y2="128.85" stroke="#2a2a2a" stroke-width="0.4"/>
 
   <!-- ── ZONE 0 MINI-ZONE DIVIDERS (dim gray horizontal) ──────────────────── -->
-  <!-- INPUT/GAIN | ENVELOPE at y = 38.5 -->
+  <!-- INPUT/GAIN | ENVELOPE  at y=38.5 -->
   <line x1="0.5"  y1="38.5" x2="24.9" y2="38.5" stroke="#2d2d2d" stroke-width="0.5"/>
-  <!-- ENVELOPE | MOD BUS at y = 89.5 -->
+  <!-- ENVELOPE | MOD BUS  at y=89.5 -->
   <line x1="0.5"  y1="89.5" x2="24.9" y2="89.5" stroke="#2d2d2d" stroke-width="0.5"/>
 
-  <!-- ── LP2 / HP INTERNAL DIVIDER (dim gray vertical) ────────────────────── -->
-  <!-- LP2 | HP at x = 203.2 (5 HP LP2, 6 HP HP) -->
+  <!-- ── LP2+HP ZONE: TOP STRIP / FILTER SECTION DIVIDER ─────────────────── -->
+  <!-- Horizontal divider between output strip (top) and filter controls (bottom) -->
+  <line x1="177.8" y1="44" x2="233.68" y2="44" stroke="#2d2d2d" stroke-width="0.5"/>
+
+  <!-- ── LP2 / HP INTERNAL DIVIDER (dim gray vertical, full height in zone) ─ -->
+  <!-- Also serves as BAND OUT | OUT divider in top strip -->
   <line x1="203.2" y1="4.5" x2="203.2" y2="128.85" stroke="#2a2a2a" stroke-width="0.4"/>
 
   <!-- ── SHARED ZONE: COMB / DIST SUBSECTION DIVIDER ──────────────────────── -->
   <line x1="25.9" y1="76" x2="60.46" y2="76" stroke="#2d2d2d" stroke-width="0.5"/>
 
-  <!-- ── OUT SUBSECTION BOX (top-right of HP zone) ────────────────────────── -->
-  <!-- Contains L and R audio output jacks; x=215.5 to x=232.68, y=5.5 to y=30 -->
-  <rect x="215.5" y="5.5" width="17.18" height="24.5" rx="0.8"
-        fill="none" stroke="#3a3a3a" stroke-width="0.4"/>
-
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- ZONE LABELS                                                             -->
   <!-- ════════════════════════════════════════════════════════════════════════ -->
 
-  <!-- Zone 0a: INPUT / GAIN  (y = 4.5 – 38.5, mini-zone center x = 12.7) -->
+  <!-- Zone 0a: INPUT / GAIN  (y=4.5–38.5) -->
   <text x="12.7" y="10.5" fill="#00d4ff" font-family="monospace" font-size="2.4"
         text-anchor="middle" font-weight="bold">INPUT / GAIN</text>
 
-  <!-- Zone 0b: ENVELOPE  (y = 38.5 – 89.5) -->
+  <!-- Zone 0b: ENVELOPE  (y=38.5–89.5) -->
   <text x="12.7" y="44" fill="#00d4ff" font-family="monospace" font-size="2.4"
         text-anchor="middle" font-weight="bold">ENVELOPE</text>
 
-  <!-- Zone 0c: MOD BUS  (y = 89.5 – 128.85) -->
+  <!-- Zone 0c: MOD BUS  (y=89.5–128.85) -->
   <text x="12.7" y="95" fill="#00d4ff" font-family="monospace" font-size="2.4"
         text-anchor="middle" font-weight="bold">MOD BUS</text>
 
-  <!-- Zone 1: SHARED  (x = 25.4 – 60.96, center = 43.18) -->
+  <!-- Zone 1: SHARED  (x=25.4–60.96, center=43.18) -->
   <text x="43.18" y="10.5" fill="#00d4ff" font-family="monospace" font-size="2.4"
         text-anchor="middle" font-weight="bold">SHARED</text>
-  <!-- COMB subsection label (below SHARED header, above COMB/DIST divider) -->
   <text x="43.18" y="17" fill="#4a6070" font-family="monospace" font-size="2.0"
         text-anchor="middle">— COMB —</text>
-  <!-- DIST subsection label (below COMB/DIST divider at y=76) -->
   <text x="43.18" y="81" fill="#4a6070" font-family="monospace" font-size="2.0"
         text-anchor="middle">— DIST —</text>
 
-  <!-- Zone 2: COMB groups  (6 HP each; centers at x = 76.2, 106.68, 137.16) -->
+  <!-- Zone 2: COMB groups  (centers at x=76.2, 106.68, 137.16) -->
   <text x="76.2"   y="10.5" fill="#00d4ff" font-family="monospace" font-size="2.4"
         text-anchor="middle" font-weight="bold">COMB 1</text>
   <text x="106.68" y="10.5" fill="#00d4ff" font-family="monospace" font-size="2.4"
@@ -100,23 +95,39 @@
   <text x="137.16" y="10.5" fill="#00d4ff" font-family="monospace" font-size="2.4"
         text-anchor="middle" font-weight="bold">COMB 3</text>
 
-  <!-- Zone 3: LP 1  (x = 152.4 – 177.8, center = 165.1) -->
+  <!-- Zone 3: LP 1  (x=152.4–177.8, center=165.1) -->
   <text x="165.1" y="10.5" fill="#00d4ff" font-family="monospace" font-size="2.4"
         text-anchor="middle" font-weight="bold">LP 1</text>
 
-  <!-- Zone 4+5 sub-zones -->
-  <!-- LP 2 sub-zone  (x = 177.8 – 203.2, center = 190.5) -->
+  <!-- Zone 4+5 — TOP STRIP labels (y=4.5–44) -->
+  <!-- BAND OUT section (x=177.8–203.2, center=190.5) -->
   <text x="190.5" y="10.5" fill="#00d4ff" font-family="monospace" font-size="2.4"
+        text-anchor="middle" font-weight="bold">BAND OUT</text>
+  <!-- sub-labels for LP2 row and HP row within BAND OUT -->
+  <text x="190.5" y="16.5" fill="#4a6070" font-family="monospace" font-size="1.9"
+        text-anchor="middle">LP 2</text>
+  <text x="190.5" y="28" fill="#4a6070" font-family="monospace" font-size="1.9"
+        text-anchor="middle">HP</text>
+
+  <!-- OUT section (x=203.2–233.68, center=218.44) -->
+  <text x="218.44" y="10.5" fill="#00d4ff" font-family="monospace" font-size="2.4"
+        text-anchor="middle" font-weight="bold">OUT</text>
+
+  <!-- Zone 4+5 — FILTER SECTION labels (y=44–128.85) -->
+  <!-- LP 2 filter (x=177.8–203.2, center=190.5) -->
+  <text x="190.5" y="50" fill="#00d4ff" font-family="monospace" font-size="2.4"
         text-anchor="middle" font-weight="bold">LP 2</text>
-  <!-- HP sub-zone  (x = 203.2 – 233.68; label left of OUT box, center = 209.35) -->
-  <text x="209.35" y="10.5" fill="#00d4ff" font-family="monospace" font-size="2.4"
+  <!-- HP filter (x=203.2–233.68, center=218.44) -->
+  <text x="218.44" y="50" fill="#00d4ff" font-family="monospace" font-size="2.4"
         text-anchor="middle" font-weight="bold">HP</text>
-  <!-- OUT label inside OUT box -->
-  <text x="224.09" y="12" fill="#888" font-family="monospace" font-size="2.0"
-        text-anchor="middle">OUT</text>
 
 </svg>
-<p class="note">Step 1: Structure only — zone separators, subsection outlines, labels. Controls to follow in Step 2.</p>
+<p class="note">
+  Step 1 rev2: Zone 4+5 now has a top output strip (BAND OUT left + OUT right) above the filter controls.
+  BAND OUT provides LP2 aux L/R and HP aux L/R bandpass tap outputs.
+  LP2/HP vertical divider doubles as BAND OUT/OUT separator.
+  Controls to follow in Step 2.
+</p>
 </div>
 </body>
 </html>

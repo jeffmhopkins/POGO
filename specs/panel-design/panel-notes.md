@@ -210,20 +210,49 @@ LP 1
 
 ---
 
-### Zone 4+5: LP 2 + HP + OUT (11 HP combined)
+### Zone 4+5: LP 2 + HP + BAND OUT + OUT (11 HP combined)
 
-LP 2 and HP are combined into a single zone with vertical cutoff sliders. Output jacks live in a
-small labeled sub-box at the top right.
+The combined LP2+HP zone is split horizontally into two sections:
+- **Top strip** (y ≈ 4.5 – 44 mm): output jacks — BAND OUT (left) and OUT (right)
+- **Filter controls** (y ≈ 44 – 128.85 mm): LP2 vertical slider and HP vertical slider with their controls
 
-#### OUT subsection (top-right corner, ~2 HP)
+The LP2/HP vertical divider at x = 203.2 mm runs the full height of this zone, serving double
+duty as the BAND OUT / OUT separator in the top strip and the LP2 / HP separator in the filter section.
+
+---
+
+#### Top Strip: BAND OUT (left, x = 177.8 – 203.2, 5 HP)
+
+Individual auxiliary bandpass tap outputs — LP2-filtered (lowpass band) and HP-filtered
+(highpass/bandpass band) — for parallel routing and creative processing independent of the
+main stereo output.
+
 | Control | Type | Notes |
 |---|---|---|
-| L OUT | Output jack | Stereo audio output left (±5 V) |
-| R OUT | Output jack | Stereo audio output right (±5 V) |
+| LP2 L | Output jack | LP2 stage stereo output left (±5 V, tapped before HP) |
+| LP2 R | Output jack | LP2 stage stereo output right (±5 V, tapped before HP) |
+| HP L | Output jack | HP stage stereo output left (±5 V, tapped after HP) |
+| HP R | Output jack | HP stage stereo output right (±5 V, tapped after HP) |
 
-Two jacks side by side, labeled **L** and **R**, in a small box at the top-right corner of the zone.
+Row layout within BAND OUT (5 HP = 25.4 mm):
+- **LP 2 row** (row label "LP 2"): LP2 L at x ≈ 186.0 mm, LP2 R at x ≈ 195.0 mm (9 mm jack pitch)
+- **HP row** (row label "HP"): HP L at x ≈ 186.0 mm, HP R at x ≈ 195.0 mm (same x, different y)
 
-#### LP 2 (left ~5.5 HP of zone)
+#### Top Strip: OUT (right, x = 203.2 – 233.68, 6 HP)
+
+Main stereo output — signal after the HP filter stage, identical to the HP aux output but
+presented on dedicated panel jacks as the primary patch point.
+
+| Control | Type | Notes |
+|---|---|---|
+| L OUT | Output jack | Main stereo output left (±5 V) |
+| R OUT | Output jack | Main stereo output right (±5 V) |
+
+Two jacks centered horizontally in the OUT sub-zone (9 mm jack pitch, ≈ 7.5 mm margins).
+
+---
+
+#### Filter Controls: LP 2 (below top strip, x = 177.8 – 203.2)
 | Control | Type | Size | Notes |
 |---|---|---|---|
 | CUTOFF | **Vertical slider** | — | LP2 cutoff frequency (20 Hz – 20 kHz, 1V/oct) |
@@ -233,7 +262,7 @@ Two jacks side by side, labeled **L** and **R**, in a small box at the top-right
 | RESONANCE ATT | Attenuverter | Narrow tall | CV attenuator for resonance |
 | RESONANCE CV | Input jack | — | CV override for resonance (0–10 V) |
 
-#### HP (right ~3.5 HP of zone, below OUT box)
+#### Filter Controls: HP (below top strip, x = 203.2 – 233.68)
 | Control | Type | Size | Notes |
 |---|---|---|---|
 | CUTOFF | **Vertical slider** | — | HP cutoff frequency (20 Hz – 20 kHz, 1V/oct) |
@@ -243,14 +272,12 @@ Two jacks side by side, labeled **L** and **R**, in a small box at the top-right
 | RESONANCE ATT | Attenuverter | Narrow tall | CV attenuator for resonance |
 | RESONANCE CV | Input jack | — | CV override for resonance (0–10 V) |
 
-Layout sketch:
+Filter control layout sketch:
 ```
-LP 2 + HP                                      ┌─ OUT ─┐
-─────────────────────────────────────────────  │  [L]  │
-                                               │  [R]  │
-  [LP2 CUTOFF   ]    [HP CUTOFF    ]           └───────┘
+LP 2 + HP (filter section, below top strip)
+─────────────────────────────────────────────────────────────────────
+  [LP2 CUTOFF   ]    [HP CUTOFF    ]
   [   slider    ]    [  slider     ]
-                                  ← below OUT box
   [RESONANCE LP2]    [RESONANCE HP ]
   [ATT] [ATT]        [ATT] [ATT]
   [CV]  [CV]         [CV]  [CV]
