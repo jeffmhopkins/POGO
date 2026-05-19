@@ -524,37 +524,36 @@
   <!-- SECTION 4a — SHARED COMB  (x:20.32–50.80, y:4.5–74)                   -->
   <!-- Zone center x=35.56 · jack x: 25.40, 35.56, 45.72                      -->
   <!-- DRY/WET cy=26 x=25.40 · WIDTH cy=26 x=45.72 (no CV)                   -->
-  <!-- POLARITY 3-pos switch center y=42 x=35.56 · MASTER OFFSET cy=62        -->
+  <!-- equal-gap layout: 4 groups, 60mm range (y=13–73), ~3.5mm gaps             -->
+  <!-- knobs cy=21 · switch body y=34 · MASTER OFFSET cy=57                     -->
   <!-- ════════════════════════════════════════════════════════════════════════ -->
 
-  <!-- DRY/WET — medium knob (APF dry/wet mix) -->
-  <!-- cx: zone_left(20.32) + gap(4.16) + r(4.5) = 29.0 — equal 3-gap spacing -->
-  <circle cx="29.0" cy="26" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="29.0" y1="26" x2="29.0" y2="21.5" stroke="#aaa" stroke-width="0.6"/>
-  <text x="29.0" y="33.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">COMB</text>
-  <text x="29.0" y="35.8" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">BYPASS</text>
+  <!-- COMB BYPASS — medium knob -->
+  <circle cx="29.0" cy="21" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="29.0" y1="21" x2="29.0" y2="16.5" stroke="#aaa" stroke-width="0.6"/>
+  <text x="29.0" y="28.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">COMB</text>
+  <text x="29.0" y="30.8" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">BYPASS</text>
 
   <!-- WIDTH — medium knob (stereo spread, no CV) -->
-  <!-- cx: 29.0 + dia(9) + gap(4.16) + r(4.5) = 42.14 -->
-  <circle cx="42.14" cy="26" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="42.14" y1="26" x2="42.14" y2="21.5" stroke="#aaa" stroke-width="0.6"/>
-  <text x="42.14" y="33.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">WIDTH</text>
+  <circle cx="42.14" cy="21" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="42.14" y1="21" x2="42.14" y2="16.5" stroke="#aaa" stroke-width="0.6"/>
+  <text x="42.14" y="28.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">WIDTH</text>
 
   <!-- POLARITY — 3-pos HORIZONTAL switch, 12mm body centered at x=35.56 -->
-  <rect x="29.56" y="40.8" width="12" height="2.4" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
+  <rect x="29.56" y="34" width="12" height="2.4" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
   <!-- slug at center (OFF) -->
-  <rect x="33.81" y="40.6" width="3.5" height="2.8" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
+  <rect x="33.81" y="33.8" width="3.5" height="2.8" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
   <!-- position labels below: left=POS, center=OFF, right=NEG -->
-  <text x="31.56" y="46" fill="#3d5260" font-family="monospace" font-size="1.6" text-anchor="middle">POS</text>
-  <text x="35.56" y="46" fill="#3d5260" font-family="monospace" font-size="1.6" text-anchor="middle">OFF</text>
-  <text x="39.56" y="46" fill="#3d5260" font-family="monospace" font-size="1.6" text-anchor="middle">NEG</text>
+  <text x="31.56" y="40.5" fill="#3d5260" font-family="monospace" font-size="1.6" text-anchor="middle">POS</text>
+  <text x="35.56" y="40.5" fill="#3d5260" font-family="monospace" font-size="1.6" text-anchor="middle">OFF</text>
+  <text x="39.56" y="40.5" fill="#3d5260" font-family="monospace" font-size="1.6" text-anchor="middle">NEG</text>
   <!-- switch label -->
-  <text x="35.56" y="50" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">POLARITY</text>
+  <text x="35.56" y="44" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">POLARITY</text>
 
-  <!-- MASTER OFFSET — XL knob r=9 · cy=61 keeps 3mm from POLARITY above, label clears divider at y=74 -->
-  <circle cx="35.56" cy="61" r="9" fill="#1a1a1a" stroke="#555" stroke-width="0.7"/>
-  <line x1="35.56" y1="61" x2="35.56" y2="52" stroke="#aaa" stroke-width="0.8"/>
-  <text x="35.56" y="73" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">MASTER OFFSET</text>
+  <!-- MASTER OFFSET — XL knob r=9, cy=57, label y=69 clears divider at y=74 -->
+  <circle cx="35.56" cy="57" r="9" fill="#1a1a1a" stroke="#555" stroke-width="0.7"/>
+  <line x1="35.56" y1="57" x2="35.56" y2="48" stroke="#aaa" stroke-width="0.8"/>
+  <text x="35.56" y="69" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">MASTER OFFSET</text>
 
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 4b — SHARED DIST  (x:20.32–50.80, y:74–128.85)                 -->
