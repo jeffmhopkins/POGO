@@ -526,14 +526,16 @@
   <!-- ════════════════════════════════════════════════════════════════════════ -->
 
   <!-- DRY/WET — medium knob (APF dry/wet mix) -->
-  <circle cx="25.40" cy="26" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="25.40" y1="26" x2="25.40" y2="21.5" stroke="#aaa" stroke-width="0.6"/>
-  <text x="25.40" y="33.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">DRY/WET</text>
+  <!-- cx = zone_left(20.32) + gap(4.16) + r(4.5) = 29.0 — equal spacing -->
+  <circle cx="29.0" cy="26" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="29.0" y1="26" x2="29.0" y2="21.5" stroke="#aaa" stroke-width="0.6"/>
+  <text x="29.0" y="33.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">DRY/WET</text>
 
   <!-- WIDTH — medium knob (stereo spread, no CV) -->
-  <circle cx="45.72" cy="26" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="45.72" y1="26" x2="45.72" y2="21.5" stroke="#aaa" stroke-width="0.6"/>
-  <text x="45.72" y="33.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">WIDTH</text>
+  <!-- cx = 29.0 + dia(9) + gap(4.16) + r(4.5) = 42.14 -->
+  <circle cx="42.14" cy="26" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="42.14" y1="26" x2="42.14" y2="21.5" stroke="#aaa" stroke-width="0.6"/>
+  <text x="42.14" y="33.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">WIDTH</text>
 
   <!-- POLARITY — 3-pos HORIZONTAL switch, 12mm body centered at x=35.56 -->
   <rect x="29.56" y="40.8" width="12" height="2.4" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
