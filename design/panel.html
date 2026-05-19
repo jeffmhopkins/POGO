@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POGO — 50HP Panel Layout</title>
+<style>
+  body { background: #000; margin: 0; padding: 1.5rem; font-family: monospace; }
+  h1 { color: #00d4ff; font-size: 0.85rem; margin: 0 0 0.75rem 0; letter-spacing: 0.1em; }
+  .wrap { max-width: 1500px; margin: 0 auto; }
+  svg { display: block; width: 100%; border: 1px solid #222; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>POGO — 50 HP PANEL LAYOUT  (1 HP = 5.08 mm)</h1>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 254 133.35">
+
+  <!-- ── PANEL BACKGROUND ───────────────────────────────────────────── -->
+  <rect x="0" y="0" width="254" height="133.35" fill="#0d0d0d"/>
+
+  <!-- Top and bottom rail bands -->
+  <rect x="0" y="0"      width="254" height="4.5"  fill="#141414"/>
+  <rect x="0" y="128.85" width="254" height="4.5"  fill="#141414"/>
+
+  <!-- Mounting holes: M3, at y=5.1 and y=128.25, x=7.5 and x=246.5 -->
+  <circle cx="7.5"   cy="5.1"    r="1.6" fill="#0d0d0d" stroke="#2a2a2a" stroke-width="0.5"/>
+  <circle cx="246.5" cy="5.1"    r="1.6" fill="#0d0d0d" stroke="#2a2a2a" stroke-width="0.5"/>
+  <circle cx="7.5"   cy="128.25" r="1.6" fill="#0d0d0d" stroke="#2a2a2a" stroke-width="0.5"/>
+  <circle cx="246.5" cy="128.25" r="1.6" fill="#0d0d0d" stroke="#2a2a2a" stroke-width="0.5"/>
+
+  <!-- Module name -->
+  <text x="127" y="7" fill="#ffffff" font-family="monospace" font-size="4" font-weight="bold" text-anchor="middle" opacity="0.18">POGO</text>
+
+  <!-- ── ZONE SEPARATOR LINES (cyan) ───────────────────────────────── -->
+  <!-- Zone 0|1 at x=25.4 -->
+  <line x1="25.4" y1="4.5" x2="25.4" y2="128.85" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
+  <!-- Zone 1|2 at x=50.8 -->
+  <line x1="50.8" y1="4.5" x2="50.8" y2="128.85" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
+  <!-- Zone 2|3 at x=172.72 -->
+  <line x1="172.72" y1="4.5" x2="172.72" y2="128.85" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
+  <!-- Zone 3|4 at x=198.12 -->
+  <line x1="198.12" y1="4.5" x2="198.12" y2="128.85" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
+  <!-- Zone 4|5 at x=223.52 -->
+  <line x1="223.52" y1="4.5" x2="223.52" y2="128.85" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
+
+  <!-- ── COMB/DIST group sub-dividers (dim) ────────────────────────── -->
+  <line x1="91.44"  y1="4.5" x2="91.44"  y2="128.85" stroke="#2a2a2a" stroke-width="0.4"/>
+  <line x1="132.08" y1="4.5" x2="132.08" y2="128.85" stroke="#2a2a2a" stroke-width="0.4"/>
+
+  <!-- ── STACKED MINI-ZONE DIVIDERS ────────────────────────────────── -->
+  <line x1="0.5"  y1="47" x2="24.9" y2="47" stroke="#2d2d2d" stroke-width="0.5"/>
+  <line x1="0.5"  y1="89" x2="24.9" y2="89" stroke="#2d2d2d" stroke-width="0.5"/>
+
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- ZONE 0 — STACKED LEFT (5 HP, x = 0–25.4)                       -->
+  <!-- ════════════════════════════════════════════════════════════════ -->
+
+  <!-- ── 0a: INPUT / GAIN (y = 4.5–47) ──────────────────────────── -->
+  <text x="12.7" y="10.5" fill="#00d4ff" font-family="monospace" font-size="2.6" text-anchor="middle" font-weight="bold">INPUT / GAIN</text>
+
+  <!-- GAIN switch (2-pos horizontal) -->
+  <text x="12.7" y="20.5" fill="#555" font-family="monospace" font-size="2" text-anchor="middle">GAIN</text>
+  <rect x="7.7" y="22" width="10" height="3.2" rx="1" fill="#1e1e1e" stroke="#444" stroke-width="0.35"/>
+  <circle cx="10.2" cy="23.6" r="1.1" fill="#555"/>
+  <circle cx="15.2" cy="23.6" r="1.1" fill="#555"/>
+  <circle cx="10.2" cy="23.6" r="0.7" fill="#cccccc"/>
+  <text x="9.5"  y="28.5" fill="#555" font-family="monospace" font-size="1.9" text-anchor="middle">1×</text>
+  <text x="15.9" y="28.5" fill="#555" font-family="monospace" font-size="1.9" text-anchor="middle">5×</text>
+
+  <!-- L IN jack -->
+  <circle cx="6.35" cy="39.5" r="3.2" fill="#1e1e1e" stroke="#ffffff" stroke-width="0.55"/>
+  <circle cx="6.35" cy="39.5" r="1.5" fill="#0a0a0a"/>
+  <text x="6.35" y="45" fill="#666" font-family="monospace" font-size="2.1" text-anchor="middle">L IN</text>
+
+  <!-- R IN jack -->
+  <circle cx="19.05" cy="39.5" r="3.2" fill="#1e1e1e" stroke="#ffffff" stroke-width="0.55"/>
+  <circle cx="19.05" cy="39.5" r="1.5" fill="#0a0a0a"/>
+  <text x="19.05" y="45" fill="#666" font-family="monospace" font-size="2.1" text-anchor="middle">R IN</text>
+
+  <!-- ── 0b: ENVELOPE (y = 47–89) ────────────────────────────────── -->
+  <text x="12.7" y="52.5" fill="#00d4ff" font-family="monospace" font-size="2.6" text-anchor="middle" font-weight="bold">ENVELOPE</text>
+
+  <!-- ATK knob (medium) -->
+  <circle cx="6.35" cy="63" r="3.5" fill="#ff7700" stroke="#993300" stroke-width="0.35"/>
+  <circle cx="6.35" cy="63" r="1.7" fill="#cc5500"/>
+  <line x1="6.35" y1="63" x2="6.35" y2="59.5" stroke="#fff" stroke-width="0.55" stroke-linecap="round"/>
+  <text x="6.35" y="68.5" fill="#777" font-family="monospace" font-size="2.1" text-anchor="middle">ATK</text>
+
+  <!-- MOD SRC 3-pos vertical switch (between ATK and REL) -->
+  <rect x="11.3" y="58" width="2.8" height="10" rx="0.9" fill="#1e1e1e" stroke="#444" stroke-width="0.35"/>
+  <circle cx="12.7" cy="60"   r="0.85" fill="#555"/>
+  <circle cx="12.7" cy="63"   r="0.85" fill="#555"/>
+  <circle cx="12.7" cy="66"   r="0.85" fill="#555"/>
+  <circle cx="12.7" cy="60"   r="0.55" fill="#cccccc"/>
+  <text x="12.7" y="56.5" fill="#555" font-family="monospace" font-size="1.8" text-anchor="middle">SRC</text>
+  <text x="17"   y="60.5" fill="#555" font-family="monospace" font-size="1.8">l</text>
+  <text x="16.2" y="63.5" fill="#555" font-family="monospace" font-size="1.8">mx</text>
+  <text x="15.8" y="66.5" fill="#555" font-family="monospace" font-size="1.8">avg</text>
+
+  <!-- REL knob (medium) -->
+  <circle cx="19.05" cy="63" r="3.5" fill="#ff7700" stroke="#993300" stroke-width="0.35"/>
+  <circle cx="19.05" cy="63" r="1.7" fill="#cc5500"/>
+  <line x1="19.05" y1="63" x2="19.05" y2="59.5" stroke="#fff" stroke-width="0.55" stroke-linecap="round"/>
+  <text x="19.05" y="68.5" fill="#777" font-family="monospace" font-size="2.1" text-anchor="middle">REL</text>
+
+  <!-- ENV L jack -->
+  <circle cx="6.35" cy="81" r="3.2" fill="#1e1e1e" stroke="#ffffff" stroke-width="0.55"/>
+  <circle cx="6.35" cy="81" r="1.5" fill="#0a0a0a"/>
+  <text x="6.35" y="86.5" fill="#666" font-family="monospace" font-size="1.9" text-anchor="middle">ENV L</text>
+
+  <!-- ENV R jack -->
+  <circle cx="19.05" cy="81" r="3.2" fill="#1e1e1e" stroke="#ffffff" stroke-width="0.55"/>
+  <circle cx="19.05" cy="81" r="1.5" fill="#0a0a0a"/>
+  <text x="19.05" y="86.5" fill="#666" font-family="monospace" font-size="1.9" text-anchor="middle">ENV R</text>
+
+  <!-- ── 0c: MOD BUS (y = 89–128.85) ─────────────────────────────── -->
+  <text x="12.7" y="94.5" fill="#00d4ff" font-family="monospace" font-size="2.6" text-anchor="middle" font-weight="bold">MOD BUS</text>
+
+  <!-- AMOUNT knob -->
+  <circle cx="6.35" cy="104" r="3.5" fill="#ff7700" stroke="#993300" stroke-width="0.35"/>
+  <circle cx="6.35" cy="104" r="1.7" fill="#cc5500"/>
+  <line x1="6.35" y1="104" x2="6.35" y2="100.5" stroke="#fff" stroke-width="0.55" stroke-linecap="round"/>
+  <text x="6.35" y="109.5" fill="#777" font-family="monospace" font-size="2.1" text-anchor="middle">AMT</text>
+
+  <!-- OFFSET knob -->
+  <circle cx="19.05" cy="104" r="3.5" fill="#ff7700" stroke="#993300" stroke-width="0.35"/>
+  <circle cx="19.05" cy="104" r="1.7" fill="#cc5500"/>
+  <line x1="19.05" y1="104" x2="19.05" y2="100.5" stroke="#fff" stroke-width="0.55" stroke-linecap="round"/>
+  <text x="19.05" y="109.5" fill="#777" font-family="monospace" font-size="2.1" text-anchor="middle">OFF</text>
+
+  <!-- MOD IN jack (centered) -->
+  <circle cx="12.7" cy="119" r="3.2" fill="#1e1e1e" stroke="#ffffff" stroke-width="0.55"/>
+  <circle cx="12.7" cy="119" r="1.5" fill="#0a0a0a"/>
+  <text x="12.7" y="124.5" fill="#666" font-family="monospace" font-size="2" text-anchor="middle">MOD IN</text>
+
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- ZONE 1 — SHARED (5 HP, x = 25.4–50.8)                         -->
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <text x="38.1" y="13" fill="#ffffff" font-family="monospace" font-size="3.2" text-anchor="middle" font-weight="bold">SHARED</text>
+
+  <!-- DRY/WET knob -->
+  <circle cx="31.75" cy="27" r="3.5" fill="#ff7700" stroke="#993300" stroke-width="0.35"/>
+  <circle cx="31.75" cy="27" r="1.7" fill="#cc5500"/>
+  <line x1="31.75" y1="27" x2="31.75" y2="23.5" stroke="#fff" stroke-width="0.55" stroke-linecap="round"/>
+  <text x="31.75" y="32.5" fill="#777" font-family="monospace" font-size="2" text-anchor="middle">D/W</text>
+
+  <!-- BLEND knob -->
+  <circle cx="44.45" cy="27" r="3.5" fill="#ff7700" stroke="#993300" stroke-width="0.35"/>
+  <circle cx="44.45" cy="27" r="1.7" fill="#cc5500"/>
+  <line x1="44.45" y1="27" x2="44.45" y2="23.5" stroke="#fff" stroke-width="0.55" stroke-linecap="round"/>
+  <text x="44.45" y="32.5" fill="#777" font-family="monospace" font-size="2" text-anchor="middle">BLEND</text>
+
+  <!-- SOURCE switch (3-pos horizontal) -->
+  <text x="31.75" y="40.5" fill="#555" font-family="monospace" font-size="1.9" text-anchor="middle">I·Bl·PD</text>
+  <rect x="27.25" y="42" width="9" height="3" rx="0.9" fill="#1e1e1e" stroke="#444" stroke-width="0.35"/>
+  <circle cx="29.5"  cy="43.5" r="0.85" fill="#555"/>
+  <circle cx="31.75" cy="43.5" r="0.85" fill="#555"/>
+  <circle cx="34.0"  cy="43.5" r="0.85" fill="#555"/>
+  <circle cx="29.5"  cy="43.5" r="0.55" fill="#cccccc"/>
+  <text x="31.75" y="47.5" fill="#555" font-family="monospace" font-size="1.9" text-anchor="middle">SRC</text>
+
+  <!-- POLARITY switch (3-pos horizontal) -->
+  <text x="44.45" y="40.5" fill="#555" font-family="monospace" font-size="1.9" text-anchor="middle">+·0·−</text>
+  <rect x="39.95" y="42" width="9" height="3" rx="0.9" fill="#1e1e1e" stroke="#444" stroke-width="0.35"/>
+  <circle cx="42.2"  cy="43.5" r="0.85" fill="#555"/>
+  <circle cx="44.45" cy="43.5" r="0.85" fill="#555"/>
+  <circle cx="46.7"  cy="43.5" r="0.85" fill="#555"/>
+  <circle cx="44.45" cy="43.5" r="0.55" fill="#cccccc"/>
+  <text x="44.45" y="47.5" fill="#555" font-family="monospace" font-size="1.9" text-anchor="middle">POL</text>
+
+  <!-- MODE switch (3-pos horizontal, centered) -->
+  <text x="38.1" y="57" fill="#555" font-family="monospace" font-size="1.9" text-anchor="middle">MODE</text>
+  <rect x="33.6" y="58.5" width="9" height="3" rx="0.9" fill="#1e1e1e" stroke="#444" stroke-width="0.35"/>
+  <circle cx="35.85" cy="60"  r="0.85" fill="#555"/>
+  <circle cx="38.1"  cy="60"  r="0.85" fill="#555"/>
+  <circle cx="40.35" cy="60"  r="0.85" fill="#555"/>
+  <circle cx="35.85" cy="60"  r="0.55" fill="#cccccc"/>
+  <text x="35.85" y="64.5" fill="#444" font-family="monospace" font-size="1.7" text-anchor="middle">clp</text>
+  <text x="38.1"  y="64.5" fill="#444" font-family="monospace" font-size="1.7" text-anchor="middle">hrd</text>
+  <text x="40.35" y="64.5" fill="#444" font-family="monospace" font-size="1.7" text-anchor="middle">fld</text>
+
+  <!-- WIDTH knob (medium, centered) -->
+  <circle cx="38.1" cy="78" r="3.5" fill="#ff7700" stroke="#993300" stroke-width="0.35"/>
+  <circle cx="38.1" cy="78" r="1.7" fill="#cc5500"/>
+  <line x1="38.1" y1="78" x2="38.1" y2="74.5" stroke="#fff" stroke-width="0.55" stroke-linecap="round"/>
+  <text x="38.1" y="83.5" fill="#777" font-family="monospace" font-size="2" text-anchor="middle">WIDTH</text>
+
+  <!-- ATT (DW and BLEND) -->
+  <ellipse cx="31.75" cy="106" rx="1.8" ry="3.2" fill="#00d4ff" stroke="#008aaa" stroke-width="0.35"/>
+  <line x1="31.75" y1="106" x2="31.75" y2="103" stroke="#fff" stroke-width="0.4" stroke-linecap="round"/>
+  <ellipse cx="44.45" cy="106" rx="1.8" ry="3.2" fill="#00d4ff" stroke="#008aaa" stroke-width="0.35"/>
+  <line x1="44.45" y1="106" x2="44.45" y2="103" stroke="#fff" stroke-width="0.4" stroke-linecap="round"/>
+
+  <!-- CV jacks (DW and BLEND) -->
+  <circle cx="31.75" cy="119" r="3.2" fill="#1e1e1e" stroke="#ffffff" stroke-width="0.55"/>
+  <circle cx="31.75" cy="119" r="1.5" fill="#0a0a0a"/>
+  <text x="31.75" y="124.5" fill="#666" font-family="monospace" font-size="2" text-anchor="middle">D/W</text>
+
+  <circle cx="44.45" cy="119" r="3.2" fill="#1e1e1e" stroke="#ffffff" stroke-width="0.55"/>
+  <circle cx="44.45" cy="119" r="1.5" fill="#0a0a0a"/>
+  <text x="44.45" y="124.5" fill="#666" font-family="monospace" font-size="2" text-anchor="middle">BL</text>
+
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- ZONE 2 — COMB / DISTORTION (24 HP, x = 50.8–172.72)           -->
+  <!-- Groups: G1 x=50.8–91.44  G2 x=91.44–132.08  G3 x=132.08–172.72 -->
+  <!-- Col positions per group: FREQ +6.77, FEED +20.32, DRIVE +33.87  -->
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <text x="111.76" y="13" fill="#ffffff" font-family="monospace" font-size="3.2" text-anchor="middle" font-weight="bold">COMB / DISTORTION</text>
+
+  <!-- Group sub-labels -->
+  <text x="71.12"  y="18" fill="#00d4ff" font-family="monospace" font-size="2.2" text-anchor="middle" opacity="0.6">1</text>
+  <text x="111.76" y="18" fill="#00d4ff" font-family="monospace" font-size="2.2" text-anchor="middle" opacity="0.6">2</text>
+  <text x="152.4"  y="18" fill="#00d4ff" font-family="monospace" font-size="2.2" text-anchor="middle" opacity="0.6">3</text>
+
+  <!-- ── GROUP 1: FREQ=57.57  FEED=71.12  DRIVE=84.67 ──────────── -->
+
+  <!-- FREQ 1 (large) -->
+  <circle cx="57.57" cy="30" r="5" fill="#ff7700" stroke="#993300" stroke-width="0.4"/>
+  <circle cx="57.57" cy="30" r="2.5" fill="#cc5500"/>
+  <line x1="57.57" y1="30" x2="57.57" y2="25" stroke="#fff" stroke-width="0.7" stroke-linecap="round"/>
+  <text x="57.57" y="37.5" fill="#aaa" font-family="monospace" font-size="2.2" text-anchor="middle">FREQ 1</text>
+
+  <!-- FEED 1 (medium) -->
+  <circle cx="71.12" cy="30" r="3.5" fill="#ff7700" stroke="#993300" stroke-width="0.35"/>
+  <circle cx="71.12" cy="30" r="1.7" fill="#cc5500"/>
+  <line x1="71.12" y1="30" x2="71.12" y2="26.5" stroke="#fff" stroke-width="0.55" stroke-linecap="round"/>
+  <text x="71.12" y="35.5" fill="#888" font-family="monospace" font-size="2.2" text-anchor="middle">FEED 1</text>
+
+  <!-- DRIVE 1 (medium) -->
+  <circle cx="84.67" cy="30" r="3.5" fill="#ff7700" stroke="#993300" stroke-width="0.35"/>
+  <circle cx="84.67" cy="30" r="1.7" fill="#cc5500"/>
+  <line x1="84.67" y1="30" x2="84.67" y2="26.5" stroke="#fff" stroke-width="0.55" stroke-linecap="round"/>
+  <text x="84.67" y="35.5" fill="#888" font-family="monospace" font-size="2.2" text-anchor="middle">DRIVE 1</text>
+
+  <!-- ATT G1 -->
+  <ellipse cx="57.57" cy="106" rx="1.8" ry="3.2" fill="#00d4ff" stroke="#008aaa" stroke-width="0.35"/>
+  <line x1="57.57" y1="106" x2="57.57" y2="103" stroke="#fff" stroke-width="0.4" stroke-linecap="round"/>
+  <ellipse cx="71.12" cy="106" rx="1.8" ry="3.2" fill="#00d4ff" stroke="#008aaa" stroke-width="0.35"/>
+  <line x1="71.12" y1="106" x2="71.12" y2="103" stroke="#fff" stroke-width="0.4" stroke-linecap="round"/>
+  <ellipse cx="84.67" cy="106" rx="1.8" ry="3.2" fill="#00d4ff" stroke="#008aaa" stroke-width="0.35"/>
+  <line x1="84.67" y1="106" x2="84.67" y2="103" stroke="#fff" stroke-width="0.4" stroke-linecap="round"/>
+
+  <!-- CV G1 -->
+  <circle cx="57.57" cy="119" r="3.2" fill="#1e1e1e" stroke="#ffffff" stroke-width="0.55"/>
+  <circle cx="57.57" cy="119" r="1.5" fill="#0a0a0a"/>
+  <text x="57.57" y="124.5" fill="#555" font-family="monospace" font-size="1.9" text-anchor="middle">F1</text>
+
+  <circle cx="71.12" cy="119" r="3.2" fill="#1e1e1e" stroke="#ffffff" stroke-width="0.55"/>
+  <circle cx="71.12" cy="119" r="1.5" fill="#0a0a0a"/>
+  <text x="71.12" y="124.5" fill="#555" font-family="monospace" font-size="1.9" text-anchor="middle">Fb1</text>
+
+  <circle cx="84.67" cy="119" r="3.2" fill="#1e1e1e" stroke="#ffffff" stroke-width="0.55"/>
+  <circle cx="84.67" cy="119" r="1.5" fill="#0a0a0a"/>
+  <text x="84.67" y="124.5" fill="#555" font-family="monospace" font-size="1.9" text-anchor="middle">Dr1</text>
+
+  <!-- ── GROUP 2: FREQ=98.21  FEED=111.76  DRIVE=125.31 ─────────── -->
+
+  <!-- FREQ 2 (large) -->
+  <circle cx="98.21" cy="30" r="5" fill="#ff7700" stroke="#993300" stroke-width="0.4"/>
+  <circle cx="98.21" cy="30" r="2.5" fill="#cc5500"/>
+  <line x1="98.21" y1="30" x2="98.21" y2="25" stroke="#fff" stroke-width="0.7" stroke-linecap="round"/>
+  <text x="98.21" y="37.5" fill="#aaa" font-family="monospace" font-size="2.2" text-anchor="middle">FREQ 2</text>
+
+  <!-- FEED 2 (medium) -->
+  <circle cx="111.76" cy="30" r="3.5" fill="#ff7700" stroke="#993300" stroke-width="0.35"/>
+  <circle cx="111.76" cy="30" r="1.7" fill="#cc5500"/>
+  <line x1="111.76" y1="30" x2="111.76" y2="26.5" stroke="#fff" stroke-width="0.55" stroke-linecap="round"/>
+  <text x="111.76" y="35.5" fill="#888" font-family="monospace" font-size="2.2" text-anchor="middle">FEED 2</text>
+
+  <!-- DRIVE 2 (medium) -->
+  <circle cx="125.31" cy="30" r="3.5" fill="#ff7700" stroke="#993300" stroke-width="0.35"/>
+  <circle cx="125.31" cy="30" r="1.7" fill="#cc5500"/>
+  <line x1="125.31" y1="30" x2="125.31" y2="26.5" stroke="#fff" stroke-width="0.55" stroke-linecap="round"/>
+  <text x="125.31" y="35.5" fill="#888" font-family="monospace" font-size="2.2" text-anchor="middle">DRIVE 2</text>
+
+  <!-- ATT G2 -->
+  <ellipse cx="98.21"  cy="106" rx="1.8" ry="3.2" fill="#00d4ff" stroke="#008aaa" stroke-width="0.35"/>
+  <line x1="98.21"  y1="106" x2="98.21"  y2="103" stroke="#fff" stroke-width="0.4" stroke-linecap="round"/>
+  <ellipse cx="111.76" cy="106" rx="1.8" ry="3.2" fill="#00d4ff" stroke="#008aaa" stroke-width="0.35"/>
+  <line x1="111.76" y1="106" x2="111.76" y2="103" stroke="#fff" stroke-width="0.4" stroke-linecap="round"/>
+  <ellipse cx="125.31" cy="106" rx="1.8" ry="3.2" fill="#00d4ff" stroke="#008aaa" stroke-width="0.35"/>
+  <line x1="125.31" y1="106" x2="125.31" y2="103" stroke="#fff" stroke-width="0.4" stroke-linecap="round"/>
+
+  <!-- CV G2 -->
+  <circle cx="98.21"  cy="119" r="3.2" fill="#1e1e1e" stroke="#ffffff" stroke-width="0.55"/>
+  <circle cx="98.21"  cy="119" r="1.5" fill="#0a0a0a"/>
+  <text x="98.21" y="124.5" fill="#555" font-family="monospace" font-size="1.9" text-anchor="middle">F2</text>
+
+  <circle cx="111.76" cy="119" r="3.2" fill="#1e1e1e" stroke="#ffffff" stroke-width="0.55"/>
+  <circle cx="111.76" cy="119" r="1.5" fill="#0a0a0a"/>
+  <text x="111.76" y="124.5" fill="#555" font-family="monospace" font-size="1.9" text-anchor="middle">Fb2</text>
+
+  <circle cx="125.31" cy="119" r="3.2" fill="#1e1e1e" stroke="#ffffff" stroke-width="0.55"/>
+  <circle cx="125.31" cy="119" r="1.5" fill="#0a0a0a"/>
+  <text x="125.31" y="124.5" fill="#555" font-family="monospace" font-size="1.9" text-anchor="middle">Dr2</text>
+
+  <!-- ── GROUP 3: FREQ=138.85  FEED=152.4  DRIVE=165.95 ─────────── -->
+
+  <!-- FREQ 3 (large) -->
+  <circle cx="138.85" cy="30" r="5" fill="#ff7700" stroke="#993300" stroke-width="0.4"/>
+  <circle cx="138.85" cy="30" r="2.5" fill="#cc5500"/>
+  <line x1="138.85" y1="30" x2="138.85" y2="25" stroke="#fff" stroke-width="0.7" stroke-linecap="round"/>
+  <text x="138.85" y="37.5" fill="#aaa" font-family="monospace" font-size="2.2" text-anchor="middle">FREQ 3</text>
+
+  <!-- FEED 3 (medium) -->
+  <circle cx="152.4" cy="30" r="3.5" fill="#ff7700" stroke="#993300" stroke-width="0.35"/>
+  <circle cx="152.4" cy="30" r="1.7" fill="#cc5500"/>
+  <line x1="152.4" y1="30" x2="152.4" y2="26.5" stroke="#fff" stroke-width="0.55" stroke-linecap="round"/>
+  <text x="152.4" y="35.5" fill="#888" font-family="monospace" font-size="2.2" text-anchor="middle">FEED 3</text>
+
+  <!-- DRIVE 3 (medium) -->
+  <circle cx="165.95" cy="30" r="3.5" fill="#ff7700" stroke="#993300" stroke-width="0.35"/>
+  <circle cx="165.95" cy="30" r="1.7" fill="#cc5500"/>
+  <line x1="165.95" y1="30" x2="165.95" y2="26.5" stroke="#fff" stroke-width="0.55" stroke-linecap="round"/>
+  <text x="165.95" y="35.5" fill="#888" font-family="monospace" font-size="2.2" text-anchor="middle">DRIVE 3</text>
+
+  <!-- ATT G3 -->
+  <ellipse cx="138.85" cy="106" rx="1.8" ry="3.2" fill="#00d4ff" stroke="#008aaa" stroke-width="0.35"/>
+  <line x1="138.85" y1="106" x2="138.85" y2="103" stroke="#fff" stroke-width="0.4" stroke-linecap="round"/>
+  <ellipse cx="152.4"  cy="106" rx="1.8" ry="3.2" fill="#00d4ff" stroke="#008aaa" stroke-width="0.35"/>
+  <line x1="152.4"  y1="106" x2="152.4"  y2="103" stroke="#fff" stroke-width="0.4" stroke-linecap="round"/>
+  <ellipse cx="165.95" cy="106" rx="1.8" ry="3.2" fill="#00d4ff" stroke="#008aaa" stroke-width="0.35"/>
+  <line x1="165.95" y1="106" x2="165.95" y2="103" stroke="#fff" stroke-width="0.4" stroke-linecap="round"/>
+
+  <!-- CV G3 -->
+  <circle cx="138.85" cy="119" r="3.2" fill="#1e1e1e" stroke="#ffffff" stroke-width="0.55"/>
+  <circle cx="138.85" cy="119" r="1.5" fill="#0a0a0a"/>
+  <text x="138.85" y="124.5" fill="#555" font-family="monospace" font-size="1.9" text-anchor="middle">F3</text>
+
+  <circle cx="152.4" cy="119" r="3.2" fill="#1e1e1e" stroke="#ffffff" stroke-width="0.55"/>
+  <circle cx="152.4" cy="119" r="1.5" fill="#0a0a0a"/>
+  <text x="152.4" y="124.5" fill="#555" font-family="monospace" font-size="1.9" text-anchor="middle">Fb3</text>
+
+  <circle cx="165.95" cy="119" r="3.2" fill="#1e1e1e" stroke="#ffffff" stroke-width="0.55"/>
+  <circle cx="165.95" cy="119" r="1.5" fill="#0a0a0a"/>
+  <text x="165.95" y="124.5" fill="#555" font-family="monospace" font-size="1.9" text-anchor="middle">Dr3</text>
+
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- ZONE 3 — LP 1 (5 HP, x = 172.72–198.12)                       -->
+  <!-- Center = 185.42  Left col = 179.07  Right col = 191.77         -->
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <text x="185.42" y="13" fill="#ffffff" font-family="monospace" font-size="3.2" text-anchor="middle" font-weight="bold">LP 1</text>
+
+  <!-- CUTOFF (large, centered) -->
+  <circle cx="185.42" cy="29" r="5" fill="#ff7700" stroke="#993300" stroke-width="0.4"/>
+  <circle cx="185.42" cy="29" r="2.5" fill="#cc5500"/>
+  <line x1="185.42" y1="29" x2="185.42" y2="24" stroke="#fff" stroke-width="0.7" stroke-linecap="round"/>
+  <text x="185.42" y="36.5" fill="#aaa" font-family="monospace" font-size="2.2" text-anchor="middle">CUTOFF</text>
+
+  <!-- RESONANCE (medium, centered) -->
+  <circle cx="185.42" cy="61" r="3.5" fill="#ff7700" stroke="#993300" stroke-width="0.35"/>
+  <circle cx="185.42" cy="61" r="1.7" fill="#cc5500"/>
+  <line x1="185.42" y1="61" x2="185.42" y2="57.5" stroke="#fff" stroke-width="0.55" stroke-linecap="round"/>
+  <text x="185.42" y="66.5" fill="#888" font-family="monospace" font-size="2.2" text-anchor="middle">RESO</text>
+
+  <!-- ATT LP1 -->
+  <ellipse cx="179.07" cy="106" rx="1.8" ry="3.2" fill="#00d4ff" stroke="#008aaa" stroke-width="0.35"/>
+  <line x1="179.07" y1="106" x2="179.07" y2="103" stroke="#fff" stroke-width="0.4" stroke-linecap="round"/>
+  <ellipse cx="191.77" cy="106" rx="1.8" ry="3.2" fill="#00d4ff" stroke="#008aaa" stroke-width="0.35"/>
+  <line x1="191.77" y1="106" x2="191.77" y2="103" stroke="#fff" stroke-width="0.4" stroke-linecap="round"/>
+
+  <!-- CV LP1 -->
+  <circle cx="179.07" cy="119" r="3.2" fill="#1e1e1e" stroke="#ffffff" stroke-width="0.55"/>
+  <circle cx="179.07" cy="119" r="1.5" fill="#0a0a0a"/>
+  <text x="179.07" y="124.5" fill="#666" font-family="monospace" font-size="2" text-anchor="middle">CO</text>
+
+  <circle cx="191.77" cy="119" r="3.2" fill="#1e1e1e" stroke="#ffffff" stroke-width="0.55"/>
+  <circle cx="191.77" cy="119" r="1.5" fill="#0a0a0a"/>
+  <text x="191.77" y="124.5" fill="#666" font-family="monospace" font-size="2" text-anchor="middle">RES</text>
+
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- ZONE 4 — LP 2 (5 HP, x = 198.12–223.52)                       -->
+  <!-- Center = 210.82  Left col = 204.47  Right col = 217.17         -->
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <text x="210.82" y="13" fill="#ffffff" font-family="monospace" font-size="3.2" text-anchor="middle" font-weight="bold">LP 2</text>
+
+  <!-- CUTOFF (medium, centered) -->
+  <circle cx="210.82" cy="29" r="3.5" fill="#ff7700" stroke="#993300" stroke-width="0.35"/>
+  <circle cx="210.82" cy="29" r="1.7" fill="#cc5500"/>
+  <line x1="210.82" y1="29" x2="210.82" y2="25.5" stroke="#fff" stroke-width="0.55" stroke-linecap="round"/>
+  <text x="210.82" y="34.5" fill="#888" font-family="monospace" font-size="2.2" text-anchor="middle">CUTOFF</text>
+
+  <!-- RESONANCE (medium, centered) -->
+  <circle cx="210.82" cy="59" r="3.5" fill="#ff7700" stroke="#993300" stroke-width="0.35"/>
+  <circle cx="210.82" cy="59" r="1.7" fill="#cc5500"/>
+  <line x1="210.82" y1="59" x2="210.82" y2="55.5" stroke="#fff" stroke-width="0.55" stroke-linecap="round"/>
+  <text x="210.82" y="64.5" fill="#888" font-family="monospace" font-size="2.2" text-anchor="middle">RESO</text>
+
+  <!-- ATT LP2 -->
+  <ellipse cx="204.47" cy="106" rx="1.8" ry="3.2" fill="#00d4ff" stroke="#008aaa" stroke-width="0.35"/>
+  <line x1="204.47" y1="106" x2="204.47" y2="103" stroke="#fff" stroke-width="0.4" stroke-linecap="round"/>
+  <ellipse cx="217.17" cy="106" rx="1.8" ry="3.2" fill="#00d4ff" stroke="#008aaa" stroke-width="0.35"/>
+  <line x1="217.17" y1="106" x2="217.17" y2="103" stroke="#fff" stroke-width="0.4" stroke-linecap="round"/>
+
+  <!-- CV LP2 -->
+  <circle cx="204.47" cy="119" r="3.2" fill="#1e1e1e" stroke="#ffffff" stroke-width="0.55"/>
+  <circle cx="204.47" cy="119" r="1.5" fill="#0a0a0a"/>
+  <text x="204.47" y="124.5" fill="#666" font-family="monospace" font-size="2" text-anchor="middle">CO</text>
+
+  <circle cx="217.17" cy="119" r="3.2" fill="#1e1e1e" stroke="#ffffff" stroke-width="0.55"/>
+  <circle cx="217.17" cy="119" r="1.5" fill="#0a0a0a"/>
+  <text x="217.17" y="124.5" fill="#666" font-family="monospace" font-size="2" text-anchor="middle">RES</text>
+
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- ZONE 5 — HP + OUT (6 HP, x = 223.52–254)                      -->
+  <!-- Center = 238.76  ATT cols = 231.13, 238.76                     -->
+  <!-- Jack row (4): 227.5  234.5  242.0  249.5                       -->
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <text x="238.76" y="13" fill="#ffffff" font-family="monospace" font-size="3.2" text-anchor="middle" font-weight="bold">HP + OUT</text>
+
+  <!-- CUTOFF (medium, centered) -->
+  <circle cx="238.76" cy="29" r="3.5" fill="#ff7700" stroke="#993300" stroke-width="0.35"/>
+  <circle cx="238.76" cy="29" r="1.7" fill="#cc5500"/>
+  <line x1="238.76" y1="29" x2="238.76" y2="25.5" stroke="#fff" stroke-width="0.55" stroke-linecap="round"/>
+  <text x="238.76" y="34.5" fill="#888" font-family="monospace" font-size="2.2" text-anchor="middle">CUTOFF</text>
+
+  <!-- RESONANCE (medium, centered) -->
+  <circle cx="238.76" cy="59" r="3.5" fill="#ff7700" stroke="#993300" stroke-width="0.35"/>
+  <circle cx="238.76" cy="59" r="1.7" fill="#cc5500"/>
+  <line x1="238.76" y1="59" x2="238.76" y2="55.5" stroke="#fff" stroke-width="0.55" stroke-linecap="round"/>
+  <text x="238.76" y="64.5" fill="#888" font-family="monospace" font-size="2.2" text-anchor="middle">RESO</text>
+
+  <!-- ATT HP (above CV jacks CO and RES) -->
+  <ellipse cx="227.5" cy="106" rx="1.8" ry="3.2" fill="#00d4ff" stroke="#008aaa" stroke-width="0.35"/>
+  <line x1="227.5" y1="106" x2="227.5" y2="103" stroke="#fff" stroke-width="0.4" stroke-linecap="round"/>
+  <ellipse cx="234.5" cy="106" rx="1.8" ry="3.2" fill="#00d4ff" stroke="#008aaa" stroke-width="0.35"/>
+  <line x1="234.5" y1="106" x2="234.5" y2="103" stroke="#fff" stroke-width="0.4" stroke-linecap="round"/>
+
+  <!-- 4-jack bottom row: CV CO, CV RES, L OUT, R OUT -->
+  <circle cx="227.5" cy="119" r="3.2" fill="#1e1e1e" stroke="#ffffff" stroke-width="0.55"/>
+  <circle cx="227.5" cy="119" r="1.5" fill="#0a0a0a"/>
+  <text x="227.5" y="124.5" fill="#666" font-family="monospace" font-size="2" text-anchor="middle">CO</text>
+
+  <circle cx="234.5" cy="119" r="3.2" fill="#1e1e1e" stroke="#ffffff" stroke-width="0.55"/>
+  <circle cx="234.5" cy="119" r="1.5" fill="#0a0a0a"/>
+  <text x="234.5" y="124.5" fill="#666" font-family="monospace" font-size="2" text-anchor="middle">RES</text>
+
+  <circle cx="242.0" cy="119" r="3.2" fill="#1e1e1e" stroke="#ffffff" stroke-width="0.55"/>
+  <circle cx="242.0" cy="119" r="1.5" fill="#0a0a0a"/>
+  <text x="242.0" y="124.5" fill="#666" font-family="monospace" font-size="2" text-anchor="middle">L</text>
+
+  <circle cx="249.5" cy="119" r="3.2" fill="#1e1e1e" stroke="#ffffff" stroke-width="0.55"/>
+  <circle cx="249.5" cy="119" r="1.5" fill="#0a0a0a"/>
+  <text x="249.5" y="124.5" fill="#666" font-family="monospace" font-size="2" text-anchor="middle">R</text>
+
+</svg>
+</div>
+</body>
+</html>
