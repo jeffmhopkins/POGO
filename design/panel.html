@@ -232,20 +232,25 @@
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 8 — LP 1  (x:142.24–162.56, center x=152.40)                  -->
   <!-- Jack x: 147.32 (CUTOFF CV), 157.48 (RES CV)                           -->
-  <!-- Common bottom anchor: CV cy=118, label y=124.5  (matches Zone 0c)      -->
-  <!-- ATT cy=109  ·  equal gaps ≈20.5mm above ATT top                        -->
-  <!-- CUTOFF cy=40  label y=50  ·  RESONANCE cy=77  label y=84.5             -->
+  <!-- Common bottom: CV cy=118 label y=124.5 · ATT cy=109                    -->
+  <!-- 3 knobs, 4 equal gaps ≈11.9mm: CUTOFF cy=31 · SPREAD cy=60            -->
+  <!--   RESONANCE cy=86                                                        -->
   <!-- ════════════════════════════════════════════════════════════════════════ -->
 
   <!-- CUTOFF — large knob, 1V/oct -->
-  <circle cx="152.40" cy="40" r="7" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
-  <line x1="152.40" y1="40" x2="152.40" y2="33" stroke="#aaa" stroke-width="0.7"/>
-  <text x="152.40" y="50" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">CUTOFF</text>
+  <circle cx="152.40" cy="31" r="7" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="152.40" y1="31" x2="152.40" y2="24" stroke="#aaa" stroke-width="0.7"/>
+  <text x="152.40" y="41" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">CUTOFF</text>
+
+  <!-- SPREAD — medium knob, bipolar, center = no change (L/R cutoff skew) -->
+  <circle cx="152.40" cy="60" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="152.40" y1="60" x2="152.40" y2="55.5" stroke="#aaa" stroke-width="0.6"/>
+  <text x="152.40" y="67.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">SPREAD</text>
 
   <!-- RESONANCE — medium knob -->
-  <circle cx="152.40" cy="77" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="152.40" y1="77" x2="152.40" y2="72.5" stroke="#aaa" stroke-width="0.6"/>
-  <text x="152.40" y="84.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">RESONANCE</text>
+  <circle cx="152.40" cy="86" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="152.40" y1="86" x2="152.40" y2="81.5" stroke="#aaa" stroke-width="0.6"/>
+  <text x="152.40" y="93.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">RESONANCE</text>
 
   <!-- CUTOFF ATT — attenuverter -->
   <circle cx="147.32" cy="109" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
@@ -294,19 +299,19 @@
   <!-- SECTION 9b — LP 2 FILTER  (x:162.56–182.88, y:28–128.85)              -->
   <!-- Center x=172.72 · Jack x: 167.64 (CUT), 177.80 (RES)                  -->
   <!-- Common bottom: CV cy=118 label y=124.5 · ATT cy=109                    -->
-  <!-- CUTOFF cy=56 label y=66 · RESONANCE cy=85 label y=92.5                 -->
-  <!-- equal gaps ≈12.5mm above ATT top                                        -->
+  <!-- CUTOFF: vertical slider track y=38–78, thumb at y=58 (midpoint)        -->
+  <!-- RESONANCE cy=86 label y=93.5                                            -->
   <!-- ════════════════════════════════════════════════════════════════════════ -->
 
-  <!-- CUTOFF — large knob -->
-  <circle cx="172.72" cy="56" r="7" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
-  <line x1="172.72" y1="56" x2="172.72" y2="49" stroke="#aaa" stroke-width="0.7"/>
-  <text x="172.72" y="66" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">CUTOFF</text>
+  <!-- CUTOFF — vertical slider -->
+  <text x="172.72" y="36.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">CUTOFF</text>
+  <rect x="171.22" y="38" width="3" height="40" rx="1.5" fill="#111" stroke="#444" stroke-width="0.5"/>
+  <rect x="167.72" y="56" width="10" height="4" rx="1.2" fill="#555" stroke="#777" stroke-width="0.4"/>
 
   <!-- RESONANCE — medium knob -->
-  <circle cx="172.72" cy="85" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="172.72" y1="85" x2="172.72" y2="80.5" stroke="#aaa" stroke-width="0.6"/>
-  <text x="172.72" y="92.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">RESONANCE</text>
+  <circle cx="172.72" cy="86" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="172.72" y1="86" x2="172.72" y2="81.5" stroke="#aaa" stroke-width="0.6"/>
+  <text x="172.72" y="93.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">RESONANCE</text>
 
   <!-- CUTOFF ATT -->
   <circle cx="167.64" cy="109" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
@@ -347,15 +352,15 @@
   <!-- Same vertical layout as LP 2 filter                                     -->
   <!-- ════════════════════════════════════════════════════════════════════════ -->
 
-  <!-- CUTOFF — large knob -->
-  <circle cx="193.04" cy="56" r="7" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
-  <line x1="193.04" y1="56" x2="193.04" y2="49" stroke="#aaa" stroke-width="0.7"/>
-  <text x="193.04" y="66" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">CUTOFF</text>
+  <!-- CUTOFF — vertical slider -->
+  <text x="193.04" y="36.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">CUTOFF</text>
+  <rect x="191.54" y="38" width="3" height="40" rx="1.5" fill="#111" stroke="#444" stroke-width="0.5"/>
+  <rect x="188.04" y="56" width="10" height="4" rx="1.2" fill="#555" stroke="#777" stroke-width="0.4"/>
 
   <!-- RESONANCE — medium knob -->
-  <circle cx="193.04" cy="85" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="193.04" y1="85" x2="193.04" y2="80.5" stroke="#aaa" stroke-width="0.6"/>
-  <text x="193.04" y="92.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">RESONANCE</text>
+  <circle cx="193.04" cy="86" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="193.04" y1="86" x2="193.04" y2="81.5" stroke="#aaa" stroke-width="0.6"/>
+  <text x="193.04" y="93.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">RESONANCE</text>
 
   <!-- CUTOFF ATT -->
   <circle cx="187.96" cy="109" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
