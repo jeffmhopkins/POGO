@@ -143,9 +143,9 @@
         text-anchor="middle" font-weight="bold">LP 1</text>
 
   <!-- Zone 4+5 TOP STRIP labels (y=4.5–28) -->
-  <!-- BAND OUT  (zone center x=172.72) -->
+  <!-- VCA  (zone center x=172.72) -->
   <text x="172.72" y="9.0" fill="#00d4ff" font-family="monospace" font-size="2.4"
-        text-anchor="middle" font-weight="bold">BAND OUT</text>
+        text-anchor="middle" font-weight="bold">VCA</text>
   <!-- OUT  (zone center x=193.04) -->
   <text x="193.04" y="9.0" fill="#00d4ff" font-family="monospace" font-size="2.4"
         text-anchor="middle" font-weight="bold">OUT</text>
@@ -279,21 +279,20 @@
   <text x="157.48" y="124.5" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">RES</text>
 
   <!-- ════════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION 9a — BAND OUT TOP STRIP  (x:162.56–182.88, y:4.5–28)          -->
-  <!-- LP1 AUX L/R only (tap at LP1 output, pre-LP2) · cy=16 · label y=22.5  -->
+  <!-- SECTION 9a — VCA TOP STRIP  (x:162.56–182.88, y:4.5–28)               -->
+  <!-- Post LP1 audio input + attenuverter · CV normals to mod bus            -->
   <!-- ════════════════════════════════════════════════════════════════════════ -->
 
-  <!-- LP1 AUX L -->
+  <!-- VCA IN — audio jack, post LP1, cy=16 aligned with OUT row -->
   <circle cx="167.64" cy="16" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="167.64" cy="16" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
   <rect x="164.14" y="22.74" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
-  <text x="167.64" y="24.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">LP1 L</text>
+  <text x="167.64" y="24.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">VCA IN</text>
 
-  <!-- LP1 AUX R -->
-  <circle cx="177.80" cy="16" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="177.80" cy="16" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <rect x="174.30" y="22.74" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
-  <text x="177.80" y="24.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">LP1 R</text>
+  <!-- VCA ATT — attenuverter, CV depth, normals to mod bus -->
+  <circle cx="177.80" cy="16" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="177.80" y1="16" x2="177.80" y2="13.5" stroke="#aaa" stroke-width="0.5"/>
+  <text x="177.80" y="24.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">AMT</text>
 
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 9b — LP 2 FILTER  (x:162.56–182.88, y:28–128.85)              -->
