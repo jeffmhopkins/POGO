@@ -113,25 +113,26 @@ Output: L OUT jack, R OUT jack (audio output, bottom row)
 
 ## General Layout Paradigm
 
-*To be completed — see zone-by-zone design session.*
-
-### Knob sizes
-TBD
+### Knob sizes — 3 tiers
+- **Attenuverter**: narrow tall style (e.g. Rogan 1S or equivalent pointer knob)
+- **Medium**: secondary parameters (feedback, resonance, blend, offset, amount)
+- **Large**: primary parameters (cutoff, freq, drive, dry/wet, attack, release)
 
 ### Jack color coding
-TBD
+None — all jacks uniform hardware finish.
 
-### Attenuverter style
-TBD
+### Attenuverter center detent
+Panel marking only — no physical detent in the pot.
 
 ### Label placement
-TBD
-
-### LED indicators
-TBD
+- Control labels: text below the knob or jack
+- Zone name: labeled at the top of the zone in silk-screen
 
 ### Zone separator style
-TBD
+Silk-screen lines between zones, similar to Pittsburgh Modular SV-1b treatment.
+
+### LED indicators
+TBD — zone by zone.
 
 ---
 
