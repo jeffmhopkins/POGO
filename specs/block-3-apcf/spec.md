@@ -38,7 +38,7 @@ At mid DRY/WET: classic phaser blend — notches audible but dry content preserv
 | FREQ 2 | 200 Hz – 8 kHz center | 1.5 kHz | Logarithmic | Center frequency of Group 2 (mid formant) |
 | FREQ 3 | 1 kHz – 20 kHz center | 6 kHz | Logarithmic | Center frequency of Group 3 (high formant) |
 | SPREAD | 0 – 100% | 50% | Linear | Multiplies spacing between groups; 0% collapses all groups to same frequency |
-| FREQ OFFSET | ±5 V equivalent | 0 | Linear | Shifts all 3 groups up or down together; acts as a master sweep |
+| FREQ OFFSET | ±5 V equivalent | 0 | Linear | Shifts all 3 groups up or down together; acts as a master sweep (panel: MASTER OFFSET large knob) |
 | FEEDBACK 1 | 0 – 95% | 0% | Linear | Resonance depth of Group 1; >95% risks instability |
 | FEEDBACK 2 | 0 – 95% | 0% | Linear | Resonance depth of Group 2 |
 | FEEDBACK 3 | 0 – 95% | 0% | Linear | Resonance depth of Group 3 |
@@ -60,6 +60,7 @@ At mid DRY/WET: classic phaser blend — notches audible but dry content preserv
 | FEEDBACK 3 | 0–10 V | Yes | Group 3 feedback depth independently |
 | BLEND | 0–10 V | Yes | Crossfade ratio; only active when SOURCE = Blend |
 | DRY/WET | 0–10 V | Yes | Sweeps blend from dry to wet |
+| MASTER OFFSET (FREQ OFFSET) | ±5 V (1V/oct) | Yes | Shifts all 3 group frequencies simultaneously; sums at each FREQ CV node |
 | SOURCE | — | None | Switch only; no CV |
 | POLARITY | — | None | Switch only; no CV |
 

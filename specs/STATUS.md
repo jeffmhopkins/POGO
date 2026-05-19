@@ -18,11 +18,11 @@ No Phase 6 (code) work begins until every row shows ✅ for Phases 1–3
 
 **Phase 4 and Phase 5 are module-level gates** — when complete, all rows flip to ✅ at once.
 
-Phase 4 deliverables → `specs/panel-design/panel-notes.md` + `specs/panel-design/panel.svg`
+Phase 4 deliverables → `specs/panel-design/panel-notes.md` + `design/panel.html` (SVG)
 Phase 5 deliverables → `specs/board-layout/layout-notes.md`
 
 ⚠️ = in progress / decision pending
-Last updated: 2026-05-18
+Last updated: 2026-05-19
 
 ## Next Steps
 

@@ -58,15 +58,15 @@ Mod Bus Processor:
 MOD BUS SIGNAL
   ↓ (to each destination via attenuverter + override jack)
 
-Destinations (13 total):
-  APF Freq 1 / 2 / 3     APF Feedback 1 / 2 / 3     APF Blend     APF Dry/Wet
-  Distortion Drive 1 / 2 / 3     LP1 Cutoff / Resonance
-  LP2 Cutoff / Resonance     HP Cutoff / Resonance
+Destinations (18 total):
+  APF Master Offset     APF Freq 1 / 2 / 3     APF Feedback 1 / 2 / 3
+  APF Blend     APF Dry/Wet     Distortion Drive 1 / 2 / 3
+  LP1 Cutoff / Resonance     LP2 Cutoff / Resonance     HP Cutoff / Resonance
 ```
 
 ## Panel Width
 
-TBD — to be determined during panel layout. Estimated 28–40 HP given control count.
+**46 HP** (233.68 mm)
 
 ## Power Budget (estimates — update from measured values during bring-up)
 

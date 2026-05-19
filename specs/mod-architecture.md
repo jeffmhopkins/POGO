@@ -25,7 +25,7 @@ Mod Bus Processor:
   OFFSET knob  (±5 V)        ─────┤──► MOD BUS SIGNAL
   │
   ▼
-  ▼ (to each of 13 destinations)
+  ▼ (to each of 18 destinations)
 
 [Per Destination]:
   MOD BUS ──[100 Ω + BAT54 clamp]──► ATTENUVERTER knob (−1× to +1×) ──► CV summing node
@@ -166,6 +166,7 @@ isolation. Use TL074 (quad, 4 halves each): 10× TL074 for all 19 attenuverter c
 
 | Destination | Block | CV Type | Override Jack |
 |---|---|---|---|
+| APF Master Offset | 3 | ±5 V, 1V/oct | Yes | Sums into all three FREQ CV nodes simultaneously |
 | APF Freq 1 | 3 | ±5 V, 1V/oct | Yes |
 | APF Freq 2 | 3 | ±5 V, 1V/oct | Yes |
 | APF Freq 3 | 3 | ±5 V, 1V/oct | Yes |
