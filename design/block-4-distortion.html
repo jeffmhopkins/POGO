@@ -32,6 +32,7 @@
   <a href="block-2-envelope-follower.html">Block 2</a>
   <a href="block-3-apcf.html">Block 3</a>
   <a href="block-4-distortion.html" class="current">Block 4</a>
+  <a href="block-VCA.html">Block VCA</a>
   <a href="block-5-lp1.html">Block 5</a>
   <a href="block-6-lp2.html">Block 6</a>
   <a href="block-7-hp.html">Block 7</a>
@@ -61,22 +62,22 @@ APF Group 3 out (L+R, ±5 V) ─────────────────
 │                              V_out_chain1_L ──►[unity buffer]──────────────────► ──┤
 │  (identical for R channel using TL072B/TL074 C+D)                                   │
 │                                                                                      │
-│  Post-dist tap ──────────────────────────────► to APF Group 1 feedback SOURCE       │
+│  Post-dist tap ──────────────────────────────► to APF Group 1 FB DIST BLEND circuit │
 └─────────────────────────────────────────────────────────────────────────────────────┘
 
 ┌─── Distortion Chain 2 ─── (APF Group 2) ────────── (same structure) ───────────────┐
 │  MODE 2 switch + DRIVE 2 knob                                                        │
-│  Post-dist tap ──► to APF Group 2 feedback SOURCE                                    │
+│  Post-dist tap ──► to APF Group 2 FB DIST BLEND circuit                              │
 └─────────────────────────────────────────────────────────────────────────────────────┘
 
 ┌─── Distortion Chain 3 ─── (APF Group 3) ────────── (same structure) ───────────────┐
 │  MODE 3 switch + DRIVE 3 knob                                                        │
-│  Post-dist tap ──► to APF Group 3 feedback SOURCE                                    │
+│  Post-dist tap ──► to APF Group 3 FB DIST BLEND circuit                              │
 └─────────────────────────────────────────────────────────────────────────────────────┘
 
-All three chain outputs ──► Summing Amp (gain = 0.5× per chain)
+All three chain outputs ──► Summing Amp (gain = 0.5× per chain) ──► Block VCA ──► LP1
     V_dst1_L ──[R_sum]──┐
-    V_dst2_L ──[R_sum]──┼──(−in) SUM_AMP_L ──(out)──► to LP1 (L)
+    V_dst2_L ──[R_sum]──┼──(−in) SUM_AMP_L ──(out)──► to Block VCA (L)
     V_dst3_L ──[R_sum]──┘
 
 Gain 0.5× per chain: R_f_sum = R_sum / 2
@@ -200,7 +201,7 @@ Wavefold:
 <ul>
   <li><strong>Summing headroom</strong>: three chains summed at high drive can exceed op-amp rail. Gain = 0.5× per chain (R_f = R_sum/2) keeps worst-case combined output to ±7.5 V.</li>
   <li><strong>CD4053 series resistance</strong>: ~100 Ω at ±5 V supply. Buffer each CD4053 output with a unity-gain op-amp half before the summing stage.</li>
-  <li><strong>Post-Dist feedback routing</strong>: each chain's output (before the summing amp) is tapped and routed back to Block 3's SOURCE selector for that group. Route as shielded traces to avoid inter-chain crosstalk.</li>
+  <li><strong>Post-Dist feedback routing</strong>: each chain's output (before the summing amp) is tapped and routed to Block 3's FB DIST BLEND crossfade circuit for that group. Route as shielded traces to avoid inter-chain crosstalk.</li>
   <li><strong>MODE switching live</strong>: brief click possible from mechanical switching. Accepted behavior.</li>
   <li><strong>Diode/zener matching</strong>: use components from the same batch within each chain. Cross-chain matching less critical.</li>
 </ul>

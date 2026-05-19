@@ -11,6 +11,7 @@ No Phase 6 (code) work begins until every row shows ✅ for Phases 1–3
 | Block 2: Envelope Follower   | ✅                  | ✅                    | ✅                      | [ ]                   | [ ]                   | [ ]           |
 | Block 3: Triple APF Comb     | ✅                  | ✅                    | ✅                      | [ ]                   | [ ]                   | [ ]           |
 | Block 4: Distortion          | ✅                  | ✅                    | ✅                      | [ ]                   | [ ]                   | [ ]           |
+| Block VCA (pre-LP1)          | ✅                  | ✅                    | ✅                      | [ ]                   | [ ]                   | [ ]           |
 | Block 5: LP Filter 1         | ✅                  | ✅                    | ✅                      | [ ]                   | [ ]                   | [ ]           |
 | Block 6: LP Filter 2         | ✅                  | ✅                    | ✅                      | [ ]                   | [ ]                   | [ ]           |
 | Block 7: HP Filter           | ✅                  | ✅                    | ✅                      | [ ]                   | [ ]                   | [ ]           |
@@ -18,7 +19,7 @@ No Phase 6 (code) work begins until every row shows ✅ for Phases 1–3
 
 **Phase 4 and Phase 5 are module-level gates** — when complete, all rows flip to ✅ at once.
 
-Phase 4 deliverables → `specs/panel-design/panel-notes.md` + `design/panel.html` (SVG)
+Phase 4 deliverables → `specs/panel-design/panel-notes.md` + `specs/panel-design/panel.svg` + `design/panel.html` (SVG)
 Phase 5 deliverables → `specs/board-layout/layout-notes.md`
 
 ⚠️ = in progress / decision pending

@@ -32,6 +32,11 @@ Stereo Input (L + R)  ←  ±5 V audio
            3 modes: Soft Clip / Hard Clip / Wavefold
            MODE switch + DRIVE knob; mode CV-selectable
   ↓
+[Block VCA] Pre-LP1 Voltage-Controlled Amplifier  (stereo)
+           V2164 quad VCA cells 3+4 (cells 1+2 shared with LP1 resonance)
+           AMT attenuverter + CV IN jack (normalizes to mod bus)
+           Unity gain at AMT center; accent/duck via envelope or external CV
+  ↓
 [Block 5]  LP Filter 1  (stereo, 2-pole Sallen-Key)
            Independent CUTOFF + RESONANCE + CV modulation
   ↓
@@ -41,12 +46,11 @@ Stereo Input (L + R)  ←  ±5 V audio
 [Block 7]  HP Filter  (stereo, 2-pole, self-oscillating)
            CUTOFF + RESONANCE + CV modulation
   ↓
-[Block B]  Output Buffers (6 jacks total)
-           LP2 AUX L / R  — tap at LP2 output (lowpass band, before HP)
-           HP AUX L / R   — tap at HP output (highpass/bandpass, after HP)
-           OUT L / R       — main stereo output (same tap as HP AUX, primary patch point)
+[Block B]  Output Buffers (4 jacks total)
+           LP1 L / R  — BAND OUT: tap at LP1 output (before LP2); labeled "BAND OUT" on panel
+           OUT L / R  — main stereo output (tap at HP output, primary patch point)
            1 kΩ series + unity-gain buffer on every jack
-Stereo Output (L + R)  →  ±5 V audio  (+ 4 aux bandpass outputs)
+Stereo Output (L + R)  →  ±5 V audio  (+ LP1 band tap)
 
 ─────────────────────────────────────────────────────────────────────
 MODULATION SYSTEM
@@ -61,9 +65,10 @@ Mod Bus Processor:
 MOD BUS SIGNAL
   ↓ (to each destination via attenuverter + override jack)
 
-Destinations (18 total):
+Destinations (19 total):
   APF Master Offset     APF Freq 1 / 2 / 3     APF Feedback 1 / 2 / 3
-  APF Blend     APF Dry/Wet     Distortion Drive 1 / 2 / 3
+  APF FB Dist Blend     APF Comb Bypass     Distortion Drive 1 / 2 / 3
+  VCA Level
   LP1 Cutoff / Resonance     LP2 Cutoff / Resonance     HP Cutoff / Resonance
 ```
 
@@ -80,13 +85,14 @@ Destinations (18 total):
 | Block 2: Envelope Follower | 10 mA | 10 mA |
 | Block 3: Triple APF Comb | 25 mA | 25 mA |
 | Block 4: Distortion | 15 mA | 15 mA |
+| Block VCA (pre-LP1) | 2 mA | 2 mA |
 | Block 5: LP Filter 1 | 15 mA | 15 mA |
 | Block 6: LP Filter 2 | 15 mA | 15 mA |
 | Block 7: HP Filter | 10 mA | 10 mA |
 | Mod Bus Processor | 10 mA | 10 mA |
-| Per-destination mod circuits (×14) | 30 mA | 30 mA |
-| Block B: Output buffers | 5 mA | 5 mA |
-| **Total estimate** | **~145 mA** | **~145 mA** |
+| Per-destination mod circuits (×15) | 32 mA | 32 mA |
+| Block B: Output buffers | 4 mA | 4 mA |
+| **Total estimate** | **~148 mA** | **~148 mA** |
 
 ## Eurorack Format
 

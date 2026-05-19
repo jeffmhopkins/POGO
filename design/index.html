@@ -35,6 +35,7 @@
   <a href="block-2-envelope-follower.html">Block 2: Envelope Follower</a>
   <a href="block-3-apcf.html">Block 3: Triple APF Comb</a>
   <a href="block-4-distortion.html">Block 4: Distortion</a>
+  <a href="block-VCA.html">Block VCA: Pre-LP1 VCA</a>
   <a href="block-5-lp1.html">Block 5: LP Filter 1</a>
   <a href="block-6-lp2.html">Block 6: LP Filter 2</a>
   <a href="block-7-hp.html">Block 7: HP Filter</a>
@@ -45,8 +46,9 @@
 <h2>Description</h2>
 <p>
   POGO is a complex stereo Eurorack filter module. It processes stereo audio through a carefully ordered signal
-  chain combining a formant-style all-pass comb filter, three distortion modes, two independent lowpass stages,
-  and a highpass stage — all with an extensive per-destination modulation system rooted in an on-board envelope follower.
+  chain combining a formant-style all-pass comb filter, three distortion modes, a pre-filter VCA, two independent
+  lowpass stages, and a highpass stage — all with an extensive per-destination modulation system rooted in an
+  on-board envelope follower.
 </p>
 
 <h2>Signal Chain (Block Diagram)</h2>
@@ -64,7 +66,7 @@ Stereo Input (L + R)   ±5 V audio
   ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │ Block 1: Pre-Gain Boost                                         │
-│ 2PDT toggle: OFF = unity (1×) | ON = boost (5×, ~14 dB)        │
+│ 2PDT horizontal toggle: OFF = unity (1×) | ON = boost (5×)     │
 │ In: ±5 V   Out: ±5 V (unity) or ±10.5 V clipped (boost)       │
 └─────────────────────────────────────────────────────────────────┘
   │
@@ -73,7 +75,7 @@ Stereo Input (L + R)   ±5 V audio
 │ Block 2: Envelope Follower                                      │
 │ Full-wave rectifier → peak detector → ×2 scaling amp           │
 │ Two independent followers: ENV OUT L, ENV OUT R (0–10 V)       │
-│ MOD SOURCE SEL: L / R / L+R  →  Mod Bus default source         │
+│ MOD SOURCE SEL: L / max(L,R) / avg(L,R)  → Mod Bus default    │
 └─────────────────────────────────────────────────────────────────┘
   │                        │
   ▼                        ▼ (0–10 V to Mod Bus)
@@ -82,8 +84,8 @@ Stereo Input (L + R)   ±5 V audio
 │ 18 OTA all-pass stages per stereo channel (3 groups of 6)       │
 │ Group 1: 100 Hz–1 kHz  │  Group 2: 500 Hz–5 kHz               │
 │ Group 3: 2 kHz–20 kHz                                          │
-│ Params: FREQ 1/2/3, SPREAD, FREQ OFFSET, STEREO WIDTH          │
-│ FEEDBACK 1/2/3 (independent), SOURCE, POLARITY, DRY/WET        │
+│ Params: FREQ 1/2/3, SPREAD, MASTER OFFSET, STEREO WIDTH        │
+│ FB 1/2/3 (independent), FB DIST BLEND, POLARITY, COMB BYPASS   │
 │ In: ±5 V  Out: ±5 V (unity gain, with headroom to ±10 V)       │
 └─────────────────────────────────────────────────────────────────┘
   │ (Group 1 out L/R)   │ (Group 2 out L/R)   │ (Group 3 out L/R)
@@ -94,8 +96,17 @@ Stereo Input (L + R)   ±5 V audio
 │ Chain 2 (Group 2) ─ MODE 2 switch             + DRIVE 2 knob   │
 │ Chain 3 (Group 3) ─ MODE 3 switch             + DRIVE 3 knob   │
 │ Summed (0.5× per chain) → single stereo output                 │
-│ Post-dist taps feed back to each group's APF feedback path      │
-│ In: ±5 V × 3  Out: ±10 V summed (0.5× gain keeps to ±7.5 V)   │
+│ Post-dist taps feed back to each group's FB DIST BLEND circuit  │
+│ In: ±5 V × 3  Out: ±7.5 V worst case summed                    │
+└─────────────────────────────────────────────────────────────────┘
+  │
+  ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ Block VCA: Pre-LP1 Voltage-Controlled Amplifier                 │
+│ V2164 quad VCA, cells 3+4 (cells 1+2 shared with LP1 Q)        │
+│ AMT attenuverter (−1× to +1×) + CV IN jack (normalizes to mod bus)│
+│ Unity gain at AMT center; accent/duck via envelope or CV        │
+│ In: ±7.5 V  Out: 0–1× attenuated → ±5 V nominal               │
 └─────────────────────────────────────────────────────────────────┘
   │
   ▼
@@ -103,6 +114,8 @@ Stereo Input (L + R)   ±5 V audio
 │ Block 5: LP Filter 1 (OTA-C SVF)                                │
 │ 2-pole lowpass, resonant, voltage-controlled                    │
 │ CUTOFF: 20 Hz–20 kHz (1V/oct)  RESONANCE: 0–self-osc          │
+│ STEREO SPREAD OFFSET: ±5 V — skews R cutoff relative to L      │
+│ LP1 output also tapped as BAND OUT (Block B)                    │
 │ In: ±5 V  Out: ±5 V (±8 V at high resonance)                   │
 └─────────────────────────────────────────────────────────────────┘
   │
@@ -110,7 +123,6 @@ Stereo Input (L + R)   ±5 V audio
 ┌─────────────────────────────────────────────────────────────────┐
 │ Block 6: LP Filter 2 (OTA-C SVF, identical topology)            │
 │ Independent CUTOFF 2 (20 Hz–20 kHz) + RESONANCE 2              │
-│ Shared PCB with LP1; shares V2164 quad VCA for Q control       │
 └─────────────────────────────────────────────────────────────────┘
   │
   ▼
@@ -125,6 +137,7 @@ Stereo Input (L + R)   ±5 V audio
 ┌─────────────────────────────────────────────────────────────────┐
 │ Block B: Output Buffers                                         │
 │ Unity-gain TL072 buffer + 1 kΩ series to each output jack      │
+│ 4 jacks: LP1 L / LP1 R (BAND OUT) + LEFT / RIGHT (main out)   │
 └─────────────────────────────────────────────────────────────────┘
   │
   ▼
@@ -151,11 +164,12 @@ MODULATION SYSTEM (parallel, feeds all blocks above)
   │                                                  parameter CV summing node
   │
   Destinations (19 total):
-    Pre-Gain Level
+    VCA Level (Block VCA)
+    APF Master Offset
     APF Freq 1 / Freq 2 / Freq 3
-    APF Feedback 1 / Feedback 2 / Feedback 3
-    APF Blend
-    APF Dry/Wet
+    APF FB 1 / FB 2 / FB 3
+    APF FB Dist Blend
+    APF Comb Bypass
     Distortion Drive 1 / Drive 2 / Drive 3
     LP1 Cutoff / LP1 Resonance
     LP2 Cutoff / LP2 Resonance
@@ -171,20 +185,22 @@ MODULATION SYSTEM (parallel, feeds all blocks above)
       <th>Phase 1: Audio Spec</th>
       <th>Phase 2: Analog Model</th>
       <th>Phase 3: Circuit Design</th>
-      <th>Phase 4: Code</th>
+      <th>Phase 4: Panel</th>
+      <th>Phase 6: Code</th>
     </tr>
   </thead>
   <tbody>
-    <tr><td><a href="mod-architecture.html">Mod Architecture</a></td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-pending">[ ]</td></tr>
-    <tr><td><a href="block-A-input-buffer.html">Block A: Input Buffer</a></td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-pending">[ ]</td></tr>
-    <tr><td><a href="block-1-pregain.html">Block 1: Pre-Gain</a></td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-pending">[ ]</td></tr>
-    <tr><td><a href="block-2-envelope-follower.html">Block 2: Envelope Follower</a></td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-pending">[ ]</td></tr>
-    <tr><td><a href="block-3-apcf.html">Block 3: Triple APF Comb</a></td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-pending">[ ]</td></tr>
-    <tr><td><a href="block-4-distortion.html">Block 4: Distortion</a></td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-pending">[ ]</td></tr>
-    <tr><td><a href="block-5-lp1.html">Block 5: LP Filter 1</a></td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-pending">[ ]</td></tr>
-    <tr><td><a href="block-6-lp2.html">Block 6: LP Filter 2</a></td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-pending">[ ]</td></tr>
-    <tr><td><a href="block-7-hp.html">Block 7: HP Filter</a></td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-pending">[ ]</td></tr>
-    <tr><td><a href="block-B-output-buffer.html">Block B: Output Buffer</a></td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-pending">[ ]</td></tr>
+    <tr><td><a href="mod-architecture.html">Mod Architecture</a></td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-pending">[ ]</td><td class="status-pending">[ ]</td></tr>
+    <tr><td><a href="block-A-input-buffer.html">Block A: Input Buffer</a></td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-pending">[ ]</td><td class="status-pending">[ ]</td></tr>
+    <tr><td><a href="block-1-pregain.html">Block 1: Pre-Gain</a></td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-pending">[ ]</td><td class="status-pending">[ ]</td></tr>
+    <tr><td><a href="block-2-envelope-follower.html">Block 2: Envelope Follower</a></td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-pending">[ ]</td><td class="status-pending">[ ]</td></tr>
+    <tr><td><a href="block-3-apcf.html">Block 3: Triple APF Comb</a></td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-pending">[ ]</td><td class="status-pending">[ ]</td></tr>
+    <tr><td><a href="block-4-distortion.html">Block 4: Distortion</a></td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-pending">[ ]</td><td class="status-pending">[ ]</td></tr>
+    <tr><td><a href="block-VCA.html">Block VCA: Pre-LP1 VCA</a></td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-pending">[ ]</td><td class="status-pending">[ ]</td></tr>
+    <tr><td><a href="block-5-lp1.html">Block 5: LP Filter 1</a></td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-pending">[ ]</td><td class="status-pending">[ ]</td></tr>
+    <tr><td><a href="block-6-lp2.html">Block 6: LP Filter 2</a></td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-pending">[ ]</td><td class="status-pending">[ ]</td></tr>
+    <tr><td><a href="block-7-hp.html">Block 7: HP Filter</a></td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-pending">[ ]</td><td class="status-pending">[ ]</td></tr>
+    <tr><td><a href="block-B-output-buffer.html">Block B: Output Buffer</a></td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-ok">✅</td><td class="status-pending">[ ]</td><td class="status-pending">[ ]</td></tr>
   </tbody>
 </table>
 
@@ -199,13 +215,14 @@ MODULATION SYSTEM (parallel, feeds all blocks above)
     <tr><td>Block 2: Envelope Follower</td><td>10 mA</td><td>10 mA</td></tr>
     <tr><td>Block 3: Triple APF Comb</td><td>55 mA</td><td>55 mA</td></tr>
     <tr><td>Block 4: Distortion</td><td>25 mA</td><td>25 mA</td></tr>
+    <tr><td>Block VCA: Pre-LP1 VCA</td><td>2 mA</td><td>2 mA</td></tr>
     <tr><td>Block 5: LP Filter 1</td><td>15 mA</td><td>15 mA</td></tr>
     <tr><td>Block 6: LP Filter 2</td><td>15 mA</td><td>15 mA</td></tr>
     <tr><td>Block 7: HP Filter</td><td>10 mA</td><td>10 mA</td></tr>
     <tr><td>Mod Bus Processor</td><td>10 mA</td><td>10 mA</td></tr>
-    <tr><td>Per-destination mod circuits (×19)</td><td>30 mA</td><td>30 mA</td></tr>
-    <tr><td>Block B: Output Buffers</td><td>5 mA</td><td>5 mA</td></tr>
-    <tr><td><strong>Total estimate</strong></td><td><strong>~185 mA</strong></td><td><strong>~185 mA</strong></td></tr>
+    <tr><td>Per-destination mod circuits (×19)</td><td>32 mA</td><td>32 mA</td></tr>
+    <tr><td>Block B: Output Buffers</td><td>4 mA</td><td>4 mA</td></tr>
+    <tr><td><strong>Total estimate</strong></td><td><strong>~188 mA</strong></td><td><strong>~188 mA</strong></td></tr>
   </tbody>
 </table>
 
@@ -220,7 +237,7 @@ MODULATION SYSTEM (parallel, feeds all blocks above)
   <tbody>
     <tr><td>Panel height</td><td>3U = 128.5 mm usable</td></tr>
     <tr><td>1 HP</td><td>5.08 mm</td></tr>
-    <tr><td>Estimated width</td><td>28–40 HP (finalized during panel layout)</td></tr>
+    <tr><td>Panel width</td><td>40 HP (203.20 mm) — finalized</td></tr>
     <tr><td>Power connector</td><td>16-pin IDC, Doepfer A-100 compatible; red stripe = pin 1 = −12 V</td></tr>
     <tr><td>Audio signal level</td><td>±5 V (10 Vpp)</td></tr>
     <tr><td>Unipolar CV range</td><td>0–10 V</td></tr>
@@ -230,8 +247,8 @@ MODULATION SYSTEM (parallel, feeds all blocks above)
 </table>
 
 <h2>Next Steps</h2>
-<p>All blocks are complete through Phase 3. Phase 4 (VCV Rack plugin code) can begin starting with Block A.
-Work in signal-chain order: A → 1 → 2 → mod architecture → 3 → 4 → 5 → 6 → 7 → B.</p>
+<p>All blocks are complete through Phase 3. Phase 4 (Panel Design) is in progress — panel SVG is complete
+at <code>specs/panel-design/panel.svg</code>. Phase 5 (Board Layout) and Phase 6 (VCV Rack code) follow.</p>
 
 </body>
 </html>

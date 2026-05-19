@@ -33,6 +33,7 @@
   <a href="block-2-envelope-follower.html">Block 2</a>
   <a href="block-3-apcf.html" class="current">Block 3</a>
   <a href="block-4-distortion.html">Block 4</a>
+  <a href="block-VCA.html">Block VCA</a>
   <a href="block-5-lp1.html">Block 5</a>
   <a href="block-6-lp2.html">Block 6</a>
   <a href="block-7-hp.html">Block 7</a>
@@ -45,7 +46,8 @@
 
 <div class="warn">
   ⚠️ Most complex and component-dense block in the module. Plan for 2–3 PCBs.
-  18× LM13700 + 18× TL072 + 5× TL074 + 3× THAT340 + 1× V2164 + 1× CD4053.
+  18× LM13700 + 18× TL072 + 5× TL074 + 3× THAT340 + 1× V2164.
+  SOURCE switch removed — replaced by FB DIST BLEND continuous crossfade knob.
 </div>
 
 <h2>1. Block Diagram</h2>
@@ -77,10 +79,10 @@ Audio L+R from Block 2 (±5 V)
   │                                                       │   │   │  │
   │                                                       ▼   ▼   ▼  │
   │                                              ┌─────────────────┐ │
-  │                                              │ V2164 DRY/WET   │ │
-  │                                              │ crossfader      │ │
-  │                                              │ (2 cells: L dry │ │
-  │                                              │  + L wet)       │ │
+  │                                              │ V2164 COMB      │ │
+  │                                              │ BYPASS VCA      │ │
+  │                                              │ (2 cells L,     │ │
+  │                                              │  2 cells R)     │ │
   │                                              └─────────────────┘ │
   │                                                       │           │
   └──────────────────────────────────────────────────────┘           │
@@ -88,32 +90,31 @@ Audio L+R from Block 2 (±5 V)
   R channel (mirrored; STEREO WIDTH adds offset to R expo inputs)    │
   └──────────────────────────────────────────────────────────────────┘
 
-Feedback path (per group, 3 stages):
-  ┌─[Stage 1: SOURCE selection]───────────────────────────────────┐
-  │  CD4053 mux:                                                  │
-  │  Internal:   V_apf_out only                                   │
-  │  Blend:      V_apf_out × (1-BLEND) + V_post_dist × BLEND     │
-  │  Post-Dist:  V_post_dist only (tap from Block 4 chain output) │
-  └────────────────────────────────────────────────────────────────┘
+Feedback path (per group, shared global stages → per-group amount):
+  ┌─[Stage 1: FB DIST BLEND — continuous crossfade (global, shared)]──────┐
+  │  Continuous pot crossfade + op-amp buffer:                             │
+  │  FB_DIST_BLEND=0:   V_fb_source = V_apf_out (clean APF feedback)      │
+  │  FB_DIST_BLEND=0.5: equal blend of APF output and post-dist signal    │
+  │  FB_DIST_BLEND=1:   V_fb_source = V_post_dist (post-dist feedback)    │
+  └────────────────────────────────────────────────────────────────────────┘
        │
-  ┌─[Stage 2: POLARITY selection]──────────────────────────────────┐
-  │  3-position panel switch:                                      │
-  │  Positive → +V_fb_source (deepens notches)                    │
-  │  Off      → GND (cuts all feedback)                           │
-  │  Negative → −V_fb_source (turns notches into peaks)           │
-  └────────────────────────────────────────────────────────────────┘
+  ┌─[Stage 2: POLARITY selection (global, shared via panel switch)]────────┐
+  │  3-position panel switch:                                               │
+  │  Positive → +V_fb_source (deepens notches)                             │
+  │  Off      → GND (cuts all feedback regardless of FB knobs)             │
+  │  Negative → −V_fb_source (turns notches into peaks)                    │
+  └────────────────────────────────────────────────────────────────────────┘
        │
-  ┌─[Stage 3: FEEDBACK amount × 3 (independent per group)]─────────┐
-  │  Each group: FEEDBACK knob + CV attenuverter                   │
-  │  g ∈ [0, 0.95] — end-stop resistor prevents g = 1             │
-  └────────────────────────────────────────────────────────────────┘
+  ┌─[Stage 3: FB amount × 3 (independent per group)]───────────────────────┐
+  │  Each group: FB knob + CV attenuverter                                  │
+  │  g ∈ [0, 0.95] — end-stop resistor prevents g = 1                      │
+  └────────────────────────────────────────────────────────────────────────┘
 
 Controls:
   FREQ 1/2/3 (knobs + CV, 1V/oct)     SPREAD (knob)
-  FREQ OFFSET (knob)                   STEREO WIDTH (knob)
-  FEEDBACK 1/2/3 (knobs + CV)         BLEND (knob + CV)
-  SOURCE (3-pos switch, global)        POLARITY (3-pos switch, global)
-  DRY/WET (knob + CV)
+  MASTER OFFSET (knob + CV)            STEREO WIDTH (knob)
+  FB 1/2/3 (knobs + CV)               FB DIST BLEND (knob + CV)
+  POLARITY (3-pos switch, global)      COMB BYPASS (knob + CV)
 </pre>
 
 <h2>2. Schematic</h2>
@@ -141,19 +142,20 @@ STEREO WIDTH offset:
   WIDTH_V → added to R channel expo inputs only (not L)
   Small summing op-amp before each R group expo converter
 
-Feedback (per group):
-  V_apf_out ──[R_a]──┬──(−in) BLEND_AMP ──(out)── V_fb_source
-  V_post_dist ─[R_b]──┘   (CD4053 routes inputs per SOURCE switch)
+Feedback path (global crossfade → global polarity → per-group amount):
+  V_apf_out ──[R_a (FB DIST BLEND pot CW end)]──┬──(−in) BLEND_AMP ──(out)── V_fb_source
+  V_post_dist ─[R_b (FB DIST BLEND pot CCW end)]──┘
+  Complementary gains: R_a + R_b = const; pot wiper drives ratio
 
   V_fb_source → POLARITY switch → V_fb_polar
   V_fb_polar ──[R_fb_fixed]──(−in) FB_SUM_AMP ──(out)── V_fb_sum
-  FEEDBACK knob wiper + CV ──[R_fb_cv]──(−in) FB_SUM_AMP
+  FB knob wiper + CV ──[R_fb_cv]──(−in) FB_SUM_AMP
   End-stop resistor ensures g ≤ 0.95 at knob maximum
 
-DRY/WET Crossfader (V2164, 4 cells):
-  V2164 cell 1: L dry   V2164 cell 2: L wet
-  V2164 cell 3: R dry   V2164 cell 4: R wet
-  Complementary control voltages from DRY/WET knob + CV
+COMB BYPASS VCA (V2164, 4 cells):
+  V2164 cell 1: L comb bypass-level   V2164 cell 2: L comb level
+  V2164 cell 3: R comb bypass-level   V2164 cell 4: R comb level
+  Complementary control voltages from COMB BYPASS knob + CV
 </pre>
 
 <h2>3. Parts List</h2>
@@ -165,22 +167,20 @@ DRY/WET Crossfader (V2164, 4 cells):
     <tr><td>OTA_x</td><td>LM13700M</td><td>SOIC-16</td><td>18</td><td>Dual OTA; 1 per 2 APF stages; 9 per channel</td></tr>
     <tr><td>APF_AMP_x</td><td>TL072CDT</td><td>SOIC-8</td><td>18</td><td>Dual op-amp; 1 per 2 APF stages; 9 per channel</td></tr>
     <tr><td>EXPO_x</td><td>THAT340 or LM394</td><td>SOIC-8</td><td>3</td><td>Matched NPN pair; 1 per group (shared L+R)</td></tr>
-    <tr><td>VCA_DW</td><td>V2164D</td><td>SOIC-16</td><td>1</td><td>Quad VCA; 4 cells for DRY/WET (L dry, L wet, R dry, R wet)</td></tr>
-    <tr><td>SW_SRC</td><td>CD4053</td><td>SOIC-16</td><td>1</td><td>Triple 2:1 mux for SOURCE selection (global)</td></tr>
+    <tr><td>VCA_CB</td><td>V2164D</td><td>SOIC-16</td><td>1</td><td>Quad VCA; 4 cells for COMB BYPASS (L bypass, L comb, R bypass, R comb)</td></tr>
     <tr><td>FB_AMP_x</td><td>TL074CDT</td><td>SOIC-14</td><td>3</td><td>Per-group feedback summing amp + BLEND_AMP + POL_INV</td></tr>
     <tr><td>MIX_AMP_x</td><td>TL074CDT</td><td>SOIC-14</td><td>2</td><td>Summing, width offset, general mixing ops</td></tr>
     <tr><td>C_apf_G1</td><td>C0G/NP0</td><td>0603</td><td>12</td><td>1.5 nF (6 per channel × 2 channels) — Group 1</td></tr>
     <tr><td>C_apf_G2</td><td>C0G/NP0</td><td>0603</td><td>12</td><td>300 pF — Group 2</td></tr>
     <tr><td>C_apf_G3</td><td>C0G/NP0</td><td>0603</td><td>12</td><td>68–82 pF — Group 3</td></tr>
     <tr><td>SW_POL</td><td>3-pos panel switch</td><td>Panel</td><td>1</td><td>POLARITY: Positive / Off / Negative</td></tr>
-    <tr><td>SW_SRC_MAN</td><td>3-pos panel switch</td><td>Panel</td><td>1</td><td>SOURCE: Internal / Blend / Post-Dist</td></tr>
-    <tr><td>RV_FREQ_1/2/3</td><td>Log-taper pot</td><td>9mm</td><td>3</td><td>FREQ center frequency per group</td></tr>
+    <tr><td>RV_FREQ_1/2/3</td><td>Log-taper pot</td><td>9mm</td><td>3</td><td>FREQ center frequency per group (XL knob, r=9)</td></tr>
     <tr><td>RV_SPREAD</td><td>Lin pot</td><td>9mm</td><td>1</td><td>Spread between groups</td></tr>
-    <tr><td>RV_OFFSET</td><td>Lin pot</td><td>9mm</td><td>1</td><td>Global FREQ OFFSET (master sweep)</td></tr>
-    <tr><td>RV_FB_1/2/3</td><td>Lin pot</td><td>9mm</td><td>3</td><td>FEEDBACK per group</td></tr>
-    <tr><td>RV_BLEND</td><td>Lin pot</td><td>9mm</td><td>1</td><td>BLEND ratio (active when SOURCE = Blend)</td></tr>
+    <tr><td>RV_MASTER_OFFSET</td><td>Lin pot</td><td>9mm</td><td>1</td><td>Global MASTER OFFSET (master sweep, XL knob)</td></tr>
+    <tr><td>RV_FB_1/2/3</td><td>Lin pot</td><td>9mm</td><td>3</td><td>FB per group (large knob, r=7)</td></tr>
+    <tr><td>RV_FB_DIST_BLEND</td><td>Lin pot</td><td>9mm</td><td>1</td><td>FB DIST BLEND: 0% = clean APF fb, 100% = post-dist fb</td></tr>
     <tr><td>RV_WIDTH</td><td>Lin pot</td><td>9mm</td><td>1</td><td>STEREO WIDTH (R channel freq offset)</td></tr>
-    <tr><td>RV_DW</td><td>Lin pot</td><td>9mm</td><td>1</td><td>DRY/WET crossfade</td></tr>
+    <tr><td>RV_COMB_BYPASS</td><td>Lin pot</td><td>9mm</td><td>1</td><td>COMB BYPASS (pre-comb VCA level)</td></tr>
   </tbody>
 </table>
 
@@ -198,6 +198,15 @@ DRY/WET Crossfader (V2164, 4 cells):
   <li><strong>Group 2</strong>: Mid formant (~500 Hz – 5 kHz)</li>
   <li><strong>Group 3</strong>: High formant (~2 kHz – 20 kHz)</li>
 </ul>
+<p>
+  <strong>FB DIST BLEND</strong>: replaces the former 3-position SOURCE switch (Internal / Blend / Post-Dist).
+  The continuous knob smoothly crossfades the feedback source from clean APF output (0%) to post-distortion
+  signal (100%). All intermediate values are musically useful.
+</p>
+<p>
+  <strong>COMB BYPASS</strong>: replaces the former DRY/WET mix control. Controls the pre-comb VCA level
+  — at 0%, the signal bypasses the comb chain entirely; at 100%, full comb processing is applied.
+</p>
 
 <h3>Phase 2 — Transfer Functions</h3>
 <pre>
@@ -210,7 +219,7 @@ Six cascaded stages (one group):
   H_6(s) = [(s − ω₀) / (s + ω₀)]^6
   Phase: φ_6(ω) = 6 × [π − 2 arctan(ω / ω₀)]
 
-Notch frequencies (at 50% DRY/WET):
+Notch frequencies:
   ω_notch_n = ω₀ × tan((5 − 2n)π / 12)   for n = 0, 1, 2  → 3 notch pairs per group
 
 OTA voltage control:
@@ -224,6 +233,7 @@ Capacitor values:
   Group 3 (2 kHz–20 kHz):  C_apf = 68–82 pF
 
 Feedback transfer function (g = feedback gain, 0 ≤ g &lt; 1):
+  V_fb_source = (1 − FB_DIST_BLEND) × V_apf_out + FB_DIST_BLEND × V_post_dist
   V_out = H_6(s) × V_in / (1 − g × POLARITY × H_6(s))
   At g → 0.95: resonance approaching self-oscillation at notch frequencies
 </pre>
@@ -232,7 +242,7 @@ Feedback transfer function (g = feedback gain, 0 ≤ g &lt; 1):
 <ul>
   <li><strong>Expo converter matching</strong>: THAT340 or LM394 matched pair required for stable 1V/oct tracking across temperature. A single general-purpose transistor will drift. Calibrate at room temperature; verify at temperature extremes.</li>
   <li><strong>HF oscillation risk</strong>: at high I_abc (high frequency), OTA stages can self-oscillate due to parasitic capacitance. Add 22 pF capacitors at each OTA output node and keep traces short.</li>
-  <li><strong>CD4053 series resistance</strong>: ~100 Ω at ±5 V supply. Buffer SW_SRC output with a unity-gain op-amp before the per-group feedback amp stages.</li>
+  <li><strong>FB DIST BLEND circuit</strong>: continuous complementary resistive crossfade + op-amp buffer. No CD4053 needed. Buffer the BLEND_AMP output before the per-group feedback summing amps to isolate the crossfade pot loading from downstream.</li>
   <li><strong>POLARITY Off position</strong>: must connect cleanly to GND — a leaky switch contact causes audible bleed-through. Use a low-leakage panel switch or add a bleeder resistor to GND at the switch output.</li>
   <li><strong>V_post_dist routing</strong>: distortion output (Block 4) must be routed to APF feedback without picking up noise. Use shielded wire or dedicated PCB trace with guard ring; keep away from OTA signal nodes.</li>
   <li><strong>Crosstalk L/R</strong>: route L and R ground planes separately; do not route L signal adjacent to R signal on PCB.</li>
@@ -246,7 +256,7 @@ Feedback transfer function (g = feedback gain, 0 ≤ g &lt; 1):
     <tr><td>RV_1VOCT_G1</td><td>±20%</td><td>Group 1 expo 1V/oct calibration</td><td>Sweep FREQ 1 CV by 1V; verify exact octave change in notch frequency</td></tr>
     <tr><td>RV_1VOCT_G2</td><td>±20%</td><td>Group 2 expo 1V/oct calibration</td><td>Same procedure as G1</td></tr>
     <tr><td>RV_1VOCT_G3</td><td>±20%</td><td>Group 3 expo 1V/oct calibration</td><td>Same procedure as G1</td></tr>
-    <tr><td>RV_FB_MAX_1</td><td>0.90–0.99</td><td>Max feedback limit, Group 1</td><td>Set so oscillation onset is just barely reachable at FEEDBACK max</td></tr>
+    <tr><td>RV_FB_MAX_1</td><td>0.90–0.99</td><td>Max feedback limit, Group 1</td><td>Set so oscillation onset is just barely reachable at FB max</td></tr>
     <tr><td>RV_FB_MAX_2</td><td>0.90–0.99</td><td>Max feedback limit, Group 2</td><td>Same</td></tr>
     <tr><td>RV_FB_MAX_3</td><td>0.90–0.99</td><td>Max feedback limit, Group 3</td><td>Same</td></tr>
   </tbody>

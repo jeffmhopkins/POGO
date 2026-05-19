@@ -32,6 +32,7 @@
   <a href="block-2-envelope-follower.html">Block 2</a>
   <a href="block-3-apcf.html">Block 3</a>
   <a href="block-4-distortion.html">Block 4</a>
+  <a href="block-VCA.html">Block VCA</a>
   <a href="block-5-lp1.html" class="current">Block 5</a>
   <a href="block-6-lp2.html">Block 6</a>
   <a href="block-7-hp.html">Block 7</a>
@@ -44,15 +45,15 @@
 
 <h2>1. Block Diagram</h2>
 <pre>
-Distortion sum output (±5 V from Block 4)
+Block VCA output (±5 V from pre-LP1 VCA)
   │
-  ▼ (L channel — R channel is identical)
+  ▼ (L channel — R channel is identical except for STEREO SPREAD OFFSET on R expo)
   │
 V_in ──[R_in 100kΩ]──(−in) SUM_AMP (TL074 half) ──(out)── V_HP
                          (+in)=GND                     │
                                                         ▼
                                             [OTA1: LM13700 cell]
-                                              I_abc from EXPO
+                                              I_abc from EXPO (shared L+R)
                                               g_m = I_abc / 2V_T
                                                         │
                                                        C1 (47 nF, C0G)
@@ -65,25 +66,32 @@ V_in ──[R_in 100kΩ]──(−in) SUM_AMP (TL074 half) ──(out)── V_H
                                                        C2 (47 nF, C0G)
                                                         │
                                                     V_LP (lowpass) ──► to LP2 (Block 6)
-                                                        │
+                                                        │             ──► BAND OUT tap (Block B)
 V_LP ──────────────────────────────────────────────(−in) SUM_AMP (feedback)
 V_BP ──[V2164 VCA cell, gain=1/Q]──────────────────(−in) SUM_AMP (resonance feedback)
 
 Expo Converter (THAT340, shared L+R):
-  V_ctrl = CUTOFF knob + CUTOFF CV (attenuverter) → THAT340 matched NPN pair
+  V_ctrl_L = CUTOFF knob + CUTOFF CV (attenuverter) → THAT340 matched NPN pair
+  V_ctrl_R = CUTOFF knob + CUTOFF CV + V_spread (STEREO SPREAD OFFSET)
   I_abc = I_ref × e^(V_ctrl / V_T)
   +1V on V_ctrl → I_abc × 2 → ω₀ × 2 → 1 octave up
 
-RESONANCE knob → V2164 control voltage → sets 1/Q (feedback depth)
-  RESONANCE = 0: V2164 gain = min → Q ≈ 0.5 (wide/flat)
-  RESONANCE = max: V2164 gain = max → Q → ∞ (self-oscillation)
+STEREO SPREAD OFFSET (R channel only):
+  Bipolar pot → V_spread → summing node on R channel expo converter input
+  V_spread = 0 V: both channels identical (center detent)
+  V_spread > 0 V: R cutoff shifts up relative to L
+  V_spread &lt; 0 V: R cutoff shifts down relative to L
+  Trim pot RV_LP1_SPREAD_NULL nulls center detent to 0 V
 
-Auxiliary outputs (optional panel jacks):
-  V_BP → BP OUT jack
-  V_HP → HP OUT jack (= SUM_AMP output before LP1 tap)
+RESONANCE knob → V2164 control voltage → sets 1/Q (feedback depth)
+  V2164 cells 1+2 for LP1 Q (cells 3+4 shared with Block VCA signal path)
+  RESONANCE = 0: Q ≈ 0.5 (wide/flat)
+  RESONANCE = max: Q → ∞ (self-oscillation)
+
+BAND OUT tap: taken at LP1 V_LP output (before LP2 input) → to Block B BAND OUT buffers
 
 Signal levels:
-  In:  ±5 V audio (±10 V at max distortion drive)
+  In:  ±5 V audio (from Block VCA)
   LP out: ±5 V (±8 V at high resonance peak)
   f_ref at V_ctrl=0V: 630 Hz
   Sweep range (±5V CV): 20 Hz (−5V) to ~20 kHz (+5V)
@@ -113,21 +121,27 @@ C1_L = 47 nF (C0G/NP0, 0603)  between OTA1 out and GND → V_BP_L
 C2_L = 47 nF (C0G/NP0, 0603)  between OTA2 out and GND → V_LP_L
 
 V_BP_L ──[V2164 cell 1 (Q control)]──► V_BP_fb  → back to SUM_AMP (−in)
-  V2164 control: RESONANCE knob → control voltage → cell gain sets 1/Q
-  Higher resonance knob = more V2164 gain = more feedback = higher Q
+  V2164 cell allocation:
+    Cell 1: LP1 L Q control (this block)
+    Cell 2: LP1 R Q control (this block)
+    Cell 3: Block VCA L signal path (Block VCA shares this IC)
+    Cell 4: Block VCA R signal path (Block VCA shares this IC)
 
 Expo Converter (LP1_EXPO, THAT340, SOIC-8):
-  V_ctrl = CUTOFF knob wiper + CV attenuverter sum
+  L channel input: V_ctrl_L = CUTOFF knob + CV attenuverter sum
+  R channel input: V_ctrl_R = V_ctrl_L + V_spread   [extra summing node]
+    V_spread from STEREO SPREAD OFFSET bipolar pot
+      CW end → +5V ref; CCW end → −5V ref; wiper → summing amp input
+    RV_LP1_SPREAD_NULL: trim to zero V_spread at center detent
   THAT340 T1 base = V_ctrl; T2 base = trim ref (RV_LP1_REF)
   I_abc = I_ref × e^((V_ctrl − V_ref) / V_T)
   RV_LP1_REF: sets f_ref (target: 630 Hz at V_ctrl = 0V)
-  RV_LP1_1VOCT: adjusts expo pair temperature compensation for accurate 1V/oct
+  RV_LP1_1VOCT: adjusts expo temperature compensation for accurate 1V/oct
 
 Output buffer (LP1_SUM_L half B or C):
-  V_LP_L → unity-gain buffer → LP1 LP OUT (to Block 6)
+  V_LP_L → unity-gain buffer → LP1 LP OUT → Block 6 (LP2) + BAND OUT tap
 
-(R channel: LP1_OTA_R, LP1_SUM_R — identical structure)
-(V2164 quad: cells 1+2 for LP1 L+R Q; cells 3+4 for LP2 L+R Q — shared IC)
+(R channel: LP1_OTA_R, LP1_SUM_R — identical structure + V_spread on expo input)
 </pre>
 
 <h2>3. Parts List</h2>
@@ -140,16 +154,18 @@ Output buffer (LP1_SUM_L half B or C):
     <tr><td>LP1_OTA_R</td><td>LM13700M</td><td>SOIC-16</td><td>1</td><td>Dual OTA; 2 integrators for R channel</td></tr>
     <tr><td>LP1_SUM_L</td><td>TL074CDT</td><td>SOIC-14</td><td>1</td><td>SVF summing amp + LP/BP/HP buffers for L channel</td></tr>
     <tr><td>LP1_SUM_R</td><td>TL074CDT</td><td>SOIC-14</td><td>1</td><td>Same for R channel</td></tr>
-    <tr><td>LP1_VCA</td><td>V2164D</td><td>SOIC-16</td><td>1</td><td>Quad VCA; cells 1+2 for LP1 L+R Q; cells 3+4 shared with LP2</td></tr>
+    <tr><td>LP1_VCA</td><td>V2164D</td><td>SOIC-16</td><td>1</td><td>Quad VCA; cells 1+2 for LP1 L+R Q; cells 3+4 shared with Block VCA signal path</td></tr>
     <tr><td>LP1_EXPO</td><td>THAT340 or LM394</td><td>SOIC-8</td><td>1</td><td>Matched NPN pair for expo converter (L+R share one)</td></tr>
     <tr><td>C1_L, C2_L</td><td>C0G/NP0 cap</td><td>0603</td><td>2</td><td>47 nF integrator caps, L channel</td></tr>
     <tr><td>C1_R, C2_R</td><td>C0G/NP0 cap</td><td>0603</td><td>2</td><td>47 nF integrator caps, R channel</td></tr>
     <tr><td>R_in_L, R_in_R</td><td>—</td><td>0603</td><td>2</td><td>100 kΩ summing amp input resistors</td></tr>
-    <tr><td>RV_CUTOFF_1</td><td>Log-taper pot</td><td>9mm</td><td>1</td><td>CUTOFF knob; 20 Hz–20 kHz range</td></tr>
-    <tr><td>RV_RES_1</td><td>Lin pot</td><td>9mm</td><td>1</td><td>RESONANCE knob; 0 to self-oscillation</td></tr>
-    <tr><td>RV_LP1_REF</td><td>Bourns 3296W</td><td>TH multiturn</td><td>1</td><td>1V/oct reference frequency; sets f at V_ctrl=0V</td></tr>
+    <tr><td>RV_CUTOFF_1</td><td>Log-taper pot</td><td>9mm</td><td>1</td><td>CUTOFF knob; 20 Hz–20 kHz range (large, r=7)</td></tr>
+    <tr><td>RV_RES_1</td><td>Lin pot</td><td>9mm</td><td>1</td><td>RESONANCE knob; 0 to self-oscillation (medium, r=4.5)</td></tr>
+    <tr><td>RV_SPREAD_OFFSET</td><td>Bipolar pot</td><td>9mm</td><td>1</td><td>STEREO SPREAD OFFSET; CW=+5V, CCW=−5V, wiper→R expo summer (medium, r=4.5)</td></tr>
+    <tr><td>RV_LP1_REF</td><td>Bourns 3296W</td><td>TH multiturn</td><td>1</td><td>1V/oct reference frequency; sets f at V_ctrl=0V (target: 630 Hz)</td></tr>
     <tr><td>RV_LP1_1VOCT</td><td>Bourns 3296W</td><td>TH multiturn</td><td>1</td><td>Expo tracking calibration; adjusts 1V/oct accuracy</td></tr>
     <tr><td>RV_LP1_QMAX</td><td>Bourns 3296W</td><td>TH multiturn</td><td>1</td><td>Maximum Q / self-oscillation onset adjustment</td></tr>
+    <tr><td>RV_LP1_SPREAD_NULL</td><td>Bourns 3224W</td><td>SMD</td><td>1</td><td>STEREO SPREAD OFFSET center-detent null (target: 0V at center)</td></tr>
     <tr><td>C_VCC, C_VEE</td><td>—</td><td>0603</td><td>8</td><td>100 nF decoupling; 2 per IC × 4 ICs</td></tr>
   </tbody>
 </table>
@@ -158,18 +174,37 @@ Output buffer (LP1_SUM_L half B or C):
 
 <h3>Phase 1 — Sonic Intent</h3>
 <p>
-  First voltage-controlled lowpass filter stage. Post-distortion tone shaping — takes the rich harmonic content
-  from the distortion chains and sculpts it into the desired texture. At low resonance and high cutoff: transparent.
+  First voltage-controlled lowpass filter stage. Receives signal from Block VCA, which gates or accents the signal
+  before it enters this filter. Post-distortion tone shaping — takes the rich harmonic content from the distortion
+  chains and sculpts it into the desired texture. At low resonance and high cutoff: transparent.
   At high resonance and swept cutoff: classic filter sweep. At maximum resonance: self-oscillation produces a
   sine-wave tone at the cutoff frequency, tunable via 1V/oct CV.
+</p>
+<p>
+  <strong>STEREO SPREAD OFFSET</strong>: bipolar knob that skews the R channel cutoff relative to L. At center
+  (0V): both channels identical. Positive: R cutoff rises above L, creating a brighter right channel.
+  Negative: R cutoff falls below L. This creates a static stereo width from a single CUTOFF setting, and
+  interacts musically with modulation on the shared CUTOFF CV.
+</p>
+<p>
+  LP1's output is also available as BAND OUT (Block B) — the signal tapped here is post-LP1 but pre-LP2,
+  capturing the first lowpass stage's character before the second LP stage further shapes it.
 </p>
 
 <h3>Phase 2 — Transfer Function</h3>
 <pre>
 H_LP(s) = ω₀² / (s² + (ω₀/Q) × s + ω₀²)
 
-ω₀ = g_m / C = (I_abc / 2V_T) / C
+ω₀_L = g_m / C = (I_abc / 2V_T) / C     (L channel)
+ω₀_R = g_m_R / C                          (R channel, with V_spread offset)
+
 1V/oct: V_ctrl +1V → I_abc ×2 → ω₀ ×2 → f ×2
+
+STEREO SPREAD OFFSET:
+  ω₀_R = ω_ref × 2^((V_ctrl + V_spread) / 1V)
+  V_spread = 0 V → ω₀_R = ω₀_L (center detent)
+  V_spread = +1 V → R cutoff 1 octave above L
+  V_spread = −1 V → R cutoff 1 octave below L
 
 f_ref = 630 Hz at V_ctrl = 0V
 Sweep: −5V → ~20 Hz; +5V → ~20 kHz  (10 octaves, 2^10 = 1024×)
@@ -179,7 +214,7 @@ Component derivation:
   g_m = 10µA / (2 × 26mV) = 192 µS
   C = g_m / ω₀_ref = 192µS / (2π × 630) = 48.5 nF → use 47 nF (C0G)
 
-Q control via V2164:
+Q control via V2164 (cells 1+2 for LP1):
   Q → ∞ at RESONANCE = 100% (self-oscillation)
   Practical Q ≈ 50 at RESONANCE = 95%
 </pre>
@@ -187,10 +222,11 @@ Q control via V2164:
 <h3>Phase 3 — Circuit Notes</h3>
 <ul>
   <li><strong>THAT340 expo converter</strong>: matched NPN pair required for stable 1V/oct tracking across temperature. Calibrate at room temperature; verify at 10°C and 40°C extremes.</li>
-  <li><strong>V2164 Q control law</strong>: V2164 gain is exponential in its control voltage. Wire the RESONANCE pot so Q response feels approximately linear to the user (shaping of control voltage required).</li>
+  <li><strong>STEREO SPREAD OFFSET summing node</strong>: V_spread is summed into the R channel expo converter input. The summing resistors must match to preserve 1V/oct tracking on R. Place the summing node physically close to the R expo converter input to minimize parasitic coupling.</li>
+  <li><strong>V2164 Q control law</strong>: V2164 gain is exponential in its control voltage. Wire the RESONANCE pot so Q response feels approximately linear to the user.</li>
   <li><strong>Self-oscillation amplitude</strong>: at Q → ∞, output amplitude limited by OTA/op-amp clipping. Optionally add BAT54 anti-parallel diodes across feedback resistor in SUM_AMP to soft-limit self-oscillation amplitude.</li>
-  <li><strong>V2164 shared with LP2</strong>: cells 1+2 for LP1 L+R Q; cells 3+4 for LP2 L+R Q. Verify no crosstalk between LP1/LP2 resonance controls in layout.</li>
-  <li><strong>L/R resonance matching</strong>: use adjacent V2164 cells (same die → well-matched). Cells 1+2 for LP1.</li>
+  <li><strong>V2164 shared with Block VCA</strong>: cells 1+2 for LP1 Q; cells 3+4 for Block VCA L/R signal path. LP1 and Block VCA must be on the same PCB. Verify no crosstalk between Q control voltage and VCA control voltage traces.</li>
+  <li><strong>BAND OUT tap</strong>: take the tap at the LP1 output buffer output (unity-gain follower on V_LP). This is the same node that feeds LP2 input — both can be driven from the same buffer without loading concerns given the 1 kΩ series output resistors in Block B.</li>
   <li><strong>LM13700 linearizing diodes</strong>: connect linearizing diode inputs to OTA differential inputs via 1 kΩ series resistors for low distortion at high signal levels.</li>
 </ul>
 
@@ -201,11 +237,12 @@ Q control via V2164:
     <tr><td>RV_LP1_REF</td><td>f_ref ±20%</td><td>1V/oct reference frequency</td><td>Adjust until CUTOFF at 0V CV = 630 Hz at LP1 LP output</td></tr>
     <tr><td>RV_LP1_1VOCT</td><td>1V/oct ±5%</td><td>Expo converter tracking calibration</td><td>+1V CV step; verify cutoff doubles exactly</td></tr>
     <tr><td>RV_LP1_QMAX</td><td>Q 10–50</td><td>Maximum resonance / self-oscillation onset</td><td>Turn RESONANCE to max; verify clean, stable sine output at cutoff frequency</td></tr>
+    <tr><td>RV_LP1_SPREAD_NULL</td><td>±100 mV</td><td>STEREO SPREAD OFFSET center-detent null</td><td>Set SPREAD OFFSET knob to center; trim until R cutoff = L cutoff (verify with tone at 630 Hz)</td></tr>
   </tbody>
 </table>
 
 <h3>Power</h3>
-<p>+12 V: ~15 mA &nbsp;|&nbsp; −12 V: ~15 mA &nbsp;(V2164 power counted once; shared with LP2)</p>
+<p>+12 V: ~15 mA &nbsp;|&nbsp; −12 V: ~15 mA &nbsp;(V2164 power counted once; cells 3+4 counted in Block VCA)</p>
 
 </body>
 </html>

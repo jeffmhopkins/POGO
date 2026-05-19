@@ -25,7 +25,7 @@ Mod Bus Processor:
   OFFSET knob  (±5 V)        ─────┤──► MOD BUS SIGNAL
   │
   ▼
-  ▼ (to each of 18 destinations)
+  ▼ (to each of 19 destinations)
 
 [Per Destination]:
   MOD BUS ──[100 Ω + BAT54 clamp]──► ATTENUVERTER knob (−1× to +1×) ──► CV summing node
@@ -160,30 +160,36 @@ Where +V_att and −V_att come from the override jack or mod bus attenuated via 
 
 **IC requirement**: 19 attenuverters × (1 buffer + 1 inverter) = 38 op-amp halves for full
 isolation. Use TL074 (quad, 4 halves each): 10× TL074 for all 19 attenuverter circuits.
-(Note: APF SOURCE/POLARITY and Distortion MODE have no attenuverter — switches only.)
+(Note: APF POLARITY and Distortion MODE have no attenuverter — switches only.
+SOURCE switch is removed; FB DIST BLEND is now a continuous knob with CV attenuverter.)
 
 ### Modulation Destinations
 
-| Destination | Block | CV Type | Override Jack |
-|---|---|---|---|
-| APF Master Offset | 3 | ±5 V, 1V/oct | Yes | Sums into all three FREQ CV nodes simultaneously |
-| APF Freq 1 | 3 | ±5 V, 1V/oct | Yes |
-| APF Freq 2 | 3 | ±5 V, 1V/oct | Yes |
-| APF Freq 3 | 3 | ±5 V, 1V/oct | Yes |
-| APF Feedback 1 | 3 | 0–10 V | Yes |
-| APF Feedback 2 | 3 | 0–10 V | Yes |
-| APF Feedback 3 | 3 | 0–10 V | Yes |
-| APF Blend | 3 | 0–10 V | Yes |
-| APF Dry/Wet | 3 | 0–10 V | Yes |
-| Distortion Drive 1 (Group 1) | 4 | 0–10 V | Yes |
-| Distortion Drive 2 (Group 2) | 4 | 0–10 V | Yes |
-| Distortion Drive 3 (Group 3) | 4 | 0–10 V | Yes |
-| LP1 Cutoff | 5 | ±5 V, 1V/oct | Yes |
-| LP1 Resonance | 5 | 0–10 V | Yes |
-| LP2 Cutoff | 6 | ±5 V, 1V/oct | Yes |
-| LP2 Resonance | 6 | 0–10 V | Yes |
-| HP Cutoff | 7 | ±5 V, 1V/oct | Yes |
-| HP Resonance | 7 | 0–10 V | Yes |
+SOURCE switch removed: the APF feedback crossfade is now controlled continuously by the
+FB DIST BLEND knob (replaces the 3-position SOURCE switch INT/BLD/PST). The CD4053 mux is
+replaced with a V2164-based continuous crossfade driven by FB DIST BLEND + its CV attenuverter.
+
+| Destination | Block | Panel Label | CV Type | Override Jack | Notes |
+|---|---|---|---|---|---|
+| APF Master Offset | 3 | OFFSET | ±5 V, 1V/oct | Yes | Sums into all three FREQ CV nodes simultaneously |
+| APF Freq 1 | 3 | FREQ (Comb 1) | ±5 V, 1V/oct | Yes | |
+| APF Freq 2 | 3 | FREQ (Comb 2) | ±5 V, 1V/oct | Yes | |
+| APF Freq 3 | 3 | FREQ (Comb 3) | ±5 V, 1V/oct | Yes | |
+| APF Feedback 1 | 3 | FB (Comb 1) | 0–10 V | Yes | Panel abbreviation: FB |
+| APF Feedback 2 | 3 | FB (Comb 2) | 0–10 V | Yes | |
+| APF Feedback 3 | 3 | FB (Comb 3) | 0–10 V | Yes | |
+| APF FB Dist Blend | 3 | FB DIST BLEND | 0–10 V | Yes | Continuous crossfade: 0% = clean APF fb, 100% = post-dist fb |
+| APF Comb Bypass | 3 | BYPASS | 0–10 V | Yes | Pre-comb VCA level; 0 V = comb bypassed, 10 V = full comb |
+| Distortion Drive 1 | 4 | DRIVE (Comb 1) | 0–10 V | Yes | |
+| Distortion Drive 2 | 4 | DRIVE (Comb 2) | 0–10 V | Yes | |
+| Distortion Drive 3 | 4 | DRIVE (Comb 3) | 0–10 V | Yes | |
+| VCA Level | VCA | AMT | 0–10 V | Yes | Pre-LP1 VCA; AMT attenuverter on panel |
+| LP1 Cutoff | 5 | CUT | ±5 V, 1V/oct | Yes | |
+| LP1 Resonance | 5 | RES | 0–10 V | Yes | |
+| LP2 Cutoff | 6 | CUT | ±5 V, 1V/oct | Yes | |
+| LP2 Resonance | 6 | RES | 0–10 V | Yes | |
+| HP Cutoff | 7 | CUT | ±5 V, 1V/oct | Yes | |
+| HP Resonance | 7 | RES | 0–10 V | Yes | |
 
 ### IC / Component Selection (Mod Bus Processor)
 

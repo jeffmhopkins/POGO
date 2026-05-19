@@ -31,6 +31,7 @@
   <a href="block-2-envelope-follower.html">Block 2</a>
   <a href="block-3-apcf.html">Block 3</a>
   <a href="block-4-distortion.html">Block 4</a>
+  <a href="block-VCA.html">Block VCA</a>
   <a href="block-5-lp1.html">Block 5</a>
   <a href="block-6-lp2.html">Block 6</a>
   <a href="block-7-hp.html">Block 7</a>
@@ -43,21 +44,35 @@
 
 <h2>1. Block Diagram</h2>
 <pre>
-HP Filter output L (±5 V from Block 7)    HP Filter output R (±5 V from Block 7)
+LP1 output L (±5 V from Block 5)         LP1 output R (±5 V from Block 5)
   │                                             │
   ▼                                             ▼
-TOB_A (+in)                                  TOB_B (+in)
-  (non-inverting unity buffer, H(s)=1)         (non-inverting unity buffer, H(s)=1)
-  TOB_A (−in) ◄── (out) feedback               TOB_B (−in) ◄── (out) feedback
+BAND_BUF_A (+in)                          BAND_BUF_B (+in)
+  (non-inverting unity buffer, H(s)=1)        (non-inverting unity buffer, H(s)=1)
+  (−in) ◄── (out) feedback                   (−in) ◄── (out) feedback
   │                                             │
-[R_out_L 1 kΩ 0603]                        [R_out_R 1 kΩ 0603]
+[R_out 1 kΩ]                              [R_out 1 kΩ]
   │                                             │
   ▼                                             ▼
-L OUTPUT JACK (Thonkiconn, TS)            R OUTPUT JACK (Thonkiconn, TS)
-  ±5 V audio, DC-coupled, low-impedance      ±5 V audio, DC-coupled, low-impedance
+LP1 L JACK — "BAND OUT L"              LP1 R JACK — "BAND OUT R"
+  ±5 V audio, DC-coupled                   ±5 V audio, DC-coupled
+
+HP output L (±5 V from Block 7)          HP output R (±5 V from Block 7)
+  │                                             │
+  ▼                                             ▼
+OUT_BUF_A (+in)                          OUT_BUF_B (+in)
+  (non-inverting unity buffer, H(s)=1)        (non-inverting unity buffer, H(s)=1)
+  (−in) ◄── (out) feedback                   (−in) ◄── (out) feedback
+  │                                             │
+[R_out 1 kΩ]                              [R_out 1 kΩ]
+  │                                             │
+  ▼                                             ▼
+LEFT OUTPUT JACK                          RIGHT OUTPUT JACK
+  ±5 V audio, DC-coupled                   ±5 V audio, DC-coupled
 
 Signal levels:
-  In:  ±5 V (up to ±8 V at high HP resonance peak)
+  BAND OUT in:  ±5 V (up to ±8 V at high LP1 resonance peak)
+  LEFT/RIGHT in: ±5 V (up to ±8 V at high HP resonance peak)
   Out: same levels, low-impedance (~1 kΩ series to jack)
 
 1 kΩ series output resistor:
@@ -69,7 +84,7 @@ Signal levels:
 
 <h2>2. Schematic</h2>
 <pre>
-               TOB (TL072CDT, SOIC-8)
+               TOB_BAND (TL072CDT, SOIC-8) — BAND OUT pair (LP1 tap)
                ┌────────────────────┐
                │  pin 8 = +12 V     │
                │  pin 4 = −12 V     │
@@ -77,11 +92,24 @@ Signal levels:
                │  100 nF each       │
                └────────────────────┘
 
-V_in_L (from HP) ──(+in, pin 3) TOB_A ──(out, pin 1)──[R_out_L 1kΩ 0603]──► L OUT jack
-                                (−in, pin 2)◄────────────────────────────────┘
+V_in_L (from LP1) ──(+in, pin 3) BAND_BUF_A ──(out, pin 1)──[R_out 1kΩ]──► LP1 L / BAND OUT L
+                                  (−in, pin 2)◄──────────────────────────────────────────┘
 
-V_in_R (from HP) ──(+in, pin 5) TOB_B ──(out, pin 7)──[R_out_R 1kΩ 0603]──► R OUT jack
-                                (−in, pin 6)◄────────────────────────────────┘
+V_in_R (from LP1) ──(+in, pin 5) BAND_BUF_B ──(out, pin 7)──[R_out 1kΩ]──► LP1 R / BAND OUT R
+                                  (−in, pin 6)◄──────────────────────────────────────────┘
+
+               TOB_OUT (TL072CDT, SOIC-8) — main stereo output pair (HP tap)
+               ┌────────────────────┐
+               │  pin 8 = +12 V     │
+               │  pin 4 = −12 V     │
+               │  C_VCC, C_VEE      │
+               └────────────────────┘
+
+V_in_L (from HP) ──(+in, pin 3) OUT_BUF_A ──(out, pin 1)──[R_out 1kΩ]──► LEFT OUTPUT jack
+                                 (−in, pin 2)◄────────────────────────────────────────┘
+
+V_in_R (from HP) ──(+in, pin 5) OUT_BUF_B ──(out, pin 7)──[R_out 1kΩ]──► RIGHT OUTPUT jack
+                                 (−in, pin 6)◄────────────────────────────────────────┘
 
 Jack type: Thonkiconn PJ301M-12 (or equivalent TS jack)
   Tip = audio signal
@@ -95,13 +123,15 @@ Jack type: Thonkiconn PJ301M-12 (or equivalent TS jack)
     <tr><th>Reference</th><th>Part Number</th><th>Package</th><th>Value</th><th>Qty</th><th>Notes</th></tr>
   </thead>
   <tbody>
-    <tr><td>TOB</td><td>TL072CDT</td><td>SOIC-8</td><td>—</td><td>1</td><td>Dual op-amp; TOB_A = L channel, TOB_B = R channel</td></tr>
-    <tr><td>R_out_L</td><td>—</td><td>0603</td><td>1 kΩ</td><td>1</td><td>Series output protection resistor, L channel</td></tr>
-    <tr><td>R_out_R</td><td>—</td><td>0603</td><td>1 kΩ</td><td>1</td><td>Series output protection resistor, R channel</td></tr>
-    <tr><td>C_VCC</td><td>—</td><td>0603</td><td>100 nF</td><td>1</td><td>Decoupling at TOB pin 8 (+12 V)</td></tr>
-    <tr><td>C_VEE</td><td>—</td><td>0603</td><td>100 nF</td><td>1</td><td>Decoupling at TOB pin 4 (−12 V)</td></tr>
-    <tr><td>J_L_OUT</td><td>Thonkiconn PJ301M-12</td><td>Panel TH</td><td>—</td><td>1</td><td>L audio output jack</td></tr>
-    <tr><td>J_R_OUT</td><td>Thonkiconn PJ301M-12</td><td>Panel TH</td><td>—</td><td>1</td><td>R audio output jack</td></tr>
+    <tr><td>TOB_BAND</td><td>TL072CDT</td><td>SOIC-8</td><td>—</td><td>1</td><td>BAND OUT buffers; BAND_BUF_A = LP1 L, BAND_BUF_B = LP1 R</td></tr>
+    <tr><td>TOB_OUT</td><td>TL072CDT</td><td>SOIC-8</td><td>—</td><td>1</td><td>Main output buffers; OUT_BUF_A = LEFT, OUT_BUF_B = RIGHT</td></tr>
+    <tr><td>R_out_x (×4)</td><td>—</td><td>0603</td><td>1 kΩ</td><td>4</td><td>Series output protection resistors (one per jack)</td></tr>
+    <tr><td>C_VCC (×2)</td><td>—</td><td>0603</td><td>100 nF</td><td>2</td><td>Decoupling at each TL072 pin 8 (+12 V)</td></tr>
+    <tr><td>C_VEE (×2)</td><td>—</td><td>0603</td><td>100 nF</td><td>2</td><td>Decoupling at each TL072 pin 4 (−12 V)</td></tr>
+    <tr><td>J_BAND_L</td><td>Thonkiconn PJ301M-12</td><td>Panel TH</td><td>—</td><td>1</td><td>LP1 L / BAND OUT L jack (top strip of LP2 zone)</td></tr>
+    <tr><td>J_BAND_R</td><td>Thonkiconn PJ301M-12</td><td>Panel TH</td><td>—</td><td>1</td><td>LP1 R / BAND OUT R jack (top strip of LP2 zone)</td></tr>
+    <tr><td>J_LEFT</td><td>Thonkiconn PJ301M-12</td><td>Panel TH</td><td>—</td><td>1</td><td>LEFT output jack (top strip of OUT+HP zone)</td></tr>
+    <tr><td>J_RIGHT</td><td>Thonkiconn PJ301M-12</td><td>Panel TH</td><td>—</td><td>1</td><td>RIGHT output jack (top strip of OUT+HP zone)</td></tr>
   </tbody>
 </table>
 
@@ -112,6 +142,14 @@ Jack type: Thonkiconn PJ301M-12 (or equivalent TS jack)
   Transparent, low-impedance output buffers. Drive the output jacks and any downstream module without coloration,
   without frequency-dependent loading, and without the last filter stage's output impedance interacting with cable
   capacitance. Identical to Block A in philosophy — the signal should not change passing through this block.
+</p>
+<p>
+  <strong>BAND OUT (LP1 L / LP1 R)</strong>: taps the LP1 output, before LP2 and HP filtering. Useful for parallel
+  routing — send the LP1 output to reverb or delay while the full chain (LP2 + HP) goes to the mix.
+  This is a mid-process tap: post-comb, post-distortion, post-VCA, post-LP1; pre-LP2 and pre-HP.
+</p>
+<p>
+  <strong>LEFT / RIGHT</strong>: main stereo output, tapped after the HP filter (end of the full signal chain).
 </p>
 
 <h3>Phase 2 — Transfer Function</h3>
@@ -124,15 +162,16 @@ Flat from DC to ~3 MHz (TL072 GBW at unity gain).
 <ul>
   <li><strong>1 kΩ series placement</strong>: resistors go between op-amp output pin and jack tip — not after the jack. Placing them after the jack provides no protection from short circuits.</li>
   <li><strong>No series capacitors</strong>: output jacks are DC-coupled per Eurorack convention. Do not add capacitors in the audio output path.</li>
-  <li><strong>Place decoupling caps within 1 mm</strong> of TOB supply pins (pins 4 and 8).</li>
+  <li><strong>Place decoupling caps within 1 mm</strong> of each TL072 supply pin.</li>
   <li><strong>TL072 not rail-to-rail</strong>: output swings to ~±10.5 V on ±12 V supply. Keep input signal ≤ ±10 V.</li>
+  <li><strong>BAND OUT tap point</strong>: taken at LP1 output buffer output (post-LP1, before LP2). The same node feeds both the LP2 input and the BAND OUT buffer. No loading conflict — both loads see the LP1 buffer output through separate 1 kΩ series resistors.</li>
 </ul>
 
 <h3>Trim Pots</h3>
 <p>None required. Unity gain is set by direct feedback topology.</p>
 
 <h3>Power</h3>
-<p>+12 V: ~2 mA &nbsp;|&nbsp; −12 V: ~2 mA</p>
+<p>+12 V: ~4 mA &nbsp;|&nbsp; −12 V: ~4 mA &nbsp;(2× TL072, ~2 mA each)</p>
 
 </body>
 </html>

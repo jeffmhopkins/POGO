@@ -111,8 +111,9 @@ V_in(L) ─(+)─[TG1A]─(out)──┬──┘  BOOST_out(L) → Block 2
                                    (switched in by toggle)
 ```
 
-Both L and R channels use identical circuits. A dual SPDT toggle switch (2PDT) selects both
-channels simultaneously with a single panel control.
+Both L and R channels use identical circuits. A dual SPDT toggle switch (2PDT) mounted
+horizontally selects both channels simultaneously with a single panel control. The 1× and 5×
+position labels sit below the switch body.
 
 **Switch wiring note:** The toggle physically switches the feedback path between a wire (G=1)
 and the R_f/R_in network (G=5). Use a 2PDT toggle: one pole for L, one pole for R.
@@ -124,7 +125,7 @@ and the R_f/R_in network (G=5). Use a 2PDT toggle: one pole for L, one pole for 
 | TG1 | TL072CDT | SOIC-8 | — | 1 | Dual op-amp: TG1A = L channel, TG1B = R channel |
 | R_f | — | 0603 | 40.2 kΩ | 2 | Feedback resistor (E96 value closest to 40 kΩ) |
 | R_in | — | 0603 | 10.0 kΩ | 2 | Input resistor (1% tolerance) |
-| SW1 | 2PDT toggle | Panel mount | — | 1 | Panel toggle, 2-pole: L and R switched simultaneously |
+| SW1 | 2PDT sub-mini toggle | Panel mount | — | 1 | Horizontal mount; 2-pole (L and R switched simultaneously); 1× / 5× labels below switch body |
 | C_VCC, C_VEE | — | 0603 | 100 nF | 2 | Supply decoupling at TG1 pins |
 
 ### Component Value Derivations

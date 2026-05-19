@@ -22,13 +22,15 @@ Each group covers a different zone:
 - **Group 3**: High formant (~2 kHz – 20 kHz)
 
 With feedback, each group develops a distinct resonant peak at its center frequency. Sweeping
-SPREAD opens or closes the distance between the three formants. Sweeping FREQ OFFSET moves all
+SPREAD opens or closes the distance between the three formants. Sweeping MASTER OFFSET moves all
 three together like a filter sweep. STEREO WIDTH drifts the R channel's formants relative to L,
 creating a shifting, spacious stereo field.
 
-At minimum DRY/WET (fully dry): comb effect is off, signal passes through unchanged.
-At maximum DRY/WET (fully wet): all 18 stages always in circuit; maximum notch depth.
-At mid DRY/WET: classic phaser blend — notches audible but dry content preserved.
+At minimum COMB BYPASS (pre-comb VCA fully closed): comb effect is off, signal passes through
+via dry path only.
+At maximum COMB BYPASS (pre-comb VCA fully open): all 18 stages always in circuit; maximum
+notch depth.
+At mid COMB BYPASS: classic phaser blend — notches audible but signal retains body.
 
 ### Parameters
 
@@ -38,15 +40,14 @@ At mid DRY/WET: classic phaser blend — notches audible but dry content preserv
 | FREQ 2 | 200 Hz – 8 kHz center | 1.5 kHz | Logarithmic | Center frequency of Group 2 (mid formant) |
 | FREQ 3 | 1 kHz – 20 kHz center | 6 kHz | Logarithmic | Center frequency of Group 3 (high formant) |
 | SPREAD | 0 – 100% | 50% | Linear | Multiplies spacing between groups; 0% collapses all groups to same frequency |
-| FREQ OFFSET | ±5 V equivalent | 0 | Linear | Shifts all 3 groups up or down together; acts as a master sweep (panel: MASTER OFFSET large knob) |
-| FEEDBACK 1 | 0 – 95% | 0% | Linear | Resonance depth of Group 1; >95% risks instability |
-| FEEDBACK 2 | 0 – 95% | 0% | Linear | Resonance depth of Group 2 |
-| FEEDBACK 3 | 0 – 95% | 0% | Linear | Resonance depth of Group 3 |
-| SOURCE | Switch: Internal / Blend / Post-Dist | Internal | N/A | Selects what signal feeds back: APF output only, crossfade mix, or Block 4 distortion output only |
-| BLEND | 0 – 100% | 50% | Linear | Crossfade ratio between APF output and Post-Dist signal; only active when SOURCE = Blend |
-| POLARITY | Switch: Positive / Off / Negative | Positive | N/A | Positive: standard notch deepening; Off: cuts all feedback regardless of FEEDBACK knobs; Negative: phase-inverts feedback, turning notches into peaks |
+| MASTER OFFSET | ±5 V equivalent | 0 | Linear | Shifts all 3 groups up or down together; acts as a master sweep (panel: MASTER OFFSET large knob) |
+| FB 1 | 0 – 95% | 0% | Linear | Resonance depth of Group 1; >95% risks instability |
+| FB 2 | 0 – 95% | 0% | Linear | Resonance depth of Group 2 |
+| FB 3 | 0 – 95% | 0% | Linear | Resonance depth of Group 3 |
+| FB DIST BLEND | 0 – 100% | 0% | Linear | Continuous crossfade: 0% = clean APF feedback (internal), 100% = post-distortion feedback |
+| POLARITY | Switch: Positive / Off / Negative | Positive | N/A | Positive: standard notch deepening; Off: cuts all feedback regardless of FB knobs; Negative: phase-inverts feedback, turning notches into peaks |
 | STEREO WIDTH | 0 – 100% | 0% | Linear | Frequency offset of R channel groups relative to L; 0% = mono, 100% = maximum stereo spread |
-| DRY/WET | 0 – 100% | 50% | Linear | Blend from fully dry to fully wet (phase-shifted) signal |
+| COMB BYPASS | 0 – 100% | 50% | Linear | Pre-comb VCA level: 0% = signal bypasses comb (dry only), 100% = full comb in signal path |
 
 ### CV Modulation Targets
 
@@ -55,13 +56,12 @@ At mid DRY/WET: classic phaser blend — notches audible but dry content preserv
 | FREQ 1 | ±5 V (1V/oct) | Yes | Sweeps Group 1 center frequency exponentially |
 | FREQ 2 | ±5 V (1V/oct) | Yes | Sweeps Group 2 center frequency exponentially |
 | FREQ 3 | ±5 V (1V/oct) | Yes | Sweeps Group 3 center frequency exponentially |
-| FEEDBACK 1 | 0–10 V | Yes | Group 1 feedback depth independently |
-| FEEDBACK 2 | 0–10 V | Yes | Group 2 feedback depth independently |
-| FEEDBACK 3 | 0–10 V | Yes | Group 3 feedback depth independently |
-| BLEND | 0–10 V | Yes | Crossfade ratio; only active when SOURCE = Blend |
-| DRY/WET | 0–10 V | Yes | Sweeps blend from dry to wet |
-| MASTER OFFSET (FREQ OFFSET) | ±5 V (1V/oct) | Yes | Shifts all 3 group frequencies simultaneously; sums at each FREQ CV node |
-| SOURCE | — | None | Switch only; no CV |
+| FB 1 | 0–10 V | Yes | Group 1 feedback depth independently |
+| FB 2 | 0–10 V | Yes | Group 2 feedback depth independently |
+| FB 3 | 0–10 V | Yes | Group 3 feedback depth independently |
+| FB DIST BLEND | 0–10 V | Yes | Crossfade ratio; always active |
+| COMB BYPASS | 0–10 V | Yes | Pre-comb VCA level; sweeps from bypassed to full comb |
+| MASTER OFFSET | ±5 V (1V/oct) | Yes | Shifts all 3 group frequencies simultaneously; sums at each FREQ CV node |
 | POLARITY | — | None | Switch only; no CV |
 
 ### Signal Levels (I/O)
@@ -75,18 +75,19 @@ True stereo: independent signal paths for L and R through all 18 stages per chan
 FREQ 1/2/3 knobs and SPREAD control both channels identically.
 STEREO WIDTH offsets R channel group frequencies: `ω_R = ω_L × 2^(WIDTH_V / 1V)` where WIDTH_V
 is a small positive or negative voltage derived from the WIDTH knob.
-DRY/WET applies identically to both channels.
+COMB BYPASS applies identically to both channels.
 
 ### Edge Cases
-- FEEDBACK at maximum (95%): near-self-oscillation; output level rises sharply. The 95% hard
+- FB at maximum (95%): near-self-oscillation; output level rises sharply. The 95% hard
   limit in the circuit must be enforced by a resistor floor in the feedback path — do not allow
   full 100% positive feedback.
-- DRY/WET at 0%: signal bypasses phase-shift influence. The all-pass stages are still in the
-  signal path but their output is muted from the mix; the dry signal is passed directly. In the
-  hardware implementation, DRY/WET is an XFade between unprocessed and processed — when fully
-  dry, no op-amp noise from the wet path reaches the output.
+- COMB BYPASS at 0%: pre-comb VCA closed; signal bypasses phase-shift influence. When fully
+  bypassed, no op-amp noise from the wet path reaches the output.
 - SPREAD at 0%: all three groups are set to the same frequency; the three sets of notches align,
   producing a deeper but narrower comb effect at one frequency region.
+- FB DIST BLEND at 0%: uses only the clean APF output as the feedback source (equivalent to
+  the former "Internal" SOURCE setting). At 100%: post-distortion signal drives all feedback
+  (equivalent to former "Post-Dist" setting). Intermediate values continuously interpolate.
 
 ---
 
@@ -118,13 +119,13 @@ When H_6 is mixed with the dry signal (V_dry + V_wet), cancellation occurs where
 arctan(ω_notch / ω₀) = (5 − 2n)π / 12
 ω_notch_n = ω₀ × tan((5 − 2n)π / 12)
 ```
-For 6 stages (at equal DRY/WET), this produces 3 notch pairs across the spectrum.
+For 6 stages (at equal COMB BYPASS), this produces 3 notch pairs across the spectrum.
 
 **Three groups, each with independent ω₀:**
 ```
-Group 1: ω₀_1 = 2π × f₁,   f₁ controlled by FREQ 1 + FREQ OFFSET + modulation
-Group 2: ω₀_2 = 2π × f₂,   f₂ controlled by FREQ 2 + FREQ OFFSET + modulation
-Group 3: ω₀_3 = 2π × f₃,   f₃ controlled by FREQ 3 + FREQ OFFSET + modulation
+Group 1: ω₀_1 = 2π × f₁,   f₁ controlled by FREQ 1 + MASTER OFFSET + modulation
+Group 2: ω₀_2 = 2π × f₂,   f₂ controlled by FREQ 2 + MASTER OFFSET + modulation
+Group 3: ω₀_3 = 2π × f₃,   f₃ controlled by FREQ 3 + MASTER OFFSET + modulation
 ```
 
 SPREAD scales the distances:
@@ -136,7 +137,7 @@ f₃_eff = f₃_base × 2^(+SPREAD × k)
 where k is a scaling factor set so that at SPREAD = 100%, the groups are maximally spread
 (Group 1 near 20 Hz, Group 3 near 20 kHz).
 
-**FREQ OFFSET:** shifts all three groups simultaneously by adding an exponential offset:
+**MASTER OFFSET:** shifts all three groups simultaneously by adding an exponential offset:
 ```
 f_n_eff = f_n_base × 2^(V_offset / 1V)
 ```
@@ -152,23 +153,23 @@ At WIDTH = 50%, approximately +2 semitones offset. At WIDTH = 100%, approximatel
 
 Each group has an independent feedback path with gain g (0 ≤ g < 1):
 ```
-V_fb_source = SOURCE_select(V_apf_out, V_post_dist, BLEND)
+V_fb_source = (1 − FB_DIST_BLEND) × V_apf_out + FB_DIST_BLEND × V_post_dist
 V_fb_signal = POLARITY_select(V_fb_source)   [+1, 0, or −1 × V_fb_source]
 V_out_group = H_6(s) × [V_in + g × V_fb_signal]
 V_out_group = H_6(s) × V_in / (1 − g × POLARITY × H_6(s))
 ```
 
-**SOURCE selection:**
+FB DIST BLEND is always active and continuously selects the feedback source:
 ```
-Internal:   V_fb_source = V_apf_out
-Blend:      V_fb_source = (1 − BLEND) × V_apf_out + BLEND × V_post_dist
-Post-Dist:  V_fb_source = V_post_dist
+FB_DIST_BLEND = 0:    V_fb_source = V_apf_out        (clean APF feedback)
+FB_DIST_BLEND = 0.5:  V_fb_source = 0.5×V_apf_out + 0.5×V_post_dist  (equal blend)
+FB_DIST_BLEND = 1:    V_fb_source = V_post_dist       (post-distortion feedback)
 ```
 
 **POLARITY selection:**
 ```
 Positive:   V_fb_signal = +V_fb_source   (standard, deepens notches)
-Off:        V_fb_signal = 0              (g effectively = 0 regardless of FEEDBACK knob)
+Off:        V_fb_signal = 0              (g effectively = 0 regardless of FB knob)
 Negative:   V_fb_signal = −V_fb_source  (inverts feedback; notches become peaks)
 ```
 
@@ -178,12 +179,13 @@ Circuit must limit g ≤ 0.95 via resistor floor in the feedback summing network
 
 ### Frequency Response (Combined Output)
 
-With DRY/WET at 50%:
+With COMB BYPASS controlling pre-comb VCA level:
 ```
-V_output = 0.5 × V_dry + 0.5 × V_wet
+V_output = V_bypass_signal + V_comb_processed
 ```
-At a notch frequency: V_wet = −V_dry (phase = π + 0° from double inversion in 6 even-order stages
-at appropriate ω_notch), so cancellation produces a deep notch. With feedback, the peaks between
+Where the COMB BYPASS VCA controls how much of the comb-processed signal is passed.
+At COMB BYPASS = 0: fully bypassed, comb output muted.
+At a notch frequency with COMB BYPASS = 100%: maximum notch depth. With feedback, the peaks between
 notches are emphasized.
 
 ### OTA-Based Voltage Control
@@ -214,7 +216,7 @@ and 36 op-amp halves total.
 - 3× expo converter circuits (one per group, shared L/R since L and R track same ω₀)
 - 3× op-amp for expo converters → ~2× TL072 (with 2 halves spare)
 - 3× feedback summing amplifiers (one per group, L and R separate) → 3× TL072 per channel
-- DRY/WET crossfader: VCA-based or resistive; 1× per channel
+- COMB BYPASS VCA: V2164-based; 1× per channel
 
 Total approximate IC count: 18× LM13700, ~24× TL072/TL074, expo transistors.
 This block is the most component-dense block in the module. Plan for 2–3 PCBs.
@@ -255,29 +257,26 @@ V_freq (from knob + CV sum) → [expo transistor pair] → I_abc → LM13700 Iab
 - Trim pot for 1V/oct tracking calibration
 - Reference current: set by resistor from +12 V to expo transistor base
 
-#### Feedback Path (per group — updated for SOURCE + POLARITY)
+#### Feedback Path (per group — FB DIST BLEND + POLARITY)
 
-Each group's feedback circuit has three stages: source selection → polarity → amount.
+Each group's feedback circuit has two stages: FB DIST BLEND crossfade → polarity → amount.
 
-**Stage 1: Source selection (shared across all 3 groups via one SOURCE switch)**
+**Stage 1: FB DIST BLEND continuous crossfade (shared across all 3 groups)**
 
 ```
 V_apf_out ──[R_a]──┬──(−) BLEND_AMP ──(out)── V_fb_source
 V_post_dist ─[R_b]──┘
 ```
 
-CD4053 triple analog mux (SOIC-16) routes to one of three configurations:
-- Internal: only V_apf_out active (R_b open)
-- Blend: both inputs active; BLEND knob sets R_a/R_b ratio via a pot-controlled summing network
-- Post-Dist: only V_post_dist active (R_a open)
+Continuous resistive crossfade with op-amp buffer:
+- FB DIST BLEND pot wiper drives complementary summing: R_a and R_b vary inversely
+- At 0%: only V_apf_out active — clean APF feedback
+- At 50%: equal blend of both sources
+- At 100%: only V_post_dist active — post-distortion feedback
+- One BLEND_AMP op-amp serves all three groups simultaneously (FB DIST BLEND is global)
+- V_post_dist is tapped directly from Block 4's output stage; route as a shielded signal
 
-BLEND CV (0–10 V via attenuverter) adds to the BLEND knob voltage before the summing network,
-allowing CV control of the internal↔post-dist crossfade ratio.
-
-One CD4053 and one BLEND_AMP op-amp serve all three groups simultaneously (SOURCE is global).
-V_post_dist is tapped directly from Block 4's output stage; route as a shielded signal.
-
-**Stage 2: Polarity selection (shared across all 3 groups via one POLARITY switch)**
+**Stage 2: POLARITY selection (shared across all 3 groups via one POLARITY switch)**
 
 ```
 V_fb_source ──(+) POL_INV ──(out)── V_fb_pos   (unity gain buffer)
@@ -286,7 +285,7 @@ V_fb_source ──(−) POL_INV ──(out)── V_fb_neg   (inverting, gain = 
 ```
 
 - Positive → routes V_fb_pos into per-group amount stage
-- Off → routes GND (no feedback signal regardless of FEEDBACK knob)
+- Off → routes GND (no feedback signal regardless of FB knob)
 - Negative → routes V_fb_neg (phase-inverted)
 
 One TL072 half as the inverter; the POLARITY switch is a 3-position panel switch routing
@@ -297,21 +296,24 @@ the appropriate signal to all three per-group feedback amount stages.
 ```
 V_fb_polar ──[R_fb_fixed]──┬──(−) summing amp ──► V_fb_sum → Group input
                             │
-                        [FEEDBACK knob pot + CV attenuverter]
+                        [FB knob pot + CV attenuverter]
                             │
                            GND
 ```
 
-FEEDBACK knob and CV attenuverter set the effective gain g in the feedback path.
+FB knob and CV attenuverter set the effective gain g in the feedback path.
 End-stop resistor (R_fb_min) in the pot circuit ensures g ≤ 0.95 at maximum setting.
 Three independent summing amps — one per group (using TL072 halves).
 
-#### DRY/WET Crossfader
+#### COMB BYPASS VCA
 
-Linear voltage-controlled crossfade using a dual VCA (e.g., V2164 quad VCA, 1 cell each
-for L-wet and L-dry; second pair for R-wet and R-dry):
-- V2164 is a quad VCA in SOIC-16; 2 cells for L (dry + wet), 2 cells for R (dry + wet)
-- DRY/WET knob → complementary control voltages to dry and wet cells
+Pre-comb VCA controls the level of signal entering the comb filter chain. At 0V (COMB BYPASS = 0),
+the comb-processed signal is muted at the VCA and only the dry path passes. At 10V, full comb
+processing feeds into the signal path.
+
+Linear voltage-controlled crossfade using V2164 quad VCA:
+- V2164 is a quad VCA in SOIC-16; 2 cells for L (bypass + comb), 2 cells for R (bypass + comb)
+- COMB BYPASS knob + CV → complementary control voltages to bypass and comb cells
 - 1× V2164 per stereo pair
 
 #### STEREO WIDTH
@@ -319,7 +321,7 @@ for L-wet and L-dry; second pair for R-wet and R-dry):
 A simple exponential offset applied to the R channel expo converter reference only:
 - WIDTH knob → small DC offset voltage added to V_freq_R only (not V_freq_L)
 - Op-amp summer adds WIDTH_V to the R expo converter input
-- WIDTH = 0: R exp is same as L → mono
+- WIDTH = 0: R expo is same as L → mono
 - WIDTH max: R expo input is shifted, R ω₀ is higher (or lower) by several semitones
 
 ### IC / Component Selection (key ICs)
@@ -329,15 +331,14 @@ A simple exponential offset applied to the R channel expo converter reference on
 | OTA_x | LM13700M | SOIC-16 | 18 | Dual OTA; 1 per 2 APF stages; 9 per channel |
 | APF_AMP_x | TL072CDT | SOIC-8 | 18 | Dual op-amp; 1 per 2 APF stages; 9 per channel |
 | EXPO_x | THAT340 or LM394 | SOIC-8 | 3 | Matched NPN pair for expo converter (1 per group) |
-| VCA_DW | V2164D | SOIC-16 | 1 | Quad VCA for DRY/WET crossfader (L+R in one IC) |
-| SW_SRC | CD4053 | SOIC-16 | 1 | Triple 2:1 mux for SOURCE selection (global) |
+| VCA_CB | V2164D | SOIC-16 | 1 | Quad VCA for COMB BYPASS VCA (L bypass, L comb, R bypass, R comb) |
 | FB_AMP_x | TL074CDT | SOIC-14 | 3 | Per-group feedback summing amp + BLEND_AMP + POL_INV (≈3 quads needed) |
 | MIX_AMP_x | TL074CDT | SOIC-14 | 2 | Summing, width offset, general purpose |
 | C_apf_G1 | C0G / NP0 | 0603 | 12 | 1.5 nF (6 per channel × 2 channels) for Group 1 |
 | C_apf_G2 | C0G / NP0 | 0603 | 12 | 300 pF for Group 2 |
 | C_apf_G3 | C0G / NP0 | 0603 | 12 | 68–82 pF for Group 3 |
 | SW_POL | 3-pos panel switch | Panel | 1 | POLARITY: Positive / Off / Negative (mechanical) |
-| SW_SRC_MAN | 3-pos panel switch | Panel | 1 | SOURCE: Internal / Blend / Post-Dist (mechanical) |
+| RV_FB_DIST_BLEND | Lin pot | 9mm | 1 | FB DIST BLEND crossfade: 0% = clean APF fb, 100% = post-dist fb |
 
 ### Trim Pots
 
@@ -362,7 +363,7 @@ A simple exponential offset applied to the R channel expo converter reference on
 - **HF oscillation**: OTA stages at high Iabc (high frequency) can self-oscillate due to parasitic capacitance. Add small (22 pF) capacitors at each OTA output node and keep traces short.
 - **Crosstalk L/R**: L and R share the same group frequencies but have separate OTA signal paths. Route L and R ground planes separately; do not route L signal adjacent to R signal on PCB.
 - **V_post_dist routing**: the distortion output (Block 4) must be routed to the APF feedback section without picking up noise. Use a shielded wire or dedicated PCB trace with guard ring; keep away from OTA signal nodes.
-- **CD4053 SOURCE switch**: the CD4053 has a small series resistance (~100 Ω on ±5 V supply) and charge injection during switching. Buffer the output of SW_SRC with a unity-gain op-amp before the per-group feedback amp stages.
+- **FB DIST BLEND crossfade**: the continuous crossfade replaces the CD4053 SOURCE switch. Use a complementary-gain resistive crossfade (pot + op-amp summer) or a V2164-based VCA crossfade. The op-amp output of the BLEND_AMP must be buffered before the per-group feedback amp stages.
 - **POLARITY Off position**: when POLARITY = Off, GND must be cleanly connected to the feedback summing node — a leaky switch contact or ground bounce will cause audible bleed-through of the feedback signal. Use a low-leakage panel switch or add a small bleeder resistor to GND at the switch output.
-- **Negative feedback stability**: with POLARITY = Negative, the feedback becomes degenerative in the normal sense but regenerative at the complementary frequencies. At high g, the system may still self-oscillate but at different frequencies than positive feedback — verify stability across the full FEEDBACK range in simulation before PCB layout.
+- **Negative feedback stability**: with POLARITY = Negative, the feedback becomes degenerative in the normal sense but regenerative at the complementary frequencies. At high g, the system may still self-oscillate but at different frequencies than positive feedback — verify stability across the full FB range in simulation before PCB layout.
 - **Calibration burden**: 6 trim pots (3 expo + 3 feedback limits) plus 3 independent feedback CV attenuverters. Document calibration order clearly: expo converters first, then feedback limits.

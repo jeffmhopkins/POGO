@@ -17,8 +17,8 @@ The three distorted group signals are summed after processing and passed to LP1.
 This per-chain arrangement means each formant band can be distorted differently:
 Group 1 (low) wavefolded for complex sub-harmonic content, Group 2 (mid) soft-clipped for
 warmth, Group 3 (high) hard-clipped for bright edge — or any combination. The distortion
-also feeds back into each group's APF feedback path when SOURCE = Post-Dist, creating a
-tight self-referential loop where the distorted formant drives its own resonance.
+is also tapped and routed to Block 3's FB DIST BLEND crossfade circuit, where it can
+drive resonance feedback at any blend ratio from 0% (clean APF feedback) to 100% (post-dist).
 
 - **Soft Clip**: Gentle, musical saturation. Adds warmth and odd harmonics. Sweet spot: 30–60%.
 - **Hard Clip**: Aggressive transistor-style clipping, strong odd harmonics. Sweet spot: 20–50%.
@@ -57,10 +57,10 @@ No independent L/R controls. No cross-chain linking of MODE or DRIVE.
 ### Signal Flow
 ```
 APF Group 1 (L+R) ──► [Distortion Chain 1: MODE 1, DRIVE 1] ──► DST1 out (L+R) ──┐
-APF Group 2 (L+R) ──► [Distortion Chain 2: MODE 2, DRIVE 2] ──► DST2 out (L+R) ──┼──► sum ──► LP1
+APF Group 2 (L+R) ──► [Distortion Chain 2: MODE 2, DRIVE 2] ──► DST2 out (L+R) ──┼──► sum ──► Block VCA ──► LP1
 APF Group 3 (L+R) ──► [Distortion Chain 3: MODE 3, DRIVE 3] ──► DST3 out (L+R) ──┘
 ```
-Each chain's output also feeds back into its own APF group's feedback path when SOURCE = Post-Dist.
+Each chain's output is also tapped and routed to Block 3's FB DIST BLEND crossfade circuit for that group.
 
 ### Edge Cases
 - All three chains at DRIVE 100%: combined sum can exceed ±10 V; attenuate in the summing
@@ -223,7 +223,7 @@ Same configuration for R channel using second TL072 or second half of the SUM_AM
 - **CD4053 series resistance**: ~100 Ω at ±5 V supply. Buffer each CD4053 output with a
   unity-gain op-amp half before the summing stage.
 - **Post-Dist feedback routing**: each chain's output (before the summing amp) must be tapped
-  and routed back to Block 3's SOURCE selector for that group. Label these tap points clearly
+  and routed back to Block 3's FB DIST BLEND crossfade circuit for that group. Label these tap points clearly
   on the schematic; route as shielded traces to avoid inter-chain crosstalk.
 - **Diode and zener matching per chain**: use components from the same batch within each chain.
   Cross-chain matching is less critical since the chains process different formant bands.

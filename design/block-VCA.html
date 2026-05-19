@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POGO — Block VCA: Pre-LP1 Voltage-Controlled Amplifier</title>
+<style>
+  body { font-family: monospace; background: #0d0d0d; color: #c8c8c8; margin: 0; padding: 2rem; }
+  h1 { color: #e8e8e8; border-bottom: 2px solid #444; padding-bottom: .5rem; }
+  h2 { color: #aaa; border-bottom: 1px solid #333; padding-bottom: .3rem; margin-top: 2rem; }
+  h3 { color: #888; margin-top: 1.5rem; }
+  a { color: #7aacdc; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  pre { background: #1a1a1a; border: 1px solid #333; padding: 1rem; overflow-x: auto; line-height: 1.5; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th { background: #222; color: #aaa; text-align: left; padding: .5rem .8rem; border: 1px solid #444; }
+  td { padding: .4rem .8rem; border: 1px solid #333; }
+  tr:nth-child(even) { background: #141414; }
+  .nav { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 2rem; }
+  .nav a { background: #1e1e1e; border: 1px solid #444; padding: .3rem .7rem; border-radius: 3px; font-size: .85rem; }
+  .nav a.current { background: #2a3a4a; border-color: #7aacdc; color: #7aacdc; }
+  .note { background: #1a1400; border-left: 3px solid #665500; padding: .5rem 1rem; margin: 1rem 0; }
+  .status { display: inline-block; background: #0d2a0d; border: 1px solid #2a5a2a; color: #6abf6a; padding: .2rem .6rem; border-radius: 3px; font-size: .85rem; }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <a href="index.html">Overview</a>
+  <a href="block-A-input-buffer.html">Block A</a>
+  <a href="block-1-pregain.html">Block 1</a>
+  <a href="block-2-envelope-follower.html">Block 2</a>
+  <a href="block-3-apcf.html">Block 3</a>
+  <a href="block-4-distortion.html">Block 4</a>
+  <a href="block-VCA.html" class="current">Block VCA</a>
+  <a href="block-5-lp1.html">Block 5</a>
+  <a href="block-6-lp2.html">Block 6</a>
+  <a href="block-7-hp.html">Block 7</a>
+  <a href="block-B-output-buffer.html">Block B</a>
+  <a href="mod-architecture.html">Mod Arch</a>
+</div>
+
+<h1>Block VCA: Pre-LP1 Voltage-Controlled Amplifier</h1>
+<span class="status">Phase 1 ✅ &nbsp; Phase 2 ✅ &nbsp; Phase 3 ✅ &nbsp; Phase 4 [ ]</span>
+
+<div class="note">
+  Positioned between Block 4 (Distortion) and Block 5 (LP Filter 1). Shares V2164 IC with LP1:
+  cells 1+2 for LP1 resonance Q; cells 3+4 for VCA L+R signal path. Both blocks must be on the same PCB.
+</div>
+
+<h2>1. Block Diagram</h2>
+<pre>
+Distortion sum output (±5–7.5 V from Block 4)
+  │
+  ├── L channel ──────────────────────────────────────────────────────┐
+  │                                                                    │
+  │  V_in_L ──[100 Ω series]──► V2164 cell 3 (L VCA) ──► V_out_L ──┤
+  │                                                                    │
+  └── R channel ──────────────────────────────────────────────────────┘
+     V_in_R ──[100 Ω series]──► V2164 cell 4 (R VCA) ──► V_out_R
+                                                               │
+                                                               ▼
+                                             to LP Filter 1 (Block 5) input
+
+CV Path (stereo-linked — same control voltage to both cells):
+
+  Mod Bus ──[tip-switch]────────────────────────────────────────────┐
+                               ▲                                    │
+                  CV IN jack ──┘  (tip-switching: CV IN replaces    │
+                                   mod bus when cable inserted)     │
+                                                                    │
+  ──[100 Ω]──[BAT54 SOT-23 clamp]──► AMT attenuverter pot ─────────►─ V2164 ctrl input
+                                       (−1× to +1×, center = 0)
+
+AMT = center (0): VCA gain = 1.0 (unity) — mod bus has no effect
+AMT = full CW, CV = 0 V: VCA gain = 0 (mute)
+AMT = full CW, CV = 10 V: VCA gain = 1.0 (full pass-through)
+AMT = full CCW, CV = 10 V: ducking — high CV reduces gain (inverted response)
+
+Signal levels:
+  In:  ±5 V to ±7.5 V (distortion chain summed output)
+  Out: 0–1× gain applied → ±5 V nominal into LP1
+  VCA headroom: V2164 rated for signal within ±supply; ±12 V rails → ±12 V safe range
+</pre>
+
+<h2>2. Schematic</h2>
+<pre>
+V2164D (SOIC-16, quad VCA IC — shared with LP1):
+  Cell allocation:
+    Cell 1 (pins 1–4):   LP1 L resonance Q control (Block 5)
+    Cell 2 (pins 5–8):   LP1 R resonance Q control (Block 5)
+    Cell 3 (pins 9–12):  VCA L signal path (this block)
+    Cell 4 (pins 13–16): VCA R signal path (this block)
+
+V_in_L ──[R_in_L 100Ω]──► V2164 cell 3 audio input (pin 9)
+                             V2164 cell 3 output (pin 11) ──► V_out_L ──► LP1 L input
+
+V_in_R ──[R_in_R 100Ω]──► V2164 cell 4 audio input (pin 13)
+                             V2164 cell 4 output (pin 15) ──► V_out_R ──► LP1 R input
+
+CV Input Path:
+  MOD BUS ──[tip-switch, Thonkiconn sleeve lug]──────────────────────────┐
+                                  ▲                                       │
+         CV IN jack tip ──────────┘   (tip-switch disconnects mod bus     │
+                                       when cable is inserted)            │
+                                                                          │
+  ──[R_cv 100Ω 0603]──[D_cv BAT54S SOT-23, clamp to ±12V]──► V_att_in  │
+                                                                          │
+  V_att_in ──► AMT attenuverter pot (9mm bipolar, center detent = 0)     │
+    CW end: +V_att_in                                                     │
+    CCW end: −V_att_in (via inverter; or wiper between +V and −V refs)   │
+    Wiper ──► V2164 cells 3+4 control input (both cells same node)       │
+</pre>
+
+<h2>3. Parts List</h2>
+<table>
+  <thead>
+    <tr><th>Reference</th><th>Part Number</th><th>Package</th><th>Value</th><th>Qty</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>VCA_MAIN</td><td>V2164D</td><td>SOIC-16</td><td>—</td><td>1</td><td>Shared with LP1: cells 1+2 = LP1 Q; cells 3+4 = VCA L/R</td></tr>
+    <tr><td>RV_AMT</td><td>Bipolar pot</td><td>9mm</td><td>—</td><td>1</td><td>AMT attenuverter (−1× to +1×, center detent); attenuverter knob r=2.5 on panel</td></tr>
+    <tr><td>D_cv</td><td>BAT54S</td><td>SOT-23</td><td>—</td><td>1</td><td>CV input clamp to ±12 V rails</td></tr>
+    <tr><td>R_cv</td><td>—</td><td>0603</td><td>100 Ω</td><td>1</td><td>Series resistor at CV IN jack input</td></tr>
+    <tr><td>R_in_L</td><td>—</td><td>0603</td><td>100 Ω</td><td>1</td><td>Series resistor at L audio input</td></tr>
+    <tr><td>R_in_R</td><td>—</td><td>0603</td><td>100 Ω</td><td>1</td><td>Series resistor at R audio input</td></tr>
+    <tr><td>J_CV_IN</td><td>Thonkiconn PJ301M-12</td><td>Panel TH</td><td>—</td><td>1</td><td>CV IN jack (tip-switching; normalizes to mod bus)</td></tr>
+  </tbody>
+</table>
+
+<h2>4. Design Notes</h2>
+
+<h3>Phase 1 — Sonic Intent</h3>
+<p>
+  A voltage-controlled amplifier placed immediately before LP Filter 1, after the distortion summing stage.
+  It functions as a dynamics gate — using the mod bus (typically driven by the envelope follower) to accent,
+  duck, or swell the signal entering the filters.
+</p>
+<ul>
+  <li><strong>Accent mode</strong>: AMT full CW, mod bus riding an envelope → filter feed rises with each transient, opening the filters dynamically.</li>
+  <li><strong>Duck/gate mode</strong>: AMT full CCW (inverted) → louder input causes the filter feed to dip, creating a sidechain-duck or gating effect.</li>
+  <li><strong>At default</strong>: AMT = center (0), mod bus at rest → signal passes at unity gain, VCA has no effect.</li>
+</ul>
+<p>
+  The AMT knob is the panel attenuverter for the VCA Level modulation destination. It controls both
+  the depth and polarity of CV modulation. No separate level or gain control exists — the VCA only
+  modulates; at rest (center) it is transparent.
+</p>
+
+<h3>Phase 2 — Transfer Function</h3>
+<pre>
+Linear VCA — output is the product of input signal and control voltage:
+
+  V_out = V_in × G_vca
+
+  G_vca = clamp(AMT_gain × V_cv_in / 10, 0, 1)
+
+  AMT_gain ∈ [−1, +1]   (bipolar attenuverter; center = 0)
+  V_cv_in ∈ [0, 10 V]   (mod bus or override CV)
+
+  AMT_gain = 0 (center detent):
+    G_vca = 0 regardless of CV → but wait: at center AMT, mod bus has no effect,
+    so V_cv_att = 0 V → G_vca = 0/10 = 0. This would mute the signal.
+
+  Correction: the V2164 is biased so that at 0V control input, gain = 1 (unity).
+  The AMT attenuverter at center (0V output) leaves the V2164 at its unity-gain bias point.
+  Full CW AMT: 10V CV → maximum V2164 gain (limited to unity; G=1)
+  Full CCW AMT: 10V CV → inverted to −10V, driving V2164 toward minimum gain (G→0)
+
+  For ducking: V_cv_att = AMT_gain × V_cv_in (negative when AMT_gain &lt; 0)
+    High CV + inverted AMT → low gain → signal dips with loud input = ducking.
+
+V2164 exponential law note:
+  V2164 uses exponential gain law. For musical accent use, the exponential law is appropriate
+  (matches logarithmic loudness perception). For linear amplitude modulation, a log-law pre-driver
+  can be added, but is not required for the intended musical use case.
+</pre>
+
+<h3>Phase 3 — Circuit Notes</h3>
+<ul>
+  <li><strong>V2164 cell allocation</strong>: sharing V2164 with LP1 saves PCB space and cost but means both blocks must be on the same PCB. Verify that LP1 resonance control voltage and VCA control voltage do not crosstalk inside the V2164 package (cells are independent by design — keep control traces separated on PCB).</li>
+  <li><strong>Unity gain at center detent</strong>: at AMT center, attenuverter output = 0 V → V2164 control input at 0 V → G = 1 (unity) at the V2164 internal reference. Verify with V2164 datasheet control law at 0 V ctrl; may require a small DC bias offset on the control input.</li>
+  <li><strong>Exponential vs linear perception</strong>: for gentle accent modulation, the V2164 exponential law is helpful. For hard gating (modulation to silence), verify the V2164 reaches G ≈ 0 within the attenuverter's output swing range.</li>
+  <li><strong>Hot input headroom</strong>: Block 4 distortion output can reach ±7.5 V at maximum drive. V2164 signal inputs are rated for signals within ±supply (±12 V here) — hot input is within safe range.</li>
+  <li><strong>Tip-switching normalling</strong>: the CV IN jack normalizes mod bus to the VCA control path. Verify Thonkiconn PJ301M-12 sleeve-switching lug is connected to the mod bus rail; inserting a cable breaks this connection and routes the jack tip to the attenuverter instead.</li>
+  <li><strong>Trim pots</strong>: none required. V2164 gain at 0 V control is inherently near unity. If a precise unity-gain offset is needed, a small fixed resistor or trim in the control path can compensate, but is typically not necessary.</li>
+</ul>
+
+<h3>Power</h3>
+<p>+12 V: ~2 mA &nbsp;|&nbsp; −12 V: ~2 mA &nbsp;(incremental; V2164 IC shared with LP1)</p>
+
+</body>
+</html>
