@@ -69,7 +69,7 @@ Destinations (18 total):
 
 ## Panel Width
 
-**46 HP** (233.68 mm)
+**40 HP** (203.20 mm)
 
 ## Power Budget (estimates — update from measured values during bring-up)
 
