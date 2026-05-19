@@ -58,10 +58,10 @@ Mod Bus Processor:
 MOD BUS SIGNAL
   ↓ (to each destination via attenuverter + override jack)
 
-Destinations (14 total):
-  Pre-Gain level        APF Freq 1 / 2 / 3     APF Feedback     APF Dry/Wet
-  Distortion Drive      Distortion Mode         LP1 Cutoff / Resonance
-  LP2 Cutoff / Resonance   HP Cutoff / Resonance
+Destinations (13 total):
+  APF Freq 1 / 2 / 3     APF Feedback 1 / 2 / 3     APF Blend     APF Dry/Wet
+  Distortion Drive 1 / 2 / 3     LP1 Cutoff / Resonance
+  LP2 Cutoff / Resonance     HP Cutoff / Resonance
 ```
 
 ## Panel Width

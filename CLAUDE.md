@@ -468,7 +468,6 @@ MOD BUS  →  100Ω + BAT54 clamp  →  ATTENUVERTER (−1× to +1×)  →  para
 
 | Destination | Block | CV Range | Notes |
 |---|---|---|---|
-| Pre-Gain level | 1 | 0–10 V → 1×–5× | electronic gain switching |
 | APF Chain 1 Freq | 3 | ±5 V, 1V/oct | |
 | APF Chain 2 Freq | 3 | ±5 V, 1V/oct | |
 | APF Chain 3 Freq | 3 | ±5 V, 1V/oct | |

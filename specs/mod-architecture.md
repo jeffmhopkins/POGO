@@ -191,7 +191,6 @@ isolation. Use TL074 (quad, 4 halves each): 10× TL074 for all 19 attenuverter c
 | LP2 Resonance | 6 | 0–10 V | Yes |
 | HP Cutoff | 7 | ±5 V, 1V/oct | Yes |
 | HP Resonance | 7 | 0–10 V | Yes |
-| Pre-Gain Level | 1 | 0–10 V | Yes (future: CV-selectable gain stage) |
 
 ### IC / Component Selection (Mod Bus Processor)
 

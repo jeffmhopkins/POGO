@@ -26,9 +26,6 @@ The toggle switch should feel intentional and definitive, like toggling between 
 
 No CV modulation for this block — mechanical toggle only.
 
-*(CV-controlled gain is available later via the Mod Bus → Pre-Gain level destination, but that
-acts as a secondary modulation layer on top of this fixed-position switch.)*
-
 ### Signal Levels (I/O)
 - Input: ±5 V audio (from Block A buffers)
 - Unity output: ±5 V
