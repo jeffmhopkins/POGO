@@ -556,35 +556,26 @@
 
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 4b — SHARED DIST  (x:20.32–50.80, y:74–128.85)                 -->
-  <!-- SOURCE 3-pos switch x=25.40 · BLEND knob x=35.56 · MODE 3-pos x=45.72 -->
-  <!-- Unified bottom: M.OFF / DRY/W / BLEND  ATT cy=109 · CV cy=118 y=124.5 -->
+  <!-- SOURCE switch removed — BLEND knob covers full clean→dist range          -->
+  <!-- Equal-gap: MODE cx=28 · BLEND cx=40 · 6.36mm gaps                       -->
+  <!-- Unified bottom: WET / OFFSET / BLEND  ATT cy=109 · CV cy=118 y=124.5   -->
   <!-- ════════════════════════════════════════════════════════════════════════ -->
 
-  <!-- SOURCE — 3-pos vertical switch, center x=25.40, body y=81–93 -->
-  <!-- INT (top) = internal feedback · BLD = blend · PST = post-distortion -->
-  <rect x="24.20" y="81" width="2.4" height="12" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
-  <!-- slug at center (BLD) -->
-  <rect x="24.00" y="85.25" width="2.8" height="3.5" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
-  <text x="27.0" y="83.5" fill="#3d5260" font-family="monospace" font-size="1.4" text-anchor="start">INT</text>
-  <text x="27.0" y="87.5" fill="#3d5260" font-family="monospace" font-size="1.4" text-anchor="start">BLD</text>
-  <text x="27.0" y="91.5" fill="#3d5260" font-family="monospace" font-size="1.4" text-anchor="start">PST</text>
-  <text x="25.40" y="96.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">SOURCE</text>
-
-  <!-- BLEND — medium knob (feedback source crossfade) -->
-  <circle cx="35.56" cy="87" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="35.56" y1="87" x2="35.56" y2="82.5" stroke="#aaa" stroke-width="0.6"/>
-  <text x="35.56" y="94.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">DISTORTION</text>
-  <text x="35.56" y="96.8" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">BLEND</text>
-
-  <!-- MODE — 3-pos vertical switch, center x=45.72, body y=81–93 -->
+  <!-- MODE — 3-pos vertical switch, cx=28, body y=81–93 -->
   <!-- SFT (top) = soft clip · HRD = hard clip · WFD = wavefold -->
-  <rect x="44.52" y="81" width="2.4" height="12" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
+  <rect x="26.8" y="81" width="2.4" height="12" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
   <!-- slug at center (HRD) -->
-  <rect x="44.32" y="85.25" width="2.8" height="3.5" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
-  <text x="47.5" y="83.5" fill="#3d5260" font-family="monospace" font-size="1.4" text-anchor="start">SFT</text>
-  <text x="47.5" y="87.5" fill="#3d5260" font-family="monospace" font-size="1.4" text-anchor="start">HRD</text>
-  <text x="47.5" y="91.5" fill="#3d5260" font-family="monospace" font-size="1.4" text-anchor="start">WFD</text>
-  <text x="45.72" y="96.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">MODE</text>
+  <rect x="26.6" y="85.25" width="2.8" height="3.5" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
+  <text x="29.4" y="83.5" fill="#3d5260" font-family="monospace" font-size="1.4" text-anchor="start">SFT</text>
+  <text x="29.4" y="87.5" fill="#3d5260" font-family="monospace" font-size="1.4" text-anchor="start">HRD</text>
+  <text x="29.4" y="91.5" fill="#3d5260" font-family="monospace" font-size="1.4" text-anchor="start">WFD</text>
+  <text x="28" y="96.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">MODE</text>
+
+  <!-- BLEND — medium knob, 0%=clean APF feedback → 100%=post-dist feedback -->
+  <circle cx="40" cy="87" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="40" y1="87" x2="40" y2="82.5" stroke="#aaa" stroke-width="0.6"/>
+  <text x="40" y="94.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">DISTORTION</text>
+  <text x="40" y="96.8" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">BLEND</text>
 
   <!-- Unified bottom row ATT — WET / OFFSET / BLEND · cy=109 -->
   <circle cx="25.40" cy="109" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
