@@ -14,7 +14,7 @@
 </head>
 <body>
 <div class="wrap">
-<h1>POGO — 46 HP PANEL LAYOUT  ·  1 HP = 5.08 mm  ·  Step 1 rev2: Structure &amp; Labels</h1>
+<h1>POGO — 46 HP PANEL LAYOUT  ·  1 HP = 5.08 mm  ·  Step 1 rev3: Structure &amp; Labels</h1>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 233.68 133.35">
 
   <!-- ── PANEL BACKGROUND ─────────────────────────────────────────────────── -->
@@ -53,8 +53,8 @@
   <line x1="0.5"  y1="89.5" x2="24.9" y2="89.5" stroke="#2d2d2d" stroke-width="0.5"/>
 
   <!-- ── LP2+HP ZONE: TOP STRIP / FILTER SECTION DIVIDER ─────────────────── -->
-  <!-- Horizontal divider between output strip (top) and filter controls (bottom) -->
-  <line x1="177.8" y1="44" x2="233.68" y2="44" stroke="#2d2d2d" stroke-width="0.5"/>
+  <!-- Minimum height: 2 jack rows at y=15 and y=23, edge+clearance → y=28 -->
+  <line x1="177.8" y1="28" x2="233.68" y2="28" stroke="#2d2d2d" stroke-width="0.5"/>
 
   <!-- ── LP2 / HP INTERNAL DIVIDER (dim gray vertical, full height in zone) ─ -->
   <!-- Also serves as BAND OUT | OUT divider in top strip -->
@@ -99,34 +99,27 @@
   <text x="165.1" y="10.5" fill="#00d4ff" font-family="monospace" font-size="2.4"
         text-anchor="middle" font-weight="bold">LP 1</text>
 
-  <!-- Zone 4+5 — TOP STRIP labels (y=4.5–44) -->
-  <!-- BAND OUT section (x=177.8–203.2, center=190.5) -->
-  <text x="190.5" y="10.5" fill="#00d4ff" font-family="monospace" font-size="2.4"
+  <!-- Zone 4+5 — TOP STRIP labels (y=4.5–28) -->
+  <!-- BAND OUT section (x=177.8–203.2, center=190.5) — no sub-labels -->
+  <text x="190.5" y="9" fill="#00d4ff" font-family="monospace" font-size="2.4"
         text-anchor="middle" font-weight="bold">BAND OUT</text>
-  <!-- sub-labels for LP2 row and HP row within BAND OUT -->
-  <text x="190.5" y="16.5" fill="#4a6070" font-family="monospace" font-size="1.9"
-        text-anchor="middle">LP 2</text>
-  <text x="190.5" y="28" fill="#4a6070" font-family="monospace" font-size="1.9"
-        text-anchor="middle">HP</text>
 
   <!-- OUT section (x=203.2–233.68, center=218.44) -->
-  <text x="218.44" y="10.5" fill="#00d4ff" font-family="monospace" font-size="2.4"
+  <text x="218.44" y="9" fill="#00d4ff" font-family="monospace" font-size="2.4"
         text-anchor="middle" font-weight="bold">OUT</text>
 
-  <!-- Zone 4+5 — FILTER SECTION labels (y=44–128.85) -->
+  <!-- Zone 4+5 — FILTER SECTION labels (y=28–128.85) -->
   <!-- LP 2 filter (x=177.8–203.2, center=190.5) -->
-  <text x="190.5" y="50" fill="#00d4ff" font-family="monospace" font-size="2.4"
+  <text x="190.5" y="34" fill="#00d4ff" font-family="monospace" font-size="2.4"
         text-anchor="middle" font-weight="bold">LP 2</text>
   <!-- HP filter (x=203.2–233.68, center=218.44) -->
-  <text x="218.44" y="50" fill="#00d4ff" font-family="monospace" font-size="2.4"
+  <text x="218.44" y="34" fill="#00d4ff" font-family="monospace" font-size="2.4"
         text-anchor="middle" font-weight="bold">HP</text>
 
 </svg>
 <p class="note">
-  Step 1 rev2: Zone 4+5 now has a top output strip (BAND OUT left + OUT right) above the filter controls.
-  BAND OUT provides LP2 aux L/R and HP aux L/R bandpass tap outputs.
-  LP2/HP vertical divider doubles as BAND OUT/OUT separator.
-  Controls to follow in Step 2.
+  Step 1 rev3: Top strip tightened to minimum height (y=4.5–28, 23.5mm) for 2 rows of jacks.
+  Sub-labels removed from BAND OUT. Filter section labels at y=34. Controls to follow in Step 2.
 </p>
 </div>
 </body>

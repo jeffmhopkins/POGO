@@ -213,8 +213,8 @@ LP 1
 ### Zone 4+5: LP 2 + HP + BAND OUT + OUT (11 HP combined)
 
 The combined LP2+HP zone is split horizontally into two sections:
-- **Top strip** (y ≈ 4.5 – 44 mm): output jacks — BAND OUT (left) and OUT (right)
-- **Filter controls** (y ≈ 44 – 128.85 mm): LP2 vertical slider and HP vertical slider with their controls
+- **Top strip** (y ≈ 4.5 – 28 mm, minimum height for 2 jack rows): output jacks — BAND OUT (left) and OUT (right). No sub-labels within BAND OUT.
+- **Filter controls** (y ≈ 28 – 128.85 mm): LP2 vertical slider and HP vertical slider with their controls
 
 The LP2/HP vertical divider at x = 203.2 mm runs the full height of this zone, serving double
 duty as the BAND OUT / OUT separator in the top strip and the LP2 / HP separator in the filter section.
@@ -234,9 +234,9 @@ main stereo output.
 | HP L | Output jack | HP stage stereo output left (±5 V, tapped after HP) |
 | HP R | Output jack | HP stage stereo output right (±5 V, tapped after HP) |
 
-Row layout within BAND OUT (5 HP = 25.4 mm):
-- **LP 2 row** (row label "LP 2"): LP2 L at x ≈ 186.0 mm, LP2 R at x ≈ 195.0 mm (9 mm jack pitch)
-- **HP row** (row label "HP"): HP L at x ≈ 186.0 mm, HP R at x ≈ 195.0 mm (same x, different y)
+Row layout within BAND OUT (5 HP = 25.4 mm, no row sub-labels):
+- **Row 1** (LP2 aux): LP2 L at x ≈ 186.0 mm, LP2 R at x ≈ 195.0 mm (9 mm jack pitch), y ≈ 15 mm
+- **Row 2** (HP aux): HP L at x ≈ 186.0 mm, HP R at x ≈ 195.0 mm (same x), y ≈ 23 mm
 
 #### Top Strip: OUT (right, x = 203.2 – 233.68, 6 HP)
 
