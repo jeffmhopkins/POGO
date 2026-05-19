@@ -68,7 +68,6 @@
 │ V_modbus_inv ──[R_inv]──(−in) MB_INV ──(out)── V_modbus  (restored polarity)│
 │                (+in) = GND; (out)◄──[R_inv]──(−in)                         │
 │                                                                              │
-│ V_modbus ──[unity buffer]──[1 kΩ series]──► MOD BUS OUT JACK               │
 └─────────────────────────────────────────────────────────────────────────────┘
   │
   V_modbus  (internal mod bus signal)
@@ -117,11 +116,7 @@ Half B: Inverter (MB_INV, restores signal polarity)
                             (+in, pin 5) = GND
                             (out)◄──[R_inv]──(−in)     (unity gain invert)
 
-Half C: Output buffer (unity gain → MOD BUS OUT jack)
-  V_modbus ──(+in, pin 9) MB_BUF ──(out, pin 8)──[1kΩ series]──► MOD BUS OUT jack
-                (−in, pin 10)◄────────────────────────────────────┘
-
-Half D: spare
+IC: TL072CDT (SOIC-8, dual op-amp) — half A: summer, half B: inverter. No output buffer needed.
 
 Trim pots on Mod Bus Processor:
   RV_MB_ZERO:       zero offset null (output = 0V when source = 0V and OFFSET knob centered)
@@ -152,13 +147,12 @@ Each bipolar pot requires 1 TL074 half for the inverter.
     <tr><td>MB_PROC</td><td>TL074CDT</td><td>SOIC-14</td><td>1</td><td>Summer + inverter + output buffer + spare half</td></tr>
     <tr><td>MB_ATT_x</td><td>TL074CDT</td><td>SOIC-14</td><td>10</td><td>Attenuverter inverter stages (19 destinations × ~2 halves / 4 per IC → 10 ICs)</td></tr>
     <tr><td>D_clamp_x</td><td>BAT54S</td><td>SOT-23</td><td>21</td><td>Input clamp at each attenuverter input (19 destinations + 2 spares)</td></tr>
-    <tr><td>R_clamp_x</td><td>—</td><td>0603</td><td>100 Ω</td><td>19</td><td>Series resistors at each attenuverter input</td></tr>
+    <tr><td>R_clamp_x</td><td>—</td><td>0603</td><td>100 Ω</td><td>13</td><td>Series resistors at each attenuverter input</td></tr>
     <tr><td>RV_AMOUNT</td><td>Lin pot</td><td>9mm</td><td>1</td><td>Mod bus AMOUNT (0.2× – 5×)</td></tr>
     <tr><td>RV_OFFSET</td><td>Lin pot</td><td>9mm</td><td>1</td><td>Mod bus OFFSET (±5 V)</td></tr>
-    <tr><td>RV_ATT_x</td><td>Bipolar pot</td><td>9mm</td><td>19</td><td>Attenuverters (one per destination; center-detent bipolar)</td></tr>
-    <tr><td>J_OVERRIDE_x</td><td>Thonkiconn PJ301M-12</td><td>Panel TH</td><td>19</td><td>Override jack per destination (tip-switching TS)</td></tr>
+    <tr><td>RV_ATT_x</td><td>Bipolar pot</td><td>9mm</td><td>13</td><td>Attenuverters (one per destination; center-detent bipolar)</td></tr>
+    <tr><td>J_OVERRIDE_x</td><td>Thonkiconn PJ301M-12</td><td>Panel TH</td><td>13</td><td>Override jack per destination (tip-switching TS)</td></tr>
     <tr><td>J_MOD_SRC</td><td>Thonkiconn PJ301M-12</td><td>Panel TH</td><td>1</td><td>PRIMARY MOD SOURCE jack (tip-switching TS)</td></tr>
-    <tr><td>J_MOD_OUT</td><td>Thonkiconn PJ301M-12</td><td>Panel TH</td><td>1</td><td>MOD BUS OUT jack (buffered output)</td></tr>
     <tr><td>RV_MB_ZERO</td><td>Bourns 3224W</td><td>SMD</td><td>1</td><td>Mod bus zero offset null</td></tr>
     <tr><td>RV_MB_AMOUNT_MAX</td><td>Bourns 3296W</td><td>TH multiturn</td><td>1</td><td>AMOUNT max gain calibration</td></tr>
   </tbody>
@@ -214,19 +208,17 @@ Per-Destination Attenuverter:
 
 <h3>Phase 3 — Circuit Notes</h3>
 <ul>
-  <li><strong>19 override jacks</strong>: all jacks must be TS type with sleeve-switching lug connected to the mod bus. Verify Thonkiconn footprint has switching lug accessible in PCB layout.</li>
-  <li><strong>Op-amp count</strong>: 1× TL074 for the mod bus processor + 10× TL074 for 19 attenuverter inverter stages = 11× TL074 for the entire modulation system. This is significant — plan power budget carefully.</li>
-  <li><strong>19 attenuverter pots</strong> is a very large number for a single module. Evaluate during panel layout whether all 19 can fit. If space is constrained, group modulation targets (e.g., a single APF attenuverter for all three APF freq destinations) and add sub-routing switches.</li>
-  <li><strong>MOD BUS OUT</strong>: buffered output of the mod bus signal. 1 kΩ series output resistor.</li>
+  <li><strong>13 override jacks</strong>: all jacks must be TS type with sleeve-switching lug connected to the mod bus. Verify Thonkiconn footprint has switching lug accessible in PCB layout.</li>
+  <li><strong>Op-amp count</strong>: 1× TL072 for the mod bus processor + 7× TL074 for 13 attenuverter inverter stages = 1× TL072 + 7× TL074 for the entire modulation system.</li>
+  <li><strong>13 attenuverter pots</strong>: evaluate during panel layout whether all 13 can fit comfortably within their respective zones.</li>
 </ul>
 
-<h3>Modulation Destinations (all 19)</h3>
+<h3>Modulation Destinations (all 13)</h3>
 <table>
   <thead>
     <tr><th>Destination</th><th>Block</th><th>CV Type</th><th>Override Jack</th></tr>
   </thead>
   <tbody>
-    <tr><td>Pre-Gain Level</td><td>1</td><td>0–10 V → 1×–5× gain</td><td>Yes</td></tr>
     <tr><td>APF Freq 1</td><td>3</td><td>±5 V, 1V/oct</td><td>Yes</td></tr>
     <tr><td>APF Freq 2</td><td>3</td><td>±5 V, 1V/oct</td><td>Yes</td></tr>
     <tr><td>APF Freq 3</td><td>3</td><td>±5 V, 1V/oct</td><td>Yes</td></tr>

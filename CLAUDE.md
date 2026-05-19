@@ -41,7 +41,7 @@ Mod Bus Processor:
   AMOUNT knob  0.2× – 5×  (scales the mod signal)
   OFFSET knob  ±5 V        (DC offset added after scaling)
   ↓
-Mod Bus Signal  (internal bus; also available as MOD BUS OUT jack for external patching)
+Mod Bus Signal  (internal bus)
   ↓
 Each modulation destination receives:
   Mod Bus (normalled)  →  Individual Override Jack  →  Attenuverter knob  →  parameter CV input
@@ -452,8 +452,7 @@ Source: post-gain / pre-comb audio — **two independent followers, one per chan
 - PRIMARY MOD SOURCE jack normalizes to the ENV selected by MOD SOURCE SEL when unplugged
 - AMOUNT knob: 0.2× – 5× gain
 - OFFSET knob: ±5 V added after scaling
-- MOD BUS OUT jack: buffered output available for external patching
-- Circuit: inverting summer op-amp (scaled mod signal + offset pot) + inverter + output buffer
+- Circuit: inverting summer op-amp (scaled mod signal + offset pot) + inverter
 - Trim pot: zero-offset null (output = 0 V when AMOUNT = center and input = 0 V)
 
 ### Per-Destination Modulation Circuit

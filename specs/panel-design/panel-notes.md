@@ -29,7 +29,7 @@ each approximately 42 mm tall.
 |---|---|---|
 | Top | Block A + Block 1 | L/R audio input jacks, pre-gain switch |
 | Middle | Block 2 | Attack, Release, ENV OUT L/R jacks, MOD SOURCE SEL switch |
-| Bottom | Mod Bus | Primary mod source jack, AMOUNT, OFFSET, MOD BUS OUT jack |
+| Bottom | Mod Bus | Primary mod source jack, AMOUNT, OFFSET |
 
 ---
 

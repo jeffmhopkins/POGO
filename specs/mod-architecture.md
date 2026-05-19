@@ -25,9 +25,7 @@ Mod Bus Processor:
   OFFSET knob  (±5 V)        ─────┤──► MOD BUS SIGNAL
   │
   ▼
-MOD BUS OUT jack  (buffered output for external patching)
-  │
-  ▼ (to each of 14 destinations)
+  ▼ (to each of 13 destinations)
 
 [Per Destination]:
   MOD BUS ──[100 Ω + BAT54 clamp]──► ATTENUVERTER knob (−1× to +1×) ──► CV summing node
@@ -64,10 +62,6 @@ Example: with an envelope from 0–10 V, AMOUNT=0.5, OFFSET=−2.5 V:
 - Silence (V=0): mod bus = −2.5 V
 - Full level (V=10): mod bus = 5 − 2.5 = 2.5 V
 - Result: mod bus swings −2.5 V to +2.5 V (centered around 0)
-
-### MOD BUS OUT jack
-Buffered output of the mod bus signal. Allows routing the processed envelope/mod source
-to other modules. 1 kΩ series output resistor.
 
 ### Per-Destination Circuit
 
@@ -136,9 +130,7 @@ V_modbus_inv ──[R_inv]──(−) MB_INV ──(out)── V_modbus
                           (out)◄──[R_inv]──(−)
 ```
 
-MOD BUS OUT: unity-gain output buffer (third TL072 half) + 1 kΩ series to jack.
-
-**IC**: 1× TL074 (quad op-amp, SOIC-14) — summer + inverter + output buffer + 1 spare half.
+**IC**: 1× TL072 (dual op-amp, SOIC-8) — summer + inverter. No output buffer needed.
 
 ### Per-Destination Attenuverter Circuit (×14 destinations)
 
