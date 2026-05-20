@@ -12,6 +12,10 @@ on:
 env:
   rack-plugin-toolchain-dir: /home/build/rack-plugin-toolchain
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   # ─── Linux x64 (fastest; used for development feedback) ───────────────────
   build-linux:
