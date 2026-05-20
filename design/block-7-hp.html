@@ -72,7 +72,7 @@ V_in ──[R_in 100kΩ]──(−in) SUM_AMP (TL072 half) ──(out)── V_H
 Feedback (resonance control):
   V_LP ──────────────────────────────────────────────► (−in) SUM_AMP
   V_BP ──[linearizing diodes]──► HP_Q_OTA IN+ (LM13700 cell A of IC_Q_C)
-                                  Iabc ← RESONANCE HP CV / R_Iabc
+                                  Iabc ← IRES_AMP inverting driver (more RESONANCE → less Iabc)
                                   I_out ─────────────────────────────► (−in) SUM_AMP (resonance feedback current)
 
   V_HP = V_in − V_LP − (1/Q) × V_BP  [SUM_AMP computes this]
@@ -117,7 +117,7 @@ HP_OTA_L (LM13700M, SOIC-16):
 Resonance Q feedback (HP_Q_OTA, IC_Q_C):
   V_BP_L ──[linearizing diodes]──► HP_Q_OTA IN+ (LM13700 cell A of IC_Q_C_L)
                                     IN− → GND
-                                    Iabc ← RESONANCE HP CV via R_Iabc
+                                    Iabc ← IRES_AMP inverting driver (V_Iabc = V_bias − V_RES_scaled; R_Iabc = 1 MΩ)
                                     I_out → HP_SUM_LA (−in) virtual-ground node
   IC_Q_C_L (Left audio board):  cell A = HP L Q; cell B = spare
   IC_Q_C_R (Right audio board): cell A = HP R Q; cell B = spare
@@ -199,9 +199,9 @@ Range: 20 Hz – 5 kHz (≈8 octaves; controlled by expo converter)
 
 <h3>Phase 3 — Circuit Notes</h3>
 <ul>
-  <li><strong>SVF summing amp polarity</strong>: the summing amplifier inverts. To get the correct HP output polarity, either invert V_LP and V_BP before summing, OR use an inverting output buffer. Document polarity carefully in schematic.</li>
+  <li><strong>SVF summing amp polarity (RESOLVED)</strong>: the SUM_AMP inverts. HP_SUM_L/R (TL072) half B = HP output buffer — configure as G = −1 inverting unity-gain (R_in = R_f, (+) = GND). This corrects the phase inversion at no extra IC cost. Annotate in schematic: "HP buffer configured as G = −1 to compensate SUM_AMP inversion."</li>
   <li><strong>OTA linearizing resistors</strong>: LM13700 has built-in linearizing diodes. Connect linearizing diode inputs to the OTA differential inputs via 1 kΩ series resistors for low distortion at high signal levels.</li>
-  <li><strong>LM13700 Q Iabc sizing</strong>: HP Q uses IC_Q_C cell A. Iabc = V_RESONANCE_HP_CV / R_Iabc. With R_in = 100 kΩ and C = 33 nF (HP), Q ≈ 100 kΩ × Iabc / 52 mV. RV_HP_QMAX sets Iabc_max. Design RESONANCE HP control so Q response feels linear to the user.</li>
+  <li><strong>LM13700 Q Iabc sizing and direction</strong>: HP Q uses IC_Q_C cell A. Q = 52 mV / (Iabc × R_in) = 52 mV / (Iabc × 100 kΩ). More Iabc → more damping → lower Q. Self-oscillation at Iabc → 0. RESONANCE HP must decrease Iabc via IRES_AMP inverting driver (same circuit as LP1/LP2): V_Iabc = V_bias − V_RES_scaled, R_Iabc = 1 MΩ. RV_HP_QMAX trims V_bias.</li>
   <li><strong>Self-oscillation amplitude</strong>: at Q → ∞, oscillation amplitude limited by op-amp/OTA clipping. Output will be a slightly distorted sine. Acceptable behavior.</li>
   <li><strong>HP above LP1/LP2 cutoff</strong>: if HP cutoff is set above LP1/LP2 cutoff, audio is attenuated by both LP and HP; effective bandpass. Output level may be very low. Valid (if unusual) patch.</li>
 </ul>

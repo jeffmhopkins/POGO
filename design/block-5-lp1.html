@@ -86,11 +86,14 @@ STEREO SPREAD OFFSET (R channel only):
   V_spread &lt; 0 V: R cutoff shifts down relative to L
   Trim pot RV_LP1_SPREAD_NULL nulls center detent to 0 V
 
-RESONANCE knob → Iabc current into LP1_Q_OTA (LM13700 cell A of IC_Q_AB) → sets Q
+RESONANCE knob → inverting Iabc driver (IRES_AMP) → LP1_Q_OTA (LM13700 cell A of IC_Q_AB) → sets Q
   IC_Q_AB: cell A = LP1 Q; cell B = LP2 Q (separate IC from integrators)
-  Iabc = V_RESONANCE_CV / R_Iabc; higher Iabc → more BP feedback current → higher Q
-  RESONANCE = 0: Iabc = 0, Q ≈ 0.5 (wide/flat)
-  RESONANCE = max: Iabc = max → Q → ∞ (self-oscillation)
+  Q = 52 mV / (Iabc × R_in): more Iabc → more BP damping → LOWER Q (flatter)
+  Self-oscillation at Iabc → 0 (NOT at max Iabc)
+  RESONANCE = 0: Iabc = 0.74 µA, Q ≈ 0.7 (Butterworth, flat response)
+  RESONANCE = max: Iabc → 0, Q → ∞ (self-oscillation)
+  Inverting driver (IRES_AMP, spare TL072 half):
+    V_Iabc = V_bias − V_RES_scaled  (V_bias ≈ +0.74 V; R_Iabc = 1 MΩ)
 
 BAND OUT tap: taken at LP1 V_LP output (before LP2 input) → to Block B BAND OUT buffers
 
@@ -222,17 +225,21 @@ Component derivation:
 
 Q control via LM13700 OTA (IC_Q_AB, cell A per channel):
   I_out injected into SUM_AMP (−in) virtual-ground → acts as BP feedback current
-  Q ≈ R_in × Iabc / (2 × V_T) = 100kΩ × Iabc / 52mV
-  Iabc = V_RESONANCE_CV / R_Iabc (R_Iabc ≈ 200 kΩ nominal; RV_LP1_QMAX sets max)
-  Q → ∞ at RESONANCE = 100% (self-oscillation)
-  Practical Q ≈ 50 at RESONANCE = 95%
+  Q = 52 mV / (Iabc × R_in) = 52 mV / (Iabc × 100 kΩ)
+  More Iabc → more damping → LOWER Q; Iabc → 0 → Q → ∞ (self-oscillation)
+  At Iabc = 0.74 µA: Q ≈ 0.7 (Butterworth flat)
+  At Iabc ≈ 10 nA:   Q ≈ 52  (near self-oscillation onset)
+  Inverting Iabc driver (IRES_AMP, spare TL072 half):
+    V_Iabc = V_bias − V_RES_scaled  (V_bias ≈ +0.74 V; R_Iabc = 1 MΩ)
+    RESONANCE=0 → Iabc=0.74 µA (Q≈0.7); RESONANCE=max → Iabc→0 (Q→∞)
+  RV_LP1_QMAX trims V_bias; sets flat-response Q and self-oscillation onset.
 </pre>
 
 <h3>Phase 3 — Circuit Notes</h3>
 <ul>
   <li><strong>THAT340 expo converter</strong>: matched NPN pair required for stable 1V/oct tracking across temperature. Calibrate at room temperature; verify at 10°C and 40°C extremes.</li>
   <li><strong>STEREO SPREAD OFFSET summing node</strong>: V_spread is summed into the R channel expo converter input. The summing resistors must match to preserve 1V/oct tracking on R. Place the summing node physically close to the R expo converter input to minimize parasitic coupling.</li>
-  <li><strong>LM13700 Q Iabc sizing</strong>: R_Iabc converts V_RESONANCE_CV (0–10 V) to Iabc. With R_in = 100 kΩ, target Iabc_max = 52 mV × Q_max / 100 kΩ. For Q_max = 50, Iabc_max ≈ 26 µA → R_Iabc ≈ 200 kΩ (confirm from RV_LP1_QMAX trim). Design RESONANCE control path so Q response feels approximately linear to the user.</li>
+  <li><strong>LM13700 Q Iabc sizing and direction</strong>: Q = 52 mV / (Iabc × 100 kΩ). More Iabc = lower Q (more damping, flatter). Self-oscillation at Iabc → 0 — the RESONANCE control MUST decrease Iabc as it increases. IRES_AMP (inverting TL072 summer): V_Iabc = V_bias − V_RES_scaled, R_Iabc = 1 MΩ. At RESONANCE=0: Iabc=0.74 µA (Q≈0.7). At RESONANCE=100%: Iabc→0 (Q→∞). RV_LP1_QMAX trims V_bias.</li>
   <li><strong>Self-oscillation amplitude</strong>: at Q → ∞, output amplitude limited by OTA/op-amp clipping. Optionally add BAT54 anti-parallel diodes across feedback resistor in SUM_AMP to soft-limit self-oscillation amplitude.</li>
   <li><strong>IC_Q_AB pairing</strong>: LP1 Q uses cell A; LP2 Q uses cell B of the same LM13700. Keep Iabc drive traces separate to avoid crosstalk between LP1 and LP2 Q controls.</li>
   <li><strong>BAND OUT tap</strong>: take the tap at the LP1 output buffer output (unity-gain follower on V_LP). This is the same node that feeds LP2 input — both can be driven from the same buffer without loading concerns given the 1 kΩ series output resistors in Block B.</li>

@@ -184,11 +184,11 @@ The normalizing is done through tip-switching of the MOD SOURCE input jack (see 
 |---|---|---|---|---|---|
 | EF1 (L channel) | TL074CDT | SOIC-14 | — | 1 | Quad op-amp: rectifier (2 halves) + scale amp (1 half) + avg(L,R) buffer (1 half) |
 | EF2 (R channel) | TL074CDT | SOIC-14 | — | 1 | Quad op-amp: rectifier (2 halves) + scale amp (1 half) + max(L,R) buffer (1 half) |
-| D_max | BAT54 | SOT-23 | — | 1 | Dual Schottky; D_maxL + D_maxR for max(L,R) diode-OR selector |
+| D_max | BAT54C | SOT-23 | — | 1 | Dual Schottky **common-cathode** (BAT54C); D_maxL anode = ENV_L, D_maxR anode = ENV_R, shared cathode = max_node → required for diode-OR. BAT54A (common anode) or BAT54S (series) are incompatible. |
 | D_atk L/R (×2) | 1N4148WS | SOD-323 | — | 2 | Attack charge diodes |
 | D_rel L/R (×2) | 1N4148WS | SOD-323 | — | 2 | Release discharge diodes |
 | D_rect L/R (×4) | 1N4148WS | SOD-323 | — | 4 | Precision rectifier diodes |
-| C_hold L/R | — | 5mm pitch | 2.2 µF | 2 | Film cap (polyester or polypropylene, low leakage); through-hole |
+| C_hold L/R | — | 0805 SMD or 5mm TH | 2.2 µF | 2 | **Primary**: 2.2 µF X7R MLCC 0805 (e.g. Murata GRM21BR71H225KA73L) — acceptable leakage for envelope hold at audio rates. **Alternative TH**: polyester or polypropylene film 2.2 µF, 5mm pitch — preferred if minimising DA-induced droop is critical during bring-up. Footprint must accommodate both to defer decision to bring-up. |
 | RV_ATK | Log-taper pot | 9mm PCB | 100 kΩ | 1 | Attack time; shared L+R |
 | RV_REL | Log-taper pot | 9mm PCB | 1 MΩ | 1 | Release time; shared L+R |
 | R_atk_end | — | 0603 | 100 Ω | 2 | Series end-stop on attack pot (sets minimum τ_a) |
@@ -196,6 +196,7 @@ The normalizing is done through tip-switching of the MOD SOURCE input jack (see 
 | R_scale | — | 0603 | 10 kΩ | 4 | Gain-of-2 scaling amp feedback and input resistors |
 | D_clamp | BZX84-C10 | SOT-23 | 10 V | 2 | Output 10 V clamp zener, one per channel |
 | R_out L/R | — | 0603 | 1 kΩ | 2 | Output series resistor to jacks |
+| C_DC_BLK_L, C_DC_BLK_R | — | 0805 SMD | 10 µF | 2 | **DNP (Do Not Populate) by default** — DC blocking cap before precision rectifier input. Footprint bridged by 0Ω resistor. Populate if DC offset from Block 1 causes non-zero envelope output at silence. |
 | C_VCC, C_VEE | — | 0603 | 100 nF | 4 | Supply decoupling (2 per IC) |
 | SW_SEL | Sub-mini toggle | Panel | 3-pos | 1 | Mod source selection: L / max(L,R) / avg(L,R) |
 
@@ -222,10 +223,8 @@ Use 10 kΩ cermet trim pot (Bourns 3224W, SMD) in series with the gain-setting R
 - Log-taper pots for attack/release: standard log pots have ~10% of rotation covering the
   bottom decade of the range. If feel is too "cramped" at slow times, use a linear pot with
   an RC shaping network to create pseudo-log response
-- 2.2 µF film cap is physically large; consider 1 µF with adjusted R values if space is tight
+- **C_hold package**: primary option is 2.2 µF X7R MLCC 0805 (all-SMD, adequate leakage for audio-rate envelope hold). Alternative: 2.2 µF film TH (5mm pitch) for minimum dielectric absorption — both footprints should exist on PCB to defer final decision to bring-up. Do NOT use 2.2 µF ceramic in 0603 (not available at standard values).
 - Diode leakage on C_hold at slow release settings: at room temperature 1N4148 leakage is
   negligible, but budget for it in the minimum release time. Use low-leakage diodes (1N4148
   is fine)
-- Input DC blocking: if the signal chain can pass significant DC offset, add a 10 µF
-  series capacitor (AC coupling) before the precision rectifier. Leave footprint unpopulated
-  and bridged by default; populate if DC offset proves problematic during bring-up.
+- **Input DC blocking (DNP)**: C_DC_BLK_L/R are 10 µF 0805 footprints in series before the precision rectifier, bridged by 0Ω resistors by default. Remove the 0Ω bridges and populate the caps if DC offset from Block 1 causes visible baseline output from ENV OUT at silence. Include both footprint and 0Ω bridge on PCB layout for each channel.

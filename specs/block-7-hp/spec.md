@@ -133,14 +133,22 @@ V_HP = SUM_AMP output = V_in − V_LP − (1/Q) × V_BP
 Resonance (Q control):
 V_BP ──[linearizing diodes]──► HP_Q_OTA IN+
                                 HP_Q_OTA IN− → GND
-                                HP_Q_OTA Iabc ←── RESONANCE CV (0–10 V via R_Iabc)
+                                HP_Q_OTA Iabc ←── inverting Iabc driver (see below)
                                 HP_Q_OTA I_out ──► SUM_AMP (−) virtual ground node
 ```
 
-Higher Iabc = higher gm = more BP feedback current = higher Q → self-oscillation.
-RESONANCE knob CW = higher Iabc = higher Q.
+Q formula (same derivation as LP1, R_in = 100 kΩ):
+  Q = 52 mV / (Iabc × 100 kΩ)
+  More Iabc → more damping → lower Q. Self-oscillation at Iabc → 0.
+  RESONANCE must DECREASE Iabc as it turns CW — use same inverting Iabc driver as LP1.
 
-HP_Q_OTA is cell A of IC_Q_C (one LM13700 per audio board; cell B is spare or future use).
+  At Iabc = 0.74 µA: Q ≈ 0.7  (flat)
+  At Iabc ≈ 10 nA:   Q ≈ 52   (near self-oscillation)
+
+  See block-5-lp1/spec.md Phase 3 for the IRES_AMP inverting driver circuit.
+  RV_HP_QMAX adjusts V_bias in the HP IRES_AMP stage.
+
+HP_Q_OTA is cell A of IC_Q_C (one LM13700 per audio board; cell B is spare).
 
 ### Integrator capacitor values (HP range: 20 Hz – 5 kHz, approximately 8 octaves)
 
@@ -171,22 +179,25 @@ For f₀ = 1 kHz (nominal): C = g_m / ω₀ = 192µS / 6283 = 30.6 nF → use 33
 |---|---|---|---|
 | RV_HP_REF | ±20% | HP cutoff 1V/oct reference frequency | Adjust until C2 (at 0 V CV) = target frequency |
 | RV_HP_1VOCT | ±5% | HP expo converter 1V/oct tracking | One-octave step test |
-| RV_HP_QMAX | Q 10–50 | Maximum Q (self-oscillation onset) | Turn RESONANCE to max; verify clean sine output |
+| RV_HP_QMAX | V_bias trim | Flat Q point and self-oscillation onset | Turn RESONANCE to max; verify clean sine output; RV_HP_QMAX adjusts inverting Iabc driver V_bias |
 
 ### Power Draw Estimate
 - 2× LM13700 (integrators) + 1× LM13700 (Q VCA, IC_Q_C) + 2× TL072: ~15 mA
 - +12 V: ~10 mA | −12 V: ~10 mA
 
 ### Known Circuit Challenges
-- SVF summing amp phase: the summing amplifier inverts. To get the correct HP output polarity,
-  the V_LP and V_BP signals must be inverted before summing, OR the final HP output buffer
-  inverts again. Document polarity carefully in schematic.
-- OTA integrator nonlinearity at large signals: LM13700 OTA linearity degrades at high signal
-  levels. Keep the signal swing at the OTA inputs below ±50 mV for low distortion. Use a
-  linearizing resistor (LM13700 has built-in linearizing diodes — connect linearizing diode inputs
-  to the OTA differential inputs via small series resistors, typically 1 kΩ).
-- Self-oscillation level: when Q → ∞, the oscillation amplitude is limited by op-amp/OTA
-  clipping. The output will be a slightly distorted sine. Acceptable behavior.
-- **LM13700 Q VCA Iabc**: R_Iabc sizing follows the same derivation as LP1/LP2. With
-  R_in = 100 kΩ and C = 33 nF (HP), Q ≈ 100 kΩ × Iabc / 52 mV. RV_HP_QMAX sets Iabc_max.
-  Design the RESONANCE pot control circuit so Q response feels linear to the user.
+- **HP output polarity (RESOLVED)**: the SUM_AMP inverts. HP_SUM_L/R (TL072) has half A =
+  SUM_AMP and half B = HP output buffer. Configure half B as an **inverting unity-gain buffer**
+  (G = −1: R_in = R_f, (+) = GND) to correct the SUM_AMP phase inversion. No extra IC needed.
+  Document this in the schematic: "HP buffer configured as G = −1 to compensate SUM_AMP inversion."
+- **Q control direction**: RESONANCE must decrease Iabc as it increases (see Q formula above).
+  The IRES_AMP inverting driver ensures this. R_Iabc = 1 MΩ, V_bias ≈ 0.74 V; Q ≈ 0.7 at
+  RESONANCE=0, Q → ∞ at RESONANCE=100% (Iabc → 0).
+- **OTA linearizing resistors**: LM13700 has built-in linearizing diodes — connect via 1 kΩ
+  series resistors to OTA differential inputs for low distortion at ±50 mV signal swings.
+- **Self-oscillation level**: Q → ∞, amplitude limited by op-amp/OTA clipping; slightly
+  distorted sine. Acceptable behavior.
+- **LP/HP SVF polarity chain**: LP1 and LP2 outputs are also phase-inverted by their respective
+  SUM_AMPs. The inversions chain through the signal path. The HP output inverting buffer corrects
+  the final output polarity; internal polarity inversions between stages do not affect audio quality
+  as long as they are consistent.

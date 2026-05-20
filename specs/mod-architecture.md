@@ -42,8 +42,8 @@ Mod Bus Processor:
 - **MOD SOURCE SEL switch** (3-position, panel): selects which envelope signal normalizes into
   the PRIMARY MOD SOURCE jack
   - Position L: ENV OUT L → Mod Bus
-  - Position R: ENV OUT R → Mod Bus
-  - Position LR: L+R averaged → Mod Bus
+  - Position max(L,R): diode-OR of ENV_L and ENV_R (tracks louder channel; BAT54C) → Mod Bus
+  - Position avg(L,R): (ENV_L + ENV_R) / 2 via resistor divider into unity-gain buffer → Mod Bus
 
 - **PRIMARY MOD SOURCE jack**: tip-switching TS jack
   - Unplugged: selected ENV signal is active
@@ -158,16 +158,14 @@ Simpler approach: use a center-tapped pot connected between +V and −V rails:
 ```
 Where +V_att and −V_att come from the override jack or mod bus attenuated via a virtual ground.
 
-**IC requirement**: 19 attenuverters × (1 buffer + 1 inverter) = 38 op-amp halves for full
-isolation. Use TL074 (quad, 4 halves each): 10× TL074 for all 19 attenuverter circuits.
-(Note: APF POLARITY and Distortion MODE have no attenuverter — switches only.
-SOURCE switch is removed; FB DIST BLEND is now a continuous knob with CV attenuverter.)
+**IC requirement**: 19 attenuverters × 2 op-amp halves (buffer + inverter) = 38 halves.
+Use TL074 (quad, 4 halves each): **10× TL074** for all 19 attenuverter circuits (40 halves; 2 spare).
 
 ### Modulation Destinations
 
 SOURCE switch removed: the APF feedback crossfade is now controlled continuously by the
 FB DIST BLEND knob (replaces the 3-position SOURCE switch INT/BLD/PST). The CD4053 mux is
-replaced with a V2164-based continuous crossfade driven by FB DIST BLEND + its CV attenuverter.
+replaced with a resistive op-amp crossfade driven by FB DIST BLEND + its CV attenuverter (see Block 3).
 
 | Destination | Block | Panel Label | CV Type | Override Jack | Notes |
 |---|---|---|---|---|---|
@@ -196,12 +194,12 @@ replaced with a V2164-based continuous crossfade driven by FB DIST BLEND + its C
 | Reference | Part Number | Package | Qty | Notes |
 |---|---|---|---|---|
 | MB_PROC | TL074CDT | SOIC-14 | 1 | Summer + inverter + output buffer + spare |
-| MB_ATT_x | TL074CDT | SOIC-14 | 7 | Attenuverter inverter stages (14 destinations × 2 halves / 4 per IC) |
+| MB_ATT_x | TL074CDT | SOIC-14 | 10 | Attenuverter inverter stages (19 destinations × 2 halves / 4 per IC = 10 ICs) |
 | D_clamp_x | BAT54S | SOT-23 | 16 | Input clamp at each attenuverter input (14 destinations + 2 spares) |
 | R_clamp_x | — | 0603 | 100 Ω | 14 | Series resistors at each attenuverter input |
 | RV_AMOUNT | Lin pot | 9mm | 1 | Mod bus AMOUNT (0.2× – 5×) |
 | RV_OFFSET | Lin pot | 9mm | 1 | Mod bus OFFSET (±5 V) |
-| RV_ATT_x | Bipolar pot | 9mm | 13 | Attenuverters (13 destinations with attenuverter; MODE has none) |
+| RV_ATT_x | Bipolar pot | 9mm | 19 | Attenuverters (one per destination; all 19 destinations have attenuverters) |
 
 ### Trim Pots
 
@@ -211,8 +209,8 @@ replaced with a V2164-based continuous crossfade driven by FB DIST BLEND + its C
 | RV_MB_AMOUNT_MAX | AMOUNT maximum gain calibration (target: 5.0×) | Set AMOUNT to max; input 1 V; trim until output = 5 V |
 
 ### Power Draw Estimate
-- 8× TL074 (mod bus + 7 attenuverter ICs): ~30 mA
-- +12 V: ~15 mA | −12 V: ~15 mA
+- 1× TL074 (MB_PROC) + 10× TL074 (attenuverter stages) = 11× TL074 total: ~38 mA
+- +12 V: ~40 mA | −12 V: ~40 mA
 
 ### Known Circuit Challenges
 - 14 attenuverter pots is a very large number for a single module. Evaluate during panel

@@ -140,21 +140,35 @@ V_HP = SUM_AMP output = V_in − V_LP − (1/Q) × V_BP
 Resonance feedback:
 V_BP ──[linearizing diodes]──► LP1_Q_OTA IN+
                                 LP1_Q_OTA IN− → GND
-                                LP1_Q_OTA Iabc ←── RESONANCE CV (0–10 V via R_Iabc)
+                                LP1_Q_OTA Iabc ←── inverting Iabc driver (see below)
                                 LP1_Q_OTA I_out ──► directly into SUM_AMP (−) virtual ground node
 ```
 
-Higher Iabc = higher gm = more BP feedback current into summing node = higher Q.
-RESONANCE knob CW → higher Iabc → higher Q → self-oscillation.
+Q formula (derived from KCL at SUM_AMP virtual-ground node, all resistors = R_in = 100 kΩ):
+  ω₀/Q = g_m_Q × R_in × ω₀  →  Q = 1 / (g_m_Q × R_in) = 52 mV / (Iabc × 100 kΩ)
 
-Q range derivation (LP1, C = 47 nF, R_in = 100 kΩ):
-  Q ≈ R_in × gm = R_in × Iabc / (2 × V_T) = 100 kΩ × Iabc / 52 mV
-  At Iabc = 1 µA: Q ≈ 1.9 (mild resonance)
-  At Iabc = 10 µA: Q ≈ 19 (strong resonance)
-  At Iabc = 50 µA: Q ≈ 96 → onset of self-oscillation
+  More Iabc → more BP damping at virtual ground → LOWER Q (flatter). Self-oscillation at Iabc → 0.
+  The RESONANCE control MUST decrease Iabc as it turns clockwise.
 
-R_Iabc = V_RESONANCE_max / Iabc_target_max = 10 V / 50 µA = 200 kΩ nominal;
-RV_LP1_QMAX trim adjusts Iabc_max and therefore self-oscillation onset.
+  At Iabc = 0.74 µA: Q ≈ 0.7  (Butterworth — flat, no resonance peak)
+  At Iabc = 0.10 µA: Q ≈ 5    (moderate resonance peak)
+  At Iabc ≈ 10 nA:   Q ≈ 52   (near self-oscillation onset)
+
+Inverting Iabc driver (RESONANCE CV must decrease Iabc as it increases):
+  One spare TL072 half (IRES_AMP) configured as an inverting summer:
+
+  V_bias = +0.74 V (derived from +12 V via resistor divider R_a/R_b, op-amp buffered)
+  V_bias ──[R_f]──(−) IRES_AMP
+  V_RES_scaled ──[R_f]──(−)       V_RES_scaled = RESONANCE_CV × (0.74 V / 10 V) via divider
+  (+) = GND; feedback R_f
+
+  V_Iabc = V_bias − V_RES_scaled
+  R_Iabc = 1 MΩ from V_Iabc node to LP1_Q_OTA Iabc pin
+
+  At RESONANCE=0:   V_Iabc = +0.74 V → Iabc = 0.74 µA (Q ≈ 0.7, flat)
+  At RESONANCE=100%: V_Iabc → 0 V   → Iabc → 0 (Q → ∞, self-oscillation)
+  Small clamp diode (anode GND, cathode V_Iabc) prevents negative Iabc if CV overshoots.
+  RV_LP1_QMAX adjusts V_bias to set the flat Q and self-oscillation onset point.
 
 ### STEREO SPREAD OFFSET Circuit
 
@@ -214,6 +228,7 @@ Both integrator capacitors C1 = C2 = 47 nF.
 | C1_L, C2_L, C1_R, C2_R | C0G/NP0 | 0603 | 4 | 47 nF integrator capacitors |
 | R_in_L, R_in_R | — | 0603 | 2 | 100 kΩ summing amp input resistor |
 | RV_SPREAD_OFFSET | Bipolar pot | 9mm | 1 | STEREO SPREAD OFFSET; CW = +5 V, CCW = −5 V, wiper → R expo summer |
+| R_spread, R_ctrl_R | — | 0603 | 2 | Summing resistors at R expo summer input; **0.1% tolerance** — mismatch adds semitone error per volt |
 | C_VCC, C_VEE | — | 0603 | 100 nF | 8 | Decoupling, 2 per IC × 4 ICs |
 
 ### Trim Pots
@@ -241,7 +256,7 @@ Both integrator capacitors C1 = C2 = 47 nF.
 ### Known Circuit Challenges
 - **Expo converter temperature drift**: THAT340 matched pair required for stable 1V/oct tracking. Calibrate at room temperature; verify at 10°C and 40°C extremes during bring-up.
 - **Self-oscillation amplitude**: at Q → ∞, output amplitude limited by OTA/op-amp rail clipping. BAT54 anti-parallel diodes across SUM_AMP feedback resistor prevent hard clipping.
-- **LM13700 Q VCA Iabc range**: R_Iabc must be sized so the Iabc range at maximum RESONANCE CV just reaches self-oscillation. RV_LP1_QMAX trims this. Too high an Iabc → unstable; too low → can't self-oscillate.
+- **LM13700 Q VCA Iabc range**: R_Iabc = 1 MΩ; at maximum resonance, Iabc → 0 (self-oscillation). RV_LP1_QMAX trims V_bias and therefore the flat-response Iabc and self-oscillation onset. Too high V_bias → Q too low at minimum resonance setting; too low → self-oscillation onset too early.
 - **L/R resonance matching**: L and R use separate LM13700 cells (one IC per audio board) driven by the same RESONANCE CV. LM13700 cells on different dies will match slightly less well than V2164 cells on the same die; the calibrated Iabc operating point should keep mismatch inaudible.
 - **STEREO SPREAD OFFSET center null**: the bipolar pot must pass exactly 0 V at center detent. RV_LP1_SPREAD_NULL compensates for mechanical offset.
-- **SPREAD OFFSET interaction with CUTOFF CV**: V_spread sums into the R expo converter input alongside the shared CUTOFF CV. Match summing resistors to preserve 1V/oct tracking on R channel.
+- **SPREAD OFFSET interaction with CUTOFF CV**: V_spread sums into the R expo converter input alongside the shared CUTOFF CV. Summing resistors (R_spread and R_ctrl in the R expo summer) must be **0.1% tolerance** to preserve 1V/oct tracking on the R channel. Any mismatch adds a constant semitone error per volt of CV. Specify 0.1% in the parts table.

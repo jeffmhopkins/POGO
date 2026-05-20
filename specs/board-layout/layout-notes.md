@@ -119,14 +119,19 @@ Densest board in the system — Block 3 APF chains dominate the component count.
 | Block A L: Input buffer | TL072 (half A + BAT54 clamp) | TL072 ×1 |
 | Block 1 L: Pre-gain | TL072 (half B), gain switch resistors | (shared with Block A IC) |
 | Block 2 L: Envelope follower | TL074 ×1 (full-wave rectifier + peak detector), TL072 ×1 (buffer + MOD SEL diode-OR) | TL074 ×1, TL072 ×1 |
-| Block 3 L: APF chains 1+2+3 | LM13700M ×9 (6 stages × 3 chains; 2 LM13700 cells per stage, 1 stage = half a LM13700 dual; 6 stages ÷ 2 per IC × 3 chains = 9 ICs), TL072 ×9 (stage buffers + comb tap) | LM13700 ×9, TL072 ×9 |
+| Block 3 L: APF chains 1+2+3 | LM13700M ×9 (6 stages × 3 chains; 2 LM13700 cells per stage, 1 stage = half a LM13700 dual; 6 stages ÷ 2 per IC × 3 chains = 9 ICs), LM13700M ×1 (**LM13700_CB1** = COMB BYPASS VCA), TL072 ×9 (stage buffers + comb tap) | LM13700 ×10, TL072 ×9 |
 | Block 4 L: Distortion | TL072 ×3 (soft clip, 1 per chain), TL072 ×3 (hard clip, 1 per chain), TL074 ×3 (wavefold, 2-stage per chain), TL074 ×1 (sum amp) | TL072 ×6, TL074 ×4 |
 | Block VCA L: Pre-LP1 VCA signal path | **THAT_VCA_L** (THAT 2180, SOIC-8) — 1 per audio board; no IC sharing | THAT 2180 ×1 |
 | Block 5 L: LP Filter 1 | LM13700M ×1 (2 OTA integrators), TL074 ×1 (SVF sum amp + buffers), **IC_Q_AB_L** cell A (LP1 L Q; cell B = LP2 L Q) | LM13700 ×1, TL074 ×1 |
 | Block 6 L: LP Filter 2 | LM13700M ×1, TL074 ×1, **IC_Q_AB_L** cell B (LP2 L Q — same IC as LP1 Q) | LM13700 ×1, TL074 ×1, (IC_Q_AB_L shared) |
 | Block 7 L: HP Filter | LM13700M ×1 (2 OTA integrators), TL072 ×1, **IC_Q_C_L** cell A (HP L Q; cell B = spare) | LM13700 ×1, TL072 ×1, LM13700 ×1 |
 | Block B L: Output buffers | TL072 ×1 (BAND OUT L + LEFT OUT, two halves) | TL072 ×1 |
-| **Left board total** | | **LM13700 ×14, TL072 ×22, TL074 ×7, THAT 2180 ×1** |
+| **Left board total** | | **LM13700 ×15, TL072 ×22, TL074 ×7, THAT 2180 ×1** |
+
+LM13700 allocation on Left audio board:
+- **Block 3 APF ×9** + **LM13700_CB1 ×1** (COMB BYPASS VCA) = 10 for Block 3
+- **LP1 integrators ×1** + **IC_Q_AB_L ×1** (LP1+LP2 Q shared) + **LP2 integrators ×1** = 3 for Blocks 5+6
+- **HP integrators ×1** + **IC_Q_C_L ×1** (HP Q) = 2 for Block 7
 
 LM13700 Q VCA allocation on Left audio board:
 - **IC_Q_AB_L**: Cell A = LP1 L Q feedback; Cell B = LP2 L Q feedback
@@ -138,7 +143,7 @@ LM13700 Q VCA allocation on Left audio board:
 
 **Purpose**: Mirror of left audio board for right channel.
 
-Identical IC inventory to left audio board. Component placement is a near-mirror of the left
+Identical IC inventory to left audio board (**LM13700 ×15, TL072 ×22, TL074 ×7, THAT 2180 ×1** — includes LM13700_CB2 COMB BYPASS VCA). Component placement is a near-mirror of the left
 board layout (not electrically identical due to STEREO SPREAD OFFSET, which adds V_spread
 to R channel only at the expo converter — this is handled on the utility board before the
 expo output arrives, so the R audio board receives a pre-offset I_abc signal and its LP1

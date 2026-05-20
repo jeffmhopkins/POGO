@@ -200,6 +200,7 @@ Wavefold:
 <h3>Phase 3 — Circuit Notes</h3>
 <ul>
   <li><strong>Summing headroom</strong>: three chains summed at high drive can exceed op-amp rail. Gain = 0.5× per chain (R_f = R_sum/2) keeps worst-case combined output to ±7.5 V.</li>
+  <li><strong>CD4053 V_EE = −12 V (CRITICAL)</strong>: The CD4053 must have V_EE connected to −12 V, V_DD to +12 V, V_SS to GND. If V_EE is left at GND, the mux silently distorts all negative-going audio. Label this explicitly on the schematic for all three MUX ICs.</li>
   <li><strong>CD4053 series resistance</strong>: ~100 Ω at ±5 V supply. Buffer each CD4053 output with a unity-gain op-amp half before the summing stage.</li>
   <li><strong>Post-Dist feedback routing</strong>: each chain's output (before the summing amp) is tapped and routed to Block 3's FB DIST BLEND crossfade circuit for that group. Route as shielded traces to avoid inter-chain crosstalk.</li>
   <li><strong>MODE switching live</strong>: brief click possible from mechanical switching. Accepted behavior.</li>

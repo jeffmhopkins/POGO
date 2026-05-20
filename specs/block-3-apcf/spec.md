@@ -239,14 +239,21 @@ Standard inverting all-pass op-amp topology with OTA as the time-constant elemen
 - R_ref: fixed reference resistor (sets passband gain balance)
 - C_apf: sets frequency range; C_apf = g_m / ω₀_max
 
-**Component values (example for Group 1, range 100 Hz – 1 kHz):**
+**Component values (Group 1, range 100 Hz – 1 kHz):**
+- Use I_abc_nom = 10 µA (operating point, same as LP1/LP2/HP filters)
+- g_m = 10 µA / (2 × 26 mV) = 192 µS
 - ω₀_max = 2π × 1000 = 6283 rad/s
-- g_m at I_abc_max ≈ 500 µA: g_m = 500µA / (2 × 26mV) = 9.6 mS
-- C_apf = g_m / ω₀_max = 9.6 mS / 6283 = 1.53 nF → use 1.5 nF (C0G 0603)
-- R_ref = 1/g_m at nominal I_abc = 10 kΩ to 100 kΩ range (set empirically)
+- C_apf = g_m / ω₀_max = 192 µS / 6283 = 30.6 nF → use **33 nF** (C0G 0603) ✓ available
 
-For Group 2 (500 Hz – 5 kHz): C_apf ≈ 300 pF
-For Group 3 (2 kHz – 20 kHz): C_apf ≈ 75 pF (use 68 pF or 82 pF)
+For Group 2 (500 Hz – 5 kHz, ω₀_max = 31416 rad/s):
+  C_apf = 192 µS / 31416 = 6.1 nF → use **6.8 nF** (C0G 0603) ✓ available
+
+For Group 3 (2 kHz – 20 kHz, ω₀_max = 125664 rad/s):
+  C_apf = 192 µS / 125664 = 1.53 nF → use **1.5 nF** (C0G 0603) ✓ available
+
+Note: earlier derivation used I_abc_max = 500 µA, giving 1000× smaller values (nF instead of µF).
+The correct derivation uses the nominal operating current (10 µA). All three values are C0G 0603.
+R_ref = 1/g_m at nominal I_abc = 10 kΩ to 100 kΩ range (set empirically)
 
 #### Expo Converter (per group)
 
@@ -341,14 +348,16 @@ A simple exponential offset applied to the R channel expo converter reference on
 |---|---|---|---|---|
 | OTA_x | LM13700M | SOIC-16 | 18 | Dual OTA; 1 per 2 APF stages; 9 per channel |
 | APF_AMP_x | TL072CDT | SOIC-8 | 18 | Dual op-amp; 1 per 2 APF stages; 9 per channel |
-| EXPO_x | THAT340 or LM394 | SOIC-8 | 3 | Matched NPN pair for expo converter (1 per group) |
+| EXPO_x | THAT340 | SOIC-8 | 3 | Matched NPN pair for expo converter (1 per group); LM394 discontinued — THAT340 only |
 | LM13700_CB1 | LM13700M | SOIC-16 | 1 | COMB BYPASS VCA — L channel: cell A = L dry path, cell B = L comb path |
 | LM13700_CB2 | LM13700M | SOIC-16 | 1 | COMB BYPASS VCA — R channel: cell A = R dry path, cell B = R comb path |
 | FB_AMP_x | TL074CDT | SOIC-14 | 3 | Per-group feedback summing amp + BLEND_AMP + POL_INV (≈3 quads needed) |
 | MIX_AMP_x | TL074CDT | SOIC-14 | 2 | Summing, width offset, general purpose |
-| C_apf_G1 | C0G / NP0 | 0603 | 12 | 1.5 nF (6 per channel × 2 channels) for Group 1 |
-| C_apf_G2 | C0G / NP0 | 0603 | 12 | 300 pF for Group 2 |
-| C_apf_G3 | C0G / NP0 | 0603 | 12 | 68–82 pF for Group 3 |
+| C_apf_G1 | C0G / NP0 | 0603 | 12 | 33 nF (6 per channel × 2 channels) — Group 1, 100 Hz–1 kHz |
+| C_apf_G2 | C0G / NP0 | 0603 | 12 | 6.8 nF — Group 2, 500 Hz–5 kHz |
+| C_apf_G3 | C0G / NP0 | 0603 | 12 | 1.5 nF — Group 3, 2 kHz–20 kHz |
+| C_hf_x | C0G / NP0 | 0603 | 36 | 22 pF HF-suppression at each OTA output node; 18 OTA cells per channel × 2 channels = 36 total |
+| R_lin_x | — | 0603 | 72 | 1 kΩ linearizing resistors at each OTA differential input; 2 per cell × 18 cells × 2 channels = 72 total |
 | SW_POL | 3-pos panel switch | Panel | 1 | POLARITY: Positive / Off / Negative (mechanical) |
 | RV_FB_DIST_BLEND | Lin pot | 9mm | 1 | FB DIST BLEND crossfade: 0% = clean APF fb, 100% = post-dist fb |
 
@@ -370,7 +379,7 @@ A simple exponential offset applied to the R channel expo converter reference on
 
 ### Known Circuit Challenges
 - **IC count**: 18 LM13700 + 18 TL072 is large. Plan 2–3 stacked PCBs with ribbon cable.
-- **Expo converter matching**: THAT340 or LM394 matched pair required for stable 1V/oct tracking across temperature; a single transistor from a general-purpose part will drift.
+- **Expo converter matching**: THAT340 matched NPN pair required for stable 1V/oct tracking across temperature. LM394 is discontinued — use THAT340 only. A single general-purpose transistor will drift.
 - **HF oscillation**: OTA stages at high Iabc (high frequency) can self-oscillate due to parasitic capacitance. Add small (22 pF) capacitors at each OTA output node and keep traces short.
 - **Crosstalk L/R**: L and R share the same group frequencies but have separate OTA signal paths. Route L and R ground planes separately; do not route L signal adjacent to R signal on PCB.
 - **V_post_dist routing**: the distortion output (Block 4) must be routed to the APF feedback section without picking up noise. Use a shielded wire or dedicated PCB trace with guard ring; keep away from OTA signal nodes.

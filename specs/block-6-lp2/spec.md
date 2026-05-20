@@ -98,6 +98,11 @@ summing amplifier, and an LM13700 OTA cell for voltage-controlled Q. See
 LP2's Q VCA uses cell B of IC_Q_AB (the same LM13700 that handles LP1 Q on cell A). LP1 and
 LP2 share one LM13700 for Q VCA per audio board — no V2164 IC required.
 
+Q formula and resonance control direction: identical to LP1. See `specs/block-5-lp1/spec.md`
+Phase 3 for the correct Q formula (Q = 52 mV / (Iabc × R_in)) and the inverting Iabc driver
+circuit. More Iabc → lower Q (flatter). Self-oscillation occurs at Iabc → 0, not at max Iabc.
+LP2 RESONANCE CV must also drive a decreasing Iabc via its own IRES_AMP inverting stage.
+
 **Key differences from LP1:**
 - Separate panel controls: CUTOFF 2, RESONANCE 2
 - Separate CV inputs and mod attenuverters
@@ -123,7 +128,7 @@ Same as LP1. Per stereo pair (L+R):
 |---|---|---|---|
 | RV_LP2_REF | f_ref2 ±20% | 1V/oct reference frequency for LP2 | Adjust until C4 (0 V CV) = ~2.5 kHz |
 | RV_LP2_1VOCT | 1V/oct ±5% | Expo converter tracking | Same one-octave step test as LP1 |
-| RV_LP2_QMAX | Q 10–50 | Maximum resonance / self-oscillation onset | Same procedure as LP1 |
+| RV_LP2_QMAX | V_bias trim | Flat Q point and self-oscillation onset | Same procedure as LP1; adjusts inverting Iabc driver V_bias |
 
 ### Power Draw Estimate
 +12 V: ~15 mA | −12 V: ~15 mA (IC_Q_AB LM13700 power shared with LP1 count)

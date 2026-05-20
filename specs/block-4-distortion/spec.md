@@ -217,6 +217,10 @@ Same configuration for R channel using second TL072 or second half of the SUM_AM
 - +12 V: ~25 mA | −12 V: ~25 mA
 
 ### Known Circuit Challenges
+- **CD4053 V_EE supply**: CD4053 handles bipolar audio signals (±5 V). The V_EE pin MUST
+  be connected to −12 V (not GND). If V_EE = GND, the mux will severely distort negative-going
+  signals (series resistance increases dramatically below 0 V). Mark V_EE = −12 V explicitly
+  in the schematic on all three CD4053 ICs. V_DD = +12 V, V_SS = GND.
 - **Summing headroom**: three chains summed at high drive can exceed op-amp rail. Set summing
   gain to 0.5× per chain (attenuate by half before summing) so worst-case sum is ±7.5 V.
   Verify in VCV prototype that this gain doesn't reduce perceived loudness too much; adjust R_sum.

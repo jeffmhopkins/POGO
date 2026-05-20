@@ -134,12 +134,15 @@ MOD BUS ──[tip switch]──[100 Ω]──[BAT54 SOT-23]──► AMT pot (�
 | D_cv | BAT54S | SOT-23 | 1 | CV input protection clamp |
 | R_cv | — | 0603 | 100 Ω | 1 | Series resistor at CV input |
 | R_in_L, R_in_R | — | 0603 | 100 Ω | 2 | Series resistors at audio inputs |
-| R_gain_L, R_gain_R | — | 0603 | TBD | 2 | V-to-I resistors at GAIN pins; value per THAT 2180 datasheet |
+| R_gain_L, R_gain_R | — | 0603 | 15 kΩ | 2 | V-to-I resistors at GAIN pins; nominal starting value — verify unity-gain current from THAT 2180 datasheet |
+| RV_VCA_UNITY_L, RV_VCA_UNITY_R | Bourns 3224W | SMD | 500 Ω | 2 | Unity-gain trim; in series with R_gain at each GAIN pin; one per audio board |
 
 ### Trim Pots
-None required for normal operation. If the unity-gain point at AMT center deviates from 0 dB,
-a small series resistor on R_gain trims the operating point. Verify unity gain by measuring
-output with AMT at center and no CV applied.
+
+| Reference | Range | Purpose | Adjustment |
+|---|---|---|---|
+| RV_VCA_UNITY_L | ±3% of R_gain | Unity gain at AMT center (L board) | Set AMT to center detent, CV IN unplugged; adjust until V_out_L = V_in_L (0 dB) |
+| RV_VCA_UNITY_R | ±3% of R_gain | Unity gain at AMT center (R board) | Same procedure on R channel |
 
 ### Power Draw Estimate
 Two THAT 2180 ICs (one per audio board). No IC sharing.
@@ -153,8 +156,10 @@ Two THAT 2180 ICs (one per audio board). No IC sharing.
 - Supply decoupling: 100 nF ceramic at each THAT 2180 supply pin.
 
 ### Known Circuit Challenges
-- **Unity gain at AMT center**: THAT 2180 GAIN pin requires a specific current for unity gain.
-  Verify from THAT 2180 datasheet. R_gain must produce that current when V_cv_att = 0 V.
+- **Unity gain at AMT center**: THAT 2180 GAIN pin requires a specific bias current for unity gain.
+  R_gain = 15 kΩ is a nominal starting value; verify the exact unity-gain control current from the
+  THAT 2180 datasheet and adjust R_gain accordingly. RV_VCA_UNITY_L/R (Bourns 3224W, 500 Ω) in
+  series with R_gain provides ±3% trim range for factory calibration after bring-up.
 - **Hot input headroom**: THAT 2180 handles signals within ±12 V rails. Block 4 output up to
   ±10 V is safe.
 - **Hard gating at full negative AMT**: verify the attenuverter output swing drives the GAIN

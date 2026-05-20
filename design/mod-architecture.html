@@ -49,9 +49,9 @@
 │ PRIMARY MOD SOURCE JACK                                                      │
 │   TS tip-switching jack                                                      │
 │   Unplugged: selected ENV OUT feeds mod bus (via MOD SOURCE SEL switch)     │
-│              SEL = L       → ENV OUT L (0–10 V from Block 2)               │
-│              SEL = max(LR) → diode-OR of L and R (tracks louder channel)   │
-│              SEL = avg(LR) → (ENV_L + ENV_R) / 2 via resistor divider      │
+│              SEL = L           → ENV OUT L (0–10 V from Block 2)           │
+│              SEL = max(L,R)   → BAT54C diode-OR of L and R (louder)        │
+│              SEL = avg(L,R)   → (ENV_L + ENV_R) / 2 via resistor divider   │
 │   Plugged:   any external CV or audio overrides the envelope normalling     │
 └─────────────────────────────────────────────────────────────────────────────┘
   │
@@ -165,7 +165,7 @@ Each bipolar pot requires 1 TL074 half for the inverter.
 
 <h4>Primary Mod Source</h4>
 <ul>
-  <li><strong>MOD SOURCE SEL switch</strong> (3-position, panel): selects which envelope signal normalizes into the PRIMARY MOD SOURCE jack (L / max(L,R) / avg(L,R)).</li>
+  <li><strong>MOD SOURCE SEL switch</strong> (3-position, panel): selects which envelope signal normalizes into the PRIMARY MOD SOURCE jack: <strong>L</strong> (ENV OUT L only) / <strong>max(L,R)</strong> (BAT54C diode-OR, tracks louder channel) / <strong>avg(L,R)</strong> ((ENV_L+ENV_R)/2 via resistor divider into buffer).</li>
   <li><strong>PRIMARY MOD SOURCE jack</strong>: tip-switching TS jack. Unplugged → selected ENV signal is active. Plugged → any external CV or audio overrides the envelope.</li>
 </ul>
 
@@ -210,7 +210,7 @@ Per-Destination Attenuverter:
 <h3>Phase 3 — Circuit Notes</h3>
 <ul>
   <li><strong>19 override jacks</strong>: all jacks must be TS type with sleeve-switching lug connected to the mod bus. Verify Thonkiconn footprint has switching lug accessible in PCB layout.</li>
-  <li><strong>Op-amp count</strong>: 1× TL074 for the mod bus processor + 10× TL074 for 19 attenuverter inverter stages. Note: SOURCE switch for APF feedback removed — replaced by FB DIST BLEND continuous knob in Block 3.</li>
+  <li><strong>Op-amp count</strong>: 1× TL074 for the mod bus processor + 10× TL074 for 19 attenuverter inverter stages (38 halves, 2 spare). SOURCE switch removed — replaced by FB DIST BLEND continuous knob with resistive op-amp crossfade in Block 3.</li>
   <li><strong>19 attenuverter pots</strong>: evaluate during panel layout whether all 19 can fit comfortably within their respective zones.</li>
 </ul>
 

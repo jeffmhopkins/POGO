@@ -228,11 +228,12 @@ IC EF2 (TL074CDT, SOIC-14, R channel):
   <tbody>
     <tr><td>EF1</td><td>TL074CDT</td><td>SOIC-14</td><td>—</td><td>1</td><td>L channel: rectifier (A+B) + scale amp (C) + avg(L,R) buffer (D)</td></tr>
     <tr><td>EF2</td><td>TL074CDT</td><td>SOIC-14</td><td>—</td><td>1</td><td>R channel: rectifier (A+B) + scale amp (C) + max(L,R) buffer (D)</td></tr>
-    <tr><td>D_max</td><td>BAT54</td><td>SOT-23</td><td>—</td><td>1</td><td>Dual Schottky; D_maxL + D_maxR for max(L,R) diode-OR selector</td></tr>
+    <tr><td>D_max</td><td>BAT54C</td><td>SOT-23</td><td>—</td><td>1</td><td>Dual Schottky <strong>common-cathode</strong> (BAT54C); D_maxL anode = ENV_L, D_maxR anode = ENV_R, shared cathode = max_node. BAT54A (common anode) or BAT54S (series) are incompatible with this diode-OR circuit.</td></tr>
     <tr><td>D_atk_L, D_atk_R</td><td>1N4148WS</td><td>SOD-323</td><td>—</td><td>2</td><td>Attack charge diodes</td></tr>
     <tr><td>D_rel_L, D_rel_R</td><td>1N4148WS</td><td>SOD-323</td><td>—</td><td>2</td><td>Release discharge diodes (reversed orientation)</td></tr>
     <tr><td>D_rect (×4)</td><td>1N4148WS</td><td>SOD-323</td><td>—</td><td>4</td><td>Precision rectifier diodes (2 per channel)</td></tr>
-    <tr><td>C_hold_L, C_hold_R</td><td>—</td><td>5mm pitch TH</td><td>2.2 µF</td><td>2</td><td>Film cap (polyester/polypropylene); low leakage critical</td></tr>
+    <tr><td>C_hold_L, C_hold_R</td><td>Murata GRM21BR71H225KA73L (SMD) or equiv film (TH)</td><td>0805 SMD <em>or</em> 5mm TH</td><td>2.2 µF</td><td>2</td><td>Primary: 2.2 µF X7R MLCC 0805 (all-SMD, adequate for audio envelope rates). Alternative: 2.2 µF polyester/polypropylene film TH (5mm pitch) — lower dielectric absorption. Footprint should accommodate both; defer final choice to bring-up.</td></tr>
+    <tr><td>C_DC_BLK_L, C_DC_BLK_R</td><td>—</td><td>0805</td><td>10 µF</td><td>2</td><td><strong>DNP by default</strong> — DC blocking cap before rectifier input. Bridge with 0Ω resistor. Populate if DC offset causes non-zero ENV output at silence.</td></tr>
     <tr><td>RV_ATK</td><td>Log-taper pot</td><td>9mm PCB</td><td>100 kΩ</td><td>1</td><td>Attack time; shared L+R; ATTACK panel control</td></tr>
     <tr><td>RV_REL</td><td>Log-taper pot</td><td>9mm PCB</td><td>1 MΩ</td><td>1</td><td>Release time; shared L+R; RELEASE panel control</td></tr>
     <tr><td>R_atk_end (×2)</td><td>—</td><td>0603</td><td>100 Ω</td><td>2</td><td>Series end-stop on attack pot; sets minimum τ_a</td></tr>
@@ -286,10 +287,10 @@ Stage 3: Output scaling amplifier
 
 <h3>Phase 3 — Circuit Notes</h3>
 <ul>
-  <li><strong>Film capacitor for C_hold</strong>: ceramic caps have high dielectric absorption causing slow voltage droop; use polyester or polypropylene film (through-hole, 5mm or 7.5mm pitch).</li>
+  <li><strong>C_hold package</strong>: primary option is 2.2 µF X7R MLCC 0805 — acceptable leakage and DA for audio-rate envelope hold. Alternative: 2.2 µF polyester film TH (5mm pitch) for lower DA. PCB footprint should accommodate both to defer decision to bring-up.</li>
   <li><strong>Log-taper pots</strong>: standard log pots concentrate most of the rotation range at the bottom decade. If attack feel is too cramped at slow times, use a linear pot with an RC shaping network for pseudo-log response.</li>
   <li><strong>Diode leakage</strong>: at room temperature, 1N4148 leakage is negligible (~1–5 nA). At slow release settings with 2.2 µF, hold time is set by diode leakage. Acceptable for release times ≤ 2 s.</li>
-  <li><strong>DC blocking (optional)</strong>: if signal chain passes significant DC offset, populate a 10 µF series cap before the rectifier. Leave footprint unpopulated and bridged by default.</li>
+  <li><strong>DC blocking (DNP)</strong>: C_DC_BLK_L/R are 10 µF 0805 footprints bridged by 0Ω resistors on the PCB. Remove the bridge and populate the cap if DC offset from Block 1 causes non-zero ENV output at silence. Both footprints must be present on every board revision.</li>
   <li><strong>MOD SOURCE SEL — three positions</strong>:
     <ul>
       <li><strong>L</strong>: ENV_L routed directly. Best for mono-left input or when only the left channel matters.</li>

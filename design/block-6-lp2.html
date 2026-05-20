@@ -100,7 +100,7 @@ IC_Q_AB_L / IC_Q_AB_R (LM13700M) — shared with LP1 (cell A):
   Cell A: LP1 L/R Q VCA (see Block 5)
   Cell B: LP2 L/R Q VCA (here)
   V_BP ──[linearizing diodes]──► LP2_Q_OTA IN+ (cell B of IC_Q_AB_L/R)
-                                  Iabc ← RESONANCE 2 CV via R_Iabc
+                                  Iabc ← IRES_AMP inverting driver (V_Iabc = V_bias − V_RES_scaled; R_Iabc = 1 MΩ)
                                   I_out → LP2_SUM (−in) virtual-ground node
 
 C1/C2 per channel (C0G/NP0, 0603):
@@ -167,6 +167,7 @@ f_ref2 ≈ 2.5 kHz (set ~2 octaves above f_ref1 = 630 Hz so LP2 starts above LP1
 <h3>Phase 3 — Circuit Notes</h3>
 <ul>
   <li><strong>Independent expo calibration</strong>: LP1 and LP2 expo converters must be calibrated separately. A CV that tracks perfectly on LP1 may be off on LP2 due to component tolerances. Always calibrate each stage independently.</li>
+  <li><strong>Q formula and Iabc direction</strong>: Q = 52 mV / (Iabc × R_in). More Iabc → more damping → lower Q. Self-oscillation at Iabc → 0. LP2 RESONANCE control must decrease Iabc via its own IRES_AMP inverting driver (same circuit as LP1). RV_LP2_QMAX trims V_bias.</li>
   <li><strong>IC_Q_AB cell pairing</strong>: LP2 Q uses cell B of IC_Q_AB; LP1 Q uses cell A. Keep Iabc drive traces separate to avoid crosstalk between the two resonance controls.</li>
   <li><strong>Ground routing</strong>: use a single ground wire between LP1 and LP2 sections of the PCB; do not rely on copper pours alone between sections carrying different signal voltages.</li>
   <li>All other circuit challenges are identical to LP1 — see <a href="block-5-lp1.html">Block 5</a>.</li>
