@@ -1,0 +1,59 @@
+name: Build VCV Rack Plugin
+
+# Triggers: every push to the dev branch or main, every PR, and manual dispatch
+on:
+  push:
+    branches:
+      - main
+      - "claude/**"
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  # ─── Linux x64 (fastest; used for development feedback) ───────────────────
+  build-linux:
+    name: Build · Linux x64
+    runs-on: ubuntu-latest
+    # Official VCV Rack toolchain container — includes Rack SDK at /rack
+    # RACK_DIR=/rack is pre-set as an env var inside the image
+    container:
+      image: ghcr.io/vcvrack/rack-plugin-toolchain:2
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build plugin
+        run: make -j$(nproc) dist
+
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: POGO-linux-x64-${{ github.run_number }}
+          path: dist/
+          if-no-files-found: warn
+          retention-days: 30
+
+  # ─── Cross-platform distributable (Linux + Mac + Windows) ─────────────────
+  # Uncomment to enable full cross-platform builds.
+  # These use the same toolchain container but pass PLATFORM= to the Makefile.
+  #
+  # build-cross:
+  #   name: Build · ${{ matrix.platform }}
+  #   runs-on: ubuntu-latest
+  #   container:
+  #     image: ghcr.io/vcvrack/rack-plugin-toolchain:2
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       platform: [linux-x64, mac-x64, mac-arm64, win-x64]
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Build
+  #       run: make -j$(nproc) dist PLATFORM=${{ matrix.platform }}
+  #     - name: Upload artifact
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: POGO-${{ matrix.platform }}-${{ github.run_number }}
+  #         path: dist/
+  #         retention-days: 30
