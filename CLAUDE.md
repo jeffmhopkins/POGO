@@ -21,11 +21,14 @@ Stereo Input (L + R)
 [Block 3]  Triple 6-Stage All-Pass          stereo, 3 independent APF chains (phaser / comb)
            Comb Filter
   ↓
-[Block 4]  Distortion                       3 selectable modes
+[Block 4]  Distortion                       3 selectable modes (SC/HC/WF per APF group)
   ↓
-[Block 5]  LP Filter 1                      resonant, voltage-controlled
+[Block VCA] Pre-LP1 VCA                     THAT 2180, envelope-driven accent/gate/duck
   ↓
-[Block 6]  LP Filter 2                      resonant, voltage-controlled, different topology
+[Block 5]  LP Filter 1                      resonant, voltage-controlled (OTA-C SVF)
+           BAND OUT tap                     LP1 output available as stereo aux output
+  ↓
+[Block 6]  LP Filter 2                      resonant, voltage-controlled (same OTA-C SVF topology as LP1)
   ↓
 [Block 7]  HP Filter                        voltage-controlled
   ↓
@@ -98,6 +101,9 @@ POGO/
 │   ├── block-4-distortion/
 │   │   ├── spec.md
 │   │   └── schematic.svg
+│   ├── block-VCA/
+│   │   ├── spec.md
+│   │   └── schematic.svg
 │   ├── block-5-lp1/
 │   │   ├── spec.md
 │   │   └── schematic.svg
@@ -121,6 +127,7 @@ POGO/
 │   ├── block-2-envelope-follower.html
 │   ├── block-3-apcf.html
 │   ├── block-4-distortion.html
+│   ├── block-VCA.html
 │   ├── block-5-lp1.html
 │   ├── block-6-lp2.html
 │   ├── block-7-hp.html
@@ -138,6 +145,7 @@ POGO/
 │       ├── EnvelopeFollower.hpp  ← Block 2
 │       ├── AllPassComb.hpp       ← Block 3
 │       ├── Distortion.hpp        ← Block 4
+│       ├── VcaBlock.hpp          ← Block VCA
 │       ├── LPFilter.hpp          ← Blocks 5 & 6
 │       ├── HPFilter.hpp          ← Block 7
 │       └── ModBus.hpp            ← Modulation architecture
@@ -237,7 +245,8 @@ Name the topology and explain why it was chosen over alternatives:
 - **SMD preferred** throughout; through-hole only where mechanical reliability demands it
 - **Passives:** 0603 (best balance of density and hand-solderability)
 - **Op-amps (SOIC-8/14):** TL072 (general purpose), LM4562 (low noise), NE5532 (audio)
-- **OTAs (SOIC-16):** LM13700 (general), AS3320 (dedicated filter IC with resonance), V2164 (quad, low noise)
+- **OTAs (SOIC-16):** LM13700 (general; used throughout for APF integrators and Q VCA cells)
+- **Signal-path VCA (SOIC-8):** THAT 2180 (current-controlled exponential VCA; Block VCA)
 - **Analog switches (SOIC-14/16):** CD4066, DG408 for CV-selected gain or routing
 - **Protection diodes (SOT-23):** BAT54 dual Schottky for rail clamping at all inputs
 
@@ -310,26 +319,28 @@ Template:
 
 ## Per-Block Phases (1–3)
 
-| Block                        | Phase 1: Audio Spec | Phase 2: Analog Model | Phase 3: Circuit | Phase 6: Code |
-|------------------------------|---------------------|-----------------------|------------------|---------------|
-| Mod Architecture             | [ ]                 | [ ]                   | [ ]              | [ ]           |
-| Block A: Input Buffer        | [ ]                 | [ ]                   | [ ]              | [ ]           |
-| Block 1: Pre-Gain            | [ ]                 | [ ]                   | [ ]              | [ ]           |
-| Block 2: Envelope Follower   | [ ]                 | [ ]                   | [ ]              | [ ]           |
-| Block 3: Triple APF Comb     | [ ]                 | [ ]                   | [ ]              | [ ]           |
-| Block 4: Distortion          | [ ]                 | [ ]                   | [ ]              | [ ]           |
-| Block 5: LP Filter 1         | [ ]                 | [ ]                   | [ ]              | [ ]           |
-| Block 6: LP Filter 2         | [ ]                 | [ ]                   | [ ]              | [ ]           |
-| Block 7: HP Filter           | [ ]                 | [ ]                   | [ ]              | [ ]           |
-| Block B: Output Buffer       | [ ]                 | [ ]                   | [ ]              | [ ]           |
+| Block                        | Phase 1: Audio Spec | Phase 2: Analog Model | Phase 3: Circuit | Phase 4: Panel | Phase 5: Layout | Phase 6: Code |
+|------------------------------|---------------------|-----------------------|------------------|----------------|-----------------|---------------|
+| Mod Architecture             | [ ]                 | [ ]                   | [ ]              | (module-level) | (module-level)  | [ ]           |
+| Block A: Input Buffer        | [ ]                 | [ ]                   | [ ]              | (module-level) | (module-level)  | [ ]           |
+| Block 1: Pre-Gain            | [ ]                 | [ ]                   | [ ]              | (module-level) | (module-level)  | [ ]           |
+| Block 2: Envelope Follower   | [ ]                 | [ ]                   | [ ]              | (module-level) | (module-level)  | [ ]           |
+| Block 3: Triple APF Comb     | [ ]                 | [ ]                   | [ ]              | (module-level) | (module-level)  | [ ]           |
+| Block 4: Distortion          | [ ]                 | [ ]                   | [ ]              | (module-level) | (module-level)  | [ ]           |
+| Block VCA: Pre-LP1 VCA       | [ ]                 | [ ]                   | [ ]              | (module-level) | (module-level)  | [ ]           |
+| Block 5: LP Filter 1         | [ ]                 | [ ]                   | [ ]              | (module-level) | (module-level)  | [ ]           |
+| Block 6: LP Filter 2         | [ ]                 | [ ]                   | [ ]              | (module-level) | (module-level)  | [ ]           |
+| Block 7: HP Filter           | [ ]                 | [ ]                   | [ ]              | (module-level) | (module-level)  | [ ]           |
+| Block B: Output Buffer       | [ ]                 | [ ]                   | [ ]              | (module-level) | (module-level)  | [ ]           |
 
 ## Module-Level Phases (gate for all Phase 6 code)
 
-- [ ] **Phase 4: Panel Design** — HP width finalized, all controls placed, sub-panel
-      board decision made, silk-screen layout approved
+- [ ] **Phase 4: Panel Design** — HP width finalized, all controls placed, board split
+      decision made, silk-screen layout approved
       → `specs/panel-design/panel-notes.md` + `specs/panel-design/panel.svg`
-- [ ] **Phase 5: Board Layout** — board split strategy decided, ground plane approach
-      defined, component placement rules documented, connector strategy finalized
+- [ ] **Phase 5: Board Layout** — board split strategy decided (4-board: control + utility +
+      left audio + right audio), ground plane approach defined, component placement rules
+      documented, connector pinout finalized
       → `specs/board-layout/layout-notes.md`
 
 Last updated: YYYY-MM-DD
@@ -434,7 +445,7 @@ Source: post-gain / pre-comb audio — **two independent followers, one per chan
 - ENV OUT R jack: buffered right-channel envelope (0–10 V)
 - MOD SOURCE SEL switch (3-position): selects which envelope normalizes into the mod bus
   - L = ENV OUT L only
-  - max(L,R) = diode-OR (BAT54) of both envelopes, buffered — tracks the louder channel at any moment
+  - max(L,R) = diode-OR (**BAT54C**, common-cathode SOT-23) of both envelopes, buffered — tracks louder channel
   - avg(L,R) = (ENV_L + ENV_R) / 2 via equal resistor divider into unity-gain buffer
 
 **Analog behavior:**
@@ -463,21 +474,23 @@ MOD BUS  →  100Ω + BAT54 clamp  →  ATTENUVERTER (−1× to +1×)  →  para
                          OVERRIDE JACK ───┘  (tip-switching; disconnects mod bus when patched)
 ```
 
-### Modulation Destinations
+### Modulation Destinations (19 total)
 
 | Destination | Block | CV Range | Notes |
 |---|---|---|---|
-| APF Chain 1 Freq | 3 | ±5 V, 1V/oct | |
-| APF Chain 2 Freq | 3 | ±5 V, 1V/oct | |
-| APF Chain 3 Freq | 3 | ±5 V, 1V/oct | |
-| APF Feedback 1 | 3 | 0–10 V | Group 1 independent |
-| APF Feedback 2 | 3 | 0–10 V | Group 2 independent |
-| APF Feedback 3 | 3 | 0–10 V | Group 3 independent |
-| APF Blend | 3 | 0–10 V | feedback source crossfade; active when SOURCE = Blend |
-| APF Dry/Wet | 3 | 0–10 V | |
+| APF Master Offset | 3 | ±5 V, 1V/oct | Sums into all three FREQ CV nodes simultaneously |
+| APF Freq 1 | 3 | ±5 V, 1V/oct | Group 1 independent |
+| APF Freq 2 | 3 | ±5 V, 1V/oct | Group 2 independent |
+| APF Freq 3 | 3 | ±5 V, 1V/oct | Group 3 independent |
+| APF Feedback 1 | 3 | 0–10 V | Group 1 feedback depth |
+| APF Feedback 2 | 3 | 0–10 V | Group 2 feedback depth |
+| APF Feedback 3 | 3 | 0–10 V | Group 3 feedback depth |
+| APF FB Dist Blend | 3 | 0–10 V | Crossfade: 0% = clean APF fb, 100% = post-dist fb |
+| APF Comb Bypass | 3 | 0–10 V | Pre-comb VCA level; 0 V = bypassed, 10 V = full comb |
 | Distortion Drive 1 | 4 | 0–10 V | Group 1 chain |
 | Distortion Drive 2 | 4 | 0–10 V | Group 2 chain |
 | Distortion Drive 3 | 4 | 0–10 V | Group 3 chain |
+| VCA Level | VCA | 0–10 V | Pre-LP1 VCA; AMT attenuverter on panel |
 | LP1 Cutoff | 5 | ±5 V, 1V/oct | |
 | LP1 Resonance | 5 | 0–10 V | 10 V = self-oscillation |
 | LP2 Cutoff | 6 | ±5 V, 1V/oct | |
@@ -515,16 +528,17 @@ Standard Eurorack 16-pin IDC (Doepfer A-100 compatible):
 |---|---|---|
 | Block A: Input buffers | 5 mA | 5 mA |
 | Block 1: Pre-Gain | 5 mA | 5 mA |
-| Block 2: Envelope Follower | 10 mA | 10 mA |
+| Block 2: Envelope Follower | 12 mA | 12 mA |
 | Block 3: Triple APF Comb | 25 mA | 25 mA |
-| Block 4: Distortion | 15 mA | 15 mA |
+| Block 4: Distortion | 25 mA | 25 mA |
+| Block VCA: Pre-LP1 VCA | 5 mA | 5 mA |
 | Block 5: LP Filter 1 | 15 mA | 15 mA |
 | Block 6: LP Filter 2 | 15 mA | 15 mA |
 | Block 7: HP Filter | 10 mA | 10 mA |
-| Mod Bus Processor | 10 mA | 10 mA |
-| Per-destination mod (×14) | 30 mA | 30 mA |
+| Mod Bus Processor | 5 mA | 5 mA |
+| Per-destination mod (×19 attenuverters) | 40 mA | 40 mA |
 | Block B: Output buffers | 5 mA | 5 mA |
-| **Total estimate** | **~145 mA** | **~145 mA** |
+| **Total estimate** | **~167 mA** | **~167 mA** |
 
 Measure actual draw during bring-up and update `specs/module-overview.md`.
 
@@ -555,7 +569,7 @@ Internal signal  →  1 kΩ series  →  Jack tip
 |---|---|
 | Panel height (usable) | 128.5 mm (3U) |
 | 1 HP | 5.08 mm |
-| POGO estimated width | 28–34 HP (finalized in panel design phase) |
+| POGO estimated width | 40 HP (finalized in Phase 4 panel design) |
 | Mounting hole size | M3 |
 | Mounting hole centers | 5.1 mm from top and bottom edges |
 | Max PCB depth from panel face | 35 mm (Doepfer A-100); up to 60 mm in deep cabinets |
@@ -573,7 +587,7 @@ Deliverables: `specs/panel-design/panel-notes.md` and `specs/panel-design/panel.
 
 ### HP Width and Control Placement
 
-- Finalize the HP count (estimated 28–34 HP; 1 HP = 5.08 mm).
+- HP count is finalized at **40 HP** (203.2 mm panel width; 1 HP = 5.08 mm).
 - Lay out all front-panel elements: audio jacks, CV jacks, knobs, switches, LEDs.
 - Eurorack spacing rules:
   - Jacks: minimum 8 mm center-to-center (Thonkiconn body = 8 mm wide, needs ≥ 1 mm gap).
@@ -588,26 +602,30 @@ Deliverables: `specs/panel-design/panel-notes.md` and `specs/panel-design/panel.
 
 ### Sub-Panel / Multi-Board Decision
 
-At POGO's complexity (28–34 HP, ~30 panel controls), a two-PCB approach is strongly preferred:
+At POGO's complexity (40 HP, ~70+ panel controls and jacks), a four-PCB split is used:
 
 **Control board (panel-mounted PCB):**
 - Mounts directly behind the panel using jack nuts and pot hardware.
 - Carries: all Thonkiconn jacks, all pots, all switches, all panel LEDs.
 - Thin board (1.0 mm or 1.2 mm) to minimize stack depth.
-- Connects to the audio board(s) via a right-angle 2.54 mm pin header or ribbon cable.
+- Connects to utility and audio boards via ribbon cables (IDC connectors).
 
-**Audio board(s):**
-- Hangs behind the control board on standoffs.
-- Carries all ICs, passive components, CV processing, filter circuits.
-- No panel hardware — all through-hole items are on the control board.
+**Utility board:**
+- Carries: mod bus processor, all 19 attenuverter circuits, expo converters (THAT340),
+  Iabc drive circuits, envelope follower selection logic.
+- Receives control voltages from the control board; sends Iabc currents to audio boards.
+- One per module (shared between L and R audio paths).
 
-Single-board alternative (all components on one PCB):
-- Simpler assembly and fewer connectors, but the board must reach all panel controls.
-- Works for simpler modules (< 16 HP, < 12 controls); not recommended for POGO.
-- Pot and jack positions constrain IC and passive placement, leading to longer signal traces.
+**Left audio board:**
+- Carries: Block A (L), Block 1 (L), Block 2 (L), Block 3 (L), Block 4 (L),
+  Block VCA (L), Block 5 (L), Block 6 (L), Block 7 (L), Block B (L).
+- Receives audio input from control board jacks; sends audio output to control board jacks.
 
-Document the chosen approach with a block diagram showing board boundaries and the
-connector pinout between boards in `panel-notes.md`.
+**Right audio board:**
+- Mirror of left audio board for the R signal path.
+
+Document the connector pinout between all four boards in `panel-notes.md` and
+`specs/board-layout/layout-notes.md`.
 
 ### Labeling and Silk-Screen
 
@@ -635,16 +653,21 @@ which signals need to be software-accessible (debug test points) and confirm pow
 
 Deliverables: `specs/board-layout/layout-notes.md`.
 
-### Single Board vs Multi-Board Split
+### Board Split (4-Board Architecture)
 
-Document the chosen strategy (see Phase 4 sub-panel decision above) and define board boundaries:
+POGO uses a four-board split. Document board boundaries and all connector pinouts in
+`layout-notes.md`:
 
 | Board | Contents | Approx size | Connects to |
 |---|---|---|---|
-| Control board | All jacks, pots, switches, LEDs | ~(HP × 5.08 mm) × 80 mm | Audio board via header |
-| Audio board | All ICs, passives, filter circuits | ~100 mm × 110 mm | Control board + Eurorack bus |
+| Control board | All jacks, pots, switches, LEDs | ~203 mm × 80 mm (40 HP) | Utility board + audio boards via IDC ribbon |
+| Utility board | Mod bus, attenuverters (×19), expo converters, Iabc drive | ~100 mm × 110 mm | Control board + both audio boards + Eurorack bus |
+| Left audio board | Block A/1/2/3/4/VCA/5/6/7/B (L channel) | ~100 mm × 110 mm | Control board + utility board |
+| Right audio board | Block A/1/2/3/4/VCA/5/6/7/B (R channel) | ~100 mm × 110 mm | Control board + utility board |
 
-If further splitting (e.g., separate LP/HP board): document split point and inter-board signals.
+The Eurorack power header lives on the utility board; power rails are distributed to
+audio boards via the ribbon connectors. Each audio board has its own ferrite beads and
+bulk decoupling.
 
 ### Ground Plane Strategy
 
@@ -762,15 +785,21 @@ Docker image.
 
 ## Where to Start
 
-1. Read `specs/STATUS.md` — if empty, begin filling in `specs/module-overview.md` with the full
-   signal chain, estimated panel width, and power budget.
-2. Work through blocks in signal-chain order: A → 1 → 2 → mod architecture → 3 → 4 → 5 → 6 → 7 → B.
-   For each block: complete Phase 1 → Phase 2 → Phase 3 in `specs/block-N-name/spec.md` and
-   `schematic.svg`, then create the HTML design doc in `design/`.
-3. When all (or nearly all) per-block Phase 3 work is stable, begin **Phase 4: Panel Design**:
-   create `specs/panel-design/panel-notes.md` and `specs/panel-design/panel.svg`.
-4. After Phase 4 is complete, begin **Phase 5: Board Layout**:
-   create `specs/board-layout/layout-notes.md`.
-5. Only after STATUS.md shows ✅ for Phases 1–3 on all blocks AND Phase 4 AND Phase 5:
-   create `src/dsp/*.hpp` for each block (Phase 6).
-6. After all blocks are coded: integrate in `src/Pogo.cpp`, build, and test in VCV Rack.
+**Current project state (as of 2026-05-20): Phases 1–5 are complete. Phase 6 (VCV Rack code)
+is the next and only remaining step.**
+
+1. Read `specs/STATUS.md` to confirm all blocks show ✅ for Phases 1–3 and Phase 4/5 are ✅.
+2. Begin Phase 6 implementation in signal-chain order:
+   A → 1 → 2 → mod architecture → 3 → 4 → VCA → 5 → 6 → 7 → B.
+   For each block: implement `src/dsp/<Block>.hpp` using the Phase 2 transfer function from
+   `specs/block-N-name/spec.md`. Apply bilinear transform; oversample at 2× or 4× for
+   nonlinear stages (Blocks 3, 4).
+3. After all DSP classes are implemented: wire them together in `src/Pogo.cpp`, add the
+   VCV Rack panel widget, and register the module in `plugin.hpp` / `plugin.cpp` / `plugin.json`.
+4. Build with `make` and test in `Rack -d`. Verify signal levels at each block boundary
+   match the specs (especially ±5 V audio, 0–10 V CV, 1V/oct tracking).
+5. Use `specs/board-layout/layout-notes.md` connector pinouts as the integration test spec —
+   every inter-board signal in hardware has a corresponding VCV Rack I/O or internal node.
+
+For reference on how earlier phases were done, all spec files and design HTML files are
+complete in `specs/` and `design/`.
