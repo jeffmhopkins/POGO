@@ -1,0 +1,23 @@
+{
+  "slug": "POGO",
+  "name": "POGO",
+  "version": "2.0.0",
+  "license": "GPL-3.0-only",
+  "brand": "Space Coast Synthesizers",
+  "author": "Space Coast Synthesizers",
+  "authorEmail": "",
+  "authorUrl": "",
+  "pluginUrl": "",
+  "manualUrl": "",
+  "sourceUrl": "",
+  "changelogUrl": "",
+  "minRackVersion": "2.0.0",
+  "modules": [
+    {
+      "slug": "Pogo",
+      "name": "POGO",
+      "description": "Stereo Triple Comb Filter with modulation",
+      "tags": ["Filter", "Phaser", "Effect"]
+    }
+  ]
+}

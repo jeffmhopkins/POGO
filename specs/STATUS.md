@@ -30,4 +30,4 @@ Last updated: 2026-05-20
 1. Per-block Phases 1–3: ✅ complete for all blocks
 2. Phase 4: panel design ✅ — panel.html + panel.svg complete; all docs synced
 3. Phase 5: board layout ✅ — 4-board split documented in specs/board-layout/layout-notes.md
-4. Begin Phase 6 (VCV Rack code): all gates cleared; start block by block in signal-chain order
+4. Phase 6 (VCV Rack code): **Stage 0 scaffold complete** — plugin.json, Makefile, src/, res/Pogo.svg committed; all 47 params / 22 inputs / 6 outputs registered; audio pass-through wired. Rack SDK install required before `make`. Next: Stage 1 (Block A + B DSP, clean pass-through test).
