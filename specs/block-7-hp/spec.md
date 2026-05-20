@@ -104,7 +104,7 @@ I_abc = I_ref × e^(V_ctrl / V_T)    (expo converter)
 Q = (summing resistor ratio at feedback input)
 ```
 In a classic SVF: Q is set by a single resistor in the feedback path. Voltage-controlled Q
-requires a VCA in the feedback path (e.g., V2164 cell) or a separate OTA.
+requires a VCA or OTA in the feedback path — this design uses an LM13700 OTA cell.
 
 ---
 
@@ -113,8 +113,9 @@ requires a VCA in the feedback path (e.g., V2164 cell) or a separate OTA.
 ### Topology: Operational Transconductance Amplifier State-Variable Filter (OTA-SVF)
 
 Uses two OTA cells (LM13700) as the integrators in the SVF core. The summing amplifier uses
-one half of a TL072. Q is controlled by a VCA cell (V2164) in the resonance feedback path,
-allowing voltage control of resonance independently from cutoff.
+one half of a TL072. Q is controlled by a third LM13700 OTA cell in the resonance feedback
+path — OTA output current injects into the SUM_AMP virtual-ground node, giving voltage-
+controlled Q independently of cutoff.
 
 ```
 V_in ──[R_in]──(−) SUM_AMP ───(out)──[OTA1 as integrator]──(out)─── V_BP
@@ -130,15 +131,16 @@ V_in ──[R_in]──(−) SUM_AMP ───(out)──[OTA1 as integrator]─
 V_HP = SUM_AMP output = V_in − V_LP − (1/Q) × V_BP
 
 Resonance (Q control):
-V_BP ──[V2164 cell, gain = 1/Q]──► back to SUM_AMP (−) input
+V_BP ──[linearizing diodes]──► HP_Q_OTA IN+
+                                HP_Q_OTA IN− → GND
+                                HP_Q_OTA Iabc ←── RESONANCE CV (0–10 V via R_Iabc)
+                                HP_Q_OTA I_out ──► SUM_AMP (−) virtual ground node
 ```
 
-The V2164 (quad VCA) controls the amount of BP feedback: higher V2164 gain = lower Q
-(less feedback → wider, flatter response). At maximum V2164 gain (maximum feedback), the
-filter self-oscillates.
+Higher Iabc = higher gm = more BP feedback current = higher Q → self-oscillation.
+RESONANCE knob CW = higher Iabc = higher Q.
 
-**Note on Q control sign:** In the SVF, increasing feedback amount increases Q (more resonance).
-The V2164 gain knob is wired so that RESONANCE knob clockwise = more feedback = higher Q.
+HP_Q_OTA is cell A of IC_Q_C (one LM13700 per audio board; cell B is spare or future use).
 
 ### Integrator capacitor values (HP range: 20 Hz – 5 kHz, approximately 8 octaves)
 
@@ -156,8 +158,9 @@ For f₀ = 1 kHz (nominal): C = g_m / ω₀ = 192µS / 6283 = 30.6 nF → use 33
 |---|---|---|---|---|
 | HP_OTA_L, HP_OTA_R | LM13700M | SOIC-16 | 2 | Dual OTA; 2 integrators per channel (1 IC per channel) |
 | HP_SUM_L, HP_SUM_R | TL072CDT | SOIC-8 | 2 | SVF summing amplifier + HP output buffer (1 IC per channel) |
-| HP_VCA | V2164D | SOIC-16 | 1 | Quad VCA; 2 cells for L resonance + 2 cells for R resonance |
-| HP_EXPO | THAT340 or LM394 | SOIC-8 | 1 | Matched NPN pair for HP expo converter (shared L+R) |
+| IC_Q_C_L | LM13700M | SOIC-16 | 1 (Left audio board) | Cell A = HP L Q VCA; cell B = spare |
+| IC_Q_C_R | LM13700M | SOIC-16 | 1 (Right audio board) | Cell A = HP R Q VCA; cell B = spare |
+| HP_EXPO | THAT340 | SOIC-8 | 1 | Matched NPN pair for HP expo converter (shared L+R) |
 | C_int_L, C_int_R | C0G/NP0 | 0603 | 4 | 33 nF integrator caps (2 per channel: C1_L, C2_L, C1_R, C2_R) |
 | R_in_L, R_in_R | — | 0603 | 2 | 100 kΩ summing amp input resistor |
 | C_VCC, C_VEE | — | 0603 | 100 nF | 8 | Decoupling, 2 per IC × 4 ICs |
@@ -171,7 +174,7 @@ For f₀ = 1 kHz (nominal): C = g_m / ω₀ = 192µS / 6283 = 30.6 nF → use 33
 | RV_HP_QMAX | Q 10–50 | Maximum Q (self-oscillation onset) | Turn RESONANCE to max; verify clean sine output |
 
 ### Power Draw Estimate
-- 2× LM13700 + 2× TL072 + 1× V2164: ~15 mA
+- 2× LM13700 (integrators) + 1× LM13700 (Q VCA, IC_Q_C) + 2× TL072: ~15 mA
 - +12 V: ~10 mA | −12 V: ~10 mA
 
 ### Known Circuit Challenges
@@ -184,6 +187,6 @@ For f₀ = 1 kHz (nominal): C = g_m / ω₀ = 192µS / 6283 = 30.6 nF → use 33
   to the OTA differential inputs via small series resistors, typically 1 kΩ).
 - Self-oscillation level: when Q → ∞, the oscillation amplitude is limited by op-amp/OTA
   clipping. The output will be a slightly distorted sine. Acceptable behavior.
-- V2164 Q control law: the V2164's gain is exponential in its control voltage. Design the
-  RESONANCE pot control circuit so that the Q response feels linear to the user (requires
-  compensating shaping of the control voltage).
+- **LM13700 Q VCA Iabc**: R_Iabc sizing follows the same derivation as LP1/LP2. With
+  R_in = 100 kΩ and C = 33 nF (HP), Q ≈ 100 kΩ × Iabc / 52 mV. RV_HP_QMAX sets Iabc_max.
+  Design the RESONANCE pot control circuit so Q response feels linear to the user.

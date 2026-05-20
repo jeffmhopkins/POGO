@@ -68,7 +68,10 @@ V_in ──[R_in 100kΩ]──(−in) SUM_AMP (TL074 half) ──(out)── V_H
                                                     V_LP (lowpass) ──► to LP2 (Block 6)
                                                         │             ──► BAND OUT tap (Block B)
 V_LP ──────────────────────────────────────────────(−in) SUM_AMP (feedback)
-V_BP ──[V2164 VCA cell, gain=1/Q]──────────────────(−in) SUM_AMP (resonance feedback)
+V_BP ──[linearizing diodes]──► LP1_Q_OTA IN+ (LM13700 cell, IC_Q_AB)
+                                 IN− → GND
+                                 Iabc ← RESONANCE CV / R_Iabc
+                                 I_out ──────────────────────(−in) SUM_AMP (resonance feedback current)
 
 Expo Converter (THAT340, shared L+R):
   V_ctrl_L = CUTOFF knob + CUTOFF CV (attenuverter) → THAT340 matched NPN pair
@@ -83,10 +86,11 @@ STEREO SPREAD OFFSET (R channel only):
   V_spread &lt; 0 V: R cutoff shifts down relative to L
   Trim pot RV_LP1_SPREAD_NULL nulls center detent to 0 V
 
-RESONANCE knob → V2164 control voltage → sets 1/Q (feedback depth)
-  V2164 cells 1+2 for LP1 Q (cells 3+4 shared with Block VCA signal path)
-  RESONANCE = 0: Q ≈ 0.5 (wide/flat)
-  RESONANCE = max: Q → ∞ (self-oscillation)
+RESONANCE knob → Iabc current into LP1_Q_OTA (LM13700 cell A of IC_Q_AB) → sets Q
+  IC_Q_AB: cell A = LP1 Q; cell B = LP2 Q (separate IC from integrators)
+  Iabc = V_RESONANCE_CV / R_Iabc; higher Iabc → more BP feedback current → higher Q
+  RESONANCE = 0: Iabc = 0, Q ≈ 0.5 (wide/flat)
+  RESONANCE = max: Iabc = max → Q → ∞ (self-oscillation)
 
 BAND OUT tap: taken at LP1 V_LP output (before LP2 input) → to Block B BAND OUT buffers
 
@@ -120,12 +124,13 @@ V_BP_fb ─[R_fb]──(−in A)
 C1_L = 47 nF (C0G/NP0, 0603)  between OTA1 out and GND → V_BP_L
 C2_L = 47 nF (C0G/NP0, 0603)  between OTA2 out and GND → V_LP_L
 
-V_BP_L ──[V2164 cell 1 (Q control)]──► V_BP_fb  → back to SUM_AMP (−in)
-  V2164 cell allocation:
-    Cell 1: LP1 L Q control (this block)
-    Cell 2: LP1 R Q control (this block)
-    Cell 3: Block VCA L signal path (Block VCA shares this IC)
-    Cell 4: Block VCA R signal path (Block VCA shares this IC)
+Resonance Q feedback (LP1_Q_OTA, IC_Q_AB):
+  V_BP_L ──[linearizing diodes]──► LP1_Q_OTA IN+ (LM13700 cell A of IC_Q_AB_L)
+                                    IN− → GND
+                                    Iabc ← RESONANCE CV (0–10V) via R_Iabc (200 kΩ nominal)
+                                    I_out → LP1_SUM_L (−in) virtual-ground node
+  IC_Q_AB_L (Left audio board):  cell A = LP1 L Q; cell B = LP2 L Q
+  IC_Q_AB_R (Right audio board): cell A = LP1 R Q; cell B = LP2 R Q
 
 Expo Converter (LP1_EXPO, THAT340, SOIC-8):
   L channel input: V_ctrl_L = CUTOFF knob + CV attenuverter sum
@@ -154,8 +159,9 @@ Output buffer (LP1_SUM_L half B or C):
     <tr><td>LP1_OTA_R</td><td>LM13700M</td><td>SOIC-16</td><td>1</td><td>Dual OTA; 2 integrators for R channel</td></tr>
     <tr><td>LP1_SUM_L</td><td>TL074CDT</td><td>SOIC-14</td><td>1</td><td>SVF summing amp + LP/BP/HP buffers for L channel</td></tr>
     <tr><td>LP1_SUM_R</td><td>TL074CDT</td><td>SOIC-14</td><td>1</td><td>Same for R channel</td></tr>
-    <tr><td>LP1_VCA</td><td>V2164D</td><td>SOIC-16</td><td>1</td><td>Quad VCA; cells 1+2 for LP1 L+R Q; cells 3+4 shared with Block VCA signal path</td></tr>
-    <tr><td>LP1_EXPO</td><td>THAT340 or LM394</td><td>SOIC-8</td><td>1</td><td>Matched NPN pair for expo converter (L+R share one)</td></tr>
+    <tr><td>IC_Q_AB_L</td><td>LM13700M</td><td>SOIC-16</td><td>1</td><td>Left audio board; cell A = LP1 L Q VCA; cell B = LP2 L Q VCA</td></tr>
+    <tr><td>IC_Q_AB_R</td><td>LM13700M</td><td>SOIC-16</td><td>1</td><td>Right audio board; cell A = LP1 R Q VCA; cell B = LP2 R Q VCA</td></tr>
+    <tr><td>LP1_EXPO</td><td>THAT340</td><td>SOIC-8</td><td>1</td><td>Matched NPN pair for expo converter (L+R share one)</td></tr>
     <tr><td>C1_L, C2_L</td><td>C0G/NP0 cap</td><td>0603</td><td>2</td><td>47 nF integrator caps, L channel</td></tr>
     <tr><td>C1_R, C2_R</td><td>C0G/NP0 cap</td><td>0603</td><td>2</td><td>47 nF integrator caps, R channel</td></tr>
     <tr><td>R_in_L, R_in_R</td><td>—</td><td>0603</td><td>2</td><td>100 kΩ summing amp input resistors</td></tr>
@@ -214,7 +220,10 @@ Component derivation:
   g_m = 10µA / (2 × 26mV) = 192 µS
   C = g_m / ω₀_ref = 192µS / (2π × 630) = 48.5 nF → use 47 nF (C0G)
 
-Q control via V2164 (cells 1+2 for LP1):
+Q control via LM13700 OTA (IC_Q_AB, cell A per channel):
+  I_out injected into SUM_AMP (−in) virtual-ground → acts as BP feedback current
+  Q ≈ R_in × Iabc / (2 × V_T) = 100kΩ × Iabc / 52mV
+  Iabc = V_RESONANCE_CV / R_Iabc (R_Iabc ≈ 200 kΩ nominal; RV_LP1_QMAX sets max)
   Q → ∞ at RESONANCE = 100% (self-oscillation)
   Practical Q ≈ 50 at RESONANCE = 95%
 </pre>
@@ -223,9 +232,9 @@ Q control via V2164 (cells 1+2 for LP1):
 <ul>
   <li><strong>THAT340 expo converter</strong>: matched NPN pair required for stable 1V/oct tracking across temperature. Calibrate at room temperature; verify at 10°C and 40°C extremes.</li>
   <li><strong>STEREO SPREAD OFFSET summing node</strong>: V_spread is summed into the R channel expo converter input. The summing resistors must match to preserve 1V/oct tracking on R. Place the summing node physically close to the R expo converter input to minimize parasitic coupling.</li>
-  <li><strong>V2164 Q control law</strong>: V2164 gain is exponential in its control voltage. Wire the RESONANCE pot so Q response feels approximately linear to the user.</li>
+  <li><strong>LM13700 Q Iabc sizing</strong>: R_Iabc converts V_RESONANCE_CV (0–10 V) to Iabc. With R_in = 100 kΩ, target Iabc_max = 52 mV × Q_max / 100 kΩ. For Q_max = 50, Iabc_max ≈ 26 µA → R_Iabc ≈ 200 kΩ (confirm from RV_LP1_QMAX trim). Design RESONANCE control path so Q response feels approximately linear to the user.</li>
   <li><strong>Self-oscillation amplitude</strong>: at Q → ∞, output amplitude limited by OTA/op-amp clipping. Optionally add BAT54 anti-parallel diodes across feedback resistor in SUM_AMP to soft-limit self-oscillation amplitude.</li>
-  <li><strong>V2164 shared with Block VCA</strong>: cells 1+2 for LP1 Q; cells 3+4 for Block VCA L/R signal path. LP1 and Block VCA must be on the same PCB. Verify no crosstalk between Q control voltage and VCA control voltage traces.</li>
+  <li><strong>IC_Q_AB pairing</strong>: LP1 Q uses cell A; LP2 Q uses cell B of the same LM13700. Keep Iabc drive traces separate to avoid crosstalk between LP1 and LP2 Q controls.</li>
   <li><strong>BAND OUT tap</strong>: take the tap at the LP1 output buffer output (unity-gain follower on V_LP). This is the same node that feeds LP2 input — both can be driven from the same buffer without loading concerns given the 1 kΩ series output resistors in Block B.</li>
   <li><strong>LM13700 linearizing diodes</strong>: connect linearizing diode inputs to OTA differential inputs via 1 kΩ series resistors for low distortion at high signal levels.</li>
 </ul>
@@ -242,7 +251,7 @@ Q control via V2164 (cells 1+2 for LP1):
 </table>
 
 <h3>Power</h3>
-<p>+12 V: ~15 mA &nbsp;|&nbsp; −12 V: ~15 mA &nbsp;(V2164 power counted once; cells 3+4 counted in Block VCA)</p>
+<p>+12 V: ~15 mA &nbsp;|&nbsp; −12 V: ~15 mA &nbsp;(IC_Q_AB LM13700 power shared with LP2 count)</p>
 
 </body>
 </html>

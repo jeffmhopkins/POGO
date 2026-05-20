@@ -103,7 +103,7 @@ Stereo Input (L + R)   ±5 V audio
   ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │ Block VCA: Pre-LP1 Voltage-Controlled Amplifier                 │
-│ V2164 quad VCA, cells 3+4 (cells 1+2 shared with LP1 Q)        │
+│ THAT 2180 single-channel VCA — 1 per audio board (no IC sharing)│
 │ AMT attenuverter (−1× to +1×) + CV IN jack (normalizes to mod bus)│
 │ Unity gain at AMT center; accent/duck via envelope or CV        │
 │ In: ±7.5 V  Out: 0–1× attenuated → ±5 V nominal               │
@@ -215,19 +215,19 @@ MODULATION SYSTEM (parallel, feeds all blocks above)
     <tr><td>Block 2: Envelope Follower</td><td>10 mA</td><td>10 mA</td></tr>
     <tr><td>Block 3: Triple APF Comb</td><td>55 mA</td><td>55 mA</td></tr>
     <tr><td>Block 4: Distortion</td><td>25 mA</td><td>25 mA</td></tr>
-    <tr><td>Block VCA: Pre-LP1 VCA</td><td>2 mA</td><td>2 mA</td></tr>
+    <tr><td>Block VCA: Pre-LP1 VCA</td><td>5 mA</td><td>5 mA</td></tr>
     <tr><td>Block 5: LP Filter 1</td><td>15 mA</td><td>15 mA</td></tr>
     <tr><td>Block 6: LP Filter 2</td><td>15 mA</td><td>15 mA</td></tr>
     <tr><td>Block 7: HP Filter</td><td>10 mA</td><td>10 mA</td></tr>
     <tr><td>Mod Bus Processor</td><td>10 mA</td><td>10 mA</td></tr>
     <tr><td>Per-destination mod circuits (×19)</td><td>32 mA</td><td>32 mA</td></tr>
     <tr><td>Block B: Output Buffers</td><td>4 mA</td><td>4 mA</td></tr>
-    <tr><td><strong>Total estimate</strong></td><td><strong>~188 mA</strong></td><td><strong>~188 mA</strong></td></tr>
+    <tr><td><strong>Total estimate</strong></td><td><strong>~191 mA</strong></td><td><strong>~191 mA</strong></td></tr>
   </tbody>
 </table>
 
 <div class="note">
-  ⚠️ Block 3 is the most power-hungry block (18× LM13700). Measure actual current during bring-up and update this table.
+  ⚠️ Block 3 is the most power-hungry block (18× LM13700 APF integrators + 2× LM13700 COMB BYPASS on utility board). Measure actual current during bring-up and update this table.
   Total estimated power is within the typical busboard limit of 250 mA per rail per module, but with limited headroom.
 </div>
 

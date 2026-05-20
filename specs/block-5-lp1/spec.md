@@ -121,9 +121,9 @@ Q_max → ∞ at self-oscillation; practical limit: Q ≈ 50 at RESONANCE = 95%
 ### Topology: State-Variable Filter (OTA-C), LP output tapped
 
 Two LM13700 OTA cells act as the integrators in the SVF core. The summing amplifier uses a
-TL074. Q (resonance) is controlled by a V2164 VCA cell in the BP feedback path, giving
-voltage-controlled resonance independently of cutoff. Tapping V_LP gives the 2-pole lowpass
-output. V_BP and V_HP are available as auxiliary output jacks.
+TL074. Q (resonance) is controlled by a third LM13700 OTA cell in the BP feedback path —
+the OTA output current injects directly into the SUM_AMP virtual-ground input node, giving
+voltage-controlled Q independently of cutoff. Tapping V_LP gives the 2-pole lowpass output.
 
 ```
 V_in ──[R_in]──(−) SUM_AMP ──(out)──[OTA1 integrator]──(out)── V_BP
@@ -138,11 +138,23 @@ V_in ──[R_in]──(−) SUM_AMP ──(out)──[OTA1 integrator]──(ou
 V_HP = SUM_AMP output = V_in − V_LP − (1/Q) × V_BP
 
 Resonance feedback:
-V_BP ──[V2164 VCA cell, gain = 1/Q]──► (−) input of SUM_AMP
+V_BP ──[linearizing diodes]──► LP1_Q_OTA IN+
+                                LP1_Q_OTA IN− → GND
+                                LP1_Q_OTA Iabc ←── RESONANCE CV (0–10 V via R_Iabc)
+                                LP1_Q_OTA I_out ──► directly into SUM_AMP (−) virtual ground node
 ```
 
-Higher V2164 gain = less feedback = lower Q (wider, flatter).
-RESONANCE knob wired so CW = more feedback = higher Q → self-oscillation.
+Higher Iabc = higher gm = more BP feedback current into summing node = higher Q.
+RESONANCE knob CW → higher Iabc → higher Q → self-oscillation.
+
+Q range derivation (LP1, C = 47 nF, R_in = 100 kΩ):
+  Q ≈ R_in × gm = R_in × Iabc / (2 × V_T) = 100 kΩ × Iabc / 52 mV
+  At Iabc = 1 µA: Q ≈ 1.9 (mild resonance)
+  At Iabc = 10 µA: Q ≈ 19 (strong resonance)
+  At Iabc = 50 µA: Q ≈ 96 → onset of self-oscillation
+
+R_Iabc = V_RESONANCE_max / Iabc_target_max = 10 V / 50 µA = 200 kΩ nominal;
+RV_LP1_QMAX trim adjusts Iabc_max and therefore self-oscillation onset.
 
 ### STEREO SPREAD OFFSET Circuit
 
@@ -196,9 +208,9 @@ Both integrator capacitors C1 = C2 = 47 nF.
 |---|---|---|---|---|
 | LP1_OTA_L, LP1_OTA_R | LM13700M | SOIC-16 | 2 | Dual OTA; both cells = 2 integrators per channel |
 | LP1_SUM_L, LP1_SUM_R | TL074CDT | SOIC-14 | 2 | Summing amp + HP/BP/LP output buffers (1 per channel) |
-| V2164-A | V2164D | SOIC-16 | 1 (Left audio board) | Cell 1=LP1 L Q feedback; cell 3=Block VCA L signal (Block VCA shares this IC); cells 2+4 spare |
-| V2164-B | V2164D | SOIC-16 | 1 (Right audio board) | Cell 1=LP1 R Q feedback; cell 3=Block VCA R signal; cells 2+4 spare |
-| LP1_EXPO | THAT340 or LM394 | SOIC-8 | 1 | Matched NPN pair for expo converter (L+R share one expo) |
+| IC_Q_AB_L | LM13700M | SOIC-16 | 1 (Left audio board) | Cell A = LP1 L Q VCA; cell B = LP2 L Q VCA (shared with LP2) |
+| IC_Q_AB_R | LM13700M | SOIC-16 | 1 (Right audio board) | Cell A = LP1 R Q VCA; cell B = LP2 R Q VCA (shared with LP2) |
+| LP1_EXPO | THAT340 | SOIC-8 | 1 | Matched NPN pair for expo converter (L+R share one expo) |
 | C1_L, C2_L, C1_R, C2_R | C0G/NP0 | 0603 | 4 | 47 nF integrator capacitors |
 | R_in_L, R_in_R | — | 0603 | 2 | 100 kΩ summing amp input resistor |
 | RV_SPREAD_OFFSET | Bipolar pot | 9mm | 1 | STEREO SPREAD OFFSET; CW = +5 V, CCW = −5 V, wiper → R expo summer |
@@ -214,25 +226,22 @@ Both integrator capacitors C1 = C2 = 47 nF.
 | RV_LP1_SPREAD_NULL | ±100 mV | STEREO SPREAD OFFSET center-detent null | Set SPREAD OFFSET to center; trim until R channel cutoff = L channel cutoff |
 
 ### Power Draw Estimate
-- 2× LM13700 + 2× TL074 + 1× V2164 (cells 1+2; cells 3+4 counted in Block VCA): ~15 mA
+- 2× LM13700 (integrators) + 1× LM13700 (Q VCA, shared with LP2) + 2× TL074: ~15 mA
 - +12 V: ~15 mA | −12 V: ~15 mA
 
 ### Schematic Notes
-- V2164 cell allocation:
-  - Cell 1: LP1 L resonance Q control (this block)
-  - Cell 2: LP1 R resonance Q control (this block)
-  - Cell 3: Block VCA L signal path (Block VCA)
-  - Cell 4: Block VCA R signal path (Block VCA)
-- LP1 and Block VCA share the same V2164 IC; place on the same PCB
-- Audio signal flows: Block VCA output → LP1 summing amp input → LP2 (Block 6) + BAND OUT tap
-- STEREO SPREAD OFFSET summing node: place close to the R channel expo converter input
-- BAND OUT tap taken at the LP1 LP output buffer, before LP2 input
+- LP1 Q VCA uses one cell of IC_Q_AB (LM13700); the other cell handles LP2 Q — both on the
+  same audio board. No V2164 IC needed for LP1.
+- Block VCA L/R (THAT 2180) is on each audio board immediately upstream of LP1; no IC sharing.
+- Audio signal: Block VCA output → LP1 SUM_AMP → OTA1 → OTA2 → LP output → LP2 + BAND OUT.
+- STEREO SPREAD OFFSET summing node: place close to the R channel expo converter input.
+- BAND OUT tap taken at the LP1 LP output buffer, before LP2 input.
+- IC_Q_AB placement: place adjacent to LP1 OTAs and LP2 OTAs (Q VCA serves both filters).
 
 ### Known Circuit Challenges
 - **Expo converter temperature drift**: THAT340 matched pair required for stable 1V/oct tracking. Calibrate at room temperature; verify at 10°C and 40°C extremes during bring-up.
-- **Self-oscillation amplitude**: at Q → ∞, output amplitude is limited by OTA/op-amp rail clipping. Add a soft limiter (BAT54 anti-parallel diodes across feedback R in the SUM_AMP) to prevent hard clipping during self-oscillation.
-- **V2164 Q control law**: V2164 gain is exponential in its control voltage. The RESONANCE pot wiring should shape the control voltage so Q response feels approximately linear to the user.
-- **L/R resonance matching**: L and R use separate V2164 cells but the same control voltage from the RESONANCE pot. If cells are mismatched, stereo imbalance at high Q is audible. V2164 cells on the same die are well-matched; use adjacent cells (cells 1+2 for LP1 Q).
-- **V2164 shared with Block VCA**: cells 1+2 for LP1 resonance Q, cells 3+4 for Block VCA L/R signal. Place LP1 and Block VCA on the same PCB. Verify no crosstalk between Q control and VCA control voltages.
-- **STEREO SPREAD OFFSET center null**: the bipolar pot must pass exactly 0 V at center detent to maintain L/R cutoff matching in the center position. The RV_LP1_SPREAD_NULL trim pot compensates for pot mechanical offset.
-- **SPREAD OFFSET interaction with CUTOFF CV**: V_spread sums into the R expo converter input alongside the shared CUTOFF CV. Ensure the summing resistors are matched to preserve 1V/oct tracking on the R channel.
+- **Self-oscillation amplitude**: at Q → ∞, output amplitude limited by OTA/op-amp rail clipping. BAT54 anti-parallel diodes across SUM_AMP feedback resistor prevent hard clipping.
+- **LM13700 Q VCA Iabc range**: R_Iabc must be sized so the Iabc range at maximum RESONANCE CV just reaches self-oscillation. RV_LP1_QMAX trims this. Too high an Iabc → unstable; too low → can't self-oscillate.
+- **L/R resonance matching**: L and R use separate LM13700 cells (one IC per audio board) driven by the same RESONANCE CV. LM13700 cells on different dies will match slightly less well than V2164 cells on the same die; the calibrated Iabc operating point should keep mismatch inaudible.
+- **STEREO SPREAD OFFSET center null**: the bipolar pot must pass exactly 0 V at center detent. RV_LP1_SPREAD_NULL compensates for mechanical offset.
+- **SPREAD OFFSET interaction with CUTOFF CV**: V_spread sums into the R expo converter input alongside the shared CUTOFF CV. Match summing resistors to preserve 1V/oct tracking on R channel.

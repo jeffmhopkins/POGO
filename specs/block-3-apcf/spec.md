@@ -308,13 +308,24 @@ Three independent summing amps — one per group (using TL072 halves).
 #### COMB BYPASS VCA
 
 Pre-comb VCA controls the level of signal entering the comb filter chain. At 0V (COMB BYPASS = 0),
-the comb-processed signal is muted at the VCA and only the dry path passes. At 10V, full comb
-processing feeds into the signal path.
+the comb-processed signal is muted and only the dry path passes. At 10V, full comb processing
+feeds into the signal path.
 
-Linear voltage-controlled crossfade using V2164 quad VCA:
-- V2164 is a quad VCA in SOIC-16; 2 cells for L (bypass + comb), 2 cells for R (bypass + comb)
-- COMB BYPASS knob + CV → complementary control voltages to bypass and comb cells
-- 1× V2164 per stereo pair
+LM13700 OTA crossfade — 2× LM13700 (4 OTA cells for L bypass, L comb, R bypass, R comb):
+
+```
+V_BYPASS_CV ──[complementary Iabc driver]──► Cell A Iabc (dry path, decreasing)
+                                          ──► Cell B Iabc (comb path, increasing)
+
+Dry path:    V_in ──► LM13700_CB1 cell A I_out ──► SUM_AMP → V_out
+Comb path:   V_comb ──► LM13700_CB1 cell B I_out ──► SUM_AMP (same node)
+(L channel — LM13700_CB1; R channel — LM13700_CB2, same structure)
+```
+
+Complementary Iabc driver: op-amp difference stage (TL072 half) generates:
+  Cell A Iabc = (V_ref − V_BYPASS_CV) / R_Iabc   (full at CV=0, zero at CV=V_ref)
+  Cell B Iabc = V_BYPASS_CV / R_Iabc               (zero at CV=0, full at CV=V_ref)
+Both cells sum current into the same SUM_AMP virtual-ground node for a smooth crossfade.
 
 #### STEREO WIDTH
 
@@ -331,7 +342,8 @@ A simple exponential offset applied to the R channel expo converter reference on
 | OTA_x | LM13700M | SOIC-16 | 18 | Dual OTA; 1 per 2 APF stages; 9 per channel |
 | APF_AMP_x | TL072CDT | SOIC-8 | 18 | Dual op-amp; 1 per 2 APF stages; 9 per channel |
 | EXPO_x | THAT340 or LM394 | SOIC-8 | 3 | Matched NPN pair for expo converter (1 per group) |
-| VCA_CB | V2164D | SOIC-16 | 1 | Quad VCA for COMB BYPASS VCA (L bypass, L comb, R bypass, R comb) |
+| LM13700_CB1 | LM13700M | SOIC-16 | 1 | COMB BYPASS VCA — L channel: cell A = L dry path, cell B = L comb path |
+| LM13700_CB2 | LM13700M | SOIC-16 | 1 | COMB BYPASS VCA — R channel: cell A = R dry path, cell B = R comb path |
 | FB_AMP_x | TL074CDT | SOIC-14 | 3 | Per-group feedback summing amp + BLEND_AMP + POL_INV (≈3 quads needed) |
 | MIX_AMP_x | TL074CDT | SOIC-14 | 2 | Summing, width offset, general purpose |
 | C_apf_G1 | C0G / NP0 | 0603 | 12 | 1.5 nF (6 per channel × 2 channels) for Group 1 |
@@ -352,9 +364,8 @@ A simple exponential offset applied to the R channel expo converter reference on
 | RV_FB_MAX_3 | 0.90–0.99 | Max feedback limit for Group 3 | Same |
 
 ### Power Draw Estimate
-- 18× LM13700: ~3.4 mA per IC = ~61 mA
+- 18× LM13700 (APF stages) + 2× LM13700 (COMB BYPASS VCA) = 20× LM13700: ~68 mA
 - 18× TL072 + ~4× TL074: ~30 mA
-- 1× V2164: ~10 mA
 - +12 V: ~55 mA | −12 V: ~55 mA (significant — plan thermal management)
 
 ### Known Circuit Challenges
@@ -363,7 +374,8 @@ A simple exponential offset applied to the R channel expo converter reference on
 - **HF oscillation**: OTA stages at high Iabc (high frequency) can self-oscillate due to parasitic capacitance. Add small (22 pF) capacitors at each OTA output node and keep traces short.
 - **Crosstalk L/R**: L and R share the same group frequencies but have separate OTA signal paths. Route L and R ground planes separately; do not route L signal adjacent to R signal on PCB.
 - **V_post_dist routing**: the distortion output (Block 4) must be routed to the APF feedback section without picking up noise. Use a shielded wire or dedicated PCB trace with guard ring; keep away from OTA signal nodes.
-- **FB DIST BLEND crossfade**: the continuous crossfade replaces the CD4053 SOURCE switch. Use a complementary-gain resistive crossfade (pot + op-amp summer) or a V2164-based VCA crossfade. The op-amp output of the BLEND_AMP must be buffered before the per-group feedback amp stages.
+- **FB DIST BLEND crossfade**: the continuous crossfade replaces the CD4053 SOURCE switch. Use a complementary-gain resistive crossfade (pot + op-amp summer). The BLEND_AMP output must be buffered before the per-group feedback amp stages.
+- **COMB BYPASS complementary Iabc driver**: the op-amp difference stage that generates complementary Iabc currents must have matched resistors (0.1% preferred, 1% acceptable) to ensure dry+comb currents sum to a constant total — otherwise the output level changes as COMB BYPASS sweeps.
 - **POLARITY Off position**: when POLARITY = Off, GND must be cleanly connected to the feedback summing node — a leaky switch contact or ground bounce will cause audible bleed-through of the feedback signal. Use a low-leakage panel switch or add a small bleeder resistor to GND at the switch output.
 - **Negative feedback stability**: with POLARITY = Negative, the feedback becomes degenerative in the normal sense but regenerative at the complementary frequencies. At high g, the system may still self-oscillate but at different frequencies than positive feedback — verify stability across the full FB range in simulation before PCB layout.
 - **Calibration burden**: 6 trim pots (3 expo + 3 feedback limits) plus 3 independent feedback CV attenuverters. Document calibration order clearly: expo converters first, then feedback limits.

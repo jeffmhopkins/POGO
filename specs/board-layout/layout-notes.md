@@ -121,16 +121,16 @@ Densest board in the system — Block 3 APF chains dominate the component count.
 | Block 2 L: Envelope follower | TL074 ×1 (full-wave rectifier + peak detector), TL072 ×1 (buffer + MOD SEL diode-OR) | TL074 ×1, TL072 ×1 |
 | Block 3 L: APF chains 1+2+3 | LM13700M ×9 (6 stages × 3 chains; 2 LM13700 cells per stage, 1 stage = half a LM13700 dual; 6 stages ÷ 2 per IC × 3 chains = 9 ICs), TL072 ×9 (stage buffers + comb tap) | LM13700 ×9, TL072 ×9 |
 | Block 4 L: Distortion | TL072 ×3 (soft clip, 1 per chain), TL072 ×3 (hard clip, 1 per chain), TL074 ×3 (wavefold, 2-stage per chain), TL074 ×1 (sum amp) | TL072 ×6, TL074 ×4 |
-| Block VCA L: Pre-LP1 VCA signal path | V2164-A cell 3 (VCA L) — shares IC with LP1 L | (shared with LP1 below) |
-| Block 5 L: LP Filter 1 | LM13700M ×1 (2 OTA integrators), TL074 ×1 (SVF sum amp + buffers), **V2164-A** ×1 (cell 1 = LP1 L Q; cell 3 = VCA L signal path) | LM13700 ×1, TL074 ×1, V2164 ×1 |
-| Block 6 L: LP Filter 2 | LM13700M ×1, TL074 ×1, **V2164-C** cell 1 (LP2 L Q) | LM13700 ×1, TL074 ×1, V2164 ×1 |
-| Block 7 L: HP Filter | LM13700M ×1 (or equivalent OTA), TL072 ×1, **V2164-C** cell 2 (HP L Q) | LM13700 ×1, TL072 ×1, (shared V2164-C) |
+| Block VCA L: Pre-LP1 VCA signal path | **THAT_VCA_L** (THAT 2180, SOIC-8) — 1 per audio board; no IC sharing | THAT 2180 ×1 |
+| Block 5 L: LP Filter 1 | LM13700M ×1 (2 OTA integrators), TL074 ×1 (SVF sum amp + buffers), **IC_Q_AB_L** cell A (LP1 L Q; cell B = LP2 L Q) | LM13700 ×1, TL074 ×1 |
+| Block 6 L: LP Filter 2 | LM13700M ×1, TL074 ×1, **IC_Q_AB_L** cell B (LP2 L Q — same IC as LP1 Q) | LM13700 ×1, TL074 ×1, (IC_Q_AB_L shared) |
+| Block 7 L: HP Filter | LM13700M ×1 (2 OTA integrators), TL072 ×1, **IC_Q_C_L** cell A (HP L Q; cell B = spare) | LM13700 ×1, TL072 ×1, LM13700 ×1 |
 | Block B L: Output buffers | TL072 ×1 (BAND OUT L + LEFT OUT, two halves) | TL072 ×1 |
-| **Left board total** | | **LM13700 ×12, TL072 ×22, TL074 ×7, V2164 ×2** |
+| **Left board total** | | **LM13700 ×14, TL072 ×22, TL074 ×7, THAT 2180 ×1** |
 
-V2164 allocation on Left audio board:
-- **V2164-A**: Cell 1 = LP1 L Q feedback; Cell 3 = Block VCA L signal; Cells 2+4 = spare
-- **V2164-C**: Cell 1 = LP2 L Q feedback; Cell 2 = HP L Q feedback; Cells 3+4 = spare
+LM13700 Q VCA allocation on Left audio board:
+- **IC_Q_AB_L**: Cell A = LP1 L Q feedback; Cell B = LP2 L Q feedback
+- **IC_Q_C_L**: Cell A = HP L Q feedback; Cell B = spare
 
 ---
 
@@ -144,29 +144,36 @@ to R channel only at the expo converter — this is handled on the utility board
 expo output arrives, so the R audio board receives a pre-offset I_abc signal and its LP1
 circuit is structurally identical to L).
 
-V2164 allocation on Right audio board:
-- **V2164-B**: Cell 1 = LP1 R Q feedback; Cell 3 = Block VCA R signal; Cells 2+4 = spare
-- **V2164-D**: Cell 1 = LP2 R Q feedback; Cell 2 = HP R Q feedback; Cells 3+4 = spare
+LM13700 Q VCA allocation on Right audio board:
+- **IC_Q_AB_R**: Cell A = LP1 R Q feedback; Cell B = LP2 R Q feedback
+- **IC_Q_C_R**: Cell A = HP R Q feedback; Cell B = spare
 
 ---
 
-## 4. V2164 Full Allocation Table
+## 4. VCA / Q IC Allocation Table
 
-Total V2164 ICs: **4** (2 per audio board).
+V2164D has been **removed from the design** (specialty Eurorack-only sourcing). Replaced with:
+- **THAT 2180** (SOIC-8): signal-path VCA in Block VCA — 1 per audio board (Mouser stock)
+- **LM13700** (SOIC-16): Q feedback OTA cells — already used throughout Block 3 APF
 
-| IC | Board | Cell 1 | Cell 2 | Cell 3 | Cell 4 |
-|---|---|---|---|---|---|
-| V2164-A | Left audio | LP1 L Q (resonance feedback) | spare | Block VCA L signal path | spare |
-| V2164-B | Right audio | LP1 R Q (resonance feedback) | spare | Block VCA R signal path | spare |
-| V2164-C | Left audio | LP2 L Q (resonance feedback) | HP L Q (resonance feedback) | spare | spare |
-| V2164-D | Right audio | LP2 R Q (resonance feedback) | HP R Q (resonance feedback) | spare | spare |
+LM13700 Q VCA allocation: **4× LM13700** for Q control (2 per audio board).
 
-**Design note**: The previous spec had 2× V2164 total with L+R channels sharing one IC
-(cells 1+2 = LP1 L+R Q; cells 3+4 = VCA L+R). That allocation mixes channels across one IC,
-which is incompatible with the L/R audio board split. The 4× V2164 allocation here keeps all
-audio signal paths on their respective channel board. Control voltages (Q drive, VCA level CV)
-arrive from the utility board via CN_UTIL_L / CN_UTIL_R — no audio signal crosses the
-board boundary.
+| IC | Board | Cell A | Cell B |
+|---|---|---|---|
+| IC_Q_AB_L | Left audio | LP1 L Q (resonance BP feedback) | LP2 L Q (resonance BP feedback) |
+| IC_Q_AB_R | Right audio | LP1 R Q (resonance BP feedback) | LP2 R Q (resonance BP feedback) |
+| IC_Q_C_L | Left audio | HP L Q (resonance BP feedback) | spare |
+| IC_Q_C_R | Right audio | HP R Q (resonance BP feedback) | spare |
+
+THAT 2180 allocation: **2× THAT 2180**, one per audio board.
+
+| IC | Board | Function |
+|---|---|---|
+| THAT_VCA_L | Left audio | Block VCA L signal-path VCA (GAIN pin current-controlled) |
+| THAT_VCA_R | Right audio | Block VCA R signal-path VCA (GAIN pin current-controlled) |
+
+All audio signal paths remain on their respective channel board. Q control Iabc and VCA level CV
+arrive from the utility board via CN_UTIL_L / CN_UTIL_R — no audio signal crosses the board boundary.
 
 ---
 
@@ -235,12 +242,12 @@ One 34-pin IDC connector (2×17).
 | 15 | LP2 L expo out | → L audio | I_abc for LP2 L |
 | 16 | HP L expo out | → L audio | I_abc for HP L |
 | 17 | LP1 CUTOFF CV | → L audio | Scaled CV after attenuverter (summing node input) |
-| 18 | LP1 RES Q CV | → L audio | V2164-A cell 1 control voltage |
+| 18 | LP1 RES Q CV | → L audio | IC_Q_AB_L cell A Iabc drive |
 | 19 | LP2 CUTOFF CV | → L audio | |
-| 20 | LP2 RES Q CV | → L audio | V2164-C cell 1 control voltage |
+| 20 | LP2 RES Q CV | → L audio | IC_Q_AB_L cell B Iabc drive |
 | 21 | HP CUTOFF CV | → L audio | |
-| 22 | HP RES Q CV | → L audio | V2164-C cell 2 control voltage |
-| 23 | VCA Level CV | → L audio | V2164-A cell 3 control voltage |
+| 22 | HP RES Q CV | → L audio | IC_Q_C_L cell A Iabc drive |
+| 23 | VCA Level CV | → L audio | THAT_VCA_L GAIN pin drive (via R_gain) |
 | 24 | COMB BYPASS CV | → L audio | Block 3 COMB BYPASS VCA control (each APF chain) |
 | 25 | APF FB 1 CV | → L audio | Feedback depth CV for APF chain 1 |
 | 26 | APF FB 2 CV | → L audio | |
@@ -265,7 +272,7 @@ board LP1 circuit is structurally identical to the L board; the STEREO SPREAD OF
 is transparent to the R audio board.
 
 Pin mapping: identical structure to CN_UTIL_L with all "L" signal names replaced by "R"
-and V2164-A/C references replaced by V2164-B/D.
+and IC_Q_AB_L/IC_Q_C_L references replaced by IC_Q_AB_R/IC_Q_C_R.
 
 ---
 
@@ -310,8 +317,9 @@ and V2164-A/C references replaced by V2164-B/D.
    stage 6 nearest output). This minimizes feedback trace length (critical for APF stability).
 7. Post-distortion tap traces (Block 4 output to board edge CN_UTIL connector): route on L4
    (bottom signal layer) with adjacent GND pour to shield from APF feedback traces.
-8. V2164 ICs: place adjacent to their primary filter block (V2164-A near LP1 OTAs; V2164-C
-   near LP2/HP OTA cluster). Keep control voltage traces short.
+8. LM13700 Q VCA ICs (IC_Q_AB, IC_Q_C): place adjacent to their respective filter OTAs
+   (IC_Q_AB near LP1+LP2 OTA cluster; IC_Q_C near HP OTAs). Keep Iabc drive traces short.
+   THAT 2180 VCA: place between Block 4 distortion output and LP1 OTA input.
 9. Trim pots: place on the top edge of each audio board (pins 1 and 3 accessible by
    screwdriver without removing the board).
 
@@ -370,7 +378,7 @@ Total inter-board connections: **152 pins** across 5 connectors.
 
 ## 11. Power Budget Revision
 
-With 4× V2164 (was 2×), and the board split now confirmed, the estimated power draw is:
+With V2164 removed and replaced by THAT 2180 + additional LM13700s, power draw is similar (LM13700 and THAT 2180 have comparable supply currents to V2164). The board split is confirmed:
 
 | Board | +12 V est. | −12 V est. |
 |---|---|---|

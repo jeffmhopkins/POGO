@@ -44,64 +44,61 @@
 <span class="status">Phase 1 ✅ &nbsp; Phase 2 ✅ &nbsp; Phase 3 ✅ &nbsp; Phase 4 [ ]</span>
 
 <div class="note">
-  Positioned between Block 4 (Distortion) and Block 5 (LP Filter 1). Shares V2164 IC with LP1:
-  cells 1+2 for LP1 resonance Q; cells 3+4 for VCA L+R signal path. Both blocks must be on the same PCB.
+  Positioned between Block 4 (Distortion) and Block 5 (LP Filter 1). Uses THAT 2180 single-channel
+  VCA — one IC per audio board. No IC sharing with LP1. Mainstream availability through THAT Corp / Mouser.
 </div>
 
 <h2>1. Block Diagram</h2>
 <pre>
 Distortion sum output (±5–7.5 V from Block 4)
   │
-  ├── L channel ──────────────────────────────────────────────────────┐
-  │                                                                    │
-  │  V_in_L ──[100 Ω series]──► V2164 cell 3 (L VCA) ──► V_out_L ──┤
-  │                                                                    │
-  └── R channel ──────────────────────────────────────────────────────┘
-     V_in_R ──[100 Ω series]──► V2164 cell 4 (R VCA) ──► V_out_R
-                                                               │
-                                                               ▼
-                                             to LP Filter 1 (Block 5) input
+  ├── L channel ──────────────────────────────────────────────────────────┐
+  │                                                                        │
+  │  V_in_L ──[100 Ω series]──► THAT_VCA_L (THAT 2180) ──► V_out_L ──┤
+  │                                                                        │
+  └── R channel ──────────────────────────────────────────────────────────┘
+     V_in_R ──[100 Ω series]──► THAT_VCA_R (THAT 2180) ──► V_out_R
+                                                                 │
+                                                                 ▼
+                                               to LP Filter 1 (Block 5) input
 
-CV Path (stereo-linked — same control voltage to both cells):
+CV Path (stereo-linked — same control current to both GAIN pins):
 
   Mod Bus ──[tip-switch]────────────────────────────────────────────┐
                                ▲                                    │
                   CV IN jack ──┘  (tip-switching: CV IN replaces    │
                                    mod bus when cable inserted)     │
                                                                     │
-  ──[100 Ω]──[BAT54 SOT-23 clamp]──► AMT attenuverter pot ─────────►─ V2164 ctrl input
-                                       (−1× to +1×, center = 0)
+  ──[100 Ω]──[BAT54 SOT-23 clamp]──► AMT attenuverter pot ─────────►─ V_cv_att
+                                       (−1× to +1×, center = 0)         │
+                                                                         │
+  V_cv_att ──[R_gain]──► THAT_VCA_L GAIN pin (L board)                  │
+  V_cv_att ──[R_gain]──► THAT_VCA_R GAIN pin (R board)  ←───────────────┘
 
-AMT = center (0): VCA gain = 1.0 (unity) — mod bus has no effect
-AMT = full CW, CV = 0 V: VCA gain = 0 (mute)
-AMT = full CW, CV = 10 V: VCA gain = 1.0 (full pass-through)
-AMT = full CCW, CV = 10 V: ducking — high CV reduces gain (inverted response)
+AMT = center (0): GAIN pin at unity-gain current → G = 1.0 (pass-through)
+AMT = full CW, CV = 0 V: GAIN drives toward minimum gain → mute
+AMT = full CW, CV = 10 V: GAIN at unity → full pass-through
+AMT = full CCW, CV = 10 V: ducking — high CV inverted → GAIN toward minimum
 
 Signal levels:
   In:  ±5 V to ±7.5 V (distortion chain summed output)
   Out: 0–1× gain applied → ±5 V nominal into LP1
-  VCA headroom: V2164 rated for signal within ±supply; ±12 V rails → ±12 V safe range
+  THAT 2180 handles signals within ±12 V rails — hot input is safe
 </pre>
 
 <h2>2. Schematic</h2>
 <pre>
-V2164D (SOIC-16, quad VCA IC — 1 per audio board, shared with LP1 same channel):
-  V2164-A (Left audio board) cell allocation:
-    Cell 1 (pins 1–4):   LP1 L resonance Q feedback (Block 5)
-    Cell 2 (pins 5–8):   spare
-    Cell 3 (pins 9–12):  VCA L signal path (this block)
-    Cell 4 (pins 13–16): spare
+THAT 2180 (SOIC-8) — 1 per audio board:
 
-  V2164-B (Right audio board) — mirror:
-    Cell 1: LP1 R Q feedback
-    Cell 3: VCA R signal path
-    Cells 2+4: spare
+V_in_L ──[R_in_L 100Ω]──► THAT_VCA_L IN+
+                            THAT_VCA_L IN− → GND
+                            THAT_VCA_L OUT ──► V_out_L ──► LP1 L input
+                            THAT_VCA_L GAIN ──[R_gain]── V_cv_att
 
-V_in_L ──[R_in_L 100Ω]──► V2164-A cell 3 audio input (pin 9)
-                             V2164-A cell 3 output (pin 11) ──► V_out_L ──► LP1 L input
-
-V_in_R ──[R_in_R 100Ω]──► V2164-B cell 3 audio input (pin 9)
-                             V2164-B cell 3 output (pin 11) ──► V_out_R ──► LP1 R input
+V_in_R ──[R_in_R 100Ω]──► THAT_VCA_R IN+  (Right audio board)
+                            THAT_VCA_R IN− → GND
+                            THAT_VCA_R OUT ──► V_out_R ──► LP1 R input
+                            THAT_VCA_R GAIN ──[R_gain]── V_cv_att
 
 CV Input Path:
   MOD BUS ──[tip-switch, Thonkiconn sleeve lug]──────────────────────────┐
@@ -113,9 +110,9 @@ CV Input Path:
                                                                           │
   V_att_in ──► AMT attenuverter pot (9mm bipolar, center detent = 0)     │
     CW end: +V_att_in                                                     │
-    CCW end: −V_att_in (via inverter; or wiper between +V and −V refs)   │
-    Wiper → utility board → VCA Level CV out → V2164-A cell 3 ctrl       │
-                                             → V2164-B cell 3 ctrl       │
+    CCW end: −V_att_in (wiper between +V and −V refs)                    │
+    Wiper (V_cv_att) → utility board → VCA Level CV on CN_UTIL_L/R       │
+                        → R_gain → THAT 2180 GAIN pin on each board       │
 </pre>
 
 <h2>3. Parts List</h2>
@@ -124,12 +121,14 @@ CV Input Path:
     <tr><th>Reference</th><th>Part Number</th><th>Package</th><th>Value</th><th>Qty</th><th>Notes</th></tr>
   </thead>
   <tbody>
-    <tr><td>VCA_MAIN</td><td>V2164D</td><td>SOIC-16</td><td>—</td><td>1</td><td>Shared with LP1: cells 1+2 = LP1 Q; cells 3+4 = VCA L/R</td></tr>
+    <tr><td>THAT_VCA_L</td><td>THAT 2180</td><td>SOIC-8</td><td>—</td><td>1</td><td>Left audio board; current-controlled VCA, exponential dB law</td></tr>
+    <tr><td>THAT_VCA_R</td><td>THAT 2180</td><td>SOIC-8</td><td>—</td><td>1</td><td>Right audio board; mirror of L</td></tr>
     <tr><td>RV_AMT</td><td>Bipolar pot</td><td>9mm</td><td>—</td><td>1</td><td>AMT attenuverter (−1× to +1×, center detent); attenuverter knob r=2.5 on panel</td></tr>
     <tr><td>D_cv</td><td>BAT54S</td><td>SOT-23</td><td>—</td><td>1</td><td>CV input clamp to ±12 V rails</td></tr>
     <tr><td>R_cv</td><td>—</td><td>0603</td><td>100 Ω</td><td>1</td><td>Series resistor at CV IN jack input</td></tr>
     <tr><td>R_in_L</td><td>—</td><td>0603</td><td>100 Ω</td><td>1</td><td>Series resistor at L audio input</td></tr>
     <tr><td>R_in_R</td><td>—</td><td>0603</td><td>100 Ω</td><td>1</td><td>Series resistor at R audio input</td></tr>
+    <tr><td>R_gain_L, R_gain_R</td><td>—</td><td>0603</td><td>TBD</td><td>2</td><td>V-to-I at GAIN pins; value per THAT 2180 datasheet gain law</td></tr>
     <tr><td>J_CV_IN</td><td>Thonkiconn PJ301M-12</td><td>Panel TH</td><td>—</td><td>1</td><td>CV IN jack (tip-switching; normalizes to mod bus)</td></tr>
   </tbody>
 </table>
@@ -164,36 +163,28 @@ Linear VCA — output is the product of input signal and control voltage:
   AMT_gain ∈ [−1, +1]   (bipolar attenuverter; center = 0)
   V_cv_in ∈ [0, 10 V]   (mod bus or override CV)
 
-  AMT_gain = 0 (center detent):
-    G_vca = 0 regardless of CV → but wait: at center AMT, mod bus has no effect,
-    so V_cv_att = 0 V → G_vca = 0/10 = 0. This would mute the signal.
+  At AMT center (0 V out): THAT 2180 GAIN pin biased for G = 1.0 (unity).
+  Full CW AMT + 10V CV: GAIN at unity-gain current → G = 1.0 (full pass-through).
+  Full CW AMT + 0V CV: GAIN driven toward minimum → G ≈ 0 (muted).
+  Full CCW AMT + 10V CV: inverted → GAIN driven toward minimum → ducking.
 
-  Correction: the V2164 is biased so that at 0V control input, gain = 1 (unity).
-  The AMT attenuverter at center (0V output) leaves the V2164 at its unity-gain bias point.
-  Full CW AMT: 10V CV → maximum V2164 gain (limited to unity; G=1)
-  Full CCW AMT: 10V CV → inverted to −10V, driving V2164 toward minimum gain (G→0)
-
-  For ducking: V_cv_att = AMT_gain × V_cv_in (negative when AMT_gain &lt; 0)
-    High CV + inverted AMT → low gain → signal dips with loud input = ducking.
-
-V2164 exponential law note:
-  V2164 uses exponential gain law. For musical accent use, the exponential law is appropriate
-  (matches logarithmic loudness perception). For linear amplitude modulation, a log-law pre-driver
-  can be added, but is not required for the intended musical use case.
+THAT 2180 exponential law note:
+  THAT 2180 uses exponential gain-in-dB law (current-controlled). For musical accent use,
+  the dB law matches logarithmic loudness perception naturally.
+  R_gain converts V_cv_att to the appropriate GAIN pin current.
 </pre>
 
 <h3>Phase 3 — Circuit Notes</h3>
 <ul>
-  <li><strong>V2164 cell allocation</strong>: sharing V2164 with LP1 saves PCB space and cost but means both blocks must be on the same PCB. Verify that LP1 resonance control voltage and VCA control voltage do not crosstalk inside the V2164 package (cells are independent by design — keep control traces separated on PCB).</li>
-  <li><strong>Unity gain at center detent</strong>: at AMT center, attenuverter output = 0 V → V2164 control input at 0 V → G = 1 (unity) at the V2164 internal reference. Verify with V2164 datasheet control law at 0 V ctrl; may require a small DC bias offset on the control input.</li>
-  <li><strong>Exponential vs linear perception</strong>: for gentle accent modulation, the V2164 exponential law is helpful. For hard gating (modulation to silence), verify the V2164 reaches G ≈ 0 within the attenuverter's output swing range.</li>
-  <li><strong>Hot input headroom</strong>: Block 4 distortion output can reach ±7.5 V at maximum drive. V2164 signal inputs are rated for signals within ±supply (±12 V here) — hot input is within safe range.</li>
-  <li><strong>Tip-switching normalling</strong>: the CV IN jack normalizes mod bus to the VCA control path. Verify Thonkiconn PJ301M-12 sleeve-switching lug is connected to the mod bus rail; inserting a cable breaks this connection and routes the jack tip to the attenuverter instead.</li>
-  <li><strong>Trim pots</strong>: none required. V2164 gain at 0 V control is inherently near unity. If a precise unity-gain offset is needed, a small fixed resistor or trim in the control path can compensate, but is typically not necessary.</li>
+  <li><strong>THAT 2180 GAIN pin</strong>: current-controlled exponential attenuator. R_gain must be sized from THAT 2180 datasheet so that V_cv_att = 0 V (AMT center) produces the unity-gain current. Verify before committing R value.</li>
+  <li><strong>No IC sharing</strong>: THAT_VCA_L and THAT_VCA_R are separate ICs, one per audio board. No crosstalk risk from shared IC, no constraint on board placement relative to LP1.</li>
+  <li><strong>Hot input headroom</strong>: Block 4 output can reach ±10 V. THAT 2180 handles signals well within ±12 V rails — safe at this level.</li>
+  <li><strong>Tip-switching normalling</strong>: the CV IN jack normalizes mod bus to the VCA control path. Verify Thonkiconn PJ301M-12 sleeve-switching lug is connected to the mod bus rail; inserting a cable breaks this and routes the jack tip to the attenuverter instead.</li>
+  <li><strong>Sourcing</strong>: THAT 2180 available from THAT Corporation directly and via Mouser. Standard distributor — no specialty Eurorack supplier required.</li>
 </ul>
 
 <h3>Power</h3>
-<p>+12 V: ~2 mA &nbsp;|&nbsp; −12 V: ~2 mA &nbsp;(incremental; V2164 IC shared with LP1)</p>
+<p>+12 V: ~5 mA &nbsp;|&nbsp; −12 V: ~5 mA &nbsp;(2× THAT 2180, one per audio board)</p>
 
 </body>
 </html>

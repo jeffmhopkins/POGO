@@ -48,8 +48,8 @@ The single AMT knob and CV IN jack apply identically to L and R. No independent 
 - AMT full CW, CV = 0 V: VCA gain = 0 — signal is fully attenuated (muted).
 - AMT full CW, CV = 10 V: VCA gain = 1.0 — full pass-through.
 - Inverted AMT (full CCW): 10 V input CV gives 0 gain; 0 V gives 1 gain (ducking behavior).
-- Hot input (±10 V at max distortion): VCA does not clip internally; the V2164 is rated for
-  signal levels within ±supply. With ±12 V rails, ±10 V signal is within safe operating range.
+- Hot input (±10 V at max distortion): VCA does not clip internally; the THAT 2180 is rated for
+  signal levels well within ±12 V rails. ±10 V signal is within safe operating range.
 
 ---
 
@@ -81,43 +81,45 @@ Note: VCA gain is unipolar (0 to 1×). Negative AMT with positive CV produces in
 behavior by driving the control toward a lower gain value.
 
 ### Frequency Response
-Flat from DC to the V2164 bandwidth limit (~1 MHz). Perceptually transparent.
+Flat from DC to the THAT 2180 bandwidth limit (>1 MHz). Perceptually transparent.
 
 ### Dynamic Behavior
-V2164 is an exponential-law VCA. The control voltage (from AMT attenuverter output) drives the
-exponential gain law. A linear-law response is achieved by using a logarithmic pre-driver
-(or by relying on the linear region of the V2164 at modest modulation depths).
+THAT 2180 is a current-controlled exponential-law VCA. The control current (derived from the
+AMT attenuverter output voltage through a gain-setting resistor) sets gain exponentially in dB.
 
-For musical use (accent / envelope VCA), the exponential law of the V2164 is appropriate:
-it matches the logarithmic nature of human loudness perception.
+For musical use (accent / envelope VCA), the exponential dB law matches logarithmic loudness
+perception and produces natural-sounding swells and accents.
 
 ---
 
 ## Phase 3: Circuit Design
 
 ### Topology
-V2164 quad VCA IC. This block uses 1 cell per audio board for the signal path. Each audio board
-has its own V2164 — the same IC also carries LP1 Q feedback on cell 1, so LP1 and VCA share
-an IC per channel, not across channels.
-
-V2164-A (Left audio board): Cell 1 = LP1 L Q feedback; Cell 3 = VCA L signal path; Cells 2+4 = spare
-V2164-B (Right audio board): Cell 1 = LP1 R Q feedback; Cell 3 = VCA R signal path; Cells 2+4 = spare
+THAT 2180 current-controlled VCA (SOIC-8). One IC per channel — no IC sharing with LP1.
+The THAT 2180 accepts a differential audio input, outputs single-ended audio, and sets gain
+exponentially in dB via current injected into the GAIN pin.
 
 ```
-V_in_L ──[100 Ω]──► V2164-A cell 3 (VCA L) ──► V_out_L ──► LP1 input L
-V_in_R ──[100 Ω]──► V2164-B cell 3 (VCA R) ──► V_out_R ──► LP1 input R
+V_in_L ──[100 Ω]──► THAT_VCA_L IN+
+                     THAT_VCA_L IN− → GND
+                     THAT_VCA_L OUT ──► V_out_L ──► LP1 input L
+                     THAT_VCA_L GAIN ──[R_gain]── V_cv_att
 
-V_cv_in (CV IN jack, normalizes to mod bus)
-  ──[100 Ω]──[BAT54 clamp]──► AMT attenuverter pot ──► V2164-A cell 3 ctrl + V2164-B cell 3 ctrl
+V_in_R ──[100 Ω]──► THAT_VCA_R IN+
+                     THAT_VCA_R IN− → GND
+                     THAT_VCA_R OUT ──► V_out_R ──► LP1 input R
+                     THAT_VCA_R GAIN ──[R_gain]── V_cv_att
 ```
 
-Both L and R cells receive the same control voltage from the AMT attenuverter — they track
-together for a stereo-linked VCA response. The control voltage arrives from the utility board
-via CN_UTIL_L / CN_UTIL_R (processed from the AMT wiper signal).
+V_cv_att (stereo-linked — both GAIN pins driven identically):
+  AMT wiper → utility board → VCA Level CV on CN_UTIL_L / CN_UTIL_R → R_gain → GAIN pin
+
+R_gain converts the attenuverter voltage to the GAIN pin control current. Value from THAT 2180
+datasheet gain law; typically 10–22 kΩ to achieve unity gain at V_cv_att = 0 V (AMT center).
 
 ### CV Input Path (standard)
 ```
-MOD BUS ──[tip switch]──[100 Ω]──[BAT54 SOT-23]──► AMT pot (−1× to +1×) ──► V2164 ctrl
+MOD BUS ──[tip switch]──[100 Ω]──[BAT54 SOT-23]──► AMT pot (−1× to +1×) ──► V_cv_att
                               ▲
                  CV IN jack ──┘  (tip-switching: disconnects mod bus when patched)
 ```
@@ -126,42 +128,34 @@ MOD BUS ──[tip switch]──[100 Ω]──[BAT54 SOT-23]──► AMT pot (�
 
 | Reference | Part Number | Package | Qty | Notes |
 |---|---|---|---|---|
-| V2164-A | V2164D | SOIC-16 | 1 (Left audio board) | Cell 1=LP1 L Q; cell 3=VCA L signal; cells 2+4 spare; shared with LP1 (same channel) |
-| V2164-B | V2164D | SOIC-16 | 1 (Right audio board) | Cell 1=LP1 R Q; cell 3=VCA R signal; cells 2+4 spare; shared with LP1 (same channel) |
+| THAT_VCA_L | THAT 2180 | SOIC-8 | 1 (Left audio board) | L channel signal path VCA |
+| THAT_VCA_R | THAT 2180 | SOIC-8 | 1 (Right audio board) | R channel signal path VCA |
 | RV_AMT | Bipolar pot | 9 mm | 1 | AMT attenuverter (−1× to +1×, center detent) |
 | D_cv | BAT54S | SOT-23 | 1 | CV input protection clamp |
 | R_cv | — | 0603 | 100 Ω | 1 | Series resistor at CV input |
 | R_in_L, R_in_R | — | 0603 | 100 Ω | 2 | Series resistors at audio inputs |
+| R_gain_L, R_gain_R | — | 0603 | TBD | 2 | V-to-I resistors at GAIN pins; value per THAT 2180 datasheet |
 
 ### Trim Pots
-None required. V2164 gain is set by control voltage; unity gain at AMT center is inherent
-when V_cv_att = 0 V (center detent of attenuverter).
-
-Optional: if unity gain offset is needed, a small trim can be added to the V2164 control
-input reference, but this is typically not required with the V2164's internal reference.
+None required for normal operation. If the unity-gain point at AMT center deviates from 0 dB,
+a small series resistor on R_gain trims the operating point. Verify unity gain by measuring
+output with AMT at center and no CV applied.
 
 ### Power Draw Estimate
-The V2164 IC is shared with LP1. The VCA block adds no additional ICs.
-Marginal additional draw from 2 V2164 cells: < 2 mA.
-- +12 V: ~2 mA | −12 V: ~2 mA (incremental, IC shared with LP1)
+Two THAT 2180 ICs (one per audio board). No IC sharing.
+- +12 V: ~5 mA | −12 V: ~5 mA (2× THAT 2180, ~2.5 mA each)
 
 ### Schematic Notes
-- V2164 cell allocation (per channel, per audio board):
-  - V2164-A (Left audio board): Cell 1=LP1 L Q; Cell 3=VCA L signal; Cells 2+4=spare
-  - V2164-B (Right audio board): Cell 1=LP1 R Q; Cell 3=VCA R signal; Cells 2+4=spare
-- VCA cell (3) control voltage arrives from utility board via CN_UTIL_L / CN_UTIL_R
-  (AMT wiper → utility board → VCA Level CV output on connector)
-- LP1 Q cell (1) control voltage also arrives from utility board (separate mod bus output)
-- Audio signal flows: Block 4 summing output → VCA cell 3 → LP1 summing amp input (all on same audio board)
+- THAT 2180 placement: each IC on its audio board, immediately before the LP1 summing amp.
+- Control voltage routing: AMT wiper → utility board → VCA Level CV pin on CN_UTIL_L /
+  CN_UTIL_R → R_gain → THAT 2180 GAIN pin. No cross-board audio signal routing.
+- Audio signal: Block 4 summing output → THAT 2180 IN+ → OUT → LP1 summing amp input.
+- Supply decoupling: 100 nF ceramic at each THAT 2180 supply pin.
 
 ### Known Circuit Challenges
-- **V2164 cell allocation**: V2164-A and V2164-B each share LP1 Q (cell 1) and VCA signal (cell 3)
-  for their respective channel. Both functions are on the same audio board — no cross-board audio
-  routing. Keep LP1 Q control trace and VCA level CV trace physically separated on the PCB
-  (cells are independent internally, but inter-trace coupling can inject noise onto ctrl inputs).
-- **Unity-gain at center detent**: the attenuverter at center (0 V output) drives V2164 control
-  to a level corresponding to G = 1. Verify this with the V2164 datasheet control law at 0 V ctrl.
-  May require a small DC bias offset on the control input to set exactly G = 1 at rest.
-- **Exponential vs linear perception**: for gentle accent modulation, the exponential law of the
-  V2164 is helpful. For hard gating (modulation to silence), verify the V2164 reaches G ≈ 0
-  within the attenuverter's output range.
+- **Unity gain at AMT center**: THAT 2180 GAIN pin requires a specific current for unity gain.
+  Verify from THAT 2180 datasheet. R_gain must produce that current when V_cv_att = 0 V.
+- **Hot input headroom**: THAT 2180 handles signals within ±12 V rails. Block 4 output up to
+  ±10 V is safe.
+- **Hard gating at full negative AMT**: verify the attenuverter output swing drives the GAIN
+  pin to THAT 2180's minimum gain point (typically −80 dB or better) within the CV range.

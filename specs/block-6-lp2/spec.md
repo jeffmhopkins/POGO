@@ -92,12 +92,11 @@ Default f_ref2: set slightly higher than f_ref1 so LP2 starts above LP1 by defau
 ### Topology: OTA-C State-Variable Filter (SVF) — identical to LP Filter 1
 
 LP2 uses the exact same circuit as LP1: two LM13700 OTA cells as integrators, TL074 as
-summing amplifier, V2164 VCA cell for voltage-controlled Q. See `specs/block-5-lp1/spec.md`
-Phase 3 for the full schematic description, signal flow, and component value derivations.
+summing amplifier, and an LM13700 OTA cell for voltage-controlled Q. See
+`specs/block-5-lp1/spec.md` Phase 3 for the full schematic description and derivations.
 
-LP1 and LP2 are placed on the same PCB (dual-row layout). This gives one shared PCB for
-both stages, reducing the unique PCB count and simplifying assembly. LP1 and LP2 share one
-V2164 quad VCA (2 cells for LP1 L+R Q, 2 cells for LP2 L+R Q).
+LP2's Q VCA uses cell B of IC_Q_AB (the same LM13700 that handles LP1 Q on cell A). LP1 and
+LP2 share one LM13700 for Q VCA per audio board — no V2164 IC required.
 
 **Key differences from LP1:**
 - Separate panel controls: CUTOFF 2, RESONANCE 2
@@ -113,8 +112,9 @@ Same as LP1. Per stereo pair (L+R):
 |---|---|---|---|---|
 | LP2_OTA_L, LP2_OTA_R | LM13700M | SOIC-16 | 2 | Dual OTA; both cells = 2 integrators per channel |
 | LP2_SUM_L, LP2_SUM_R | TL074CDT | SOIC-14 | 2 | Summing amp + output buffers |
-| LP2_VCA (shared) | V2164D | SOIC-16 | — | Shared with LP1 quad VCA (cells 3+4 for LP2) |
-| LP2_EXPO | THAT340 or LM394 | SOIC-8 | 1 | Separate matched pair from LP1 expo |
+| IC_Q_AB_L (cell B) | LM13700M | SOIC-16 | — | LP2 L Q VCA; cell A = LP1 L Q VCA (IC shared with LP1) |
+| IC_Q_AB_R (cell B) | LM13700M | SOIC-16 | — | LP2 R Q VCA; cell A = LP1 R Q VCA (IC shared with LP1) |
+| LP2_EXPO | THAT340 | SOIC-8 | 1 | Separate matched pair from LP1 expo |
 | C1/C2 per channel | C0G/NP0 | 0603 | 4 | 47 nF (same value as LP1) |
 
 ### Trim Pots
@@ -126,7 +126,7 @@ Same as LP1. Per stereo pair (L+R):
 | RV_LP2_QMAX | Q 10–50 | Maximum resonance / self-oscillation onset | Same procedure as LP1 |
 
 ### Power Draw Estimate
-+12 V: ~15 mA | −12 V: ~15 mA (V2164 power shared with LP1 count)
++12 V: ~15 mA | −12 V: ~15 mA (IC_Q_AB LM13700 power shared with LP1 count)
 
 ### Known Circuit Challenges
 All LP1 challenges apply. Additionally:

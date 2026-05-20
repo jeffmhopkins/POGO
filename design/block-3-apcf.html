@@ -46,7 +46,7 @@
 
 <div class="warn">
   ⚠️ Most complex and component-dense block in the module. Plan for 2–3 PCBs.
-  18× LM13700 + 18× TL072 + 5× TL074 + 3× THAT340 + 1× V2164.
+  20× LM13700 + 18× TL072 + 5× TL074 + 3× THAT340 (18 APF stages + 2 COMB BYPASS VCA).
   SOURCE switch removed — replaced by FB DIST BLEND continuous crossfade knob.
 </div>
 
@@ -79,10 +79,10 @@ Audio L+R from Block 2 (±5 V)
   │                                                       │   │   │  │
   │                                                       ▼   ▼   ▼  │
   │                                              ┌─────────────────┐ │
-  │                                              │ V2164 COMB      │ │
+  │                                              │ LM13700 COMB    │ │
   │                                              │ BYPASS VCA      │ │
-  │                                              │ (2 cells L,     │ │
-  │                                              │  2 cells R)     │ │
+  │                                              │ (CB1=L, CB2=R;  │ │
+  │                                              │  2 OTA cells ea)│ │
   │                                              └─────────────────┘ │
   │                                                       │           │
   └──────────────────────────────────────────────────────┘           │
@@ -152,10 +152,14 @@ Feedback path (global crossfade → global polarity → per-group amount):
   FB knob wiper + CV ──[R_fb_cv]──(−in) FB_SUM_AMP
   End-stop resistor ensures g ≤ 0.95 at knob maximum
 
-COMB BYPASS VCA (V2164, 4 cells):
-  V2164 cell 1: L comb bypass-level   V2164 cell 2: L comb level
-  V2164 cell 3: R comb bypass-level   V2164 cell 4: R comb level
-  Complementary control voltages from COMB BYPASS knob + CV
+COMB BYPASS VCA (LM13700, 2 ICs, 4 OTA cells):
+  LM13700_CB1 cell A: L dry (bypass) path    LM13700_CB1 cell B: L comb path
+  LM13700_CB2 cell A: R dry (bypass) path    LM13700_CB2 cell B: R comb path
+
+  Complementary Iabc from op-amp difference stage:
+    Cell A Iabc = (V_ref − V_BYPASS_CV) / R_Iabc  ← dry fades out as CV rises
+    Cell B Iabc = V_BYPASS_CV / R_Iabc              ← comb fades in as CV rises
+  Both OTA I_out currents sum at the SUM_AMP virtual-ground node → smooth crossfade
 </pre>
 
 <h2>3. Parts List</h2>
@@ -166,8 +170,9 @@ COMB BYPASS VCA (V2164, 4 cells):
   <tbody>
     <tr><td>OTA_x</td><td>LM13700M</td><td>SOIC-16</td><td>18</td><td>Dual OTA; 1 per 2 APF stages; 9 per channel</td></tr>
     <tr><td>APF_AMP_x</td><td>TL072CDT</td><td>SOIC-8</td><td>18</td><td>Dual op-amp; 1 per 2 APF stages; 9 per channel</td></tr>
-    <tr><td>EXPO_x</td><td>THAT340 or LM394</td><td>SOIC-8</td><td>3</td><td>Matched NPN pair; 1 per group (shared L+R)</td></tr>
-    <tr><td>VCA_CB</td><td>V2164D</td><td>SOIC-16</td><td>1</td><td>Quad VCA; 4 cells for COMB BYPASS (L bypass, L comb, R bypass, R comb)</td></tr>
+    <tr><td>EXPO_x</td><td>THAT340</td><td>SOIC-8</td><td>3</td><td>Matched NPN pair; 1 per group (shared L+R)</td></tr>
+    <tr><td>LM13700_CB1</td><td>LM13700M</td><td>SOIC-16</td><td>1</td><td>COMB BYPASS VCA L: cell A = L dry path, cell B = L comb path</td></tr>
+    <tr><td>LM13700_CB2</td><td>LM13700M</td><td>SOIC-16</td><td>1</td><td>COMB BYPASS VCA R: cell A = R dry path, cell B = R comb path</td></tr>
     <tr><td>FB_AMP_x</td><td>TL074CDT</td><td>SOIC-14</td><td>3</td><td>Per-group feedback summing amp + BLEND_AMP + POL_INV</td></tr>
     <tr><td>MIX_AMP_x</td><td>TL074CDT</td><td>SOIC-14</td><td>2</td><td>Summing, width offset, general mixing ops</td></tr>
     <tr><td>C_apf_G1</td><td>C0G/NP0</td><td>0603</td><td>12</td><td>1.5 nF (6 per channel × 2 channels) — Group 1</td></tr>
