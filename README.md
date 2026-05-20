@@ -113,9 +113,9 @@ POGO/
 
 ### Via GitHub Actions (no local setup required)
 
-Every push to `main` or any `claude/**` branch triggers an automatic build using VCV Rack's
-official toolchain Docker image, which includes the Rack SDK. No local SDK installation
-is needed.
+Every push to `main` or any `claude/**` branch triggers an automatic build. The workflow
+downloads the latest stable Rack 2 SDK from GitHub Releases and compiles the plugin on an
+Ubuntu runner — no local SDK installation or Docker setup is needed.
 
 **To get a build artifact:**
 
@@ -153,13 +153,6 @@ ln -s $(pwd) ~/.rack2/plugins/POGO
 # 4. Launch Rack in dev mode (loads plugins from the plugins folder)
 Rack -d
 ```
-
-### Cross-platform builds (Linux + Mac + Windows)
-
-The workflow includes a commented-out matrix job for cross-platform distributable builds.
-To enable it, uncomment the `build-cross` job in `.github/workflows/build.yml`. All four
-platforms (linux-x64, mac-x64, mac-arm64, win-x64) build from the same Linux runner using
-the cross-compilers bundled in the toolchain image.
 
 ---
 

@@ -14,14 +14,35 @@ jobs:
   build-linux:
     name: Build · Linux x64
     runs-on: ubuntu-latest
-    # Official VCV Rack toolchain container — includes Rack SDK at /rack
-    # RACK_DIR=/rack is pre-set as an env var inside the image
-    container:
-      image: ghcr.io/vcvrack/rack-plugin-toolchain:2
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Download Rack 2 SDK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Fetch the latest stable Rack 2.x release from the GitHub API and
+          # grab the Linux x64 SDK asset URL.
+          SDK_URL=$(curl -fsSL \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            "https://api.github.com/repos/VCVRack/Rack/releases" \
+            | jq -r '[.[] | select(.prerelease == false)
+                           | select(.tag_name | startswith("v2."))
+                     ][0].assets[]
+                     | select(.name | test("SDK.*lin.*x64.*\\.zip$"; "i"))
+                     | .browser_download_url')
+
+          if [ -z "$SDK_URL" ] || [ "$SDK_URL" = "null" ]; then
+            echo "ERROR: Could not locate a Rack 2 Linux x64 SDK asset."
+            exit 1
+          fi
+
+          echo "Downloading SDK: $SDK_URL"
+          curl -fsSL -o Rack-SDK.zip "$SDK_URL"
+          unzip -q Rack-SDK.zip
+          echo "RACK_DIR=$GITHUB_WORKSPACE/Rack-SDK" >> "$GITHUB_ENV"
 
       - name: Build plugin
         run: make -j$(nproc) dist
@@ -33,27 +54,3 @@ jobs:
           path: dist/
           if-no-files-found: warn
           retention-days: 30
-
-  # ─── Cross-platform distributable (Linux + Mac + Windows) ─────────────────
-  # Uncomment to enable full cross-platform builds.
-  # These use the same toolchain container but pass PLATFORM= to the Makefile.
-  #
-  # build-cross:
-  #   name: Build · ${{ matrix.platform }}
-  #   runs-on: ubuntu-latest
-  #   container:
-  #     image: ghcr.io/vcvrack/rack-plugin-toolchain:2
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       platform: [linux-x64, mac-x64, mac-arm64, win-x64]
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Build
-  #       run: make -j$(nproc) dist PLATFORM=${{ matrix.platform }}
-  #     - name: Upload artifact
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: POGO-${{ matrix.platform }}-${{ github.run_number }}
-  #         path: dist/
-  #         retention-days: 30
