@@ -114,8 +114,8 @@ POGO/
 ### Via GitHub Actions (no local setup required)
 
 Every push to `main` or any `claude/**` branch triggers an automatic build. The workflow
-downloads the latest stable Rack 2 SDK from GitHub Releases and compiles the plugin on an
-Ubuntu runner — no local SDK installation or Docker setup is needed.
+downloads the Rack 2.6 SDK from `vcvrack.com` and compiles the plugin on an Ubuntu runner —
+no local SDK installation or Docker setup is needed.
 
 **To get a build artifact:**
 
