@@ -23,19 +23,29 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Fetch the latest stable Rack 2.x release from the GitHub API and
-          # grab the Linux x64 SDK asset URL.
-          SDK_URL=$(curl -fsSL \
+          RELEASES=$(curl -fsSL \
             -H "Authorization: Bearer $GH_TOKEN" \
-            "https://api.github.com/repos/VCVRack/Rack/releases" \
-            | jq -r '[.[] | select(.prerelease == false)
-                           | select(.tag_name | startswith("v2."))
-                     ][0].assets[]
-                     | select(.name | test("SDK.*lin.*x64.*\\.zip$"; "i"))
-                     | .browser_download_url')
+            "https://api.github.com/repos/VCVRack/Rack/releases?per_page=20")
+
+          echo "Available Rack releases:"
+          echo "$RELEASES" | jq -r '.[] | "  \(.tag_name)  prerelease=\(.prerelease)"' | head -10
+
+          # first() walks all v2.x releases regardless of prerelease flag
+          SDK_URL=$(echo "$RELEASES" | jq -r '
+            first(
+              .[] | select(.tag_name | startswith("v2.")) |
+              .assets[] |
+              select(.name | test("SDK.*lin.*x64.*\\.zip$"; "i")) |
+              .browser_download_url
+            )
+          ')
 
           if [ -z "$SDK_URL" ] || [ "$SDK_URL" = "null" ]; then
             echo "ERROR: Could not locate a Rack 2 Linux x64 SDK asset."
+            echo "Assets in first v2.x release:"
+            echo "$RELEASES" | jq -r '
+              first(.[] | select(.tag_name | startswith("v2."))) | .assets[].name
+            '
             exit 1
           fi
 
