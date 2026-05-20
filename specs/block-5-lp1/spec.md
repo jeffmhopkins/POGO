@@ -196,7 +196,8 @@ Both integrator capacitors C1 = C2 = 47 nF.
 |---|---|---|---|---|
 | LP1_OTA_L, LP1_OTA_R | LM13700M | SOIC-16 | 2 | Dual OTA; both cells = 2 integrators per channel |
 | LP1_SUM_L, LP1_SUM_R | TL074CDT | SOIC-14 | 2 | Summing amp + HP/BP/LP output buffers (1 per channel) |
-| LP1_VCA | V2164D | SOIC-16 | 1 | Quad VCA; cells 1+2 for LP1 L+R resonance Q; cells 3+4 shared with Block VCA |
+| V2164-A | V2164D | SOIC-16 | 1 (Left audio board) | Cell 1=LP1 L Q feedback; cell 3=Block VCA L signal (Block VCA shares this IC); cells 2+4 spare |
+| V2164-B | V2164D | SOIC-16 | 1 (Right audio board) | Cell 1=LP1 R Q feedback; cell 3=Block VCA R signal; cells 2+4 spare |
 | LP1_EXPO | THAT340 or LM394 | SOIC-8 | 1 | Matched NPN pair for expo converter (L+R share one expo) |
 | C1_L, C2_L, C1_R, C2_R | C0G/NP0 | 0603 | 4 | 47 nF integrator capacitors |
 | R_in_L, R_in_R | — | 0603 | 2 | 100 kΩ summing amp input resistor |

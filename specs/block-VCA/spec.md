@@ -96,20 +96,24 @@ it matches the logarithmic nature of human loudness perception.
 ## Phase 3: Circuit Design
 
 ### Topology
-V2164 quad VCA IC. This block uses 2 cells (L and R signal paths). The remaining 2 cells are
-shared with LP1's resonance control (V2164 is a quad; LP1 uses 2 cells for Q modulation,
-VCA uses the other 2 cells for amplitude control).
+V2164 quad VCA IC. This block uses 1 cell per audio board for the signal path. Each audio board
+has its own V2164 — the same IC also carries LP1 Q feedback on cell 1, so LP1 and VCA share
+an IC per channel, not across channels.
+
+V2164-A (Left audio board): Cell 1 = LP1 L Q feedback; Cell 3 = VCA L signal path; Cells 2+4 = spare
+V2164-B (Right audio board): Cell 1 = LP1 R Q feedback; Cell 3 = VCA R signal path; Cells 2+4 = spare
 
 ```
-V_in_L ──[100 Ω]──► V2164 cell 3 (L VCA) ──► V_out_L ──► LP1 input L
-V_in_R ──[100 Ω]──► V2164 cell 4 (R VCA) ──► V_out_R ──► LP1 input R
+V_in_L ──[100 Ω]──► V2164-A cell 3 (VCA L) ──► V_out_L ──► LP1 input L
+V_in_R ──[100 Ω]──► V2164-B cell 3 (VCA R) ──► V_out_R ──► LP1 input R
 
 V_cv_in (CV IN jack, normalizes to mod bus)
-  ──[100 Ω]──[BAT54 clamp]──► AMT attenuverter pot ──► V2164 control input
+  ──[100 Ω]──[BAT54 clamp]──► AMT attenuverter pot ──► V2164-A cell 3 ctrl + V2164-B cell 3 ctrl
 ```
 
 Both L and R cells receive the same control voltage from the AMT attenuverter — they track
-together for a stereo-linked VCA response.
+together for a stereo-linked VCA response. The control voltage arrives from the utility board
+via CN_UTIL_L / CN_UTIL_R (processed from the AMT wiper signal).
 
 ### CV Input Path (standard)
 ```
@@ -122,7 +126,8 @@ MOD BUS ──[tip switch]──[100 Ω]──[BAT54 SOT-23]──► AMT pot (�
 
 | Reference | Part Number | Package | Qty | Notes |
 |---|---|---|---|---|
-| VCA_MAIN | V2164D | SOIC-16 | 1 | Shared with LP1: cells 1+2 for LP1 Q, cells 3+4 for L/R VCA |
+| V2164-A | V2164D | SOIC-16 | 1 (Left audio board) | Cell 1=LP1 L Q; cell 3=VCA L signal; cells 2+4 spare; shared with LP1 (same channel) |
+| V2164-B | V2164D | SOIC-16 | 1 (Right audio board) | Cell 1=LP1 R Q; cell 3=VCA R signal; cells 2+4 spare; shared with LP1 (same channel) |
 | RV_AMT | Bipolar pot | 9 mm | 1 | AMT attenuverter (−1× to +1×, center detent) |
 | D_cv | BAT54S | SOT-23 | 1 | CV input protection clamp |
 | R_cv | — | 0603 | 100 Ω | 1 | Series resistor at CV input |
@@ -141,20 +146,19 @@ Marginal additional draw from 2 V2164 cells: < 2 mA.
 - +12 V: ~2 mA | −12 V: ~2 mA (incremental, IC shared with LP1)
 
 ### Schematic Notes
-- V2164 cell allocation:
-  - Cell 1: LP1 L resonance Q control (Block 5)
-  - Cell 2: LP1 R resonance Q control (Block 5)
-  - Cell 3: VCA L signal path (this block)
-  - Cell 4: VCA R signal path (this block)
-- Route V2164 cells 3 and 4 control voltage from the same attenuverter node
-- Place VCA on the same PCB as LP1 (they share the V2164 IC)
-- Audio signal flows: Block 4 summing output → VCA inputs → LP1 summing amp input
+- V2164 cell allocation (per channel, per audio board):
+  - V2164-A (Left audio board): Cell 1=LP1 L Q; Cell 3=VCA L signal; Cells 2+4=spare
+  - V2164-B (Right audio board): Cell 1=LP1 R Q; Cell 3=VCA R signal; Cells 2+4=spare
+- VCA cell (3) control voltage arrives from utility board via CN_UTIL_L / CN_UTIL_R
+  (AMT wiper → utility board → VCA Level CV output on connector)
+- LP1 Q cell (1) control voltage also arrives from utility board (separate mod bus output)
+- Audio signal flows: Block 4 summing output → VCA cell 3 → LP1 summing amp input (all on same audio board)
 
 ### Known Circuit Challenges
-- **V2164 cell allocation**: sharing the V2164 with LP1 saves PCB space and cost but means both
-  blocks must be on the same PCB. Verify that LP1 resonance control voltage and VCA control
-  voltage do not crosstalk inside the V2164 package (cells are independent — no risk at the
-  circuit level, but keep control traces routed away from each other on PCB).
+- **V2164 cell allocation**: V2164-A and V2164-B each share LP1 Q (cell 1) and VCA signal (cell 3)
+  for their respective channel. Both functions are on the same audio board — no cross-board audio
+  routing. Keep LP1 Q control trace and VCA level CV trace physically separated on the PCB
+  (cells are independent internally, but inter-trace coupling can inject noise onto ctrl inputs).
 - **Unity-gain at center detent**: the attenuverter at center (0 V output) drives V2164 control
   to a level corresponding to G = 1. Verify this with the V2164 datasheet control law at 0 V ctrl.
   May require a small DC bias offset on the control input to set exactly G = 1 at rest.

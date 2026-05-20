@@ -85,18 +85,23 @@ Signal levels:
 
 <h2>2. Schematic</h2>
 <pre>
-V2164D (SOIC-16, quad VCA IC — shared with LP1):
-  Cell allocation:
-    Cell 1 (pins 1–4):   LP1 L resonance Q control (Block 5)
-    Cell 2 (pins 5–8):   LP1 R resonance Q control (Block 5)
+V2164D (SOIC-16, quad VCA IC — 1 per audio board, shared with LP1 same channel):
+  V2164-A (Left audio board) cell allocation:
+    Cell 1 (pins 1–4):   LP1 L resonance Q feedback (Block 5)
+    Cell 2 (pins 5–8):   spare
     Cell 3 (pins 9–12):  VCA L signal path (this block)
-    Cell 4 (pins 13–16): VCA R signal path (this block)
+    Cell 4 (pins 13–16): spare
 
-V_in_L ──[R_in_L 100Ω]──► V2164 cell 3 audio input (pin 9)
-                             V2164 cell 3 output (pin 11) ──► V_out_L ──► LP1 L input
+  V2164-B (Right audio board) — mirror:
+    Cell 1: LP1 R Q feedback
+    Cell 3: VCA R signal path
+    Cells 2+4: spare
 
-V_in_R ──[R_in_R 100Ω]──► V2164 cell 4 audio input (pin 13)
-                             V2164 cell 4 output (pin 15) ──► V_out_R ──► LP1 R input
+V_in_L ──[R_in_L 100Ω]──► V2164-A cell 3 audio input (pin 9)
+                             V2164-A cell 3 output (pin 11) ──► V_out_L ──► LP1 L input
+
+V_in_R ──[R_in_R 100Ω]──► V2164-B cell 3 audio input (pin 9)
+                             V2164-B cell 3 output (pin 11) ──► V_out_R ──► LP1 R input
 
 CV Input Path:
   MOD BUS ──[tip-switch, Thonkiconn sleeve lug]──────────────────────────┐
@@ -109,7 +114,8 @@ CV Input Path:
   V_att_in ──► AMT attenuverter pot (9mm bipolar, center detent = 0)     │
     CW end: +V_att_in                                                     │
     CCW end: −V_att_in (via inverter; or wiper between +V and −V refs)   │
-    Wiper ──► V2164 cells 3+4 control input (both cells same node)       │
+    Wiper → utility board → VCA Level CV out → V2164-A cell 3 ctrl       │
+                                             → V2164-B cell 3 ctrl       │
 </pre>
 
 <h2>3. Parts List</h2>
