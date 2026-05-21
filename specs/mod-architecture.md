@@ -178,9 +178,9 @@ replaced with a resistive op-amp crossfade driven by FB DIST BLEND + its CV atte
 | APF Feedback 3 | 3 | FB (Comb 3) | 0–10 V | Yes | |
 | APF FB Dist Blend | 3 | FB DIST BLEND | 0–10 V | Yes | Continuous crossfade: 0% = clean APF fb, 100% = post-dist fb |
 | APF Comb Bypass | 3 | BYPASS | 0–10 V | Yes | Pre-comb VCA level; 0 V = comb bypassed, 10 V = full comb |
-| Distortion Drive 1 | 4 | DRIVE (Comb 1) | 0–10 V | Yes | |
-| Distortion Drive 2 | 4 | DRIVE (Comb 2) | 0–10 V | Yes | |
-| Distortion Drive 3 | 4 | DRIVE (Comb 3) | 0–10 V | Yes | |
+| Distortion Drive 1 | 4 | DRIVE (Comb 1) | 0–10 V | Yes | 0V = mute, 2V = unity/clean, 10V = full drive |
+| Distortion Drive 2 | 4 | DRIVE (Comb 2) | 0–10 V | Yes | 0V = mute, 2V = unity/clean, 10V = full drive |
+| Distortion Drive 3 | 4 | DRIVE (Comb 3) | 0–10 V | Yes | 0V = mute, 2V = unity/clean, 10V = full drive |
 | VCA Level | VCA | AMT | 0–10 V | Yes | Pre-LP1 VCA; AMT attenuverter on panel |
 | LP1 Cutoff | 5 | CUT | ±5 V, 1V/oct | Yes | |
 | LP1 Resonance | 5 | RES | 0–10 V | Yes | |

@@ -99,7 +99,8 @@ Soft Clip (SC) sub-circuit:
                                          (out)◄──[D1+D2 anti-parallel: 1N4148WS]──(−in)
                                          (out)◄──[R_f fixed]──────────────────────(−in)
 
-  DRIVE 1 knob (log-taper pot) varies R_in: min R_in → high gain → strong saturation.
+  DRIVE 1 knob (linear pot, 50kΩ B-taper, dual-zone: CCW=mute · 9am=unity/clean · CW=full drive)
+  varies R_in: at 20% rotation R_in = R_f = 10kΩ → unity gain, no distortion.
   Anti-parallel diodes D1+D2: when signal exceeds Vf (~0.6 V), diodes conduct, clamping output.
 
 Hard Clip (HC) sub-circuit:
@@ -116,7 +117,7 @@ Wavefold (WF) sub-circuit (TL074, 2 halves per channel):
   V_in_L ──[gain stage: WF_1A]──► V_gain_L
   V_gain_L ──[fold stage 1: WF_1B]──► V_wf_L
   DRIVE 1 sets input gain (gain stage amplifies before fold stages).
-  Trim pot RV_WF_GAIN_1 calibrates fold onset at DRIVE = 50%.
+  Trim pot RV_WF_GAIN_1 calibrates unity-point; verify clean unity at DRIVE = 20%, fold onset at DRIVE ≈ 25%.
 
 MODE select (CD4053, MUX_1):
   Panel switch SW_MODE_1 (3-pos) drives CD4053 A/B select pins directly.
@@ -145,9 +146,9 @@ Summing Amp (L channel, using SUM_AMP TL074 halves A+B):
     <tr><td>D_sc_1/2/3 (×6)</td><td>1N4148WS</td><td>SOD-323</td><td>6</td><td>Soft clip diodes; 2 per chain (1 anti-parallel pair, shared L+R)</td></tr>
     <tr><td>Z_hc_1/2/3 (×6)</td><td>BZX84-C5V1</td><td>SOT-23</td><td>6</td><td>Hard clip zeners; 2 per chain (5.1 V)</td></tr>
     <tr><td>SW_MODE_1/2/3</td><td>3-pos switch</td><td>Panel</td><td>3</td><td>MODE 1/2/3: SC / HC / WF (one per chain, mechanical only)</td></tr>
-    <tr><td>RV_DRV_1/2/3</td><td>Log-taper pot</td><td>9mm</td><td>3</td><td>DRIVE 1/2/3; one per chain; shared L+R within chain</td></tr>
+    <tr><td>RV_DRV_1/2/3</td><td><strong>Linear pot (B-taper), 50kΩ</strong></td><td>9mm</td><td>3</td><td>DRIVE 1/2/3; one per chain; shared L+R; unity at 9am (20% rotation = 10kΩ = R_f)</td></tr>
     <tr><td>RV_HC_THRESH_1/2/3</td><td>Bourns 3296W</td><td>TH multiturn</td><td>3</td><td>Hard clip threshold symmetry per chain</td></tr>
-    <tr><td>RV_WF_GAIN_1/2/3</td><td>Bourns 3224W</td><td>SMD</td><td>3</td><td>Wavefold input gain per chain; fold onset at DRIVE = 50%</td></tr>
+    <tr><td>RV_WF_GAIN_1/2/3</td><td>Bourns 3224W</td><td>SMD</td><td>3</td><td>Unity-point calibration; fold onset above 9am; adjust until fold begins at DRIVE ≈ 25%</td></tr>
   </tbody>
 </table>
 
@@ -172,10 +173,25 @@ Summing Amp (L channel, using SUM_AMP TL074 halves A+B):
 
 <h3>Phase 2 — Transfer Functions</h3>
 <pre>
+Two-Zone Drive Mapping (all modes):
+
+  Zone 1 — Volume (param ≤ 0.20):
+    out = in × (param / 0.20)
+    Linear attenuation from mute (0.0) to unity (0.20). No distortion; all three modes identical.
+
+  Zone 2 — Distortion (param > 0.20):
+    d = (param − 0.20) / 0.80      ← normalized drive factor, 0 → 1
+    Apply per-mode transfer function below with drive factor d.
+    Unity gain at d = 0; full drive at d = 1.
+
+  CV note: 0–10 V range; 0 V = mute, 2 V = unity (9am), 10 V = full drive.
+  Hardware: gain = R_f / R_in; unity when R_in = R_f = 10kΩ (20% of 50kΩ linear pot).
+  R_min_series ≈ 470Ω (prevents ∞ gain at full CW); max gain ≈ 21× (full drive).
+
 Soft Clip:
   y = tanh(d × x) / tanh(d)
   where x = normalized input (−1 to +1 = ±5 V full scale)
-        d = exp(DRIVE_knob × k)   (log taper mapping)
+        d = drive factor from two-zone mapping above (0 → 1 → beyond)
   At d → 0: y ≈ x (linear)
   At d → ∞: y = sign(x) (approaches hard clip)
   Even harmonics: none (symmetrical clipping → odd harmonics only)
@@ -212,7 +228,7 @@ Wavefold:
   <thead><tr><th>Reference</th><th>Range</th><th>Purpose</th><th>Adjustment Procedure</th></tr></thead>
   <tbody>
     <tr><td>RV_HC_THRESH_1/2/3</td><td>±1 V</td><td>Hard clip threshold per chain</td><td>Adjust until symmetrical clip at ±5 V input with DRIVE at mid</td></tr>
-    <tr><td>RV_WF_GAIN_1/2/3</td><td>×0.8–×1.2</td><td>Wavefold input gain per chain</td><td>Adjust until fold onset occurs at DRIVE = 50%</td></tr>
+    <tr><td>RV_WF_GAIN_1/2/3</td><td>×0.8–×1.2</td><td>Unity-point calibration; wavefold onset above 9am</td><td>Trim so fold onset begins at DRIVE ≈ 25% (just above 9am); verify clean unity at DRIVE = 20%</td></tr>
   </tbody>
 </table>
 

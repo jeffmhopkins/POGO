@@ -183,7 +183,7 @@ Each group has a frequency range label in dim color below the section title:
 |---|---|---|---|
 | FREQ 1 / 2 / 3 | Knob | **XL (r = 9)** | Center frequency per group; centered in zone, cy = 32 |
 | FB 1 / 2 / 3 | Knob | **Large (r = 7)** | Feedback amount per group (0–95%); centered, cy = 61 |
-| DRIVE 1 / 2 / 3 | Knob | **Large (r = 7)** | Distortion drive per group; centered, cy = 87 |
+| DRIVE 1 / 2 / 3 | Knob | **Large (r = 7)** | Distortion drive per group; centered, cy = 87; dual-zone: CCW=mute, 9am=unity/clean, CW=full distortion drive |
 | FREQ ATT 1/2/3 | Attenuverter | r = 2.5 | Above FREQ CV jack (left jack position) |
 | FB ATT 1/2/3 | Attenuverter | r = 2.5 | Above FB CV jack (center jack position) |
 | DRIVE ATT 1/2/3 | Attenuverter | r = 2.5 | Above DRIVE CV jack (right jack position) |

@@ -148,7 +148,7 @@ struct Pogo : Module {
 		// Comb 1
 		configParam(FREQ_1_PARAM, -5.f, 5.f, 0.f, "Comb 1 Freq", " V/oct");
 		configParam(FB_1_PARAM, 0.f, 1.f, 0.f, "Comb 1 Feedback");
-		configParam(DRIVE_1_PARAM, 0.f, 1.f, 0.f, "Comb 1 Drive");
+		configParam(DRIVE_1_PARAM, 0.f, 1.f, 0.20f, "Comb 1 Drive");
 		configParam(FREQ_ATT_1_PARAM, -1.f, 1.f, 0.f, "Comb 1 Freq CV Depth");
 		configParam(FB_ATT_1_PARAM, -1.f, 1.f, 0.f, "Comb 1 FB CV Depth");
 		configParam(DRIVE_ATT_1_PARAM, -1.f, 1.f, 0.f, "Comb 1 Drive CV Depth");
@@ -156,7 +156,7 @@ struct Pogo : Module {
 		// Comb 2
 		configParam(FREQ_2_PARAM, -5.f, 5.f, 0.f, "Comb 2 Freq", " V/oct");
 		configParam(FB_2_PARAM, 0.f, 1.f, 0.f, "Comb 2 Feedback");
-		configParam(DRIVE_2_PARAM, 0.f, 1.f, 0.f, "Comb 2 Drive");
+		configParam(DRIVE_2_PARAM, 0.f, 1.f, 0.20f, "Comb 2 Drive");
 		configParam(FREQ_ATT_2_PARAM, -1.f, 1.f, 0.f, "Comb 2 Freq CV Depth");
 		configParam(FB_ATT_2_PARAM, -1.f, 1.f, 0.f, "Comb 2 FB CV Depth");
 		configParam(DRIVE_ATT_2_PARAM, -1.f, 1.f, 0.f, "Comb 2 Drive CV Depth");
@@ -164,7 +164,7 @@ struct Pogo : Module {
 		// Comb 3
 		configParam(FREQ_3_PARAM, -5.f, 5.f, 0.f, "Comb 3 Freq", " V/oct");
 		configParam(FB_3_PARAM, 0.f, 1.f, 0.f, "Comb 3 Feedback");
-		configParam(DRIVE_3_PARAM, 0.f, 1.f, 0.f, "Comb 3 Drive");
+		configParam(DRIVE_3_PARAM, 0.f, 1.f, 0.20f, "Comb 3 Drive");
 		configParam(FREQ_ATT_3_PARAM, -1.f, 1.f, 0.f, "Comb 3 Freq CV Depth");
 		configParam(FB_ATT_3_PARAM, -1.f, 1.f, 0.f, "Comb 3 FB CV Depth");
 		configParam(DRIVE_ATT_3_PARAM, -1.f, 1.f, 0.f, "Comb 3 Drive CV Depth");
