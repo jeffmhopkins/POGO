@@ -380,3 +380,8 @@ def build_schematic():
 if __name__ == "__main__":
     build_schematic()
     write_schematic("pogo-control-board.kicad_sch")
+    try:
+        import validate_schematic
+        validate_schematic.validate("pogo-control-board.kicad_sch")
+    except ImportError:
+        print("(kiutils not installed — skipping structural validation)")
