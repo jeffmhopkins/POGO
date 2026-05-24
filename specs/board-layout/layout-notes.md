@@ -71,8 +71,8 @@ All components are through-hole (Thonkiconn jacks, pot hardware, switches).
 | Audio I/O jacks | L IN, R IN, ENV OUT L, ENV OUT R, BAND OUT L, BAND OUT R, LEFT OUT, RIGHT OUT | 8 |
 | CV override jacks | BYPASS CV, OFFSET CV, FB DIST BLEND CV, VCA AMT CV, LP1 CUTOFF CV, LP1 RES CV, LP2 CUTOFF CV, LP2 RES CV, HP CUTOFF CV, HP RES CV, FREQ 1/2/3 CV, FB 1/2/3 CV, DRIVE 1/2/3 CV | 19 |
 | Main panel knobs (9 mm pots) | AMOUNT, OFFSET, WIDTH, COMB BYPASS, MASTER OFFSET (XL), POLARITY, FB DIST BLEND, FREQ 1/2/3 (XL), FB 1/2/3 (large), DRIVE 1/2/3 (large), CUTOFF LP1 (large), STEREO SPREAD OFFSET, RESONANCE LP1, CUTOFF LP2 (slider), RESONANCE LP2, CUTOFF HP (slider), RESONANCE HP | ~25 |
-| Attenuverter knobs (9 mm bipolar pots) | One per CV override jack (19 destinations) + AMT (VCA) | 20 |
-| Switches | GAIN (horizontal 2-pos sub-mini), MODE 1/2/3 (3-pos sub-mini) | 4 |
+| Attenuverter knobs (9 mm bipolar pots) | One per mod destination (19 total; VCA AMT is destination #4, not a separate knob) | 19 |
+| Switches | GAIN (horizontal 2-pos sub-mini, SW1), MOD SRC (3-pos sub-mini, SW2), POLARITY (3-pos sub-mini, SW3), MODE (3-pos sub-mini, SW4 — **1 shared switch** for all 3 comb groups per panel-notes.md; see note below) | 4 |
 | LEDs | (none on control board; power LED on utility board) | 0 |
 
 **Connects to**: Utility board via CN_CTRL_1 + CN_CTRL_2.
@@ -218,13 +218,66 @@ Ribbon cables run from control board (back of panel) down to utility board (hang
 |---|---|---|---|
 | 1–2 | GND ×2 | — | Wiper return ground |
 | 3–4 | +12 V, −12 V | → ctrl | Bipolar pot reference rails |
-| 5 | GAIN switch pos | ← ctrl | 1× or 5× switch position (logic level) |
-| 6–8 | MODE 1/2/3 switch pos | ← ctrl | 3-pos switch per distortion chain |
-| 9–28 | Attenuverter wipers ×19 + AMT wiper | ← ctrl | One wiper per mod destination attenuverter knob (19) + VCA AMT (1) = 20 wipers |
+| 5 | GAIN switch pos | ← ctrl | SW1 common output; 1× position → GND on ctrl board, 5× position → pulled high |
+| 6 | MODE SFT pos | ← ctrl | SW4 pos-1 output (Soft Clip); high when MODE = SFT; utility board decodes which of pins 6–8 is high |
+| 7 | MODE HRD pos | ← ctrl | SW4 pos-2 output (Hard Clip) |
+| 8 | MODE WFD pos | ← ctrl | SW4 pos-3 output (Wavefold) |
+| 9–27 | Attenuverter wipers ×19 | ← ctrl | One wiper per mod destination (19 total). Order: BYPASS, MASTER OFFSET, FB DIST BLEND, VCA AMT, LP1 CUT, LP1 RES, LP2 CUT, LP2 RES, HP CUT, HP RES, FREQ1, FREQ2, FREQ3, FB1, FB2, FB3, DRIVE1, DRIVE2, DRIVE3 |
+| 28 | spare | — | Previously described as "VCA AMT wiper" — VCA AMT IS destination #4, already on pin 12 above |
 | 29 | AMOUNT wiper | ← ctrl | Mod bus AMOUNT knob |
 | 30 | OFFSET wiper | ← ctrl | Mod bus OFFSET knob |
 | 31 | STEREO SPREAD OFFSET wiper | ← ctrl | LP1 R spread; routes to utility board LP1 expo summing node |
-| 32–34 | spare | — | |
+| 32 | MOD SRC switch com | ← ctrl | SW2 common; utility board uses which position is high to select ENV source (L / MAX / AVG) |
+| 33 | POLARITY switch com | ← ctrl | SW3 common; utility board uses which position is high for APF feedback polarity (POS / OFF / NEG) |
+| 34 | spare | — | |
+
+**MODE switch note**: panel-notes.md documents **one** shared MODE switch (SW4) for all three
+distortion chains simultaneously. The layout-notes previously said "3-pos switch per distortion
+chain" (three separate switches), which contradicts the panel design. This is an **unresolved
+design decision**: a single shared MODE means all three comb groups always use the same
+distortion mode; three separate switches would allow independent mode per group. Confirm with
+panel design before PCB layout. If changed to 3 switches, pins 6–8 become per-group MODE
+signals and require expanding to cover all three switch position outputs.
+
+---
+
+### CN_CTRL_3 (Control board ↔ Utility board — main parameter wipers)
+
+**24-pin IDC connector (2×12).** Carries the 21 main parameter pot/slider wipers that do not
+fit in CN_CTRL_1 or CN_CTRL_2. These are the "raw" panel position signals for the signal-
+processing parameters; the utility board and audio boards use them to set filter cutoff,
+feedback depth, etc.
+
+**Status: pinout placeholder — must be finalized before PCB layout.**
+
+| Pins | Signal | Direction | Notes |
+|---|---|---|---|
+| 1–2 | GND ×2 | — | Wiper return ground |
+| 3 | ATTACK wiper | ← ctrl | RV1; 0–+12 V → utility board envelope follower τ_attack |
+| 4 | RELEASE wiper | ← ctrl | RV2; 0–+12 V → utility board envelope follower τ_release |
+| 5 | COMB BYPASS wiper | ← ctrl | RV5; 0–+12 V → utility board COMB BYPASS VCA level |
+| 6 | WIDTH wiper | ← ctrl | RV6; bipolar → utility board APF R-channel freq offset |
+| 7 | MASTER OFFSET wiper | ← ctrl | RV7; bipolar → utility board APF global freq offset |
+| 8 | FB DIST BLEND wiper | ← ctrl | RV8; 0–+12 V → utility board FB DIST BLEND crossfade |
+| 9 | FREQ 1 wiper | ← ctrl | RV12; bipolar → utility board APF group 1 expo converter |
+| 10 | FREQ 2 wiper | ← ctrl | RV18; bipolar → APF group 2 expo converter |
+| 11 | FREQ 3 wiper | ← ctrl | RV24; bipolar → APF group 3 expo converter |
+| 12 | FB 1 wiper | ← ctrl | RV13; 0–+12 V → utility board APF FB1 CV |
+| 13 | FB 2 wiper | ← ctrl | RV19 |
+| 14 | FB 3 wiper | ← ctrl | RV25 |
+| 15 | DRIVE 1 wiper | ← ctrl | RV14; 0–+12 V → audio board Block 4 chain 1 |
+| 16 | DRIVE 2 wiper | ← ctrl | RV20 |
+| 17 | DRIVE 3 wiper | ← ctrl | RV26 |
+| 18 | LP1 CUTOFF wiper | ← ctrl | RV31; bipolar → utility board LP1 expo converter |
+| 19 | LP1 RESONANCE wiper | ← ctrl | RV33; 0–+12 V → utility board LP1 Q CV |
+| 20 | LP2 CUTOFF wiper | ← ctrl | RV36 (ALPS slider); bipolar → utility board LP2 expo converter |
+| 21 | LP2 RESONANCE wiper | ← ctrl | RV37; 0–+12 V → utility board LP2 Q CV |
+| 22 | HP CUTOFF wiper | ← ctrl | RV40 (ALPS slider); bipolar → utility board HP expo converter |
+| 23 | HP RESONANCE wiper | ← ctrl | RV41; 0–+12 V → utility board HP Q CV |
+| 24 | spare | — | |
+
+**Connector spec**: 2.54 mm pitch shrouded IDC header (2×12), same series as CN_CTRL_1/2.
+Standard parts: Amphenol T813, TE 1-103976-4, or equivalent.
 
 ---
 
@@ -422,11 +475,12 @@ Placed on utility board, immediately after power header:
 |---|---|---|---|
 | CN_CTRL_1 | 34 | 2.54 mm IDC, ribbon cable | Unchanged |
 | CN_CTRL_2 | 34 | 2.54 mm IDC, ribbon cable | Unchanged |
+| CN_CTRL_3 | **24** | 2.54 mm IDC, ribbon cable | New; carries 21 main parameter wipers not in CN_CTRL_1/2 (FREQ/FB/DRIVE/LP/HP/ATTACK/RELEASE etc.) + 2 GND + 1 spare |
 | CN_UTIL_L | **40** | 2.54 mm IDC, ribbon cable | Expanded from 34; 3 GND guards added for I_abc group |
 | CN_UTIL_R | **40** | 2.54 mm IDC, ribbon cable | Same expansion |
 | Eurorack bus | 16 | Shrouded IDC, standard Eurorack | Unchanged |
 
-Total inter-board connections: **164 pins** across 5 connectors (was 152).
+Total inter-board connections: **188 pins** across 6 connectors (was 152 before noise audit + CN_CTRL_3 addition).
 
 ---
 
