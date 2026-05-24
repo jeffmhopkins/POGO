@@ -99,10 +99,11 @@ Audio jack sleeve → `GND`. Pot CCW end:
 - Bipolar attenuverter: CCW=`-12V`, CW=`+12V`
 - Unipolar main pot: CCW=`GND`, CW=`+12V`
 
-Override CV jack switch lug → same net as the attenuverter CW end on the utility board
-(not on the control board connector — the switch lug is internal to the control board).
-For the control board schematic, the switch lug connects to a `NET_MODBUS_NORM_<DEST>` label
-(documents the normalling path; utility board resolves it).
+All 19 CV override jack switch lugs share a single net: `NET_MODBUS_NORM`.
+On the control board PCB, all 19 SW pads are wired together and to CN_CTRL_2 pin 39.
+The utility board drives that pin with the processed Mod Bus output (post-AMOUNT/OFFSET,
+buffered). When no cable is plugged into any CV jack, the tip sees the Mod Bus signal via
+the internal Thonkiconn switch. This costs 1 connector pin instead of 19.
 
 ---
 
@@ -136,6 +137,7 @@ CN_CTRL_1 (34-pin) and CN_CTRL_2 (40-pin) cover:
 - POLARITY position outputs POS/OFF/NEG (CN2 pins 35–37)
 - AMOUNT wiper, OFFSET wiper, STEREO SPREAD OFFSET wiper (CN2 pins 29–31)
 - ENV NORM return → MOD IN jack SW lug (CN2 pin 38)
+- MOD BUS NORM → all 19 CV override jack SW lugs wired together (CN2 pin 39)
 
 **Switch common wiring on control board**: All SP3T and SPDT switch commons tie directly to
 +12V or GND on the control board (power symbols, no connector pin). Only position outputs
@@ -189,9 +191,8 @@ python3 generate_control_board.py
 
 1. Open `pogo-control-board.kicad_sch` in KiCad 7 (free download from kicad.org)
 2. Run ERC (Tools → Electrical Rules Checker):
-   - Expected: "pin unconnected" warnings for CV override jack switch lugs (NET_MODBUS_NORM_*,
-     19 of them) and spare connector pins — these are intentional
-   - Not expected: short circuits, missing power pins, duplicate reference designators
+   - Expected: "pin unconnected" warnings for 3 spare connector pins (SPARE_CN2_28, SPARE_CN2_40, SPARE_CN3_24) — intentional
+   - Not expected: short circuits, missing power pins, duplicate reference designators, any other floating nets
 3. Check component count: 28 jacks + 43 pots/sliders + 4 switches + 3 connectors = 78 components
 4. Verify connector pin assignments match `layout-notes.md` CN_CTRL_1 and CN_CTRL_2 tables
 5. Export netlist: File → Export → Netlist → KiCad format → `pogo-control-board.net`

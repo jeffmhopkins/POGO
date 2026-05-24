@@ -512,9 +512,9 @@ def build_schematic():
               col, ZY); col+=1
 
     # Zone 1 CV jacks: BYPASS, OFFSET (MASTER), BLEND
-    place_jack("J10", "BYPASS CV",  "NET_CV_BYPASS",       "GND", "NET_MODBUS_NORM_BYPASS",  col, ZY); col+=1
-    place_jack("J11", "OFFSET CV",  "NET_CV_OFFSET",       "GND", "NET_MODBUS_NORM_OFFSET",  col, ZY); col+=1
-    place_jack("J12", "BLEND CV",   "NET_CV_BLEND",        "GND", "NET_MODBUS_NORM_BLEND",   col, ZY); col+=1
+    place_jack("J10", "BYPASS CV",  "NET_CV_BYPASS",       "GND", "NET_MODBUS_NORM",  col, ZY); col+=1
+    place_jack("J11", "OFFSET CV",  "NET_CV_OFFSET",       "GND", "NET_MODBUS_NORM",  col, ZY); col+=1
+    place_jack("J12", "BLEND CV",   "NET_CV_BLEND",        "GND", "NET_MODBUS_NORM",   col, ZY); col+=1
 
     # Zone 1 attenuverter pots: BYPASS ATT, OFFSET ATT, BLEND ATT
     place_pot("RV9",  "BYPASS ATT",  "-12V", "NET_WPR_ATT_BYPASS",  "+12V", col, ZY); col+=1
@@ -530,9 +530,9 @@ def build_schematic():
     place_pot("RV15", "FREQ ATT1","-12V", "NET_WPR_ATT_FREQ1",  "+12V", col, ZY); col+=1
     place_pot("RV16", "FB ATT1",  "-12V", "NET_WPR_ATT_FB1",    "+12V", col, ZY); col+=1
     place_pot("RV17", "DRIVE ATT1","-12V","NET_WPR_ATT_DRIVE1", "+12V", col, ZY); col+=1
-    place_jack("J13", "FREQ CV1", "NET_CV_FREQ1",  "GND", "NET_MODBUS_NORM_FREQ1",  col, ZY); col+=1
-    place_jack("J14", "FB CV1",   "NET_CV_FB1",    "GND", "NET_MODBUS_NORM_FB1",    col, ZY); col+=1
-    place_jack("J15", "DRIVE CV1","NET_CV_DRIVE1", "GND", "NET_MODBUS_NORM_DRIVE1", col, ZY); col+=1
+    place_jack("J13", "FREQ CV1", "NET_CV_FREQ1",  "GND", "NET_MODBUS_NORM",  col, ZY); col+=1
+    place_jack("J14", "FB CV1",   "NET_CV_FB1",    "GND", "NET_MODBUS_NORM",    col, ZY); col+=1
+    place_jack("J15", "DRIVE CV1","NET_CV_DRIVE1", "GND", "NET_MODBUS_NORM", col, ZY); col+=1
 
     # -----------------------------------------------------------------------
     # Zone 2b: COMB 2
@@ -543,9 +543,9 @@ def build_schematic():
     place_pot("RV21", "FREQ ATT2","-12V", "NET_WPR_ATT_FREQ2",  "+12V", col, ZY); col+=1
     place_pot("RV22", "FB ATT2",  "-12V", "NET_WPR_ATT_FB2",    "+12V", col, ZY); col+=1
     place_pot("RV23", "DRIVE ATT2","-12V","NET_WPR_ATT_DRIVE2", "+12V", col, ZY); col+=1
-    place_jack("J16", "FREQ CV2", "NET_CV_FREQ2",  "GND", "NET_MODBUS_NORM_FREQ2",  col, ZY); col+=1
-    place_jack("J17", "FB CV2",   "NET_CV_FB2",    "GND", "NET_MODBUS_NORM_FB2",    col, ZY); col+=1
-    place_jack("J18", "DRIVE CV2","NET_CV_DRIVE2", "GND", "NET_MODBUS_NORM_DRIVE2", col, ZY); col+=1
+    place_jack("J16", "FREQ CV2", "NET_CV_FREQ2",  "GND", "NET_MODBUS_NORM",  col, ZY); col+=1
+    place_jack("J17", "FB CV2",   "NET_CV_FB2",    "GND", "NET_MODBUS_NORM",    col, ZY); col+=1
+    place_jack("J18", "DRIVE CV2","NET_CV_DRIVE2", "GND", "NET_MODBUS_NORM", col, ZY); col+=1
 
     # -----------------------------------------------------------------------
     # Zone 2c: COMB 3
@@ -556,16 +556,16 @@ def build_schematic():
     place_pot("RV27", "FREQ ATT3","-12V", "NET_WPR_ATT_FREQ3",  "+12V", col, ZY); col+=1
     place_pot("RV28", "FB ATT3",  "-12V", "NET_WPR_ATT_FB3",    "+12V", col, ZY); col+=1
     place_pot("RV29", "DRIVE ATT3","-12V","NET_WPR_ATT_DRIVE3", "+12V", col, ZY); col+=1
-    place_jack("J19", "FREQ CV3", "NET_CV_FREQ3",  "GND", "NET_MODBUS_NORM_FREQ3",  col, ZY); col+=1
-    place_jack("J20", "FB CV3",   "NET_CV_FB3",    "GND", "NET_MODBUS_NORM_FB3",    col, ZY); col+=1
-    place_jack("J21", "DRIVE CV3","NET_CV_DRIVE3", "GND", "NET_MODBUS_NORM_DRIVE3", col, ZY); col+=1
+    place_jack("J19", "FREQ CV3", "NET_CV_FREQ3",  "GND", "NET_MODBUS_NORM",  col, ZY); col+=1
+    place_jack("J20", "FB CV3",   "NET_CV_FB3",    "GND", "NET_MODBUS_NORM",    col, ZY); col+=1
+    place_jack("J21", "DRIVE CV3","NET_CV_DRIVE3", "GND", "NET_MODBUS_NORM", col, ZY); col+=1
 
     # -----------------------------------------------------------------------
     # Zone 3: VCA + LP1
     # -----------------------------------------------------------------------
     # VCA: AMT attenuverter + CV IN jack
     place_pot("RV30", "VCA AMT",   "-12V", "NET_WPR_ATT_VCA_AMT",  "+12V", col, ZY); col+=1
-    place_jack("J22", "VCA CV IN", "NET_CV_VCA_AMT", "GND", "NET_MODBUS_NORM_VCA_AMT", col, ZY); col+=1
+    place_jack("J22", "VCA CV IN", "NET_CV_VCA_AMT", "GND", "NET_MODBUS_NORM", col, ZY); col+=1
 
     # LP1: CUTOFF knob, STEREO SPREAD OFFSET, RESONANCE, attenuverters, CV jacks
     place_pot("RV31", "LP1 CUTOFF",    "-12V", "NET_WPR_LP1_CUT",    "+12V", col, ZY); col+=1
@@ -573,8 +573,8 @@ def build_schematic():
     place_pot("RV33", "LP1 RES",       "GND",  "NET_WPR_LP1_RES",    "+12V", col, ZY); col+=1
     place_pot("RV34", "LP1 CUT ATT",   "-12V", "NET_WPR_ATT_LP1_CUT","+12V", col, ZY); col+=1
     place_pot("RV35", "LP1 RES ATT",   "-12V", "NET_WPR_ATT_LP1_RES","+12V", col, ZY); col+=1
-    place_jack("J23", "LP1 CUT CV",  "NET_CV_LP1_CUT", "GND", "NET_MODBUS_NORM_LP1_CUT", col, ZY); col+=1
-    place_jack("J24", "LP1 RES CV",  "NET_CV_LP1_RES", "GND", "NET_MODBUS_NORM_LP1_RES", col, ZY); col+=1
+    place_jack("J23", "LP1 CUT CV",  "NET_CV_LP1_CUT", "GND", "NET_MODBUS_NORM", col, ZY); col+=1
+    place_jack("J24", "LP1 RES CV",  "NET_CV_LP1_RES", "GND", "NET_MODBUS_NORM", col, ZY); col+=1
 
     # -----------------------------------------------------------------------
     # Zone 4: BAND OUT + LP2
@@ -587,8 +587,8 @@ def build_schematic():
     place_pot("RV37", "LP2 RES",       "GND",  "NET_WPR_LP2_RES",    "+12V", col, ZY); col+=1
     place_pot("RV38", "LP2 CUT ATT",   "-12V", "NET_WPR_ATT_LP2_CUT","+12V", col, ZY); col+=1
     place_pot("RV39", "LP2 RES ATT",   "-12V", "NET_WPR_ATT_LP2_RES","+12V", col, ZY); col+=1
-    place_jack("J25", "LP2 CUT CV",  "NET_CV_LP2_CUT", "GND", "NET_MODBUS_NORM_LP2_CUT", col, ZY); col+=1
-    place_jack("J26", "LP2 RES CV",  "NET_CV_LP2_RES", "GND", "NET_MODBUS_NORM_LP2_RES", col, ZY); col+=1
+    place_jack("J25", "LP2 CUT CV",  "NET_CV_LP2_CUT", "GND", "NET_MODBUS_NORM", col, ZY); col+=1
+    place_jack("J26", "LP2 RES CV",  "NET_CV_LP2_RES", "GND", "NET_MODBUS_NORM", col, ZY); col+=1
 
     # -----------------------------------------------------------------------
     # Zone 5: OUT + HP
@@ -601,8 +601,8 @@ def build_schematic():
     place_pot("RV41", "HP RES",        "GND",  "NET_WPR_HP_RES",    "+12V", col, ZY); col+=1
     place_pot("RV42", "HP CUT ATT",    "-12V", "NET_WPR_ATT_HP_CUT","+12V", col, ZY); col+=1
     place_pot("RV43", "HP RES ATT",    "-12V", "NET_WPR_ATT_HP_RES","+12V", col, ZY); col+=1
-    place_jack("J27", "HP CUT CV",  "NET_CV_HP_CUT", "GND", "NET_MODBUS_NORM_HP_CUT", col, ZY); col+=1
-    place_jack("J28", "HP RES CV",  "NET_CV_HP_RES", "GND", "NET_MODBUS_NORM_HP_RES", col, ZY); col+=1
+    place_jack("J27", "HP CUT CV",  "NET_CV_HP_CUT", "GND", "NET_MODBUS_NORM", col, ZY); col+=1
+    place_jack("J28", "HP RES CV",  "NET_CV_HP_RES", "GND", "NET_MODBUS_NORM", col, ZY); col+=1
 
     # -----------------------------------------------------------------------
     # CN_CTRL_1 (34-pin): Power + Audio I/O + CV override jack tips
@@ -676,7 +676,7 @@ def build_schematic():
     cn2_nets[36] = "NET_SW_POL_OFF"
     cn2_nets[37] = "NET_SW_POL_NEG"
     cn2_nets[38] = "NET_ENV_NORM"   # ENV normalling return: utility board drives J9 SW lug
-    cn2_nets[39] = "SPARE_CN2_39"
+    cn2_nets[39] = "NET_MODBUS_NORM" # Mod Bus output return: drives all 19 CV jack SW lugs (wired together on ctrl board PCB)
     cn2_nets[40] = "SPARE_CN2_40"
     place_idc40("CN2", "CN_CTRL_2", cn2_nets, cn2_col, ZY)
 

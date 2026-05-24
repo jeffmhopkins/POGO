@@ -234,8 +234,9 @@ Ribbon cables run from control board (back of panel) down to utility board (hang
 | 35 | POLARITY pos-1 (POS) | ← ctrl | SW3 pos-1 output; high when POLARITY = Positive |
 | 36 | POLARITY pos-2 (OFF) | ← ctrl | SW3 pos-2 output; high when POLARITY = Off |
 | 37 | POLARITY pos-3 (NEG) | ← ctrl | SW3 pos-3 output; high when POLARITY = Negative |
-| 38 | ENV NORM return | → ctrl | Selected ENV from utility board → MOD IN jack SW lug (J9 normalling) |
-| 39–40 | spare | — | |
+| 38 | ENV NORM return | → ctrl | Selected ENV output from utility board → MOD IN jack SW lug (J9 normalling). When no cable in J9, tip = SW = this ENV signal, normalizing MOD IN to ENV. |
+| 39 | MOD BUS NORM | → ctrl | Processed Mod Bus output (post AMOUNT/OFFSET) from utility board → all 19 CV override jack SW lugs (wired together on control board PCB). When no cable in any CV jack, its tip = SW = the Mod Bus, normalizing that attenuverter input to the Mod Bus. |
+| 40 | spare | — | |
 
 **Switch commons on control board**: All four switch commons tie directly to +12V on the
 control board (no connector pin needed). Each position pin is high (+12V) when selected,
@@ -246,11 +247,16 @@ utility board). The utility board decodes which of the three position pins is hi
 all three distortion chains simultaneously. All three comb groups always use the same
 distortion mode. CN_CTRL_2 pins 6–8 carry the single switch's position outputs (SFT / HRD / WFD).
 
-**MOD IN normalling**: MOD IN jack (J9) tip → CN_CTRL_1 pin 34 → utility board. The jack
-switch lug (SW pin) connects to CN_CTRL_2 pin 38 (ENV NORM return). When no cable is
-plugged into J9, the Thonkiconn switch internally connects tip to SW, so the selected ENV
-signal from the utility board drives the mod bus input. When a cable is plugged, the tip
-connects to the cable signal and SW is physically disconnected from tip.
+**MOD IN normalling (J9)**: Tip → CN_CTRL_1 pin 34 → utility board mod bus processor input.
+SW lug → CN_CTRL_2 pin 38 (ENV NORM return). When no cable: tip = SW = selected ENV, so
+the ENV signal drives the mod bus input. When cable plugged: tip = cable, SW disconnects.
+
+**CV override jack normalling (J10–J28)**: All 19 SW lugs are wired together on the control
+board PCB as one net (NET_MODBUS_NORM). That net connects to CN_CTRL_2 pin 39, driven by the
+utility board's processed Mod Bus output (buffered op-amp output, low impedance). When no cable
+is plugged into any CV override jack, its tip = SW = Mod Bus, normalizing the attenuverter
+input to the Mod Bus. The utility board buffer comfortably drives all 19 high-impedance
+attenuverter inputs simultaneously (~5 kΩ total load at 19 × 100 kΩ pots in parallel).
 
 ---
 
