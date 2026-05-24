@@ -263,8 +263,9 @@ def emit_lib_symbols():
     emit(sym_rpot())
     emit(sym_spdt())
     emit(sym_sp3t())
-    emit(sym_idc(17, 2))   # 34-pin (CN_CTRL_1, CN_CTRL_2)
-    emit(sym_idc(12, 2))   # 24-pin (CN_CTRL_3 — 23 signals needed + 1 spare)
+    emit(sym_idc(17, 2))   # 34-pin (CN_CTRL_1)
+    emit(sym_idc(20, 2))   # 40-pin (CN_CTRL_2 — expanded to carry all switch positions)
+    emit(sym_idc(12, 2))   # 24-pin (CN_CTRL_3 — 23 parameter wipers + 1 spare)
     emit(sym_power("+12V"))
     emit(sym_power("-12V"))
     emit(sym_power("GND"))
@@ -344,19 +345,21 @@ def place_spdt(ref, value, a_net, b_net, c_net, col, row_y):
     oy = row_y
     place_symbol("Switch:SW_SPDT", ref, value, ox, oy)
     pins = spdt_pins(ox, oy)
-    connect_pin(a_net, *pins["1"], shape="passive")
-    connect_pin(b_net, *pins["2"], shape="passive")
-    connect_pin(c_net, *pins["3"], shape="passive")
+    if a_net: connect_pin(a_net, *pins["1"], shape="passive")
+    if b_net: connect_pin(b_net, *pins["2"], shape="passive")
+    if c_net: connect_pin(c_net, *pins["3"], shape="passive")
+    return pins
 
 def place_sp3t(ref, value, p1_net, p2_net, p3_net, c_net, col, row_y):
     ox = col * 20.0
     oy = row_y
     place_symbol("Switch:SW_SP3T", ref, value, ox, oy)
     pins = sp3t_pins(ox, oy)
-    connect_pin(p1_net, *pins["1"], shape="passive")
-    connect_pin(p2_net, *pins["2"], shape="passive")
-    connect_pin(p3_net, *pins["3"], shape="passive")
-    connect_pin(c_net,  *pins["4"], shape="passive")
+    if p1_net: connect_pin(p1_net, *pins["1"], shape="passive")
+    if p2_net: connect_pin(p2_net, *pins["2"], shape="passive")
+    if p3_net: connect_pin(p3_net, *pins["3"], shape="passive")
+    if c_net:  connect_pin(c_net,  *pins["4"], shape="passive")
+    return pins
 
 def place_idc34(ref, value, net_map, col, row_y):
     """net_map: dict {pin_str: net_name}"""
@@ -386,6 +389,15 @@ def place_idc24(ref, value, net_map, col, row_y):
         if net:
             connect_pin(net, *pins[str(pin)], shape="passive")
 
+def place_idc40(ref, value, net_map, col, row_y):
+    ox = col * 20.0
+    oy = row_y
+    place_symbol("Connector_IDC:IDC-Header_2x20_P2.54mm_Vertical", ref, value, ox, oy)
+    pins = idc_pins(ox, oy, 20)
+    for pin, net in net_map.items():
+        if net:
+            connect_pin(net, *pins[str(pin)], shape="passive")
+
 # ---------------------------------------------------------------------------
 # Main: define all components and their net assignments
 # ---------------------------------------------------------------------------
@@ -406,22 +418,27 @@ def build_schematic():
     place_jack("J1",  "L IN",    "NET_L_IN",       "GND", "GND", col, ZY); col+=1
     place_jack("J2",  "R IN",    "NET_R_IN",        "GND", "GND", col, ZY); col+=1
 
-    # GAIN switch: SW1 — pos A = 1× (GND), pos B = 5×, common = signal
-    # A=1x position, B=5x position, C=common output to pre-gain stage
-    place_spdt("SW1", "GAIN 1x/5x",
-               "NET_SW_GAIN_1X", "NET_SW_GAIN_5X", "NET_SW_GAIN_COM",
-               col, ZY); col+=1
+    # GAIN switch (SPDT): 1× throw → GND, 5× throw → +12V, common → CN2 pin 5.
+    # Common reads GND when 1× selected, +12V when 5× selected; utility board decodes.
+    pins = place_spdt("SW1", "GAIN 1x/5x",
+                      None, None, "NET_SW_GAIN_COM",
+                      col, ZY)
+    power_sym("GND",  *pins["1"])   # 1× throw → GND
+    power_sym("+12V", *pins["2"])   # 5× throw → +12V
+    col += 1
 
     # -----------------------------------------------------------------------
     # Zone 0b: ENVELOPE section
     # -----------------------------------------------------------------------
     ZY = 50  # same row, continue columns
 
-    # MOD SRC select switch: SW2 — 3-pos: L / MAX / AVG
-    place_sp3t("SW2", "MOD SRC SEL",
-               "NET_SW_MODSRC_L", "NET_SW_MODSRC_MAX", "NET_SW_MODSRC_AVG",
-               "NET_SW_MODSRC_COM",
-               col, ZY); col+=1
+    # MOD SRC select switch: SW2 — 3-pos: L / MAX / AVG; common → +12V on board.
+    pins = place_sp3t("SW2", "MOD SRC SEL",
+                      "NET_SW_MODSRC_L", "NET_SW_MODSRC_MAX", "NET_SW_MODSRC_AVG",
+                      None,
+                      col, ZY)
+    power_sym("+12V", *pins["4"])   # MOD SRC common → +12V
+    col += 1
 
     # ATTACK pot
     place_pot("RV1", "ATTACK",
@@ -466,11 +483,13 @@ def build_schematic():
               "-12V", "NET_WPR_WIDTH", "+12V",
               col, ZY); col+=1
 
-    # POLARITY switch: SW3 — 3-pos: POS / OFF / NEG
-    place_sp3t("SW3", "POLARITY",
-               "NET_SW_POL_POS", "NET_SW_POL_OFF", "NET_SW_POL_NEG",
-               "NET_SW_POL_COM",
-               col, ZY); col+=1
+    # POLARITY switch: SW3 — 3-pos: POS / OFF / NEG; common → +12V on board.
+    pins = place_sp3t("SW3", "POLARITY",
+                      "NET_SW_POL_POS", "NET_SW_POL_OFF", "NET_SW_POL_NEG",
+                      None,
+                      col, ZY)
+    power_sym("+12V", *pins["4"])   # POLARITY common → +12V
+    col += 1
 
     place_pot("RV7", "MASTER OFFSET",
               "-12V", "NET_WPR_MASTER_OFFSET", "+12V",
@@ -479,21 +498,14 @@ def build_schematic():
     # -----------------------------------------------------------------------
     # Zone 1 DIST section: MODE switch (shared), FB DIST BLEND
     # -----------------------------------------------------------------------
-    # AMBIGUITY (unresolved — must decide before PCB): panel-notes.md shows ONE shared
-    # MODE switch for all 3 comb groups. layout-notes.md §5 CN_CTRL_2 pins 6–8 says
-    # "3-pos switch per distortion chain" (3 separate switches, one per comb group).
-    #
-    # This generator follows panel-notes (1 shared switch = SW4). If the decision changes
-    # to 3 switches, add SW5 (Comb 2) and SW6 (Comb 3), update CN2 pins 6–11 to carry
-    # SFT/HRD/WFD position nets for each switch, and update layout-notes.md.
-    #
-    # For SP3T switch on CN2: the utility board needs the 3 position outputs (SFT/HRD/WFD),
-    # not the common. Common ties to +12V or GND on the control board. Sending the 3
-    # position nets allows the utility board to decode which mode is selected.
-    place_sp3t("SW4", "MODE",
-               "NET_SW_MODE_SFT", "NET_SW_MODE_HRD", "NET_SW_MODE_WFD",
-               "NET_SW_MODE_COM",
-               col, ZY); col+=1
+    # MODE switch (SW4): 1 shared switch for all 3 comb groups (per panel.svg).
+    # Common → +12V on control board; position outputs → CN2 pins 6–8.
+    pins = place_sp3t("SW4", "MODE",
+                      "NET_SW_MODE_SFT", "NET_SW_MODE_HRD", "NET_SW_MODE_WFD",
+                      None,
+                      col, ZY)
+    power_sym("+12V", *pins["4"])   # MODE common → +12V
+    col += 1
 
     place_pot("RV8", "FB DIST BLEND",
               "GND", "NET_WPR_FB_DIST_BLEND", "+12V",
@@ -614,27 +626,21 @@ def build_schematic():
         23: "NET_CV_HP_CUT",  24: "NET_CV_HP_RES",
         25: "NET_CV_FREQ1",   26: "NET_CV_FREQ2",
         27: "NET_CV_FREQ3",
-        # 28–34: FB1, FB2, FB3, DRIVE1, DRIVE2, DRIVE3, spare
+        # 28–34: FB1, FB2, FB3, DRIVE1, DRIVE2, DRIVE3, MOD IN
         28: "NET_CV_FB1",     29: "NET_CV_FB2",
         30: "NET_CV_FB3",     31: "NET_CV_DRIVE1",
         32: "NET_CV_DRIVE2",  33: "NET_CV_DRIVE3",
-        34: "SPARE_CN1_34",
+        34: "NET_MOD_IN",     # MOD IN jack tip → utility board mod bus processor input
     }
     place_idc34("CN1", "CN_CTRL_1", cn1_nets, cn1_col, ZY)
 
     # -----------------------------------------------------------------------
-    # CN_CTRL_2 (34-pin): Pot wipers + switch positions
+    # CN_CTRL_2 (40-pin, 2×20): Pot wipers + switch position outputs
     # Per layout-notes.md §5 CN_CTRL_2 pinout
     # -----------------------------------------------------------------------
     cn2_col = col; col += 1
-    # Attenuverter wipers (pins 9–28): 19 attenuverter pots + VCA AMT
-    # Order matches mod destination list in mod-architecture.md:
-    # BYPASS, OFFSET(MASTER), BLEND(FB DIST BLEND), VCA AMT,
-    # LP1 CUT, LP1 RES, LP2 CUT, LP2 RES, HP CUT, HP RES,
-    # FREQ1, FREQ2, FREQ3, FB1, FB2, FB3, DRIVE1, DRIVE2, DRIVE3
-    # 19 attenuverter wipers: one per mod destination (mod-architecture.md table, same order).
-    # Pins 9–27 = 19 wipers. Pin 28 = SPARE (layout-notes.md "19 + VCA AMT = 20" is a
-    # wording issue; VCA AMT IS destination #4, already included in the 19).
+    # 19 attenuverter wipers (one per mod destination, same order as mod-architecture.md).
+    # VCA AMT is destination #4, included in the 19. Pins 9–27; pin 28 = SPARE.
     att_wipers = [
         "NET_WPR_ATT_BYPASS",   "NET_WPR_ATT_OFFSET",   "NET_WPR_ATT_BLEND",
         "NET_WPR_ATT_VCA_AMT",                                                  # dest #4
@@ -644,35 +650,35 @@ def build_schematic():
         "NET_WPR_ATT_FREQ1",    "NET_WPR_ATT_FREQ2",    "NET_WPR_ATT_FREQ3",
         "NET_WPR_ATT_FB1",      "NET_WPR_ATT_FB2",      "NET_WPR_ATT_FB3",
         "NET_WPR_ATT_DRIVE1",   "NET_WPR_ATT_DRIVE2",   "NET_WPR_ATT_DRIVE3",  # dest #19
-    ]  # exactly 19 entries → pins 9–27; pin 28 = SPARE
+    ]
     assert len(att_wipers) == 19, f"Expected 19 att wipers, got {len(att_wipers)}"
 
     cn2_nets = {
         1:  "GND",              2:  "GND",
         3:  "+12V",             4:  "-12V",
         5:  "NET_SW_GAIN_COM",
-        # MODE switch position nets on pins 6–8. SP3T common ties to +12V on control board;
-        # the 3 position outputs carry logic-level signals to the utility board.
-        # If decision changes to 3 separate MODE switches (one per comb group), these become
-        # NET_SW_MODE1_SFT / NET_SW_MODE2_SFT / NET_SW_MODE3_SFT (and expand to 6 pins).
-        6:  "NET_SW_MODE_SFT",   # MODE pos 1 (Soft Clip) output
-        7:  "NET_SW_MODE_HRD",   # MODE pos 2 (Hard Clip) output
-        8:  "NET_SW_MODE_WFD",   # MODE pos 3 (Wavefold) output
-        # MOD SRC and POLARITY position nets on pins TBD (spare).
-        # For now: send common outputs for MOD SRC and POLARITY here too.
-        # Utility board needs to see which position these switches are in to route ENV.
+        6:  "NET_SW_MODE_SFT",  # MODE pos 1 (Soft Clip) → utility board
+        7:  "NET_SW_MODE_HRD",  # MODE pos 2 (Hard Clip) → utility board
+        8:  "NET_SW_MODE_WFD",  # MODE pos 3 (Wavefold) → utility board
     }
     for i, wpr in enumerate(att_wipers):
         cn2_nets[9 + i] = wpr   # pins 9–27 (19 wipers)
-    cn2_nets[28] = "SPARE_CN2_28"   # layout-notes "20th wiper" ambiguity resolved: spare
+    cn2_nets[28] = "SPARE_CN2_28"
     cn2_nets[29] = "NET_WPR_AMOUNT"
     cn2_nets[30] = "NET_WPR_OFFSET_MB"
     cn2_nets[31] = "NET_WPR_LP1_SPREAD"
-    # MOD SRC and POLARITY position signals: use remaining spares
-    cn2_nets[32] = "NET_SW_MODSRC_COM"  # MOD SRC switch common → utility board ENV select
-    cn2_nets[33] = "NET_SW_POL_COM"     # POLARITY switch common → utility board APF feedback
-    cn2_nets[34] = "SPARE_CN2_34"
-    place_idc34("CN2", "CN_CTRL_2", cn2_nets, cn2_col, ZY)
+    # MOD SRC position outputs (SW2): L / MAX / AVG — utility board selects ENV routing
+    cn2_nets[32] = "NET_SW_MODSRC_L"
+    cn2_nets[33] = "NET_SW_MODSRC_MAX"
+    cn2_nets[34] = "NET_SW_MODSRC_AVG"
+    # POLARITY position outputs (SW3): POS / OFF / NEG — utility board APF feedback sign
+    cn2_nets[35] = "NET_SW_POL_POS"
+    cn2_nets[36] = "NET_SW_POL_OFF"
+    cn2_nets[37] = "NET_SW_POL_NEG"
+    cn2_nets[38] = "NET_ENV_NORM"   # ENV normalling return: utility board drives J9 SW lug
+    cn2_nets[39] = "SPARE_CN2_39"
+    cn2_nets[40] = "SPARE_CN2_40"
+    place_idc40("CN2", "CN_CTRL_2", cn2_nets, cn2_col, ZY)
 
     # -----------------------------------------------------------------------
     # CN_CTRL_3 (24-pin, 2×12): Main parameter wipers not in CN_CTRL_1/2.

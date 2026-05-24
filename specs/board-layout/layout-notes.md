@@ -21,8 +21,8 @@ POGO uses four PCBs. The split is driven by three constraints:
 │  Control Board  (panel-mounted, 1.2 mm FR4)                     │
 │    Jacks, pots, switches only — no signal processing ICs        │
 └──────────────┬──────────────────────────────────────────────────┘
-               │  CN_CTRL_1 + CN_CTRL_2
-               │  (2× 34-pin 2.54 mm IDC ribbon cable)
+               │  CN_CTRL_1 (34-pin) + CN_CTRL_2 (40-pin) + CN_CTRL_3 (24-pin)
+               │  (2.54 mm IDC ribbon cables)
                │
                │
     ┌──────────┴──────────────────────────────────────────────┐
@@ -75,7 +75,7 @@ All components are through-hole (Thonkiconn jacks, pot hardware, switches).
 | Switches | GAIN (2-pos horizontal sub-mini, SW1), MOD SRC (3-pos horizontal sub-mini, SW2), POLARITY (3-pos horizontal sub-mini, SW3), MODE (3-pos vertical sub-mini, SW4 — 1 shared switch for all 3 comb groups, per panel.svg) | 4 |
 | LEDs | (none on control board; power LED on utility board) | 0 |
 
-**Connects to**: Utility board via CN_CTRL_1 + CN_CTRL_2.
+**Connects to**: Utility board via CN_CTRL_1 + CN_CTRL_2 + CN_CTRL_3.
 No BAT54 protection here — protection lives on utility board immediately after the jack signals arrive.
 
 ---
@@ -191,7 +191,7 @@ to the panel). Straight header on the utility board (faces outward to the L/R au
 
 ### CN_CTRL_1 and CN_CTRL_2 (Control board ↔ Utility board)
 
-Two 34-pin IDC connectors (2×17, shrouded) = 68 total pins.
+CN_CTRL_1 is 34-pin (2×17); CN_CTRL_2 is 40-pin (2×20) — 74 total pins across these two connectors.
 Ribbon cables run from control board (back of panel) down to utility board (hanging behind).
 
 **CN_CTRL_1 — Power + Audio I/O + Override CV jacks (34 pins)**
@@ -210,9 +210,10 @@ Ribbon cables run from control board (back of panel) down to utility board (hang
 | 13 | LEFT OUT | → ctrl | Main stereo L output (to panel LEFT jack) |
 | 14 | RIGHT OUT | → ctrl | Main stereo R output |
 | 15–27 | Override CV jacks 1–13 (tips) | ← ctrl | Mod destination override jack tips (BYPASS, OFFSET, FB DIST BLEND, VCA AMT, LP1 CUTOFF, LP1 RES, LP2 CUTOFF, LP2 RES, HP CUTOFF, HP RES, FREQ 1, FREQ 2, FREQ 3) |
-| 28–34 | Override CV jacks 14–19 + spare (tips) | ← ctrl | FB 1, FB 2, FB 3, DRIVE 1, DRIVE 2, DRIVE 3 override jacks + 1 spare |
+| 28–33 | Override CV jacks 14–19 (tips) | ← ctrl | FB 1, FB 2, FB 3, DRIVE 1, DRIVE 2, DRIVE 3 override jacks |
+| 34 | MOD IN tip | ← ctrl | Primary mod source jack tip → utility board mod bus processor input |
 
-**CN_CTRL_2 — Panel pot wipers + switch positions (34 pins)**
+**CN_CTRL_2 — Panel pot wipers + switch position outputs (40 pins, 2×20)**
 
 | Pins | Signal | Direction | Notes |
 |---|---|---|---|
@@ -227,15 +228,29 @@ Ribbon cables run from control board (back of panel) down to utility board (hang
 | 29 | AMOUNT wiper | ← ctrl | Mod bus AMOUNT knob |
 | 30 | OFFSET wiper | ← ctrl | Mod bus OFFSET knob |
 | 31 | STEREO SPREAD OFFSET wiper | ← ctrl | LP1 R spread; routes to utility board LP1 expo summing node |
-| 32 | MOD SRC switch com | ← ctrl | SW2 common; utility board uses which position is high to select ENV source (L / MAX / AVG) |
-| 33 | POLARITY switch com | ← ctrl | SW3 common; utility board uses which position is high for APF feedback polarity (POS / OFF / NEG) |
-| 34 | spare | — | |
+| 32 | MOD SRC pos-1 (L) | ← ctrl | SW2 pos-1 output; high when MOD SRC = L ENV |
+| 33 | MOD SRC pos-2 (MAX) | ← ctrl | SW2 pos-2 output; high when MOD SRC = MAX(L,R) |
+| 34 | MOD SRC pos-3 (AVG) | ← ctrl | SW2 pos-3 output; high when MOD SRC = AVG(L,R) |
+| 35 | POLARITY pos-1 (POS) | ← ctrl | SW3 pos-1 output; high when POLARITY = Positive |
+| 36 | POLARITY pos-2 (OFF) | ← ctrl | SW3 pos-2 output; high when POLARITY = Off |
+| 37 | POLARITY pos-3 (NEG) | ← ctrl | SW3 pos-3 output; high when POLARITY = Negative |
+| 38 | ENV NORM return | → ctrl | Selected ENV from utility board → MOD IN jack SW lug (J9 normalling) |
+| 39–40 | spare | — | |
+
+**Switch commons on control board**: All four switch commons tie directly to +12V on the
+control board (no connector pin needed). Each position pin is high (+12V) when selected,
+while the other positions of the same switch are open (float or are pulled low on the
+utility board). The utility board decodes which of the three position pins is high.
 
 **MODE switch**: panel.svg (authoritative) shows **one** shared 3-pos MODE switch (SW4) for
 all three distortion chains simultaneously. All three comb groups always use the same
-distortion mode. The earlier layout-notes text "3-pos switch per distortion chain" was wrong
-and has been corrected. CN_CTRL_2 pins 6–8 carry the single switch's position outputs
-(SFT / HRD / WFD).
+distortion mode. CN_CTRL_2 pins 6–8 carry the single switch's position outputs (SFT / HRD / WFD).
+
+**MOD IN normalling**: MOD IN jack (J9) tip → CN_CTRL_1 pin 34 → utility board. The jack
+switch lug (SW pin) connects to CN_CTRL_2 pin 38 (ENV NORM return). When no cable is
+plugged into J9, the Thonkiconn switch internally connects tip to SW, so the selected ENV
+signal from the utility board drives the mod bus input. When a cable is plugged, the tip
+connects to the cable signal and SW is physically disconnected from tip.
 
 ---
 
@@ -471,14 +486,14 @@ Placed on utility board, immediately after power header:
 
 | Connector | Pins | Type | Notes |
 |---|---|---|---|
-| CN_CTRL_1 | 34 | 2.54 mm IDC, ribbon cable | Unchanged |
-| CN_CTRL_2 | 34 | 2.54 mm IDC, ribbon cable | Unchanged |
-| CN_CTRL_3 | **24** | 2.54 mm IDC, ribbon cable | New; carries 21 main parameter wipers not in CN_CTRL_1/2 (FREQ/FB/DRIVE/LP/HP/ATTACK/RELEASE etc.) + 2 GND + 1 spare |
+| CN_CTRL_1 | 34 | 2.54 mm IDC, ribbon cable | Power + audio I/O + 19 CV tips + MOD IN tip |
+| CN_CTRL_2 | **40** | 2.54 mm IDC, ribbon cable | Wipers + switch position outputs + ENV NORM return; expanded from 34 to carry all SP3T position nets individually |
+| CN_CTRL_3 | **24** | 2.54 mm IDC, ribbon cable | 21 main parameter wipers (FREQ/FB/DRIVE/LP/HP/ATTACK/RELEASE etc.) + 2 GND + 1 spare |
 | CN_UTIL_L | **40** | 2.54 mm IDC, ribbon cable | Expanded from 34; 3 GND guards added for I_abc group |
 | CN_UTIL_R | **40** | 2.54 mm IDC, ribbon cable | Same expansion |
 | Eurorack bus | 16 | Shrouded IDC, standard Eurorack | Unchanged |
 
-Total inter-board connections: **188 pins** across 6 connectors (was 152 before noise audit + CN_CTRL_3 addition).
+Total inter-board connections: **194 pins** across 6 connectors (CN_CTRL_2 expanded from 34→40 to accommodate individual SP3T position outputs).
 
 ---
 

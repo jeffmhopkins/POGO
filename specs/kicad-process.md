@@ -78,8 +78,9 @@ Pin endpoint = symbol (at X Y) + pin offset from lib_symbol definition.
 | ALPS RS45xx slider | `Device:R_POT` | Same 3-pin | Value="SLIDER LP2 CUTOFF" etc. |
 | Sub-mini toggle 2-pos (SPDT) | `Switch:SW_SPDT` | C=Common, A=throw-A, B=throw-B | GAIN switch |
 | Sub-mini toggle 3-pos (SP3T) | `Switch:SW_SP3T` | C=Common, 1/2/3=positions | MOD SRC, MODE 1/2/3, POLARITY |
-| IDC 34-pin (2×17) | `Connector_IDC:IDC-Header_2x17_P2.54mm_Vertical` | Pins 1–34 | CN_CTRL_1, CN_CTRL_2 |
-| IDC 24-pin placeholder (2×12) | `Connector_IDC:IDC-Header_2x12_P2.54mm_Vertical` | Pins 1–24 | CN_CTRL_3 (undocumented wipers; 23 needed + 1 spare) |
+| IDC 34-pin (2×17) | `Connector_IDC:IDC-Header_2x17_P2.54mm_Vertical` | Pins 1–34 | CN_CTRL_1 only |
+| IDC 40-pin (2×20) | `Connector_IDC:IDC-Header_2x20_P2.54mm_Vertical` | Pins 1–40 | CN_CTRL_2 (expanded from 34 to carry individual SP3T position outputs) |
+| IDC 24-pin placeholder (2×12) | `Connector_IDC:IDC-Header_2x12_P2.54mm_Vertical` | Pins 1–24 | CN_CTRL_3 (21 main parameter wipers + 2 GND + 1 spare) |
 | Power rails | `power:+12V`, `power:-12V`, `power:GND` | 1 pin each | Pot supply ends |
 
 ---
@@ -116,8 +117,8 @@ For the control board schematic, the switch lug connects to a `NET_MODBUS_NORM_<
 
 Numbering is sequential within each prefix, ordered left-to-right, top-to-bottom on the panel.
 J1–J8 = audio I/O jacks; J9 = MOD IN; J10–J28 = CV override jacks (19 destinations).
-RV1–RV41 = pots/sliders. SW1 = GAIN; SW2 = MOD SRC; SW3 = POLARITY; SW4–SW6 = MODE 1/2/3.
-CN1 = CN_CTRL_1; CN2 = CN_CTRL_2; CN3 = CN_CTRL_3 (placeholder).
+RV1–RV43 = pots/sliders (43 total). SW1 = GAIN; SW2 = MOD SRC; SW3 = POLARITY; SW4 = MODE (1 shared).
+CN1 = CN_CTRL_1 (34-pin); CN2 = CN_CTRL_2 (40-pin); CN3 = CN_CTRL_3 (24-pin placeholder).
 
 ---
 
@@ -125,16 +126,21 @@ CN1 = CN_CTRL_1; CN2 = CN_CTRL_2; CN3 = CN_CTRL_3 (placeholder).
 
 ### CN_CTRL_3: Missing main parameter wipers
 
-CN_CTRL_1 and CN_CTRL_2 (documented in `specs/board-layout/layout-notes.md`) cover:
-- Audio I/O jacks (8 signals)
+CN_CTRL_1 (34-pin) and CN_CTRL_2 (40-pin) cover:
+- Audio I/O jacks (8 signals) + MOD IN tip (CN1 pin 34)
 - 19 override CV jack tips
-- 19 attenuverter wipers (one per mod destination; pins 9–27 of CN_CTRL_2)
-- GAIN switch, MODE switch position outputs, MOD SRC switch, POLARITY switch
-- AMOUNT wiper, OFFSET wiper, STEREO SPREAD OFFSET wiper
+- 19 attenuverter wipers (CN2 pins 9–27), VCA AMT is destination #4 (pin 12); CN2 pin 28 is SPARE
+- GAIN switch common (CN2 pin 5)
+- MODE position outputs SFT/HRD/WFD (CN2 pins 6–8, 1 shared SW4 per panel.svg)
+- MOD SRC position outputs L/MAX/AVG (CN2 pins 32–34)
+- POLARITY position outputs POS/OFF/NEG (CN2 pins 35–37)
+- AMOUNT wiper, OFFSET wiper, STEREO SPREAD OFFSET wiper (CN2 pins 29–31)
+- ENV NORM return → MOD IN jack SW lug (CN2 pin 38)
 
-**Note on layout-notes.md "19 + VCA AMT = 20"**: VCA Level IS one of the 19 mod destinations
-and its attenuverter wiper appears once (CN_CTRL_2 pin 12 = `NET_WPR_ATT_VCA_AMT`). The
-layout-notes phrasing is misleading. CN_CTRL_2 pin 28 is SPARE.
+**Switch common wiring on control board**: All SP3T and SPDT switch commons tie directly to
++12V or GND on the control board (power symbols, no connector pin). Only position outputs
+and the GAIN common go through the connector. The utility board decodes which position pin
+is high to determine switch state.
 
 **Not covered** by CN_CTRL_1/2 (21 signals requiring 24-pin CN_CTRL_3):
 - ATTACK wiper, RELEASE wiper
@@ -144,8 +150,8 @@ layout-notes phrasing is misleading. CN_CTRL_2 pin 28 is SPARE.
 - LP2 CUTOFF (slider) wiper, LP2 RESONANCE wiper
 - HP CUTOFF (slider) wiper, HP RESONANCE wiper
 
-These are assigned to **CN_CTRL_3** (24-pin IDC, 2×12 = 23 signals + 1 spare) in the
-generated schematic. The actual pinout must be added to `layout-notes.md` before PCB layout.
+These are assigned to **CN_CTRL_3** (24-pin IDC, 2×12 = 21 signals + 2 GND + 1 spare) in
+the generated schematic. The full pinout is documented in `layout-notes.md` §5.
 
 ### MODE switch
 
@@ -183,9 +189,10 @@ python3 generate_control_board.py
 
 1. Open `pogo-control-board.kicad_sch` in KiCad 7 (free download from kicad.org)
 2. Run ERC (Tools → Electrical Rules Checker):
-   - Expected: "pin unconnected" warnings for CN_CTRL_3 placeholder pins — these are intentional
+   - Expected: "pin unconnected" warnings for CV override jack switch lugs (NET_MODBUS_NORM_*,
+     19 of them) and spare connector pins — these are intentional
    - Not expected: short circuits, missing power pins, duplicate reference designators
-3. Check component count: 28 jacks + 41 pots/sliders + 6 switches + 3 connectors = 78 components
+3. Check component count: 28 jacks + 43 pots/sliders + 4 switches + 3 connectors = 78 components
 4. Verify connector pin assignments match `layout-notes.md` CN_CTRL_1 and CN_CTRL_2 tables
 5. Export netlist: File → Export → Netlist → KiCad format → `pogo-control-board.net`
 
