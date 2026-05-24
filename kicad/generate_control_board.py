@@ -263,8 +263,8 @@ def emit_lib_symbols():
     emit(sym_rpot())
     emit(sym_spdt())
     emit(sym_sp3t())
-    emit(sym_idc(17, 2))   # 34-pin
-    emit(sym_idc(10, 2))   # 20-pin
+    emit(sym_idc(17, 2))   # 34-pin (CN_CTRL_1, CN_CTRL_2)
+    emit(sym_idc(12, 2))   # 24-pin (CN_CTRL_3 — 23 signals needed + 1 spare)
     emit(sym_power("+12V"))
     emit(sym_power("-12V"))
     emit(sym_power("GND"))
@@ -377,6 +377,15 @@ def place_idc20(ref, value, net_map, col, row_y):
         if net:
             connect_pin(net, *pins[str(pin)], shape="passive")
 
+def place_idc24(ref, value, net_map, col, row_y):
+    ox = col * 20.0
+    oy = row_y
+    place_symbol("Connector_IDC:IDC-Header_2x12_P2.54mm_Vertical", ref, value, ox, oy)
+    pins = idc_pins(ox, oy, 12)
+    for pin, net in net_map.items():
+        if net:
+            connect_pin(net, *pins[str(pin)], shape="passive")
+
 # ---------------------------------------------------------------------------
 # Main: define all components and their net assignments
 # ---------------------------------------------------------------------------
@@ -470,8 +479,17 @@ def build_schematic():
     # -----------------------------------------------------------------------
     # Zone 1 DIST section: MODE switch (shared), FB DIST BLEND
     # -----------------------------------------------------------------------
-    # The panel has ONE MODE switch that selects mode for all 3 comb groups.
-    # SW4 = MODE switch: SFT / HRD / WFD
+    # AMBIGUITY (unresolved — must decide before PCB): panel-notes.md shows ONE shared
+    # MODE switch for all 3 comb groups. layout-notes.md §5 CN_CTRL_2 pins 6–8 says
+    # "3-pos switch per distortion chain" (3 separate switches, one per comb group).
+    #
+    # This generator follows panel-notes (1 shared switch = SW4). If the decision changes
+    # to 3 switches, add SW5 (Comb 2) and SW6 (Comb 3), update CN2 pins 6–11 to carry
+    # SFT/HRD/WFD position nets for each switch, and update layout-notes.md.
+    #
+    # For SP3T switch on CN2: the utility board needs the 3 position outputs (SFT/HRD/WFD),
+    # not the common. Common ties to +12V or GND on the control board. Sending the 3
+    # position nets allows the utility board to decode which mode is selected.
     place_sp3t("SW4", "MODE",
                "NET_SW_MODE_SFT", "NET_SW_MODE_HRD", "NET_SW_MODE_WFD",
                "NET_SW_MODE_COM",
@@ -614,41 +632,52 @@ def build_schematic():
     # BYPASS, OFFSET(MASTER), BLEND(FB DIST BLEND), VCA AMT,
     # LP1 CUT, LP1 RES, LP2 CUT, LP2 RES, HP CUT, HP RES,
     # FREQ1, FREQ2, FREQ3, FB1, FB2, FB3, DRIVE1, DRIVE2, DRIVE3
+    # 19 attenuverter wipers: one per mod destination (mod-architecture.md table, same order).
+    # Pins 9–27 = 19 wipers. Pin 28 = SPARE (layout-notes.md "19 + VCA AMT = 20" is a
+    # wording issue; VCA AMT IS destination #4, already included in the 19).
     att_wipers = [
         "NET_WPR_ATT_BYPASS",   "NET_WPR_ATT_OFFSET",   "NET_WPR_ATT_BLEND",
-        "NET_WPR_ATT_VCA_AMT",
+        "NET_WPR_ATT_VCA_AMT",                                                  # dest #4
         "NET_WPR_ATT_LP1_CUT",  "NET_WPR_ATT_LP1_RES",
         "NET_WPR_ATT_LP2_CUT",  "NET_WPR_ATT_LP2_RES",
         "NET_WPR_ATT_HP_CUT",   "NET_WPR_ATT_HP_RES",
         "NET_WPR_ATT_FREQ1",    "NET_WPR_ATT_FREQ2",    "NET_WPR_ATT_FREQ3",
         "NET_WPR_ATT_FB1",      "NET_WPR_ATT_FB2",      "NET_WPR_ATT_FB3",
-        "NET_WPR_ATT_DRIVE1",   "NET_WPR_ATT_DRIVE2",   "NET_WPR_ATT_DRIVE3",
-        "NET_WPR_ATT_VCA_AMT",  # pin 28 = VCA AMT (also RV30 wiper above)
-    ]
+        "NET_WPR_ATT_DRIVE1",   "NET_WPR_ATT_DRIVE2",   "NET_WPR_ATT_DRIVE3",  # dest #19
+    ]  # exactly 19 entries → pins 9–27; pin 28 = SPARE
+    assert len(att_wipers) == 19, f"Expected 19 att wipers, got {len(att_wipers)}"
+
     cn2_nets = {
         1:  "GND",              2:  "GND",
         3:  "+12V",             4:  "-12V",
         5:  "NET_SW_GAIN_COM",
-        # NOTE: MODE switches need 2 pins each (A_sel + B_sel for CD4053).
-        # Pins 6–8 currently show 1 pin/switch — UNRESOLVED (see kicad-process.md).
-        # Using 1 pin per switch here pending encoding decision.
-        6:  "NET_SW_MODE_COM",  # MODE switch common (encoding TBD)
-        7:  "NET_SW_MODSRC_COM",# MOD SRC switch common
-        8:  "NET_SW_POL_COM",   # POLARITY switch common
+        # MODE switch position nets on pins 6–8. SP3T common ties to +12V on control board;
+        # the 3 position outputs carry logic-level signals to the utility board.
+        # If decision changes to 3 separate MODE switches (one per comb group), these become
+        # NET_SW_MODE1_SFT / NET_SW_MODE2_SFT / NET_SW_MODE3_SFT (and expand to 6 pins).
+        6:  "NET_SW_MODE_SFT",   # MODE pos 1 (Soft Clip) output
+        7:  "NET_SW_MODE_HRD",   # MODE pos 2 (Hard Clip) output
+        8:  "NET_SW_MODE_WFD",   # MODE pos 3 (Wavefold) output
+        # MOD SRC and POLARITY position nets on pins TBD (spare).
+        # For now: send common outputs for MOD SRC and POLARITY here too.
+        # Utility board needs to see which position these switches are in to route ENV.
     }
     for i, wpr in enumerate(att_wipers):
-        cn2_nets[9 + i] = wpr   # pins 9–28
+        cn2_nets[9 + i] = wpr   # pins 9–27 (19 wipers)
+    cn2_nets[28] = "SPARE_CN2_28"   # layout-notes "20th wiper" ambiguity resolved: spare
     cn2_nets[29] = "NET_WPR_AMOUNT"
     cn2_nets[30] = "NET_WPR_OFFSET_MB"
     cn2_nets[31] = "NET_WPR_LP1_SPREAD"
-    cn2_nets[32] = "SPARE_CN2_32"
-    cn2_nets[33] = "SPARE_CN2_33"
+    # MOD SRC and POLARITY position signals: use remaining spares
+    cn2_nets[32] = "NET_SW_MODSRC_COM"  # MOD SRC switch common → utility board ENV select
+    cn2_nets[33] = "NET_SW_POL_COM"     # POLARITY switch common → utility board APF feedback
     cn2_nets[34] = "SPARE_CN2_34"
     place_idc34("CN2", "CN_CTRL_2", cn2_nets, cn2_col, ZY)
 
     # -----------------------------------------------------------------------
-    # CN_CTRL_3 (20-pin placeholder): Main parameter wipers not in CN_CTRL_1/2
-    # FLAGGED: pinout TBD — must be documented in layout-notes.md before PCB layout
+    # CN_CTRL_3 (24-pin, 2×12): Main parameter wipers not in CN_CTRL_1/2.
+    # 23 signals needed (2 GND + 21 wipers) → 24-pin gives 1 spare.
+    # FLAGGED: exact pinout TBD — must be finalized in layout-notes.md before PCB layout.
     # -----------------------------------------------------------------------
     cn3_col = col; col += 1
     cn3_nets = {
@@ -662,11 +691,10 @@ def build_schematic():
         15: "NET_WPR_DRIVE1",        16: "NET_WPR_DRIVE2",
         17: "NET_WPR_DRIVE3",        18: "NET_WPR_LP1_CUT",
         19: "NET_WPR_LP1_RES",       20: "NET_WPR_LP2_CUT",
-        # NOTE: LP2_RES, HP_CUT, HP_RES don't fit in 20 pins.
-        # Extend to 24-pin or use a second CN_CTRL_3b connector.
-        # For now: LP2_RES/HP_CUT/HP_RES are on spare pins (TBD).
+        21: "NET_WPR_LP2_RES",       22: "NET_WPR_HP_CUT",   # these 3 overflowed 20-pin
+        23: "NET_WPR_HP_RES",        24: "SPARE_CN3_24",
     }
-    place_idc20("CN3", "CN_CTRL_3_PLACEHOLDER_TBD", cn3_nets, cn3_col, ZY)
+    place_idc24("CN3", "CN_CTRL_3_PLACEHOLDER_TBD", cn3_nets, cn3_col, ZY)
 
     # -----------------------------------------------------------------------
     # Close schematic

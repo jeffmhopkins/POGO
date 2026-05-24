@@ -79,7 +79,7 @@ Pin endpoint = symbol (at X Y) + pin offset from lib_symbol definition.
 | Sub-mini toggle 2-pos (SPDT) | `Switch:SW_SPDT` | C=Common, A=throw-A, B=throw-B | GAIN switch |
 | Sub-mini toggle 3-pos (SP3T) | `Switch:SW_SP3T` | C=Common, 1/2/3=positions | MOD SRC, MODE 1/2/3, POLARITY |
 | IDC 34-pin (2×17) | `Connector_IDC:IDC-Header_2x17_P2.54mm_Vertical` | Pins 1–34 | CN_CTRL_1, CN_CTRL_2 |
-| IDC 20-pin placeholder (2×10) | `Connector_IDC:IDC-Header_2x10_P2.54mm_Vertical` | Pins 1–20 | CN_CTRL_3 (undocumented wipers) |
+| IDC 24-pin placeholder (2×12) | `Connector_IDC:IDC-Header_2x12_P2.54mm_Vertical` | Pins 1–24 | CN_CTRL_3 (undocumented wipers; 23 needed + 1 spare) |
 | Power rails | `power:+12V`, `power:-12V`, `power:GND` | 1 pin each | Pot supply ends |
 
 ---
@@ -128,11 +128,15 @@ CN1 = CN_CTRL_1; CN2 = CN_CTRL_2; CN3 = CN_CTRL_3 (placeholder).
 CN_CTRL_1 and CN_CTRL_2 (documented in `specs/board-layout/layout-notes.md`) cover:
 - Audio I/O jacks (8 signals)
 - 19 override CV jack tips
-- 20 attenuverter wipers + AMT wiper
-- GAIN switch, MODE switches, MOD SRC switch
+- 19 attenuverter wipers (one per mod destination; pins 9–27 of CN_CTRL_2)
+- GAIN switch, MODE switch position outputs, MOD SRC switch, POLARITY switch
 - AMOUNT wiper, OFFSET wiper, STEREO SPREAD OFFSET wiper
 
-**Not covered** by CN_CTRL_1/2 (~18 signals):
+**Note on layout-notes.md "19 + VCA AMT = 20"**: VCA Level IS one of the 19 mod destinations
+and its attenuverter wiper appears once (CN_CTRL_2 pin 12 = `NET_WPR_ATT_VCA_AMT`). The
+layout-notes phrasing is misleading. CN_CTRL_2 pin 28 is SPARE.
+
+**Not covered** by CN_CTRL_1/2 (21 signals requiring 24-pin CN_CTRL_3):
 - ATTACK wiper, RELEASE wiper
 - COMB BYPASS wiper, WIDTH wiper, MASTER OFFSET wiper, FB DIST BLEND wiper
 - FREQ 1/2/3 wipers, FB 1/2/3 wipers, DRIVE 1/2/3 wipers
@@ -140,20 +144,23 @@ CN_CTRL_1 and CN_CTRL_2 (documented in `specs/board-layout/layout-notes.md`) cov
 - LP2 CUTOFF (slider) wiper, LP2 RESONANCE wiper
 - HP CUTOFF (slider) wiper, HP RESONANCE wiper
 
-These are assigned to **CN_CTRL_3** (20-pin IDC placeholder) in the generated schematic.
-The actual pinout of CN_CTRL_3 must be defined and added to `layout-notes.md` before PCB layout.
+These are assigned to **CN_CTRL_3** (24-pin IDC, 2×12 = 23 signals + 1 spare) in the
+generated schematic. The actual pinout must be added to `layout-notes.md` before PCB layout.
 
-### MODE switch encoding
+### MODE switch encoding and count
 
-Each SP3T MODE switch (SW4/SW5/SW6) drives two CD4053 select pins (A_sel, B_sel) on the
-utility board. CN_CTRL_2 pins 6–8 show one pin per MODE switch — insufficient for a SP3T.
-Resolution options:
-1. **Two pins per switch** (6 total for 3 switches): use CN_CTRL_2 pins 6–11; requires
-   updating the layout-notes.md CN_CTRL_2 pinout.
-2. **Resistor-encoded voltage**: encode 3-level state as one voltage on one pin; utility board
-   uses a comparator to decode. Saves pins but adds complexity.
+**Switch count ambiguity**: panel-notes.md shows ONE shared MODE switch (SW4, in Zone 1
+DIST section) for all 3 comb groups. layout-notes.md CN_CTRL_2 pins 6–8 says "3-pos switch
+per distortion chain" (implying 3 switches, one per comb group). The generator follows
+panel-notes (1 shared switch). Decision must be confirmed before PCB layout.
 
-Decision must be made before utility board schematic is drawn.
+**How position signals reach utility board**: CN_CTRL_2 pins 6–8 carry the 3 position output
+nets of SW4: `NET_SW_MODE_SFT`, `NET_SW_MODE_HRD`, `NET_SW_MODE_WFD`. The switch common
+ties to +12V on the control board; the active position pulls its net to +12V while the other
+two float (or are pulled low on the utility board). The utility board decodes which of the 3
+is high to select the CD4053 A/B state. If 3 separate switches are used, expand CN_CTRL_2
+pins 6–8 to carry one position signal per switch group (possibly 9 pins for 3 switches × 3
+positions), requiring a pinout revision in layout-notes.md.
 
 ---
 
