@@ -30,7 +30,7 @@ Stereo Input (L + R)  ←  ±5 V audio
   ↓
 [Block 4]  Distortion  (stereo)
            3 modes: Soft Clip / Hard Clip / Wavefold
-           MODE switch + DRIVE knob; mode CV-selectable
+           MODE switch + DRIVE knob (CCW=mute, 9am=unity/clean, CW=full drive)
   ↓
 [Block VCA] Pre-LP1 Voltage-Controlled Amplifier  (stereo)
            V2164 quad VCA cells 3+4 (cells 1+2 shared with LP1 resonance)
