@@ -147,20 +147,16 @@ layout-notes phrasing is misleading. CN_CTRL_2 pin 28 is SPARE.
 These are assigned to **CN_CTRL_3** (24-pin IDC, 2×12 = 23 signals + 1 spare) in the
 generated schematic. The actual pinout must be added to `layout-notes.md` before PCB layout.
 
-### MODE switch encoding and count
+### MODE switch
 
-**Switch count ambiguity**: panel-notes.md shows ONE shared MODE switch (SW4, in Zone 1
-DIST section) for all 3 comb groups. layout-notes.md CN_CTRL_2 pins 6–8 says "3-pos switch
-per distortion chain" (implying 3 switches, one per comb group). The generator follows
-panel-notes (1 shared switch). Decision must be confirmed before PCB layout.
+**One shared switch (SW4)**, confirmed by `panel.svg` (single switch at cx=28 in Zone 1 DIST
+section; no per-group MODE switches in Zones 2a/2b/2c). All three comb groups always use
+the same distortion mode.
 
-**How position signals reach utility board**: CN_CTRL_2 pins 6–8 carry the 3 position output
-nets of SW4: `NET_SW_MODE_SFT`, `NET_SW_MODE_HRD`, `NET_SW_MODE_WFD`. The switch common
-ties to +12V on the control board; the active position pulls its net to +12V while the other
-two float (or are pulled low on the utility board). The utility board decodes which of the 3
-is high to select the CD4053 A/B state. If 3 separate switches are used, expand CN_CTRL_2
-pins 6–8 to carry one position signal per switch group (possibly 9 pins for 3 switches × 3
-positions), requiring a pinout revision in layout-notes.md.
+CN_CTRL_2 pins 6–8 carry the 3 position output nets of SW4: `NET_SW_MODE_SFT`,
+`NET_SW_MODE_HRD`, `NET_SW_MODE_WFD`. The switch common ties to +12V on the control board;
+the active position is high while the other two float (or are pulled low on the utility board).
+The utility board decodes which of the 3 is high to select the CD4053 A/B state.
 
 ---
 

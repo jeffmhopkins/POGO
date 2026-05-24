@@ -72,7 +72,7 @@ All components are through-hole (Thonkiconn jacks, pot hardware, switches).
 | CV override jacks | BYPASS CV, OFFSET CV, FB DIST BLEND CV, VCA AMT CV, LP1 CUTOFF CV, LP1 RES CV, LP2 CUTOFF CV, LP2 RES CV, HP CUTOFF CV, HP RES CV, FREQ 1/2/3 CV, FB 1/2/3 CV, DRIVE 1/2/3 CV | 19 |
 | Main panel knobs (9 mm pots) | AMOUNT, OFFSET, WIDTH, COMB BYPASS, MASTER OFFSET (XL), POLARITY, FB DIST BLEND, FREQ 1/2/3 (XL), FB 1/2/3 (large), DRIVE 1/2/3 (large), CUTOFF LP1 (large), STEREO SPREAD OFFSET, RESONANCE LP1, CUTOFF LP2 (slider), RESONANCE LP2, CUTOFF HP (slider), RESONANCE HP | ~25 |
 | Attenuverter knobs (9 mm bipolar pots) | One per mod destination (19 total; VCA AMT is destination #4, not a separate knob) | 19 |
-| Switches | GAIN (horizontal 2-pos sub-mini, SW1), MOD SRC (3-pos sub-mini, SW2), POLARITY (3-pos sub-mini, SW3), MODE (3-pos sub-mini, SW4 — **1 shared switch** for all 3 comb groups per panel-notes.md; see note below) | 4 |
+| Switches | GAIN (2-pos horizontal sub-mini, SW1), MOD SRC (3-pos horizontal sub-mini, SW2), POLARITY (3-pos horizontal sub-mini, SW3), MODE (3-pos vertical sub-mini, SW4 — 1 shared switch for all 3 comb groups, per panel.svg) | 4 |
 | LEDs | (none on control board; power LED on utility board) | 0 |
 
 **Connects to**: Utility board via CN_CTRL_1 + CN_CTRL_2.
@@ -231,13 +231,11 @@ Ribbon cables run from control board (back of panel) down to utility board (hang
 | 33 | POLARITY switch com | ← ctrl | SW3 common; utility board uses which position is high for APF feedback polarity (POS / OFF / NEG) |
 | 34 | spare | — | |
 
-**MODE switch note**: panel-notes.md documents **one** shared MODE switch (SW4) for all three
-distortion chains simultaneously. The layout-notes previously said "3-pos switch per distortion
-chain" (three separate switches), which contradicts the panel design. This is an **unresolved
-design decision**: a single shared MODE means all three comb groups always use the same
-distortion mode; three separate switches would allow independent mode per group. Confirm with
-panel design before PCB layout. If changed to 3 switches, pins 6–8 become per-group MODE
-signals and require expanding to cover all three switch position outputs.
+**MODE switch**: panel.svg (authoritative) shows **one** shared 3-pos MODE switch (SW4) for
+all three distortion chains simultaneously. All three comb groups always use the same
+distortion mode. The earlier layout-notes text "3-pos switch per distortion chain" was wrong
+and has been corrected. CN_CTRL_2 pins 6–8 carry the single switch's position outputs
+(SFT / HRD / WFD).
 
 ---
 
