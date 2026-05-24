@@ -24,12 +24,13 @@ POGO uses four PCBs. The split is driven by three constraints:
                │  CN_CTRL_1 + CN_CTRL_2
                │  (2× 34-pin 2.54 mm IDC ribbon cable)
                │
+               │
     ┌──────────┴──────────────────────────────────────────────┐
     │  Utility / HW-Connect Board                              │
     │  Eurorack power, mod bus, expo converters, shared CVs   │
     └─────────────────────┬─────────────────────┬────────────┘
                CN_UTIL_L  │                     │  CN_UTIL_R
-          (34-pin IDC)     │                     │  (34-pin IDC)
+          (40-pin IDC)     │                     │  (40-pin IDC)
                            │                     │
               ┌────────────┘                     └──────────────┐
               │                                                  │
@@ -229,49 +230,65 @@ Ribbon cables run from control board (back of panel) down to utility board (hang
 
 ### CN_UTIL_L (Utility board ↔ Left audio board)
 
-One 34-pin IDC connector (2×17).
+**40-pin IDC connector (2×20).** Expanded from original 34-pin to add GND guard pins for
+I_abc exponential current signals (noise-audit.md H2). Use 2.54 mm pitch shrouded IDC header.
 
 | Pins | Signal | Direction | Notes |
 |---|---|---|---|
-| 1–2 | +12 V | → L audio | |
-| 3–4 | −12 V | → L audio | |
-| 5–6 | GND ×2 | — | |
+| 1–2 | +12 V | → L audio | Power |
+| 3–4 | −12 V | → L audio | Power |
+| 5–6 | GND ×2 | — | Star-ground return for power |
 | 7 | L IN buffered | → L audio | L audio input (post utility-board buffer) |
-| 8 | ENV OUT L | ← L audio | Envelope follower L output → to utility board → CN_CTRL_1 |
-| 9 | BAND OUT L | ← L audio | LP1 L output → to utility board → CN_CTRL_1 |
-| 10 | LEFT OUT | ← L audio | HP L output → to utility board → CN_CTRL_1 |
-| 11 | APF FREQ 1 expo out | → L audio | I_abc for APF group 1 L (expo current from THAT340-1) |
-| 12 | APF FREQ 2 expo out | → L audio | APF group 2 L |
-| 13 | APF FREQ 3 expo out | → L audio | APF group 3 L |
-| 14 | LP1 L expo out | → L audio | I_abc for LP1 L integrators (from THAT340-LP1 Q1) |
-| 15 | LP2 L expo out | → L audio | I_abc for LP2 L |
-| 16 | HP L expo out | → L audio | I_abc for HP L |
-| 17 | LP1 CUTOFF CV | → L audio | Scaled CV after attenuverter (summing node input) |
-| 18 | LP1 RES Q CV | → L audio | IC_Q_AB_L cell A Iabc drive |
-| 19 | LP2 CUTOFF CV | → L audio | |
-| 20 | LP2 RES Q CV | → L audio | IC_Q_AB_L cell B Iabc drive |
-| 21 | HP CUTOFF CV | → L audio | |
-| 22 | HP RES Q CV | → L audio | IC_Q_C_L cell A Iabc drive |
-| 23 | VCA Level CV | → L audio | THAT_VCA_L GAIN pin drive (via R_gain) |
-| 24 | COMB BYPASS CV | → L audio | Block 3 COMB BYPASS VCA control (each APF chain) |
-| 25 | APF FB 1 CV | → L audio | Feedback depth CV for APF chain 1 |
-| 26 | APF FB 2 CV | → L audio | |
-| 27 | APF FB 3 CV | → L audio | |
-| 28 | DRIVE 1 CV | → L audio | Distortion chain 1 drive CV |
-| 29 | DRIVE 2 CV | → L audio | |
-| 30 | DRIVE 3 CV | → L audio | |
-| 31 | Post-dist tap L chain 1 | ← L audio | Post-dist signal → utility board FB DIST BLEND crossfade |
-| 32 | Post-dist tap L chain 2 | ← L audio | |
-| 33 | Post-dist tap L chain 3 | ← L audio | |
-| 34 | FB DIST BLEND out (to L APF) | → L audio | Crossfaded feedback signal back to Block 3 L |
+| 8 | ENV OUT L | ← L audio | Envelope follower L output → utility board → CN_CTRL_1 |
+| 9 | BAND OUT L | ← L audio | LP1 L output → utility board → CN_CTRL_1 |
+| 10 | LEFT OUT | ← L audio | HP L output → utility board → CN_CTRL_1 |
+| 11 | **GND guard** | — | Ground return adjacent to I_abc group; reduces capacitive coupling onto expo current lines |
+| 12 | APF FREQ 1 expo out | → L audio | I_abc for APF group 1 L (from THAT340-1) |
+| 13 | APF FREQ 2 expo out | → L audio | I_abc for APF group 2 L |
+| 14 | **GND guard** | — | |
+| 15 | APF FREQ 3 expo out | → L audio | I_abc for APF group 3 L |
+| 16 | LP1 L expo out | → L audio | I_abc for LP1 L integrators (from THAT340-LP1 Q1) |
+| 17 | **GND guard** | — | |
+| 18 | LP2 L expo out | → L audio | I_abc for LP2 L |
+| 19 | HP L expo out | → L audio | I_abc for HP L |
+| 20 | LP1 CUTOFF CV | → L audio | Scaled CV after attenuverter (summing node input) |
+| 21 | LP1 RES Q CV | → L audio | IC_Q_AB_L cell A Iabc drive |
+| 22 | LP2 CUTOFF CV | → L audio | |
+| 23 | LP2 RES Q CV | → L audio | IC_Q_AB_L cell B Iabc drive |
+| 24 | HP CUTOFF CV | → L audio | |
+| 25 | HP RES Q CV | → L audio | IC_Q_C_L cell A Iabc drive |
+| 26 | VCA Level CV | → L audio | THAT_VCA_L GAIN pin drive (via R_gain) |
+| 27 | COMB BYPASS CV | → L audio | Block 3 COMB BYPASS VCA control |
+| 28 | APF FB 1 CV | → L audio | Feedback depth CV for APF chain 1 |
+| 29 | APF FB 2 CV | → L audio | |
+| 30 | APF FB 3 CV | → L audio | |
+| 31 | DRIVE 1 CV | → L audio | Distortion chain 1 drive CV |
+| 32 | DRIVE 2 CV | → L audio | |
+| 33 | DRIVE 3 CV | → L audio | |
+| 34 | **GND** | — | Ground return adjacent to post-dist tap group |
+| 35 | Post-dist tap L chain 1 | ← L audio | Post-dist audio → utility board FB DIST BLEND. Add 100 pF C0G to GND at utility board entry (EMI only; do NOT use 100 nF — audio signal) |
+| 36 | Post-dist tap L chain 2 | ← L audio | Same |
+| 37 | Post-dist tap L chain 3 | ← L audio | Same |
+| 38 | FB DIST BLEND out (to L APF) | → L audio | Crossfaded feedback → Block 3 L. Add 100 pF C0G to GND at audio board entry |
+| 39–40 | spare | — | |
+
+**I_abc group routing note:** Add 10 nF C0G 0402 bypass cap from each I_abc trace to GND
+on the audio board immediately after the connector footprint (within 2 mm of pin). See
+noise-audit.md H3. Combined with GND guard pins above, these provide ~60 dB noise rejection
+on expo current lines from ribbon cable coupling.
+
+**Post-dist tap note:** Pins 35–37 carry full-bandwidth audio (up to 20 kHz). The 100 pF
+bypass caps at the utility board entry suppress EMI above ~1 GHz without affecting audio.
+Do NOT substitute 100 nF — that would roll off at 16 kHz at 100 Ω source impedance. See
+noise-audit.md H6.
 
 ---
 
 ### CN_UTIL_R (Utility board ↔ Right audio board)
 
-Mirror of CN_UTIL_L with R-channel signals.
+**40-pin IDC connector (2×20).** Mirror of CN_UTIL_L with R-channel signals.
 
-Key difference: LP1 R expo out (pin 14 equivalent) carries the I_abc from THAT340-LP1 Q2,
+Key difference: LP1 R expo out (pin 16 in revised pinout) carries the I_abc from THAT340-LP1 Q2,
 which has V_spread already summed into its base voltage on the utility board. The R audio
 board LP1 circuit is structurally identical to the L board; the STEREO SPREAD OFFSET
 is transparent to the R audio board.
@@ -327,6 +344,38 @@ and IC_Q_AB_L/IC_Q_C_L references replaced by IC_Q_AB_R/IC_Q_C_R.
    THAT 2180 VCA: place between Block 4 distortion output and LP1 OTA input.
 9. Trim pots: place on the top edge of each audio board (pins 1 and 3 accessible by
    screwdriver without removing the board).
+10. **L/R signal isolation rule (M1):** APF chain L-channel signal traces must maintain ≥3 mm
+    separation from corresponding R-channel signal traces on the same layer. Prefer routing one
+    channel on L1 (top signal layer) and the other on L4 (bottom signal layer) — the L2 GND
+    plane then acts as a shield between them. Applies to all 36 LM13700 signal nodes (18 per
+    channel) and the associated TL072 APF amp outputs. See noise-audit.md M1.
+11. **OTA HF suppression cap placement rule (M4):** The 22 pF C0G HF-suppression cap at each
+    LM13700 OTA output pin (pin 4 per cell) must be placed within 1 mm of the pin, with the
+    GND via on the cap's second pad. Do not route through any shared trace before the cap.
+    Series inductance (~5 nH/cm) on a 5 mm trace resonates with 22 pF at ~680 MHz, worsening
+    HF behavior. Total trace length OTA pin → cap pad: ≤1 mm. See noise-audit.md M4.
+12. **THAT340 Kelvin ground for emitter bias resistors (M3):** Each THAT340 emitter bias
+    resistor (R_e) ground return must connect via a **dedicated trace** (≥0.5 mm wide, ≤5 mm
+    length) directly to the L2 GND plane via, not through any shared audio signal return trace.
+    Audio return currents in a shared trace create I×R voltage across R_e, modulating the expo
+    output (pitch modulation at audio frequency). See noise-audit.md M3.
+
+### Utility board (additional to rules 3–5 above)
+13. **THAT340 power island (H5):** Add a dedicated local pi-filter for the THAT340 cluster
+    supply rails, separate from the main board power pour:
+    - +12 V: [main plane] → [100 Ω 0603] → [10 µF electrolytic] → [100 nF ceramic] → THAT340 +VCC
+    - −12 V: same structure
+    The 100 Ω series resistance + 10 µF capacitor creates a lowpass at 159 Hz, attenuating
+    100 Hz busboard ripple and HF switching noise before it reaches expo converters. Power drop:
+    100 Ω × (6 THAT340 × 1 mA) = 0.6 V → THAT340 operates at 11.4 V (within spec, operates
+    to 5 V minimum). Route THAT340 power island as an isolated copper island on L3 (power layer)
+    connected to the main power pour only at the pi-filter input side. See noise-audit.md H5.
+14. **I_abc bypass caps at audio board connector (H3):** On the audio board, place 10 nF C0G
+    0402 caps from each I_abc trace to GND immediately after the CN_UTIL_L/R connector footprint
+    (within 2 mm of each I_abc pin). Applies to pins 12, 13, 15, 16, 18, 19 of CN_UTIL_L/R.
+    Combined with the GND guard pins in the connector (H2), these caps provide ~60 dB rejection
+    of any noise coupled onto expo current lines from adjacent ribbon cable conductors.
+    See noise-audit.md H3.
 
 ---
 
@@ -369,15 +418,15 @@ Placed on utility board, immediately after power header:
 
 ## 10. Inter-Board Signal Counts (Summary)
 
-| Connector | Pins | Type |
-|---|---|---|
-| CN_CTRL_1 | 34 | 2.54 mm IDC, ribbon cable |
-| CN_CTRL_2 | 34 | 2.54 mm IDC, ribbon cable |
-| CN_UTIL_L | 34 | 2.54 mm IDC, ribbon cable |
-| CN_UTIL_R | 34 | 2.54 mm IDC, ribbon cable |
-| Eurorack bus | 16 | Shrouded IDC, standard Eurorack |
+| Connector | Pins | Type | Notes |
+|---|---|---|---|
+| CN_CTRL_1 | 34 | 2.54 mm IDC, ribbon cable | Unchanged |
+| CN_CTRL_2 | 34 | 2.54 mm IDC, ribbon cable | Unchanged |
+| CN_UTIL_L | **40** | 2.54 mm IDC, ribbon cable | Expanded from 34; 3 GND guards added for I_abc group |
+| CN_UTIL_R | **40** | 2.54 mm IDC, ribbon cable | Same expansion |
+| Eurorack bus | 16 | Shrouded IDC, standard Eurorack | Unchanged |
 
-Total inter-board connections: **152 pins** across 5 connectors.
+Total inter-board connections: **164 pins** across 5 connectors (was 152).
 
 ---
 
@@ -396,4 +445,39 @@ With V2164 removed and replaced by THAT 2180 + additional LM13700s, power draw i
 Measure actual draw during bring-up. 200 mA / rail is the target ceiling for a standard
 Eurorack busboard slot.
 
-Last updated: 2026-05-20
+---
+
+## 12. Bring-Up Checklist
+
+Complete these checks **before** applying audio signals to any assembled board.
+
+### All boards
+- [ ] **BAT54S polarity (M2):** For every BAT54S clamp IC on the board, verify with diode-test
+  DMM: pin 2 (center, signal node) reads ~300 mV forward drop to pin 3 (toward +12 V) and
+  ~300 mV to pin 1 (toward −12 V). Reversed orientation creates a silent ESD protection failure
+  with no obvious symptom. ~50+ BAT54S ICs across all boards. See noise-audit.md M2.
+- [ ] **Power rail voltages:** Measure +12 V and −12 V at the power header pins before
+  inserting the module in a case. Verify BAT85 reverse polarity protection diodes pass correct
+  polarity and block reversed supply.
+
+### Utility board
+- [ ] **THAT340 power island:** Verify +12 V at THAT340 cluster VCC pins is 11.4 ± 0.3 V
+  (100 Ω drop at ~6 mA → 0.6 V from 12 V rail). If outside range, check pi-filter resistor.
+- [ ] **Mod bus zero offset:** Adjust RV_MB_ZERO with AMOUNT at center and input = 0 V;
+  trim until mod bus output = 0 V.
+
+### Left and Right audio boards
+- [ ] **CD4053 V_EE supply (D4):** Before applying audio, verify V_EE = −12 V on all three
+  CD4053 ICs (Block 4) with a DMM. If V_EE = GND, the mode mux will silently distort all
+  negative-going audio — no other symptom. See noise-audit.md D4.
+- [ ] **LM4562 Block A output:** Feed a 1 kHz sine at ±1 V into L IN and R IN jacks; verify
+  unity-gain output at Block A output nodes with oscilloscope.
+- [ ] **LP1/LP2/HP expo converters:** Calibrate 1V/oct tracking per block (RV_REF, RV_1VOCT
+  trim pots). Verify at 25°C; recheck at operating temperature after 10 min warm-up.
+- [ ] **BAND OUT phase (D3):** With a 1 kHz sine at L IN, compare BAND OUT L and LEFT OUT
+  phase on an oscilloscope. Confirm both are in-phase with the input (or document the offset
+  if they are not). See noise-audit.md D3.
+
+---
+
+Last updated: 2026-05-24 (noise audit pass — see specs/shared/noise-audit.md)

@@ -138,5 +138,8 @@ All LP1 challenges apply. Additionally:
 - **Independent expo calibration**: LP1 and LP2 expo converters must be calibrated separately
   even though they use the same circuit. A CV that tracks perfectly on LP1 may be slightly
   off on LP2 if component tolerances differ — always calibrate each stage independently.
-- **Ground routing**: use a single ground wire between LP1 and LP2 sections of the PCB;
-  do not rely on copper pours alone between sections that carry different signal voltages.
+- **Ground routing (M5)**: add a dedicated **3× GND stitching via array** (three M3-pad GND vias
+  in a row) on the boundary between the LP1 and LP2 footprint clusters on the audio board. These
+  connect L1 copper islands through L2 GND plane. Do not rely on copper pour alone between
+  sections carrying different signal voltages — pour impedance may not be low enough at audio
+  frequencies if pour continuity is broken by trace routing. See noise-audit.md M5.

@@ -356,9 +356,11 @@ A simple exponential offset applied to the R channel expo converter reference on
 | C_apf_G1 | C0G / NP0 | 0603 | 12 | 33 nF (6 per channel × 2 channels) — Group 1, 100 Hz–1 kHz |
 | C_apf_G2 | C0G / NP0 | 0603 | 12 | 6.8 nF — Group 2, 500 Hz–5 kHz |
 | C_apf_G3 | C0G / NP0 | 0603 | 12 | 1.5 nF — Group 3, 2 kHz–20 kHz |
-| C_hf_x | C0G / NP0 | 0603 | 36 | 22 pF HF-suppression at each OTA output node; 18 OTA cells per channel × 2 channels = 36 total |
+| C_hf_x | C0G / NP0 | 0603 | 36 | 22 pF HF-suppression at each OTA output node; 18 OTA cells per channel × 2 channels = 36 total. **Must be placed within 1 mm of OTA output pin** — see noise-audit.md M4 |
 | R_lin_x | — | 0603 | 72 | 1 kΩ linearizing resistors at each OTA differential input; 2 per cell × 18 cells × 2 channels = 72 total |
+| C_iabc_x | C0G / NP0 | 0402 | 36 | 10 nF bypass cap from each LM13700 Iabc pin to GND; 18 OTA cells per channel × 2 channels = 36 total. Place within 2 mm of Iabc pin. Filters HF noise on expo current lines from ribbon cable. See noise-audit.md H3 |
 | SW_POL | 3-pos panel switch | Panel | 1 | POLARITY: Positive / Off / Negative (mechanical) |
+| R_pol_bleed | — | 0603 | 10 kΩ | 1 | Bleeder resistor from POLARITY switch "Off" contact to GND. Prevents switch contact leakage current from appearing at feedback summing node when POLARITY = Off. See noise-audit.md H4 |
 | RV_FB_DIST_BLEND | Lin pot | 9mm | 1 | FB DIST BLEND crossfade: 0% = clean APF fb, 100% = post-dist fb |
 
 ### Trim Pots
@@ -385,6 +387,6 @@ A simple exponential offset applied to the R channel expo converter reference on
 - **V_post_dist routing**: the distortion output (Block 4) must be routed to the APF feedback section without picking up noise. Use a shielded wire or dedicated PCB trace with guard ring; keep away from OTA signal nodes.
 - **FB DIST BLEND crossfade**: the continuous crossfade replaces the CD4053 SOURCE switch. Use a complementary-gain resistive crossfade (pot + op-amp summer). The BLEND_AMP output must be buffered before the per-group feedback amp stages.
 - **COMB BYPASS complementary Iabc driver**: the op-amp difference stage that generates complementary Iabc currents must have matched resistors (0.1% preferred, 1% acceptable) to ensure dry+comb currents sum to a constant total — otherwise the output level changes as COMB BYPASS sweeps.
-- **POLARITY Off position**: when POLARITY = Off, GND must be cleanly connected to the feedback summing node — a leaky switch contact or ground bounce will cause audible bleed-through of the feedback signal. Use a low-leakage panel switch or add a small bleeder resistor to GND at the switch output.
+- **POLARITY Off position (RESOLVED)**: when POLARITY = Off, GND must be cleanly connected to the feedback summing node. Switch contact leakage (1–10 nA typical for panel toggle switches) through R_fb_fixed (100 kΩ) = up to 1 mV at the summing node — audible bleed-through at high FB settings. **Fix**: R_pol_bleed = 10 kΩ to GND at the "Off" contact. 10 nA through 10 kΩ = 0.1 µV — inaudible. See noise-audit.md H4.
 - **Negative feedback stability**: with POLARITY = Negative, the feedback becomes degenerative in the normal sense but regenerative at the complementary frequencies. At high g, the system may still self-oscillate but at different frequencies than positive feedback — verify stability across the full FB range in simulation before PCB layout.
 - **Calibration burden**: 6 trim pots (3 expo + 3 feedback limits) plus 3 independent feedback CV attenuverters. Document calibration order clearly: expo converters first, then feedback limits.

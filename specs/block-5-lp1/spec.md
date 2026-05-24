@@ -227,6 +227,8 @@ Both integrator capacitors C1 = C2 = 47 nF.
 | LP1_EXPO | THAT340 | SOIC-8 | 1 | Matched NPN pair for expo converter (L+R share one expo) |
 | C1_L, C2_L, C1_R, C2_R | C0G/NP0 | 0603 | 4 | 47 nF integrator capacitors |
 | R_in_L, R_in_R | — | 0603 | 2 | 100 kΩ summing amp input resistor |
+| C_iabc_int_L, C_iabc_int_R | C0G/NP0 | 0402 | 2 | 10 nF bypass from LP1 integrator OTA Iabc pin to GND; place within 2 mm of Iabc pin. Filters HF noise on expo current from ribbon cable (see noise-audit.md H3) |
+| C_iabc_q_L, C_iabc_q_R | C0G/NP0 | 0402 | 2 | 10 nF bypass from IC_Q_AB_L/R cell A Iabc pin to GND; same placement rule |
 | RV_SPREAD_OFFSET | Bipolar pot | 9mm | 1 | STEREO SPREAD OFFSET; CW = +5 V, CCW = −5 V, wiper → R expo summer |
 | R_spread, R_ctrl_R | — | 0603 | 2 | Summing resistors at R expo summer input; **0.1% tolerance** — mismatch adds semitone error per volt |
 | C_VCC, C_VEE | — | 0603 | 100 nF | 8 | Decoupling, 2 per IC × 4 ICs |
@@ -260,3 +262,5 @@ Both integrator capacitors C1 = C2 = 47 nF.
 - **L/R resonance matching**: L and R use separate LM13700 cells (one IC per audio board) driven by the same RESONANCE CV. LM13700 cells on different dies will match slightly less well than V2164 cells on the same die; the calibrated Iabc operating point should keep mismatch inaudible.
 - **STEREO SPREAD OFFSET center null**: the bipolar pot must pass exactly 0 V at center detent. RV_LP1_SPREAD_NULL compensates for mechanical offset.
 - **SPREAD OFFSET interaction with CUTOFF CV**: V_spread sums into the R expo converter input alongside the shared CUTOFF CV. Summing resistors (R_spread and R_ctrl in the R expo summer) must be **0.1% tolerance** to preserve 1V/oct tracking on the R channel. Any mismatch adds a constant semitone error per volt of CV. Specify 0.1% in the parts table.
+- **OTA-C noise at high Q (accepted limitation — D1)**: at Q → ∞ (Iabc → 0), LM13700 input noise current (~10 pA/√Hz) reflected through the high-impedance integrator capacitor raises the noise floor. This is inherent to OTA-C topology and is not fixable without a fundamentally different filter architecture. At self-oscillation onset, the oscillating sine tone dominates and masks the elevated noise floor. See noise-audit.md D1.
+- **LP1/LP2 Q-VCA thermal coupling (accepted limitation — D2)**: LP1 Q uses IC_Q_AB cell A; LP2 Q uses cell B of the same IC die. At the nominal Iabc operating point (<1 µA), each cell dissipates <10 µW — thermal coupling between cells is negligible and does not cause audible Q drift between LP1 and LP2. See noise-audit.md D2.
