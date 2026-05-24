@@ -99,6 +99,7 @@ POGO/
 ├── kicad/                    ← KiCad 7 schematic generation (board design system)
 │   ├── kicad_common.py       ← Shared generator infrastructure (all 4 boards)
 │   ├── generate_control_board.py  ← Control board generator script
+│   ├── validate_schematic.py ← Structural validator (kiutils-based)
 │   ├── pogo-control-board.kicad_sch  ← Generated control board schematic
 │   ├── pogo.kicad_pro        ← KiCad 7 project file
 │   └── kicad-process.md      ← (see specs/kicad-process.md) generation workflow
@@ -138,13 +139,42 @@ is the authoritative source and the `.kicad_sch` is the artifact.
 cd kicad
 python3 generate_control_board.py
 # → writes pogo-control-board.kicad_sch
-# → prints parens-balance check and single-occurrence net list
+# → automatically runs validate_schematic.py and prints a pass/fail report
 ```
 
 The generated schematic contains **78 components** — 28 jacks, 43 pots/sliders, 4 switches,
 and 3 IDC connectors (CN1 34-pin, CN2 40-pin, CN3 24-pin) — connected entirely via global
 net labels (no drawn wires). Three nets are intentionally single-occurrence:
 `SPARE_CN2_28`, `SPARE_CN2_40`, `SPARE_CN3_24`.
+
+### Validating a schematic
+
+`validate_schematic.py` parses the generated `.kicad_sch` using
+[kiutils](https://github.com/mvnmgrx/kiutils) and runs five structural checks:
+
+| Check | What it catches |
+|---|---|
+| Component counts | Wrong number of J / RV / SW / CN components |
+| Duplicate refs | Two symbols claiming the same reference designator |
+| Floating nets | Single-occurrence global labels (unexpected unconnected nets) |
+| Required nets | Missing signal, wiper, CV, switch, or power nets by name |
+| MODBUS_NORM count | Must appear exactly 20× (19 SW lugs + 1 CN2 pin) |
+
+```bash
+# Run standalone (requires: pip3 install kiutils)
+cd kicad
+python3 validate_schematic.py
+# or against any schematic:
+python3 validate_schematic.py path/to/other.kicad_sch
+```
+
+The validator exits 0 on pass, 1 on any error — suitable for CI. The generator calls it
+automatically, so a broken generator change fails immediately.
+
+**What this does not cover:** ERC pin-type conflicts, short circuits between power rails, and
+missing power pin connections on ICs. For those, open the schematic in KiCad 7 and run
+`Tools → Electrical Rules Checker`. Expected ERC output: three "pin unconnected" warnings
+for the intentional spare pins — nothing else.
 
 ### Shared infrastructure (`kicad_common.py`)
 
