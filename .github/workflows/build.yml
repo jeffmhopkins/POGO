@@ -82,10 +82,24 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Get Rack SDK
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           pushd $HOME
-          wget -O Rack-SDK.zip https://vcvrack.com/downloads/Rack-SDK-latest-mac-x64+arm64.zip
-          unzip Rack-SDK.zip
+          VERSIONS=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
+            "https://api.github.com/repos/VCVRack/Rack/tags?per_page=20" | \
+            jq -r '.[].name | ltrimstr("v")' | grep '^2\.')
+          for VERSION in $VERSIONS; do
+            URL="https://vcvrack.com/downloads/Rack-SDK-${VERSION}-mac-x64+arm64.zip"
+            echo "Trying Rack SDK v${VERSION}..."
+            if wget -q -O Rack-SDK.zip "$URL"; then
+              echo "Using Rack SDK v${VERSION}"
+              unzip Rack-SDK.zip
+              break
+            fi
+            rm -f Rack-SDK.zip
+          done
+          [ -d Rack-SDK ] || { echo "ERROR: No Rack SDK found for any recent version" >&2; exit 1; }
 
       - name: Build plugin
         run: |
