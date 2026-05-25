@@ -31,7 +31,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Build plugin
         run: |
@@ -40,7 +40,7 @@ jobs:
           make plugin-build-lin-x64
 
       - name: Upload Linux artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: POGO-linux-x64-${{ github.run_number }}
           path: ${{ env.rack-plugin-toolchain-dir }}/plugin-build
@@ -57,7 +57,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Build plugin
         run: |
@@ -66,7 +66,7 @@ jobs:
           make plugin-build-win-x64
 
       - name: Upload Windows artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: POGO-win-x64-${{ github.run_number }}
           path: ${{ env.rack-plugin-toolchain-dir }}/plugin-build
@@ -80,7 +80,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Get Rack SDK
         env:
@@ -109,7 +109,7 @@ jobs:
           make dist
 
       - name: Upload macOS artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: POGO-mac-${{ github.run_number }}
           path: dist/
@@ -123,7 +123,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Install kiutils
         run: pip install kiutils
@@ -135,7 +135,7 @@ jobs:
         run: python3 kicad/validate_schematic.py kicad/pogo-control-board.kicad_sch
 
       - name: Upload schematic artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: POGO-kicad-${{ github.run_number }}
           path: kicad/pogo-control-board.kicad_sch
