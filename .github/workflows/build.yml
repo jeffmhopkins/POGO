@@ -84,7 +84,11 @@ jobs:
       - name: Get latest Rack SDK version
         id: rack-sdk
         run: |
-          VERSION=$(curl -s https://api.github.com/repos/VCVRack/Rack/releases/latest | jq -r '.tag_name | ltrimstr("v")')
+          VERSION=$(curl -s https://api.github.com/repos/VCVRack/Rack/releases/latest | jq -r '.tag_name // empty' | sed 's/^v//')
+          if [ -z "$VERSION" ] || [ "$VERSION" = "null" ]; then
+            echo "ERROR: failed to resolve Rack SDK version from GitHub API" >&2
+            exit 1
+          fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Rack SDK version: $VERSION"
 
