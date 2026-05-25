@@ -240,7 +240,7 @@
 
   <!-- SECTION 8b — LP 1 FILTER  (x:142.24–162.56, center x=152.40)           -->
   <!-- Jack x: 147.32 (CUTOFF CV), 157.48 (RES CV)                           -->
-  <!-- Common bottom: CV cy=118 label y=124.5 · ATT cy=109                    -->
+  <!-- Common bottom: CV cy=123 label y=128 · ATT cy=109                    -->
   <!-- CUTOFF cy=47 (top=40=LP2 slider top) · SPREAD cy=70 · RESONANCE cy=93  -->
   <!-- ════════════════════════════════════════════════════════════════════════ -->
 
@@ -269,14 +269,14 @@
   <line x1="157.48" y1="109" x2="157.48" y2="106.5" stroke="#aaa" stroke-width="0.5"/>
 
   <!-- CUTOFF CV jack -->
-  <circle cx="147.32" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="147.32" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="147.32" y="124.5" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">CUT</text>
+  <circle cx="147.32" cy="123" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="147.32" cy="123" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="147.32" y="128" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">CUT</text>
 
   <!-- RES CV jack -->
-  <circle cx="157.48" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="157.48" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="157.48" y="124.5" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">RES</text>
+  <circle cx="157.48" cy="123" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="157.48" cy="123" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="157.48" y="128" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">RES</text>
 
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 9a — BAND OUT TOP STRIP  (x:162.56–182.88, y:4.5–28)          -->
@@ -298,7 +298,7 @@
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 9b — LP 2 FILTER  (x:162.56–182.88, y:28–128.85)              -->
   <!-- Center x=172.72 · Jack x: 167.64 (CUT), 177.80 (RES)                  -->
-  <!-- Common bottom: CV cy=118 label y=124.5 · ATT cy=109                    -->
+  <!-- Common bottom: CV cy=123 label y=128 · ATT cy=109                    -->
   <!-- CUTOFF: 45mm travel slider (ALPS RS4515N) track y=40–85, thumb y=62.5  -->
   <!-- RESONANCE cy=93 label y=101                                             -->
   <!-- ════════════════════════════════════════════════════════════════════════ -->
@@ -320,14 +320,14 @@
   <line x1="177.80" y1="109" x2="177.80" y2="106.5" stroke="#aaa" stroke-width="0.5"/>
 
   <!-- CUTOFF CV jack -->
-  <circle cx="167.64" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="167.64" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="167.64" y="124.5" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">CUT</text>
+  <circle cx="167.64" cy="123" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="167.64" cy="123" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="167.64" y="128" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">CUT</text>
 
   <!-- RES CV jack -->
-  <circle cx="177.80" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="177.80" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="177.80" y="124.5" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">RES</text>
+  <circle cx="177.80" cy="123" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="177.80" cy="123" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="177.80" y="128" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">RES</text>
 
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 10a — OUT TOP STRIP  (x:182.88–203.20, y:4.5–42)              -->
@@ -369,14 +369,14 @@
   <line x1="198.12" y1="109" x2="198.12" y2="106.5" stroke="#aaa" stroke-width="0.5"/>
 
   <!-- CUTOFF CV jack -->
-  <circle cx="187.96" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="187.96" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="187.96" y="124.5" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">CUT</text>
+  <circle cx="187.96" cy="123" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="187.96" cy="123" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="187.96" y="128" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">CUT</text>
 
   <!-- RES CV jack -->
-  <circle cx="198.12" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="198.12" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="198.12" y="124.5" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">RES</text>
+  <circle cx="198.12" cy="123" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="198.12" cy="123" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="198.12" y="128" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">RES</text>
 
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 5 — COMB 1  (x:50.80–81.28, center x=66.04)                   -->
@@ -414,19 +414,19 @@
   <line x1="76.20" y1="109" x2="76.20" y2="106.5" stroke="#aaa" stroke-width="0.5"/>
 
   <!-- FREQ CV jack -->
-  <circle cx="55.88" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="55.88" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="55.88" y="124.5" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
+  <circle cx="55.88" cy="123" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="55.88" cy="123" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="55.88" y="128" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
 
   <!-- FEED CV jack -->
-  <circle cx="66.04" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="66.04" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="66.04" y="124.5" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">FB</text>
+  <circle cx="66.04" cy="123" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="66.04" cy="123" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="66.04" y="128" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">FB</text>
 
   <!-- DRIVE CV jack -->
-  <circle cx="76.20" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="76.20" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="76.20" y="124.5" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">DRIVE</text>
+  <circle cx="76.20" cy="123" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="76.20" cy="123" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="76.20" y="128" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">DRIVE</text>
 
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 6 — COMB 2  (x:81.28–111.76, center x=96.52)                  -->
@@ -462,19 +462,19 @@
   <line x1="106.68" y1="109" x2="106.68" y2="106.5" stroke="#aaa" stroke-width="0.5"/>
 
   <!-- FREQ CV jack -->
-  <circle cx="86.36" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="86.36" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="86.36" y="124.5" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
+  <circle cx="86.36" cy="123" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="86.36" cy="123" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="86.36" y="128" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
 
   <!-- FEED CV jack -->
-  <circle cx="96.52" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="96.52" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="96.52" y="124.5" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">FB</text>
+  <circle cx="96.52" cy="123" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="96.52" cy="123" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="96.52" y="128" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">FB</text>
 
   <!-- DRIVE CV jack -->
-  <circle cx="106.68" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="106.68" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="106.68" y="124.5" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">DRIVE</text>
+  <circle cx="106.68" cy="123" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="106.68" cy="123" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="106.68" y="128" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">DRIVE</text>
 
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 7 — COMB 3  (x:111.76–142.24, center x=127.00)                -->
@@ -510,19 +510,19 @@
   <line x1="137.16" y1="109" x2="137.16" y2="106.5" stroke="#aaa" stroke-width="0.5"/>
 
   <!-- FREQ CV jack -->
-  <circle cx="116.84" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="116.84" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="116.84" y="124.5" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
+  <circle cx="116.84" cy="123" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="116.84" cy="123" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="116.84" y="128" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
 
   <!-- FEED CV jack -->
-  <circle cx="127.00" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="127.00" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="127.00" y="124.5" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">FB</text>
+  <circle cx="127.00" cy="123" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="127.00" cy="123" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="127.00" y="128" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">FB</text>
 
   <!-- DRIVE CV jack -->
-  <circle cx="137.16" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="137.16" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="137.16" y="124.5" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">DRIVE</text>
+  <circle cx="137.16" cy="123" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="137.16" cy="123" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="137.16" y="128" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">DRIVE</text>
 
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 4a — SHARED COMB  (x:20.32–50.80, y:4.5–74)                   -->
@@ -563,7 +563,7 @@
   <!-- SECTION 4b — SHARED DIST  (x:20.32–50.80, y:74–128.85)                 -->
   <!-- SOURCE switch removed — BLEND knob covers full clean→dist range          -->
   <!-- Equal-gap: MODE cx=28 · BLEND cx=40 · 6.36mm gaps                       -->
-  <!-- Unified bottom: WET / OFFSET / BLEND  ATT cy=109 · CV cy=118 y=124.5   -->
+  <!-- Unified bottom: WET / OFFSET / BLEND  ATT cy=109 · CV cy=123 y=128   -->
   <!-- ════════════════════════════════════════════════════════════════════════ -->
 
   <!-- MODE — 3-pos vertical switch, cx=28, body y=81–93 -->
@@ -592,16 +592,16 @@
 
   <!-- Unified bottom row CV — cy=118, label y=124.5 -->
   <!-- WET (DRY/WET) CV -->
-  <circle cx="25.40" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="25.40" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="25.40" y="124.5" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">BYPASS</text>
+  <circle cx="25.40" cy="123" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="25.40" cy="123" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="25.40" y="128" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">BYPASS</text>
   <!-- OFFSET (MASTER OFFSET) CV -->
-  <circle cx="35.56" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="35.56" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="35.56" y="124.5" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">OFFSET</text>
+  <circle cx="35.56" cy="123" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="35.56" cy="123" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="35.56" y="128" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">OFFSET</text>
   <!-- BLEND CV -->
-  <circle cx="45.72" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="45.72" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="45.72" y="124.5" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">BLEND</text>
+  <circle cx="45.72" cy="123" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="45.72" cy="123" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="45.72" y="128" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">BLEND</text>
 
 </svg>
