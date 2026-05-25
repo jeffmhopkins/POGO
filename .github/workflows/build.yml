@@ -12,7 +12,6 @@ on:
 
 env:
   rack-plugin-toolchain-dir: /home/build/rack-plugin-toolchain
-  RACK_SDK_VERSION: 2.5.2
 
 defaults:
   run:
@@ -82,9 +81,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Get Rack SDK
+      - name: Get latest Rack SDK version
+        id: rack-sdk
         run: |
-          curl -sLo RackSDK.zip "https://vcvrack.com/downloads/RackSDK-${{ env.RACK_SDK_VERSION }}-mac-x64+arm64.zip"
+          VERSION=$(curl -s https://api.github.com/repos/VCVRack/Rack/releases/latest | jq -r '.tag_name | ltrimstr("v")')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Rack SDK version: $VERSION"
+
+      - name: Download Rack SDK
+        run: |
+          curl -sLo RackSDK.zip "https://vcvrack.com/downloads/RackSDK-${{ steps.rack-sdk.outputs.version }}-mac-x64+arm64.zip"
           unzip -q RackSDK.zip
 
       - name: Build plugin
