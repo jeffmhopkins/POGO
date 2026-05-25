@@ -43,7 +43,7 @@ jobs:
         run: |
           mkdir -p /tmp/artifact
           find ${{ env.rack-plugin-toolchain-dir }}/plugin-build -name "*.vcvplugin" | \
-            while read f; do tar --use-compress-program=zstd -xf "$f" -C /tmp/artifact/; done
+            while read f; do zstd -d "$f" -c | tar -x -C /tmp/artifact/; done
 
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v7
@@ -75,7 +75,7 @@ jobs:
         run: |
           mkdir -p /tmp/artifact
           find ${{ env.rack-plugin-toolchain-dir }}/plugin-build -name "*.vcvplugin" | \
-            while read f; do tar --use-compress-program=zstd -xf "$f" -C /tmp/artifact/; done
+            while read f; do zstd -d "$f" -c | tar -x -C /tmp/artifact/; done
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v7
@@ -124,7 +124,7 @@ jobs:
         run: |
           mkdir -p artifact
           find dist -name "*.vcvplugin" | \
-            while read f; do tar --use-compress-program=zstd -xf "$f" -C artifact/; done
+            while read f; do zstd -d "$f" -c | tar -x -C artifact/; done
 
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v7
