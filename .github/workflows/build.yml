@@ -45,3 +45,29 @@ jobs:
           path: ${{ env.rack-plugin-toolchain-dir }}/plugin-build
           if-no-files-found: warn
           retention-days: 30
+
+  # ─── KiCad schematic generation + validation ──────────────────────────────
+  kicad-build:
+    name: KiCad · Generate & Validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install kiutils
+        run: pip install kiutils
+
+      - name: Generate control board schematic
+        run: python3 kicad/generate_control_board.py
+
+      - name: Validate schematic (9 checks, 326 pin assignments)
+        run: python3 kicad/validate_schematic.py kicad/pogo-control-board.kicad_sch
+
+      - name: Upload schematic artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: POGO-kicad-${{ github.run_number }}
+          path: kicad/pogo-control-board.kicad_sch
+          if-no-files-found: error
+          retention-days: 30
