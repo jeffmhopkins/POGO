@@ -4,21 +4,21 @@
 // Blocks 5 & 6: 2-pole state-variable low-pass filter.
 // Uses Andrew Simper's trapezoidal-integrated SVF for numerical stability.
 //
-// cutoffV  [V/oct, bipolar]: 1 V/oct CV. f_ref = 630 Hz at 0 V.
-//          Effective range: ±5 V → ~20 Hz to 20 kHz.
+// cutoffV  [V/oct, bipolar]: 1 V/oct CV. f_ref at 0 V set per instance.
+//          LP1: f_ref = 630 Hz (spec Phase 1: 20 Hz–20 kHz over ±5 V).
+//          LP2: f_ref = 2500 Hz (~2 octaves above LP1, spec Phase 3).
+//          Effective range: ±5 V → f_ref/32 to f_ref×32.
 // resParam [0,1]: resonance → Q from 0.5 to ~50 (near self-oscillation).
 // spreadV  [V]: per-channel frequency offset for stereo widening (R channel only).
 struct LPFilter {
 	float ic1 = 0.f, ic2 = 0.f;
-
-	// Reference frequency at 0 V (Hz)
-	static constexpr float F_REF = 630.f;
+	float fref = 630.f; // Reference freq at 0 V; set to 2500 for LP2
 
 	// Compute filter g and k coefficients from CV and resonance.
 	// g = tan(pi * f0 / fs),  k = 1/Q
 	static void computeCoeffs(float cutoffV, float resParam, float sampleRate,
-	                           float& g, float& k) {
-		float f0 = F_REF * std::pow(2.f, cutoffV);
+	                           float fref_, float& g, float& k) {
+		float f0 = fref_ * std::pow(2.f, cutoffV);
 		f0 = clamp(f0, 10.f, sampleRate * 0.48f);
 		g  = std::tan(M_PI * f0 / sampleRate);
 		// Resonance: Q ∈ [0.5, 50]; high resonance → low k = 1/Q
@@ -29,7 +29,7 @@ struct LPFilter {
 	// Returns LP output. HP and BP also available but not exposed here.
 	float process(float x, float cutoffV, float resParam, float sampleRate) {
 		float g, k;
-		computeCoeffs(cutoffV, resParam, sampleRate, g, k);
+		computeCoeffs(cutoffV, resParam, sampleRate, fref, g, k);
 		float a1 = 1.f / (1.f + g * (g + k));
 		float a2 = g * a1;
 		float a3 = g * a2;

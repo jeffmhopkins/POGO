@@ -10,7 +10,10 @@
 // MODE: 0 = soft clip (tanh), 1 = hard clip, 2 = wavefold
 struct Distortion {
 	static float softClip(float x, float d) {
-		float drive = std::exp(d * 4.f); // 1–55× exponential
+		// drive=0 at d=0 (linear/clean) rising exponentially to ~54 at d=1.
+		// Spec: "DRIVE at 9am = unity gain, all modes: signal passes clean at 1:1."
+		float drive = std::exp(d * 4.f) - 1.f; // 0–54×
+		if (drive < 1e-6f) return x;
 		float denom = std::tanh(drive);
 		return (denom > 1e-6f) ? std::tanh(drive * x) / denom : x;
 	}

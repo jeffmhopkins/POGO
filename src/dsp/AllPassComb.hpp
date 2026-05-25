@@ -5,9 +5,9 @@
 //
 // Each group consists of 6 cascaded 1st-order APF stages and a feedback path.
 // Three independent groups (L+R stereo, each processed separately):
-//   Group 1: 20 Hz – 2 kHz    (f_ref = 200 Hz)
-//   Group 2: 200 Hz – 8 kHz   (f_ref = 2 kHz)
-//   Group 3: 1 kHz – 20 kHz   (f_ref = 10 kHz)
+//   Group 1: 20 Hz – 2 kHz    (f_ref = 200 Hz  at 0 V)
+//   Group 2: 200 Hz – 8 kHz   (f_ref = 1500 Hz at 0 V)
+//   Group 3: 1 kHz – 20 kHz   (f_ref = 6000 Hz at 0 V)
 
 // ── First-order all-pass section ─────────────────────────────────────────────
 // H(z) = (a + z^-1) / (1 + a*z^-1)
@@ -81,8 +81,9 @@ struct TripleAPF {
 	              const float blend[3],
 	              float combBypass, float widthOffset,
 	              float sampleRate) {
-		// f_ref for each group at 0 V/oct — local static avoids C++11 ODR issue
-		static const float F_REF[3] = {200.f, 2000.f, 10000.f};
+		// f_ref per group at 0 V/oct (spec Phase 1 defaults: 200 Hz / 1.5 kHz / 6 kHz)
+		// local static avoids C++11 ODR issue with constexpr array members
+		static const float F_REF[3] = {200.f, 1500.f, 6000.f};
 		float wetSum = 0.f;
 		for (int i = 0; i < 3; i++) {
 			float f0 = F_REF[i] * std::pow(2.f, freqV[i] + widthOffset);

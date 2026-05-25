@@ -281,20 +281,20 @@ struct Pogo : Module {
 		configParam(VCA_AMT_PARAM, -1.f, 1.f, 0.f, "VCA CV Depth");
 
 		// LP1
-		configParam(LP1_CUTOFF_PARAM, -4.f, 4.f, 0.f, "LP1 Cutoff", " V/oct");
+		configParam(LP1_CUTOFF_PARAM, -5.f, 5.f, 0.f, "LP1 Cutoff", " V/oct");
 		configParam(LP1_SPREAD_PARAM, -1.f, 1.f, 0.f, "LP1 Stereo Spread Offset", " V/oct");
 		configParam(LP1_RESONANCE_PARAM, 0.f, 1.f, 0.f, "LP1 Resonance");
 		configParam(LP1_CUT_ATT_PARAM, -1.f, 1.f, 0.f, "LP1 Cutoff CV Depth");
 		configParam(LP1_RES_ATT_PARAM, -1.f, 1.f, 0.f, "LP1 Resonance CV Depth");
 
 		// LP2
-		configParam(LP2_CUTOFF_PARAM, -4.f, 4.f, 0.f, "LP2 Cutoff", " V/oct");
+		configParam(LP2_CUTOFF_PARAM, -5.f, 5.f, 2.0f, "LP2 Cutoff", " V/oct");
 		configParam(LP2_RESONANCE_PARAM, 0.f, 1.f, 0.f, "LP2 Resonance");
 		configParam(LP2_CUT_ATT_PARAM, -1.f, 1.f, 0.f, "LP2 Cutoff CV Depth");
 		configParam(LP2_RES_ATT_PARAM, -1.f, 1.f, 0.f, "LP2 Resonance CV Depth");
 
 		// HP
-		configParam(HP_CUTOFF_PARAM, -4.f, 4.f, 0.f, "HP Cutoff", " V/oct");
+		configParam(HP_CUTOFF_PARAM, -5.f, 5.f, 0.f, "HP Cutoff", " V/oct");
 		configParam(HP_RESONANCE_PARAM, 0.f, 1.f, 0.f, "HP Resonance");
 		configParam(HP_CUT_ATT_PARAM, -1.f, 1.f, 0.f, "HP Cutoff CV Depth");
 		configParam(HP_RES_ATT_PARAM, -1.f, 1.f, 0.f, "HP Resonance CV Depth");
@@ -330,6 +330,8 @@ struct Pogo : Module {
 		configOutput(BAND_R_OUTPUT, "LP1 Aux R");
 		configOutput(L_OUTPUT, "Audio L");
 		configOutput(R_OUTPUT, "Audio R");
+
+		lp2L.fref = lp2R.fref = 2500.f;
 	}
 
 	// ── DSP state ────────────────────────────────────────────────────────────
@@ -381,25 +383,25 @@ struct Pogo : Module {
 		float pgR = PreGain::process(inR, gainParam);
 
 		// ── Block 2: envelope follower ────────────────────────────────────────
-		float modSrc = params[MOD_SRC_PARAM].getValue(); // 0=L, 1=max, 2=avg
-		float envSrcL = pgL;
-		float envSrcR = pgR;
-		float envSrcMono;
-		if (modSrc < 0.5f)       envSrcMono = envSrcL;
-		else if (modSrc < 1.5f)  envSrcMono = std::max(std::abs(envSrcL), std::abs(envSrcR));
-		else                      envSrcMono = (envSrcL + envSrcR) * 0.5f;
-
+		// Each channel follows its own audio (independent stereo envelopes).
 		float atkP = params[ATTACK_PARAM].getValue();
 		float relP = params[RELEASE_PARAM].getValue();
-		float envOutL = envL.process(envSrcMono, atkP, relP, dt);
-		float envOutR = envR.process(envSrcMono, atkP, relP, dt);
+		float envOutL = envL.process(pgL, atkP, relP, dt);
+		float envOutR = envR.process(pgR, atkP, relP, dt);
+
+		// MOD SRC switch selects which combination feeds the mod bus normalling.
+		float modSrc = params[MOD_SRC_PARAM].getValue(); // 0=L, 1=max(L,R), 2=avg
+		float modSrcEnv;
+		if (modSrc < 0.5f)       modSrcEnv = envOutL;
+		else if (modSrc < 1.5f)  modSrcEnv = std::max(envOutL, envOutR);
+		else                      modSrcEnv = (envOutL + envOutR) * 0.5f;
 
 		// ── Mod bus ───────────────────────────────────────────────────────────
 		float modSrcV;
 		if (inputs[MOD_IN_INPUT].isConnected())
 			modSrcV = inputs[MOD_IN_INPUT].getVoltage();
 		else
-			modSrcV = envOutL; // normalise to envelope follower
+			modSrcV = modSrcEnv; // normalise to selected envelope combination
 
 		float busV = ModBusProcessor::process(modSrcV,
 		                                      params[MOD_AMOUNT_PARAM].getValue(),
@@ -518,11 +520,11 @@ struct Pogo : Module {
 		float outL = hpL.process(lp2L_, hpCV, hpRes, fs);
 		float outR = hpR.process(lp2R_, hpCV, hpRes, fs);
 
-		// ── Block B: output buffers ───────────────────────────────────────────
-		outputs[L_OUTPUT].setVoltage(clamp(outL, -11.5f, 11.5f));
-		outputs[R_OUTPUT].setVoltage(clamp(outR, -11.5f, 11.5f));
-		outputs[BAND_L_OUTPUT].setVoltage(clamp(bandL, -11.5f, 11.5f));
-		outputs[BAND_R_OUTPUT].setVoltage(clamp(bandR, -11.5f, 11.5f));
+		// ── Block B: output buffers (LM4562, ±11 V swing on ±12 V rails) ─────
+		outputs[L_OUTPUT].setVoltage(clamp(outL, -11.0f, 11.0f));
+		outputs[R_OUTPUT].setVoltage(clamp(outR, -11.0f, 11.0f));
+		outputs[BAND_L_OUTPUT].setVoltage(clamp(bandL, -11.0f, 11.0f));
+		outputs[BAND_R_OUTPUT].setVoltage(clamp(bandR, -11.0f, 11.0f));
 		outputs[ENV_L_OUTPUT].setVoltage(envOutL);
 		outputs[ENV_R_OUTPUT].setVoltage(envOutR);
 	}
