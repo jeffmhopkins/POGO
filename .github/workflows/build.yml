@@ -138,6 +138,8 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: POGO-kicad-${{ github.run_number }}
-          path: kicad/pogo-control-board.kicad_sch
+          path: |
+            kicad/*.kicad_sch
+            kicad/*.kicad_pro
           if-no-files-found: error
           retention-days: 30
