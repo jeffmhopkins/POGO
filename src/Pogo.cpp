@@ -1,4 +1,13 @@
 #include "plugin.hpp"
+#include "dsp/InputBuffer.hpp"
+#include "dsp/PreGain.hpp"
+#include "dsp/EnvelopeFollower.hpp"
+#include "dsp/ModBus.hpp"
+#include "dsp/AllPassComb.hpp"
+#include "dsp/Distortion.hpp"
+#include "dsp/VcaBlock.hpp"
+#include "dsp/LPFilter.hpp"
+#include "dsp/HPFilter.hpp"
 
 // ── Horizontal 2-position slide switch ────────────────────────────────────
 struct PogoSwitchH2 : app::Switch {
@@ -320,14 +329,175 @@ struct Pogo : Module {
 		configOutput(R_OUTPUT, "Audio R");
 	}
 
+	// ── DSP state ────────────────────────────────────────────────────────────
+	EnvelopeFollower envL, envR;
+	TripleAPF        combL, combR;
+	// Distortion taps from previous sample (needed for APF feedback blend)
+	float distTapL[3] = {}, distTapR[3] = {};
+	LPFilter lp1L, lp1R;
+	LPFilter lp2L, lp2R;
+	HPFilter hpL, hpR;
+
+	void onReset() override {
+		envL.reset(); envR.reset();
+		combL.reset(); combR.reset();
+		for (int i = 0; i < 3; i++) distTapL[i] = distTapR[i] = 0.f;
+		lp1L.reset(); lp1R.reset();
+		lp2L.reset(); lp2R.reset();
+		hpL.reset();  hpR.reset();
+	}
+
 	void process(const ProcessArgs& args) override {
-		// Stage 0: pass audio straight through; all DSP is stubbed
-		outputs[L_OUTPUT].setVoltage(inputs[L_IN_INPUT].getVoltage());
-		outputs[R_OUTPUT].setVoltage(inputs[R_IN_INPUT].getVoltage());
-		outputs[BAND_L_OUTPUT].setVoltage(inputs[L_IN_INPUT].getVoltage());
-		outputs[BAND_R_OUTPUT].setVoltage(inputs[R_IN_INPUT].getVoltage());
-		outputs[ENV_L_OUTPUT].setVoltage(0.f);
-		outputs[ENV_R_OUTPUT].setVoltage(0.f);
+		const float fs = args.sampleRate;
+		const float dt = args.sampleTime;
+
+		// ── Block A: input buffers ────────────────────────────────────────────
+		float inL = InputBuffer::process(inputs[L_IN_INPUT].getVoltage());
+		float inR = InputBuffer::process(inputs[R_IN_INPUT].isConnected()
+		                                 ? inputs[R_IN_INPUT].getVoltage()
+		                                 : inL); // normalise R to L if unpatched
+
+		// ── Block 1: pre-gain boost ───────────────────────────────────────────
+		float gainParam = params[GAIN_PARAM].getValue();
+		float pgL = PreGain::process(inL, gainParam);
+		float pgR = PreGain::process(inR, gainParam);
+
+		// ── Block 2: envelope follower ────────────────────────────────────────
+		float modSrc = params[MOD_SRC_PARAM].getValue(); // 0=L, 1=max, 2=avg
+		float envSrcL = pgL;
+		float envSrcR = pgR;
+		float envSrcMono;
+		if (modSrc < 0.5f)       envSrcMono = envSrcL;
+		else if (modSrc < 1.5f)  envSrcMono = std::max(std::abs(envSrcL), std::abs(envSrcR));
+		else                      envSrcMono = (envSrcL + envSrcR) * 0.5f;
+
+		float atkP = params[ATTACK_PARAM].getValue();
+		float relP = params[RELEASE_PARAM].getValue();
+		float envOutL = envL.process(envSrcMono, atkP, relP, dt);
+		float envOutR = envR.process(envSrcMono, atkP, relP, dt);
+
+		// ── Mod bus ───────────────────────────────────────────────────────────
+		float modSrcV;
+		if (inputs[MOD_IN_INPUT].isConnected())
+			modSrcV = inputs[MOD_IN_INPUT].getVoltage();
+		else
+			modSrcV = envOutL; // normalise to envelope follower
+
+		float busV = ModBusProcessor::process(modSrcV,
+		                                      params[MOD_AMOUNT_PARAM].getValue(),
+		                                      params[MOD_OFFSET_PARAM].getValue());
+
+		// Helper: resolve one mod destination
+		auto modDest = [&](int cvInput, int attParam) -> float {
+			bool has = inputs[cvInput].isConnected();
+			return applyDestination(busV,
+			                        inputs[cvInput].getVoltage(),
+			                        has,
+			                        params[attParam].getValue());
+		};
+
+		// ── Block 3: triple APF comb filter ──────────────────────────────────
+		// Per-group parameters
+		float freqV[3] = {
+			params[FREQ_1_PARAM].getValue() + modDest(FREQ_CV_1_INPUT, FREQ_ATT_1_PARAM),
+			params[FREQ_2_PARAM].getValue() + modDest(FREQ_CV_2_INPUT, FREQ_ATT_2_PARAM),
+			params[FREQ_3_PARAM].getValue() + modDest(FREQ_CV_3_INPUT, FREQ_ATT_3_PARAM),
+		};
+		// MASTER OFFSET adds to all three simultaneously
+		float masterOff = params[MASTER_OFFSET_PARAM].getValue()
+		                  + modDest(MASTER_OFFSET_CV_INPUT, MASTER_OFFSET_ATT_PARAM);
+		for (int i = 0; i < 3; i++) freqV[i] += masterOff;
+
+		float fbGain[3] = {
+			clamp(params[FB_1_PARAM].getValue() + modDest(FB_CV_1_INPUT, FB_ATT_1_PARAM), 0.f, 1.f),
+			clamp(params[FB_2_PARAM].getValue() + modDest(FB_CV_2_INPUT, FB_ATT_2_PARAM), 0.f, 1.f),
+			clamp(params[FB_3_PARAM].getValue() + modDest(FB_CV_3_INPUT, FB_ATT_3_PARAM), 0.f, 1.f),
+		};
+
+		int polSwitch = (int)std::round(params[POLARITY_PARAM].getValue()); // 0=pos, 1=off, 2=neg
+		float polarity[3];
+		float polVal = (polSwitch == 0) ? 1.f : (polSwitch == 2) ? -1.f : 0.f;
+		for (int i = 0; i < 3; i++) polarity[i] = polVal;
+
+		float blendParam = clamp(params[FB_DIST_BLEND_PARAM].getValue()
+		                         + modDest(BLEND_CV_INPUT, BLEND_ATT_PARAM), 0.f, 1.f);
+		float blendArr[3] = {blendParam, blendParam, blendParam};
+
+		float combBypass = clamp(params[COMB_BYPASS_PARAM].getValue()
+		                         + modDest(BYPASS_CV_INPUT, BYPASS_ATT_PARAM), 0.f, 1.f);
+		float widthParam = params[WIDTH_PARAM].getValue(); // ±1 V/oct offset on R
+
+		float combOutL = combL.process(pgL, freqV, fbGain, polarity,
+		                               distTapL, blendArr, combBypass, 0.f, fs);
+		float combOutR = combR.process(pgR, freqV, fbGain, polarity,
+		                               distTapR, blendArr, combBypass, widthParam, fs);
+
+		// ── Block 4: distortion ───────────────────────────────────────────────
+		int distMode = (int)std::round(params[DIST_MODE_PARAM].getValue());
+		float driveCV[3] = {
+			clamp(params[DRIVE_1_PARAM].getValue() + modDest(DRIVE_CV_1_INPUT, DRIVE_ATT_1_PARAM), 0.f, 1.f),
+			clamp(params[DRIVE_2_PARAM].getValue() + modDest(DRIVE_CV_2_INPUT, DRIVE_ATT_2_PARAM), 0.f, 1.f),
+			clamp(params[DRIVE_3_PARAM].getValue() + modDest(DRIVE_CV_3_INPUT, DRIVE_ATT_3_PARAM), 0.f, 1.f),
+		};
+
+		// Process each group independently, then sum with 0.5× per chain
+		float distSumL = 0.f, distSumR = 0.f;
+		for (int i = 0; i < 3; i++) {
+			// Use the APF group outputs as per-group inputs to distortion
+			float apcfL = combL.groups[i].prevOut;
+			float apcfR = combR.groups[i].prevOut;
+			distTapL[i] = Distortion::process(apcfL, driveCV[i], distMode);
+			distTapR[i] = Distortion::process(apcfR, driveCV[i], distMode);
+			distSumL += distTapL[i] * 0.5f;
+			distSumR += distTapR[i] * 0.5f;
+		}
+		// Clamp summed output
+		distSumL = clamp(distSumL, -10.5f, 10.5f);
+		distSumR = clamp(distSumR, -10.5f, 10.5f);
+
+		// ── Block VCA ─────────────────────────────────────────────────────────
+		float vcaCV  = inputs[VCA_CV_INPUT].isConnected()
+		               ? inputs[VCA_CV_INPUT].getVoltage()
+		               : busV; // normalise to mod bus
+		float vcaAmt = params[VCA_AMT_PARAM].getValue();
+		float vcaL   = VcaBlock::process(distSumL, vcaAmt, vcaCV);
+		float vcaR   = VcaBlock::process(distSumR, vcaAmt, vcaCV);
+
+		// ── Block 5: LP Filter 1 ─────────────────────────────────────────────
+		float lp1CV  = params[LP1_CUTOFF_PARAM].getValue()
+		               + modDest(LP1_CUT_CV_INPUT, LP1_CUT_ATT_PARAM);
+		float lp1Res = clamp(params[LP1_RESONANCE_PARAM].getValue()
+		                     + modDest(LP1_RES_CV_INPUT, LP1_RES_ATT_PARAM) / 10.f,
+		                     0.f, 1.f);
+		float spreadV = params[LP1_SPREAD_PARAM].getValue();
+		float bandL = lp1L.process(vcaL, lp1CV,          lp1Res, fs);
+		float bandR = lp1R.process(vcaR, lp1CV + spreadV, lp1Res, fs);
+
+		// ── Block 6: LP Filter 2 ─────────────────────────────────────────────
+		float lp2CV  = params[LP2_CUTOFF_PARAM].getValue()
+		               + modDest(LP2_CUT_CV_INPUT, LP2_CUT_ATT_PARAM);
+		float lp2Res = clamp(params[LP2_RESONANCE_PARAM].getValue()
+		                     + modDest(LP2_RES_CV_INPUT, LP2_RES_ATT_PARAM) / 10.f,
+		                     0.f, 1.f);
+		float lp2L_ = lp2L.process(bandL, lp2CV, lp2Res, fs);
+		float lp2R_ = lp2R.process(bandR, lp2CV, lp2Res, fs);
+
+		// ── Block 7: HP Filter ────────────────────────────────────────────────
+		float hpCV  = params[HP_CUTOFF_PARAM].getValue()
+		              + modDest(HP_CUT_CV_INPUT, HP_CUT_ATT_PARAM);
+		float hpRes = clamp(params[HP_RESONANCE_PARAM].getValue()
+		                    + modDest(HP_RES_CV_INPUT, HP_RES_ATT_PARAM) / 10.f,
+		                    0.f, 1.f);
+		float outL = hpL.process(lp2L_, hpCV, hpRes, fs);
+		float outR = hpR.process(lp2R_, hpCV, hpRes, fs);
+
+		// ── Block B: output buffers ───────────────────────────────────────────
+		outputs[L_OUTPUT].setVoltage(clamp(outL, -11.5f, 11.5f));
+		outputs[R_OUTPUT].setVoltage(clamp(outR, -11.5f, 11.5f));
+		outputs[BAND_L_OUTPUT].setVoltage(clamp(bandL, -11.5f, 11.5f));
+		outputs[BAND_R_OUTPUT].setVoltage(clamp(bandR, -11.5f, 11.5f));
+		outputs[ENV_L_OUTPUT].setVoltage(envOutL);
+		outputs[ENV_R_OUTPUT].setVoltage(envOutR);
 	}
 };
 
