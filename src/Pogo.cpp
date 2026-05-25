@@ -1,5 +1,101 @@
 #include "plugin.hpp"
 
+// ── Horizontal 2-position slide switch ────────────────────────────────────
+struct PogoSwitchH2 : app::Switch {
+	PogoSwitchH2() { box.size = mm2px(Vec(9.f, 5.f)); }
+
+	void draw(const DrawArgs& args) override {
+		float w = box.size.x, h = box.size.y;
+		float cy = h * 0.5f;
+		float bodyH = mm2px(2.4f), slugW = mm2px(3.5f), slugH = mm2px(2.8f);
+
+		nvgBeginPath(args.vg);
+		nvgRoundedRect(args.vg, 0, cy - bodyH * 0.5f, w, bodyH, mm2px(1.2f));
+		nvgFillColor(args.vg, nvgRGB(0x22, 0x22, 0x22));
+		nvgFill(args.vg);
+		nvgStrokeColor(args.vg, nvgRGB(0x55, 0x55, 0x55));
+		nvgStrokeWidth(args.vg, 0.5f);
+		nvgStroke(args.vg);
+
+		auto* pq = getParamQuantity();
+		float t = pq ? (pq->getValue() - pq->getMinValue()) / (pq->getMaxValue() - pq->getMinValue()) : 0.f;
+		float slugX = t * (w - slugW);
+		nvgBeginPath(args.vg);
+		nvgRoundedRect(args.vg, slugX, cy - slugH * 0.5f, slugW, slugH, mm2px(0.8f));
+		nvgFillColor(args.vg, nvgRGB(0x66, 0x66, 0x66));
+		nvgFill(args.vg);
+		nvgStrokeColor(args.vg, nvgRGB(0x88, 0x88, 0x88));
+		nvgStrokeWidth(args.vg, 0.3f);
+		nvgStroke(args.vg);
+	}
+};
+
+// ── Horizontal 3-position slide switch ────────────────────────────────────
+struct PogoSwitchH3 : app::Switch {
+	PogoSwitchH3() { box.size = mm2px(Vec(12.f, 5.f)); }
+
+	void draw(const DrawArgs& args) override {
+		float w = box.size.x, h = box.size.y;
+		float cy = h * 0.5f;
+		float bodyH = mm2px(2.4f), slugW = mm2px(3.5f), slugH = mm2px(2.8f);
+
+		nvgBeginPath(args.vg);
+		nvgRoundedRect(args.vg, 0, cy - bodyH * 0.5f, w, bodyH, mm2px(1.2f));
+		nvgFillColor(args.vg, nvgRGB(0x22, 0x22, 0x22));
+		nvgFill(args.vg);
+		nvgStrokeColor(args.vg, nvgRGB(0x55, 0x55, 0x55));
+		nvgStrokeWidth(args.vg, 0.5f);
+		nvgStroke(args.vg);
+
+		auto* pq = getParamQuantity();
+		float t = pq ? (pq->getValue() - pq->getMinValue()) / (pq->getMaxValue() - pq->getMinValue()) : 0.5f;
+		float slugX = t * (w - slugW);
+		nvgBeginPath(args.vg);
+		nvgRoundedRect(args.vg, slugX, cy - slugH * 0.5f, slugW, slugH, mm2px(0.8f));
+		nvgFillColor(args.vg, nvgRGB(0x66, 0x66, 0x66));
+		nvgFill(args.vg);
+		nvgStrokeColor(args.vg, nvgRGB(0x88, 0x88, 0x88));
+		nvgStrokeWidth(args.vg, 0.3f);
+		nvgStroke(args.vg);
+	}
+};
+
+// ── Vertical slider (45 mm travel, matching LP2 / HP SVG tracks) ──────────
+struct PogoSlider : app::SliderKnob {
+	PogoSlider() { box.size = mm2px(Vec(13.f, 45.f)); }
+
+	void draw(const DrawArgs& args) override {
+		float w = box.size.x, h = box.size.y;
+		float trackW = mm2px(4.f);
+		float trackX  = (w - trackW) * 0.5f;
+		float handleW = w, handleH = mm2px(7.f);
+		float travelH = h - handleH;
+
+		auto* pq = getParamQuantity();
+		float t = pq ? (pq->getValue() - pq->getMinValue()) / (pq->getMaxValue() - pq->getMinValue()) : 0.5f;
+		float handleY = (1.f - t) * travelH; // top = max value
+
+		// Track
+		nvgBeginPath(args.vg);
+		nvgRoundedRect(args.vg, trackX, 0, trackW, h, mm2px(1.5f));
+		nvgFillColor(args.vg, nvgRGB(0x11, 0x11, 0x11));
+		nvgFill(args.vg);
+		nvgStrokeColor(args.vg, nvgRGB(0x44, 0x44, 0x44));
+		nvgStrokeWidth(args.vg, 0.5f);
+		nvgStroke(args.vg);
+
+		// Handle
+		nvgBeginPath(args.vg);
+		nvgRoundedRect(args.vg, 0, handleY, handleW, handleH, mm2px(1.8f));
+		nvgFillColor(args.vg, nvgRGB(0x55, 0x55, 0x55));
+		nvgFill(args.vg);
+		nvgStrokeColor(args.vg, nvgRGB(0x77, 0x77, 0x77));
+		nvgStrokeWidth(args.vg, 0.4f);
+		nvgStroke(args.vg);
+	}
+};
+
+// ─────────────────────────────────────────────────────────────────────────
 struct Pogo : Module {
 	enum ParamId {
 		// Zone 0a — INPUT / GAIN
@@ -119,7 +215,7 @@ struct Pogo : Module {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 
 		// Zone 0a
-		configSwitch(GAIN_PARAM, 0.f, 1.f, 0.f, "Gain", {"1×", "5×"});
+		configSwitch(GAIN_PARAM, 0.f, 1.f, 0.f, "Gain", {"1\xc3\x97", "5\xc3\x97"});
 
 		// Zone 0b
 		configSwitch(MOD_SRC_PARAM, 0.f, 2.f, 1.f, "Mod Source Select", {"L", "Max(L,R)", "Avg(L,R)"});
@@ -235,20 +331,170 @@ struct Pogo : Module {
 	}
 };
 
+// ─────────────────────────────────────────────────────────────────────────
 struct PogoWidget : ModuleWidget {
+	// Helper: add a centered text label. cx/baseY in mm (SVG coordinates).
+	// baseY is the SVG text baseline; we offset up by ~0.75x font size so the
+	// cap-height is centred on that row.
+	void addLabel(float cx_mm, float baseY_mm, const char* text,
+	              NVGcolor col, float sizeMm) {
+		const float W  = mm2px(50.f);
+		const float H  = mm2px(sizeMm * 1.5f);
+		auto* lbl = createWidget<ui::Label>(
+			mm2px(Vec(cx_mm - 25.f, baseY_mm - sizeMm * 0.75f))
+		);
+		lbl->box.size        = Vec(W, H);
+		lbl->text            = text;
+		lbl->color           = col;
+		lbl->fontSize        = mm2px(sizeMm);
+		lbl->alignment       = ui::Label::CENTER_ALIGNMENT;
+		addChild(lbl);
+	}
+
 	PogoWidget(Pogo* module) {
 		setModule(module);
 		setPanel(createPanel(asset::plugin(pluginInstance, "res/Pogo.svg")));
 
-		// ── Zone 0a — INPUT / GAIN ──────────────────────────────────────────
+		// Colour palette matching the SVG
+		const NVGcolor CYAN    = nvgRGB(0x00, 0xd4, 0xff);
+		const NVGcolor GRAY_99 = nvgRGB(0x99, 0x99, 0x99);
+		const NVGcolor GRAY_88 = nvgRGB(0x88, 0x88, 0x88);
+		const NVGcolor GRAY_77 = nvgRGB(0x77, 0x77, 0x77);
+		const NVGcolor SUBDUE  = nvgRGB(0x4a, 0x60, 0x70);
+		const NVGcolor DIMBLUE = nvgRGB(0x3d, 0x52, 0x60);
+
+		// ── Title bars ─────────────────────────────────────────────────────
+		addLabel(101.60f,   3.5f, "POGO  \xc2\xb7  STEREO TRIPLE COMB FILTER", CYAN,    3.5f);
+		addLabel(101.60f, 132.0f, "SPACE COAST SYNTHESIZERS  \xc2\xb7  SCS",   SUBDUE,  2.4f);
+
+		// ── Zone headers ───────────────────────────────────────────────────
+		addLabel( 10.16f,  9.0f, "INPUT / GAIN", CYAN, 2.4f);
+		addLabel( 10.16f, 43.5f, "ENVELOPE",     CYAN, 2.4f);
+		addLabel( 10.16f, 94.0f, "MOD BUS",      CYAN, 2.4f);
+		addLabel( 35.56f,  9.0f, "CONTROL",      CYAN, 2.4f);
+		addLabel( 66.04f,  9.0f, "COMB 1",       CYAN, 2.4f);
+		addLabel( 96.52f,  9.0f, "COMB 2",       CYAN, 2.4f);
+		addLabel(127.00f,  9.0f, "COMB 3",       CYAN, 2.4f);
+		addLabel(152.40f,  9.0f, "VCA",          CYAN, 2.4f);
+		addLabel(152.40f, 33.0f, "LP 1",         CYAN, 2.4f);
+		addLabel(172.72f,  9.0f, "BAND OUT",     CYAN, 2.4f);
+		addLabel(193.04f,  9.0f, "OUT",          CYAN, 2.4f);
+		addLabel(172.72f, 33.0f, "LP 2",         CYAN, 2.4f);
+		addLabel(193.04f, 33.0f, "HP",           CYAN, 2.4f);
+
+		// Comb frequency-range subtitles
+		addLabel( 66.04f, 13.5f, "20Hz-2kHz",   SUBDUE, 1.6f);
+		addLabel( 96.52f, 13.5f, "200Hz-8kHz",  SUBDUE, 1.6f);
+		addLabel(127.00f, 13.5f, "1kHz-20kHz",  SUBDUE, 1.6f);
+
+		// ── Zone 0a: INPUT / GAIN ──────────────────────────────────────────
+		addLabel(  5.08f, 23.5f, "L IN",    GRAY_88, 1.8f);
+		addLabel( 15.24f, 23.5f, "R IN",    GRAY_88, 1.8f);
+		addLabel( 10.16f, 37.0f, "GAIN",    GRAY_99, 1.8f);
+		// Switch position labels
+		addLabel(  7.91f, 33.0f, "1\xc3\x97", DIMBLUE, 1.6f);
+		addLabel( 12.41f, 33.0f, "5\xc3\x97", DIMBLUE, 1.6f);
+
+		// ── Zone 0b: ENVELOPE ─────────────────────────────────────────────
+		addLabel( 10.16f, 48.0f, "MOD SRC", DIMBLUE, 1.6f);
+		// Switch position labels
+		addLabel(  6.16f, 54.5f, "L",   DIMBLUE, 1.6f);
+		addLabel( 10.16f, 54.5f, "MAX", DIMBLUE, 1.6f);
+		addLabel( 14.16f, 54.5f, "AVG", DIMBLUE, 1.6f);
+		addLabel(  5.08f, 69.5f, "ATTACK",  GRAY_99, 1.8f);
+		addLabel( 15.24f, 69.5f, "RELEASE", GRAY_99, 1.8f);
+		addLabel(  5.08f, 87.0f, "ENV L",   GRAY_88, 1.8f);
+		addLabel( 15.24f, 87.0f, "ENV R",   GRAY_88, 1.8f);
+
+		// ── Zone 0c: MOD BUS ──────────────────────────────────────────────
+		addLabel(  5.08f, 108.5f, "AMOUNT", GRAY_99, 1.8f);
+		addLabel( 15.24f, 108.5f, "OFFSET", GRAY_99, 1.8f);
+		addLabel( 10.16f, 124.5f, "MOD IN", GRAY_88, 1.8f);
+
+		// ── Zone 1: CONTROL — COMB section ────────────────────────────────
+		addLabel( 29.00f,  28.5f, "COMB",         GRAY_99, 1.8f);
+		addLabel( 29.00f,  30.8f, "BYPASS",       GRAY_99, 1.8f);
+		addLabel( 42.14f,  28.5f, "WIDTH",        GRAY_99, 1.8f);
+		// POLARITY switch position labels
+		addLabel( 31.56f,  40.5f, "POS", DIMBLUE, 1.6f);
+		addLabel( 35.56f,  40.5f, "OFF", DIMBLUE, 1.6f);
+		addLabel( 39.56f,  40.5f, "NEG", DIMBLUE, 1.6f);
+		addLabel( 35.56f,  44.0f, "POLARITY",     GRAY_99, 1.8f);
+		addLabel( 35.56f,  69.0f, "MASTER OFFSET",GRAY_99, 1.8f);
+
+		// ── Zone 1: CONTROL — DIST section ────────────────────────────────
+		// MODE switch: vertical (CKSSThree), position labels to its right
+		addLabel( 29.40f,  83.5f, "SFT", DIMBLUE, 1.4f);
+		addLabel( 29.40f,  87.5f, "HRD", DIMBLUE, 1.4f);
+		addLabel( 29.40f,  91.5f, "WFD", DIMBLUE, 1.4f);
+		addLabel( 28.00f,  96.5f, "MODE",         GRAY_99, 1.8f);
+		addLabel( 40.00f,  94.5f, "FB DIST",      GRAY_99, 1.8f);
+		addLabel( 40.00f,  96.8f, "BLEND",        GRAY_99, 1.8f);
+
+		// ── Zone 1: unified bottom row CV jacks ───────────────────────────
+		addLabel( 25.40f, 124.5f, "BYPASS", GRAY_77, 1.8f);
+		addLabel( 35.56f, 124.5f, "OFFSET", GRAY_77, 1.8f);
+		addLabel( 45.72f, 124.5f, "BLEND",  GRAY_77, 1.8f);
+
+		// ── Zone 2a: COMB 1 ───────────────────────────────────────────────
+		addLabel( 66.04f,  44.0f, "FREQ",  GRAY_99, 1.8f);
+		addLabel( 66.04f,  71.0f, "FB",    GRAY_99, 1.8f);
+		addLabel( 66.04f,  97.0f, "DRIVE", GRAY_99, 1.8f);
+		addLabel( 55.88f, 124.5f, "FREQ",  GRAY_77, 1.8f);
+		addLabel( 66.04f, 124.5f, "FB",    GRAY_77, 1.8f);
+		addLabel( 76.20f, 124.5f, "DRIVE", GRAY_77, 1.8f);
+
+		// ── Zone 2b: COMB 2 ───────────────────────────────────────────────
+		addLabel( 96.52f,  44.0f, "FREQ",  GRAY_99, 1.8f);
+		addLabel( 96.52f,  71.0f, "FB",    GRAY_99, 1.8f);
+		addLabel( 96.52f,  97.0f, "DRIVE", GRAY_99, 1.8f);
+		addLabel( 86.36f, 124.5f, "FREQ",  GRAY_77, 1.8f);
+		addLabel( 96.52f, 124.5f, "FB",    GRAY_77, 1.8f);
+		addLabel(106.68f, 124.5f, "DRIVE", GRAY_77, 1.8f);
+
+		// ── Zone 2c: COMB 3 ───────────────────────────────────────────────
+		addLabel(127.00f,  44.0f, "FREQ",  GRAY_99, 1.8f);
+		addLabel(127.00f,  71.0f, "FB",    GRAY_99, 1.8f);
+		addLabel(127.00f,  97.0f, "DRIVE", GRAY_99, 1.8f);
+		addLabel(116.84f, 124.5f, "FREQ",  GRAY_77, 1.8f);
+		addLabel(127.00f, 124.5f, "FB",    GRAY_77, 1.8f);
+		addLabel(137.16f, 124.5f, "DRIVE", GRAY_77, 1.8f);
+
+		// ── Zone 3: VCA + LP1 ─────────────────────────────────────────────
+		addLabel(147.32f,  24.5f, "AMT",   GRAY_99, 1.8f);
+		addLabel(157.48f,  24.5f, "CV IN", GRAY_77, 1.8f);
+		addLabel(152.40f,  57.0f, "CUTOFF",       GRAY_99, 1.8f);
+		addLabel(152.40f,  77.5f, "STEREO SPREAD", GRAY_99, 1.8f);
+		addLabel(152.40f,  79.8f, "OFFSET",        GRAY_99, 1.8f);
+		addLabel(152.40f, 101.0f, "RESONANCE",     GRAY_99, 1.8f);
+		addLabel(147.32f, 124.5f, "CUT", GRAY_77, 1.8f);
+		addLabel(157.48f, 124.5f, "RES", GRAY_77, 1.8f);
+
+		// ── Zone 4: BAND OUT + LP2 ────────────────────────────────────────
+		addLabel(167.64f,  24.5f, "LP1 L", GRAY_88, 1.8f);
+		addLabel(177.80f,  24.5f, "LP1 R", GRAY_88, 1.8f);
+		addLabel(172.72f,  38.0f, "CUTOFF",   GRAY_99, 1.8f);
+		addLabel(172.72f, 101.0f, "RESONANCE",GRAY_99, 1.8f);
+		addLabel(167.64f, 124.5f, "CUT", GRAY_77, 1.8f);
+		addLabel(177.80f, 124.5f, "RES", GRAY_77, 1.8f);
+
+		// ── Zone 5: OUT + HP ──────────────────────────────────────────────
+		addLabel(187.96f,  24.5f, "LEFT",  GRAY_88, 1.8f);
+		addLabel(198.12f,  24.5f, "RIGHT", GRAY_88, 1.8f);
+		addLabel(193.04f,  38.0f, "CUTOFF",   GRAY_99, 1.8f);
+		addLabel(193.04f, 101.0f, "RESONANCE",GRAY_99, 1.8f);
+		addLabel(187.96f, 124.5f, "CUT", GRAY_77, 1.8f);
+		addLabel(198.12f, 124.5f, "RES", GRAY_77, 1.8f);
+
+		// ── Zone 0a — INPUT / GAIN ──────────────────────────────────────
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(5.08f, 16.f)), module, Pogo::L_IN_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(15.24f, 16.f)), module, Pogo::R_IN_INPUT));
-		// GAIN: 2-pos horizontal switch, body centered at (10.16, 28.2)
-		addParam(createParamCentered<CKSS>(mm2px(Vec(10.16f, 28.2f)), module, Pogo::GAIN_PARAM));
+		// GAIN: 2-pos horizontal switch
+		addParam(createParamCentered<PogoSwitchH2>(mm2px(Vec(10.16f, 28.2f)), module, Pogo::GAIN_PARAM));
 
 		// ── Zone 0b — ENVELOPE ─────────────────────────────────────────────
-		// MOD SRC: 3-pos horizontal switch at (10.16, 51)
-		addParam(createParamCentered<CKSSThree>(mm2px(Vec(10.16f, 51.f)), module, Pogo::MOD_SRC_PARAM));
+		// MOD SRC: 3-pos horizontal switch
+		addParam(createParamCentered<PogoSwitchH3>(mm2px(Vec(10.16f, 51.f)), module, Pogo::MOD_SRC_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(5.08f, 64.f)), module, Pogo::ATTACK_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(15.24f, 64.f)), module, Pogo::RELEASE_PARAM));
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(5.08f, 80.f)), module, Pogo::ENV_L_OUTPUT));
@@ -262,12 +508,12 @@ struct PogoWidget : ModuleWidget {
 		// ── Zone 1 — CONTROL / COMB ────────────────────────────────────────
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(29.0f, 21.f)), module, Pogo::COMB_BYPASS_PARAM));
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(42.14f, 21.f)), module, Pogo::WIDTH_PARAM));
-		// POLARITY: 3-pos horizontal switch, body center at (35.56, 35.2)
-		addParam(createParamCentered<CKSSThree>(mm2px(Vec(35.56f, 35.2f)), module, Pogo::POLARITY_PARAM));
+		// POLARITY: 3-pos horizontal switch
+		addParam(createParamCentered<PogoSwitchH3>(mm2px(Vec(35.56f, 35.2f)), module, Pogo::POLARITY_PARAM));
 		addParam(createParamCentered<RoundHugeBlackKnob>(mm2px(Vec(35.56f, 57.f)), module, Pogo::MASTER_OFFSET_PARAM));
 
 		// ── Zone 1 — CONTROL / DIST ────────────────────────────────────────
-		// MODE: 3-pos vertical switch, center at (28, 87)
+		// MODE: 3-pos vertical switch (correct orientation)
 		addParam(createParamCentered<CKSSThree>(mm2px(Vec(28.f, 87.f)), module, Pogo::DIST_MODE_PARAM));
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(40.f, 87.f)), module, Pogo::FB_DIST_BLEND_PARAM));
 
@@ -330,8 +576,8 @@ struct PogoWidget : ModuleWidget {
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(177.80f, 16.f)), module, Pogo::BAND_R_OUTPUT));
 
 		// ── Zone 4 — LP2 ───────────────────────────────────────────────────
-		// LP2 CUTOFF is a vertical slider (ALPS RS4515N); knob placeholder at track midpoint (Stage 0)
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(172.72f, 62.5f)), module, Pogo::LP2_CUTOFF_PARAM));
+		// LP2 CUTOFF: vertical slider, 13mm x 45mm, center at track midpoint
+		addParam(createParamCentered<PogoSlider>(mm2px(Vec(172.72f, 62.5f)), module, Pogo::LP2_CUTOFF_PARAM));
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(172.72f, 93.f)), module, Pogo::LP2_RESONANCE_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(167.64f, 109.f)), module, Pogo::LP2_CUT_ATT_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(177.80f, 109.f)), module, Pogo::LP2_RES_ATT_PARAM));
@@ -343,8 +589,8 @@ struct PogoWidget : ModuleWidget {
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(198.12f, 16.f)), module, Pogo::R_OUTPUT));
 
 		// ── Zone 5 — HP ────────────────────────────────────────────────────
-		// HP CUTOFF is a vertical slider; knob placeholder at track midpoint (Stage 0)
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(193.04f, 62.5f)), module, Pogo::HP_CUTOFF_PARAM));
+		// HP CUTOFF: vertical slider, matching LP2 geometry
+		addParam(createParamCentered<PogoSlider>(mm2px(Vec(193.04f, 62.5f)), module, Pogo::HP_CUTOFF_PARAM));
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(193.04f, 93.f)), module, Pogo::HP_RESONANCE_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(187.96f, 109.f)), module, Pogo::HP_CUT_ATT_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(198.12f, 109.f)), module, Pogo::HP_RES_ATT_PARAM));
