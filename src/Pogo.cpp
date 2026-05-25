@@ -338,6 +338,13 @@ struct Pogo : Module {
 	LPFilter lp2L, lp2R;
 	HPFilter hpL, hpR;
 
+	// 2× oversampling for Blocks 3+4 (APF comb + distortion).
+	// QUALITY=8 gives ~90 dB stopband attenuation, acceptable CPU on modern hw.
+	static constexpr int OS = 2;
+	static constexpr int OS_QUALITY = 8;
+	dsp::Upsampler<OS, OS_QUALITY> upL, upR;
+	dsp::Decimator<OS, OS_QUALITY> decL, decR;
+
 	void onReset() override {
 		envL.reset(); envR.reset();
 		combL.reset(); combR.reset();
@@ -345,6 +352,14 @@ struct Pogo : Module {
 		lp1L.reset(); lp1R.reset();
 		lp2L.reset(); lp2R.reset();
 		hpL.reset();  hpR.reset();
+		upL.reset();  upR.reset();
+		decL.reset(); decR.reset();
+	}
+
+	void onSampleRateChange() override {
+		// Filter state holds frequency-dependent memory; reset on rate change
+		// so transients don't appear at the new rate.
+		onReset();
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -427,11 +442,8 @@ struct Pogo : Module {
 		                         + modDest(BYPASS_CV_INPUT, BYPASS_ATT_PARAM), 0.f, 1.f);
 		float widthParam = params[WIDTH_PARAM].getValue(); // ±1 V/oct offset on R
 
-		// Run APF (combBypass=1 — bypass crossfade applied after distortion below)
-		combL.process(pgL, freqV, fbGain, polarity, distTapL, blendArr, 1.f, 0.f, fs);
-		combR.process(pgR, freqV, fbGain, polarity, distTapR, blendArr, 1.f, widthParam, fs);
-
-		// ── Block 4: distortion (per APF group) ──────────────────────────────
+		// ── Blocks 3+4: 2× oversampled APF comb + distortion ────────────────
+		// Upsample pre-gain signal to 2× rate
 		int distMode = (int)std::round(params[DIST_MODE_PARAM].getValue());
 		float driveCV[3] = {
 			clamp(params[DRIVE_1_PARAM].getValue() + modDest(DRIVE_CV_1_INPUT, DRIVE_ATT_1_PARAM), 0.f, 1.f),
@@ -439,16 +451,33 @@ struct Pogo : Module {
 			clamp(params[DRIVE_3_PARAM].getValue() + modDest(DRIVE_CV_3_INPUT, DRIVE_ATT_3_PARAM), 0.f, 1.f),
 		};
 
-		float distSumL = 0.f, distSumR = 0.f;
-		for (int i = 0; i < 3; i++) {
-			distTapL[i] = Distortion::process(combL.groups[i].prevOut, driveCV[i], distMode);
-			distTapR[i] = Distortion::process(combR.groups[i].prevOut, driveCV[i], distMode);
-			distSumL += distTapL[i] * 0.5f;
-			distSumR += distTapR[i] * 0.5f;
+		float upBufL[OS], upBufR[OS];
+		upL.process(pgL, upBufL);
+		upR.process(pgR, upBufR);
+
+		float postL[OS], postR[OS];
+		const float fs2 = 2.f * fs; // APF coefficients at oversampled rate
+		for (int s = 0; s < OS; s++) {
+			// APF at 2× rate; distTapL/R carry feedback from previous OS step
+			combL.process(upBufL[s], freqV, fbGain, polarity, distTapL, blendArr, 1.f, 0.f,       fs2);
+			combR.process(upBufR[s], freqV, fbGain, polarity, distTapR, blendArr, 1.f, widthParam, fs2);
+
+			// Distortion per group; update distTap for next OS step's APF blend
+			float dSumL = 0.f, dSumR = 0.f;
+			for (int i = 0; i < 3; i++) {
+				distTapL[i] = Distortion::process(combL.groups[i].prevOut, driveCV[i], distMode);
+				distTapR[i] = Distortion::process(combR.groups[i].prevOut, driveCV[i], distMode);
+				dSumL += distTapL[i] * 0.5f;
+				dSumR += distTapR[i] * 0.5f;
+			}
+			// combBypass crossfade at oversampled rate
+			postL[s] = clamp(upBufL[s] * (1.f - combBypass) + dSumL * combBypass, -10.5f, 10.5f);
+			postR[s] = clamp(upBufR[s] * (1.f - combBypass) + dSumR * combBypass, -10.5f, 10.5f);
 		}
-		// combBypass crossfade: dry pre-APF signal vs wet distorted APF sum
-		distSumL = clamp(pgL * (1.f - combBypass) + distSumL * combBypass, -10.5f, 10.5f);
-		distSumR = clamp(pgR * (1.f - combBypass) + distSumR * combBypass, -10.5f, 10.5f);
+
+		// Decimate back to base rate
+		float distSumL = decL.process(postL);
+		float distSumR = decR.process(postR);
 
 		// ── Block VCA ─────────────────────────────────────────────────────────
 		float vcaCV  = inputs[VCA_CV_INPUT].isConnected()

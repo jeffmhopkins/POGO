@@ -5,17 +5,17 @@ No Phase 6 (code) work begins until every row shows ✅ for Phases 1–3
 
 | Block                        | Phase 1: Audio Spec | Phase 2: Analog Model | Phase 3: Circuit Design | Phase 4: Panel Design | Phase 5: Board Layout | Phase 6: Code |
 |------------------------------|---------------------|-----------------------|-------------------------|-----------------------|-----------------------|---------------|
-| Mod Architecture             | ✅                  | ✅                    | ✅                      | ✅                    | ✅                    | [ ]           |
-| Block A: Input Buffer        | ✅                  | ✅                    | ✅                      | ✅                    | ✅                    | [ ]           |
-| Block 1: Pre-Gain            | ✅                  | ✅                    | ✅                      | ✅                    | ✅                    | [ ]           |
-| Block 2: Envelope Follower   | ✅                  | ✅                    | ✅                      | ✅                    | ✅                    | [ ]           |
-| Block 3: Triple APF Comb     | ✅                  | ✅                    | ✅                      | ✅                    | ✅                    | [ ]           |
-| Block 4: Distortion          | ✅                  | ✅                    | ✅                      | ✅                    | ✅                    | [ ]           |
-| Block VCA (pre-LP1)          | ✅                  | ✅                    | ✅                      | ✅                    | ✅                    | [ ]           |
-| Block 5: LP Filter 1         | ✅                  | ✅                    | ✅                      | ✅                    | ✅                    | [ ]           |
-| Block 6: LP Filter 2         | ✅                  | ✅                    | ✅                      | ✅                    | ✅                    | [ ]           |
-| Block 7: HP Filter           | ✅                  | ✅                    | ✅                      | ✅                    | ✅                    | [ ]           |
-| Block B: Output Buffer       | ✅                  | ✅                    | ✅                      | ✅                    | ✅                    | [ ]           |
+| Mod Architecture             | ✅                  | ✅                    | ✅                      | ✅                    | ✅                    | ✅             |
+| Block A: Input Buffer        | ✅                  | ✅                    | ✅                      | ✅                    | ✅                    | ✅             |
+| Block 1: Pre-Gain            | ✅                  | ✅                    | ✅                      | ✅                    | ✅                    | ✅             |
+| Block 2: Envelope Follower   | ✅                  | ✅                    | ✅                      | ✅                    | ✅                    | ✅             |
+| Block 3: Triple APF Comb     | ✅                  | ✅                    | ✅                      | ✅                    | ✅                    | ✅             |
+| Block 4: Distortion          | ✅                  | ✅                    | ✅                      | ✅                    | ✅                    | ✅             |
+| Block VCA (pre-LP1)          | ✅                  | ✅                    | ✅                      | ✅                    | ✅                    | ✅             |
+| Block 5: LP Filter 1         | ✅                  | ✅                    | ✅                      | ✅                    | ✅                    | ✅             |
+| Block 6: LP Filter 2         | ✅                  | ✅                    | ✅                      | ✅                    | ✅                    | ✅             |
+| Block 7: HP Filter           | ✅                  | ✅                    | ✅                      | ✅                    | ✅                    | ✅             |
+| Block B: Output Buffer       | ✅                  | ✅                    | ✅                      | ✅                    | ✅                    | ✅             |
 
 **Phase 4 and Phase 5 are module-level gates** — when complete, all rows flip to ✅ at once.
 
@@ -46,4 +46,10 @@ Full audit findings: `specs/shared/noise-audit.md`
 2. Phase 4: panel design ✅ — panel.html + panel.svg complete; all docs synced
 3. Phase 5: board layout ✅ — 4-board split documented in specs/board-layout/layout-notes.md
 4. **Noise audit** ✅ — completed 2026-05-24; see specs/shared/noise-audit.md
-5. Phase 6 (VCV Rack code): **Stage 0 scaffold complete** — plugin.json, Makefile, src/, res/Pogo.svg committed; all 47 params / 22 inputs / 6 outputs registered; audio pass-through wired. Rack SDK install required before `make`. Next: Stage 1 (Block A + B DSP, clean pass-through test).
+5. Phase 6 (VCV Rack code): ✅ **complete** — all DSP blocks implemented (A, 1, 2, mod bus,
+   3, 4, VCA, 5, 6, 7, B). Full signal chain wired in `src/Pogo.cpp`. Blocks 3+4 run at
+   2× oversampled rate (dsp::Upsampler/Decimator). `onSampleRateChange()` resets filter
+   state. Panel widget with all 47 params / 22 inputs / 6 outputs registered.
+   **Remaining before hardware validation**: replace placeholder `res/Pogo.svg` panel art.
+
+Last updated: 2026-05-25
