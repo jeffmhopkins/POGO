@@ -50,6 +50,6 @@ Full audit findings: `specs/shared/noise-audit.md`
    3, 4, VCA, 5, 6, 7, B). Full signal chain wired in `src/Pogo.cpp`. Blocks 3+4 run at
    2× oversampled rate (dsp::Upsampler/Decimator). `onSampleRateChange()` resets filter
    state. Panel widget with all 47 params / 22 inputs / 6 outputs registered.
-   **Remaining before hardware validation**: replace placeholder `res/Pogo.svg` panel art.
+   `res/Pogo.svg` panel art is complete — all 56 widget positions verified against C++ layout.
 
 Last updated: 2026-05-25
