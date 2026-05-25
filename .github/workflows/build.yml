@@ -83,8 +83,13 @@ jobs:
 
       - name: Get latest Rack SDK version
         id: rack-sdk
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          VERSION=$(curl -s https://api.github.com/repos/VCVRack/Rack/releases/latest | jq -r '.tag_name // empty' | sed 's/^v//')
+          VERSION=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
+            "https://api.github.com/repos/VCVRack/Rack/releases?per_page=10" | \
+            jq -r '[.[] | select(.prerelease == false)] | first | .tag_name // empty' | \
+            sed 's/^v//')
           if [ -z "$VERSION" ] || [ "$VERSION" = "null" ]; then
             echo "ERROR: failed to resolve Rack SDK version from GitHub API" >&2
             exit 1
