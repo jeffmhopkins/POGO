@@ -338,8 +338,8 @@ Template:
 - [ ] **Phase 4: Panel Design** — HP width finalized, all controls placed, board split
       decision made, silk-screen layout approved
       → `specs/panel-design/panel-notes.md` + `specs/panel-design/panel.svg`
-- [ ] **Phase 5: Board Layout** — board split strategy decided (4-board: control + utility +
-      left audio + right audio), ground plane approach defined, component placement rules
+- [ ] **Phase 5: Board Layout** — board split strategy decided (3-board: control + utility +
+      combined audio), ground plane approach defined, component placement rules
       documented, connector pinout finalized
       → `specs/board-layout/layout-notes.md`
 
@@ -574,30 +574,30 @@ Deliverables: `specs/panel-design/panel-notes.md` and `specs/panel-design/panel.
 
 ### Sub-Panel / Multi-Board Decision
 
-At POGO's complexity (40 HP, ~70+ panel controls and jacks), a four-PCB split is used:
+At POGO's complexity (40 HP, ~70+ panel controls and jacks), a three-PCB split is used:
 
 **Control board (panel-mounted PCB):**
 - Mounts directly behind the panel using jack nuts and pot hardware.
-- Carries: all Thonkiconn jacks, all pots, all switches, all panel LEDs.
-- Thin board (1.0 mm or 1.2 mm) to minimize stack depth.
-- Connects to utility and audio boards via ribbon cables (IDC connectors).
+- Carries: all Thonkiconn jacks, all pots, all switches.
+- Thin board (1.2 mm) to minimize stack depth.
+- Connects to utility board via three IDC ribbon cables (CN_CTRL_1/2/3, 98 pins total).
+  Right-angle IDC headers on Control board bottom edge; straight headers on Utility top edge.
 
-**Utility board:**
+**Utility board (~200 mm × 80 mm, full-width):**
 - Carries: mod bus processor, all 19 attenuverter circuits, expo converters (THAT340),
   Iabc drive circuits, envelope follower selection logic.
-- Receives control voltages from the control board; sends Iabc currents to audio boards.
+- Receives control voltages from the control board via IDC ribbon.
+- Connects to combined audio board via two 40-pin stacking headers (face-to-face, 8 mm standoff):
+  STK_AUDIO_L (left zone, L-channel signals) and STK_AUDIO_R (right zone, R-channel signals).
 - One per module (shared between L and R audio paths).
 
-**Left audio board:**
-- Carries: Block A (L), Block 1 (L), Block 2 (L), Block 3 (L), Block 4 (L),
-  Block VCA (L), Block 5 (L), Block 6 (L), Block 7 (L), Block B (L).
-- Receives audio input from control board jacks; sends audio output to control board jacks.
+**Combined audio board (~200 mm × 100 mm):**
+- L-channel (Block A/1/2/3/4/VCA/5/6/7/B) occupies the left half (~96 mm).
+- R-channel (same blocks) occupies the right half (~96 mm).
+- A 4 mm center GND guard strip (solid copper, all layers, no signal traces) separates the two halves.
+- Stacks directly behind the utility board on M3 standoffs — total module depth ~31 mm.
 
-**Right audio board:**
-- Mirror of left audio board for the R signal path.
-
-Document the connector pinout between all four boards in `panel-notes.md` and
-`specs/board-layout/layout-notes.md`.
+Document all connector pinouts in `specs/board-layout/layout-notes.md`.
 
 ### Labeling and Silk-Screen
 
@@ -625,21 +625,20 @@ which signals need to be software-accessible (debug test points) and confirm pow
 
 Deliverables: `specs/board-layout/layout-notes.md`.
 
-### Board Split (4-Board Architecture)
+### Board Split (3-Board Architecture)
 
-POGO uses a four-board split. Document board boundaries and all connector pinouts in
+POGO uses a three-board split. Document board boundaries and all connector pinouts in
 `layout-notes.md`:
 
 | Board | Contents | Approx size | Connects to |
 |---|---|---|---|
-| Control board | All jacks, pots, switches, LEDs | ~203 mm × 80 mm (40 HP) | Utility board + audio boards via IDC ribbon |
-| Utility board | Mod bus, attenuverters (×19), expo converters, Iabc drive | ~100 mm × 110 mm | Control board + both audio boards + Eurorack bus |
-| Left audio board | Block A/1/2/3/4/VCA/5/6/7/B (L channel) | ~100 mm × 110 mm | Control board + utility board |
-| Right audio board | Block A/1/2/3/4/VCA/5/6/7/B (R channel) | ~100 mm × 110 mm | Control board + utility board |
+| Control board | All jacks, pots, switches | ~203 mm × 80 mm (40 HP) | Utility board via 3× IDC ribbon (CN_CTRL_1/2/3) |
+| Utility board | Mod bus, attenuverters (×19), expo converters, Iabc drive | ~200 mm × 80 mm | Control board (IDC ribbon) + combined audio board (stacking headers) + Eurorack bus |
+| Combined audio board | Block A/1/2/3/4/VCA/5/6/7/B — L-channel left half, R-channel right half, 4 mm center GND strip | ~200 mm × 100 mm | Utility board (stacking headers) |
 
 The Eurorack power header lives on the utility board; power rails are distributed to
-audio boards via the ribbon connectors. Each audio board has its own ferrite beads and
-bulk decoupling.
+the combined audio board via the STK_AUDIO_L/R stacking headers. The combined audio board
+has its own ferrite beads and bulk decoupling on each power rail after the stacking header.
 
 ### Ground Plane Strategy
 
@@ -678,11 +677,17 @@ Apply these rules in KiCad (or equivalent) before routing:
 - Red stripe (−12 V, pin 1) orientation: mark clearly on silk-screen with a triangle or arrow.
 - Ferrite bead on each rail in series between header and board power plane.
 
-**Control board ↔ Audio board connector:**
-- 2.54 mm right-angle pin header on the audio board; mating socket on control board.
-- Group signals by type: GND first, then +12 V / −12 V, then audio signals, then CV signals.
-- Keep connector ≤ 40 pins; if more signals are needed, use two connectors.
-- Document the full pinout in `layout-notes.md` — this becomes the integration test spec.
+**Control board ↔ Utility board (IDC ribbon):**
+- Three cables: CN_CTRL_1 (34-pin), CN_CTRL_2 (40-pin), CN_CTRL_3 (24-pin).
+- Right-angle 2.54 mm IDC headers on Control board bottom edge (clear strip below CV jack row).
+- Straight 2.54 mm IDC headers on Utility board top edge; ribbon cables ~100 mm length.
+- Full pinouts documented in `layout-notes.md` §5.
+
+**Utility board ↔ Combined audio board (stacking headers):**
+- Two 40-pin 2×20 2.54 mm straight pin headers on Utility board back face.
+- Matching socket headers on Combined audio board top face; 8 mm M3 standoffs at four corners.
+- STK_AUDIO_L (left zone, L-channel), STK_AUDIO_R (right zone, R-channel).
+- Full pinouts documented in `layout-notes.md` §5.
 
 **Jack-to-board:**
 - Use PCB-mount Thonkiconn (PJ301M-12) — direct solder to control board, no flying leads.

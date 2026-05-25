@@ -17,8 +17,7 @@ syntax. The generator is the authoritative source; the `.kicad_sch` file is the 
 |---|---|
 | 1. Control board | Purely passive (jacks, pots, switches). No ICs. Easiest to validate format. |
 | 2. Utility board | Complex (mod bus, attenuverters, THAT340s). Do after format is proven. |
-| 3. Left audio board | All analog signal processing ICs. Most dense. |
-| 4. Right audio board | Mirror of left. Copy-paste with net-name substitution. |
+| 3. Combined audio board | All analog signal processing ICs — L-channel left half, R-channel right half. Most dense. Use separate sub-sheets or zone comments to distinguish L and R areas. |
 
 ---
 
@@ -26,9 +25,13 @@ syntax. The generator is the authoritative source; the `.kicad_sch` file is the 
 
 ```
 kicad/
-  pogo.kicad_pro                   KiCad 7 project file (references all schematics)
-  generate_control_board.py        Generator script → produces pogo-control-board.kicad_sch
-  pogo-control-board.kicad_sch     Generated artifact (control board only)
+  pogo.kicad_pro                    KiCad 7 project file (references all schematics)
+  generate_control_board.py         Generator script → produces pogo-control-board.kicad_sch
+  pogo-control-board.kicad_sch      Generated artifact (control board — complete)
+  generate_utility_board.py         [planned] → pogo-utility-board.kicad_sch
+  pogo-utility-board.kicad_sch      [planned artifact]
+  generate_audio_combined.py        [planned] → pogo-audio-combined.kicad_sch
+  pogo-audio-combined.kicad_sch     [planned artifact] (L-channel left half, R-channel right half)
 ```
 
 ---
@@ -199,7 +202,7 @@ python3 generate_control_board.py
 4. IDC connectors may need manual part assignment — search Nexar/Octopart within Flux for
    "2.54mm IDC header 34 pin" and "2.54mm IDC header 20 pin"
 5. Net names are preserved exactly as generated — verify them in Flux's net list view
-6. PCB layout can begin once all four schematics are imported and part numbers are assigned
+6. PCB layout can begin once all three schematics are imported and part numbers are assigned
 
 ---
 
@@ -213,12 +216,16 @@ Each board's generator script follows the same structure:
 | Power symbols | +12V, -12V, GND at every IC supply pin |
 | Component instances | One per IC, resistor, capacitor, etc. |
 | Global labels | Net name at every pin |
-| Connector block | IDC connector with CN_UTIL_L / CN_UTIL_R / CN_CTRL pinout |
+| Connector block | Stacking header footprints (STK_AUDIO_L / STK_AUDIO_R) or IDC connectors (CN_CTRL) |
 
 For the utility board: add `Device:R` (resistors), `Device:C` (caps), `Amplifier_Operational:TL074`
 (quad op-amp SOIC-14), `Amplifier_Operational:TL072` (dual op-amp), and the THAT340 (custom
-symbol needed — 16-pin SOIC with 4 NPN transistors).
+symbol needed — 16-pin SOIC with 4 NPN transistors). Stacking header connectors for
+STK_AUDIO_L and STK_AUDIO_R (2×20 2.54 mm): use `Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Vertical`.
 
-For audio boards: additionally `Amplifier_Operational:LM13700` (18-pin DIP/SOIC OTA),
+For the combined audio board: additionally `Amplifier_Operational:LM13700` (18-pin DIP/SOIC OTA),
 `Amplifier_Operational:LM4562` (SOIC-8), `Amplifier_Operational:NE5532` (SOIC-8),
-and the CD4053 analog switch (SOIC-16).
+and the CD4053 analog switch (SOIC-16). The schematic should use zone annotations or
+hierarchical sub-sheets to distinguish L-channel (left half) and R-channel (right half)
+components. All L-channel reference designators end in _L (e.g., IC_Q_AB_L); all R-channel
+end in _R. The center GND strip appears as a power symbol cluster with no signal connections.

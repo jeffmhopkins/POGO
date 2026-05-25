@@ -34,7 +34,7 @@ A full IC-level noise and inter-block impedance audit was completed. Key design 
 - **Block 5**: Added 10 nF Iabc bypass caps at Q-VCA; documented OTA-C noise limitation (D1, D2)
 - **Block 6**: Added GND stitching via array spec between LP1 and LP2 sections (M5)
 - **Block B**: Added BAND OUT phase verification note for Phase 6 (D3)
-- **CN_UTIL_L/R**: Expanded from 34-pin to 40-pin; 3 GND guard pins interleaved in I_abc group (H2)
+- **STK_AUDIO_L/R**: 40-pin stacking headers replacing IDC ribbon for Utility→Audio connection; GND guard pins retained in pinout for I_abc group (H2)
 - **layout-notes.md**: New routing rules M1–M4, THAT340 power island (H5), H6 post-dist tap,
   bring-up checklist (Section 12)
 
@@ -44,7 +44,7 @@ Full audit findings: `specs/shared/noise-audit.md`
 
 1. Per-block Phases 1–3: ✅ complete for all blocks
 2. Phase 4: panel design ✅ — panel.html + panel.svg complete; all docs synced
-3. Phase 5: board layout ✅ — 4-board split documented in specs/board-layout/layout-notes.md
+3. Phase 5: board layout ✅ — 3-board split documented in specs/board-layout/layout-notes.md
 4. **Noise audit** ✅ — completed 2026-05-24; see specs/shared/noise-audit.md
 5. Phase 6 (VCV Rack code): ✅ **complete** — all DSP blocks implemented (A, 1, 2, mod bus,
    3, 4, VCA, 5, 6, 7, B). Full signal chain wired in `src/Pogo.cpp`. Blocks 3+4 run at

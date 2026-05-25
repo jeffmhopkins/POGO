@@ -148,7 +148,7 @@ Q formula (same derivation as LP1, R_in = 100 kΩ):
   See block-5-lp1/spec.md Phase 3 for the IRES_AMP inverting driver circuit.
   RV_HP_QMAX adjusts V_bias in the HP IRES_AMP stage.
 
-HP_Q_OTA is cell A of IC_Q_C (one LM13700 per audio board; cell B is spare).
+HP_Q_OTA is cell A of IC_Q_C (one LM13700 per channel; cell B is spare).
 
 ### Integrator capacitor values (HP range: 20 Hz – 5 kHz, approximately 8 octaves)
 
@@ -166,8 +166,8 @@ For f₀ = 1 kHz (nominal): C = g_m / ω₀ = 192µS / 6283 = 30.6 nF → use 33
 |---|---|---|---|---|
 | HP_OTA_L, HP_OTA_R | LM13700M | SOIC-16 | 2 | Dual OTA; 2 integrators per channel (1 IC per channel) |
 | HP_SUM_L, HP_SUM_R | TL072CDT | SOIC-8 | 2 | SVF summing amplifier + HP output buffer (1 IC per channel) |
-| IC_Q_C_L | LM13700M | SOIC-16 | 1 (Left audio board) | Cell A = HP L Q VCA; cell B = spare |
-| IC_Q_C_R | LM13700M | SOIC-16 | 1 (Right audio board) | Cell A = HP R Q VCA; cell B = spare |
+| IC_Q_C_L | LM13700M | SOIC-16 | 1 (combined audio, L-channel) | Cell A = HP L Q VCA; cell B = spare |
+| IC_Q_C_R | LM13700M | SOIC-16 | 1 (combined audio, R-channel) | Cell A = HP R Q VCA; cell B = spare |
 | HP_EXPO | THAT340 | SOIC-8 | 1 | Matched NPN pair for HP expo converter (shared L+R) |
 | C_int_L, C_int_R | C0G/NP0 | 0603 | 4 | 33 nF integrator caps (2 per channel: C1_L, C2_L, C1_R, C2_R) |
 | R_in_L, R_in_R | — | 0603 | 2 | 100 kΩ summing amp input resistor |

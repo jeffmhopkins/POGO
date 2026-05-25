@@ -119,8 +119,8 @@ Resonance Q feedback (HP_Q_OTA, IC_Q_C):
                                     IN− → GND
                                     Iabc ← IRES_AMP inverting driver (V_Iabc = V_bias − V_RES_scaled; R_Iabc = 1 MΩ)
                                     I_out → HP_SUM_LA (−in) virtual-ground node
-  IC_Q_C_L (Left audio board):  cell A = HP L Q; cell B = spare
-  IC_Q_C_R (Right audio board): cell A = HP R Q; cell B = spare
+  IC_Q_C_L (combined audio board, L-channel): cell A = HP L Q; cell B = spare
+  IC_Q_C_R (combined audio board, R-channel): cell A = HP R Q; cell B = spare
 
 HP_EXPO (THAT340, SOIC-8):
   Shared L+R expo converter
@@ -145,8 +145,8 @@ Output buffers:
     <tr><td>HP_OTA_R</td><td>LM13700M</td><td>SOIC-16</td><td>1</td><td>Dual OTA; 2 integrators for R channel</td></tr>
     <tr><td>HP_SUM_L</td><td>TL072CDT</td><td>SOIC-8</td><td>1</td><td>SVF summing amp (half A) + HP buffer (half B), L channel</td></tr>
     <tr><td>HP_SUM_R</td><td>TL072CDT</td><td>SOIC-8</td><td>1</td><td>SVF summing amp + buffer, R channel</td></tr>
-    <tr><td>IC_Q_C_L</td><td>LM13700M</td><td>SOIC-16</td><td>1</td><td>Left audio board; cell A = HP L Q VCA; cell B = spare</td></tr>
-    <tr><td>IC_Q_C_R</td><td>LM13700M</td><td>SOIC-16</td><td>1</td><td>Right audio board; cell A = HP R Q VCA; cell B = spare</td></tr>
+    <tr><td>IC_Q_C_L</td><td>LM13700M</td><td>SOIC-16</td><td>1</td><td>Combined audio board L-channel; cell A = HP L Q VCA; cell B = spare</td></tr>
+    <tr><td>IC_Q_C_R</td><td>LM13700M</td><td>SOIC-16</td><td>1</td><td>Combined audio board R-channel; cell A = HP R Q VCA; cell B = spare</td></tr>
     <tr><td>HP_EXPO</td><td>THAT340</td><td>SOIC-8</td><td>1</td><td>Matched NPN pair; shared L+R expo converter</td></tr>
     <tr><td>C_int_1L, C_int_2L</td><td>C0G/NP0 cap</td><td>0603</td><td>2</td><td>33 nF integrator caps, L channel</td></tr>
     <tr><td>C_int_1R, C_int_2R</td><td>C0G/NP0 cap</td><td>0603</td><td>2</td><td>33 nF integrator caps, R channel</td></tr>

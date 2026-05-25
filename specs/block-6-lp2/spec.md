@@ -96,7 +96,7 @@ summing amplifier, and an LM13700 OTA cell for voltage-controlled Q. See
 `specs/block-5-lp1/spec.md` Phase 3 for the full schematic description and derivations.
 
 LP2's Q VCA uses cell B of IC_Q_AB (the same LM13700 that handles LP1 Q on cell A). LP1 and
-LP2 share one LM13700 for Q VCA per audio board — no V2164 IC required.
+LP2 share one LM13700 for Q VCA per channel — no V2164 IC required.
 
 Q formula and resonance control direction: identical to LP1. See `specs/block-5-lp1/spec.md`
 Phase 3 for the correct Q formula (Q = 52 mV / (Iabc × R_in)) and the inverting Iabc driver

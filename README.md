@@ -46,7 +46,7 @@ Stereo In → Input Buffer → Pre-Gain → Envelope Follower
 attenuverters and override jacks for 19 CV destinations — every key parameter is
 voltage-controllable.
 
-**Hardware target:** 40 HP, 4-board split (control + utility + left audio + right audio),
+**Hardware target:** 40 HP, 3-board split (control + utility + combined audio),
 ±12 V Eurorack power, ~167 mA per rail.
 
 ---
@@ -62,7 +62,7 @@ implemented block by block.
 | Phase 2 | Analog behavior model (all blocks) | ✅ Complete |
 | Phase 3 | Circuit design (all blocks) | ✅ Complete |
 | Phase 4 | Panel design — 40 HP layout, all controls placed | ✅ Complete |
-| Phase 5 | Board layout — 4-board split, connector pinouts | ✅ Complete |
+| Phase 5 | Board layout — 3-board split, connector pinouts | ✅ Complete |
 | Phase 6 | VCV Rack 2 plugin — **Stage 0 scaffold done; DSP next** | 🔄 In Progress |
 
 ### Phase 6 Development Stages
@@ -92,12 +92,12 @@ POGO/
 │   ├── mod-architecture.md   ← Modulation system spec
 │   ├── panel-design/         ← Phase 4: 40 HP panel layout
 │   │   └── panel.svg         ← Authoritative panel layout SVG
-│   ├── board-layout/         ← Phase 5: 4-board split, connector pinouts
-│   │   └── layout-notes.md   ← Full CN_CTRL_1/2/3 and CN_UTIL_L/R pinouts
+│   ├── board-layout/         ← Phase 5: 3-board split, connector pinouts
+│   │   └── layout-notes.md   ← Full CN_CTRL_1/2/3 and STK_AUDIO_L/R pinouts
 │   ├── block-*/spec.md       ← Per-block specifications (Phases 1–3)
 │   └── shared/               ← Reusable circuit standards (CV protection, power)
 ├── kicad/                    ← KiCad 7 schematic generation (board design system)
-│   ├── kicad_common.py       ← Shared generator infrastructure (all 4 boards)
+│   ├── kicad_common.py       ← Shared generator infrastructure (all 3 boards)
 │   ├── generate_control_board.py  ← Control board generator script
 │   ├── validate_schematic.py ← Structural validator (kiutils-based)
 │   ├── pogo-control-board.kicad_sch  ← Generated control board schematic
@@ -130,8 +130,7 @@ is the authoritative source and the `.kicad_sch` is the artifact.
 |---|---|---|---|
 | Control board | `generate_control_board.py` | ✅ Complete | Jacks, pots, switches, IDC connectors |
 | Utility board | `generate_utility_board.py` | ⬜ Next | Mod bus, attenuverters, THAT340 expo converters |
-| Left audio board | `generate_audio_left.py` | ⬜ | All analog ICs (LM13700, THAT2180, etc.) |
-| Right audio board | `generate_audio_right.py` | ⬜ | Mirror of left |
+| Combined audio board | `generate_audio_combined.py` | ⬜ | All analog ICs — L-channel left half, R-channel right half, 4 mm center GND strip |
 
 ### Running the control board generator
 
@@ -220,7 +219,7 @@ Key design decisions captured in the schematic:
 4. Net names are preserved exactly as generated
 
 See `specs/kicad-process.md` for the full generation methodology, ERC validation steps,
-and the template for the remaining three board generators.
+and the template for the remaining two board generators.
 
 ---
 
@@ -286,7 +285,7 @@ Key design decisions documented:
   and inverted Iabc driver (more RESONANCE → less Iabc → higher Q → self-oscillation)
 - All-pass comb filter capacitor values: 33 nF / 6.8 nF / 1.5 nF (Groups 1/2/3)
 - Modulation bus: 19 destinations, each with override jack and bipolar attenuverter
-- 4-board hardware split: control + utility + left audio + right audio
+- 3-board hardware split: control + utility + combined audio (L-channel left half, R-channel right half)
 
 ---
 
@@ -294,7 +293,7 @@ Key design decisions documented:
 
 POGO is designed for hardware construction after the VCV Rack prototype validates the DSP.
 Circuit specs:
-- **ICs**: LM13700 OTA (15 per audio board), THAT 2180 VCA, THAT340 expo converters, LM4562 (Block A), NE5532 (Block 1), TL072/TL074 op-amps
+- **ICs**: LM13700 OTA (15 per channel), THAT 2180 VCA, THAT340 expo converters, LM4562 (Block A), NE5532 (Block 1), TL072/TL074 op-amps
 - **Power**: ±12 V Eurorack, ~167 mA per rail
-- **Format**: 40 HP, 3U, 4-PCB split
+- **Format**: 40 HP, 3U, 3-PCB split
 - **CV protection**: 100 Ω series + BAT54S clamp on every input jack (see `specs/shared/cv-input-protection.md`)

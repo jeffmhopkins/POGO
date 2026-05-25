@@ -222,8 +222,8 @@ Both integrator capacitors C1 = C2 = 47 nF.
 |---|---|---|---|---|
 | LP1_OTA_L, LP1_OTA_R | LM13700M | SOIC-16 | 2 | Dual OTA; both cells = 2 integrators per channel |
 | LP1_SUM_L, LP1_SUM_R | TL074CDT | SOIC-14 | 2 | Summing amp + HP/BP/LP output buffers (1 per channel) |
-| IC_Q_AB_L | LM13700M | SOIC-16 | 1 (Left audio board) | Cell A = LP1 L Q VCA; cell B = LP2 L Q VCA (shared with LP2) |
-| IC_Q_AB_R | LM13700M | SOIC-16 | 1 (Right audio board) | Cell A = LP1 R Q VCA; cell B = LP2 R Q VCA (shared with LP2) |
+| IC_Q_AB_L | LM13700M | SOIC-16 | 1 (combined audio, L-channel) | Cell A = LP1 L Q VCA; cell B = LP2 L Q VCA (shared with LP2) |
+| IC_Q_AB_R | LM13700M | SOIC-16 | 1 (combined audio, R-channel) | Cell A = LP1 R Q VCA; cell B = LP2 R Q VCA (shared with LP2) |
 | LP1_EXPO | THAT340 | SOIC-8 | 1 | Matched NPN pair for expo converter (L+R share one expo) |
 | C1_L, C2_L, C1_R, C2_R | C0G/NP0 | 0603 | 4 | 47 nF integrator capacitors |
 | R_in_L, R_in_R | — | 0603 | 2 | 100 kΩ summing amp input resistor |
@@ -247,9 +247,9 @@ Both integrator capacitors C1 = C2 = 47 nF.
 - +12 V: ~15 mA | −12 V: ~15 mA
 
 ### Schematic Notes
-- LP1 Q VCA uses one cell of IC_Q_AB (LM13700); the other cell handles LP2 Q — both on the
-  same audio board. No V2164 IC needed for LP1.
-- Block VCA L/R (THAT 2180) is on each audio board immediately upstream of LP1; no IC sharing.
+- LP1 Q VCA uses one cell of IC_Q_AB (LM13700); the other cell handles LP2 Q — both in the
+  same channel half of the combined audio board. No V2164 IC needed for LP1.
+- Block VCA L/R (THAT 2180) is in each channel half immediately upstream of LP1; no IC sharing.
 - Audio signal: Block VCA output → LP1 SUM_AMP → OTA1 → OTA2 → LP output → LP2 + BAND OUT.
 - STEREO SPREAD OFFSET summing node: place close to the R channel expo converter input.
 - BAND OUT tap taken at the LP1 LP output buffer, before LP2 input.
@@ -259,7 +259,7 @@ Both integrator capacitors C1 = C2 = 47 nF.
 - **Expo converter temperature drift**: THAT340 matched pair required for stable 1V/oct tracking. Calibrate at room temperature; verify at 10°C and 40°C extremes during bring-up.
 - **Self-oscillation amplitude**: at Q → ∞, output amplitude limited by OTA/op-amp rail clipping. BAT54 anti-parallel diodes across SUM_AMP feedback resistor prevent hard clipping.
 - **LM13700 Q VCA Iabc range**: R_Iabc = 1 MΩ; at maximum resonance, Iabc → 0 (self-oscillation). RV_LP1_QMAX trims V_bias and therefore the flat-response Iabc and self-oscillation onset. Too high V_bias → Q too low at minimum resonance setting; too low → self-oscillation onset too early.
-- **L/R resonance matching**: L and R use separate LM13700 cells (one IC per audio board) driven by the same RESONANCE CV. LM13700 cells on different dies will match slightly less well than V2164 cells on the same die; the calibrated Iabc operating point should keep mismatch inaudible.
+- **L/R resonance matching**: L and R use separate LM13700 cells (one IC per channel) driven by the same RESONANCE CV. LM13700 cells on different dies will match slightly less well than V2164 cells on the same die; the calibrated Iabc operating point should keep mismatch inaudible.
 - **STEREO SPREAD OFFSET center null**: the bipolar pot must pass exactly 0 V at center detent. RV_LP1_SPREAD_NULL compensates for mechanical offset.
 - **SPREAD OFFSET interaction with CUTOFF CV**: V_spread sums into the R expo converter input alongside the shared CUTOFF CV. Summing resistors (R_spread and R_ctrl in the R expo summer) must be **0.1% tolerance** to preserve 1V/oct tracking on the R channel. Any mismatch adds a constant semitone error per volt of CV. Specify 0.1% in the parts table.
 - **OTA-C noise at high Q (accepted limitation — D1)**: at Q → ∞ (Iabc → 0), LM13700 input noise current (~10 pA/√Hz) reflected through the high-impedance integrator capacitor raises the noise floor. This is inherent to OTA-C topology and is not fixable without a fundamentally different filter architecture. At self-oscillation onset, the oscillating sine tone dominates and masks the elevated noise floor. See noise-audit.md D1.

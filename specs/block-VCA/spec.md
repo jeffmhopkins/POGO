@@ -112,7 +112,7 @@ V_in_R ──[100 Ω]──► THAT_VCA_R IN+
 ```
 
 V_cv_att (stereo-linked — both GAIN pins driven identically):
-  AMT wiper → utility board → VCA Level CV on CN_UTIL_L / CN_UTIL_R → R_gain → GAIN pin
+  AMT wiper → utility board → VCA Level CV on STK_AUDIO_L / STK_AUDIO_R → R_gain → GAIN pin
 
 R_gain converts the attenuverter voltage to the GAIN pin control current. Value from THAT 2180
 datasheet gain law; typically 10–22 kΩ to achieve unity gain at V_cv_att = 0 V (AMT center).
@@ -128,14 +128,14 @@ MOD BUS ──[tip switch]──[100 Ω]──[BAT54 SOT-23]──► AMT pot (�
 
 | Reference | Part Number | Package | Qty | Notes |
 |---|---|---|---|---|
-| THAT_VCA_L | THAT 2180 | SOIC-8 | 1 (Left audio board) | L channel signal path VCA |
-| THAT_VCA_R | THAT 2180 | SOIC-8 | 1 (Right audio board) | R channel signal path VCA |
+| THAT_VCA_L | THAT 2180 | SOIC-8 | 1 (combined audio, L-channel) | L channel signal path VCA |
+| THAT_VCA_R | THAT 2180 | SOIC-8 | 1 (combined audio, R-channel) | R channel signal path VCA |
 | RV_AMT | Bipolar pot | 9 mm | 1 | AMT attenuverter (−1× to +1×, center detent) |
 | D_cv | BAT54S | SOT-23 | 1 | CV input protection clamp |
 | R_cv | — | 0603 | 100 Ω | 1 | Series resistor at CV input |
 | R_in_L, R_in_R | — | 0603 | 100 Ω | 2 | Series resistors at audio inputs |
 | R_gain_L, R_gain_R | — | 0603 | 15 kΩ | 2 | V-to-I resistors at GAIN pins; nominal starting value — verify unity-gain current from THAT 2180 datasheet |
-| RV_VCA_UNITY_L, RV_VCA_UNITY_R | Bourns 3224W | SMD | 500 Ω | 2 | Unity-gain trim; in series with R_gain at each GAIN pin; one per audio board |
+| RV_VCA_UNITY_L, RV_VCA_UNITY_R | Bourns 3224W | SMD | 500 Ω | 2 | Unity-gain trim; in series with R_gain at each GAIN pin; one per channel |
 
 ### Trim Pots
 
@@ -145,13 +145,13 @@ MOD BUS ──[tip switch]──[100 Ω]──[BAT54 SOT-23]──► AMT pot (�
 | RV_VCA_UNITY_R | ±3% of R_gain | Unity gain at AMT center (R board) | Same procedure on R channel |
 
 ### Power Draw Estimate
-Two THAT 2180 ICs (one per audio board). No IC sharing.
+Two THAT 2180 ICs (one per channel on combined audio board). No IC sharing.
 - +12 V: ~5 mA | −12 V: ~5 mA (2× THAT 2180, ~2.5 mA each)
 
 ### Schematic Notes
-- THAT 2180 placement: each IC on its audio board, immediately before the LP1 summing amp.
-- Control voltage routing: AMT wiper → utility board → VCA Level CV pin on CN_UTIL_L /
-  CN_UTIL_R → R_gain → THAT 2180 GAIN pin. No cross-board audio signal routing.
+- THAT 2180 placement: each IC in its channel half of the combined audio board, immediately before the LP1 summing amp.
+- Control voltage routing: AMT wiper → utility board → VCA Level CV pin on STK_AUDIO_L /
+  STK_AUDIO_R → R_gain → THAT 2180 GAIN pin. No cross-channel audio signal routing.
 - Audio signal: Block 4 summing output → THAT 2180 IN+ → OUT → LP1 summing amp input.
 - Supply decoupling: 100 nF ceramic at each THAT 2180 supply pin.
 

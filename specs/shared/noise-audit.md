@@ -9,15 +9,16 @@ noise accumulation, and board design rules.
 
 ## 1. Inter-Block Architecture Summary
 
-All signal-chain blocks (A through B) reside on the left and right audio boards respectively.
+All signal-chain blocks (A through B) reside on the combined audio board — L-channel in the
+left half, R-channel in the right half, separated by a 4 mm center GND guard strip.
 Every inter-block connection within a channel is a **direct DC-coupled PCB trace** — no coupling
 capacitors in the signal path. Output impedances are ~1.5 Ω (closed-loop op-amp) at every stage;
 input impedances are 100 kΩ (SVF summing nodes), 10 kΩ (Block 1 gain stage), or 10 MΩ (unity
 followers). No impedance mismatches exist at the board-level signal chain.
 
-Inter-board connections use four IDC ribbon cables:
-- CN_CTRL_1/2 (34-pin each): control board ↔ utility board — audio I/O, pot wipers, switch positions
-- CN_UTIL_L/R (now **40-pin** each): utility board ↔ audio boards — I_abc expo currents, CVs, post-dist taps
+Board-to-board connections use two technologies:
+- CN_CTRL_1 (34-pin) + CN_CTRL_2 (40-pin) + CN_CTRL_3 (24-pin): control board ↔ utility board — IDC ribbon cables
+- STK_AUDIO_L + STK_AUDIO_R (**40-pin** each): utility board ↔ combined audio board — 2.54 mm stacking headers (face-to-face)
 
 The highest-risk inter-board signals are the **I_abc exponential currents** (pins 12–19 in revised
 pinout) — any noise on these lines modulates filter frequency directly. Changes H2 and H3 below
@@ -63,28 +64,28 @@ entering Block 3's 36 OTA stages.
 - Same SOIC-8 footprint, ±15V supply, GBW ~55 MHz
 **Changed in:** `specs/block-A-input-buffer/spec.md` Phase 3 IC selection
 
-### H2: CN_UTIL_L/R — expand to 40-pin, add GND guard pins for I_abc signals
+### H2: STK_AUDIO_L/R — 40-pin with GND guard pins for I_abc signals
 
 **Problem:** The six I_abc exponential current signals (APF FREQ 1/2/3, LP1/LP2/HP expo
-outputs) were on adjacent ribbon cable conductors with no interleaved GND returns. IDC ribbon
-cable (~1 pF/cm coupling capacitance) couples noise from adjacent signal conductors onto I_abc
-lines. I_abc noise directly modulates filter pitch.
-**Resolution:** Expand CN_UTIL_L/R from 34-pin to **40-pin** IDC. Add 3 GND guard pins
-interleaved in the I_abc group (see revised pinout in layout-notes.md Section 5).
-40-pin IDC headers and ribbon are standard 2.54 mm parts (same form factor as 34-pin).
+outputs) require adjacent GND guard pins to prevent capacitive coupling of noise onto these
+frequency-sensitive current lines. I_abc noise directly modulates filter pitch.
+**Resolution:** STK_AUDIO_L/R stacking headers use 40-pin pinout with 3 GND guard pins
+interleaved in the I_abc group (see pinout in layout-notes.md Section 5). Stacking headers
+have inherently lower inter-pin coupling than IDC ribbon cable (no long parallel runs of
+adjacent conductors), providing additional noise margin over the original IDC design.
 **Changed in:** `specs/board-layout/layout-notes.md` Section 5 connector tables
 
 ### H3: LM13700 Iabc pins — 10 nF local bypass cap
 
-**Problem:** The trace from THAT340 expo output → ribbon connector → audio board → LM13700
-Iabc pin can be 10–20 cm and acts as an antenna for HF noise. LM13700 Iabc pin impedance
-is ~2.6 kΩ at nominal 10 µA operating current; voltage noise on this trace couples directly
-into I_abc, modulating cutoff frequency.
+**Problem:** The trace from THAT340 expo output → stacking header → combined audio board →
+LM13700 Iabc pin can still pick up HF noise. LM13700 Iabc pin impedance is ~2.6 kΩ at nominal
+10 µA operating current; voltage noise on this trace couples directly into I_abc, modulating
+cutoff frequency.
 **Resolution:** Add **10 nF C0G 0402 cap** from each LM13700 Iabc pin to GND, within 2 mm
 of the pin. At 2.6 kΩ source impedance: f_-3dB = 1/(2π × 2.6k × 10n) = 6.1 kHz — low-pass
-filtering noise above audio range from coupling. Combined with H2's GND guards (which reduce
-the coupled voltage noise ~60 dB via the GND interleave), this gives extremely robust I_abc
-noise immunity.
+filtering noise above audio range. Combined with H2's GND guard pins (which reduce coupled
+voltage noise ~60 dB) and the stacking header's inherently lower coupling vs. IDC ribbon,
+this gives extremely robust I_abc noise immunity.
 **Changed in:** `specs/block-3-apcf/spec.md`, `specs/block-5-lp1/spec.md` Phase 3 IC tables
 (also applies to LP2 and HP by reference to LP1 topology)
 
@@ -113,17 +114,21 @@ cluster supply (+12V and −12V) on the utility board, separate from the main bo
 
 ### H6: Post-distortion feedback path — 100 pF EMI bypass, GND-adjacent routing
 
-**Problem:** V_post_dist travels: Block 4 audio board → CN_UTIL_L pins 31–34 → utility board
-FB DIST BLEND crossfade → CN_UTIL_L pin 35 → back to Block 3 audio board (two ribbon crossings).
-Noise injected on this path lands in Block 3's regenerative feedback loop, where it is amplified
-at high FB settings.
+**Problem:** V_post_dist travels: Block 4 (combined audio board) → STK_AUDIO_L pins 31–34 →
+utility board FB DIST BLEND crossfade → STK_AUDIO_L pin 35 → back to Block 3 (combined audio
+board). Although stacking headers eliminate the long ribbon cable runs, the signal still crosses
+the board boundary twice and enters Block 3's regenerative feedback loop, where any noise is
+amplified at high FB settings.
 **Resolution:**
 1. Block 4 TL074 SUM_AMP output (source Z ~1.5 Ω) confirmed to drive post-dist tap pins directly.
-2. **100 pF C0G cap** to GND at post-dist tap entries on utility board (at connector, after pin).
+2. **100 pF C0G cap** to GND at post-dist tap entries on utility board (at stacking header, after pin).
    100 pF at 1.5 Ω source Z rolls off at 1 GHz — EMI suppression only, no effect on audio.
    IMPORTANT: do NOT use 100 nF here; 100 nF at 100 Ω would roll off at 16 kHz, destroying HF content.
-3. Same 100 pF caps at the FB DIST BLEND return pin entry on the audio board.
+3. Same 100 pF caps at the FB DIST BLEND return pin entry on the combined audio board.
 4. Post-dist tap group (pins 31–35 in revised pinout) located adjacent to a GND pin.
+Note: The stacking header design substantially reduces inter-pin coupling versus the original
+IDC ribbon, further improving H6 noise immunity. The 100 pF bypass remains advisable as
+belt-and-suspenders protection given the signal's route through the regenerative feedback path.
 **Changed in:** `specs/board-layout/layout-notes.md` Section 5 and 7
 
 ### H7: Block 1 — TL072 → NE5532
@@ -220,5 +225,5 @@ Added to bring-up checklist in layout-notes.md: verify with DMM before applying 
 | `specs/block-5-lp1/spec.md` | Added 10 nF Iabc bypass; D1 and D2 limitations noted (H3) |
 | `specs/block-6-lp2/spec.md` | GND stitching via array spec (M5) |
 | `specs/block-B-output-buffer/spec.md` | BAND OUT phase verification note (D3) |
-| `specs/board-layout/layout-notes.md` | CN_UTIL_L/R → 40-pin; new routing rules M1–M5; THAT340 power island H5; H6 post-dist tap; bring-up checklist |
+| `specs/board-layout/layout-notes.md` | STK_AUDIO_L/R 40-pin stacking headers; new routing rules M1–M5; THAT340 power island H5; H6 post-dist tap; bring-up checklist |
 | `specs/STATUS.md` | Audit completion noted |

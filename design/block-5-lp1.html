@@ -132,8 +132,8 @@ Resonance Q feedback (LP1_Q_OTA, IC_Q_AB):
                                     IN− → GND
                                     Iabc ← RESONANCE CV (0–10V) via R_Iabc (200 kΩ nominal)
                                     I_out → LP1_SUM_L (−in) virtual-ground node
-  IC_Q_AB_L (Left audio board):  cell A = LP1 L Q; cell B = LP2 L Q
-  IC_Q_AB_R (Right audio board): cell A = LP1 R Q; cell B = LP2 R Q
+  IC_Q_AB_L (combined audio board, L-channel): cell A = LP1 L Q; cell B = LP2 L Q
+  IC_Q_AB_R (combined audio board, R-channel): cell A = LP1 R Q; cell B = LP2 R Q
 
 Expo Converter (LP1_EXPO, THAT340, SOIC-8):
   L channel input: V_ctrl_L = CUTOFF knob + CV attenuverter sum
@@ -162,8 +162,8 @@ Output buffer (LP1_SUM_L half B or C):
     <tr><td>LP1_OTA_R</td><td>LM13700M</td><td>SOIC-16</td><td>1</td><td>Dual OTA; 2 integrators for R channel</td></tr>
     <tr><td>LP1_SUM_L</td><td>TL074CDT</td><td>SOIC-14</td><td>1</td><td>SVF summing amp + LP/BP/HP buffers for L channel</td></tr>
     <tr><td>LP1_SUM_R</td><td>TL074CDT</td><td>SOIC-14</td><td>1</td><td>Same for R channel</td></tr>
-    <tr><td>IC_Q_AB_L</td><td>LM13700M</td><td>SOIC-16</td><td>1</td><td>Left audio board; cell A = LP1 L Q VCA; cell B = LP2 L Q VCA</td></tr>
-    <tr><td>IC_Q_AB_R</td><td>LM13700M</td><td>SOIC-16</td><td>1</td><td>Right audio board; cell A = LP1 R Q VCA; cell B = LP2 R Q VCA</td></tr>
+    <tr><td>IC_Q_AB_L</td><td>LM13700M</td><td>SOIC-16</td><td>1</td><td>Combined audio board L-channel; cell A = LP1 L Q VCA; cell B = LP2 L Q VCA</td></tr>
+    <tr><td>IC_Q_AB_R</td><td>LM13700M</td><td>SOIC-16</td><td>1</td><td>Combined audio board R-channel; cell A = LP1 R Q VCA; cell B = LP2 R Q VCA</td></tr>
     <tr><td>LP1_EXPO</td><td>THAT340</td><td>SOIC-8</td><td>1</td><td>Matched NPN pair for expo converter (L+R share one)</td></tr>
     <tr><td>C1_L, C2_L</td><td>C0G/NP0 cap</td><td>0603</td><td>2</td><td>47 nF integrator caps, L channel</td></tr>
     <tr><td>C1_R, C2_R</td><td>C0G/NP0 cap</td><td>0603</td><td>2</td><td>47 nF integrator caps, R channel</td></tr>
