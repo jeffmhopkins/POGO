@@ -742,6 +742,22 @@ Phase 5 are complete at the module level.
 
 ---
 
+## Git Workflow
+
+**Always develop on `dev`.** Never commit directly to `main`.
+
+```bash
+git checkout dev          # confirm you are on dev before any work
+git pull origin dev       # sync before starting
+# ... make changes ...
+git push origin dev       # push to dev
+```
+
+CI runs on every push to `dev` (Linux/Windows/macOS plugin builds + KiCad schematic
+generation and validation). Merges to `main` are done manually when a milestone is stable.
+
+---
+
 ## Build & Test Workflow
 
 ```bash
