@@ -49,7 +49,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: POGO-linux-x64-${{ github.run_number }}
-          path: /tmp/artifact/POGO
+          path: /tmp/artifact
           if-no-files-found: warn
           retention-days: 30
 
@@ -81,7 +81,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: POGO-win-x64-${{ github.run_number }}
-          path: /tmp/artifact/POGO
+          path: /tmp/artifact
           if-no-files-found: warn
           retention-days: 30
 
@@ -130,7 +130,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: POGO-mac-${{ github.run_number }}
-          path: artifact/POGO
+          path: artifact
           if-no-files-found: warn
           retention-days: 30
 
