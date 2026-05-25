@@ -39,11 +39,17 @@ jobs:
           pushd ${{ env.rack-plugin-toolchain-dir }}
           make plugin-build-lin-x64
 
+      - name: Stage artifact
+        run: |
+          mkdir -p /tmp/artifact
+          find ${{ env.rack-plugin-toolchain-dir }}/plugin-build -name "*.vcvplugin" -o -name "*.zip" | \
+            while read f; do unzip -q "$f" -d /tmp/artifact/; done
+
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v7
         with:
           name: POGO-linux-x64-${{ github.run_number }}
-          path: ${{ env.rack-plugin-toolchain-dir }}/plugin-build
+          path: /tmp/artifact/POGO
           if-no-files-found: warn
           retention-days: 30
 
@@ -65,11 +71,17 @@ jobs:
           pushd ${{ env.rack-plugin-toolchain-dir }}
           make plugin-build-win-x64
 
+      - name: Stage artifact
+        run: |
+          mkdir -p /tmp/artifact
+          find ${{ env.rack-plugin-toolchain-dir }}/plugin-build -name "*.vcvplugin" -o -name "*.zip" | \
+            while read f; do unzip -q "$f" -d /tmp/artifact/; done
+
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v7
         with:
           name: POGO-win-x64-${{ github.run_number }}
-          path: ${{ env.rack-plugin-toolchain-dir }}/plugin-build
+          path: /tmp/artifact/POGO
           if-no-files-found: warn
           retention-days: 30
 
@@ -108,11 +120,17 @@ jobs:
           make dep
           make dist
 
+      - name: Stage artifact
+        run: |
+          mkdir -p artifact
+          find dist -name "*.vcvplugin" -o -name "*.zip" | \
+            while read f; do unzip -q "$f" -d artifact/; done
+
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v7
         with:
           name: POGO-mac-${{ github.run_number }}
-          path: dist/
+          path: artifact/POGO
           if-no-files-found: warn
           retention-days: 30
 
