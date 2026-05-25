@@ -1,9 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="203.20mm" height="133.35mm" viewBox="0 0 203.20 133.35">
+<svg xmlns="http://www.w3.org/2000/svg" width="203.20mm" height="128.5mm" viewBox="0 0 203.20 128.5">
 
   <!-- ── PANEL BACKGROUND ─────────────────────────────────────────────────── -->
-  <rect x="0" y="0" width="203.20" height="133.35" fill="#0d0d0d"/>
+  <rect x="0" y="0" width="203.20" height="128.5"  fill="#0d0d0d"/>
   <rect x="0" y="0"      width="203.20" height="4.5"  fill="#141414"/>
-  <rect x="0" y="128.85" width="203.20" height="4.5"  fill="#141414"/>
+  <rect x="0" y="124.0"  width="203.20" height="4.5"  fill="#141414"/>
 
   <!--
     JACK SPACING STANDARD: 1 jack per 2 HP = 10.16 mm pitch
@@ -43,11 +43,11 @@
       Comb 2 | Comb 3:  (106.68 + 116.84) / 2 = 111.76
   -->
 
-  <!-- Mounting holes: M3, x=7.5 and x=195.70, y=5.1 and y=128.25 -->
+  <!-- Mounting holes: M3, x=7.5 and x=195.70, y=5.1 and y=123.4 -->
   <circle cx="7.5"    cy="5.1"    r="1.6" fill="#0d0d0d" stroke="#2a2a2a" stroke-width="0.5"/>
   <circle cx="195.70" cy="5.1"    r="1.6" fill="#0d0d0d" stroke="#2a2a2a" stroke-width="0.5"/>
-  <circle cx="7.5"    cy="128.25" r="1.6" fill="#0d0d0d" stroke="#2a2a2a" stroke-width="0.5"/>
-  <circle cx="195.70" cy="128.25" r="1.6" fill="#0d0d0d" stroke="#2a2a2a" stroke-width="0.5"/>
+  <circle cx="7.5"    cy="123.4" r="1.6" fill="#0d0d0d" stroke="#2a2a2a" stroke-width="0.5"/>
+  <circle cx="195.70" cy="123.4" r="1.6" fill="#0d0d0d" stroke="#2a2a2a" stroke-width="0.5"/>
 
   <!-- ── TOP STRIP: single line centered ──────────────────────────────────── -->
   <text x="101.60" y="3.5" fill="#00d4ff" font-family="monospace" font-size="3.5"
@@ -59,21 +59,21 @@
 
   <!-- ── MAIN ZONE SEPARATOR LINES (cyan) — all at exact HP zone boundaries ── -->
   <!-- Zone 0 | Zone 1  x = 20.32 -->
-  <line x1="20.32" y1="4.5" x2="20.32" y2="128.85" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
+  <line x1="20.32" y1="4.5" x2="20.32" y2="124.0" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
   <!-- Zone 1 | Comb 1  x = 50.80 -->
-  <line x1="50.80" y1="4.5" x2="50.80" y2="128.85" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
+  <line x1="50.80" y1="4.5" x2="50.80" y2="124.0" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
   <!-- Comb 3 | LP 1  x = 142.24 -->
-  <line x1="142.24" y1="4.5" x2="142.24" y2="128.85" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
+  <line x1="142.24" y1="4.5" x2="142.24" y2="124.0" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
   <!-- LP 1 | LP 2  x = 162.56 -->
-  <line x1="162.56" y1="4.5" x2="162.56" y2="128.85" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
+  <line x1="162.56" y1="4.5" x2="162.56" y2="124.0" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
   <!-- LP 2 | HP+OUT  x = 182.88 -->
-  <line x1="182.88" y1="4.5" x2="182.88" y2="128.85" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
+  <line x1="182.88" y1="4.5" x2="182.88" y2="124.0" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
 
   <!-- ── COMB GROUP SUB-DIVIDERS (dim gray vertical) ──────────────────────── -->
   <!-- Comb 1 | Comb 2  x = 81.28 -->
-  <line x1="81.28"  y1="4.5" x2="81.28"  y2="128.85" stroke="#2a2a2a" stroke-width="0.4"/>
+  <line x1="81.28"  y1="4.5" x2="81.28"  y2="124.0" stroke="#2a2a2a" stroke-width="0.4"/>
   <!-- Comb 2 | Comb 3  x = 111.76 -->
-  <line x1="111.76" y1="4.5" x2="111.76" y2="128.85" stroke="#2a2a2a" stroke-width="0.4"/>
+  <line x1="111.76" y1="4.5" x2="111.76" y2="124.0" stroke="#2a2a2a" stroke-width="0.4"/>
 
   <!-- ── ZONE 0 MINI-ZONE DIVIDERS (dim gray horizontal) ──────────────────── -->
   <line x1="0.5"  y1="38.5" x2="19.82" y2="38.5" stroke="#2d2d2d" stroke-width="0.5"/>
