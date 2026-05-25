@@ -347,7 +347,7 @@ struct PogoWidget : ModuleWidget {
 		lbl->text            = text;
 		lbl->color           = col;
 		lbl->fontSize        = mm2px(sizeMm);
-		lbl->alignment       = ui::Label::CENTER_ALIGNMENT;
+		lbl->alignment       = NVG_ALIGN_CENTER;
 		addChild(lbl);
 	}
 
