@@ -110,9 +110,8 @@ def sym_power(name):
 # IDC connector lib_symbol — parameterised by row count
 # ---------------------------------------------------------------------------
 
-def sym_idc(rows, cols=2):
-    """IDC header lib_symbol. rows=17→34-pin, rows=20→40-pin, rows=12→24-pin."""
-    name = f"Connector_IDC:IDC-Header_{cols}x{rows:02d}_P2.54mm_Vertical"
+def _connector_sym(name, rows, cols=2):
+    """Shared body for IDC and PinHeader lib symbols (same 2.54mm 2-col geometry)."""
     short = name.split(":")[-1]
     lines = [
         f'  (symbol "{name}"',
@@ -139,6 +138,18 @@ def sym_idc(rows, cols=2):
         ]
     lines += ['    )', '  )']
     return '\n'.join(lines)
+
+
+def sym_idc(rows, cols=2):
+    """IDC header lib_symbol. rows=17→34-pin, rows=20→40-pin, rows=12→24-pin."""
+    name = f"Connector_IDC:IDC-Header_{cols}x{rows:02d}_P2.54mm_Vertical"
+    return _connector_sym(name, rows, cols)
+
+
+def sym_pin_header(rows, cols=2):
+    """PinHeader stacking header lib_symbol. rows=20→40-pin (2×20)."""
+    name = f"Connector_PinHeader_2.54mm:PinHeader_{cols}x{rows:02d}_P2.54mm_Vertical"
+    return _connector_sym(name, rows, cols)
 
 
 # ---------------------------------------------------------------------------
@@ -656,3 +667,71 @@ def place_idc24(ref, value, net_map, col, row_y):
 def place_idc16(ref, value, net_map, col, row_y):
     """16-pin IDC (Eurorack power header)."""
     _place_idc(8, ref, value, net_map, col, row_y)
+
+
+# ---------------------------------------------------------------------------
+# PinHeader stacking header placement (Utility ↔ Audio board)
+# ---------------------------------------------------------------------------
+
+def _place_pin_header(rows, ref, value, net_map, col, row_y):
+    ox, oy = col * 20.0, row_y
+    cols = 2
+    lib_id = f"Connector_PinHeader_2.54mm:PinHeader_{cols}x{rows:02d}_P2.54mm_Vertical"
+    place_symbol(lib_id, ref, value, ox, oy)
+    pins = idc_pins(ox, oy, rows)   # same geometry as IDC
+    for pin, net in net_map.items():
+        if net:
+            connect_pin(net, *pins[str(pin)], shape="passive")
+
+
+def place_pin_header40(ref, value, net_map, col, row_y):
+    """40-pin stacking header (2×20) — STK_AUDIO_L / STK_AUDIO_R."""
+    _place_pin_header(20, ref, value, net_map, col, row_y)
+
+
+# ---------------------------------------------------------------------------
+# THAT340 and CD4053 pin coordinate helpers
+# ---------------------------------------------------------------------------
+
+def that340_pins(ox, oy):
+    """THAT340 SOIC-16 connection-point coords. Matches sym_that340() geometry."""
+    return {
+        "1":  (ox - 11.43, oy + 8.89),   # B1
+        "2":  (ox + 11.43, oy + 8.89),   # C1
+        "3":  (ox + 11.43, oy + 6.35),   # E1
+        "4":  (ox - 11.43, oy + 6.35),   # SUB
+        "5":  (ox - 11.43, oy + 3.81),   # B3
+        "6":  (ox + 11.43, oy + 3.81),   # C3
+        "7":  (ox + 11.43, oy + 1.27),   # E3
+        "8":  (ox - 11.43, oy + 1.27),   # SUB
+        "9":  (ox - 11.43, oy - 1.27),   # SUB
+        "10": (ox + 11.43, oy - 1.27),   # E4
+        "11": (ox + 11.43, oy - 3.81),   # C4
+        "12": (ox - 11.43, oy - 3.81),   # B4
+        "13": (ox - 11.43, oy - 6.35),   # SUB
+        "14": (ox + 11.43, oy - 6.35),   # E2
+        "15": (ox + 11.43, oy - 8.89),   # C2
+        "16": (ox - 11.43, oy - 8.89),   # B2
+    }
+
+
+def cd4053_pins(ox, oy):
+    """CD4053 SOIC-16 connection-point coords. Matches sym_cd4053() geometry."""
+    return {
+        "11": (ox - 8.89, oy + 6.35),   # A
+        "10": (ox - 8.89, oy + 3.81),   # B
+        "9":  (ox - 8.89, oy + 1.27),   # C
+        "6":  (ox - 8.89, oy - 1.27),   # INH
+        "16": (ox - 8.89, oy - 3.81),   # VDD
+        "8":  (ox - 8.89, oy - 6.35),   # VSS
+        "7":  (ox + 8.89, oy - 6.35),   # VEE
+        "14": (ox + 8.89, oy + 6.35),   # X_A
+        "13": (ox + 8.89, oy + 5.08),   # X0_A
+        "15": (ox + 8.89, oy + 3.81),   # X1_A
+        "2":  (ox + 8.89, oy + 1.27),   # X_B
+        "1":  (ox + 8.89, oy + 0.00),   # X0_B
+        "3":  (ox + 8.89, oy - 1.27),   # X1_B
+        "5":  (ox + 8.89, oy - 3.81),   # X_C
+        "4":  (ox + 8.89, oy - 5.08),   # X0_C
+        "12": (ox + 8.89, oy - 6.35),   # X1_C
+    }

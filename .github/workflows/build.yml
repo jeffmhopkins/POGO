@@ -149,8 +149,14 @@ jobs:
       - name: Generate control board schematic
         run: python3 kicad/generate_control_board.py
 
-      - name: Validate schematic (9 checks, 326 pin assignments)
+      - name: Validate control board (9 checks, 326 pin assignments)
         run: python3 kicad/validate_schematic.py kicad/pogo-control-board.kicad_sch
+
+      - name: Generate utility board schematic
+        run: python3 kicad/generate_utility_board.py
+
+      - name: Validate utility board (7 checks, 477 coordinate-verified pin assignments)
+        run: python3 kicad/validate_utility_board.py kicad/pogo-utility-board.kicad_sch
 
       - name: Upload schematic artifact
         uses: actions/upload-artifact@v7
