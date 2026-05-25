@@ -37,28 +37,32 @@ True stereo: independent L and R buffer circuits.
 `H(s) = 1`  — unity gain, all frequencies, flat phase response.
 
 Op-amp configured as a voltage follower (non-inverting, gain = 1):
-`V_out = V_in` over the full audio range (DC to 100 kHz with TL072, GBW = 3 MHz)
+`V_out = V_in` over the full audio range (DC to 100 kHz, GBW = 55 MHz for LM4562)
 
 ### Frequency Response
-Flat from DC to ~100 kHz (−3 dB at GBW/1 ≈ 3 MHz for TL072 at unity gain). Audio band
+Flat from DC to ~100 kHz (−3 dB at GBW/1 ≈ 55 MHz for LM4562 at unity gain). Audio band
 (20 Hz – 20 kHz) is essentially perfect.
 
 ### Nonlinearity
 None intended. Input is clamped to ±12 V before the op-amp; op-amp output swings to within ~1.5 V
-of the ±12 V rails (TL072 output: ±10.5 V typical on ±12 V supply). Signals above ~±10.5 V
+of the ±12 V rails (LM4562 output: ±11 V typical on ±12 V supply). Signals above ~±11 V
 will be clipped by the op-amp — acceptable, as Eurorack signals should not exceed ±5 V.
 
 ### Known Analog Imperfections
-- TL072 input offset voltage: ~3 mV typical → negligible DC offset at output
-- TL072 noise: 18 nV/√Hz — acceptable for a signal that will be heavily processed downstream
+- LM4562 input offset voltage: ~0.1 mV typical → negligible DC offset at output
+- LM4562 noise: 2.7 nV/√Hz — 6.7× quieter than TL072; sets the noise floor for all downstream
+  processing. At 20 kHz bandwidth: 0.38 µV_rms input-referred noise at output.
+  Original TL072 (18 nV/√Hz) was replaced here because Block A is the first active stage —
+  any noise added here is amplified by Block 1 boost (5×) and processed by all downstream blocks.
+  See specs/shared/noise-audit.md issue H1.
 
 ---
 
 ## Phase 3: Circuit Design
 
 ### Topology
-Non-inverting op-amp voltage follower. One half of a TL072 (SOIC-8) per input channel.
-Two inputs (L + R) fit on a single TL072. See `specs/shared/cv-input-protection.md` for the
+Non-inverting op-amp voltage follower. One half of an LM4562 (SOIC-8) per input channel.
+Two inputs (L + R) fit on a single LM4562. See `specs/shared/cv-input-protection.md` for the
 input protection network preceding each buffer.
 
 ```
@@ -79,7 +83,7 @@ Jack (R) tip
 
 | Reference | Part Number | Package | Value | Qty | Notes |
 |---|---|---|---|---|---|
-| TU1 | TL072CDT | SOIC-8 | — | 1 | Dual op-amp; one half per channel |
+| TU1 | LM4562MA | SOIC-8 | — | 1 | Dual op-amp; one half per channel. Replaces TL072CDT — 2.7 nV/√Hz vs. 18 nV/√Hz; SOIC-8 pin-compatible; ±15 V supply; GBW 55 MHz |
 | R_L_in, R_R_in | — | 0603 | 100 Ω | 2 | Series protection |
 | D_L, D_R | BAT54S | SOT-23 | — | 2 | Dual Schottky clamp; 1 per jack |
 | C_VCC, C_VEE | — | 0603 | 100 nF | 2 | Decoupling at TU1 supply pins |
@@ -88,14 +92,15 @@ Jack (R) tip
 None required for input buffers — unity gain is set by direct feedback topology.
 
 ### Power Draw Estimate
-- TL072 quiescent: ~1.4 mA per supply rail per IC
-- +12 V: ~2 mA | −12 V: ~2 mA (for L+R input buffer pair)
+- LM4562 quiescent: ~5 mA per supply rail per IC
+- +12 V: ~5 mA | −12 V: ~5 mA (for L+R input buffer pair)
 
 ### Schematic Notes (see schematic.svg)
 - Place 100 nF decoupling caps within 1 mm of TU1 supply pins (pins 4 and 8)
 - Route BAT54 clamp diodes close to the jack footprint, before the series resistor traces reach TU1
-- L and R inputs share one TL072 package; label TU1A (L) and TU1B (R)
+- L and R inputs share one LM4562 package; label TU1A (L) and TU1B (R)
 
 ### Known Circuit Challenges
-- TL072 is not rail-to-rail output; keep internal signal levels ≤ ±10 V to avoid clipping
+- LM4562 is not rail-to-rail output; keep internal signal levels ≤ ±11 V to avoid clipping
 - BAT54S SOT-23 package is polarity-sensitive — double-check cathode/anode orientation in layout
+- LM4562 quiescent current (~5 mA/rail) is higher than TL072 (~1.4 mA/rail); update power budget if needed

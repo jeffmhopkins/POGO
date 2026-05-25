@@ -99,3 +99,12 @@ None required.
 - Use Thonkiconn PJ301M-12 (or equivalent) TS jacks for all four output jacks
 - BAND OUT taps Block 5 (LP1) output node; LEFT/RIGHT tap Block 7 (HP) output node
 - All four jacks are on the top-strip subsections of the panel (see panel-notes.md)
+- **BAND OUT phase relative to main output (D3 — verify at Phase 6)**: BAND OUT taps the LP1 V_LP
+  node (OTA2 integrator output). Main LEFT/RIGHT output is the HP filter output after the HP
+  output inverting buffer (which corrects for all SVF phase inversions). Whether BAND OUT and
+  LEFT/RIGHT are in phase depends on the polarity of the LP1 OTA integrators. Confirm that both
+  outputs are in-phase with the module input at Phase 6 VCV Rack verification (inject sine at
+  input; check BAND OUT and LEFT OUT with oscilloscope or phase measurement tool). See
+  noise-audit.md D3. If BAND OUT is inverted relative to expected, add an inverting unity-gain
+  buffer (G = −1, one TL072 half) before the BAND OUT jack without adding a new IC (use spare
+  TL072 half from Block B). Do not apply this fix speculatively — verify first.

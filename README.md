@@ -91,9 +91,18 @@ POGO/
 │   ├── module-overview.md    ← Full signal chain and power budget
 │   ├── mod-architecture.md   ← Modulation system spec
 │   ├── panel-design/         ← Phase 4: 40 HP panel layout
+│   │   └── panel.svg         ← Authoritative panel layout SVG
 │   ├── board-layout/         ← Phase 5: 4-board split, connector pinouts
+│   │   └── layout-notes.md   ← Full CN_CTRL_1/2/3 and CN_UTIL_L/R pinouts
 │   ├── block-*/spec.md       ← Per-block specifications (Phases 1–3)
 │   └── shared/               ← Reusable circuit standards (CV protection, power)
+├── kicad/                    ← KiCad 7 schematic generation (board design system)
+│   ├── kicad_common.py       ← Shared generator infrastructure (all 4 boards)
+│   ├── generate_control_board.py  ← Control board generator script
+│   ├── validate_schematic.py ← Structural validator (kiutils-based)
+│   ├── pogo-control-board.kicad_sch  ← Generated control board schematic
+│   ├── pogo.kicad_pro        ← KiCad 7 project file
+│   └── kicad-process.md      ← (see specs/kicad-process.md) generation workflow
 ├── design/                   ← HTML design documents (one per block)
 ├── src/                      ← VCV Rack plugin source (Phase 6)
 │   ├── plugin.hpp / plugin.cpp
@@ -106,6 +115,112 @@ POGO/
 ├── plugin.json
 └── Makefile
 ```
+
+---
+
+## KiCad Schematic Generation
+
+All EDA files are generated from the specs — no hand-drawn schematics. Each board has a
+Python generator script in `kicad/` that emits a valid KiCad 7 `.kicad_sch` file; the script
+is the authoritative source and the `.kicad_sch` is the artifact.
+
+### Board order
+
+| Board | Generator | Status | Notes |
+|---|---|---|---|
+| Control board | `generate_control_board.py` | ✅ Complete | Jacks, pots, switches, IDC connectors |
+| Utility board | `generate_utility_board.py` | ⬜ Next | Mod bus, attenuverters, THAT340 expo converters |
+| Left audio board | `generate_audio_left.py` | ⬜ | All analog ICs (LM13700, THAT2180, etc.) |
+| Right audio board | `generate_audio_right.py` | ⬜ | Mirror of left |
+
+### Running the control board generator
+
+```bash
+cd kicad
+python3 generate_control_board.py
+# → writes pogo-control-board.kicad_sch
+# → automatically runs validate_schematic.py and prints a pass/fail report
+```
+
+The generated schematic contains **78 components** — 28 jacks, 43 pots/sliders, 4 switches,
+and 3 IDC connectors (CN1 34-pin, CN2 40-pin, CN3 24-pin) — connected entirely via global
+net labels (no drawn wires). Three nets are intentionally single-occurrence:
+`SPARE_CN2_28`, `SPARE_CN2_40`, `SPARE_CN3_24`.
+
+### Validating a schematic
+
+`validate_schematic.py` parses the generated `.kicad_sch` using
+[kiutils](https://github.com/mvnmgrx/kiutils) and runs nine checks, verifying 326 individual
+pin assignments:
+
+| Check | What it catches |
+|---|---|
+| Component counts | Wrong number of J / RV / SW / CN components |
+| Duplicate refs | Two symbols claiming the same reference designator |
+| Floating nets | Single-occurrence global labels (unexpected unconnected nets) |
+| Required nets | Missing signal, wiper, CV, switch, or power nets by name |
+| MODBUS_NORM count | Must appear exactly 20× (19 SW lugs + 1 CN2 pin) |
+| Jack pin assignments | Tip / sleeve / SW-lug net per J1–J28 |
+| Pot pin assignments | CCW / wiper / CW net per RV1–RV43 |
+| Switch pin assignments | All throws and common per SW1–SW4 |
+| Connector pinouts (CN1/2/3) | All 34+40+24 = 98 connector pins vs. layout-notes.md §5 |
+
+```bash
+# Run standalone (requires: pip3 install kiutils)
+cd kicad
+python3 validate_schematic.py
+# or against any schematic:
+python3 validate_schematic.py path/to/other.kicad_sch
+```
+
+The validator exits 0 on pass, 1 on any error — suitable for CI. The generator calls it
+automatically, so a broken generator change fails immediately.
+
+**What this does not cover:** ERC pin-type conflicts, short circuits between power rails, and
+missing power pin connections on ICs. For those, open the schematic in KiCad 7 and run
+`Tools → Electrical Rules Checker`. Expected ERC output: three "pin unconnected" warnings
+for the intentional spare pins — nothing else.
+
+### Shared infrastructure (`kicad_common.py`)
+
+`kicad_common.py` is imported by every board generator. It provides:
+
+- **`begin_schematic()` / `end_schematic()` / `write_schematic()`** — file skeleton and output
+- **`sym_power()` / `sym_idc()` / `sym_rpot()` / `sym_r()` / `sym_c()`** — passive lib symbols
+- **`sym_tl072()` / `sym_lm4562()` / `sym_ne5532()` / `sym_tl074()`** — op-amp lib symbols
+- **`sym_lm13700()` / `sym_that340()` / `sym_that2180()` / `sym_cd4053()`** — IC lib symbols
+- **`*_pins(ox, oy)`** — pin coordinate helpers for every component type
+- **`place_symbol()` / `connect_pin()` / `power_sym()` / `global_label()`** — emitters
+- **`place_idc34/40/24/16()`** — IDC connector placement with net map
+
+### Connector architecture
+
+```
+Control board ──CN1 (34-pin)──► Utility board   power rails + audio I/O + 19 CV jack tips
+              ──CN2 (40-pin)──►                  attenuverter wipers + switch outputs
+              ──CN3 (24-pin)──►                  main parameter wipers (FREQ/FB/DRIVE/filter Qs)
+```
+
+Key design decisions captured in the schematic:
+
+- **`NET_MODBUS_NORM`**: All 19 CV override jack switch lugs are wired together on the
+  control board PCB to a single net. The utility board drives this net (post-AMOUNT/OFFSET
+  mod bus output) via CN2 pin 39 — one connector pin instead of 19.
+- **`NET_ENV_NORM`**: MOD IN jack SW lug is driven by the utility board's selected ENV output
+  (CN2 pin 38) so the mod source normalizes to the envelope when no cable is plugged.
+- **Switch commons**: SP3T and SPDT switch commons tie directly to +12V power symbols on the
+  control board (no connector pin). Only position outputs and the GAIN common go to CN2.
+
+### Importing into Flux.ai
+
+1. In Flux.ai: **File → Import → KiCad 7 Schematic**
+2. Select `kicad/pogo-control-board.kicad_sch`
+3. Standard parts (R_POT, AudioJack, SW_SPDT, SW_SP3T) auto-match; IDC connectors may need
+   manual assignment from Nexar/Octopart search within Flux
+4. Net names are preserved exactly as generated
+
+See `specs/kicad-process.md` for the full generation methodology, ERC validation steps,
+and the template for the remaining three board generators.
 
 ---
 
@@ -179,7 +294,7 @@ Key design decisions documented:
 
 POGO is designed for hardware construction after the VCV Rack prototype validates the DSP.
 Circuit specs:
-- **ICs**: LM13700 OTA (15 per audio board), THAT 2180 VCA, THAT340 expo converters, TL072/TL074 op-amps
+- **ICs**: LM13700 OTA (15 per audio board), THAT 2180 VCA, THAT340 expo converters, LM4562 (Block A), NE5532 (Block 1), TL072/TL074 op-amps
 - **Power**: ±12 V Eurorack, ~167 mA per rail
 - **Format**: 40 HP, 3U, 4-PCB split
 - **CV protection**: 100 Ω series + BAT54S clamp on every input jack (see `specs/shared/cv-input-protection.md`)

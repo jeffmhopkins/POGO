@@ -433,40 +433,12 @@ Last updated: YYYY-MM-DD
 
 ## Modulation Architecture
 
-### Envelope Follower (Block 2)
+Full Phase 1–3 specification: `specs/mod-architecture.md` (transfer functions, circuit
+topology, IC selection, trim pots).
 
-Source: post-gain / pre-comb audio — **two independent followers, one per channel**
-
-**Audio spec:**
-- Converts audio amplitude to a 0–10 V CV signal
-- ATTACK: 0.1 ms – 200 ms (shared knob for L and R)
-- RELEASE: 5 ms – 2 s (shared knob for L and R)
-- ENV OUT L jack: buffered left-channel envelope (0–10 V)
-- ENV OUT R jack: buffered right-channel envelope (0–10 V)
-- MOD SOURCE SEL switch (3-position): selects which envelope normalizes into the mod bus
-  - L = ENV OUT L only
-  - max(L,R) = diode-OR (**BAT54C**, common-cathode SOT-23) of both envelopes, buffered — tracks louder channel
-  - avg(L,R) = (ENV_L + ENV_R) / 2 via equal resistor divider into unity-gain buffer
-
-**Analog behavior:**
-- Full-wave precision rectifier → RC peak detector (separate attack/release diode paths)
-- τ_attack = ATTACK knob value; τ_release = RELEASE knob value
-- Output amplifier scales rectified peak to 0–10 V
-
-**Circuit:**
-- Full-wave precision rectifier: TL074 + 1N4148WS diodes (one TL074 per channel)
-- Attack RC via charge diode; release RC via discharge diode (independent time constants)
-- Trim pots: ENV SCALE L and ENV SCALE R (0 V = silence, 10 V = full-scale ±5 V Eurorack audio)
-
-### Mod Bus Processor
-
-- PRIMARY MOD SOURCE jack normalizes to the ENV selected by MOD SOURCE SEL when unplugged
-- AMOUNT knob: 0.2× – 5× gain
-- OFFSET knob: ±5 V added after scaling
-- Circuit: inverting summer op-amp (scaled mod signal + offset pot) + inverter
-- Trim pot: zero-offset null (output = 0 V when AMOUNT = center and input = 0 V)
-
-### Per-Destination Modulation Circuit
+**Summary:** Block 2 (envelope follower) produces a 0–10 V signal that normalizes into the mod
+bus. The mod bus processor scales it (AMOUNT 0.2×–5×) and adds a DC offset (OFFSET ±5 V). Each
+of 19 destinations receives the mod bus through an override jack and attenuverter (−1× to +1×):
 
 ```
 MOD BUS  →  100Ω + BAT54 clamp  →  ATTENUVERTER (−1× to +1×)  →  parameter CV summing node
@@ -785,8 +757,9 @@ Docker image.
 
 ## Where to Start
 
-**Current project state (as of 2026-05-20): Phases 1–5 are complete. Phase 6 (VCV Rack code)
-is the next and only remaining step.**
+**Current project state (as of 2026-05-25): Phases 1–5 are complete, including a noise &
+inter-block connection audit (2026-05-24 — see `specs/shared/noise-audit.md`). Phase 6
+(VCV Rack code) is the next and only remaining step.**
 
 1. Read `specs/STATUS.md` to confirm all blocks show ✅ for Phases 1–3 and Phase 4/5 are ✅.
 2. Begin Phase 6 implementation in signal-chain order:

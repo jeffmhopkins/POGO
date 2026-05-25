@@ -42,8 +42,10 @@ share the same gain state at all times. True stereo signal path (independent op-
 - At 5× gain with a full-scale ±5 V input: theoretical output ±25 V, clamped to ~±10.5 V by
   op-amp output swing limits. This soft saturation is a feature, not a bug — it adds harmonic
   content before the comb filter.
-- Signal near silence: 5× of near-zero is still near-zero. No noise floor amplification concern
-  given TL072's input noise floor.
+- Signal near silence in boost mode: NE5532 noise (5 nV/√Hz) × 5× gain = 25 nV/√Hz at Block 1
+  output — equivalent input-referred noise is 5 nV/√Hz, lower than any downstream stage. The
+  noise floor contribution of Block 1 boost is dominated by Block A's LM4562 output (2.7 nV/√Hz
+  amplified 5× = 13.5 nV/√Hz) summed in quadrature. See noise-audit.md issue H7.
 
 ---
 
@@ -122,7 +124,7 @@ and the R_f/R_in network (G=5). Use a 2PDT toggle: one pole for L, one pole for 
 
 | Reference | Part Number | Package | Value | Qty | Notes |
 |---|---|---|---|---|---|
-| TG1 | TL072CDT | SOIC-8 | — | 1 | Dual op-amp: TG1A = L channel, TG1B = R channel |
+| TG1 | NE5532D | SOIC-8 | — | 1 | Dual op-amp: TG1A = L channel, TG1B = R channel. Replaces TL072CDT — 5 nV/√Hz vs. 18 nV/√Hz; SOIC-8 pin-compatible; ±15 V supply; GBW 10 MHz; 25 nV/√Hz at Block 1 output in 5× boost (vs. 90 nV/√Hz for TL072) |
 | R_f | — | 0603 | 40.2 kΩ | 2 | Feedback resistor (E96 value closest to 40 kΩ) |
 | R_in | — | 0603 | 10.0 kΩ | 2 | Input resistor (1% tolerance) |
 | SW1 | 2PDT sub-mini toggle | Panel mount | — | 1 | Horizontal mount; 2-pole (L and R switched simultaneously); 1× / 5× labels below switch body |
@@ -155,3 +157,7 @@ series combination of 9.1 kΩ fixed + 2 kΩ trim pot (Bourns 3224W).
 - 2PDT toggle must switch cleanly with no intermediate floating state between positions;
   use a break-before-make or make-before-break toggle (either acceptable here since the gain
   stages are not sensitive to momentary float during switching)
+- **Noise in boost mode (5×)**: NE5532 (5 nV/√Hz) × 5 = 25 nV/√Hz at Block 1 output in boost.
+  Combined with Block A LM4562 noise (2.7 nV/√Hz × 5 = 13.5 nV/√Hz), total input-referred noise
+  ≈ √(25² + 13.5²) ≈ 28 nV/√Hz. At 20 kHz BW: ~4 µV_rms noise floor in boost mode — accepted
+  design tradeoff. See specs/shared/noise-audit.md issue H7.

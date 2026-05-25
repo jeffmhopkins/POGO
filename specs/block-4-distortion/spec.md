@@ -31,9 +31,9 @@ drive resonance feedback at any blend ratio from 0% (clean APF feedback) to 100%
 | MODE 1 | Switch: SC / HC / WF | SC | N/A | Distortion type for APF Group 1: Soft Clip / Hard Clip / Wavefold |
 | MODE 2 | Switch: SC / HC / WF | SC | N/A | Distortion type for APF Group 2 |
 | MODE 3 | Switch: SC / HC / WF | SC | N/A | Distortion type for APF Group 3 |
-| DRIVE 1 | 0% (mute) – 100% (full distortion) | ~20% (9am = unity/clean) | Linear (dual-zone: 0–20% = volume, 20–100% = distortion drive) | CCW = mute; 9am = unity gain, no distortion; CW = full drive for Group 1 |
-| DRIVE 2 | 0% (mute) – 100% (full distortion) | ~20% (9am = unity/clean) | Linear (dual-zone: 0–20% = volume, 20–100% = distortion drive) | Same as DRIVE 1 for Group 2 |
-| DRIVE 3 | 0% (mute) – 100% (full distortion) | ~20% (9am = unity/clean) | Linear (dual-zone: 0–20% = volume, 20–100% = distortion drive) | Same as DRIVE 1 for Group 3 |
+| DRIVE 1 | 0% (mute) – 100% (full distortion) | ~20% (9am = unity/clean) | Linear (dual-zone: 0–20% = volume, 20–100% = distortion drive) | CCW = mute; 9am = unity/clean; CW = full drive; applies equally to L and R |
+| DRIVE 2 | 0% (mute) – 100% (full distortion) | ~20% (9am = unity/clean) | Linear (dual-zone: 0–20% = volume, 20–100% = distortion drive) | Same as DRIVE 1 for Group 2; applies equally to L and R |
+| DRIVE 3 | 0% (mute) – 100% (full distortion) | ~20% (9am = unity/clean) | Linear (dual-zone: 0–20% = volume, 20–100% = distortion drive) | Same as DRIVE 1 for Group 3; applies equally to L and R |
 
 ### CV Modulation Targets
 
@@ -63,15 +63,16 @@ APF Group 3 (L+R) ──► [Distortion Chain 3: MODE 3, DRIVE 3] ──► DST3
 Each chain's output is also tapped and routed to Block 3's FB DIST BLEND crossfade circuit for that group.
 
 ### Edge Cases
-- DRIVE CCW (0%): output is muted; that formant group is silenced completely.
-- DRIVE at 9am (~20%): output is unity gain; signal passes clean with no distortion applied,
-  all three modes behave identically (clean pass-through at this level).
-- DRIVE just above 9am: distortion onset; gentle saturation begins.
+- DRIVE CCW (0%) = mute: chain output is silenced. Useful for gating individual formant bands.
+- DRIVE at 9am (~20% rotation) = unity gain, all modes: signal passes clean at 1:1. This is
+  the default/bypass position for distortion — gain is set, no clipping occurs in any mode.
+- DRIVE above 9am = distortion onset: the drive factor increases from 0 toward full distortion
+  as DRIVE sweeps from 20% to 100%.
 - All three chains at DRIVE 100%: combined sum can exceed ±10 V; attenuate in the summing
   amp (gain ≈ 0.5 per chain into the sum) to keep combined output within ±10 V headroom.
 - MODE switching live: brief click possible from mechanical switching. Accepted behavior.
-- Mix use: set two groups at 9am (unity) and one group to CW for selective formant distortion
-  without losing level on the clean groups.
+- One chain's DRIVE at 9am: that group passes through clean; other two may be distorted.
+  Useful for selectively distorting high or low formants while preserving the other.
 
 ---
 
@@ -79,26 +80,28 @@ Each chain's output is also tapped and routed to Block 3's FB DIST BLEND crossfa
 
 ### Two-Zone Drive Mapping (all modes)
 
-The DRIVE knob operates in two zones defined by the unity point at 20% rotation (9am):
+The DRIVE knob uses a linear taper with a dual-zone behavior derived from the pot wiper position
+`p` (0.0 = CCW, 1.0 = CW):
 
 ```
-Zone 1 — Volume (param ≤ 0.20):
-  out = in × (param / 0.20)
-  Linear attenuation from mute (0.0) to unity (0.20).
-  No distortion. All three modes produce identical clean output.
-
-Zone 2 — Distortion (param > 0.20):
-  d = (param − 0.20) / 0.80      ← normalized drive factor, 0 → 1
-  Applies the per-mode transfer function below with drive factor d.
-  Unity gain at d = 0; full drive at d = 1.
-
-CV note: 0–10 V range; 0 V = mute, 2 V = unity (9am), 10 V = full drive.
+p ≤ 0.20:  out = in × (p / 0.20)           ← volume zone; no distortion, gain 0→1×
+p > 0.20:  d = (p − 0.20) / 0.80           ← distortion zone; d sweeps 0→1
+           apply mode transfer function with drive factor mapped from d
 ```
 
-Hardware implementation: DRIVE controls R_in in the inverting op-amp topology (gain = R_f / R_in).
-Unity gain occurs when R_in = R_f = 10 kΩ (at 20% of 50 kΩ linear pot).
-At CCW, R_in → 50 kΩ + R_min_series → gain → R_f / 50 kΩ ≈ 0 → mute.
-At CW, R_in → R_min_series (≈ 470 Ω) → gain ≈ R_f / R_min ≈ 21× → full drive.
+At p = 0.20 (9am): volume zone ceiling meets distortion zone floor. Unity gain, no clipping in
+any mode. This is the mechanical zero-distortion point.
+
+CV note: 0V = mute (p=0), 2V = unity/clean (p=0.20 = 9am), 10V = full drive (p=1.0).
+CV interpretation: p = V_cv / 10.0, then apply two-zone formula above.
+
+Hardware: gain = R_f / R_in; unity when R_in = R_f = 10 kΩ (at 20% of 50 kΩ linear pot).
+R_min_series ≈ 470 Ω (prevents ∞ gain at CW); max gain ≈ 21×.
+
+Drive factor per mode at p > 0.20 (d = (p − 0.20) / 0.80 → 0 to 1):
+- Soft Clip: `drive_sc = exp(d × k_sc)` (k_sc ≈ 4; retains smoothly increasing saturation)
+- Hard Clip: `drive_hc = 1 + d × 4` (d=0 → 1×, d=1 → 5×; linear gain into zener clamp)
+- Wavefold: `drive_wf = 1 + d × 4` (same linear scale; fold threshold constant, gain varies)
 
 ### Mode 1: Soft Clip Transfer Function
 
@@ -234,19 +237,18 @@ Same configuration for R channel using second TL072 or second half of the SUM_AM
 
 ### Component Value Derivations (DRIVE pot unity calibration)
 
-Unity gain condition: R_f = R_in at 9am (20% rotation of a 50 kΩ linear pot).
-- 20% of 50 kΩ = 10 kΩ → R_f = 10 kΩ for all three sub-circuits (SC R_f, HC R_f, WF input-gain resistor)
-- R_min_series at wiper low end (prevents ∞ gain at full CW): R_min ≈ 470 Ω
-  → max gain = 10 kΩ / 470 Ω ≈ 21× (full drive factor for all modes)
-- Pot resistance at CCW = 50 kΩ → gain = 10 kΩ / 50 kΩ = 0.2 (−14 dB; not absolute mute,
-  but effectively inaudible at this level; trim pot RV_WF_GAIN can bring to true zero if needed)
+Unity gain at 9am requires 20% of the pot's full resistance at the wiper:
+- 20% of 50 kΩ linear pot = 10 kΩ → R_f = 10 kΩ for all three sub-circuits (SC, HC, WF)
+- R_min (series resistor preventing ∞ gain at full CW) ≈ 470 Ω → max gain ≈ 21×
+- R_f derivation check: R_f / R_wiper_at_unity = 10k / 10k = 1× = 0 dB at 9am ✓
+- At full CW: gain = R_f / R_min = 10k / 470Ω ≈ 21× — well into hard saturation for all modes
 
 ### Trim Pots
 
 | Reference | Range | Purpose | Adjustment |
 |---|---|---|---|
 | RV_HC_THRESH_N (×3) | ±1 V | Hard clip threshold per chain | Adjust until symmetrical clip at ±5 V |
-| RV_WF_GAIN_N (×3) | ×0.8–×1.2 | Unity-point calibration; wavefold onset above 9am | Trim so fold onset begins at DRIVE ≈ 25% (just above 9am); verify clean unity at DRIVE = 20% |
+| RV_WF_GAIN_N (×3) | ×0.8–×1.2 | Unity-point calibration: wavefold onset cleanly above 9am | Fold onset at DRIVE ≈ 25% — clean pass-through from CCW to just above 9am |
 
 ### Power Draw Estimate
 - 6× TL072 + 4× TL074 + 3× CD4053: ~25 mA

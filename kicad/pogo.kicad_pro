@@ -1,0 +1,47 @@
+(kicad_pro
+  (version 1)
+  (generator "pcbnew")
+  (generator_version "7.0")
+  (meta
+    (filename "pogo.kicad_pro")
+  )
+  (schematic
+    (meta
+      (filename "pogo-control-board.kicad_sch")
+    )
+  )
+  (pcb
+    (meta
+      (filename "")
+    )
+  )
+  (libraries
+    (pinned_symbol_libs)
+    (pinned_footprint_libs)
+  )
+  (net_settings
+    (classes
+      (class "Default"
+        (clearance 0.2)
+        (track_width 0.25)
+        (diff_pair_width 0.2)
+        (diff_pair_gap 0.25)
+        (wire_width 6)
+        (bus_width 12)
+        (line_style 0)
+        (pcb_color "rgba(0, 0, 0, 0.000)")
+        (schematic_color "rgba(0, 0, 0, 0.000)")
+      )
+    )
+  )
+  (schematic_settings
+    (defaults
+      (apply_sim_defaults_to_all_nets no)
+      (junction_size_choice 3)
+      (power_symbol_size 1.27)
+    )
+    (drawing
+      (junction_size 1.0160)
+    )
+  )
+)
