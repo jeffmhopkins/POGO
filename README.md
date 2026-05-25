@@ -150,7 +150,8 @@ net labels (no drawn wires). Three nets are intentionally single-occurrence:
 ### Validating a schematic
 
 `validate_schematic.py` parses the generated `.kicad_sch` using
-[kiutils](https://github.com/mvnmgrx/kiutils) and runs five structural checks:
+[kiutils](https://github.com/mvnmgrx/kiutils) and runs nine checks, verifying 326 individual
+pin assignments:
 
 | Check | What it catches |
 |---|---|
@@ -159,6 +160,10 @@ net labels (no drawn wires). Three nets are intentionally single-occurrence:
 | Floating nets | Single-occurrence global labels (unexpected unconnected nets) |
 | Required nets | Missing signal, wiper, CV, switch, or power nets by name |
 | MODBUS_NORM count | Must appear exactly 20× (19 SW lugs + 1 CN2 pin) |
+| Jack pin assignments | Tip / sleeve / SW-lug net per J1–J28 |
+| Pot pin assignments | CCW / wiper / CW net per RV1–RV43 |
+| Switch pin assignments | All throws and common per SW1–SW4 |
+| Connector pinouts (CN1/2/3) | All 34+40+24 = 98 connector pins vs. layout-notes.md §5 |
 
 ```bash
 # Run standalone (requires: pip3 install kiutils)
@@ -289,7 +294,7 @@ Key design decisions documented:
 
 POGO is designed for hardware construction after the VCV Rack prototype validates the DSP.
 Circuit specs:
-- **ICs**: LM13700 OTA (15 per audio board), THAT 2180 VCA, THAT340 expo converters, TL072/TL074 op-amps
+- **ICs**: LM13700 OTA (15 per audio board), THAT 2180 VCA, THAT340 expo converters, LM4562 (Block A), NE5532 (Block 1), TL072/TL074 op-amps
 - **Power**: ±12 V Eurorack, ~167 mA per rail
 - **Format**: 40 HP, 3U, 4-PCB split
 - **CV protection**: 100 Ω series + BAT54S clamp on every input jack (see `specs/shared/cv-input-protection.md`)

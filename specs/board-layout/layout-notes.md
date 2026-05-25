@@ -267,7 +267,7 @@ fit in CN_CTRL_1 or CN_CTRL_2. These are the "raw" panel position signals for th
 processing parameters; the utility board and audio boards use them to set filter cutoff,
 feedback depth, etc.
 
-**Status: pinout placeholder — must be finalized before PCB layout.**
+**Status: finalized — implemented in `kicad/pogo-control-board.kicad_sch` and verified by `kicad/validate_schematic.py` checks 9–11 (CN3 pinout, 24 pin assignments).**
 
 | Pins | Signal | Direction | Notes |
 |---|---|---|---|

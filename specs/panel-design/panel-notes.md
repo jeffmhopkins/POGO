@@ -360,8 +360,10 @@ Gray horizontal divider (COMB/DIST boundary in CONTROL zone): y ≈ 74 mm, x = 2
 
 ---
 
-## Open Questions
+## Deferred to Manufacturing Phase
+
+These do not block Phase 6 (VCV Rack DSP validation precedes hardware manufacturing decisions).
 
 - Exact slider part selection (ALPS RS4515N or equivalent) — confirm travel and PCB footprint
-- Silk-screen font for manufacturing files — TBD
-- Panel material and finish — TBD (FR4 with white silk-screen vs anodized aluminum)
+- Silk-screen font for manufacturing files
+- Panel material and finish (FR4 with white silk-screen vs. anodized aluminum)

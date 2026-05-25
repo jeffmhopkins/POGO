@@ -82,17 +82,21 @@ Destinations (19 total):
 |---|---|---|
 | Block A: Input buffers | 5 mA | 5 mA |
 | Block 1: Pre-Gain | 5 mA | 5 mA |
-| Block 2: Envelope Follower | 10 mA | 10 mA |
+| Block 2: Envelope Follower | 12 mA | 12 mA |
 | Block 3: Triple APF Comb | 25 mA | 25 mA |
-| Block 4: Distortion | 15 mA | 15 mA |
-| Block VCA (pre-LP1) | 2 mA | 2 mA |
+| Block 4: Distortion | 25 mA | 25 mA |
+| Block VCA: Pre-LP1 VCA | 5 mA | 5 mA |
 | Block 5: LP Filter 1 | 15 mA | 15 mA |
 | Block 6: LP Filter 2 | 15 mA | 15 mA |
 | Block 7: HP Filter | 10 mA | 10 mA |
-| Mod Bus Processor | 10 mA | 10 mA |
-| Per-destination mod circuits (×15) | 32 mA | 32 mA |
-| Block B: Output buffers | 4 mA | 4 mA |
-| **Total estimate** | **~148 mA** | **~148 mA** |
+| Mod Bus Processor | 5 mA | 5 mA |
+| Per-destination mod (×19 attenuverters) | 40 mA | 40 mA |
+| Block B: Output buffers | 5 mA | 5 mA |
+| **Total estimate** | **~167 mA** | **~167 mA** |
+
+Board-level view by PCB (utility + both audio boards, different aggregation): see
+`specs/board-layout/layout-notes.md` §11 (~195 mA — utility board overhead accounts for
+the difference).
 
 ## Eurorack Format
 

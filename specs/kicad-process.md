@@ -123,28 +123,15 @@ CN1 = CN_CTRL_1 (34-pin); CN2 = CN_CTRL_2 (40-pin); CN3 = CN_CTRL_3 (24-pin plac
 
 ---
 
-## Known Gaps (to resolve before PCB layout)
+## Design Decisions (Resolved)
 
-### CN_CTRL_3: Missing main parameter wipers
+### CN_CTRL_3: Main parameter wipers — 24-pin IDC
 
-CN_CTRL_1 (34-pin) and CN_CTRL_2 (40-pin) cover:
-- Audio I/O jacks (8 signals) + MOD IN tip (CN1 pin 34)
-- 19 override CV jack tips
-- 19 attenuverter wipers (CN2 pins 9–27), VCA AMT is destination #4 (pin 12); CN2 pin 28 is SPARE
-- GAIN switch common (CN2 pin 5)
-- MODE position outputs SFT/HRD/WFD (CN2 pins 6–8, 1 shared SW4 per panel.svg)
-- MOD SRC position outputs L/MAX/AVG (CN2 pins 32–34)
-- POLARITY position outputs POS/OFF/NEG (CN2 pins 35–37)
-- AMOUNT wiper, OFFSET wiper, STEREO SPREAD OFFSET wiper (CN2 pins 29–31)
-- ENV NORM return → MOD IN jack SW lug (CN2 pin 38)
-- MOD BUS NORM → all 19 CV override jack SW lugs wired together (CN2 pin 39)
+CN_CTRL_1 (34-pin) and CN_CTRL_2 (40-pin) carry audio I/O, 19 CV override jack tips, 19
+attenuverter wipers, switch position outputs, and mod bus normalling signals. The remaining
+21 main parameter pot/slider wipers that do not fit in CN_CTRL_1/2 are carried by **CN_CTRL_3**
+(24-pin IDC, 2×12 = 21 signals + 2 GND + 1 spare):
 
-**Switch common wiring on control board**: All SP3T and SPDT switch commons tie directly to
-+12V or GND on the control board (power symbols, no connector pin). Only position outputs
-and the GAIN common go through the connector. The utility board decodes which position pin
-is high to determine switch state.
-
-**Not covered** by CN_CTRL_1/2 (21 signals requiring 24-pin CN_CTRL_3):
 - ATTACK wiper, RELEASE wiper
 - COMB BYPASS wiper, WIDTH wiper, MASTER OFFSET wiper, FB DIST BLEND wiper
 - FREQ 1/2/3 wipers, FB 1/2/3 wipers, DRIVE 1/2/3 wipers
@@ -152,19 +139,24 @@ is high to determine switch state.
 - LP2 CUTOFF (slider) wiper, LP2 RESONANCE wiper
 - HP CUTOFF (slider) wiper, HP RESONANCE wiper
 
-These are assigned to **CN_CTRL_3** (24-pin IDC, 2×12 = 21 signals + 2 GND + 1 spare) in
-the generated schematic. The full pinout is documented in `layout-notes.md` §5.
+**Status: finalized.** Full 24-pin pinout: `layout-notes.md` §5. Implemented in
+`kicad/pogo-control-board.kicad_sch` (CN3). Verified by `kicad/validate_schematic.py`
+checks 9–11 (all 24 pin assignments).
+
+**Switch common wiring**: All SP3T and SPDT switch commons tie directly to +12V or GND on the
+control board (power symbols, no connector pin). Only position outputs and the GAIN common go
+through the connector. The utility board decodes which position pin is high.
 
 ### MODE switch
 
-**One shared switch (SW4)**, confirmed by `panel.svg` (single switch at cx=28 in Zone 1 DIST
-section; no per-group MODE switches in Zones 2a/2b/2c). All three comb groups always use
-the same distortion mode.
+**Decision: one shared 3-position vertical switch (SW4)** for all three distortion chains,
+confirmed by `panel.svg` (single switch at cx=28 in Zone 1 DIST section; no per-group MODE
+switches in Zones 2a/2b/2c).
 
-CN_CTRL_2 pins 6–8 carry the 3 position output nets of SW4: `NET_SW_MODE_SFT`,
-`NET_SW_MODE_HRD`, `NET_SW_MODE_WFD`. The switch common ties to +12V on the control board;
-the active position is high while the other two float (or are pulled low on the utility board).
-The utility board decodes which of the 3 is high to select the CD4053 A/B state.
+CN_CTRL_2 pins 6–8 carry SW4's three position outputs: `NET_SW_MODE_SFT`, `NET_SW_MODE_HRD`,
+`NET_SW_MODE_WFD`. The switch common ties to +12V on the control board; the active position is
+high. The utility board decodes which of the three is high to set the CD4053 A/B state for
+all three Block 4 distortion chains simultaneously.
 
 ---
 
