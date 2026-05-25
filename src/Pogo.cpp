@@ -71,7 +71,10 @@ struct PogoSwitchH3 : app::Switch {
 
 // ── Vertical slider (45 mm travel, matching LP2 / HP SVG tracks) ──────────
 struct PogoSlider : app::SliderKnob {
-	PogoSlider() { box.size = mm2px(Vec(13.f, 45.f)); }
+	PogoSlider() {
+		box.size   = mm2px(Vec(13.f, 45.f));
+		horizontal = false; // vertical fader: drag up = higher value
+	}
 
 	void draw(const DrawArgs& args) override {
 		float w = box.size.x, h = box.size.y;
@@ -527,158 +530,10 @@ struct Pogo : Module {
 
 // ─────────────────────────────────────────────────────────────────────────
 struct PogoWidget : ModuleWidget {
-	// Helper: add a centered text label. cx/baseY in mm (SVG coordinates).
-	// baseY is the SVG text baseline; we offset up by ~0.75x font size so the
-	// cap-height is centred on that row.
-	void addLabel(float cx_mm, float baseY_mm, const char* text,
-	              NVGcolor col, float sizeMm) {
-		const float W  = mm2px(50.f);
-		const float H  = mm2px(sizeMm * 1.5f);
-		auto* lbl = createWidget<ui::Label>(
-			mm2px(Vec(cx_mm - 25.f, baseY_mm - sizeMm * 0.75f))
-		);
-		lbl->box.size        = Vec(W, H);
-		lbl->text            = text;
-		lbl->color           = col;
-		lbl->fontSize        = mm2px(sizeMm);
-		lbl->alignment       = ui::Label::CENTER_ALIGNMENT;
-		addChild(lbl);
-	}
-
 	PogoWidget(Pogo* module) {
 		setModule(module);
 		setPanel(createPanel(asset::plugin(pluginInstance, "res/Pogo.svg")));
-
-		// Colour palette matching the SVG
-		const NVGcolor CYAN    = nvgRGB(0x00, 0xd4, 0xff);
-		const NVGcolor GRAY_99 = nvgRGB(0x99, 0x99, 0x99);
-		const NVGcolor GRAY_88 = nvgRGB(0x88, 0x88, 0x88);
-		const NVGcolor GRAY_77 = nvgRGB(0x77, 0x77, 0x77);
-		const NVGcolor SUBDUE  = nvgRGB(0x4a, 0x60, 0x70);
-		const NVGcolor DIMBLUE = nvgRGB(0x3d, 0x52, 0x60);
-
-		// ── Title bars ─────────────────────────────────────────────────────
-		addLabel(101.60f,   3.5f, "POGO  \xc2\xb7  STEREO TRIPLE COMB FILTER", CYAN,    3.5f);
-		addLabel(101.60f, 132.0f, "SPACE COAST SYNTHESIZERS  \xc2\xb7  SCS",   SUBDUE,  2.4f);
-
-		// ── Zone headers ───────────────────────────────────────────────────
-		addLabel( 10.16f,  9.0f, "INPUT / GAIN", CYAN, 2.4f);
-		addLabel( 10.16f, 43.5f, "ENVELOPE",     CYAN, 2.4f);
-		addLabel( 10.16f, 94.0f, "MOD BUS",      CYAN, 2.4f);
-		addLabel( 35.56f,  9.0f, "CONTROL",      CYAN, 2.4f);
-		addLabel( 66.04f,  9.0f, "COMB 1",       CYAN, 2.4f);
-		addLabel( 96.52f,  9.0f, "COMB 2",       CYAN, 2.4f);
-		addLabel(127.00f,  9.0f, "COMB 3",       CYAN, 2.4f);
-		addLabel(152.40f,  9.0f, "VCA",          CYAN, 2.4f);
-		addLabel(152.40f, 33.0f, "LP 1",         CYAN, 2.4f);
-		addLabel(172.72f,  9.0f, "BAND OUT",     CYAN, 2.4f);
-		addLabel(193.04f,  9.0f, "OUT",          CYAN, 2.4f);
-		addLabel(172.72f, 33.0f, "LP 2",         CYAN, 2.4f);
-		addLabel(193.04f, 33.0f, "HP",           CYAN, 2.4f);
-
-		// Comb frequency-range subtitles
-		addLabel( 66.04f, 13.5f, "20Hz-2kHz",   SUBDUE, 1.6f);
-		addLabel( 96.52f, 13.5f, "200Hz-8kHz",  SUBDUE, 1.6f);
-		addLabel(127.00f, 13.5f, "1kHz-20kHz",  SUBDUE, 1.6f);
-
-		// ── Zone 0a: INPUT / GAIN ──────────────────────────────────────────
-		addLabel(  5.08f, 23.5f, "L IN",    GRAY_88, 1.8f);
-		addLabel( 15.24f, 23.5f, "R IN",    GRAY_88, 1.8f);
-		addLabel( 10.16f, 37.0f, "GAIN",    GRAY_99, 1.8f);
-		// Switch position labels
-		addLabel(  7.91f, 33.0f, "1\xc3\x97", DIMBLUE, 1.6f);
-		addLabel( 12.41f, 33.0f, "5\xc3\x97", DIMBLUE, 1.6f);
-
-		// ── Zone 0b: ENVELOPE ─────────────────────────────────────────────
-		addLabel( 10.16f, 48.0f, "MOD SRC", DIMBLUE, 1.6f);
-		// Switch position labels
-		addLabel(  6.16f, 54.5f, "L",   DIMBLUE, 1.6f);
-		addLabel( 10.16f, 54.5f, "MAX", DIMBLUE, 1.6f);
-		addLabel( 14.16f, 54.5f, "AVG", DIMBLUE, 1.6f);
-		addLabel(  5.08f, 69.5f, "ATTACK",  GRAY_99, 1.8f);
-		addLabel( 15.24f, 69.5f, "RELEASE", GRAY_99, 1.8f);
-		addLabel(  5.08f, 87.0f, "ENV L",   GRAY_88, 1.8f);
-		addLabel( 15.24f, 87.0f, "ENV R",   GRAY_88, 1.8f);
-
-		// ── Zone 0c: MOD BUS ──────────────────────────────────────────────
-		addLabel(  5.08f, 108.5f, "AMOUNT", GRAY_99, 1.8f);
-		addLabel( 15.24f, 108.5f, "OFFSET", GRAY_99, 1.8f);
-		addLabel( 10.16f, 124.5f, "MOD IN", GRAY_88, 1.8f);
-
-		// ── Zone 1: CONTROL — COMB section ────────────────────────────────
-		addLabel( 29.00f,  28.5f, "COMB",         GRAY_99, 1.8f);
-		addLabel( 29.00f,  30.8f, "BYPASS",       GRAY_99, 1.8f);
-		addLabel( 42.14f,  28.5f, "WIDTH",        GRAY_99, 1.8f);
-		// POLARITY switch position labels
-		addLabel( 31.56f,  40.5f, "POS", DIMBLUE, 1.6f);
-		addLabel( 35.56f,  40.5f, "OFF", DIMBLUE, 1.6f);
-		addLabel( 39.56f,  40.5f, "NEG", DIMBLUE, 1.6f);
-		addLabel( 35.56f,  44.0f, "POLARITY",     GRAY_99, 1.8f);
-		addLabel( 35.56f,  69.0f, "MASTER OFFSET",GRAY_99, 1.8f);
-
-		// ── Zone 1: CONTROL — DIST section ────────────────────────────────
-		// MODE switch: vertical (CKSSThree), position labels to its right
-		addLabel( 29.40f,  83.5f, "SFT", DIMBLUE, 1.4f);
-		addLabel( 29.40f,  87.5f, "HRD", DIMBLUE, 1.4f);
-		addLabel( 29.40f,  91.5f, "WFD", DIMBLUE, 1.4f);
-		addLabel( 28.00f,  96.5f, "MODE",         GRAY_99, 1.8f);
-		addLabel( 40.00f,  94.5f, "FB DIST",      GRAY_99, 1.8f);
-		addLabel( 40.00f,  96.8f, "BLEND",        GRAY_99, 1.8f);
-
-		// ── Zone 1: unified bottom row CV jacks ───────────────────────────
-		addLabel( 25.40f, 124.5f, "BYPASS", GRAY_77, 1.8f);
-		addLabel( 35.56f, 124.5f, "OFFSET", GRAY_77, 1.8f);
-		addLabel( 45.72f, 124.5f, "BLEND",  GRAY_77, 1.8f);
-
-		// ── Zone 2a: COMB 1 ───────────────────────────────────────────────
-		addLabel( 66.04f,  44.0f, "FREQ",  GRAY_99, 1.8f);
-		addLabel( 66.04f,  71.0f, "FB",    GRAY_99, 1.8f);
-		addLabel( 66.04f,  97.0f, "DRIVE", GRAY_99, 1.8f);
-		addLabel( 55.88f, 124.5f, "FREQ",  GRAY_77, 1.8f);
-		addLabel( 66.04f, 124.5f, "FB",    GRAY_77, 1.8f);
-		addLabel( 76.20f, 124.5f, "DRIVE", GRAY_77, 1.8f);
-
-		// ── Zone 2b: COMB 2 ───────────────────────────────────────────────
-		addLabel( 96.52f,  44.0f, "FREQ",  GRAY_99, 1.8f);
-		addLabel( 96.52f,  71.0f, "FB",    GRAY_99, 1.8f);
-		addLabel( 96.52f,  97.0f, "DRIVE", GRAY_99, 1.8f);
-		addLabel( 86.36f, 124.5f, "FREQ",  GRAY_77, 1.8f);
-		addLabel( 96.52f, 124.5f, "FB",    GRAY_77, 1.8f);
-		addLabel(106.68f, 124.5f, "DRIVE", GRAY_77, 1.8f);
-
-		// ── Zone 2c: COMB 3 ───────────────────────────────────────────────
-		addLabel(127.00f,  44.0f, "FREQ",  GRAY_99, 1.8f);
-		addLabel(127.00f,  71.0f, "FB",    GRAY_99, 1.8f);
-		addLabel(127.00f,  97.0f, "DRIVE", GRAY_99, 1.8f);
-		addLabel(116.84f, 124.5f, "FREQ",  GRAY_77, 1.8f);
-		addLabel(127.00f, 124.5f, "FB",    GRAY_77, 1.8f);
-		addLabel(137.16f, 124.5f, "DRIVE", GRAY_77, 1.8f);
-
-		// ── Zone 3: VCA + LP1 ─────────────────────────────────────────────
-		addLabel(147.32f,  24.5f, "AMT",   GRAY_99, 1.8f);
-		addLabel(157.48f,  24.5f, "CV IN", GRAY_77, 1.8f);
-		addLabel(152.40f,  57.0f, "CUTOFF",       GRAY_99, 1.8f);
-		addLabel(152.40f,  77.5f, "STEREO SPREAD", GRAY_99, 1.8f);
-		addLabel(152.40f,  79.8f, "OFFSET",        GRAY_99, 1.8f);
-		addLabel(152.40f, 101.0f, "RESONANCE",     GRAY_99, 1.8f);
-		addLabel(147.32f, 124.5f, "CUT", GRAY_77, 1.8f);
-		addLabel(157.48f, 124.5f, "RES", GRAY_77, 1.8f);
-
-		// ── Zone 4: BAND OUT + LP2 ────────────────────────────────────────
-		addLabel(167.64f,  24.5f, "LP1 L", GRAY_88, 1.8f);
-		addLabel(177.80f,  24.5f, "LP1 R", GRAY_88, 1.8f);
-		addLabel(172.72f,  38.0f, "CUTOFF",   GRAY_99, 1.8f);
-		addLabel(172.72f, 101.0f, "RESONANCE",GRAY_99, 1.8f);
-		addLabel(167.64f, 124.5f, "CUT", GRAY_77, 1.8f);
-		addLabel(177.80f, 124.5f, "RES", GRAY_77, 1.8f);
-
-		// ── Zone 5: OUT + HP ──────────────────────────────────────────────
-		addLabel(187.96f,  24.5f, "LEFT",  GRAY_88, 1.8f);
-		addLabel(198.12f,  24.5f, "RIGHT", GRAY_88, 1.8f);
-		addLabel(193.04f,  38.0f, "CUTOFF",   GRAY_99, 1.8f);
-		addLabel(193.04f, 101.0f, "RESONANCE",GRAY_99, 1.8f);
-		addLabel(187.96f, 124.5f, "CUT", GRAY_77, 1.8f);
-		addLabel(198.12f, 124.5f, "RES", GRAY_77, 1.8f);
+		// All text labels are in res/Pogo.svg — no addLabel() calls needed.
 
 		// ── Zone 0a — INPUT / GAIN ──────────────────────────────────────
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(5.08f, 16.f)), module, Pogo::L_IN_INPUT));

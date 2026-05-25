@@ -303,11 +303,8 @@
   <!-- RESONANCE cy=93 label y=101                                             -->
   <!-- ════════════════════════════════════════════════════════════════════════ -->
 
-  <!-- CUTOFF — vertical slider: 45mm travel (ALPS RS4515N or equiv.)         -->
-  <!-- Panel aperture: 4mm W × 45mm H  ·  Knob cap: 13mm W × 7mm H          -->
+  <!-- CUTOFF — vertical slider (PogoSlider widget draws track+handle) -->
   <text x="172.72" y="38" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">CUTOFF</text>
-  <rect x="170.72" y="40" width="4" height="45" rx="1.5" fill="#111" stroke="#444" stroke-width="0.5"/>
-  <rect x="166.22" y="59" width="13" height="7" rx="1.8" fill="#555" stroke="#777" stroke-width="0.4"/>
 
   <!-- RESONANCE — medium knob -->
   <circle cx="172.72" cy="93" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
@@ -355,11 +352,8 @@
   <!-- Same vertical layout as LP 2 filter                                     -->
   <!-- ════════════════════════════════════════════════════════════════════════ -->
 
-  <!-- CUTOFF — vertical slider: 45mm travel (ALPS RS4515N or equiv.)         -->
-  <!-- Panel aperture: 4mm W × 45mm H  ·  Knob cap: 13mm W × 7mm H          -->
+  <!-- CUTOFF — vertical slider (PogoSlider widget draws track+handle) -->
   <text x="193.04" y="38" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">CUTOFF</text>
-  <rect x="191.04" y="40" width="4" height="45" rx="1.5" fill="#111" stroke="#444" stroke-width="0.5"/>
-  <rect x="186.54" y="59" width="13" height="7" rx="1.8" fill="#555" stroke="#777" stroke-width="0.4"/>
 
   <!-- RESONANCE — medium knob -->
   <circle cx="193.04" cy="93" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
