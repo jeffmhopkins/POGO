@@ -81,30 +81,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Get latest Rack SDK version
-        id: rack-sdk
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get Rack SDK
         run: |
-          VERSION=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
-            "https://api.github.com/repos/VCVRack/Rack/releases?per_page=1" | \
-            jq -r '.[0].tag_name // empty' | \
-            sed 's/^v//')
-          if [ -z "$VERSION" ] || [ "$VERSION" = "null" ]; then
-            echo "ERROR: failed to resolve Rack SDK version from GitHub API" >&2
-            exit 1
-          fi
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Rack SDK version: $VERSION"
-
-      - name: Download Rack SDK
-        run: |
-          curl -sLo RackSDK.zip "https://vcvrack.com/downloads/RackSDK-${{ steps.rack-sdk.outputs.version }}-mac-x64+arm64.zip"
-          unzip -q RackSDK.zip
+          pushd $HOME
+          wget -O Rack-SDK.zip https://vcvrack.com/downloads/Rack-SDK-latest-mac-x64+arm64.zip
+          unzip Rack-SDK.zip
 
       - name: Build plugin
         run: |
-          export RACK_DIR=$GITHUB_WORKSPACE/Rack-SDK
+          export RACK_DIR=$HOME/Rack-SDK
+          make dep
           make dist
 
       - name: Upload macOS artifact
