@@ -427,12 +427,11 @@ struct Pogo : Module {
 		                         + modDest(BYPASS_CV_INPUT, BYPASS_ATT_PARAM), 0.f, 1.f);
 		float widthParam = params[WIDTH_PARAM].getValue(); // ±1 V/oct offset on R
 
-		float combOutL = combL.process(pgL, freqV, fbGain, polarity,
-		                               distTapL, blendArr, combBypass, 0.f, fs);
-		float combOutR = combR.process(pgR, freqV, fbGain, polarity,
-		                               distTapR, blendArr, combBypass, widthParam, fs);
+		// Run APF (combBypass=1 — bypass crossfade applied after distortion below)
+		combL.process(pgL, freqV, fbGain, polarity, distTapL, blendArr, 1.f, 0.f, fs);
+		combR.process(pgR, freqV, fbGain, polarity, distTapR, blendArr, 1.f, widthParam, fs);
 
-		// ── Block 4: distortion ───────────────────────────────────────────────
+		// ── Block 4: distortion (per APF group) ──────────────────────────────
 		int distMode = (int)std::round(params[DIST_MODE_PARAM].getValue());
 		float driveCV[3] = {
 			clamp(params[DRIVE_1_PARAM].getValue() + modDest(DRIVE_CV_1_INPUT, DRIVE_ATT_1_PARAM), 0.f, 1.f),
@@ -440,20 +439,16 @@ struct Pogo : Module {
 			clamp(params[DRIVE_3_PARAM].getValue() + modDest(DRIVE_CV_3_INPUT, DRIVE_ATT_3_PARAM), 0.f, 1.f),
 		};
 
-		// Process each group independently, then sum with 0.5× per chain
 		float distSumL = 0.f, distSumR = 0.f;
 		for (int i = 0; i < 3; i++) {
-			// Use the APF group outputs as per-group inputs to distortion
-			float apcfL = combL.groups[i].prevOut;
-			float apcfR = combR.groups[i].prevOut;
-			distTapL[i] = Distortion::process(apcfL, driveCV[i], distMode);
-			distTapR[i] = Distortion::process(apcfR, driveCV[i], distMode);
+			distTapL[i] = Distortion::process(combL.groups[i].prevOut, driveCV[i], distMode);
+			distTapR[i] = Distortion::process(combR.groups[i].prevOut, driveCV[i], distMode);
 			distSumL += distTapL[i] * 0.5f;
 			distSumR += distTapR[i] * 0.5f;
 		}
-		// Clamp summed output
-		distSumL = clamp(distSumL, -10.5f, 10.5f);
-		distSumR = clamp(distSumR, -10.5f, 10.5f);
+		// combBypass crossfade: dry pre-APF signal vs wet distorted APF sum
+		distSumL = clamp(pgL * (1.f - combBypass) + distSumL * combBypass, -10.5f, 10.5f);
+		distSumR = clamp(pgR * (1.f - combBypass) + distSumR * combBypass, -10.5f, 10.5f);
 
 		// ── Block VCA ─────────────────────────────────────────────────────────
 		float vcaCV  = inputs[VCA_CV_INPUT].isConnected()

@@ -71,9 +71,6 @@ struct APFGroup {
 struct TripleAPF {
 	APFGroup groups[3];
 
-	// f_ref for each group at 0 V/oct
-	static constexpr float F_REF[3] = {200.f, 2000.f, 10000.f};
-
 	// Process one sample.
 	// freqV[3], fbGain[3], polarity[3], distV[3], blend[3]: per-group params
 	// combBypass: wet/dry crossfade
@@ -84,6 +81,8 @@ struct TripleAPF {
 	              const float blend[3],
 	              float combBypass, float widthOffset,
 	              float sampleRate) {
+		// f_ref for each group at 0 V/oct — local static avoids C++11 ODR issue
+		static const float F_REF[3] = {200.f, 2000.f, 10000.f};
 		float wetSum = 0.f;
 		for (int i = 0; i < 3; i++) {
 			float f0 = F_REF[i] * std::pow(2.f, freqV[i] + widthOffset);
