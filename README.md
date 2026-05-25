@@ -63,22 +63,22 @@ implemented block by block.
 | Phase 3 | Circuit design (all blocks) | ✅ Complete |
 | Phase 4 | Panel design — 40 HP layout, all controls placed | ✅ Complete |
 | Phase 5 | Board layout — 3-board split, connector pinouts | ✅ Complete |
-| Phase 6 | VCV Rack 2 plugin — **Stage 0 scaffold done; DSP next** | 🔄 In Progress |
+| Phase 6 | VCV Rack 2 plugin — DSP complete, UI/integration refinement | 🔄 In Progress |
 
 ### Phase 6 Development Stages
 
 | Stage | Description | Status |
 |---|---|---|
 | Stage 0 | Scaffold: plugin.json, Makefile, all params/IOs registered, blank panel | ✅ Done |
-| Stage 1 | Block A + B: input/output buffers, clean pass-through test | ⬜ Next |
-| Stage 2 | Block 1: Pre-gain (switched 1× / 5×) | ⬜ |
-| Stage 3 | Block 2: Envelope follower (0–10 V CV) | ⬜ |
-| Stage 4 | Blocks 5/6/7: LP1, LP2, HP filters (OTA-C SVF, bilinear transform) | ⬜ |
-| Stage 5 | Block VCA: Pre-LP1 VCA (THAT 2180 gain law) | ⬜ |
-| Stage 6 | Block 3: Triple APF comb filter (6-stage per-group all-pass chain) | ⬜ |
-| Stage 7 | Block 4: Distortion (soft clip / hard clip / wavefold, 2× oversampled) | ⬜ |
-| Stage 8 | Mod architecture: mod bus processor + 19 attenuverter destinations | ⬜ |
-| Stage 9 | Full integration and signal-chain verification | ⬜ |
+| Stage 1 | Block A + B: input/output buffers | ✅ Done |
+| Stage 2 | Block 1: Pre-gain (switched 1× / 5×) | ✅ Done |
+| Stage 3 | Block 2: Envelope follower (0–10 V CV) | ✅ Done |
+| Stage 4 | Blocks 5/6/7: LP1, LP2, HP filters (OTA-C SVF, bilinear transform) | ✅ Done |
+| Stage 5 | Block VCA: Pre-LP1 VCA (THAT 2180 gain law) | ✅ Done |
+| Stage 6 | Block 3: Triple APF comb filter (6-stage per-group all-pass chain) | ✅ Done |
+| Stage 7 | Block 4: Distortion (soft clip / hard clip / wavefold, 2× oversampled) | ✅ Done |
+| Stage 8 | Mod architecture: mod bus processor + 19 attenuverter destinations | ✅ Done |
+| Stage 9 | Full integration and signal-chain verification | 🔄 In Progress |
 
 ---
 
@@ -86,32 +86,48 @@ implemented block by block.
 
 ```
 POGO/
-├── specs/                    ← Hardware design documentation (Phases 1–5)
-│   ├── STATUS.md             ← Master phase-completion checklist
-│   ├── module-overview.md    ← Full signal chain and power budget
-│   ├── mod-architecture.md   ← Modulation system spec
-│   ├── panel-design/         ← Phase 4: 40 HP panel layout
-│   │   └── panel.svg         ← Authoritative panel layout SVG
-│   ├── board-layout/         ← Phase 5: 3-board split, connector pinouts
-│   │   └── layout-notes.md   ← Full CN_CTRL_1/2/3 and STK_AUDIO_L/R pinouts
-│   ├── block-*/spec.md       ← Per-block specifications (Phases 1–3)
-│   └── shared/               ← Reusable circuit standards (CV protection, power)
-├── kicad/                    ← KiCad 7 schematic generation (board design system)
-│   ├── kicad_common.py       ← Shared generator infrastructure (all 3 boards)
-│   ├── generate_control_board.py  ← Control board generator script
-│   ├── validate_schematic.py ← Structural validator (kiutils-based)
-│   ├── pogo-control-board.kicad_sch  ← Generated control board schematic
-│   ├── pogo.kicad_pro        ← KiCad 7 project file
-│   └── kicad-process.md      ← (see specs/kicad-process.md) generation workflow
-├── design/                   ← HTML design documents (one per block)
-├── src/                      ← VCV Rack plugin source (Phase 6)
+├── specs/                         ← Hardware design documentation (Phases 1–5)
+│   ├── STATUS.md                  ← Master phase-completion checklist
+│   ├── module-overview.md         ← Full signal chain and power budget
+│   ├── mod-architecture.md        ← Modulation system spec
+│   ├── kicad-process.md           ← KiCad generation + PCB layout workflow
+│   ├── panel-design/              ← Phase 4: 40 HP panel layout
+│   │   ├── panel-notes.md
+│   │   └── panel.svg              ← Authoritative panel layout SVG (source for PCB placement)
+│   ├── board-layout/              ← Phase 5: 3-board split, connector pinouts
+│   │   └── layout-notes.md        ← Full CN_CTRL_1/2/3 and STK_AUDIO_L/R pinouts
+│   ├── block-*/spec.md            ← Per-block specifications (Phases 1–3)
+│   └── shared/
+│       ├── cv-input-protection.md ← Standard CV jack → buffer circuit
+│       ├── power-filtering.md     ← Standard power decoupling per board
+│       └── noise-audit.md         ← IC-level noise & inter-block impedance audit (2026-05-24)
+├── kicad/                         ← KiCad 7 schematic generation
+│   ├── kicad_common.py            ← Shared generator infrastructure (symbols, pin coords, emitters)
+│   ├── generate_control_board.py  ← Control board schematic generator
+│   ├── validate_schematic.py      ← Control board validator (9 checks, 326 pin assignments)
+│   ├── generate_utility_board.py  ← Utility board schematic generator
+│   ├── validate_utility_board.py  ← Utility board validator (7 checks, 477 coord-verified pins)
+│   ├── pogo-control-board.kicad_sch  ← Generated artifact
+│   ├── pogo-utility-board.kicad_sch  ← Generated artifact
+│   └── pogo.kicad_pro             ← KiCad 7 project file
+├── design/                        ← HTML design documents (one per block + panel)
+├── src/                           ← VCV Rack plugin source (Phase 6)
 │   ├── plugin.hpp / plugin.cpp
-│   ├── Pogo.cpp              ← Module definition, all params/IOs, widget
-│   └── dsp/                  ← DSP classes (one per block, added per stage)
+│   ├── Pogo.cpp                   ← Module definition, params/IOs, panel widget
+│   └── dsp/                       ← DSP classes (all blocks implemented)
+│       ├── InputBuffer.hpp        ← Block A
+│       ├── PreGain.hpp            ← Block 1
+│       ├── EnvelopeFollower.hpp   ← Block 2
+│       ├── AllPassComb.hpp        ← Block 3
+│       ├── Distortion.hpp         ← Block 4
+│       ├── VcaBlock.hpp           ← Block VCA
+│       ├── LPFilter.hpp           ← Blocks 5 & 6
+│       ├── HPFilter.hpp           ← Block 7
+│       └── ModBus.hpp             ← Mod architecture
 ├── res/
-│   └── Pogo.svg              ← Panel SVG for VCV Rack
+│   └── Pogo.svg                   ← Panel SVG for VCV Rack
 ├── .github/workflows/
-│   └── build.yml             ← GitHub Actions CI build
+│   └── build.yml                  ← CI: Linux/Windows/macOS plugin builds + KiCad validation
 ├── plugin.json
 └── Makefile
 ```
@@ -129,8 +145,8 @@ is the authoritative source and the `.kicad_sch` is the artifact.
 | Board | Generator | Status | Notes |
 |---|---|---|---|
 | Control board | `generate_control_board.py` | ✅ Complete | Jacks, pots, switches, IDC connectors |
-| Utility board | `generate_utility_board.py` | ⬜ Next | Mod bus, attenuverters, THAT340 expo converters |
-| Combined audio board | `generate_audio_combined.py` | ⬜ | All analog ICs — L-channel left half, R-channel right half, 4 mm center GND strip |
+| Utility board | `generate_utility_board.py` | ✅ Complete | Mod bus, attenuverters, THAT340 expo converters |
+| Combined audio board | `generate_audio_combined.py` | ⬜ Next | All analog ICs — L-channel left half, R-channel right half, 4 mm center GND strip |
 
 ### Running the control board generator
 
@@ -180,6 +196,22 @@ missing power pin connections on ICs. For those, open the schematic in KiCad 7 a
 `Tools → Electrical Rules Checker`. Expected ERC output: three "pin unconnected" warnings
 for the intentional spare pins — nothing else.
 
+### Validating the utility board
+
+`validate_utility_board.py` uses a different approach from the control board validator: it
+monkey-patches `generate_utility_board.build_schematic()` to capture every expected
+`(component, net, x, y)` tuple from the generator itself, then verifies each one exists at
+that exact coordinate in the generated `.kicad_sch`. This catches pin swaps, wrong nets, and
+connector mis-wiring — not just net occurrence counts.
+
+```bash
+cd kicad
+python3 generate_utility_board.py   # → writes pogo-utility-board.kicad_sch
+python3 validate_utility_board.py pogo-utility-board.kicad_sch
+```
+
+Coverage: **477 pin assignments** across 28 components (CN6/CN1/CN2/CN3, STK_L/STK_R, U1–U22).
+
 ### Shared infrastructure (`kicad_common.py`)
 
 `kicad_common.py` is imported by every board generator. It provides:
@@ -226,7 +258,7 @@ and the PCB layout workflow.
 
 ### Via GitHub Actions (no local setup required)
 
-Every push to `main` or any `claude/**` branch triggers an automatic build. The workflow
+Every push to `main`, `dev`, or any `claude/**` branch triggers an automatic build. The workflow
 downloads the Rack 2.6 SDK from `vcvrack.com` and compiles the plugin on an Ubuntu runner —
 no local SDK installation or Docker setup is needed.
 
