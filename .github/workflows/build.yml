@@ -67,7 +67,7 @@ jobs:
       - name: Generate utility board schematic
         run: python3 kicad/generate_utility_board.py
 
-      - name: Validate utility board (11 checks, 173 nets)
+      - name: Validate utility board (7 checks, 477 coordinate-verified pin assignments)
         run: python3 kicad/validate_utility_board.py kicad/pogo-utility-board.kicad_sch
 
       - name: Upload schematic artifact
