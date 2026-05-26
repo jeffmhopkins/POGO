@@ -33,8 +33,9 @@ struct HPFilter {
 		float v2 = ic2 + a2 * ic1 + a3 * v3;
 		ic1 = 2.f * v1 - ic1;
 		ic2 = 2.f * v2 - ic2;
-		// HP output; negate compensates for SVF summing amp inversion in hardware
-		return -(v3 - k * v1 - v2);
+		// HP output: x - k*v1 - v2 (standard Simper SVF); negate compensates for
+		// SVF summing amp inversion in hardware.
+		return -(x - k * v1 - v2);
 	}
 
 	void reset() { ic1 = ic2 = 0.f; }
