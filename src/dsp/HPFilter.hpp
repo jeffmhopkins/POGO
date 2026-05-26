@@ -9,6 +9,7 @@
 // resParam [0,1]: Q exponential 0.5–2000. Top ~5% is self-oscillation territory.
 struct HPFilter {
 	float ic1 = 0.f, ic2 = 0.f;
+	float prevBP = 0.f;  // BP tap (v1) from last process() — used for BAND OUT
 
 	static constexpr float F_REF = 632.f;
 
@@ -33,10 +34,11 @@ struct HPFilter {
 		float v2 = ic2 + a2 * ic1 + a3 * v3;
 		ic1 = 2.f * v1 - ic1;
 		ic2 = 2.f * v2 - ic2;
+		prevBP = v1;
 		// HP output: x - k*v1 - v2 (standard Simper SVF); negate compensates for
 		// SVF summing amp inversion in hardware.
 		return -(x - k * v1 - v2);
 	}
 
-	void reset() { ic1 = ic2 = 0.f; }
+	void reset() { ic1 = ic2 = prevBP = 0.f; }
 };

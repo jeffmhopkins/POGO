@@ -223,8 +223,8 @@ struct Pogo : Module {
 	enum OutputId {
 		ENV_L_OUTPUT,
 		ENV_R_OUTPUT,
-		BAND_L_OUTPUT,   // LP1 aux L (BAND OUT)
-		BAND_R_OUTPUT,   // LP1 aux R (BAND OUT)
+		BAND_L_OUTPUT,   // HP bandpass tap L (BAND OUT)
+		BAND_R_OUTPUT,   // HP bandpass tap R (BAND OUT)
 		L_OUTPUT,
 		R_OUTPUT,
 		NUM_OUTPUTS
@@ -337,8 +337,8 @@ struct Pogo : Module {
 		// Outputs
 		configOutput(ENV_L_OUTPUT, "Envelope CV L");
 		configOutput(ENV_R_OUTPUT, "Envelope CV R");
-		configOutput(BAND_L_OUTPUT, "LP1 Aux L");
-		configOutput(BAND_R_OUTPUT, "LP1 Aux R");
+		configOutput(BAND_L_OUTPUT, "HP Bandpass L");
+		configOutput(BAND_R_OUTPUT, "HP Bandpass R");
 		configOutput(L_OUTPUT, "Audio L");
 		configOutput(R_OUTPUT, "Audio R");
 
@@ -527,8 +527,8 @@ struct Pogo : Module {
 		// ── Block B: output buffers (LM4562, ±11 V swing on ±12 V rails) ─────
 		outputs[L_OUTPUT].setVoltage(clamp(outL, -11.0f, 11.0f));
 		outputs[R_OUTPUT].setVoltage(clamp(outR, -11.0f, 11.0f));
-		outputs[BAND_L_OUTPUT].setVoltage(clamp(bandL, -11.0f, 11.0f));
-		outputs[BAND_R_OUTPUT].setVoltage(clamp(bandR, -11.0f, 11.0f));
+		outputs[BAND_L_OUTPUT].setVoltage(clamp(hpL.prevBP, -11.0f, 11.0f));
+		outputs[BAND_R_OUTPUT].setVoltage(clamp(hpR.prevBP, -11.0f, 11.0f));
 		outputs[ENV_L_OUTPUT].setVoltage(envOutL);
 		outputs[ENV_R_OUTPUT].setVoltage(envOutR);
 	}
