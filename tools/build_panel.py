@@ -713,17 +713,9 @@ def _build_svg_lines(data: dict, rules: DesignRules) -> list[str]:
             )
 
     lines.append("")
-    lines.append("  <!-- ── ZONE 0 MINI-ZONE DIVIDERS (dim gray horizontal) ───────────────────── -->")
+    lines.append("  <!-- ── ZONE DIVIDERS (dim gray horizontal) ──────────────────────────────── -->")
     for sep in data.get("separators", []):
-        if sep["type"] == "h" and sep["style"] == "zone_div" and sep.get("x2", 999) < 21:
-            lines.append(
-                "  " + svg.svg_separator_h(sep["x1"], sep["x2"], sep["y"], sep["style"], colors)
-            )
-
-    lines.append("")
-    lines.append("  <!-- ── ZONE 1: BAND / DIST SUBSECTION DIVIDER (horizontal) ──────────────── -->")
-    for sep in data.get("separators", []):
-        if sep["type"] == "h" and sep["style"] == "zone_div" and sep.get("x1", 0) > 20:
+        if sep["type"] == "h" and sep["style"] == "zone_div":
             lines.append(
                 "  " + svg.svg_separator_h(sep["x1"], sep["x2"], sep["y"], sep["style"], colors)
             )
