@@ -26,17 +26,25 @@ _REPO = Path(__file__).resolve().parent.parent
 _FP_ROOT = _REPO / "kicad" / "footprints"
 
 # Map component type → (relative footprint path, origin_offset_x, origin_offset_y)
-# origin_offset is the footprint's origin relative to the component's "panel anchor"
-# (panel hole centre for jacks; shaft centre for pots).
-# The SVG transform becomes: translate(cx-ox, cy-oy)
+# origin_offset is the footprint's origin relative to the component's "panel anchor".
+# The SVG transform becomes: translate(cx-ox, cy-oy), so any footprint point (px,py)
+# renders at panel position (px+cx-ox, py+cy-oy).
+#
+# Jack (WQP-PJ398SM): the F.Fab/F.SilkS barrel body circle is at footprint (0, 6.48).
+#   Setting oy=6.48 places the barrel circle at (cx, cy) — the panel hole symbol centre.
+#   The sleeve pad S (footprint y=0) then renders at (cx, cy-6.48), which is above the hole.
+#   DRC still uses JACK_CY from panel_rules.py (measured from sleeve centre = true hole).
+#
+# Pot (Alpha RD901F): footprint origin = pin1; shaft centre = (7.5, 2.5).
+#   F.Fab shaft circle is at (center 7.5 2.5) → setting ox=7.5, oy=2.5 aligns it to (cx,cy).
 _FOOTPRINT_MAP: dict[str, tuple[str, float, float]] = {
     "jack_input": (
         "Connector_Audio.pretty/Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles.kicad_mod",
-        0.0, 0.0,
+        0.0, 6.48,  # barrel body F.Fab circle at footprint (0,6.48) → panel hole (cx,cy)
     ),
     "jack_output": (
         "Connector_Audio.pretty/Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles.kicad_mod",
-        0.0, 0.0,
+        0.0, 6.48,
     ),
     "trimpot": (
         "Potentiometer_THT.pretty/Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles.kicad_mod",
@@ -53,6 +61,26 @@ _FOOTPRINT_MAP: dict[str, tuple[str, float, float]] = {
     "knob_xl": (
         "Potentiometer_THT.pretty/Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles.kicad_mod",
         7.5, 2.5,
+    ),
+    "led": (
+        "LED_THT.pretty/LED_D3.0mm.kicad_mod",
+        0.0, 0.0,   # origin = LED body centre = panel hole centre
+    ),
+    "led_labeled": (
+        "LED_THT.pretty/LED_D3.0mm.kicad_mod",
+        0.0, 0.0,
+    ),
+    "switch_H2": (
+        "Button_Switch_THT.pretty/SW_SPDT_PanelMount.kicad_mod",
+        0.0, 0.0,   # origin = actuator centre = panel hole centre
+    ),
+    "switch_H3": (
+        "Button_Switch_THT.pretty/SW_SPDT_PanelMount.kicad_mod",
+        0.0, 0.0,
+    ),
+    "switch_V3": (
+        "Button_Switch_THT.pretty/SW_SPDT_PanelMount.kicad_mod",
+        0.0, 0.0,
     ),
 }
 
@@ -173,10 +201,21 @@ def _prims_to_svg(prims: list[dict], tx: float, ty: float, rotate: int) -> str:
 
 # ── Public API ─────────────────────────────────────────────────────────────────
 
+_ANCHOR_MARKER = (
+    '<line x1="-1.8" y1="0" x2="1.8" y2="0"'
+    ' stroke="#00ff88" stroke-width="0.18" fill="none"/>'
+    '<line x1="0" y1="-1.8" x2="0" y2="1.8"'
+    ' stroke="#00ff88" stroke-width="0.18" fill="none"/>'
+    '<circle cx="0" cy="0" r="0.6"'
+    ' stroke="#00ff88" stroke-width="0.18" fill="none"/>'
+)
+
+
 def build_kicad_layer(components: list[dict[str, Any]]) -> str:
     """Return an SVG <g id='layer-kicad'> element with all footprint geometry.
 
     Each component in `components` must have resolved cx, cy, type, and optionally rotate.
+    A green cross-hair is drawn at each component's panel anchor (cx, cy).
     """
     pieces: list[str] = []
 
@@ -194,12 +233,18 @@ def build_kicad_layer(components: list[dict[str, Any]]) -> str:
         cy     = float(comp.get("cy", 0))
         rotate = int(comp.get("rotate", 0))
 
-        # Translate so that the panel anchor (shaft/hole) lands at (cx, cy).
-        # footprint origin is at (ox, oy) relative to the panel anchor → subtract offset.
+        # Translate so that the visual centre of the footprint lands at (cx, cy).
+        # For jacks: barrel body circle (at footprint 0,6.48) → panel hole (cx,cy).
+        # For pots:  shaft circle (at footprint 7.5,2.5) → shaft centre (cx,cy).
         tx = cx - ox
         ty = cy - oy
 
         pieces.append(_prims_to_svg(prims, tx, ty, rotate))
+
+        # Green cross-hair marks the panel anchor (cx, cy) regardless of footprint offset.
+        pieces.append(
+            f'<g transform="translate({cx:.3f},{cy:.3f})">{_ANCHOR_MARKER}</g>'
+        )
 
     inner = "\n  ".join(pieces)
     return f'<g id="layer-kicad" style="display:none;">\n  {inner}\n</g>'
