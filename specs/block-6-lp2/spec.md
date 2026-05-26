@@ -28,7 +28,7 @@ differentiation from LP1.
 
 | Name | Range | Default | Taper | Description |
 |---|---|---|---|---|
-| CUTOFF 2 | 20 Hz – 20 kHz | 8 kHz | Logarithmic (1V/oct) | Lowpass cutoff frequency (independent of LP1) |
+| CUTOFF 2 | 20 Hz – 20 kHz | ~2.5 kHz | Logarithmic (1V/oct) | Lowpass cutoff frequency (independent of LP1); panel default at +2.0 V → 632 × 2² ≈ 2.5 kHz, placing LP2 above LP1's default |
 | RESONANCE 2 | 0 – 100% (self-osc) | 0% | Linear | Q from 0.5 to ∞; independent of LP1 resonance |
 
 ### CV Modulation Targets
@@ -82,8 +82,9 @@ When ω₀_1 ≠ ω₀_2:
 ### Parameter Mapping
 Same as LP1 — see Block 5 Phase 2 for expo converter formula.
 
-Reference frequency for LP2: f_ref2 set independently via its own trim pot.
-Default f_ref2: set slightly higher than f_ref1 so LP2 starts above LP1 by default.
+Reference frequency for LP2: f_ref2 = 632 Hz at 0 V — identical to LP1 (same expo calibration
+target). LP2 starts above LP1 by default via panel position: the CUTOFF 2 slider/knob defaults
+to +2.0 V, placing LP2 at ~2.5 kHz while LP1 defaults to 632 Hz at 0 V.
 
 ---
 
@@ -126,7 +127,7 @@ Same as LP1. Per stereo pair (L+R):
 
 | Reference | Range | Purpose | Adjustment |
 |---|---|---|---|
-| RV_LP2_REF | f_ref2 ±20% | 1V/oct reference frequency for LP2 | Adjust until C4 (0 V CV) = ~2.5 kHz |
+| RV_LP2_REF | f_ref2 ±20% | 1V/oct reference frequency for LP2 | Adjust until C4 (0 V CV) = 632 Hz |
 | RV_LP2_1VOCT | 1V/oct ±5% | Expo converter tracking | Same one-octave step test as LP1 |
 | RV_LP2_QMAX | V_bias trim | Flat Q point and self-oscillation onset | Same procedure as LP1; adjusts inverting Iabc driver V_bias |
 

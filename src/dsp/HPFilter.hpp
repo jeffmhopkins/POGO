@@ -4,13 +4,13 @@
 // Block 7: 2-pole state-variable high-pass filter.
 // Same Simper SVF topology as LPFilter; HP output tapped instead.
 //
-// cutoffV  [V/oct, bipolar]: 1 V/oct CV. f_ref = 300 Hz at 0 V.
-//          Effective range: ±5 V → ~10 Hz to 5 kHz.
+// cutoffV  [V/oct, bipolar]: 1 V/oct CV. f_ref = 632 Hz at 0 V.
+//          Effective range: ±5 V → ~20 Hz (−5 V) to ~20 kHz (+5 V).
 // resParam [0,1]: Q from 0.5 to ~50.
 struct HPFilter {
 	float ic1 = 0.f, ic2 = 0.f;
 
-	static constexpr float F_REF = 300.f;
+	static constexpr float F_REF = 632.f;
 
 	static void computeCoeffs(float cutoffV, float resParam, float sampleRate,
 	                           float& g, float& k) {

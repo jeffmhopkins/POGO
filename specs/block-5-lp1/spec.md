@@ -105,7 +105,7 @@ Practical range: ±5 V → ±5 octave spread (±2 octave is the musical sweet sp
 At V_cv = 0 V: f_cutoff_L = f_ref (set by calibration trim pot)
 At V_cv = +1 V: f_cutoff_L = 2 × f_ref (one octave up)
 With a ±5 V range: 10 octave sweep (2^10 = 1024× frequency range).
-Choose f_ref ≈ 630 Hz so that ±5 V spans 20 Hz (−5 V) to ~20 kHz (+5 V).
+Choose f_ref = 632 Hz so that ±5 V spans 20 Hz (−5 V) to ~20 kHz (+5 V).
 
 **Resonance to Q:**
 ```
@@ -206,12 +206,12 @@ I_abc = I_ref × e^(V_ctrl / V_T)    (expo converter, THAT340 matched pair)
 ### Component Value Derivations
 
 Target range: 20 Hz – 20 kHz (10 octaves, ±5 V at 1V/oct → 2^10 = 1024×).
-Choose f_ref = 630 Hz at V_ctrl = 0 V so that −5 V gives ~20 Hz and +5 V gives ~20 kHz.
+Choose f_ref = 632 Hz at V_ctrl = 0 V so that −5 V gives ~20 Hz and +5 V gives ~20 kHz.
 
 At nominal I_abc = 10 µA:
 ```
 g_m = 10 µA / (2 × 26 mV) = 192 µS
-C = g_m / ω₀_ref = 192 µS / (2π × 630) = 48.5 nF → use 47 nF (C0G 0603)
+C = g_m / ω₀_ref = 192 µS / (2π × 632) = 48.3 nF → use 47 nF (C0G 0603)
 ```
 
 Both integrator capacitors C1 = C2 = 47 nF.
@@ -237,7 +237,7 @@ Both integrator capacitors C1 = C2 = 47 nF.
 
 | Reference | Range | Purpose | Adjustment |
 |---|---|---|---|
-| RV_LP1_REF | f_ref ±20% | 1V/oct reference frequency | Adjust until C4 (0 V CV) = 630 Hz at LP1 output |
+| RV_LP1_REF | f_ref ±20% | 1V/oct reference frequency | Adjust until C4 (0 V CV) = 632 Hz at LP1 output |
 | RV_LP1_1VOCT | 1V/oct ±5% | Expo converter tracking calibration | One-octave step: +1 V CV should double cutoff frequency |
 | RV_LP1_QMAX | Q 10–50 | Maximum resonance / self-oscillation onset | Turn RESONANCE to max; verify clean, stable sine output |
 | RV_LP1_SPREAD_NULL | ±100 mV | STEREO SPREAD OFFSET center-detent null | Set SPREAD OFFSET to center; trim until R channel cutoff = L channel cutoff |

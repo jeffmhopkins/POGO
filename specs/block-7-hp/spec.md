@@ -19,21 +19,21 @@ At low resonance: clean, transparent high-pass tilt. At high resonance: pronounc
 peak; sweeping the cutoff with CV creates a classic "bubble" or "quack" effect. At maximum
 resonance: self-oscillation at the HP cutoff frequency.
 
-Range: 20 Hz to ~5 kHz (high cutoff frequencies are less musically useful for an HP stage
-placed after two LP filters; the HP is primarily for low-end sculpting).
+Range: 20 Hz to ~20 kHz (matching LP1/LP2; sweeps the full practical audio range at ±5 V,
+1V/oct). f_ref = 632 Hz at 0 V.
 
 ### Parameters
 
 | Name | Range | Default | Taper | Description |
 |---|---|---|---|---|
-| CUTOFF HP | 20 Hz – 5 kHz | 80 Hz | Logarithmic (1V/oct) | HP cutoff frequency |
+| CUTOFF HP | 20 Hz – 20 kHz | 80 Hz (−3.0 V at f_ref=632 Hz) | Logarithmic (1V/oct) | HP cutoff frequency |
 | RESONANCE HP | 0 – 100% (self-osc) | 0% | Linear | Q from 0.5 to ∞; self-oscillation at HP cutoff at maximum |
 
 ### CV Modulation Targets
 
 | Target | CV Range | Attenuverter | Notes |
 |---|---|---|---|
-| CUTOFF HP | ±5 V (1V/oct) | Yes | Exponential mapping; sweeps 20 Hz–5 kHz |
+| CUTOFF HP | ±5 V (1V/oct) | Yes | Exponential mapping; sweeps 20 Hz–20 kHz (f_ref = 632 Hz at 0 V) |
 | RESONANCE HP | 0–10 V | Yes | CV drives resonance; 10 V = self-oscillation |
 
 ### Signal Levels (I/O)
@@ -150,13 +150,13 @@ Q formula (same derivation as LP1, R_in = 100 kΩ):
 
 HP_Q_OTA is cell A of IC_Q_C (one LM13700 per channel; cell B is spare).
 
-### Integrator capacitor values (HP range: 20 Hz – 5 kHz, approximately 8 octaves)
+### Integrator capacitor values (HP range: 20 Hz – 20 kHz, approximately 10 octaves, matching LP1/LP2)
 
-Target ω₀_min = 2π × 20 = 125.7 rad/s at minimum V_ctrl (e.g., I_abc = 1 µA)
-Target ω₀_max = 2π × 5000 = 31,416 rad/s at maximum V_ctrl (e.g., I_abc = 250 µA)
+Target ω₀_min = 2π × 20 = 125.7 rad/s at minimum V_ctrl (−5 V → ~20 Hz)
+Target ω₀_max = 2π × 20000 = 125,664 rad/s at maximum V_ctrl (+5 V → ~20 kHz)
 
-At I_abc = 10 µA nominal: g_m = 10µA / (2 × 26mV) = 192 µS
-For f₀ = 1 kHz (nominal): C = g_m / ω₀ = 192µS / 6283 = 30.6 nF → use 33 nF (0603, C0G)
+At I_abc = 10 µA nominal (f_ref = 632 Hz at 0 V): g_m = 10µA / (2 × 26mV) = 192 µS
+For f_ref = 632 Hz: C = g_m / ω₀_ref = 192µS / (2π × 632) = 48.3 nF → use 47 nF (C0G/NP0 0603, same as LP1/LP2)
 
 (Verify range in simulation — exact values set during prototyping and trim pot calibration.)
 
@@ -169,7 +169,7 @@ For f₀ = 1 kHz (nominal): C = g_m / ω₀ = 192µS / 6283 = 30.6 nF → use 33
 | IC_Q_C_L | LM13700M | SOIC-16 | 1 (combined audio, L-channel) | Cell A = HP L Q VCA; cell B = spare |
 | IC_Q_C_R | LM13700M | SOIC-16 | 1 (combined audio, R-channel) | Cell A = HP R Q VCA; cell B = spare |
 | HP_EXPO | THAT340 | SOIC-8 | 1 | Matched NPN pair for HP expo converter (shared L+R) |
-| C_int_L, C_int_R | C0G/NP0 | 0603 | 4 | 33 nF integrator caps (2 per channel: C1_L, C2_L, C1_R, C2_R) |
+| C_int_L, C_int_R | C0G/NP0 | 0603 | 4 | 47 nF integrator caps (2 per channel: C1_L, C2_L, C1_R, C2_R; same value as LP1/LP2) |
 | R_in_L, R_in_R | — | 0603 | 2 | 100 kΩ summing amp input resistor |
 | C_VCC, C_VEE | — | 0603 | 100 nF | 8 | Decoupling, 2 per IC × 4 ICs |
 
@@ -177,7 +177,7 @@ For f₀ = 1 kHz (nominal): C = g_m / ω₀ = 192µS / 6283 = 30.6 nF → use 33
 
 | Reference | Range | Purpose | Adjustment |
 |---|---|---|---|
-| RV_HP_REF | ±20% | HP cutoff 1V/oct reference frequency | Adjust until C2 (at 0 V CV) = target frequency |
+| RV_HP_REF | ±20% | HP cutoff 1V/oct reference frequency | Adjust until C2 (at 0 V CV) = 632 Hz |
 | RV_HP_1VOCT | ±5% | HP expo converter 1V/oct tracking | One-octave step test |
 | RV_HP_QMAX | V_bias trim | Flat Q point and self-oscillation onset | Turn RESONANCE to max; verify clean sine output; RV_HP_QMAX adjusts inverting Iabc driver V_bias |
 

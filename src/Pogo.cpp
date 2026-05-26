@@ -294,7 +294,7 @@ struct Pogo : Module {
 		configParam(LP2_RES_ATT_PARAM, -1.f, 1.f, 0.f, "LP2 Resonance CV Depth");
 
 		// HP
-		configParam(HP_CUTOFF_PARAM, -5.f, 5.f, 0.f, "HP Cutoff", " V/oct");
+		configParam(HP_CUTOFF_PARAM, -5.f, 5.f, -3.0f, "HP Cutoff", " V/oct");
 		configParam(HP_RESONANCE_PARAM, 0.f, 1.f, 0.f, "HP Resonance");
 		configParam(HP_CUT_ATT_PARAM, -1.f, 1.f, 0.f, "HP Cutoff CV Depth");
 		configParam(HP_RES_ATT_PARAM, -1.f, 1.f, 0.f, "HP Resonance CV Depth");
@@ -331,7 +331,7 @@ struct Pogo : Module {
 		configOutput(L_OUTPUT, "Audio L");
 		configOutput(R_OUTPUT, "Audio R");
 
-		lp2L.fref = lp2R.fref = 2500.f;
+		// LP1, LP2, and HP all use f_ref = 632 Hz at 0 V (struct defaults; no override needed)
 	}
 
 	// ── DSP state ────────────────────────────────────────────────────────────

@@ -4,15 +4,13 @@
 // Blocks 5 & 6: 2-pole state-variable low-pass filter.
 // Uses Andrew Simper's trapezoidal-integrated SVF for numerical stability.
 //
-// cutoffV  [V/oct, bipolar]: 1 V/oct CV. f_ref at 0 V set per instance.
-//          LP1: f_ref = 630 Hz (spec Phase 1: 20 Hz–20 kHz over ±5 V).
-//          LP2: f_ref = 2500 Hz (~2 octaves above LP1, spec Phase 3).
-//          Effective range: ±5 V → f_ref/32 to f_ref×32.
+// cutoffV  [V/oct, bipolar]: 1 V/oct CV. f_ref = 632 Hz at 0 V (LP1 and LP2).
+//          Effective range: ±5 V → ~20 Hz (−5 V) to ~20 kHz (+5 V).
 // resParam [0,1]: resonance → Q from 0.5 to ~50 (near self-oscillation).
 // spreadV  [V]: per-channel frequency offset for stereo widening (R channel only).
 struct LPFilter {
 	float ic1 = 0.f, ic2 = 0.f;
-	float fref = 630.f; // Reference freq at 0 V; set to 2500 for LP2
+	float fref = 632.f; // Reference freq at 0 V (both LP1 and LP2)
 
 	// Compute filter g and k coefficients from CV and resonance.
 	// g = tan(pi * f0 / fs),  k = 1/Q
