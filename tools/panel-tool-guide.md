@@ -1,0 +1,384 @@
+# POGO Panel Build Tool — Reference Guide
+
+## Overview
+
+The panel build tool turns `tools/panel-data.yaml` into the VCV Rack SVG (`res/Pogo-source.svg`)
+and an interactive design-review HTML file (`design/panel-debug.html`). All positions, colors,
+and design rules live in the YAML. Nothing in `res/` is hand-edited after the tool exists.
+
+All commands run from the repo root.
+
+---
+
+## CLI Quick Reference
+
+```
+python3 tools/build_panel.py                    # rebuild SVG + HTML (default)
+python3 tools/build_panel.py --resource         # SVG only
+python3 tools/build_panel.py --design           # HTML debug viewer only
+python3 tools/build_panel.py --check            # DRC only; exit 1 on violations
+python3 tools/build_panel.py --list             # table of all resolved positions
+python3 tools/build_panel.py --next ZONE_ID     # x_start for the section after ZONE_ID
+python3 tools/build_panel.py --dist ID1 ID2     # clearances between two components
+python3 tools/build_panel.py --snap-to ID DIR TYPE GAP   # placement calculator
+python3 tools/build_panel.py --zone-bbox ZONE_ID         # bounding box of a zone
+```
+
+### --dist
+
+Shows center-to-center, nut-edge clearance, and PCB courtyard gap between any two components.
+Use this before committing a cy value to verify there is no conflict.
+
+```
+python3 tools/build_panel.py --dist LFO1_OUT MOD_AMOUNT
+
+  LFO1_OUT    jack_output  cx=22.86  cy=76.00
+  MOD_AMOUNT  trimpot      cx=22.86  cy=96.50
+
+  Δcx = +0.00 mm (0.00 HP)  ← aligned on cx
+  Δcy = +20.50 mm (4.04 HP)
+  Center-to-center:  20.50 mm
+  Nut/hole clearance: +10.00 mm  (r=5.0+r=5.5=10.5)  ✓
+  PCB courtyard gap:  +0.85 mm  ✓
+```
+
+### --snap-to
+
+Given an existing component, computes the cx/cy for a new component placed adjacent to it with
+a specified nut-edge gap. Also shows the resulting PCB courtyard gap as a sanity check.
+
+```
+python3 tools/build_panel.py --snap-to MOD_IN above trimpot 2.0
+
+  Snap trimpot above of MOD_IN (jack_input  r=5.0mm), 2.0mm nut-edge gap:
+  offset = r_existing(5.0) + gap(2.0) + r_new(5.5) = 12.50mm
+
+  new cx = 22.86 mm  (4.50 HP)
+  new cy = 92.50 mm
+  PCB courtyard gap: +4.41 mm  ✓
+```
+
+Direction options: `right`, `left`, `above` (or `up`), `below` (or `down`)
+
+### --next
+
+Returns the right boundary of a column-relative zone, which is the x_start for the next section.
+
+```
+python3 tools/build_panel.py --next zone_modbus
+→  zone_modbus  next x_start = 45.72 mm  (HP 9.00)
+```
+
+### --zone-bbox
+
+Shows the center-point bounding box of all components in a zone plus the zone's x span.
+
+```
+python3 tools/build_panel.py --zone-bbox zone_lfo
+
+  Zone 'zone_lfo' component bbox (centres):
+  cx: 22.86 – 38.10 mm  (span 15.24 mm = 3.00 HP)
+  cy: 64.00 – 76.00 mm  (span 12.00 mm)
+  zone x: 15.24 – 45.72 mm  (2 cols × 15.24 mm pitch = 30.48 mm)
+```
+
+---
+
+## panel-data.yaml Structure
+
+### Top-level keys
+
+```yaml
+meta:          # HP width, panel dimensions, title
+colors:        # all SVG color tokens
+design_rules:  # keepout bounds, jack/att positions, label offsets
+footprints:    # nut radii (used by DRC)
+mounting_holes: # M3 hole positions
+separators:    # horizontal / vertical divider lines
+zone_labels:   # floating text labels (section titles)
+zones:         # component zones (the meat of the file)
+```
+
+### Zone structure (column-relative, preferred)
+
+```yaml
+- id: zone_example
+  label: "Human-readable description"
+  x_start: 45.72      # left edge of section (mm)
+  col_pitch: 15.24    # 3 HP per column
+  cols: 2             # total columns (defines right edge = x_start + cols×col_pitch)
+  components:
+    - id: MY_JACK
+      type: jack_input
+      col: 0           # cx = x_start + (col+0.5)×col_pitch = 53.34mm
+      cy: 16           # explicit mm from top of panel
+      label: "IN"
+      font_size: 1.8
+      cpp_id: "MY_JACK_INPUT"
+```
+
+cx can also be set explicitly when a component doesn't fall on a column grid:
+```yaml
+    - id: MY_LED
+      type: led
+      cx: 58.84        # explicit — not column-relative
+      cy: 76
+      cpp_light: "MY_LIGHT"
+```
+
+### Component types and their panel-face radii
+
+| Type | Panel r (mm) | Notes |
+|------|-------------|-------|
+| `jack_input`, `jack_output` | 5.0 (nut) | Thonkiconn PJ301M-12 |
+| `trimpot` | 5.5 (nut) | Alpha 9mm, small knob cap |
+| `knob_medium` | 5.5 (nut) | Alpha 9mm, 4.5mm cap radius |
+| `knob_large` | 5.5 (nut) | Alpha 9mm, 7.0mm cap radius |
+| `knob_xl` | 5.5 (nut) | Alpha 9mm, 9.0mm cap radius |
+| `switch_H2` | 3.15 (hole) | 2-pos horizontal slide |
+| `switch_H3` | 3.15 (hole) | 3-pos horizontal slide |
+| `switch_V3` | 3.15 (hole) | 3-pos vertical slide |
+| `led` | 1.6 (hole) | 3mm LED, unlabeled |
+| `led_labeled` | 1.6 (hole) | 3mm LED with label below |
+
+### Component rotation
+
+Add `rotate: 180` (or 90/270) to rotate the PCB courtyard only. Panel appearance is unchanged
+(circular holes and nuts look the same at any rotation).
+
+The key use case is inverting a bottom-row jack so its PCB body extends UP instead of DOWN:
+
+```yaml
+- id: FREQ_CV_1
+  type: jack_input
+  col: 2
+  cy: 112.5     # would normally fail PCB keepout (bottom=125.48mm)
+  rotate: 180   # flips body: courtyard bottom = 113.92mm < 118.5mm ✓
+  cpp_id: "FREQ_CV_1_INPUT"
+```
+
+### Template placeholders in cy
+
+Components with `cy: _cv_jack_cy_` or `cy: _att_cy_` resolve to the design_rules values:
+- `_cv_jack_cy_` → 105.0mm (bottom CV jack row)
+- `_att_cy_` → 96.5mm (attenuverter row, paired with CV row)
+
+### Separator styles
+
+```yaml
+separators:
+  - {type: v, x: 45.72, y1: 4.5, y2: 124.0, style: main_cyan}   # bright cyan vertical
+  - {type: v, x: 60.96, y1: 4.5, y2: 124.0, style: subdiv_gray} # dim gray vertical
+  - {type: h, x1: 45.72, x2: 91.44, y: 52.0, style: zone_div}   # horizontal divider
+```
+
+---
+
+## PCB Constraint Quick Reference
+
+All distances in mm, measured from component panel-hole center.
+
+### Thonkiconn PJ301M-12 (jack)
+- PCB courtyard: x ∈ [−5.0, +5.0], y ∈ [−1.42, +12.98] (origin = panel hole)
+- y extends **12.98mm below** hole by default (rotate: 180 flips to 12.98mm above)
+- Nut radius: 5.0mm
+
+### Alpha RD901F 9mm (pot / trimpot / knobs)
+- PCB courtyard: x ∈ [−8.65, +5.1], y ∈ [−6.67, +6.67] (origin = shaft centre)
+- Nut radius: 5.5mm
+
+### Sub-mini toggle switch
+- PCB courtyard: x ∈ [−4.5, +4.5], y ∈ [−3.5, +7.5]
+- Panel hole radius: 3.15mm
+
+### 3mm LED
+- PCB courtyard: x ∈ [−2.0, +2.0], y ∈ [−1.5, +4.0]
+- Panel hole radius: 1.6mm
+
+### Rail keepout
+- Top: y < 10.0mm — no panel holes, no PCB courtyard
+- Bottom: y > 118.5mm — no panel holes, no PCB courtyard
+
+### Minimum cy values (default rotation)
+| Component | Max cy for PCB clearance | Formula |
+|-----------|------------------------|---------|
+| `jack_*` | 105.52mm | 118.5 − 12.98 |
+| `trimpot` | 111.83mm | 118.5 − 6.67 |
+| `switch_*` | 115.0mm | 118.5 − 3.5 (CY bottom offset) |
+
+### Minimum gap between stacked components (same cx column)
+| Above ↕ Below | Min cy gap | Formula |
+|---------------|-----------|---------|
+| jack above pot | 8.09mm | 1.42 + 6.67 (touching courtyards) |
+| pot above jack | 19.65mm | 6.67 + 12.98 (touching courtyards) |
+| jack above jack | 14.40mm | 1.42 + 12.98 |
+| pot above pot | 13.34mm | 6.67 + 6.67 |
+
+The `pot above jack` gap (19.65mm) is the critical one — it forced the LFO_OUT / MOD_AMOUNT
+layout to use cy=76 and cy=96.5 respectively.
+
+---
+
+## Section Addition Workflow
+
+```
+1.  python3 tools/build_panel.py --check              # confirm clean baseline
+2.  python3 tools/build_panel.py --next LAST_ZONE_ID  # get x_start
+3.  Choose HP width, col_pitch, number of columns
+4.  Add zone skeleton to panel-data.yaml
+5.  Add one row of components at a time
+6.  python3 tools/build_panel.py --check              # after each row
+7.  Use --dist to verify any tight clearances
+8.  Use --snap-to to position a component relative to an existing one
+9.  python3 tools/build_panel.py                      # rebuild SVG + HTML when clean
+10. Confirm section before moving to the next
+```
+
+---
+
+## Pre-Engineered Sub-Agent Prompts
+
+These are self-contained prompts. Copy the relevant one as the `prompt:` field when spawning
+an agent, filling in the `[PLACEHOLDER]` values.
+
+---
+
+### Add a new 6HP section (generic)
+
+```
+You are adding a new section to the POGO Eurorack panel build tool.
+The tool lives in tools/ and the source of truth is tools/panel-data.yaml.
+Run all commands from the repo root.
+
+Branch: topology_change
+
+TASK: Add a [SECTION_NAME] section at x_start=[X_START]mm ([HP_N] HP wide).
+
+Section layout:
+  [DESCRIBE COMPONENTS: types, rough vertical positions, labels, cpp_ids]
+
+Hard PCB constraints (MUST satisfy -- these are physical rail limits):
+  - jack cy_max = 105.52mm (courtyard bottom ≤ 118.5mm)
+  - pot cy_max = 111.83mm
+  - Stacked in same cx column: pot-above-jack needs ≥ 19.65mm gap
+  - Use rotate: 180 on a jack if you need cy > 105.52mm (body flips up)
+
+Workflow:
+  1. Run `python3 tools/build_panel.py --check` to confirm clean baseline
+  2. Add zone to panel-data.yaml with column-relative positioning
+     (x_start, col_pitch, cols; components use col: N, not explicit cx)
+  3. Run --check after every group of components added
+  4. Use --dist ID1 ID2 to verify tight vertical clearances before committing
+  5. Use --snap-to ID direction type gap to calculate positions relative to existing components
+  6. When --check passes: run python3 tools/build_panel.py to rebuild SVG + HTML
+  7. Run --list for the new zone and report the results
+  8. Commit and push to branch topology_change
+
+Do NOT create a pull request.
+```
+
+---
+
+### Fix DRC violations
+
+```
+The POGO panel build tool has DRC violations that need to be resolved.
+The tool lives in tools/ and source of truth is tools/panel-data.yaml.
+Run all commands from the repo root. Branch: topology_change.
+
+TASK: Fix all DRC violations.
+
+  1. Run `python3 tools/build_panel.py --check` and read the violation list
+  2. For each [PCB OVERLAP] violation: the two components' PCB courtyards intersect.
+     Fix by increasing the cy gap between them. Required gaps:
+       - pot above jack (same cx): ≥ 19.65mm center-to-center
+       - jack above pot: ≥ 8.09mm
+       - jack above jack: ≥ 14.40mm
+       - pot above pot: ≥ 13.34mm
+     Use `--dist ID1 ID2` to see current gap and how much to move.
+  3. For each [PCB KEEPOUT] violation: component courtyard exceeds y > 118.5mm.
+     Fix by moving component up (lower cy) OR adding rotate: 180 to flip body above hole.
+     Max safe cy (default rotation): jack ≤ 105.52mm, pot ≤ 111.83mm.
+  4. For each [NUT KEEPOUT] violation: nut circle enters y < 10mm or y > 118.5mm.
+     Fix by adjusting cy.
+  5. After each fix, run --check to confirm the violation is resolved.
+  6. When all violations are cleared: run python3 tools/build_panel.py and commit.
+
+IMPORTANT: [PCB KEEPOUT] is a real blocking error — the PCB cannot extend into the rail zone.
+```
+
+---
+
+### Add a CV jack + attenuverter pair
+
+```
+Add a CV jack with attenuverter to an existing zone in tools/panel-data.yaml.
+Run all commands from the repo root. Branch: topology_change.
+
+TASK: Add CV jack '[CV_JACK_ID]' and attenuverter '[ATT_ID]' to zone '[ZONE_ID]'.
+  - CV jack at col [COL], cy = _cv_jack_cy_ (resolves to 105.0mm)
+  - Attenuverter (trimpot) at col [COL], cy = _att_cy_ (resolves to 96.5mm)
+  - cpp_id for jack: '[CPP_ID]'
+  - cpp_param for att: '[CPP_PARAM]'
+  - Label: '[LABEL]'
+
+The _cv_jack_cy_ and _att_cy_ templates auto-resolve from design_rules.
+Gap between att pot (cy=96.5) and CV jack (cy=105.0) = 8.5mm > 8.09mm minimum ✓
+
+Steps:
+  1. Run --check to confirm clean baseline
+  2. Add the two components to the zone
+  3. Run --check and --dist ATT_ID CV_JACK_ID to verify
+  4. Run build to rebuild SVG + HTML
+  5. Commit and push
+```
+
+---
+
+### Verify clearance before adding a component
+
+```
+Before adding a component to the POGO panel, verify it clears existing components.
+Run all commands from the repo root.
+
+TASK: Check whether [NEW_TYPE] at cx=[CX]mm, cy=[CY]mm clears all neighbors.
+
+  1. Run `python3 tools/build_panel.py --list` to find components near cx=[CX], cy=[CY]
+  2. For each nearby component, run:
+       python3 tools/build_panel.py --dist [NEARBY_ID] [NEW_TYPE]
+     (use a placeholder ID for the new component if it doesn't exist yet)
+  3. Apply the PCB gap rules:
+       - pot above jack: need ≥ 19.65mm
+       - jack above pot: need ≥ 8.09mm
+       - same-type: use 14.4mm (jack/jack) or 13.34mm (pot/pot)
+  4. To find a safe cy, use:
+       python3 tools/build_panel.py --snap-to [NEAREST_ID] [direction] [NEW_TYPE] [gap]
+  5. Report: proposed position, clearances to all neighbors, DRC status
+```
+
+---
+
+## Design Rules Summary (from panel-data.yaml)
+
+```yaml
+design_rules:
+  top_keepout:       10.0    # no hardware above this y
+  bot_keepout_start: 118.5   # no hardware below this y (PCB rail limit)
+  cv_jack_cy:        105.0   # bottom CV jack row (_cv_jack_cy_ template)
+  att_offset:        -8.5    # att_cy = cv_jack_cy + att_offset = 96.5
+  jack_label_dy:     7.0     # label baseline = cy + 7.0
+  output_rect_dy:    -1.76   # output jack border rect top offset from label
+  output_rect_h:     2.26
+  jack_pitch:        15.24   # 1 jack per 3 HP (default col_pitch)
+  indicator_length:  2.5     # trimpot indicator line length
+```
+
+## Current Panel State (Section 0)
+
+```
+HP 1–2:   (empty)
+HP 3–9:   Section 0 — INPUT / LFO / MOD BUS  (x=15.24–45.72mm)
+HP 10–60: (to be designed)
+```
+
+Next section starts at x=45.72mm (HP 9).
