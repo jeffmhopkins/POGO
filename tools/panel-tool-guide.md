@@ -13,15 +13,20 @@ All commands run from the repo root.
 ## CLI Quick Reference
 
 ```
-python3 tools/build_panel.py                    # rebuild SVG + HTML (default)
-python3 tools/build_panel.py --resource         # SVG only
-python3 tools/build_panel.py --design           # HTML debug viewer only
-python3 tools/build_panel.py --check            # DRC only; exit 1 on violations
-python3 tools/build_panel.py --list             # table of all resolved positions
-python3 tools/build_panel.py --next ZONE_ID     # x_start for the section after ZONE_ID
-python3 tools/build_panel.py --dist ID1 ID2     # clearances between two components
+python3 tools/build_panel.py                             # rebuild SVG + HTML (default)
+python3 tools/build_panel.py --resource                  # SVG only
+python3 tools/build_panel.py --design                    # HTML debug viewer only
+python3 tools/build_panel.py --check                     # DRC only; exit 1 on violations
+python3 tools/build_panel.py --list                      # table of all resolved positions
+python3 tools/build_panel.py --next ZONE_ID              # x_start for the section after ZONE_ID
+python3 tools/build_panel.py --dist ID1 ID2              # clearances between two components
 python3 tools/build_panel.py --snap-to ID DIR TYPE GAP   # placement calculator
 python3 tools/build_panel.py --zone-bbox ZONE_ID         # bounding box of a zone
+python3 tools/build_panel.py --select X1 Y1 X2 Y2        # list components in a bounding box
+python3 tools/build_panel.py --shift ZONE_ID DX DY       # preview bulk zone shift
+python3 tools/build_panel.py --shift ZONE_ID DX DY --apply   # write zone shift to YAML
+python3 tools/build_panel.py --shift-select X1 Y1 X2 Y2 DX DY         # preview bbox shift
+python3 tools/build_panel.py --shift-select X1 Y1 X2 Y2 DX DY --apply # write bbox shift
 ```
 
 ### --dist
@@ -78,8 +83,110 @@ python3 tools/build_panel.py --zone-bbox zone_lfo
 
   Zone 'zone_lfo' component bbox (centres):
   cx: 22.86 – 38.10 mm  (span 15.24 mm = 3.00 HP)
-  cy: 64.00 – 76.00 mm  (span 12.00 mm)
+  cy: 64.00 – 74.50 mm  (span 10.50 mm)
   zone x: 15.24 – 45.72 mm  (2 cols × 15.24 mm pitch = 30.48 mm)
+```
+
+### --select
+
+Returns a table of all components whose resolved panel-hole centres fall within the specified
+bounding box (all coordinates in mm, min/max order doesn't matter).
+
+```
+python3 tools/build_panel.py --select 15 60 45 90
+
+  Selection bbox: x=[15.00–45.00]  y=[60.00–90.00]  (6 component(s))
+
+  ZONE                 ID                             TYPE                  cx      cy  rot
+  -----------------------------------------------------------------------------------------
+  zone_lfo             LFO1_SPEED                     trimpot            22.86   64.00
+  zone_lfo             LFO2_SPEED                     trimpot            38.10   64.00
+  zone_lfo             LFO1_OUT                       jack_output        22.86   74.50
+  zone_lfo             LFO2_OUT                       jack_output        38.10   74.50
+  zone_lfo             LFO1_LED                       led                22.86   82.00
+  zone_lfo             LFO2_LED                       led                38.10   82.00
+```
+
+Use `--select` to identify which zone and component IDs to reference before running `--shift`
+or `--shift-select`.
+
+### --shift
+
+Previews (or applies) a bulk dx/dy position shift for every component in the named zone.
+
+- **DX** shifts the zone's `x_start` (column-relative components move automatically). Any
+  component with an explicit `cx:` field has its value patched individually.
+- **DY** patches every component's `cy:` value. Template placeholders (`_cv_jack_cy_`,
+  `_att_cy_`) are converted to their resolved numeric values plus the offset.
+
+Without `--apply` the output is a dry-run preview. DRC runs automatically after `--apply`.
+
+```
+python3 tools/build_panel.py --shift zone_lfo 0 5
+
+  Shift zone 'zone_lfo'  dx=+0mm  dy=+5mm  (6 change(s)):
+
+  comp  LFO1_SPEED              cy: 64 → 69
+  comp  LFO2_SPEED              cy: 64 → 69
+  comp  LFO1_OUT                cy: 74.5 → 79.5
+  comp  LFO2_OUT                cy: 74.5 → 79.5
+  comp  LFO1_LED                cy: 82 → 87
+  comp  LFO2_LED                cy: 82 → 87
+
+  (dry-run — add --apply to write changes to panel-data.yaml)
+
+
+python3 tools/build_panel.py --shift zone_lfo 0 5 --apply
+  → patches panel-data.yaml, then prints DRC result
+```
+
+Template placeholder example — `_cv_jack_cy_` and `_att_cy_` resolve before shifting:
+```
+python3 tools/build_panel.py --shift zone_modbus 0 2
+
+  comp  MOD_AMOUNT              cy: _att_cy_ → 96.25
+  comp  MOD_OFFSET              cy: _att_cy_ → 96.25
+  comp  MOD_IN                  cy: _cv_jack_cy_ → 107
+  comp  MOD_LED                 cy: _cv_jack_cy_ → 107
+```
+
+**Note:** Band zones (`band1`, `band2`, `band3`) are not supported — edit their
+`cx_left`/`cx_center`/`cx_right` directly in the YAML.
+
+### --shift-select
+
+Like `--shift` but operates on components selected by bounding box rather than by zone.
+Useful for moving a subset of a zone, or components from multiple adjacent zones.
+
+- For components using `col:` (column-relative x), a warning is printed for each affected zone
+  and the suggestion to use `--shift ZONE_ID DX 0` instead of patching cx individually.
+- Components with explicit `cx:` values are shifted directly.
+
+```
+python3 tools/build_panel.py --shift-select 15 60 45 90 0 5
+
+  Shift-select  bbox=(15.00,60.00)–(45.00,90.00)  dx=+0  dy=+5  (6 patch(es)):
+
+  [zone_lfo] LFO1_SPEED            cy: 64 → 69
+  [zone_lfo] LFO2_SPEED            cy: 64 → 69
+  [zone_lfo] LFO1_OUT              cy: 74.5 → 79.5
+  [zone_lfo] LFO2_OUT              cy: 74.5 → 79.5
+  [zone_lfo] LFO1_LED              cy: 82 → 87
+  [zone_lfo] LFO2_LED              cy: 82 → 87
+
+  (dry-run — add --apply to write changes to panel-data.yaml)
+
+
+python3 tools/build_panel.py --shift-select 15 60 45 90 0 5 --apply
+  → patches panel-data.yaml, then prints DRC result
+```
+
+**Typical workflow:**
+```
+1. --select X1 Y1 X2 Y2            # identify what's in the area
+2. --shift-select X1 Y1 X2 Y2 DX DY   # preview the change
+3. --shift-select X1 Y1 X2 Y2 DX DY --apply  # apply if DRC passes
+4. python3 tools/build_panel.py    # rebuild SVG + HTML
 ```
 
 ---
@@ -365,7 +472,7 @@ design_rules:
   top_keepout:       10.0    # no hardware above this y
   bot_keepout_start: 118.5   # no hardware below this y (PCB rail limit)
   cv_jack_cy:        105.0   # bottom CV jack row (_cv_jack_cy_ template)
-  att_offset:        -8.5    # att_cy = cv_jack_cy + att_offset = 96.5
+  att_offset:        -10.75  # att_cy = cv_jack_cy + att_offset = 94.25
   jack_label_dy:     7.0     # label baseline = cy + 7.0
   output_rect_dy:    -1.76   # output jack border rect top offset from label
   output_rect_h:     2.26

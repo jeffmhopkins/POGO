@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -324,6 +325,304 @@ def print_zone_bbox(data: dict, rules: DesignRules, zone_id: str) -> None:
     print()
 
 
+# ── YAML patcher ─────────────────────────────────────────────────────────────
+
+def _yaml_repr(val: Any) -> str:
+    """Return the canonical YAML text representation of a parsed scalar value."""
+    if isinstance(val, bool):
+        return "true" if val else "false"
+    if isinstance(val, int):
+        return str(val)
+    if isinstance(val, float):
+        for d in range(0, 8):
+            s = f"{val:.{d}f}"
+            if abs(float(s) - val) < 1e-9:
+                return s
+        return repr(val)
+    if isinstance(val, str):
+        return val
+    return str(val)
+
+
+def _fmt_val(v: float) -> str:
+    """Format a float for YAML output — strip trailing zeros (80.0 → '80', 79.5 → '79.5')."""
+    if v == int(v):
+        return str(int(v))
+    s = f"{v:.3f}".rstrip("0")
+    return s if not s.endswith(".") else s[:-1]
+
+
+def _apply_yaml_patches(data_path: Path, patches: list[tuple[str, str, str, str]]) -> None:
+    """Apply targeted text patches to a YAML file preserving comments/formatting.
+
+    Each patch is (entity_id, key, old_str, new_str).
+    Locates 'id: entity_id' then finds 'key: old_str' within the same YAML block.
+    """
+    text  = data_path.read_text(encoding="utf-8")
+    lines = text.split("\n")
+
+    for entity_id, key, old_str, new_str in patches:
+        id_pat = re.compile(r'^(\s*)(?:- )?id:\s+' + re.escape(entity_id) + r'\s*$')
+        id_line   = None
+        id_indent = 0
+        for i, line in enumerate(lines):
+            m = id_pat.match(line)
+            if m:
+                id_line   = i
+                id_indent = len(m.group(1))
+                break
+
+        if id_line is None:
+            print(f"  WARNING: entity '{entity_id}' not found in YAML", file=sys.stderr)
+            continue
+
+        key_pat = re.compile(
+            r'^(\s+)' + re.escape(key) + r':\s+' + re.escape(old_str) + r'(\s*(?:#.*)?)$'
+        )
+        patched = False
+        for j in range(id_line + 1, min(id_line + 40, len(lines))):
+            line     = lines[j]
+            stripped = line.lstrip()
+            if not stripped:
+                continue
+            if len(line) - len(stripped) <= id_indent and stripped.startswith("-"):
+                break  # entered the next entity at the same nesting level
+            m = key_pat.match(line)
+            if m:
+                lines[j] = f"{m.group(1)}{key}: {new_str}{m.group(2)}"
+                patched = True
+                break
+
+        if not patched:
+            print(
+                f"  WARNING: '{entity_id}.{key}: {old_str}' not found in patch window",
+                file=sys.stderr,
+            )
+
+    data_path.write_text("\n".join(lines), encoding="utf-8")
+
+
+# ── Select / shift helpers ────────────────────────────────────────────────────
+
+def print_select(
+    data: dict, rules: DesignRules, x1: float, y1: float, x2: float, y2: float
+) -> None:
+    """Print all components whose resolved panel-hole centres fall within a bounding box."""
+    lx, rx = min(x1, x2), max(x1, x2)
+    ty, by = min(y1, y2), max(y1, y2)
+
+    hits: list[tuple[str, dict]] = []
+    for zone in data.get("zones", []):
+        zone_id = zone.get("id", "")
+        if zone_id in ("band1", "band2", "band3"):
+            for comp in _resolve_band_components(zone, rules):
+                cx = float(comp.get("cx", 0))
+                cy = float(comp.get("cy", 0))
+                if lx <= cx <= rx and ty <= cy <= by:
+                    hits.append((zone_id, comp))
+        else:
+            for comp in zone.get("components", []):
+                resolved = _resolve_comp(comp, rules, zone=zone)
+                cx = float(resolved.get("cx", 0))
+                cy = float(resolved.get("cy", 0))
+                if lx <= cx <= rx and ty <= cy <= by:
+                    hits.append((zone_id, resolved))
+
+    if not hits:
+        print(f"  No components in bbox ({lx:.2f},{ty:.2f})–({rx:.2f},{by:.2f}).")
+        return
+
+    header = f"{'ZONE':<20} {'ID':<30} {'TYPE':<16} {'cx':>7} {'cy':>7}  {'rot':>3}"
+    print(f"\n  Selection bbox: x=[{lx:.2f}–{rx:.2f}]  y=[{ty:.2f}–{by:.2f}]"
+          f"  ({len(hits)} component(s))\n")
+    print("  " + header)
+    print("  " + "-" * len(header))
+    for zone_id, comp in hits:
+        cid    = comp.get("id") or comp.get("cpp_id") or comp.get("cpp_param") or "?"
+        ctype  = comp.get("type", "")
+        cx     = float(comp.get("cx", 0))
+        cy     = float(comp.get("cy", 0))
+        rotate = int(comp.get("rotate", 0))
+        rot_s  = f"{rotate}°" if rotate else ""
+        print(f"  {zone_id:<20} {cid:<30} {ctype:<16} {cx:>7.2f} {cy:>7.2f}  {rot_s:>3}")
+    print()
+
+
+def shift_zone(
+    data: dict,
+    rules: DesignRules,
+    zone_id: str,
+    dx: float,
+    dy: float,
+    apply: bool = False,
+    data_path: Path | None = None,
+) -> None:
+    """Print (and optionally apply) a bulk position shift for all components in a zone."""
+    target_zone = None
+    for zone in data.get("zones", []):
+        if zone.get("id") == zone_id:
+            target_zone = zone
+            break
+
+    if target_zone is None:
+        print(f"Zone '{zone_id}' not found.", file=sys.stderr)
+        return
+
+    if zone_id in ("band1", "band2", "band3"):
+        print(
+            "Band zones use cx_left/cx_center/cx_right — edit the YAML directly for band shifts.",
+            file=sys.stderr,
+        )
+        return
+
+    patches: list[tuple[str, str, str, str]] = []
+    preview: list[str] = []
+
+    if dx != 0 and "x_start" in target_zone:
+        old_xs = target_zone["x_start"]
+        new_xs = float(old_xs) + dx
+        old_s  = _yaml_repr(old_xs)
+        new_s  = _fmt_val(new_xs)
+        preview.append(f"  zone  {zone_id:<26}  x_start: {old_s} → {new_s}")
+        patches.append((zone_id, "x_start", old_s, new_s))
+
+    col_rel_noted = False
+    for comp in target_zone.get("components", []):
+        resolved = _resolve_comp(comp, rules, zone=target_zone)
+        cid = comp.get("id") or comp.get("cpp_id") or comp.get("cpp_param") or "?"
+
+        if dx != 0 and "cx" in comp:
+            old_cx = comp["cx"]
+            new_cx = float(old_cx) + dx
+            old_s  = _yaml_repr(old_cx)
+            new_s  = _fmt_val(new_cx)
+            preview.append(f"  comp  {cid:<26}  cx: {old_s} → {new_s}")
+            patches.append((cid, "cx", old_s, new_s))
+        elif dx != 0 and "col" in comp and not col_rel_noted:
+            preview.append(f"  (column-relative components shift via zone x_start above)")
+            col_rel_noted = True
+
+        if dy != 0 and "cy" in comp:
+            old_cy_raw  = comp["cy"]
+            resolved_cy = float(resolved.get("cy", 0))
+            new_cy      = resolved_cy + dy
+            old_s       = _yaml_repr(old_cy_raw)
+            new_s       = _fmt_val(new_cy)
+            preview.append(f"  comp  {cid:<26}  cy: {old_s} → {new_s}")
+            patches.append((cid, "cy", old_s, new_s))
+
+    if not patches:
+        print(f"  Nothing to shift in zone '{zone_id}' (dx={dx:+.3g}, dy={dy:+.3g}).")
+        return
+
+    print(f"\n  Shift zone '{zone_id}'  dx={dx:+.3g}mm  dy={dy:+.3g}mm"
+          f"  ({len(patches)} change(s)):\n")
+    for ln in preview:
+        print(ln)
+    print()
+
+    dp = data_path or DATA_FILE
+    if apply:
+        _apply_yaml_patches(dp, patches)
+        print(f"  Applied {len(patches)} patch(es) to {dp.name}")
+        new_data  = load_data(dp)
+        new_rules = DesignRules.from_data(new_data)
+        viols     = run_drc(new_data, new_rules)
+        if viols:
+            print(f"\n  DRC after shift: {len(viols)} violation(s):", file=sys.stderr)
+            for v in viols:
+                print(f"    {v}", file=sys.stderr)
+        else:
+            print("  DRC after shift: PASS")
+    else:
+        print(f"  (dry-run — add --apply to write changes to {dp.name})")
+
+
+def shift_select(
+    data: dict,
+    rules: DesignRules,
+    x1: float, y1: float,
+    x2: float, y2: float,
+    dx: float, dy: float,
+    apply: bool = False,
+    data_path: Path | None = None,
+) -> None:
+    """Print (and optionally apply) a bulk shift for all components inside a bounding box."""
+    lx, rx = min(x1, x2), max(x1, x2)
+    ty, by = min(y1, y2), max(y1, y2)
+
+    patches: list[tuple[str, str, str, str]] = []
+    preview: list[str] = []
+    col_rel_warned: set[str] = set()
+
+    for zone in data.get("zones", []):
+        zone_id = zone.get("id", "")
+        if zone_id in ("band1", "band2", "band3"):
+            continue
+        for comp in zone.get("components", []):
+            resolved = _resolve_comp(comp, rules, zone=zone)
+            cx = float(resolved.get("cx", 0))
+            cy = float(resolved.get("cy", 0))
+            if not (lx <= cx <= rx and ty <= cy <= by):
+                continue
+
+            cid = comp.get("id") or comp.get("cpp_id") or comp.get("cpp_param") or "?"
+
+            if dx != 0:
+                if "cx" in comp:
+                    old_cx = comp["cx"]
+                    new_cx = float(old_cx) + dx
+                    old_s  = _yaml_repr(old_cx)
+                    new_s  = _fmt_val(new_cx)
+                    preview.append(f"  [{zone_id}] {cid:<28}  cx: {old_s} → {new_s}")
+                    patches.append((cid, "cx", old_s, new_s))
+                elif "col" in comp and zone_id not in col_rel_warned:
+                    col_rel_warned.add(zone_id)
+                    preview.append(
+                        f"  [{zone_id}] NOTE: column-relative components — "
+                        f"use --shift {zone_id} {dx:+.3g} 0 to shift the zone's x_start"
+                    )
+
+            if dy != 0 and "cy" in comp:
+                old_cy_raw  = comp["cy"]
+                resolved_cy = float(resolved.get("cy", 0))
+                new_cy      = resolved_cy + dy
+                old_s       = _yaml_repr(old_cy_raw)
+                new_s       = _fmt_val(new_cy)
+                preview.append(f"  [{zone_id}] {cid:<28}  cy: {old_s} → {new_s}")
+                patches.append((cid, "cy", old_s, new_s))
+
+    if not preview:
+        print(f"  No components in bbox ({lx:.2f},{ty:.2f})–({rx:.2f},{by:.2f}).")
+        return
+
+    print(f"\n  Shift-select  bbox=({lx:.2f},{ty:.2f})–({rx:.2f},{by:.2f})"
+          f"  dx={dx:+.3g}  dy={dy:+.3g}  ({len(patches)} patch(es)):\n")
+    for ln in preview:
+        print(ln)
+    print()
+
+    if not patches:
+        print("  No patches to apply (all matching components are column-relative for cx).")
+        return
+
+    dp = data_path or DATA_FILE
+    if apply:
+        _apply_yaml_patches(dp, patches)
+        print(f"  Applied {len(patches)} patch(es) to {dp.name}")
+        new_data  = load_data(dp)
+        new_rules = DesignRules.from_data(new_data)
+        viols     = run_drc(new_data, new_rules)
+        if viols:
+            print(f"\n  DRC after shift: {len(viols)} violation(s):", file=sys.stderr)
+            for v in viols:
+                print(f"    {v}", file=sys.stderr)
+        else:
+            print("  DRC after shift: PASS")
+    else:
+        print(f"  (dry-run — add --apply to write changes to {dp.name})")
+
+
 # ── SVG generation ────────────────────────────────────────────────────────────
 
 _FONT = 'font-family="monospace"'
@@ -628,7 +927,6 @@ def build_svg(data: dict, rules: DesignRules) -> str:
 
 def _scale_svg_for_html(svg_content: str, scale: float = 4.0) -> str:
     """Replace mm dimensions in the SVG root element with px for screen display."""
-    import re
     m_w = re.search(r'<svg[^>]*\swidth="([\d.]+)mm"', svg_content)
     m_h = re.search(r'<svg[^>]*\sheight="([\d.]+)mm"', svg_content)
     W_px = round(float(m_w.group(1)) * scale) if m_w else round(203.20 * scale)
@@ -699,10 +997,8 @@ def _wrap_svg_in_layers(
     if overlay is None:
         overlay = {"jacks": [], "pots": [], "knobs": [], "switches": [], "leds": []}
 
-    # Extract panel dimensions from SVG attributes (works for any HP width).
-    import re as _re
-    m_w = _re.search(r'width="([\d.]+)px"', svg_content)
-    m_h = _re.search(r'height="([\d.]+)px"', svg_content)
+    m_w = re.search(r'width="([\d.]+)px"', svg_content)
+    m_h = re.search(r'height="([\d.]+)px"', svg_content)
     scale_used = scale  # SVG has already been scaled by _scale_svg_for_html
     W = float(m_w.group(1)) / scale_used if m_w else 203.20
     H = float(m_h.group(1)) / scale_used if m_h else 128.5
@@ -924,14 +1220,18 @@ def main() -> int:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Query commands (no files written):
-  --check               DRC report; exit 1 on violations
-  --list                Table of all resolved component positions
-  --next ZONE_ID        Next x_start after a column-relative zone
-  --dist ID1 ID2        Center-to-center, nut-edge, and PCB courtyard distances
-  --snap-to ID DIR TYPE GAP  cx/cy for TYPE with GAP mm nut-edge clearance from ID
-                        DIR: right | left | above | below
-                        TYPE: jack_input | trimpot | knob_medium | switch_H2 | led | …
-  --zone-bbox ZONE_ID   Component bounding box for a zone
+  --check                        DRC report; exit 1 on violations
+  --list                         Table of all resolved component positions
+  --next ZONE_ID                 Next x_start after a column-relative zone
+  --dist ID1 ID2                 Center-to-center, nut-edge, and PCB courtyard distances
+  --snap-to ID DIR TYPE GAP      cx/cy for TYPE with GAP mm nut-edge clearance from ID
+                                 DIR: right | left | above | below
+                                 TYPE: jack_input | trimpot | knob_medium | switch_H2 | led | …
+  --zone-bbox ZONE_ID            Component bounding box for a zone
+  --select X1 Y1 X2 Y2           List components whose centres fall within the bbox
+  --shift ZONE_ID DX DY          Preview bulk shift of all components in a zone
+  --shift-select X1 Y1 X2 Y2 DX DY  Preview bulk shift of components in a bbox
+  --apply                        Write --shift / --shift-select changes to panel-data.yaml
 """,
     )
     parser.add_argument("--resource",  action="store_true", help="Write res/Pogo-source.svg")
@@ -945,11 +1245,22 @@ Query commands (no files written):
                         help="Distance and clearance between two components")
     parser.add_argument("--snap-to",   nargs=4, metavar=("ID", "DIR", "TYPE", "GAP"),
                         help="cx/cy for placing TYPE component GAP mm from ID in DIR")
-    parser.add_argument("--zone-bbox", metavar="ZONE_ID",   help="Bounding box of a zone's components")
+    parser.add_argument("--zone-bbox",     metavar="ZONE_ID",   help="Bounding box of a zone's components")
+    parser.add_argument("--select",        nargs=4, metavar=("X1", "Y1", "X2", "Y2"),
+                        help="List components within a bounding box (mm)")
+    parser.add_argument("--shift",         nargs=3, metavar=("ZONE_ID", "DX", "DY"),
+                        help="Preview (or --apply) bulk shift of all components in a zone")
+    parser.add_argument("--shift-select",  nargs=6,
+                        metavar=("X1", "Y1", "X2", "Y2", "DX", "DY"),
+                        help="Preview (or --apply) bulk shift of components in a bbox")
+    parser.add_argument("--apply",         action="store_true",
+                        help="Apply --shift / --shift-select changes to panel-data.yaml")
     args = parser.parse_args()
 
     is_query = any([args.check, args.list, args.next, args.dist,
-                    getattr(args, "snap_to", None), getattr(args, "zone_bbox", None)])
+                    getattr(args, "snap_to", None), getattr(args, "zone_bbox", None),
+                    getattr(args, "select", None),  getattr(args, "shift", None),
+                    getattr(args, "shift_select", None)])
 
     # Default: both --resource and --design
     if not any([args.resource, args.design, args.mfr, args.cpp, is_query]):
@@ -990,6 +1301,30 @@ Query commands (no files written):
     zone_bbox = getattr(args, "zone_bbox", None)
     if zone_bbox:
         print_zone_bbox(data, rules, zone_bbox)
+        return 0
+
+    if args.select:
+        x1, y1, x2, y2 = [float(v) for v in args.select]
+        print_select(data, rules, x1, y1, x2, y2)
+        return 0
+
+    if args.shift:
+        try:
+            dx, dy = float(args.shift[1]), float(args.shift[2])
+        except ValueError as e:
+            print(f"DX and DY must be numbers: {e}", file=sys.stderr)
+            return 1
+        shift_zone(data, rules, args.shift[0], dx, dy, apply=args.apply, data_path=DATA_FILE)
+        return 0
+
+    shift_sel = getattr(args, "shift_select", None)
+    if shift_sel:
+        try:
+            x1, y1, x2, y2, dx, dy = [float(v) for v in shift_sel]
+        except ValueError as e:
+            print(f"All --shift-select arguments must be numbers: {e}", file=sys.stderr)
+            return 1
+        shift_select(data, rules, x1, y1, x2, y2, dx, dy, apply=args.apply, data_path=DATA_FILE)
         return 0
 
     violations = run_drc(data, rules)
