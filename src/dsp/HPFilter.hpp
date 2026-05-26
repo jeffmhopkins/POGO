@@ -6,7 +6,7 @@
 //
 // cutoffV  [V/oct, bipolar]: 1 V/oct CV. f_ref = 632 Hz at 0 V.
 //          Effective range: ±5 V → ~20 Hz (−5 V) to ~20 kHz (+5 V).
-// resParam [0,1]: Q from 0.5 to ~50.
+// resParam [0,1]: Q exponential 0.5–2000. Top ~5% is self-oscillation territory.
 struct HPFilter {
 	float ic1 = 0.f, ic2 = 0.f;
 
@@ -17,7 +17,7 @@ struct HPFilter {
 		float f0 = F_REF * std::pow(2.f, cutoffV);
 		f0 = clamp(f0, 10.f, sampleRate * 0.48f);
 		g  = std::tan(M_PI * f0 / sampleRate);
-		float Q = 0.5f + resParam * 49.5f;
+		float Q = 0.5f * std::pow(4000.f, resParam);
 		k = 1.f / Q;
 	}
 

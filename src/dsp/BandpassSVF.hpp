@@ -5,8 +5,9 @@
 // Same Andrew Simper trapezoidal SVF as LPFilter/HPFilter; BP output = v1.
 //
 // freqV    [V/oct, bipolar]: 1V/oct CV. f_ref[3] = {200, 1500, 6000} Hz at 0 V.
-// qParam   [0,1]: exponential Q taper — 0.5 (flat) at 0, 10 at 0.5, 200 (very tight) at 1.
-//          Formula: Q = 0.5 × 400^qParam. Output normalized by 1/Q² so peak = unity.
+// qParam   [0,1]: exponential Q taper — Q = 0.5 × 400^qParam → [0.5, 200].
+//          Output normalized by 1/Q² so peak gain = 1/Q (bandwidth control only,
+//          not amplitude). Does NOT self-oscillate by design.
 // polarity: +1 = normal, 0 = silence, -1 = phase-inverted output before summing.
 //
 // TESTING: 4-pole (two cascaded 2-pole SVF stages). Spec says 2-pole; see STATUS.md.
