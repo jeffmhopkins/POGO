@@ -48,7 +48,7 @@ design_rules:
   output_rect_dy:    -1.76
   output_rect_h:      2.26
   output_rect_rx:     0.6
-  jack_pitch:        10.16   # 1 jack per 2 HP
+  jack_pitch:        15.24   # 1 jack per 3 HP
   indicator_length:   2.5
 
 # ── Hardware footprints (for DRC overlay) ────────────────────────────────────
