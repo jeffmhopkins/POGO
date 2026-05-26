@@ -1,0 +1,568 @@
+# POGO panel data — edit this file to change the panel layout.
+# Generated SVG and C++ stubs are produced by tools/build_panel.py.
+
+# ── Meta ─────────────────────────────────────────────────────────────────────
+meta:
+  width_mm: 203.20
+  height_mm: 128.5
+  viewBox: "0 0 203.20 128.5"
+  title: "POGO  · STEREO TRIPLE BANDPASS FILTER"
+  title_dot_color: "#ff8800"
+  brand: "SPACE COAST SYNTHESIZERS  ·  SCS"
+
+# ── Colors ───────────────────────────────────────────────────────────────────
+colors:
+  panel_bg:       "#0d0d0d"
+  panel_strip:    "#141414"
+  cyan:           "#00d4ff"
+  brand_text:     "#4a6070"
+  control_text:   "#999"
+  jack_text:      "#888"
+  jack_outer:     "#555"
+  jack_inner:     "#333"
+  jack_inner_s:   "#666"
+  knob_fill:      "#1a1a1a"
+  knob_stroke:    "#555"
+  indicator:      "#aaa"
+  switch_body:    "#222"
+  switch_slug:    "#666"
+  switch_slug_s:  "#888"
+  switch_label:   "#3d5260"
+  subdiv:         "#2a2a2a"
+  zone_div:       "#2d2d2d"
+  output_rect_s:  "#888"
+  led_fill:       "#441111"
+  led_stroke:     "#cc2222"
+
+# ── Design rules ─────────────────────────────────────────────────────────────
+design_rules:
+  top_keepout:       10.0
+  bot_keepout_start: 118.5
+  cv_jack_cy:        112.5     # nut bottom = 117.5mm → 1mm clear of keepout at 118.5
+  att_offset:       -10.75     # att_cy = cv_jack_cy + att_offset = 101.75
+  jack_label_dy:      7.0      # label_y = cy + 7.0
+  output_rect_dy:    -1.76     # rect_y = label_y + output_rect_dy (= label_y - 1.76)
+  output_rect_h:      2.26
+  output_rect_rx:     0.6
+  jack_pitch:        10.16
+  indicator_length:   2.5      # trimpot indicator: from cy to cy - indicator_length
+
+# ── Hardware footprints (for DRC overlay) ────────────────────────────────────
+footprints:
+  jack_thonkiconn:
+    body_r_mm: 4.0      # PCB footprint outer radius
+    nut_r_mm:  5.0      # PJ301M-12 hex nut flat-to-flat / 2 ≈ 5.0 mm
+  pot_alpha9mm:
+    body_r_mm: 4.5
+    nut_r_mm:  5.5      # M7 bushing nut across-flats / 2
+  led_3mm:
+    body_r_mm: 1.5
+
+# ── Mounting holes ────────────────────────────────────────────────────────────
+mounting_holes:
+  - {cx: 7.5,    cy: 5.1}
+  - {cx: 195.70, cy: 5.1}
+  - {cx: 7.5,    cy: 123.4}
+  - {cx: 195.70, cy: 123.4}
+
+# ── Separator lines ───────────────────────────────────────────────────────────
+separators:
+  # Main zone separators (cyan vertical)
+  - {type: v, x: 20.32,  y1: 4.5, y2: 124.0, style: main_cyan}
+  - {type: v, x: 50.80,  y1: 4.5, y2: 124.0, style: main_cyan}
+  - {type: v, x: 142.24, y1: 4.5, y2: 124.0, style: main_cyan}
+  - {type: v, x: 162.56, y1: 4.5, y2: 124.0, style: main_cyan}
+  - {type: v, x: 182.88, y1: 4.5, y2: 124.0, style: main_cyan}
+  # Band sub-dividers (dim gray vertical)
+  - {type: v, x: 81.28,  y1: 4.5, y2: 124.0, style: subdiv_gray}
+  - {type: v, x: 111.76, y1: 4.5, y2: 124.0, style: subdiv_gray}
+  # Zone 0 mini-zone dividers (gray horizontal)
+  - {type: h, x1: 0.5,   x2: 19.82, y: 51.78, style: zone_div}
+  - {type: h, x1: 0.5,   x2: 19.82, y: 94.2,  style: zone_div}
+  # Zone 1 subsection divider
+  - {type: h, x1: 20.82, x2: 50.30, y: 76.0,  style: zone_div}
+  # LP2+HP horizontal divider (cyan)
+  - {type: h, x1: 142.24, x2: 203.20, y: 28.0, style: main_cyan}
+
+# ── Zone labels ───────────────────────────────────────────────────────────────
+zone_labels:
+  - {x: 10.16,  y: 9.0,   text: "INPUT / GAIN"}
+  - {x: 10.16,  y: 56.78, text: "LFO"}
+  - {x: 10.16,  y: 99.2,  text: "MOD BUS"}
+  - {x: 35.56,  y: 9.0,   text: "CONTROL"}
+  - {x: 66.04,  y: 9.0,   text: "BAND 1",   subtitle: "200Hz–2kHz"}
+  - {x: 96.52,  y: 9.0,   text: "BAND 2",   subtitle: "1.5kHz–8kHz"}
+  - {x: 127.00, y: 9.0,   text: "BAND 3",   subtitle: "6kHz–20kHz"}
+  - {x: 152.40, y: 9.0,   text: "VCA"}
+  - {x: 152.40, y: 33.0,  text: "LP 1"}
+  - {x: 172.72, y: 9.0,   text: "BAND OUT"}
+  - {x: 193.04, y: 9.0,   text: "OUT"}
+  - {x: 172.72, y: 33.0,  text: "LP 2"}
+  - {x: 193.04, y: 33.0,  text: "HP"}
+
+# ── Band template (anchor, merged by Bands 1/2/3) ────────────────────────────
+_band_template: &band_template
+  freq:
+    type: knob_xl
+    cy: 34
+    label: "FREQ"
+  focus:
+    type: knob_large
+    cy: 63
+    label: "FOCUS"
+  drive:
+    type: knob_large
+    cy: 89
+    label: "DRIVE"
+  atts:
+    cy_offset: 0   # att_cy computed from design_rules
+    labels: ["FREQ", "FOCUS", "DRIVE"]
+  cv_jacks:
+    labels: ["FREQ", "FOCUS", "DRIVE"]
+    cpp_params: ["FREQ_ATT_{N}_PARAM", "FB_ATT_{N}_PARAM", "DRIVE_ATT_{N}_PARAM"]
+    cpp_inputs: ["FREQ_CV_{N}_INPUT", "FB_CV_{N}_INPUT", "DRIVE_CV_{N}_INPUT"]
+  cpp_params:
+    freq:  "FREQ_{N}_PARAM"
+    focus: "FB_{N}_PARAM"
+    drive: "DRIVE_{N}_PARAM"
+
+# ── Zones ─────────────────────────────────────────────────────────────────────
+zones:
+
+  - id: zone0a
+    label: "Zone 0a — INPUT / GAIN"
+    x_center: 10.16
+    components:
+      - id: L_IN
+        type: jack_input
+        cx: 5.08
+        cy: 16
+        label: "L IN"
+        font_size: 1.8
+        cpp_id: "L_IN_INPUT"
+      - id: R_IN
+        type: jack_input
+        cx: 15.24
+        cy: 16
+        label: "R IN"
+        font_size: 1.8
+        cpp_id: "R_IN_INPUT"
+      - id: GAIN
+        type: switch_H2
+        cx: 10.16
+        cy: 32
+        label_above: "GAIN"
+        label_above_y: 28.5
+        pos_labels: ["1×", "5×"]
+        pos_xs: [7.91, 12.41]
+        pos_y: 36.0
+        cpp_param: "GAIN_PARAM"
+      - id: BP3_L
+        type: jack_input
+        cx: 5.08
+        cy: 43
+        label: "BP3 L"
+        font_size: 1.6
+        cpp_id: "ALT_BP_L_INPUT"
+      - id: BP3_R
+        type: jack_input
+        cx: 15.24
+        cy: 43
+        label: "BP3 R"
+        font_size: 1.6
+        cpp_id: "ALT_BP_R_INPUT"
+
+  - id: zone0b
+    label: "Zone 0b — LFO"
+    x_center: 10.16
+    components:
+      - id: LFO1_SPEED
+        type: trimpot
+        cx: 5.08
+        cy: 62.6
+        label: "SPEED"
+        label_font_size: 1.8
+        cpp_param: "LFO1_SPEED_PARAM"
+      - id: LFO2_SPEED
+        type: trimpot
+        cx: 15.24
+        cy: 62.6
+        label: "SPEED"
+        label_font_size: 1.8
+        cpp_param: "LFO2_SPEED_PARAM"
+      - id: LFO1_LED
+        type: led
+        cx: 5.08
+        cy: 73.3
+        cpp_light: "LFO1_LIGHT"
+      - id: LFO2_LED
+        type: led
+        cx: 15.24
+        cy: 73.3
+        cpp_light: "LFO2_LIGHT"
+      - id: LFO1_OUT
+        type: jack_output
+        cx: 5.08
+        cy: 82
+        label: "LFO 1"
+        font_size: 1.8
+        rect: {x: 1.58, y: 87.24, w: 7.0, h: 2.26}
+        cpp_id: "LFO1_OUTPUT"
+      - id: LFO2_OUT
+        type: jack_output
+        cx: 15.24
+        cy: 82
+        label: "LFO 2"
+        font_size: 1.8
+        rect: {x: 11.74, y: 87.24, w: 7.0, h: 2.26}
+        cpp_id: "LFO2_OUTPUT"
+
+  - id: zone0c
+    label: "Zone 0c — MOD BUS"
+    x_center: 10.16
+    components:
+      - id: MOD_AMOUNT
+        type: trimpot
+        cx: 5.08
+        cy: 101.75   # att_cy = cv_jack_cy + att_offset = 112.5 - 10.75
+        label: "AMOUNT"
+        label_font_size: 1.8
+        cpp_param: "MOD_AMOUNT_PARAM"
+      - id: MOD_OFFSET
+        type: trimpot
+        cx: 15.24
+        cy: 101.75
+        label: "OFFSET"
+        label_font_size: 1.8
+        cpp_param: "MOD_OFFSET_PARAM"
+      - id: MOD_IN
+        type: jack_input
+        cx: 5.08
+        cy: 112.5    # cv_jack_cy — nut bottom = 117.5mm, 1mm clear of keepout
+        label: "MOD IN"
+        font_size: 1.8
+        cpp_id: "MOD_IN_INPUT"
+      - id: MOD_LED
+        type: led_labeled
+        cx: 15.24
+        cy: 112.5
+        label: "MOD"
+        label_y_offset: 7.0
+        label_fill: "#888"
+        cpp_light: "MOD_LIGHT"
+
+  - id: zone1_top
+    label: "Zone 1 — CONTROL / COMB"
+    x_center: 35.56
+    components:
+      - id: COMB_BYPASS
+        type: knob_medium
+        cx: 29.0
+        cy: 23
+        label_lines: ["COMB", "BYPASS"]
+        cpp_param: "COMB_BYPASS_PARAM"
+      - id: WIDTH
+        type: knob_medium
+        cx: 42.14
+        cy: 23
+        label_lines: ["WIDTH"]
+        cpp_param: "WIDTH_PARAM"
+      - id: POLARITY
+        type: switch_H3
+        cx: 35.56
+        cy: 37.2
+        pos_labels: ["POS", "OFF", "NEG"]
+        pos_xs: [31.56, 35.56, 39.56]
+        pos_y: 42.5
+        label_below: "POLARITY"
+        label_below_y: 46.0
+        cpp_param: "POLARITY_PARAM"
+      - id: MASTER_OFFSET
+        type: knob_xl
+        cx: 35.56
+        cy: 59
+        label_lines: ["MASTER OFFSET"]
+        label_fill: "#999"
+        cpp_param: "MASTER_OFFSET_PARAM"
+
+  - id: zone1_bottom
+    label: "Zone 1 — CONTROL / DIST"
+    x_center: 35.56
+    components:
+      - id: MODE
+        type: switch_V3
+        cx: 28
+        cy_body_top: 83
+        body_height: 12
+        slug_y_offset: 4.25
+        pos_labels: ["SFT", "HRD", "WFD"]
+        pos_ys: [85.5, 89.5, 93.5]
+        label_below: "MODE"
+        label_below_y: 98.5
+        cpp_param: "DIST_MODE_PARAM"
+      - id: FB_DIST_BLEND
+        type: knob_medium
+        cx: 40
+        cy: 89
+        label_lines: ["FB DIST", "BLEND"]
+        cpp_param: "FB_DIST_BLEND_PARAM"
+      # Bottom row attenuverters (Zone 1)
+      - id: BYPASS_ATT
+        type: trimpot
+        cx: 25.40
+        cy: _att_cy_
+        cpp_param: "BYPASS_ATT_PARAM"
+      - id: MASTER_OFFSET_ATT
+        type: trimpot
+        cx: 35.56
+        cy: _att_cy_
+        cpp_param: "MASTER_OFFSET_ATT_PARAM"
+      - id: BLEND_ATT
+        type: trimpot
+        cx: 45.72
+        cy: _att_cy_
+        cpp_param: "BLEND_ATT_PARAM"
+      # Bottom row CV jacks (Zone 1)
+      - id: BYPASS_CV
+        type: jack_input
+        cx: 25.40
+        cy: _cv_jack_cy_
+        label: "BYPASS"
+        font_size: 1.8
+        cpp_id: "BYPASS_CV_INPUT"
+      - id: MASTER_OFFSET_CV
+        type: jack_input
+        cx: 35.56
+        cy: _cv_jack_cy_
+        label: "OFFSET"
+        font_size: 1.8
+        cpp_id: "MASTER_OFFSET_CV_INPUT"
+      - id: BLEND_CV
+        type: jack_input
+        cx: 45.72
+        cy: _cv_jack_cy_
+        label: "BLEND"
+        font_size: 1.8
+        cpp_id: "BLEND_CV_INPUT"
+
+  - id: band1
+    label: "Band 1"
+    <<: *band_template
+    x_center: 66.04
+    band_n: 1
+    cx_left:   55.88
+    cx_center: 66.04
+    cx_right:  76.20
+    cv_labels: ["FREQ", "FOCUS", "DRIVE"]
+
+  - id: band2
+    label: "Band 2"
+    <<: *band_template
+    x_center: 96.52
+    band_n: 2
+    cx_left:   86.36
+    cx_center: 96.52
+    cx_right:  106.68
+    cv_labels: ["FREQ", "FOCUS", "DRIVE"]
+
+  - id: band3
+    label: "Band 3"
+    <<: *band_template
+    x_center: 127.00
+    band_n: 3
+    cx_left:   116.84
+    cx_center: 127.00
+    cx_right:  137.16
+    cv_labels: ["FREQ", "FOCUS", "DRIVE"]
+
+  - id: vca_top
+    label: "VCA — top strip"
+    components:
+      - id: VCA_AMT
+        type: trimpot
+        cx: 147.32
+        cy: 16
+        label: "AMT"
+        label_font_size: 1.8
+        cpp_param: "VCA_AMT_PARAM"
+      - id: VCA_CV_IN
+        type: jack_input
+        cx: 157.48
+        cy: 16
+        label: "CV IN"
+        font_size: 1.8
+        cpp_id: "VCA_CV_INPUT"
+
+  - id: lp1
+    label: "LP 1 Filter"
+    components:
+      - id: LP1_CUTOFF
+        type: knob_large
+        cx: 152.40
+        cy: 49
+        label_lines: ["CUTOFF"]
+        cpp_param: "LP1_CUTOFF_PARAM"
+      - id: LP1_SPREAD
+        type: knob_medium
+        cx: 152.40
+        cy: 72
+        label_lines: ["STEREO SPREAD", "OFFSET"]
+        cpp_param: "LP1_SPREAD_PARAM"
+      - id: LP1_RESONANCE
+        type: knob_medium
+        cx: 152.40
+        cy: 95
+        label_lines: ["RESONANCE"]
+        cpp_param: "LP1_RESONANCE_PARAM"
+      - id: LP1_CUT_ATT
+        type: trimpot
+        cx: 147.32
+        cy: _att_cy_
+        cpp_param: "LP1_CUT_ATT_PARAM"
+      - id: LP1_RES_ATT
+        type: trimpot
+        cx: 157.48
+        cy: _att_cy_
+        cpp_param: "LP1_RES_ATT_PARAM"
+      - id: LP1_CUT_CV
+        type: jack_input
+        cx: 147.32
+        cy: _cv_jack_cy_
+        label: "CUT"
+        font_size: 1.8
+        cpp_id: "LP1_CUT_CV_INPUT"
+      - id: LP1_RES_CV
+        type: jack_input
+        cx: 157.48
+        cy: _cv_jack_cy_
+        label: "RES"
+        font_size: 1.8
+        cpp_id: "LP1_RES_CV_INPUT"
+
+  - id: band_out_top
+    label: "BAND OUT — top strip"
+    components:
+      - id: HP_BP_L
+        type: jack_output
+        cx: 167.64
+        cy: 16
+        label: "HP BP L"
+        font_size: 1.8
+        rect_w: 7.0
+        cpp_id: "BAND_L_OUTPUT"
+      - id: HP_BP_R
+        type: jack_output
+        cx: 177.80
+        cy: 16
+        label: "HP BP R"
+        font_size: 1.8
+        rect_w: 7.0
+        cpp_id: "BAND_R_OUTPUT"
+
+  - id: lp2
+    label: "LP 2 Filter"
+    components:
+      - id: LP2_CUTOFF_LABEL
+        type: slider_label
+        cx: 172.72
+        y: 38
+        label: "CUTOFF"
+      - id: LP2_CUTOFF
+        type: slider
+        cx: 172.72
+        cy: 64.5
+        cpp_param: "LP2_CUTOFF_PARAM"
+      - id: LP2_RESONANCE
+        type: knob_medium
+        cx: 172.72
+        cy: 95
+        label_lines: ["RESONANCE"]
+        cpp_param: "LP2_RESONANCE_PARAM"
+      - id: LP2_CUT_ATT
+        type: trimpot
+        cx: 167.64
+        cy: _att_cy_
+        cpp_param: "LP2_CUT_ATT_PARAM"
+      - id: LP2_RES_ATT
+        type: trimpot
+        cx: 177.80
+        cy: _att_cy_
+        cpp_param: "LP2_RES_ATT_PARAM"
+      - id: LP2_CUT_CV
+        type: jack_input
+        cx: 167.64
+        cy: _cv_jack_cy_
+        label: "CUT"
+        font_size: 1.8
+        cpp_id: "LP2_CUT_CV_INPUT"
+      - id: LP2_RES_CV
+        type: jack_input
+        cx: 177.80
+        cy: _cv_jack_cy_
+        label: "RES"
+        font_size: 1.8
+        cpp_id: "LP2_RES_CV_INPUT"
+
+  - id: out_top
+    label: "OUT — top strip"
+    components:
+      - id: OUT_LEFT
+        type: jack_output
+        cx: 187.96
+        cy: 16
+        label: "LEFT"
+        font_size: 1.8
+        rect_w: 5.92
+        cpp_id: "L_OUTPUT"
+      - id: OUT_RIGHT
+        type: jack_output
+        cx: 198.12
+        cy: 16
+        label: "RIGHT"
+        font_size: 1.8
+        rect_w: 7.0
+        cpp_id: "R_OUTPUT"
+
+  - id: hp
+    label: "HP Filter"
+    components:
+      - id: HP_CUTOFF_LABEL
+        type: slider_label
+        cx: 193.04
+        y: 38
+        label: "CUTOFF"
+      - id: HP_CUTOFF
+        type: slider
+        cx: 193.04
+        cy: 64.5
+        cpp_param: "HP_CUTOFF_PARAM"
+      - id: HP_RESONANCE
+        type: knob_medium
+        cx: 193.04
+        cy: 95
+        label_lines: ["RESONANCE"]
+        cpp_param: "HP_RESONANCE_PARAM"
+      - id: HP_CUT_ATT
+        type: trimpot
+        cx: 187.96
+        cy: _att_cy_
+        cpp_param: "HP_CUT_ATT_PARAM"
+      - id: HP_RES_ATT
+        type: trimpot
+        cx: 198.12
+        cy: _att_cy_
+        cpp_param: "HP_RES_ATT_PARAM"
+      - id: HP_CUT_CV
+        type: jack_input
+        cx: 187.96
+        cy: _cv_jack_cy_
+        label: "CUT"
+        font_size: 1.8
+        cpp_id: "HP_CUT_CV_INPUT"
+      - id: HP_RES_CV
+        type: jack_input
+        cx: 198.12
+        cy: _cv_jack_cy_
+        label: "RES"
+        font_size: 1.8
+        cpp_id: "HP_RES_CV_INPUT"
