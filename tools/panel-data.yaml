@@ -81,17 +81,18 @@ separators:
 
 # ── Zone labels ───────────────────────────────────────────────────────────────
 zone_labels:
-  - {x: 30.48, y: 12.0, text: "INPUT / GAIN"}
-  - {x: 30.48, y: 60.0, text: "LFO"}
+  - {x: 17.145, y: 12.0, text: "INPUT / GAIN"}
+  - {x: 17.145, y: 60.0, text: "LFO"}
 
 # ── Zones ─────────────────────────────────────────────────────────────────────
 zones:
 
   # ── Section 0a: INPUT / GAIN ──────────────────────────────────────────────
-  # col 0 → cx = 20.955mm, col 1 → cx = 32.385mm
+  # x_start = 5.715mm so col 0 lands at 2.25 HP (11.43mm) from panel left edge
+  # col 0 → cx = 11.43mm, col 1 → cx = 22.86mm
   - id: zone_input
     label: "Zone 0a — INPUT / GAIN"
-    x_start: 15.24
+    x_start: 5.715
     col_pitch: 11.43
     cols: 2
     components:
@@ -111,12 +112,12 @@ zones:
         cpp_id: "R_IN_INPUT"
       - id: GAIN
         type: switch_H2
-        cx: 26.67
+        cx: 17.145
         cy: 28
         label_above: "GAIN"
         label_above_y: 22.0
         pos_labels: ["1×", "5×"]
-        pos_xs: [22.17, 31.17]
+        pos_xs: [12.645, 21.645]
         pos_y: 33.0
         cpp_param: "GAIN_PARAM"
       - id: BP3_L

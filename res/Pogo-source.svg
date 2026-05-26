@@ -42,31 +42,31 @@
   <!-- ════════════════════════════════════════════════════════════════════════ -->
 
   <!-- INPUT / GAIN -->
-  <text x="30.48" y="12.0" fill="#00d4ff" font-family="monospace" font-size="2.4" text-anchor="middle" font-weight="bold">INPUT / GAIN</text>
+  <text x="17.145" y="12.0" fill="#00d4ff" font-family="monospace" font-size="2.4" text-anchor="middle" font-weight="bold">INPUT / GAIN</text>
 
   <!-- LFO -->
-  <text x="30.48" y="60.0" fill="#00d4ff" font-family="monospace" font-size="2.4" text-anchor="middle" font-weight="bold">LFO</text>
+  <text x="17.145" y="60.0" fill="#00d4ff" font-family="monospace" font-size="2.4" text-anchor="middle" font-weight="bold">LFO</text>
 
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- Zone 0a — INPUT / GAIN                                                   -->
   <!-- ════════════════════════════════════════════════════════════════════════ -->
 
-  <circle cx="20.955" cy="18.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="20.955" cy="18.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="20.955" y="25.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">L IN</text>
-  <circle cx="32.385" cy="18.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="32.385" cy="18.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="32.385" y="25.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">R IN</text>
-  <text x="26.67" y="22.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">GAIN</text>
-  <rect x="22.17" y="26.80" width="9" height="2.4" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
-  <rect x="22.67" y="26.60" width="3.5" height="2.8" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
-  <text x="22.17" y="33.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">1×</text>
-  <text x="31.17" y="33.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">5×</text>
-  <circle cx="20.955" cy="44.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="20.955" cy="44.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="20.955" y="51.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">BP3 L</text>
-  <circle cx="32.385" cy="44.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="32.385" cy="44.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="32.385" y="51.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">BP3 R</text>
+  <circle cx="11.43" cy="18.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="11.43" cy="18.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="11.43" y="25.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">L IN</text>
+  <circle cx="22.86" cy="18.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="22.86" cy="18.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="22.86" y="25.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">R IN</text>
+  <text x="17.145" y="22.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">GAIN</text>
+  <rect x="12.64" y="26.80" width="9" height="2.4" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
+  <rect x="13.14" y="26.60" width="3.5" height="2.8" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
+  <text x="12.645" y="33.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">1×</text>
+  <text x="21.645" y="33.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">5×</text>
+  <circle cx="11.43" cy="44.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="11.43" cy="44.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="11.43" y="51.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">BP3 L</text>
+  <circle cx="22.86" cy="44.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="22.86" cy="44.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="22.86" y="51.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">BP3 R</text>
 
 </svg>
