@@ -116,12 +116,12 @@ zones:
       - id: GAIN
         type: switch_H2
         cx: 30.48
-        cy: 32
+        cy: 34
         label_above: "GAIN"
-        label_above_y: 28.0
+        label_above_y: 30.0
         pos_labels: ["1×", "5×"]
         pos_xs: [25.98, 34.98]
-        pos_y: 37.0
+        pos_y: 39.0
         cpp_param: "GAIN_PARAM"
       - id: BP3_L
         type: jack_input
@@ -176,12 +176,12 @@ zones:
         cpp_id: "LFO2_OUTPUT"
       - id: LFO1_LED
         type: led
-        col: 0
-        cy: 82
+        cx: 30.48    # centred in x-gap between jack columns (27.86–33.10mm)
+        cy: 76
         cpp_light: "LFO1_LIGHT"
       - id: LFO2_LED
         type: led
-        col: 1
+        cx: 30.48    # centred in x-gap between jack columns
         cy: 82
         cpp_light: "LFO2_LIGHT"
 

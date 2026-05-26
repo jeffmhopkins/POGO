@@ -342,13 +342,15 @@ class DesignRules:
         return out
 
     def _check_pcb_overlaps(self, components: list[dict[str, Any]]) -> list[str]:
-        """PCB courtyard rectangles must not overlap each other."""
+        """PCB courtyard rectangles must not overlap each other.
+
+        Checks all component types that have a PCB footprint (jacks, pots,
+        switches, LEDs) — not just jacks and pots.
+        """
         out: list[str] = []
         footprinted = []
         for comp in components:
-            ctype = comp.get("type", "")
-            if ctype not in JACK_TYPES and ctype not in POT_TYPES:
-                continue
+            ctype  = comp.get("type", "")
             cx     = float(comp.get("cx", 0))
             cy     = float(comp.get("cy", 0))
             rotate = int(comp.get("rotate", 0))
