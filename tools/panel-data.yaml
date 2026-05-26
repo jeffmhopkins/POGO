@@ -71,11 +71,144 @@ mounting_holes:
   - {cx: 297.30, cy: 123.4}
 
 # ── Separator lines ───────────────────────────────────────────────────────────
-separators: []
+# Section 0 occupies HP 3–9 (x = 15.24–45.72 mm)
+# Columns at cx=20.32 (HP 4) and cx=35.56 (HP 7) — 3 HP pitch
+separators:
+  # Section 0 right boundary — cyan vertical
+  - {type: v, x: 45.72, y1: 4.5, y2: 124.0, style: main_cyan}
+  # Sub-section dividers within Section 0
+  - {type: h, x1: 15.24, x2: 45.22, y: 52.0, style: zone_div}
+  - {type: h, x1: 15.24, x2: 45.22, y: 94.0, style: zone_div}
 
 # ── Zone labels ───────────────────────────────────────────────────────────────
-zone_labels: []
+zone_labels:
+  - {x: 27.94, y:  9.0, text: "INPUT / GAIN"}
+  - {x: 27.94, y: 55.0, text: "LFO"}
+  - {x: 27.94, y: 97.5, text: "MOD BUS"}
 
 # ── Zones ─────────────────────────────────────────────────────────────────────
-# Add one zone at a time. Run `python3 tools/build_panel.py --check` after each.
-zones: []
+zones:
+
+  # ── Section 0a: INPUT / GAIN ──────────────────────────────────────────────
+  # 2 input jacks + pre-gain switch + 2 alt bandpass inputs
+  - id: zone_input
+    label: "Zone 0a — INPUT / GAIN"
+    components:
+      - id: L_IN
+        type: jack_input
+        cx: 20.32
+        cy: 16
+        label: "L IN"
+        font_size: 1.8
+        cpp_id: "L_IN_INPUT"
+      - id: R_IN
+        type: jack_input
+        cx: 35.56
+        cy: 16
+        label: "R IN"
+        font_size: 1.8
+        cpp_id: "R_IN_INPUT"
+      - id: GAIN
+        type: switch_H2
+        cx: 27.94
+        cy: 32
+        label_above: "GAIN"
+        label_above_y: 28.0
+        pos_labels: ["1×", "5×"]
+        pos_xs: [23.44, 32.44]
+        pos_y: 37.0
+        cpp_param: "GAIN_PARAM"
+      - id: BP3_L
+        type: jack_input
+        cx: 20.32
+        cy: 44
+        label: "BP3 L"
+        font_size: 1.6
+        cpp_id: "ALT_BP_L_INPUT"
+      - id: BP3_R
+        type: jack_input
+        cx: 35.56
+        cy: 44
+        label: "BP3 R"
+        font_size: 1.6
+        cpp_id: "ALT_BP_R_INPUT"
+
+  # ── Section 0b: LFO ───────────────────────────────────────────────────────
+  # Two independent LFOs: speed trimpot + LED + output jack each
+  - id: zone_lfo
+    label: "Zone 0b — LFO"
+    components:
+      - id: LFO1_SPEED
+        type: trimpot
+        cx: 20.32
+        cy: 66
+        label: "SPEED"
+        label_font_size: 1.8
+        cpp_param: "LFO1_SPEED_PARAM"
+      - id: LFO2_SPEED
+        type: trimpot
+        cx: 35.56
+        cy: 66
+        label: "SPEED"
+        label_font_size: 1.8
+        cpp_param: "LFO2_SPEED_PARAM"
+      - id: LFO1_LED
+        type: led
+        cx: 20.32
+        cy: 75
+        cpp_light: "LFO1_LIGHT"
+      - id: LFO2_LED
+        type: led
+        cx: 35.56
+        cy: 75
+        cpp_light: "LFO2_LIGHT"
+      - id: LFO1_OUT
+        type: jack_output
+        cx: 20.32
+        cy: 82
+        label: "LFO 1"
+        font_size: 1.8
+        cpp_id: "LFO1_OUTPUT"
+      - id: LFO2_OUT
+        type: jack_output
+        cx: 35.56
+        cy: 82
+        label: "LFO 2"
+        font_size: 1.8
+        cpp_id: "LFO2_OUTPUT"
+
+  # ── Section 0c: MOD BUS ───────────────────────────────────────────────────
+  # Mod bus processor: amount + offset trimpots, mod input jack, activity LED
+  # att_cy = 101.75, cv_jack_cy = 112.5 (from design_rules)
+  - id: zone_modbus
+    label: "Zone 0c — MOD BUS"
+    components:
+      - id: MOD_AMOUNT
+        type: trimpot
+        cx: 20.32
+        cy: _att_cy_
+        label: "AMOUNT"
+        label_font_size: 1.8
+        cpp_param: "MOD_AMOUNT_PARAM"
+      - id: MOD_OFFSET
+        type: trimpot
+        cx: 35.56
+        cy: _att_cy_
+        label: "OFFSET"
+        label_font_size: 1.8
+        cpp_param: "MOD_OFFSET_PARAM"
+      - id: MOD_IN
+        type: jack_input
+        cx: 20.32
+        cy: _cv_jack_cy_
+        label: "MOD IN"
+        font_size: 1.8
+        cpp_id: "MOD_IN_INPUT"
+      - id: MOD_LED
+        type: led_labeled
+        cx: 35.56
+        cy: _cv_jack_cy_
+        label: "MOD"
+        label_y_offset: 7.0
+        label_fill: "#888"
+        cpp_light: "MOD_LIGHT"
