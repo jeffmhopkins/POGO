@@ -45,7 +45,7 @@
   <text x="11.43" y="12.0" fill="#00d4ff" font-family="monospace" font-size="2.4" text-anchor="middle" font-weight="bold">INPUT / GAIN</text>
 
   <!-- LFO -->
-  <text x="11.43" y="60.0" fill="#00d4ff" font-family="monospace" font-size="2.4" text-anchor="middle" font-weight="bold">LFO</text>
+  <text x="11.43" y="47.0" fill="#00d4ff" font-family="monospace" font-size="2.4" text-anchor="middle" font-weight="bold">LFO</text>
 
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- Zone 0a — INPUT / GAIN                                                   -->
@@ -57,21 +57,21 @@
   <circle cx="17.145" cy="17.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="17.145" cy="17.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
   <text x="17.145" y="24.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">R IN</text>
-  <text x="5.715" y="27.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">MAIN</text>
-  <rect x="1.21" y="29.80" width="9" height="2.4" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
-  <rect x="1.71" y="29.60" width="3.5" height="2.8" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
-  <text x="1.215" y="35.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">1×</text>
-  <text x="10.215" y="35.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">5×</text>
-  <text x="17.145" y="27.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">BP3</text>
-  <rect x="12.64" y="29.80" width="9" height="2.4" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
-  <rect x="13.14" y="29.60" width="3.5" height="2.8" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
-  <text x="12.645" y="35.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">1×</text>
-  <text x="21.645" y="35.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">5×</text>
-  <circle cx="5.715" cy="45.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="5.715" cy="45.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="5.715" y="52.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">BP3 L</text>
-  <circle cx="17.145" cy="45.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="17.145" cy="45.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="17.145" y="52.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">BP3 R</text>
+  <text x="28.575" y="13.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">MAIN</text>
+  <rect x="24.07" y="15.80" width="9" height="2.4" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
+  <rect x="24.57" y="15.60" width="3.5" height="2.8" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
+  <text x="24.075" y="21.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">1×</text>
+  <text x="33.075" y="21.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">5×</text>
+  <circle cx="5.715" cy="31.5" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="5.715" cy="31.5" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="5.715" y="38.5" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">BP3 L</text>
+  <circle cx="17.145" cy="31.5" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="17.145" cy="31.5" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="17.145" y="38.5" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">BP3 R</text>
+  <text x="28.575" y="28.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">BP3</text>
+  <rect x="24.07" y="30.30" width="9" height="2.4" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
+  <rect x="24.57" y="30.10" width="3.5" height="2.8" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
+  <text x="24.075" y="35.5" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">1×</text>
+  <text x="33.075" y="35.5" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">5×</text>
 
 </svg>

@@ -76,25 +76,24 @@ mounting_holes:
 separators:
   # Section 0 right boundary — cyan vertical
   - {type: v, x: 45.72, y1: 4.5, y2: 124.0, style: main_cyan}
-  # INPUT / GAIN → LFO boundary (BP3 labels land at y=52; separator below at 56)
-  - {type: h, x1: 1.0, x2: 45.22, y: 56.0, style: zone_div}
+  # INPUT / GAIN → LFO boundary (BP3 labels land at y=38.5; separator below at 43)
+  - {type: h, x1: 1.0, x2: 45.22, y: 43.0, style: zone_div}
 
 # ── Zone labels ───────────────────────────────────────────────────────────────
 zone_labels:
   - {x: 11.43, y: 12.0, text: "INPUT / GAIN"}
-  - {x: 11.43, y: 60.0, text: "LFO"}
+  - {x: 11.43, y: 47.0, text: "LFO"}
 
 # ── Zones ─────────────────────────────────────────────────────────────────────
 zones:
 
   # ── Section 0a: INPUT / GAIN ──────────────────────────────────────────────
-  # x_start = 0 so col 0 lands at 1.125 HP (5.715mm) from panel left edge
-  # col 0 → cx = 5.715mm, col 1 → cx = 17.145mm
+  # col 0 → cx = 5.715mm, col 1 → cx = 17.145mm, col 2 → cx = 28.575mm (switches)
   - id: zone_input
     label: "Zone 0a — INPUT / GAIN"
     x_start: 0
     col_pitch: 11.43
-    cols: 2
+    cols: 3
     components:
       - id: L_IN
         type: jack_input
@@ -114,24 +113,16 @@ zones:
         cpp_id: "R_IN_INPUT"
       - id: GAIN_MAIN
         type: switch_H2
-        cx: 5.715
-        cy: 31
+        cx: 28.575
+        cy: 17
         label_above: "MAIN"
         pos_labels: ["1×", "5×"]
-        pos_xs: [1.215, 10.215]
+        pos_xs: [24.075, 33.075]
         cpp_param: "GAIN_PARAM"
-      - id: GAIN_BP3
-        type: switch_H2
-        cx: 17.145
-        cy: 31
-        label_above: "BP3"
-        pos_labels: ["1×", "5×"]
-        pos_xs: [12.645, 21.645]
-        cpp_param: "ALT_GAIN_PARAM"
       - id: BP3_L
         type: jack_input
         col: 0
-        cy: 45
+        cy: 31.5
         rotate: 180
         label: "BP3 L"
         font_size: 1.6
@@ -139,8 +130,16 @@ zones:
       - id: BP3_R
         type: jack_input
         col: 1
-        cy: 45
+        cy: 31.5
         rotate: 180
         label: "BP3 R"
         font_size: 1.6
         cpp_id: "ALT_BP_R_INPUT"
+      - id: GAIN_BP3
+        type: switch_H2
+        cx: 28.575
+        cy: 31.5
+        label_above: "BP3"
+        pos_labels: ["1×", "5×"]
+        pos_xs: [24.075, 33.075]
+        cpp_param: "ALT_GAIN_PARAM"
