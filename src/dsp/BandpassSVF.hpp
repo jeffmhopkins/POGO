@@ -33,10 +33,9 @@ struct TripleBandpass {
 	SVFGroup groups[3];
 	float prevOut[3] = {};
 
-	static constexpr float F_REF[3] = {200.f, 1500.f, 6000.f};
-
 	float process(float x, float freqV[3], float fbParam[3], int polarity,
 	              float distTap[3], float blend, float widthOffset, float sampleRate) {
+		constexpr float F_REF[3] = {200.f, 1500.f, 6000.f};
 		float sum = 0.f;
 		float pol = (polarity == 1) ? 1.f : (polarity == -1) ? -1.f : 0.f;
 		for (int i = 0; i < 3; i++) {
