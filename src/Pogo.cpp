@@ -575,8 +575,8 @@ struct PogoWidget : ModuleWidget {
 		// ── Zone 0c — MOD BUS ──────────────────────────────────────────────
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(5.08f, 105.f)), module, Pogo::MOD_AMOUNT_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(15.24f, 105.f)), module, Pogo::MOD_OFFSET_PARAM));
-		addChild(createLightCentered<SmallLight<RedLight>>(mm2px(Vec(10.16f, 113.f)), module, Pogo::MOD_LIGHT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(10.16f, 118.f)), module, Pogo::MOD_IN_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(5.08f, 118.f)), module, Pogo::MOD_IN_INPUT));
+		addChild(createLightCentered<SmallLight<RedLight>>(mm2px(Vec(15.24f, 118.f)), module, Pogo::MOD_LIGHT));
 
 		// ── Zone 1 — CONTROL / COMB ────────────────────────────────────────
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(29.0f, 23.f)), module, Pogo::COMB_BYPASS_PARAM));

@@ -20,10 +20,9 @@
     padding: 20px;
     border-radius: 4px;
   }
-  /* Scale SVG to a comfortable browser size — 203mm wide at ~4px/mm */
   .panel-wrap svg {
-    width: 812px;   /* 203.2mm × 4 px/mm */
-    height: 514px;  /* 128.5mm × 4 px/mm */
+    width: 812px;
+    height: 514px;
     display: block;
   }
   .note {
@@ -225,7 +224,7 @@
 
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 3 — ZONE 0c: MOD BUS  (y:91–124)                               -->
-  <!-- AMOUNT at cy=105 · OFFSET at cy=105 · MOD LED at cy=113 · MOD IN cy=118 -->
+  <!-- AMOUNT at cy=105 · OFFSET at cy=105 · MOD IN cy=118 L · MOD LED cy=118 R -->
   <!-- ════════════════════════════════════════════════════════════════════════ -->
 
   <!-- AMOUNT knob, cy=105 -->
@@ -238,13 +237,14 @@
   <line x1="15.24" y1="105" x2="15.24" y2="102.5" stroke="#aaa" stroke-width="0.5"/>
   <text x="15.24" y="110.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">OFFSET</text>
 
-  <!-- MOD LED indicator, cy=113 -->
-  <circle cx="10.16" cy="113" r="1.2" fill="#441111" stroke="#cc2222" stroke-width="0.4"/>
+  <!-- MOD IN jack, cy=118, left column -->
+  <circle cx="5.08" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="5.08" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="5.08" y="123.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">MOD IN</text>
 
-  <!-- MOD IN jack, cy=118 -->
-  <circle cx="10.16" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="10.16" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="10.16" y="123.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">MOD IN</text>
+  <!-- MOD LED indicator, cy=118, right column (same row as jack) -->
+  <circle cx="15.24" cy="118" r="1.2" fill="#441111" stroke="#cc2222" stroke-width="0.4"/>
+  <text x="15.24" y="123.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">MOD</text>
 
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 4a — SHARED BAND  (x:20.32–50.80, y:4.5–76)                    -->
