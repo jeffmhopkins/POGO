@@ -68,11 +68,18 @@ Last updated: 2026-05-26
 | Peak gain at resonance | Q | Q² (at max FB: 2500×; clamped downstream) |
 | LM13700 integrators (Block 3, per channel) | 3 | **6** (if hardware follows) |
 | Power (Block 3) | ~12 mA | ~18 mA (if hardware follows) |
+| FB_DIST_BLEND → SVF input path | Post-dist signal additively mixes into SVF input | **Removed** — SVF input is clean audio only; FB_DIST_BLEND knob/CV still registered on panel but inactive |
+| FB parameter label | FB (Feedback) | Renamed `qParam` in code — controls Q directly; param IDs (FB_1/2/3_PARAM) unchanged |
 
-**What changed in code:** `SVFGroup` now runs two cascaded SVF stages per group
-(`ic1a/ic2a` → stage 1 BP → `ic1b/ic2b` → stage 2 BP output).
-No changes to `TripleBandpass`, `Pogo.cpp`, params, or I/O.
+**What changed in code:**
+- `SVFGroup`: two cascaded 2-pole stages (`ic1a/ic2a` → `ic1b/ic2b`)
+- `TripleBandpass::process()`: removed `distTap[]` and `blend` args; SVF input = `x` only
+- `Pogo.cpp`: `fbParam` → `qParam`; `blend` variable removed; process() calls updated
 
-**Decision pending:** Evaluate subjectively — do the tighter formant peaks justify the
-hardware cost (double integrators per group)? If yes, update Phase 3 spec and board layout.
-If no, revert `SVFGroup` to single stage.
+**Knob/CV still wired (no effect):** FB_DIST_BLEND knob and BLEND_CV attenuverter are
+registered and visible on panel but their values are never read. Dead code until a decision
+is made.
+
+**Decision pending:**
+1. 4-pole vs 2-pole: evaluate subjectively — tighter formant peaks vs hardware cost?
+2. FB_DIST_BLEND: repurpose the knob/CV for something else, or remove from panel entirely?

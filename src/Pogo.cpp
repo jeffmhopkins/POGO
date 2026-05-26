@@ -337,7 +337,7 @@ struct Pogo : Module {
 	// ── DSP state ────────────────────────────────────────────────────────────
 	EnvelopeFollower envL, envR;
 	TripleBandpass   bandpassL, bandpassR;
-	// Distortion taps from previous OS step (fed back into SVF input via FB_DIST_BLEND)
+	// Distortion taps — post-SVF output fed into Block 4; not routed back into SVF input.
 	float distTapL[3] = {}, distTapR[3] = {};
 	LPFilter lp1L, lp1R;
 	LPFilter lp2L, lp2R;
@@ -416,7 +416,7 @@ struct Pogo : Module {
 			                        params[attParam].getValue());
 		};
 
-		// ── Block 3: triple APF comb filter ──────────────────────────────────
+		// ── Block 3: triple bandpass SVF (formant F1/F2/F3) ─────────────────
 		// Per-group parameters
 		float freqV[3] = {
 			params[FREQ_1_PARAM].getValue() + modDest(FREQ_CV_1_INPUT, FREQ_ATT_1_PARAM),
@@ -428,7 +428,7 @@ struct Pogo : Module {
 		                  + modDest(MASTER_OFFSET_CV_INPUT, MASTER_OFFSET_ATT_PARAM);
 		for (int i = 0; i < 3; i++) freqV[i] += masterOff;
 
-		float fbParam[3] = {
+		float qParam[3] = {
 			clamp(params[FB_1_PARAM].getValue() + modDest(FB_CV_1_INPUT, FB_ATT_1_PARAM), 0.f, 1.f),
 			clamp(params[FB_2_PARAM].getValue() + modDest(FB_CV_2_INPUT, FB_ATT_2_PARAM), 0.f, 1.f),
 			clamp(params[FB_3_PARAM].getValue() + modDest(FB_CV_3_INPUT, FB_ATT_3_PARAM), 0.f, 1.f),
@@ -436,9 +436,6 @@ struct Pogo : Module {
 
 		int polSwitch = (int)std::round(params[POLARITY_PARAM].getValue()); // 0=pos, 1=off, 2=neg
 		int polarityVal = (polSwitch == 0) ? 1 : (polSwitch == 2) ? -1 : 0;
-
-		float blend = clamp(params[FB_DIST_BLEND_PARAM].getValue()
-		                    + modDest(BLEND_CV_INPUT, BLEND_ATT_PARAM), 0.f, 1.f);
 
 		float combBypass = clamp(params[COMB_BYPASS_PARAM].getValue()
 		                         + modDest(BYPASS_CV_INPUT, BYPASS_ATT_PARAM), 0.f, 1.f);
@@ -459,9 +456,9 @@ struct Pogo : Module {
 		float postL[OS], postR[OS];
 		const float fs2 = 2.f * fs;
 		for (int s = 0; s < OS; s++) {
-			// SVF at 2× rate; distTapL/R carry post-dist feedback from previous OS step
-			bandpassL.process(upBufL[s], freqV, fbParam, polarityVal, distTapL, blend, 0.f,       fs2);
-			bandpassR.process(upBufR[s], freqV, fbParam, polarityVal, distTapR, blend, widthParam, fs2);
+			// SVF at 2× rate; clean audio in, no distortion feedback path
+			bandpassL.process(upBufL[s], freqV, qParam, polarityVal, 0.f,        fs2);
+			bandpassR.process(upBufR[s], freqV, qParam, polarityVal, widthParam, fs2);
 
 			// Distortion per group; update distTap for next OS step's SVF blend
 			float dSumL = 0.f, dSumR = 0.f;
