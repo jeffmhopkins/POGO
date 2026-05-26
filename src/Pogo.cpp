@@ -346,9 +346,9 @@ struct Pogo : Module {
 		configOutput(BAND_R_OUTPUT, "HP Bandpass R");
 
 		// Lights
-		configLight<RedLight>(LFO1_LIGHT, "LFO 1 value");
-		configLight<RedLight>(LFO2_LIGHT, "LFO 2 value");
-		configLight<RedLight>(MOD_LIGHT, "Mod bus signal");
+		configLight(LFO1_LIGHT, "LFO 1 value");
+		configLight(LFO2_LIGHT, "LFO 2 value");
+		configLight(MOD_LIGHT, "Mod bus signal");
 		configOutput(L_OUTPUT, "Audio L");
 		configOutput(R_OUTPUT, "Audio R");
 
