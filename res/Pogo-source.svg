@@ -77,21 +77,21 @@
   <!-- Zone 0b — LFO                                                            -->
   <!-- ════════════════════════════════════════════════════════════════════════ -->
 
-  <circle cx="5.715" cy="55.75" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="5.715" cy="55.75" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <rect x="2.21" y="60.99" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
-  <text x="5.715" y="62.8" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">LFO 1</text>
-  <circle cx="17.145" cy="55.75" r="1.2" fill="#112244" stroke="#2255cc" stroke-width="0.4"/>
-  <circle cx="28.575" cy="55.75" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
-  <line x1="28.575" y1="55.75" x2="28.575" y2="51.25" stroke="#aaa" stroke-width="0.6"/>
-  <text x="28.575" y="63.2" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">Rate 1</text>
-  <circle cx="5.715" cy="70.15" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="5.715" cy="70.15" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <rect x="2.21" y="75.39" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
-  <text x="5.715" y="77.2" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">LFO 2</text>
-  <circle cx="17.145" cy="70.15" r="1.2" fill="#112244" stroke="#2255cc" stroke-width="0.4"/>
-  <circle cx="28.575" cy="70.15" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
-  <line x1="28.575" y1="70.15" x2="28.575" y2="65.65" stroke="#aaa" stroke-width="0.6"/>
-  <text x="28.575" y="77.7" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">Rate 2</text>
+  <circle cx="5.715" cy="51.375" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="5.715" cy="51.375" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <rect x="2.21" y="56.62" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
+  <text x="5.715" y="58.4" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">LFO 1</text>
+  <circle cx="17.145" cy="51.375" r="1.2" fill="#112244" stroke="#2255cc" stroke-width="0.4"/>
+  <circle cx="28.575" cy="51.375" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="28.575" y1="51.375" x2="28.575" y2="46.875" stroke="#aaa" stroke-width="0.6"/>
+  <text x="28.575" y="58.9" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">Rate 1</text>
+  <circle cx="5.715" cy="65.775" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="5.715" cy="65.775" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <rect x="2.21" y="71.02" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
+  <text x="5.715" y="72.8" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">LFO 2</text>
+  <circle cx="17.145" cy="65.775" r="1.2" fill="#112244" stroke="#2255cc" stroke-width="0.4"/>
+  <circle cx="28.575" cy="65.775" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="28.575" y1="65.775" x2="28.575" y2="61.275000000000006" stroke="#aaa" stroke-width="0.6"/>
+  <text x="28.575" y="73.3" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">Rate 2</text>
 
 </svg>
