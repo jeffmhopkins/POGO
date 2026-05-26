@@ -9,8 +9,10 @@
 // fbParam [0,1]: resonance → Q from 0.5 (flat) to ~50 (near self-oscillation).
 // polarity: +1 = normal, 0 = silence, -1 = phase-inverted output before summing.
 // blend   [0,1]: FB_DIST_BLEND — post-distortion signal added to SVF input.
+// TESTING: 4-pole (two cascaded 2-pole SVF stages). Spec says 2-pole; see STATUS.md.
 struct SVFGroup {
-	float ic1 = 0.f, ic2 = 0.f;
+	float ic1a = 0.f, ic2a = 0.f;  // stage 1
+	float ic1b = 0.f, ic2b = 0.f;  // stage 2
 
 	float process(float x, float f0, float Q, float sampleRate) {
 		float g = std::tan(M_PI * f0 / sampleRate);
@@ -18,15 +20,22 @@ struct SVFGroup {
 		float a1 = 1.f / (1.f + g * (g + k));
 		float a2 = g * a1;
 		float a3 = g * a2;
-		float v3 = x - ic2;
-		float v1 = a1 * ic1 + a2 * v3;
-		float v2 = ic2 + a2 * ic1 + a3 * v3;
-		ic1 = 2.f * v1 - ic1;
-		ic2 = 2.f * v2 - ic2;
-		return v1;  // BP output (LP = v2, HP = v3 - k*v1 - v2)
+		// Stage 1
+		float v3 = x - ic2a;
+		float v1 = a1 * ic1a + a2 * v3;
+		float v2 = ic2a + a2 * ic1a + a3 * v3;
+		ic1a = 2.f * v1 - ic1a;
+		ic2a = 2.f * v2 - ic2a;
+		// Stage 2 — same coefficients, independent state
+		v3 = v1 - ic2b;
+		v1 = a1 * ic1b + a2 * v3;
+		v2 = ic2b + a2 * ic1b + a3 * v3;
+		ic1b = 2.f * v1 - ic1b;
+		ic2b = 2.f * v2 - ic2b;
+		return v1;  // 4-pole BP output
 	}
 
-	void reset() { ic1 = ic2 = 0.f; }
+	void reset() { ic1a = ic2a = ic1b = ic2b = 0.f; }
 };
 
 struct TripleBandpass {

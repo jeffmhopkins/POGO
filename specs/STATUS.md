@@ -52,4 +52,27 @@ Full audit findings: `specs/shared/noise-audit.md`
    state. Panel widget with all 47 params / 22 inputs / 6 outputs registered.
    `res/Pogo.svg` panel art is complete — all 56 widget positions verified against C++ layout.
 
-Last updated: 2026-05-25
+Last updated: 2026-05-26
+
+---
+
+## ⚠️ TESTING DIVERGENCE — DSP vs. Spec (2026-05-26)
+
+**Branch:** `topology_change`
+
+| Item | Spec (Phase 3) | DSP (current code) |
+|---|---|---|
+| Block 3 SVF pole count | 2-pole per group | **4-pole** (two cascaded 2-pole stages) |
+| Rolloff per side | 6 dB/octave | 12 dB/octave |
+| Effective bandwidth at same Q | BW = f₀/Q | BW ≈ 0.644 × f₀/Q |
+| Peak gain at resonance | Q | Q² (at max FB: 2500×; clamped downstream) |
+| LM13700 integrators (Block 3, per channel) | 3 | **6** (if hardware follows) |
+| Power (Block 3) | ~12 mA | ~18 mA (if hardware follows) |
+
+**What changed in code:** `SVFGroup` now runs two cascaded SVF stages per group
+(`ic1a/ic2a` → stage 1 BP → `ic1b/ic2b` → stage 2 BP output).
+No changes to `TripleBandpass`, `Pogo.cpp`, params, or I/O.
+
+**Decision pending:** Evaluate subjectively — do the tighter formant peaks justify the
+hardware cost (double integrators per group)? If yes, update Phase 3 spec and board layout.
+If no, revert `SVFGroup` to single stage.
