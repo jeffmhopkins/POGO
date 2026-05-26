@@ -5,7 +5,8 @@
 // Same Andrew Simper trapezoidal SVF as LPFilter/HPFilter; BP output = v1.
 //
 // freqV    [V/oct, bipolar]: 1V/oct CV. f_ref[3] = {200, 1500, 6000} Hz at 0 V.
-// qParam   [0,1]: Q from 0.5 (flat) to 50 (near self-oscillation).
+// qParam   [0,1]: exponential Q taper — 0.5 (flat) at 0, 10 at 0.5, 200 (very tight) at 1.
+//          Formula: Q = 0.5 × 400^qParam. Output normalized by 1/Q² so peak = unity.
 // polarity: +1 = normal, 0 = silence, -1 = phase-inverted output before summing.
 //
 // TESTING: 4-pole (two cascaded 2-pole SVF stages). Spec says 2-pole; see STATUS.md.
@@ -52,9 +53,11 @@ struct TripleBandpass {
 		for (int i = 0; i < 3; i++) {
 			float f0 = F_REF[i] * std::pow(2.f, freqV[i] + widthOffset);
 			f0 = clamp(f0, 10.f, sampleRate * 0.48f);
-			float Q  = 0.5f + qParam[i] * 49.5f;
+			// Exponential Q taper: 0.5 (flat) to 200 (very tight). 1/Q² normalizes
+			// peak to unity so Q shapes bandwidth only, not output level.
+			float Q  = 0.5f * std::pow(400.f, qParam[i]);
 			float y  = groups[i].process(x, f0, Q, sampleRate);
-			y *= 1.f / (Q * Q);  // normalize 4-pole BP peak to unity; Q shapes bandwidth only
+			y *= 1.f / (Q * Q);
 			prevOut[i] = y;
 			sum += pol * y;
 		}
