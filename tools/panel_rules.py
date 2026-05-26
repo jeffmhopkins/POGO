@@ -20,6 +20,21 @@ JACK_CY = (-5.0, -1.42, 5.0, 12.98)   # (x1, y1, x2, y2)
 #   → relative to shaft: x∈[-8.65, 5.1], y∈[-6.67, 6.67]
 POT_CY  = (-8.65, -6.67, 5.1, 6.67)
 
+# Sub-mini toggle switch (SPDT THT, e.g. C&K M-series)
+# Panel hole: 6.3mm Ø → r=3.15mm
+# PCB courtyard: relative to switch body centre
+SWITCH_PANEL_R = 3.15
+SWITCH_CY      = (-4.5, -3.5, 4.5, 7.5)
+
+# 3mm LED THT
+# Panel hole: 3.2mm Ø → r=1.6mm
+# PCB courtyard: relative to LED body centre
+LED_PANEL_R = 1.6
+LED_CY      = (-2.0, -1.5, 2.0, 4.0)
+
+SWITCH_TYPES = {"switch_H2", "switch_H3", "switch_V3"}
+LED_TYPES    = {"led", "led_labeled"}
+
 # Minimum clearance from PCB courtyard edge to mounting hole centre (M3, r≈3.5mm)
 MOUNTING_HOLE_CLEARANCE_MM = 3.5
 
@@ -34,6 +49,12 @@ def _get_courtyard(cx: float, cy: float, ctype: str) -> tuple[float, float, floa
         return (cx + x1, cy + y1, cx + x2, cy + y2)
     if ctype in POT_TYPES:
         x1, y1, x2, y2 = POT_CY
+        return (cx + x1, cy + y1, cx + x2, cy + y2)
+    if ctype in SWITCH_TYPES:
+        x1, y1, x2, y2 = SWITCH_CY
+        return (cx + x1, cy + y1, cx + x2, cy + y2)
+    if ctype in LED_TYPES:
+        x1, y1, x2, y2 = LED_CY
         return (cx + x1, cy + y1, cx + x2, cy + y2)
     return None
 
@@ -154,12 +175,14 @@ class DesignRules:
 
         Returns a list of violation strings (empty = no violations).
         Violations are prefixed with a category tag, e.g. [NUT KEEPOUT].
+        [PCB KEEPOUT] entries are informational warnings (not blocking errors).
         """
         violations: list[str] = []
         violations.extend(self._check_nut_keepout(components))
         violations.extend(self._check_pcb_overlaps(components))
         if mounting_holes:
             violations.extend(self._check_mounting_clearance(components, mounting_holes))
+        violations.extend(self._check_pcb_keepout(components))
         return violations
 
     # ── Individual check passes ───────────────────────────────────────────────
@@ -181,6 +204,32 @@ class DesignRules:
                 v = self._pot_keepout_violation(cx, cy, label)
                 if v:
                     out.append(f"[NUT KEEPOUT] {v}")
+            elif ctype in SWITCH_TYPES:
+                top_edge = cy - SWITCH_PANEL_R
+                bot_edge = cy + SWITCH_PANEL_R
+                if top_edge < self.top_keepout:
+                    out.append(
+                        f"[NUT KEEPOUT] SWITCH '{label}' at cy={cy:.2f}: hole top={top_edge:.2f}"
+                        f" encroaches TOP keepout ({self.top_keepout:.2f})"
+                    )
+                if bot_edge > self.bot_keepout_start:
+                    out.append(
+                        f"[NUT KEEPOUT] SWITCH '{label}' at cy={cy:.2f}: hole bottom={bot_edge:.2f}"
+                        f" exceeds BOT keepout start ({self.bot_keepout_start:.2f})"
+                    )
+            elif ctype in LED_TYPES:
+                top_edge = cy - LED_PANEL_R
+                bot_edge = cy + LED_PANEL_R
+                if top_edge < self.top_keepout:
+                    out.append(
+                        f"[NUT KEEPOUT] LED '{label}' at cy={cy:.2f}: hole top={top_edge:.2f}"
+                        f" encroaches TOP keepout ({self.top_keepout:.2f})"
+                    )
+                if bot_edge > self.bot_keepout_start:
+                    out.append(
+                        f"[NUT KEEPOUT] LED '{label}' at cy={cy:.2f}: hole bottom={bot_edge:.2f}"
+                        f" exceeds BOT keepout start ({self.bot_keepout_start:.2f})"
+                    )
         return out
 
     def _check_pcb_overlaps(self, components: list[dict[str, Any]]) -> list[str]:
@@ -210,6 +259,34 @@ class DesignRules:
                         f"[PCB OVERLAP] '{la}' ({ca['type']}) ↔ '{lb}' ({cb['type']})"
                         f" — overlap {dx:.2f}×{dy:.2f}mm"
                     )
+        return out
+
+    def _check_pcb_keepout(self, components: list[dict[str, Any]]) -> list[str]:
+        """PCB courtyard rectangles that extend into top/bottom keep-out zones.
+
+        These are informational [PCB KEEPOUT] warnings — expected for through-panel
+        components near panel edges — not blocking errors.
+        """
+        out: list[str] = []
+        for comp in components:
+            ctype = comp.get("type", "")
+            cx = float(comp.get("cx", 0))
+            cy = float(comp.get("cy", 0))
+            rect = _get_courtyard(cx, cy, ctype)
+            if rect is None:
+                continue
+            rx1, ry1, rx2, ry2 = rect
+            label = _comp_label(comp)
+            if ry1 < self.top_keepout:
+                out.append(
+                    f"[PCB KEEPOUT] '{label}' ({ctype}) courtyard top={ry1:.2f}"
+                    f" extends into TOP keepout ({self.top_keepout:.2f}) — informational"
+                )
+            if ry2 > self.bot_keepout_start:
+                out.append(
+                    f"[PCB KEEPOUT] '{label}' ({ctype}) courtyard bottom={ry2:.2f}"
+                    f" extends into BOT keepout ({self.bot_keepout_start:.2f}) — informational"
+                )
         return out
 
     def _check_mounting_clearance(

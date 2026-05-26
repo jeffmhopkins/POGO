@@ -55,19 +55,25 @@ def resolve_components(data: dict, rules: DesignRules) -> list[dict]:
             flat.extend(_resolve_band_components(zone, rules))
         else:
             for comp in zone.get("components", []):
-                flat.append(_resolve_comp(comp, rules))
+                flat.append(_resolve_comp(comp, rules, zone=zone))
     return flat
 
 
-def _resolve_comp(comp: dict, rules: DesignRules) -> dict:
+def _resolve_comp(comp: dict, rules: DesignRules, zone: dict | None = None) -> dict:
     c = dict(comp)
+    # Column-relative x resolution
+    if 'col' in c and zone and 'x_start' in zone:
+        x_start   = float(zone['x_start'])
+        col_pitch = float(zone.get('col_pitch', rules.jack_pitch))
+        c['cx'] = x_start + (float(c['col']) + 0.5) * col_pitch
     cy = c.get("cy")
-    if cy is None or (isinstance(cy, str) and cy.startswith("_")):
-        ctype = c.get("type", "")
-        if ctype in {"jack_input", "jack_output"}:
-            c["cy"] = rules.cv_jack_cy
-        else:
-            c["cy"] = rules.att_cy
+    if cy == "_cv_jack_cy_" or cy is None and c.get("type", "") in {"jack_input", "jack_output"}:
+        c["cy"] = rules.cv_jack_cy
+    elif cy == "_att_cy_" or cy is None:
+        c["cy"] = rules.att_cy
+    elif isinstance(cy, str) and cy.startswith("_"):
+        # Unknown template — fall back by type
+        c["cy"] = rules.cv_jack_cy if c.get("type", "") in {"jack_input", "jack_output"} else rules.att_cy
     else:
         c["cy"] = float(cy)
     return c
@@ -114,6 +120,46 @@ def run_drc(data: dict, rules: DesignRules) -> list[str]:
     components    = resolve_components(data, rules)
     mh            = data.get("mounting_holes", [])
     return rules.check_all(components, mounting_holes=mh)
+
+
+# ── Component list / next-x helpers ──────────────────────────────────────────
+
+def print_component_list(data: dict, rules: DesignRules) -> None:
+    """Print a table of all resolved components grouped by zone."""
+    header = f"{'ZONE':<20} {'ID':<30} {'TYPE':<16} {'cx':>7} {'cy':>7}"
+    print(header)
+    print("-" * len(header))
+    for zone in data.get("zones", []):
+        zone_id = zone.get("id", "")
+        if zone_id in ("band1", "band2", "band3"):
+            comps = _resolve_band_components(zone, rules)
+            for comp in comps:
+                cid   = comp.get("id") or comp.get("cpp_id") or comp.get("cpp_param") or "?"
+                ctype = comp.get("type", "")
+                cx    = float(comp.get("cx", 0))
+                cy    = float(comp.get("cy", 0))
+                print(f"{zone_id:<20} {cid:<30} {ctype:<16} {cx:>7.2f} {cy:>7.2f}")
+        else:
+            for comp in zone.get("components", []):
+                resolved = _resolve_comp(comp, rules, zone=zone)
+                cid   = resolved.get("id") or resolved.get("cpp_id") or resolved.get("cpp_param") or "?"
+                ctype = resolved.get("type", "")
+                cx    = float(resolved.get("cx", 0))
+                cy    = float(resolved.get("cy", 0))
+                print(f"{zone_id:<20} {cid:<30} {ctype:<16} {cx:>7.2f} {cy:>7.2f}")
+
+
+def get_next_x(data: dict, rules: DesignRules, zone_id: str) -> float | None:
+    """Return the next x_start after a column-relative zone, or None if not found."""
+    for zone in data.get("zones", []):
+        if zone.get("id") == zone_id:
+            if "x_start" not in zone or "cols" not in zone:
+                return None
+            x_start   = float(zone["x_start"])
+            col_pitch = float(zone.get("col_pitch", rules.jack_pitch))
+            cols      = int(zone["cols"])
+            return x_start + cols * col_pitch
+    return None
 
 
 # ── SVG generation ────────────────────────────────────────────────────────────
@@ -258,7 +304,8 @@ def _build_svg_lines(data: dict, rules: DesignRules) -> list[str]:
             lines.extend(_band_svg_lines(zone, rules, colors))
         else:
             for comp in zone.get("components", []):
-                chunk = _component_svg(comp, rules, colors)
+                resolved = _resolve_comp(comp, rules, zone=zone)
+                chunk = _component_svg(resolved, rules, colors)
                 if chunk:
                     lines.append("  " + chunk.replace("\n", "\n  "))
 
@@ -434,11 +481,15 @@ def _scale_svg_for_html(svg_content: str, scale: float = 4.0) -> str:
 
 def _collect_overlay_positions(data: dict, rules: DesignRules) -> dict:
     """Return component positions grouped by type for overlay rendering."""
-    jacks: list[tuple[float, float]] = []
-    pots:  list[tuple[float, float]] = []
-    knobs: list[tuple[float, float, float]] = []  # cx, cy, r_mm
+    jacks:   list[tuple[float, float]] = []
+    pots:    list[tuple[float, float]] = []
+    knobs:   list[tuple[float, float, float]] = []  # cx, cy, r_mm
+    switches: list[tuple[float, float]] = []
+    leds:    list[tuple[float, float]] = []
 
     r_map = {"knob_medium": 4.5, "knob_large": 7.0, "knob_xl": 9.0}
+
+    from panel_rules import SWITCH_TYPES, LED_TYPES  # noqa: E402
 
     for comp in resolve_components(data, rules):
         cx    = float(comp.get("cx", 0))
@@ -451,8 +502,12 @@ def _collect_overlay_positions(data: dict, rules: DesignRules) -> dict:
             pots.append((cx, cy))
         elif ctype in r_map:
             knobs.append((cx, cy, r_map[ctype]))
+        elif ctype in SWITCH_TYPES:
+            switches.append((cx, cy))
+        elif ctype in LED_TYPES:
+            leds.append((cx, cy))
 
-    return {"jacks": jacks, "pots": pots, "knobs": knobs}
+    return {"jacks": jacks, "pots": pots, "knobs": knobs, "switches": switches, "leds": leds}
 
 
 def _wrap_svg_in_layers(
@@ -471,7 +526,7 @@ def _wrap_svg_in_layers(
     svg_open = svg_content[: m.start(1)].rstrip()
 
     if overlay is None:
-        overlay = {"jacks": [], "pots": [], "knobs": []}
+        overlay = {"jacks": [], "pots": [], "knobs": [], "switches": [], "leds": []}
 
     # Extract panel dimensions from SVG attributes (works for any HP width).
     import re as _re
@@ -509,6 +564,14 @@ def _wrap_svg_in_layers(
         nuts_parts.append(
             f'    <circle cx="{cx}" cy="{cy}" r="{r}" fill="rgba(255,140,0,0.25)" stroke="#ff8c00" stroke-width="0.25"/>'
         )
+    for cx, cy in overlay.get("switches", []):
+        nuts_parts.append(
+            f'    <circle cx="{cx}" cy="{cy}" r="3.15" fill="rgba(220,100,255,0.35)" stroke="#dc64ff" stroke-width="0.25"/>'
+        )
+    for cx, cy in overlay.get("leds", []):
+        nuts_parts.append(
+            f'    <circle cx="{cx}" cy="{cy}" r="1.6" fill="rgba(100,220,100,0.35)" stroke="#64dc64" stroke-width="0.25"/>'
+        )
     nuts_layer = (
         '\n  <g id="layer-nuts" style="display:none;">\n'
         + "\n".join(nuts_parts)
@@ -518,6 +581,8 @@ def _wrap_svg_in_layers(
     # ── PCB footprints layer (KiCad courtyard projected onto panel plane) ──────
     # Thonkiconn PJ301M-12: courtyard x∈[-5,5] y∈[-1.42,12.98] (origin = panel hole)
     # Alpha RD901F 9mm:     courtyard relative to shaft center x∈[-8.65,5.1] y∈[-6.67,6.67]
+    # Switch: courtyard SWITCH_CY = (-4.5,-3.5,4.5,7.5) relative to switch centre
+    # LED:    courtyard LED_CY    = (-2.0,-1.5,2.0,4.0) relative to LED centre
     pcb_parts: list[str] = []
     for cx, cy in overlay["jacks"]:
         pcb_parts.append(
@@ -533,6 +598,16 @@ def _wrap_svg_in_layers(
         pcb_parts.append(
             f'    <rect x="{cx - 8.65}" y="{cy - 6.67}" width="13.75" height="13.34"'
             f' fill="rgba(255,140,0,0.12)" stroke="#ff8c00" stroke-width="0.2" stroke-dasharray="0.8 0.4"/>'
+        )
+    for cx, cy in overlay.get("switches", []):
+        pcb_parts.append(
+            f'    <rect x="{cx - 4.5}" y="{cy - 3.5}" width="9" height="11"'
+            f' fill="rgba(220,100,255,0.15)" stroke="#dc64ff" stroke-width="0.2" stroke-dasharray="0.8 0.4"/>'
+        )
+    for cx, cy in overlay.get("leds", []):
+        pcb_parts.append(
+            f'    <rect x="{cx - 2.0}" y="{cy - 1.5}" width="4" height="5.5"'
+            f' fill="rgba(100,220,100,0.15)" stroke="#64dc64" stroke-width="0.2" stroke-dasharray="0.8 0.4"/>'
         )
     pcb_layer = (
         '\n  <g id="layer-pcb" style="display:none;">\n'
@@ -567,6 +642,7 @@ def build_html(svg_content: str, rules: DesignRules, violations: list[str], data
             "NUT KEEPOUT":    "#ff6666",
             "PCB OVERLAP":    "#ffaa44",
             "MH CLEARANCE":   "#ffdd55",
+            "PCB KEEPOUT":    "#88aaff",
             "OTHER":          "#cc99ff",
         }
         parts = []
@@ -651,11 +727,14 @@ def main() -> int:
     parser.add_argument("--design",   action="store_true", help="Write design/panel-debug.html")
     parser.add_argument("--mfr",      action="store_true", help="Write res/Pogo.svg via inkscape")
     parser.add_argument("--cpp",      action="store_true", help="Print C++ stubs to stdout")
-    parser.add_argument("--check",    action="store_true", help="DRC only; exit 1 on violations")
+    parser.add_argument("--check",    action="store_true", help="DRC only; exit 1 on blocking violations")
+    parser.add_argument("--list",     action="store_true", help="Print table of all resolved components")
+    parser.add_argument("--next",     metavar="ZONE_ID",   help="Print next x_start after a column-relative zone")
     args = parser.parse_args()
 
     # Default: both --resource and --design
-    if not any([args.resource, args.design, args.mfr, args.cpp, args.check]):
+    if not any([args.resource, args.design, args.mfr, args.cpp, args.check,
+                args.list, args.next]):
         args.resource = True
         args.design   = True
 
@@ -665,19 +744,44 @@ def main() -> int:
     violations = run_drc(data, rules)
 
     if args.check:
-        if violations:
+        blocking = [v for v in violations if not v.startswith("[PCB KEEPOUT]")]
+        informational = [v for v in violations if v.startswith("[PCB KEEPOUT]")]
+        if blocking:
             from collections import defaultdict
             groups: dict[str, list[str]] = defaultdict(list)
-            for v in violations:
+            for v in blocking:
                 tag = v.split("]")[0].lstrip("[") if v.startswith("[") else "OTHER"
                 groups[tag].append(v)
-            print(f"DRC FAILED — {len(violations)} violation(s):", file=sys.stderr)
+            print(f"DRC FAILED — {len(blocking)} violation(s):", file=sys.stderr)
             for tag, items in sorted(groups.items()):
                 print(f"\n  [{tag}] ({len(items)})", file=sys.stderr)
                 for v in items:
                     print(f"    {v}", file=sys.stderr)
+            if informational:
+                print(f"\n  [PCB KEEPOUT] ({len(informational)}) — informational only:",
+                      file=sys.stderr)
+                for v in informational:
+                    print(f"    {v}", file=sys.stderr)
             return 1
-        print("DRC PASS — no violations.")
+        if informational:
+            print(f"DRC PASS (with {len(informational)} [PCB KEEPOUT] informational warning(s)):")
+            for v in informational:
+                print(f"  {v}")
+        else:
+            print("DRC PASS — no violations.")
+        return 0
+
+    if args.list:
+        print_component_list(data, rules)
+        return 0
+
+    if args.next:
+        nx = get_next_x(data, rules, args.next)
+        if nx is None:
+            print(f"Zone '{args.next}' not found or not column-relative.", file=sys.stderr)
+            return 1
+        hp = nx / 5.08
+        print(f"{args.next}  next x_start = {nx:.2f} mm  (HP {hp:.2f})")
         return 0
 
     svg_content = build_svg(data, rules)
