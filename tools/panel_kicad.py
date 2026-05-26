@@ -84,9 +84,12 @@ _FOOTPRINT_MAP: dict[str, tuple[str, float, float]] = {
     ),
 }
 
-# Visual style per KiCad layer
+# Visual style per KiCad layer.
+# F.CrtYd is intentionally omitted: the KiCad footprints use a component-specific
+# visual anchor (e.g. barrel body for jacks) rather than the sleeve/hole centre, so
+# the footprint F.CrtYd lines would be offset from the DRC courtyard boxes shown in
+# layer-pcb. Accurate courtyards are provided by layer-pcb (panel_rules.py).
 _LAYER_STYLE: dict[str, dict] = {
-    "F.CrtYd": {"stroke": "#00d4ff", "fill": "none",                  "sw": 0.12, "dash": "0.8 0.5"},
     "F.Fab":   {"stroke": "#f5a623", "fill": "rgba(245,166,35,0.08)", "sw": 0.10, "dash": ""},
     "F.SilkS": {"stroke": "#cccccc", "fill": "none",                  "sw": 0.10, "dash": ""},
 }

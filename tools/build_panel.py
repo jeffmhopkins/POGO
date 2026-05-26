@@ -1158,7 +1158,6 @@ def build_html(svg_content: str, rules: DesignRules, violations: list[str], data
         ("#dc64ff", "●", "Switch hole  r=3.15mm"),
         ("#64dc64", "●", "LED hole  r=1.6mm"),
         ("#ffcc00", "⬚", "PCB courtyard  (simplified bbox; dashed)"),
-        ("#00d4ff", "⬚", "KiCad courtyard  F.CrtYd (actual; dashed)"),
         ("#f5a623", "⬚", "KiCad fab outline  F.Fab"),
         ("#cccccc", "⬚", "KiCad silkscreen  F.SilkS"),
         ("#ff44ff", "●", "KiCad pad  (through-hole marker)"),
