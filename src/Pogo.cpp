@@ -449,6 +449,24 @@ struct Pogo : Module {
 		int polSwitch = (int)std::round(params[POLARITY_PARAM].getValue()); // 0=pos, 1=off, 2=neg
 		int polarityVal = (polSwitch == 0) ? 1 : (polSwitch == 2) ? -1 : 0;
 
+		// ── Block VCA ─────────────────────────────────────────────────────────
+		float vcaCV  = inputs[VCA_CV_INPUT].isConnected()
+		               ? inputs[VCA_CV_INPUT].getVoltage()
+		               : busV; // normalise to mod bus
+		float vcaAmt = params[VCA_AMT_PARAM].getValue();
+		float vcaL   = VcaBlock::process(pgL, vcaAmt, vcaCV);
+		float vcaR   = VcaBlock::process(pgR, vcaAmt, vcaCV);
+
+		// ── Block 5: LP Filter 1 ─────────────────────────────────────────────
+		float lp1CV  = params[LP1_CUTOFF_PARAM].getValue()
+		               + modDest(LP1_CUT_CV_INPUT, LP1_CUT_ATT_PARAM);
+		float lp1Res = clamp(params[LP1_RESONANCE_PARAM].getValue()
+		                     + modDest(LP1_RES_CV_INPUT, LP1_RES_ATT_PARAM) / 10.f,
+		                     0.f, 1.f);
+		float spreadV = params[LP1_SPREAD_PARAM].getValue();
+		float bandL = lp1L.process(vcaL, lp1CV,          lp1Res, fs);
+		float bandR = lp1R.process(vcaR, lp1CV + spreadV, lp1Res, fs);
+
 		float combBypass = clamp(params[COMB_BYPASS_PARAM].getValue()
 		                         + modDest(BYPASS_CV_INPUT, BYPASS_ATT_PARAM), 0.f, 1.f);
 		float widthParam = params[WIDTH_PARAM].getValue(); // ±1 V/oct offset on R
@@ -461,14 +479,14 @@ struct Pogo : Module {
 			clamp(params[DRIVE_3_PARAM].getValue() + modDest(DRIVE_CV_3_INPUT, DRIVE_ATT_3_PARAM), 0.f, 1.f),
 		};
 
-		// Alt BP3 inputs: when patched, replace pgL/pgR as SVF input only.
+		// Alt BP3 inputs: when patched, bypass VCA+LP1 and feed directly into SVF.
 		// R normalizes to L alt if only L is patched.
 		bool altLConn = inputs[ALT_BP_L_INPUT].isConnected();
 		bool altRConn = inputs[ALT_BP_R_INPUT].isConnected();
-		float bpInL = altLConn ? inputs[ALT_BP_L_INPUT].getVoltage() : pgL;
+		float bpInL = altLConn ? inputs[ALT_BP_L_INPUT].getVoltage() : bandL;
 		float bpInR = altRConn ? inputs[ALT_BP_R_INPUT].getVoltage()
 		            : altLConn ? inputs[ALT_BP_L_INPUT].getVoltage()
-		            : pgR;
+		            : bandR;
 
 		float upBufL[OS], upBufR[OS];
 		upL.process(bpInL, upBufL);
@@ -498,23 +516,14 @@ struct Pogo : Module {
 		float distSumL = decL.process(postL);
 		float distSumR = decR.process(postR);
 
-		// ── Block VCA ─────────────────────────────────────────────────────────
-		float vcaCV  = inputs[VCA_CV_INPUT].isConnected()
-		               ? inputs[VCA_CV_INPUT].getVoltage()
-		               : busV; // normalise to mod bus
-		float vcaAmt = params[VCA_AMT_PARAM].getValue();
-		float vcaL   = VcaBlock::process(distSumL, vcaAmt, vcaCV);
-		float vcaR   = VcaBlock::process(distSumR, vcaAmt, vcaCV);
-
-		// ── Block 5: LP Filter 1 ─────────────────────────────────────────────
-		float lp1CV  = params[LP1_CUTOFF_PARAM].getValue()
-		               + modDest(LP1_CUT_CV_INPUT, LP1_CUT_ATT_PARAM);
-		float lp1Res = clamp(params[LP1_RESONANCE_PARAM].getValue()
-		                     + modDest(LP1_RES_CV_INPUT, LP1_RES_ATT_PARAM) / 10.f,
-		                     0.f, 1.f);
-		float spreadV = params[LP1_SPREAD_PARAM].getValue();
-		float bandL = lp1L.process(vcaL, lp1CV,          lp1Res, fs);
-		float bandR = lp1R.process(vcaR, lp1CV + spreadV, lp1Res, fs);
+		// ── Block 7: HP Filter ────────────────────────────────────────────────
+		float hpCV  = params[HP_CUTOFF_PARAM].getValue()
+		              + modDest(HP_CUT_CV_INPUT, HP_CUT_ATT_PARAM);
+		float hpRes = clamp(params[HP_RESONANCE_PARAM].getValue()
+		                    + modDest(HP_RES_CV_INPUT, HP_RES_ATT_PARAM) / 10.f,
+		                    0.f, 1.f);
+		float hpOutL = hpL.process(distSumL, hpCV, hpRes, fs);
+		float hpOutR = hpR.process(distSumR, hpCV, hpRes, fs);
 
 		// ── Block 6: LP Filter 2 ─────────────────────────────────────────────
 		float lp2CV  = params[LP2_CUTOFF_PARAM].getValue()
@@ -522,17 +531,8 @@ struct Pogo : Module {
 		float lp2Res = clamp(params[LP2_RESONANCE_PARAM].getValue()
 		                     + modDest(LP2_RES_CV_INPUT, LP2_RES_ATT_PARAM) / 10.f,
 		                     0.f, 1.f);
-		float lp2L_ = lp2L.process(bandL, lp2CV, lp2Res, fs);
-		float lp2R_ = lp2R.process(bandR, lp2CV, lp2Res, fs);
-
-		// ── Block 7: HP Filter ────────────────────────────────────────────────
-		float hpCV  = params[HP_CUTOFF_PARAM].getValue()
-		              + modDest(HP_CUT_CV_INPUT, HP_CUT_ATT_PARAM);
-		float hpRes = clamp(params[HP_RESONANCE_PARAM].getValue()
-		                    + modDest(HP_RES_CV_INPUT, HP_RES_ATT_PARAM) / 10.f,
-		                    0.f, 1.f);
-		float outL = hpL.process(lp2L_, hpCV, hpRes, fs);
-		float outR = hpR.process(lp2R_, hpCV, hpRes, fs);
+		float outL = lp2L.process(hpOutL, lp2CV, lp2Res, fs);
+		float outR = lp2R.process(hpOutR, lp2CV, lp2Res, fs);
 
 		// ── Block B: output buffers (LM4562, ±11 V swing on ±12 V rails) ─────
 		outputs[L_OUTPUT].setVoltage(clamp(outL, -11.0f, 11.0f));
