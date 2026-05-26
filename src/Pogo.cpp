@@ -107,6 +107,17 @@ struct PogoSlider : app::SliderKnob {
 	}
 };
 
+struct FormantFreqQuantity : ParamQuantity {
+	float fref = 200.f;
+	std::string getDisplayValueString() override {
+		float hz = fref * std::pow(2.f, getValue());
+		if (hz >= 1000.f)
+			return string::f("%.2f kHz", hz / 1000.f);
+		return string::f("%.1f Hz", hz);
+	}
+	std::string getUnit() override { return ""; }
+};
+
 // ─────────────────────────────────────────────────────────────────────────
 struct Pogo : Module {
 	enum ParamId {
@@ -253,29 +264,29 @@ struct Pogo : Module {
 		configParam(MASTER_OFFSET_ATT_PARAM, -1.f, 1.f, 0.f, "Master Offset CV Depth");
 		configParam(BLEND_ATT_PARAM, -1.f, 1.f, 0.f, "FB Dist Blend CV Depth");
 
-		// Comb 1
-		configParam(FREQ_1_PARAM, -5.f, 5.f, 0.f, "Comb 1 Freq", " V/oct");
-		configParam(FB_1_PARAM, 0.f, 1.f, 0.f, "Comb 1 Feedback");
-		configParam(DRIVE_1_PARAM, 0.f, 1.f, 0.20f, "Comb 1 Drive");
-		configParam(FREQ_ATT_1_PARAM, -1.f, 1.f, 0.f, "Comb 1 Freq CV Depth");
-		configParam(FB_ATT_1_PARAM, -1.f, 1.f, 0.f, "Comb 1 FB CV Depth");
-		configParam(DRIVE_ATT_1_PARAM, -1.f, 1.f, 0.f, "Comb 1 Drive CV Depth");
+		// Formant 1
+		configParam<FormantFreqQuantity>(FREQ_1_PARAM, -5.f, 5.f, 0.f, "Formant 1 Freq")->fref = 200.f;
+		configParam(FB_1_PARAM, 0.f, 1.f, 0.f, "Formant 1 Q");
+		configParam(DRIVE_1_PARAM, 0.f, 1.f, 0.20f, "Formant 1 Drive");
+		configParam(FREQ_ATT_1_PARAM, -1.f, 1.f, 0.f, "Formant 1 Freq CV Depth");
+		configParam(FB_ATT_1_PARAM, -1.f, 1.f, 0.f, "Formant 1 Q CV Depth");
+		configParam(DRIVE_ATT_1_PARAM, -1.f, 1.f, 0.f, "Formant 1 Drive CV Depth");
 
-		// Comb 2
-		configParam(FREQ_2_PARAM, -5.f, 5.f, 0.f, "Comb 2 Freq", " V/oct");
-		configParam(FB_2_PARAM, 0.f, 1.f, 0.f, "Comb 2 Feedback");
-		configParam(DRIVE_2_PARAM, 0.f, 1.f, 0.20f, "Comb 2 Drive");
-		configParam(FREQ_ATT_2_PARAM, -1.f, 1.f, 0.f, "Comb 2 Freq CV Depth");
-		configParam(FB_ATT_2_PARAM, -1.f, 1.f, 0.f, "Comb 2 FB CV Depth");
-		configParam(DRIVE_ATT_2_PARAM, -1.f, 1.f, 0.f, "Comb 2 Drive CV Depth");
+		// Formant 2
+		configParam<FormantFreqQuantity>(FREQ_2_PARAM, -5.f, 5.f, 0.f, "Formant 2 Freq")->fref = 1500.f;
+		configParam(FB_2_PARAM, 0.f, 1.f, 0.f, "Formant 2 Q");
+		configParam(DRIVE_2_PARAM, 0.f, 1.f, 0.20f, "Formant 2 Drive");
+		configParam(FREQ_ATT_2_PARAM, -1.f, 1.f, 0.f, "Formant 2 Freq CV Depth");
+		configParam(FB_ATT_2_PARAM, -1.f, 1.f, 0.f, "Formant 2 Q CV Depth");
+		configParam(DRIVE_ATT_2_PARAM, -1.f, 1.f, 0.f, "Formant 2 Drive CV Depth");
 
-		// Comb 3
-		configParam(FREQ_3_PARAM, -5.f, 5.f, 0.f, "Comb 3 Freq", " V/oct");
-		configParam(FB_3_PARAM, 0.f, 1.f, 0.f, "Comb 3 Feedback");
-		configParam(DRIVE_3_PARAM, 0.f, 1.f, 0.20f, "Comb 3 Drive");
-		configParam(FREQ_ATT_3_PARAM, -1.f, 1.f, 0.f, "Comb 3 Freq CV Depth");
-		configParam(FB_ATT_3_PARAM, -1.f, 1.f, 0.f, "Comb 3 FB CV Depth");
-		configParam(DRIVE_ATT_3_PARAM, -1.f, 1.f, 0.f, "Comb 3 Drive CV Depth");
+		// Formant 3
+		configParam<FormantFreqQuantity>(FREQ_3_PARAM, -5.f, 5.f, 0.f, "Formant 3 Freq")->fref = 6000.f;
+		configParam(FB_3_PARAM, 0.f, 1.f, 0.f, "Formant 3 Q");
+		configParam(DRIVE_3_PARAM, 0.f, 1.f, 0.20f, "Formant 3 Drive");
+		configParam(FREQ_ATT_3_PARAM, -1.f, 1.f, 0.f, "Formant 3 Freq CV Depth");
+		configParam(FB_ATT_3_PARAM, -1.f, 1.f, 0.f, "Formant 3 Q CV Depth");
+		configParam(DRIVE_ATT_3_PARAM, -1.f, 1.f, 0.f, "Formant 3 Drive CV Depth");
 
 		// VCA
 		configParam(VCA_AMT_PARAM, -1.f, 1.f, 0.f, "VCA CV Depth");
