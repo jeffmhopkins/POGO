@@ -565,10 +565,10 @@ struct PogoWidget : ModuleWidget {
 		addParam(createParamCentered<PogoSwitchH2>(mm2px(Vec(10.16f, 30.2f)), module, Pogo::GAIN_PARAM));
 
 		// ── Zone 0b — LFO ──────────────────────────────────────────────────
-		addChild(createLightCentered<SmallLight<RedLight>>(mm2px(Vec(5.08f, 61.f)), module, Pogo::LFO1_LIGHT));
-		addChild(createLightCentered<SmallLight<RedLight>>(mm2px(Vec(15.24f, 61.f)), module, Pogo::LFO2_LIGHT));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(5.08f, 66.f)), module, Pogo::LFO1_SPEED_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(15.24f, 66.f)), module, Pogo::LFO2_SPEED_PARAM));
+		addChild(createLightCentered<SmallLight<RedLight>>(mm2px(Vec(5.08f, 56.f)), module, Pogo::LFO1_LIGHT));
+		addChild(createLightCentered<SmallLight<RedLight>>(mm2px(Vec(15.24f, 56.f)), module, Pogo::LFO2_LIGHT));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(5.08f, 69.f)), module, Pogo::LFO1_SPEED_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(15.24f, 69.f)), module, Pogo::LFO2_SPEED_PARAM));
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(5.08f, 82.f)), module, Pogo::LFO1_OUTPUT));
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(15.24f, 82.f)), module, Pogo::LFO2_OUTPUT));
 
