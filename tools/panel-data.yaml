@@ -91,12 +91,12 @@ zones:
 
   # ── Section 0a: INPUT / GAIN ──────────────────────────────────────────────
   # 2 input jacks + pre-gain switch + 2 alt bandpass inputs
-  # x_start = 15.24 (HP3), col_pitch = 15.24 (3HP), cols = 2
-  # col 0 → cx = 22.86mm, col 1 → cx = 38.10mm
+  # x_start = 15.24 (HP3), col_pitch = 11.43 (2.25HP), cols = 2
+  # col 0 → cx = 20.955mm, col 1 → cx = 32.385mm
   - id: zone_input
     label: "Zone 0a — INPUT / GAIN"
     x_start: 15.24
-    col_pitch: 15.24
+    col_pitch: 11.43
     cols: 2
     components:
       - id: L_IN
@@ -115,12 +115,12 @@ zones:
         cpp_id: "R_IN_INPUT"
       - id: GAIN
         type: switch_H2
-        cx: 30.48
+        cx: 26.67
         cy: 28
         label_above: "GAIN"
         label_above_y: 22.0
         pos_labels: ["1×", "5×"]
-        pos_xs: [25.98, 34.98]
+        pos_xs: [22.17, 31.17]
         pos_y: 33.0
         cpp_param: "GAIN_PARAM"
       - id: BP3_L
