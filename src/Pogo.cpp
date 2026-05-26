@@ -559,9 +559,9 @@ struct PogoWidget : ModuleWidget {
 		// ── Zone 0a — INPUT / GAIN ──────────────────────────────────────
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(5.08f, 16.f)), module, Pogo::L_IN_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(15.24f, 16.f)), module, Pogo::R_IN_INPUT));
-		addParam(createParamCentered<PogoSwitchH2>(mm2px(Vec(10.16f, 26.f)), module, Pogo::GAIN_PARAM));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(5.08f, 38.f)), module, Pogo::ALT_BP_L_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(15.24f, 38.f)), module, Pogo::ALT_BP_R_INPUT));
+		addParam(createParamCentered<PogoSwitchH2>(mm2px(Vec(10.16f, 32.f)), module, Pogo::GAIN_PARAM));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(5.08f, 43.f)), module, Pogo::ALT_BP_L_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(15.24f, 43.f)), module, Pogo::ALT_BP_R_INPUT));
 
 		// ── Zone 0b — LFO ──────────────────────────────────────────────────
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(5.08f, 62.6f)), module, Pogo::LFO1_SPEED_PARAM));
