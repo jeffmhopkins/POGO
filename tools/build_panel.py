@@ -126,7 +126,7 @@ def run_drc(data: dict, rules: DesignRules) -> list[str]:
 
 def print_component_list(data: dict, rules: DesignRules) -> None:
     """Print a table of all resolved components grouped by zone."""
-    header = f"{'ZONE':<20} {'ID':<30} {'TYPE':<16} {'cx':>7} {'cy':>7}"
+    header = f"{'ZONE':<20} {'ID':<30} {'TYPE':<16} {'cx':>7} {'cy':>7}  {'rot':>3}"
     print(header)
     print("-" * len(header))
     for zone in data.get("zones", []):
@@ -134,19 +134,23 @@ def print_component_list(data: dict, rules: DesignRules) -> None:
         if zone_id in ("band1", "band2", "band3"):
             comps = _resolve_band_components(zone, rules)
             for comp in comps:
-                cid   = comp.get("id") or comp.get("cpp_id") or comp.get("cpp_param") or "?"
-                ctype = comp.get("type", "")
-                cx    = float(comp.get("cx", 0))
-                cy    = float(comp.get("cy", 0))
-                print(f"{zone_id:<20} {cid:<30} {ctype:<16} {cx:>7.2f} {cy:>7.2f}")
+                cid    = comp.get("id") or comp.get("cpp_id") or comp.get("cpp_param") or "?"
+                ctype  = comp.get("type", "")
+                cx     = float(comp.get("cx", 0))
+                cy     = float(comp.get("cy", 0))
+                rotate = int(comp.get("rotate", 0))
+                rot_s  = f"{rotate}°" if rotate else ""
+                print(f"{zone_id:<20} {cid:<30} {ctype:<16} {cx:>7.2f} {cy:>7.2f}  {rot_s:>3}")
         else:
             for comp in zone.get("components", []):
                 resolved = _resolve_comp(comp, rules, zone=zone)
-                cid   = resolved.get("id") or resolved.get("cpp_id") or resolved.get("cpp_param") or "?"
-                ctype = resolved.get("type", "")
-                cx    = float(resolved.get("cx", 0))
-                cy    = float(resolved.get("cy", 0))
-                print(f"{zone_id:<20} {cid:<30} {ctype:<16} {cx:>7.2f} {cy:>7.2f}")
+                cid    = resolved.get("id") or resolved.get("cpp_id") or resolved.get("cpp_param") or "?"
+                ctype  = resolved.get("type", "")
+                cx     = float(resolved.get("cx", 0))
+                cy     = float(resolved.get("cy", 0))
+                rotate = int(resolved.get("rotate", 0))
+                rot_s  = f"{rotate}°" if rotate else ""
+                print(f"{zone_id:<20} {cid:<30} {ctype:<16} {cx:>7.2f} {cy:>7.2f}  {rot_s:>3}")
 
 
 def get_next_x(data: dict, rules: DesignRules, zone_id: str) -> float | None:
@@ -160,6 +164,163 @@ def get_next_x(data: dict, rules: DesignRules, zone_id: str) -> float | None:
             cols      = int(zone["cols"])
             return x_start + cols * col_pitch
     return None
+
+
+# ── Query helpers ─────────────────────────────────────────────────────────────
+
+def _comp_index(data: dict, rules: DesignRules) -> dict[str, dict]:
+    """Build a dict mapping component ID → resolved component dict."""
+    index: dict[str, dict] = {}
+    for comp in resolve_components(data, rules):
+        key = comp.get("id") or comp.get("cpp_id") or comp.get("cpp_param")
+        if key:
+            index[key] = comp
+    return index
+
+
+def print_dist(data: dict, rules: DesignRules, id1: str, id2: str) -> None:
+    """Print center-to-center, nut-edge, and PCB-courtyard distance between two components."""
+    from panel_rules import get_panel_r, _get_courtyard, _rect_min_gap  # noqa: E402
+    idx = _comp_index(data, rules)
+    c1, c2 = idx.get(id1), idx.get(id2)
+    if c1 is None:
+        print(f"Component '{id1}' not found.", file=sys.stderr)
+        return
+    if c2 is None:
+        print(f"Component '{id2}' not found.", file=sys.stderr)
+        return
+
+    cx1, cy1 = float(c1.get("cx", 0)), float(c1.get("cy", 0))
+    cx2, cy2 = float(c2.get("cx", 0)), float(c2.get("cy", 0))
+    t1,  t2  = c1.get("type", ""),     c2.get("type", "")
+    rot1     = int(c1.get("rotate", 0))
+    rot2     = int(c2.get("rotate", 0))
+    r1       = get_panel_r(t1, rules)
+    r2       = get_panel_r(t2, rules)
+
+    dx   = cx2 - cx1
+    dy   = cy2 - cy1
+    dist = (dx ** 2 + dy ** 2) ** 0.5
+
+    rot1_s = f"  rotate={rot1}°" if rot1 else ""
+    rot2_s = f"  rotate={rot2}°" if rot2 else ""
+    print(f"\n  {id1:<22} {t1:<14}  cx={cx1:>7.2f}  cy={cy1:>7.2f}{rot1_s}")
+    print(f"  {id2:<22} {t2:<14}  cx={cx2:>7.2f}  cy={cy2:>7.2f}{rot2_s}")
+    print()
+
+    align_x = "← aligned on cx" if abs(dx) < 0.01 else ""
+    align_y = "← aligned on cy" if abs(dy) < 0.01 else ""
+    print(f"  Δcx = {dx:+.2f} mm ({abs(dx)/5.08:.2f} HP)  {align_x}")
+    print(f"  Δcy = {dy:+.2f} mm ({abs(dy)/5.08:.2f} HP)  {align_y}")
+    print(f"  Center-to-center:  {dist:.2f} mm")
+
+    if r1 > 0 and r2 > 0:
+        nut_gap = dist - r1 - r2
+        status  = "✓" if nut_gap >= 0 else "CLASH"
+        print(f"  Nut/hole clearance: {nut_gap:+.2f} mm  (r={r1}+r={r2}={r1+r2})  {status}")
+
+    rect1 = _get_courtyard(cx1, cy1, t1, rot1)
+    rect2 = _get_courtyard(cx2, cy2, t2, rot2)
+    if rect1 and rect2:
+        pcb_gap = _rect_min_gap(rect1, rect2)
+        status  = "✓" if pcb_gap >= 0 else "OVERLAP"
+        print(f"  PCB courtyard gap:  {pcb_gap:+.2f} mm  {status}")
+    print()
+
+
+def print_snap_to(
+    data: dict,
+    rules: DesignRules,
+    comp_id: str,
+    direction: str,
+    new_type: str,
+    gap_mm: float,
+) -> None:
+    """Print cx/cy for placing new_type with gap_mm nut-edge clearance from comp_id."""
+    from panel_rules import get_panel_r, _get_courtyard, _rect_min_gap  # noqa: E402
+    idx = _comp_index(data, rules)
+    c = idx.get(comp_id)
+    if c is None:
+        print(f"Component '{comp_id}' not found.", file=sys.stderr)
+        return
+
+    cx     = float(c.get("cx", 0))
+    cy     = float(c.get("cy", 0))
+    ctype  = c.get("type", "")
+    rotate = int(c.get("rotate", 0))
+    r_ex   = get_panel_r(ctype, rules)
+    r_new  = get_panel_r(new_type, rules)
+    offset = r_ex + gap_mm + r_new
+
+    direction = direction.lower()
+    if direction == "right":
+        new_cx, new_cy = cx + offset, cy
+    elif direction == "left":
+        new_cx, new_cy = cx - offset, cy
+    elif direction in ("below", "down"):
+        new_cx, new_cy = cx, cy + offset
+    elif direction in ("above", "up"):
+        new_cx, new_cy = cx, cy - offset
+    else:
+        print(f"Unknown direction '{direction}'. Use: right, left, above/up, below/down.",
+              file=sys.stderr)
+        return
+
+    hp_x = new_cx / 5.08
+    hp_y = new_cy / 5.08
+    print(f"\n  Snap {new_type} {direction} of {comp_id} ({ctype}  r={r_ex:.1f}mm),"
+          f" {gap_mm:.1f}mm nut-edge gap:")
+    print(f"  offset = r_existing({r_ex}) + gap({gap_mm}) + r_new({r_new}) = {offset:.2f}mm")
+    print()
+    print(f"  new cx = {new_cx:.2f} mm  ({hp_x:.2f} HP)")
+    print(f"  new cy = {new_cy:.2f} mm  ({hp_y:.2f} HP)")
+
+    # PCB courtyard verification at the proposed position
+    rect_ex  = _get_courtyard(cx, cy, ctype, rotate)
+    rect_new = _get_courtyard(new_cx, new_cy, new_type, 0)
+    if rect_ex and rect_new:
+        pcb_gap = _rect_min_gap(rect_ex, rect_new)
+        status  = "✓" if pcb_gap >= 0 else "OVERLAP — check PCB clearance"
+        print(f"  PCB courtyard gap: {pcb_gap:+.2f} mm  {status}")
+    print()
+
+
+def print_zone_bbox(data: dict, rules: DesignRules, zone_id: str) -> None:
+    """Print the center-point bounding box and zone parameters for a zone."""
+    found = False
+    comps = []
+    for zone in data.get("zones", []):
+        if zone.get("id") != zone_id:
+            continue
+        found = True
+        for comp in zone.get("components", []):
+            comps.append(_resolve_comp(comp, rules, zone=zone))
+
+    if not found:
+        print(f"Zone '{zone_id}' not found.", file=sys.stderr)
+        return
+    if not comps:
+        print(f"Zone '{zone_id}' has no components.")
+        return
+
+    cx_vals = [float(c.get("cx", 0)) for c in comps]
+    cy_vals = [float(c.get("cy", 0)) for c in comps]
+    min_cx, max_cx = min(cx_vals), max(cx_vals)
+    min_cy, max_cy = min(cy_vals), max(cy_vals)
+
+    print(f"\n  Zone '{zone_id}' component bbox (centres):")
+    print(f"  cx: {min_cx:.2f} – {max_cx:.2f} mm  (span {max_cx-min_cx:.2f} mm = {(max_cx-min_cx)/5.08:.2f} HP)")
+    print(f"  cy: {min_cy:.2f} – {max_cy:.2f} mm  (span {max_cy-min_cy:.2f} mm)")
+
+    for zone in data.get("zones", []):
+        if zone.get("id") == zone_id and "x_start" in zone:
+            x_start   = float(zone["x_start"])
+            col_pitch = float(zone.get("col_pitch", rules.jack_pitch))
+            cols      = int(zone.get("cols", 0))
+            right_x   = x_start + cols * col_pitch
+            print(f"  zone x: {x_start:.2f} – {right_x:.2f} mm"
+                  f"  ({cols} cols × {col_pitch:.2f} mm pitch = {right_x-x_start:.2f} mm)")
+    print()
 
 
 # ── SVG generation ────────────────────────────────────────────────────────────
@@ -480,32 +641,37 @@ def _scale_svg_for_html(svg_content: str, scale: float = 4.0) -> str:
 
 
 def _collect_overlay_positions(data: dict, rules: DesignRules) -> dict:
-    """Return component positions grouped by type for overlay rendering."""
-    jacks:   list[tuple[float, float]] = []
-    pots:    list[tuple[float, float]] = []
-    knobs:   list[tuple[float, float, float]] = []  # cx, cy, r_mm
-    switches: list[tuple[float, float]] = []
-    leds:    list[tuple[float, float]] = []
+    """Return component positions grouped by type for overlay rendering.
 
-    r_map = {"knob_medium": 4.5, "knob_large": 7.0, "knob_xl": 9.0}
+    Each entry is (cx, cy, rotate) for types with PCB courtyards, or
+    (cx, cy, r_cap) for knob visual caps.
+    """
+    jacks:    list[tuple] = []  # (cx, cy, rotate)
+    pots:     list[tuple] = []  # (cx, cy, rotate)
+    knobs:    list[tuple] = []  # (cx, cy, r_cap) — visual nut cap only
+    switches: list[tuple] = []  # (cx, cy, rotate)
+    leds:     list[tuple] = []  # (cx, cy, rotate)
 
-    from panel_rules import SWITCH_TYPES, LED_TYPES  # noqa: E402
+    r_cap_map = {"knob_medium": 4.5, "knob_large": 7.0, "knob_xl": 9.0}
+
+    from panel_rules import SWITCH_TYPES, LED_TYPES, JACK_TYPES, POT_TYPES  # noqa: E402
 
     for comp in resolve_components(data, rules):
-        cx    = float(comp.get("cx", 0))
-        cy    = float(comp.get("cy", 0))
-        ctype = comp.get("type", "")
+        cx     = float(comp.get("cx", 0))
+        cy     = float(comp.get("cy", 0))
+        ctype  = comp.get("type", "")
+        rotate = int(comp.get("rotate", 0))
 
-        if ctype in ("jack_input", "jack_output"):
-            jacks.append((cx, cy))
-        elif ctype == "trimpot":
-            pots.append((cx, cy))
-        elif ctype in r_map:
-            knobs.append((cx, cy, r_map[ctype]))
+        if ctype in JACK_TYPES:
+            jacks.append((cx, cy, rotate))
+        elif ctype in POT_TYPES:
+            pots.append((cx, cy, rotate))
+            if ctype in r_cap_map:
+                knobs.append((cx, cy, r_cap_map[ctype]))
         elif ctype in SWITCH_TYPES:
-            switches.append((cx, cy))
+            switches.append((cx, cy, rotate))
         elif ctype in LED_TYPES:
-            leds.append((cx, cy))
+            leds.append((cx, cy, rotate))
 
     return {"jacks": jacks, "pots": pots, "knobs": knobs, "switches": switches, "leds": leds}
 
@@ -551,12 +717,13 @@ def _wrap_svg_in_layers(
   </g>"""
 
     # ── Nuts / knob-caps layer ─────────────────────────────────────────────────
+    # Nut circles are rotationally symmetric — rotation doesn't change their shape.
     nuts_parts: list[str] = []
-    for cx, cy in overlay["jacks"]:
+    for cx, cy, _rot in overlay["jacks"]:
         nuts_parts.append(
             f'    <circle cx="{cx}" cy="{cy}" r="5" fill="rgba(255,204,0,0.35)" stroke="#ffcc00" stroke-width="0.25"/>'
         )
-    for cx, cy in overlay["pots"]:
+    for cx, cy, _rot in overlay["pots"]:
         nuts_parts.append(
             f'    <circle cx="{cx}" cy="{cy}" r="5.5" fill="rgba(100,180,255,0.35)" stroke="#64b4ff" stroke-width="0.25"/>'
         )
@@ -564,11 +731,11 @@ def _wrap_svg_in_layers(
         nuts_parts.append(
             f'    <circle cx="{cx}" cy="{cy}" r="{r}" fill="rgba(255,140,0,0.25)" stroke="#ff8c00" stroke-width="0.25"/>'
         )
-    for cx, cy in overlay.get("switches", []):
+    for cx, cy, _rot in overlay.get("switches", []):
         nuts_parts.append(
             f'    <circle cx="{cx}" cy="{cy}" r="3.15" fill="rgba(220,100,255,0.35)" stroke="#dc64ff" stroke-width="0.25"/>'
         )
-    for cx, cy in overlay.get("leds", []):
+    for cx, cy, _rot in overlay.get("leds", []):
         nuts_parts.append(
             f'    <circle cx="{cx}" cy="{cy}" r="1.6" fill="rgba(100,220,100,0.35)" stroke="#64dc64" stroke-width="0.25"/>'
         )
@@ -578,37 +745,30 @@ def _wrap_svg_in_layers(
         + "\n  </g>"
     )
 
-    # ── PCB footprints layer (KiCad courtyard projected onto panel plane) ──────
-    # Thonkiconn PJ301M-12: courtyard x∈[-5,5] y∈[-1.42,12.98] (origin = panel hole)
-    # Alpha RD901F 9mm:     courtyard relative to shaft center x∈[-8.65,5.1] y∈[-6.67,6.67]
-    # Switch: courtyard SWITCH_CY = (-4.5,-3.5,4.5,7.5) relative to switch centre
-    # LED:    courtyard LED_CY    = (-2.0,-1.5,2.0,4.0) relative to LED centre
+    # ── PCB footprints layer (KiCad courtyards, rotation-aware) ──────────────────
+    from panel_rules import _get_courtyard as _cy_rect  # noqa: E402
     pcb_parts: list[str] = []
-    for cx, cy in overlay["jacks"]:
+
+    def _pcb_rect(cx, cy, ctype, rotate, fill, stroke):
+        rect = _cy_rect(cx, cy, ctype, rotate)
+        if rect is None:
+            return
+        x1, y1, x2, y2 = rect
         pcb_parts.append(
-            f'    <rect x="{cx - 5}" y="{cy - 1.42}" width="10" height="14.4"'
-            f' fill="rgba(255,204,0,0.15)" stroke="#ffcc00" stroke-width="0.2" stroke-dasharray="0.8 0.4"/>'
+            f'    <rect x="{x1:.3f}" y="{y1:.3f}" width="{x2-x1:.3f}" height="{y2-y1:.3f}"'
+            f' fill="{fill}" stroke="{stroke}" stroke-width="0.2" stroke-dasharray="0.8 0.4"/>'
         )
-    for cx, cy in overlay["pots"]:
-        pcb_parts.append(
-            f'    <rect x="{cx - 8.65}" y="{cy - 6.67}" width="13.75" height="13.34"'
-            f' fill="rgba(100,180,255,0.15)" stroke="#64b4ff" stroke-width="0.2" stroke-dasharray="0.8 0.4"/>'
-        )
+
+    for cx, cy, rotate in overlay["jacks"]:
+        _pcb_rect(cx, cy, "jack_input", rotate, "rgba(255,204,0,0.15)", "#ffcc00")
+    for cx, cy, rotate in overlay["pots"]:
+        _pcb_rect(cx, cy, "trimpot", rotate, "rgba(100,180,255,0.15)", "#64b4ff")
     for cx, cy, r in overlay["knobs"]:
-        pcb_parts.append(
-            f'    <rect x="{cx - 8.65}" y="{cy - 6.67}" width="13.75" height="13.34"'
-            f' fill="rgba(255,140,0,0.12)" stroke="#ff8c00" stroke-width="0.2" stroke-dasharray="0.8 0.4"/>'
-        )
-    for cx, cy in overlay.get("switches", []):
-        pcb_parts.append(
-            f'    <rect x="{cx - 4.5}" y="{cy - 3.5}" width="9" height="11"'
-            f' fill="rgba(220,100,255,0.15)" stroke="#dc64ff" stroke-width="0.2" stroke-dasharray="0.8 0.4"/>'
-        )
-    for cx, cy in overlay.get("leds", []):
-        pcb_parts.append(
-            f'    <rect x="{cx - 2.0}" y="{cy - 1.5}" width="4" height="5.5"'
-            f' fill="rgba(100,220,100,0.15)" stroke="#64dc64" stroke-width="0.2" stroke-dasharray="0.8 0.4"/>'
-        )
+        _pcb_rect(cx, cy, "knob_medium", 0, "rgba(255,140,0,0.12)", "#ff8c00")
+    for cx, cy, rotate in overlay.get("switches", []):
+        _pcb_rect(cx, cy, "switch_H2", rotate, "rgba(220,100,255,0.15)", "#dc64ff")
+    for cx, cy, rotate in overlay.get("leds", []):
+        _pcb_rect(cx, cy, "led", rotate, "rgba(100,220,100,0.15)", "#64dc64")
     pcb_layer = (
         '\n  <g id="layer-pcb" style="display:none;">\n'
         + "\n".join(pcb_parts)
@@ -722,24 +882,75 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="POGO panel build tool",
         formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Query commands (no files written):
+  --check               DRC report; exit 1 on violations
+  --list                Table of all resolved component positions
+  --next ZONE_ID        Next x_start after a column-relative zone
+  --dist ID1 ID2        Center-to-center, nut-edge, and PCB courtyard distances
+  --snap-to ID DIR TYPE GAP  cx/cy for TYPE with GAP mm nut-edge clearance from ID
+                        DIR: right | left | above | below
+                        TYPE: jack_input | trimpot | knob_medium | switch_H2 | led | …
+  --zone-bbox ZONE_ID   Component bounding box for a zone
+""",
     )
-    parser.add_argument("--resource", action="store_true", help="Write res/Pogo-source.svg")
-    parser.add_argument("--design",   action="store_true", help="Write design/panel-debug.html")
-    parser.add_argument("--mfr",      action="store_true", help="Write res/Pogo.svg via inkscape")
-    parser.add_argument("--cpp",      action="store_true", help="Print C++ stubs to stdout")
-    parser.add_argument("--check",    action="store_true", help="DRC only; exit 1 on blocking violations")
-    parser.add_argument("--list",     action="store_true", help="Print table of all resolved components")
-    parser.add_argument("--next",     metavar="ZONE_ID",   help="Print next x_start after a column-relative zone")
+    parser.add_argument("--resource",  action="store_true", help="Write res/Pogo-source.svg")
+    parser.add_argument("--design",    action="store_true", help="Write design/panel-debug.html")
+    parser.add_argument("--mfr",       action="store_true", help="Write res/Pogo.svg via inkscape")
+    parser.add_argument("--cpp",       action="store_true", help="Print C++ stubs to stdout")
+    parser.add_argument("--check",     action="store_true", help="DRC only; exit 1 on violations")
+    parser.add_argument("--list",      action="store_true", help="Print table of all resolved components")
+    parser.add_argument("--next",      metavar="ZONE_ID",   help="Print next x_start after a zone")
+    parser.add_argument("--dist",      nargs=2, metavar=("ID1", "ID2"),
+                        help="Distance and clearance between two components")
+    parser.add_argument("--snap-to",   nargs=4, metavar=("ID", "DIR", "TYPE", "GAP"),
+                        help="cx/cy for placing TYPE component GAP mm from ID in DIR")
+    parser.add_argument("--zone-bbox", metavar="ZONE_ID",   help="Bounding box of a zone's components")
     args = parser.parse_args()
 
+    is_query = any([args.check, args.list, args.next, args.dist,
+                    getattr(args, "snap_to", None), getattr(args, "zone_bbox", None)])
+
     # Default: both --resource and --design
-    if not any([args.resource, args.design, args.mfr, args.cpp, args.check,
-                args.list, args.next]):
+    if not any([args.resource, args.design, args.mfr, args.cpp, is_query]):
         args.resource = True
         args.design   = True
 
     data  = load_data()
     rules = DesignRules.from_data(data)
+
+    # ── Query-only paths (no SVG build needed) ────────────────────────────────
+    if args.list:
+        print_component_list(data, rules)
+        return 0
+
+    if args.next:
+        nx = get_next_x(data, rules, args.next)
+        if nx is None:
+            print(f"Zone '{args.next}' not found or not column-relative.", file=sys.stderr)
+            return 1
+        hp = nx / 5.08
+        print(f"{args.next}  next x_start = {nx:.2f} mm  (HP {hp:.2f})")
+        return 0
+
+    if args.dist:
+        print_dist(data, rules, args.dist[0], args.dist[1])
+        return 0
+
+    snap_to = getattr(args, "snap_to", None)
+    if snap_to:
+        try:
+            gap_mm = float(snap_to[3])
+        except ValueError:
+            print(f"GAP must be a number, got '{snap_to[3]}'", file=sys.stderr)
+            return 1
+        print_snap_to(data, rules, snap_to[0], snap_to[1], snap_to[2], gap_mm)
+        return 0
+
+    zone_bbox = getattr(args, "zone_bbox", None)
+    if zone_bbox:
+        print_zone_bbox(data, rules, zone_bbox)
+        return 0
 
     violations = run_drc(data, rules)
 
@@ -757,19 +968,6 @@ def main() -> int:
                     print(f"    {v}", file=sys.stderr)
             return 1
         print("DRC PASS — no violations.")
-        return 0
-
-    if args.list:
-        print_component_list(data, rules)
-        return 0
-
-    if args.next:
-        nx = get_next_x(data, rules, args.next)
-        if nx is None:
-            print(f"Zone '{args.next}' not found or not column-relative.", file=sys.stderr)
-            return 1
-        hp = nx / 5.08
-        print(f"{args.next}  next x_start = {nx:.2f} mm  (HP {hp:.2f})")
         return 0
 
     svg_content = build_svg(data, rules)

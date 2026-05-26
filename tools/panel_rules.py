@@ -42,21 +42,57 @@ JACK_TYPES = {"jack_input", "jack_output"}
 POT_TYPES  = {"trimpot", "knob_medium", "knob_large", "knob_xl"}
 
 
-def _get_courtyard(cx: float, cy: float, ctype: str) -> tuple[float, float, float, float] | None:
-    """Return (x1, y1, x2, y2) PCB courtyard rect or None if the type has no footprint."""
+def _rotate_rect(
+    rect: tuple[float, float, float, float],
+    degrees: int,
+) -> tuple[float, float, float, float]:
+    """Rotate a (x1,y1,x2,y2) bounding rect about the origin by degrees CW (0/90/180/270).
+
+    Used to rotate PCB courtyard constants before applying to component position.
+    Example: JACK_CY rotated 180° flips the body from extending downward to upward,
+    allowing bottom-row jacks to be mounted inverted so the PCB body points up.
+    """
+    if degrees == 0:
+        return rect
+    x1, y1, x2, y2 = rect
+    corners = [(x1, y1), (x2, y1), (x1, y2), (x2, y2)]
+    if degrees == 90:
+        rotated = [(y, -x) for x, y in corners]
+    elif degrees == 180:
+        rotated = [(-x, -y) for x, y in corners]
+    elif degrees == 270:
+        rotated = [(-y, x) for x, y in corners]
+    else:
+        return rect
+    xs = [p[0] for p in rotated]
+    ys = [p[1] for p in rotated]
+    return (min(xs), min(ys), max(xs), max(ys))
+
+
+def _get_courtyard(
+    cx: float,
+    cy: float,
+    ctype: str,
+    rotate: int = 0,
+) -> tuple[float, float, float, float] | None:
+    """Return (x1, y1, x2, y2) PCB courtyard rect or None if the type has no footprint.
+
+    rotate (0/90/180/270 CW) rotates the courtyard template before positioning.
+    Useful for inverting jacks (rotate=180 moves body above hole instead of below).
+    """
+    base: tuple[float, float, float, float] | None = None
     if ctype in JACK_TYPES:
-        x1, y1, x2, y2 = JACK_CY
-        return (cx + x1, cy + y1, cx + x2, cy + y2)
-    if ctype in POT_TYPES:
-        x1, y1, x2, y2 = POT_CY
-        return (cx + x1, cy + y1, cx + x2, cy + y2)
-    if ctype in SWITCH_TYPES:
-        x1, y1, x2, y2 = SWITCH_CY
-        return (cx + x1, cy + y1, cx + x2, cy + y2)
-    if ctype in LED_TYPES:
-        x1, y1, x2, y2 = LED_CY
-        return (cx + x1, cy + y1, cx + x2, cy + y2)
-    return None
+        base = JACK_CY
+    elif ctype in POT_TYPES:
+        base = POT_CY
+    elif ctype in SWITCH_TYPES:
+        base = SWITCH_CY
+    elif ctype in LED_TYPES:
+        base = LED_CY
+    if base is None:
+        return None
+    x1, y1, x2, y2 = _rotate_rect(base, rotate)
+    return (cx + x1, cy + y1, cx + x2, cy + y2)
 
 
 def _rect_overlap(r1: tuple, r2: tuple) -> tuple[float, float]:
@@ -64,6 +100,36 @@ def _rect_overlap(r1: tuple, r2: tuple) -> tuple[float, float]:
     dx = min(r1[2], r2[2]) - max(r1[0], r2[0])
     dy = min(r1[3], r2[3]) - max(r1[1], r2[1])
     return dx, dy
+
+
+def _rect_min_gap(r1: tuple, r2: tuple) -> float:
+    """Signed minimum gap between two axis-aligned rects.
+
+    Returns positive = gap (distance between nearest edges), negative = overlap depth.
+    For overlapping rects, returns the negative of the minimum penetration axis.
+    """
+    sep_x = max(0.0, max(r1[0], r2[0]) - min(r1[2], r2[2]))
+    sep_y = max(0.0, max(r1[1], r2[1]) - min(r1[3], r2[3]))
+    if sep_x > 0 and sep_y > 0:
+        return (sep_x ** 2 + sep_y ** 2) ** 0.5
+    if sep_x > 0 or sep_y > 0:
+        return max(sep_x, sep_y)
+    ov_x = min(r1[2], r2[2]) - max(r1[0], r2[0])
+    ov_y = min(r1[3], r2[3]) - max(r1[1], r2[1])
+    return -min(ov_x, ov_y)
+
+
+def get_panel_r(ctype: str, rules: Any) -> float:
+    """Return the panel-face nut / hole radius (mm) for a component type."""
+    if ctype in JACK_TYPES:
+        return rules.jack_nut_r
+    if ctype in POT_TYPES:
+        return rules.pot_nut_r
+    if ctype in SWITCH_TYPES:
+        return SWITCH_PANEL_R
+    if ctype in LED_TYPES:
+        return LED_PANEL_R
+    return 0.0
 
 
 def _comp_label(comp: dict) -> str:
@@ -241,9 +307,10 @@ class DesignRules:
             ctype = comp.get("type", "")
             if ctype not in JACK_TYPES and ctype not in POT_TYPES:
                 continue
-            cx = float(comp.get("cx", 0))
-            cy = float(comp.get("cy", 0))
-            rect = _get_courtyard(cx, cy, ctype)
+            cx     = float(comp.get("cx", 0))
+            cy     = float(comp.get("cy", 0))
+            rotate = int(comp.get("rotate", 0))
+            rect   = _get_courtyard(cx, cy, ctype, rotate)
             if rect:
                 footprinted.append((comp, rect))
 
@@ -270,10 +337,11 @@ class DesignRules:
         """
         out: list[str] = []
         for comp in components:
-            ctype = comp.get("type", "")
-            cx = float(comp.get("cx", 0))
-            cy = float(comp.get("cy", 0))
-            rect = _get_courtyard(cx, cy, ctype)
+            ctype  = comp.get("type", "")
+            cx     = float(comp.get("cx", 0))
+            cy     = float(comp.get("cy", 0))
+            rotate = int(comp.get("rotate", 0))
+            rect   = _get_courtyard(cx, cy, ctype, rotate)
             if rect is None:
                 continue
             rx1, ry1, rx2, ry2 = rect
@@ -299,10 +367,11 @@ class DesignRules:
         out: list[str] = []
         r = MOUNTING_HOLE_CLEARANCE_MM
         for comp in components:
-            ctype = comp.get("type", "")
-            cx = float(comp.get("cx", 0))
-            cy = float(comp.get("cy", 0))
-            rect = _get_courtyard(cx, cy, ctype)
+            ctype  = comp.get("type", "")
+            cx     = float(comp.get("cx", 0))
+            cy     = float(comp.get("cy", 0))
+            rotate = int(comp.get("rotate", 0))
+            rect   = _get_courtyard(cx, cy, ctype, rotate)
             if rect is None:
                 continue
             cx1, cy1, cx2, cy2 = rect
