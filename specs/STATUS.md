@@ -56,6 +56,29 @@ Last updated: 2026-05-26
 
 ---
 
+## ⚠️ TOPOLOGY INVESTIGATION IN PROGRESS — spec/audio-intent freeze
+
+**Branch:** `topology_change`
+
+The signal chain order is under active experimentation in the plugin. **Do not update
+per-block specs, audio intent, or circuit designs until the plugin experiments are
+complete and a topology is chosen.** Plugin code changes come first; spec rewrites follow
+only after the routing is confirmed.
+
+**Candidate new routing:** Input → PreGain → Envelope → **VCA → LP1 → Triple BP → HP → LP2** → Output
+(current code: PreGain → Triple BP → VCA → LP1 → LP2 → HP)
+
+Items frozen pending topology decision:
+- Block 3 (Triple BP) Phase 1–3 spec
+- Block VCA Phase 1–3 spec  
+- Block 5 LP1 Phase 1–3 spec
+- Block 6 LP2 Phase 1–3 spec
+- Block 7 HP Phase 1–3 spec
+- `CLAUDE.md` signal chain table
+- All schematic SVGs in `specs/block-*/`
+
+---
+
 ## ⚠️ TESTING DIVERGENCE — DSP vs. Spec (2026-05-26)
 
 **Branch:** `topology_change`
