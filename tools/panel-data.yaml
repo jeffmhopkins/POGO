@@ -86,7 +86,7 @@ separators:
 zone_labels:
   - {x: 17.78, y: 8.25, text: "INPUT"}
   - {x: 17.145, y: 47.0, text: "LFOs"}
-  - {x: 17.78, y: 80.0, text: "MOD BUS"}
+  - {x: 17.78, y: 78.0, text: "MOD BUS"}
 
 # ── Zones ─────────────────────────────────────────────────────────────────────
 zones:
@@ -198,9 +198,11 @@ zones:
         cpp_param: "LFO2_RATE_PARAM"
 
   # ── Section 0c: MOD BUS ───────────────────────────────────────────────────
-  # SCALE: col 0 (cx=5.715), rotate 180 to keep CrtYd inside left edge
-  # OFFSET: col 1 (cx=17.145), staggered 13.34mm below SCALE (min pot→pot gap)
-  # MOD IN: col 2 (cx=28.575), cv_jack_cy=112mm (CrtYd bottom=118.5mm)
+  # Row 1 knobs: SCALE col 0 (rotate=180 keeps CrtYd in panel), VCA AMT col 2
+  #   col 0 and col 2 have 5.56mm x-gap → same cy OK; cy=83
+  # Row 2 knobs: OFFSET col 0 (rotate=180), VCA OFS col 2; cy=96.34 (min pot→pot 13.34mm)
+  # Row 3 jacks: MOD IN col 0, LED col 1 (blue), VCA IN col 2; cy=112 (cv_jack_cy)
+  #   Pot→jack gap: 96.34+6.67=103.01 vs 112-7.9=104.1 → 1.09mm clearance ✓
   - id: zone_mod
     label: "Zone 0c — MOD BUS"
     x_start: 0
@@ -210,20 +212,47 @@ zones:
       - id: SCALE
         type: knob_medium
         col: 0
-        cy: 84.375
+        cy: 83.0
         rotate: 180
         label: "SCALE"
         cpp_param: "MOD_SCALE_PARAM"
+      - id: VCA_AMT
+        type: knob_medium
+        col: 2
+        cy: 83.0
+        label: "VCA AMT"
+        cpp_param: "VCA_AMT_PARAM"
       - id: OFFSET
         type: knob_medium
-        col: 1
-        cy: 97.715
+        col: 0
+        cy: 96.34
+        rotate: 180
         label: "OFFSET"
         cpp_param: "MOD_OFFSET_PARAM"
+      - id: VCA_OFS
+        type: knob_medium
+        col: 2
+        cy: 96.34
+        label: "VCA OFS"
+        cpp_param: "VCA_OFS_PARAM"
       - id: MOD_IN
         type: jack_input
-        col: 2
+        col: 0
         cy: 112.0
         label: "MOD IN"
         font_size: 1.6
         cpp_id: "MOD_INPUT"
+      - id: MOD_LED
+        type: led
+        col: 1
+        cy: 112.0
+        led_fill:   "#112244"
+        led_stroke: "#2255cc"
+        cpp_id: "MOD_LED"
+      - id: VCA_IN
+        type: jack_input
+        col: 2
+        cy: 112.0
+        label: "VCA IN"
+        font_size: 1.6
+        cpp_id: "VCA_INPUT"

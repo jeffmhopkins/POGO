@@ -48,7 +48,7 @@
   <text x="17.145" y="47.0" fill="#00d4ff" font-family="monospace" font-size="2.4" text-anchor="middle" font-weight="bold">LFOs</text>
 
   <!-- MOD BUS -->
-  <text x="17.78" y="80.0" fill="#00d4ff" font-family="monospace" font-size="2.4" text-anchor="middle" font-weight="bold">MOD BUS</text>
+  <text x="17.78" y="78.0" fill="#00d4ff" font-family="monospace" font-size="2.4" text-anchor="middle" font-weight="bold">MOD BUS</text>
 
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- Zone 0a — INPUT / GAIN                                                   -->
@@ -102,14 +102,24 @@
   <!-- Zone 0c — MOD BUS                                                        -->
   <!-- ════════════════════════════════════════════════════════════════════════ -->
 
-  <circle cx="5.715" cy="84.375" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
-  <line x1="5.715" y1="84.375" x2="5.715" y2="79.875" stroke="#aaa" stroke-width="0.6"/>
-  <text x="5.715" y="91.9" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">SCALE</text>
-  <circle cx="17.145" cy="97.715" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
-  <line x1="17.145" y1="97.715" x2="17.145" y2="93.215" stroke="#aaa" stroke-width="0.6"/>
-  <text x="17.145" y="105.2" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">OFFSET</text>
+  <circle cx="5.715" cy="83.0" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="5.715" y1="83.0" x2="5.715" y2="78.5" stroke="#aaa" stroke-width="0.6"/>
+  <text x="5.715" y="90.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">SCALE</text>
+  <circle cx="28.575" cy="83.0" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="28.575" y1="83.0" x2="28.575" y2="78.5" stroke="#aaa" stroke-width="0.6"/>
+  <text x="28.575" y="90.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">VCA AMT</text>
+  <circle cx="5.715" cy="96.34" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="5.715" y1="96.34" x2="5.715" y2="91.84" stroke="#aaa" stroke-width="0.6"/>
+  <text x="5.715" y="103.8" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">OFFSET</text>
+  <circle cx="28.575" cy="96.34" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="28.575" y1="96.34" x2="28.575" y2="91.84" stroke="#aaa" stroke-width="0.6"/>
+  <text x="28.575" y="103.8" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">VCA OFS</text>
+  <circle cx="5.715" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="5.715" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="5.715" y="119.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">MOD IN</text>
+  <circle cx="17.145" cy="112.0" r="1.2" fill="#112244" stroke="#2255cc" stroke-width="0.4"/>
   <circle cx="28.575" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="28.575" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="28.575" y="119.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">MOD IN</text>
+  <text x="28.575" y="119.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">VCA IN</text>
 
 </svg>
