@@ -30,21 +30,21 @@ _FP_ROOT = _REPO / "kicad" / "footprints"
 # The SVG transform becomes: translate(cx-ox, cy-oy), so any footprint point (px,py)
 # renders at panel position (px+cx-ox, py+cy-oy).
 #
-# Jack (WQP-PJ398SM): the F.Fab/F.SilkS barrel body circle is at footprint (0, 6.48).
-#   Setting oy=6.48 places the barrel circle at (cx, cy) — the panel hole symbol centre.
-#   The sleeve pad S (footprint y=0) then renders at (cx, cy-6.48), which is above the hole.
-#   DRC still uses JACK_CY from panel_rules.py (measured from sleeve centre = true hole).
+# Jack (WQP-PJ398SM): origin = sleeve S pad = panel hole centre.
+#   F.Fab barrel body circle at footprint (0, 6.48) renders at (cx, cy+6.48) — the body
+#   extends behind the panel surface, which is physically correct.
+#   The green origin cross-hair marks (cx, cy) = panel hole.
 #
 # Pot (Alpha RD901F): footprint origin = pin1; shaft centre = (7.5, 2.5).
 #   F.Fab shaft circle is at (center 7.5 2.5) → setting ox=7.5, oy=2.5 aligns it to (cx,cy).
 _FOOTPRINT_MAP: dict[str, tuple[str, float, float]] = {
     "jack_input": (
         "Connector_Audio.pretty/Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles.kicad_mod",
-        0.0, 6.48,  # barrel body F.Fab circle at footprint (0,6.48) → panel hole (cx,cy)
+        0.0, 0.0,   # origin = sleeve S pad = panel hole centre
     ),
     "jack_output": (
         "Connector_Audio.pretty/Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles.kicad_mod",
-        0.0, 6.48,
+        0.0, 0.0,
     ),
     "trimpot": (
         "Potentiometer_THT.pretty/Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles.kicad_mod",
