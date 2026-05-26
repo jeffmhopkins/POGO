@@ -112,13 +112,22 @@ zones:
         label: "R IN"
         font_size: 1.8
         cpp_id: "R_IN_INPUT"
-      - id: GAIN
+      - id: GAIN_MAIN
         type: switch_H2
-        cx: 11.43
+        cx: 5.715
         cy: 31
+        label_above: "MAIN"
         pos_labels: ["1×", "5×"]
-        pos_xs: [6.93, 15.93]
+        pos_xs: [1.215, 10.215]
         cpp_param: "GAIN_PARAM"
+      - id: GAIN_BP3
+        type: switch_H2
+        cx: 17.145
+        cy: 31
+        label_above: "BP3"
+        pos_labels: ["1×", "5×"]
+        pos_xs: [12.645, 21.645]
+        cpp_param: "ALT_GAIN_PARAM"
       - id: BP3_L
         type: jack_input
         col: 0
