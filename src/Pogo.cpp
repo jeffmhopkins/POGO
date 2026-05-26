@@ -590,9 +590,9 @@ struct PogoWidget : ModuleWidget {
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(40.f, 89.f)), module, Pogo::FB_DIST_BLEND_PARAM));
 
 		// ── Zone 1 — unified bottom row ────────────────────────────────────
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(25.40f, 102.f)), module, Pogo::BYPASS_ATT_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(35.56f, 102.f)), module, Pogo::MASTER_OFFSET_ATT_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(45.72f, 102.f)), module, Pogo::BLEND_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(25.40f, 107.25f)), module, Pogo::BYPASS_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(35.56f, 107.25f)), module, Pogo::MASTER_OFFSET_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(45.72f, 107.25f)), module, Pogo::BLEND_ATT_PARAM));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(25.40f, 118.f)), module, Pogo::BYPASS_CV_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(35.56f, 118.f)), module, Pogo::MASTER_OFFSET_CV_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(45.72f, 118.f)), module, Pogo::BLEND_CV_INPUT));
@@ -601,9 +601,9 @@ struct PogoWidget : ModuleWidget {
 		addParam(createParamCentered<RoundHugeBlackKnob>(mm2px(Vec(66.04f, 34.f)), module, Pogo::FREQ_1_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(66.04f, 63.f)), module, Pogo::FB_1_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(66.04f, 89.f)), module, Pogo::DRIVE_1_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(55.88f, 102.f)), module, Pogo::FREQ_ATT_1_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(66.04f, 102.f)), module, Pogo::FB_ATT_1_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(76.20f, 102.f)), module, Pogo::DRIVE_ATT_1_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(55.88f, 107.25f)), module, Pogo::FREQ_ATT_1_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(66.04f, 107.25f)), module, Pogo::FB_ATT_1_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(76.20f, 107.25f)), module, Pogo::DRIVE_ATT_1_PARAM));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(55.88f, 118.f)), module, Pogo::FREQ_CV_1_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(66.04f, 118.f)), module, Pogo::FB_CV_1_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(76.20f, 118.f)), module, Pogo::DRIVE_CV_1_INPUT));
@@ -612,9 +612,9 @@ struct PogoWidget : ModuleWidget {
 		addParam(createParamCentered<RoundHugeBlackKnob>(mm2px(Vec(96.52f, 34.f)), module, Pogo::FREQ_2_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(96.52f, 63.f)), module, Pogo::FB_2_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(96.52f, 89.f)), module, Pogo::DRIVE_2_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(86.36f, 102.f)), module, Pogo::FREQ_ATT_2_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(96.52f, 102.f)), module, Pogo::FB_ATT_2_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(106.68f, 102.f)), module, Pogo::DRIVE_ATT_2_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(86.36f, 107.25f)), module, Pogo::FREQ_ATT_2_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(96.52f, 107.25f)), module, Pogo::FB_ATT_2_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(106.68f, 107.25f)), module, Pogo::DRIVE_ATT_2_PARAM));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(86.36f, 118.f)), module, Pogo::FREQ_CV_2_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(96.52f, 118.f)), module, Pogo::FB_CV_2_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(106.68f, 118.f)), module, Pogo::DRIVE_CV_2_INPUT));
@@ -623,9 +623,9 @@ struct PogoWidget : ModuleWidget {
 		addParam(createParamCentered<RoundHugeBlackKnob>(mm2px(Vec(127.00f, 34.f)), module, Pogo::FREQ_3_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(127.00f, 63.f)), module, Pogo::FB_3_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(127.00f, 89.f)), module, Pogo::DRIVE_3_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(116.84f, 102.f)), module, Pogo::FREQ_ATT_3_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(127.00f, 102.f)), module, Pogo::FB_ATT_3_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(137.16f, 102.f)), module, Pogo::DRIVE_ATT_3_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(116.84f, 107.25f)), module, Pogo::FREQ_ATT_3_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(127.00f, 107.25f)), module, Pogo::FB_ATT_3_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(137.16f, 107.25f)), module, Pogo::DRIVE_ATT_3_PARAM));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(116.84f, 118.f)), module, Pogo::FREQ_CV_3_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(127.00f, 118.f)), module, Pogo::FB_CV_3_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(137.16f, 118.f)), module, Pogo::DRIVE_CV_3_INPUT));
@@ -638,8 +638,8 @@ struct PogoWidget : ModuleWidget {
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(152.40f, 49.f)), module, Pogo::LP1_CUTOFF_PARAM));
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(152.40f, 72.f)), module, Pogo::LP1_SPREAD_PARAM));
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(152.40f, 95.f)), module, Pogo::LP1_RESONANCE_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(147.32f, 102.f)), module, Pogo::LP1_CUT_ATT_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(157.48f, 102.f)), module, Pogo::LP1_RES_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(147.32f, 107.25f)), module, Pogo::LP1_CUT_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(157.48f, 107.25f)), module, Pogo::LP1_RES_ATT_PARAM));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(147.32f, 118.f)), module, Pogo::LP1_CUT_CV_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(157.48f, 118.f)), module, Pogo::LP1_RES_CV_INPUT));
 
@@ -651,8 +651,8 @@ struct PogoWidget : ModuleWidget {
 		// LP2 CUTOFF: vertical slider, 13mm x 45mm, center at track midpoint
 		addParam(createParamCentered<PogoSlider>(mm2px(Vec(172.72f, 64.5f)), module, Pogo::LP2_CUTOFF_PARAM));
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(172.72f, 95.f)), module, Pogo::LP2_RESONANCE_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(167.64f, 102.f)), module, Pogo::LP2_CUT_ATT_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(177.80f, 102.f)), module, Pogo::LP2_RES_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(167.64f, 107.25f)), module, Pogo::LP2_CUT_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(177.80f, 107.25f)), module, Pogo::LP2_RES_ATT_PARAM));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(167.64f, 118.f)), module, Pogo::LP2_CUT_CV_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(177.80f, 118.f)), module, Pogo::LP2_RES_CV_INPUT));
 
@@ -664,8 +664,8 @@ struct PogoWidget : ModuleWidget {
 		// HP CUTOFF: vertical slider, matching LP2 geometry
 		addParam(createParamCentered<PogoSlider>(mm2px(Vec(193.04f, 64.5f)), module, Pogo::HP_CUTOFF_PARAM));
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(193.04f, 95.f)), module, Pogo::HP_RESONANCE_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(187.96f, 102.f)), module, Pogo::HP_CUT_ATT_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(198.12f, 102.f)), module, Pogo::HP_RES_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(187.96f, 107.25f)), module, Pogo::HP_CUT_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(198.12f, 107.25f)), module, Pogo::HP_RES_ATT_PARAM));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(187.96f, 118.f)), module, Pogo::HP_CUT_CV_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(198.12f, 118.f)), module, Pogo::HP_RES_CV_INPUT));
 	}
