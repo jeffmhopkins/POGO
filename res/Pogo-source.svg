@@ -76,37 +76,37 @@
   <!-- Zone 0b — LFO                                                            -->
   <!-- ════════════════════════════════════════════════════════════════════════ -->
 
-  <circle cx="22.86" cy="60.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="22.86" y1="60.0" x2="22.86" y2="57.5" stroke="#aaa" stroke-width="0.5"/>
-  <text x="22.86" y="65.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">SPEED</text>
-  <circle cx="38.1" cy="60.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="38.1" y1="60.0" x2="38.1" y2="57.5" stroke="#aaa" stroke-width="0.5"/>
-  <text x="38.1" y="65.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">SPEED</text>
-  <circle cx="22.86" cy="69.0" r="1.2" fill="#441111" stroke="#cc2222" stroke-width="0.4"/>
-  <circle cx="38.1" cy="69.0" r="1.2" fill="#441111" stroke="#cc2222" stroke-width="0.4"/>
-  <circle cx="22.86" cy="82.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="22.86" cy="82.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <rect x="19.36" y="87.24" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
-  <text x="22.86" y="89.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">LFO 1</text>
-  <circle cx="38.1" cy="82.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="38.1" cy="82.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <rect x="34.60" y="87.24" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
-  <text x="38.1" y="89.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">LFO 2</text>
+  <circle cx="20.955" cy="60.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="20.955" y1="60.0" x2="20.955" y2="57.5" stroke="#aaa" stroke-width="0.5"/>
+  <text x="20.955" y="65.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">SPEED</text>
+  <circle cx="32.385" cy="60.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="32.385" y1="60.0" x2="32.385" y2="57.5" stroke="#aaa" stroke-width="0.5"/>
+  <text x="32.385" y="65.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">SPEED</text>
+  <circle cx="20.955" cy="69.0" r="1.2" fill="#441111" stroke="#cc2222" stroke-width="0.4"/>
+  <circle cx="32.385" cy="69.0" r="1.2" fill="#441111" stroke="#cc2222" stroke-width="0.4"/>
+  <circle cx="20.955" cy="82.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="20.955" cy="82.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <rect x="17.45" y="87.24" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
+  <text x="20.955" y="89.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">LFO 1</text>
+  <circle cx="32.385" cy="82.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="32.385" cy="82.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <rect x="28.88" y="87.24" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
+  <text x="32.385" y="89.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">LFO 2</text>
 
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- Zone 0c — MOD BUS                                                        -->
   <!-- ════════════════════════════════════════════════════════════════════════ -->
 
-  <circle cx="22.86" cy="97.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="22.86" y1="97.0" x2="22.86" y2="94.5" stroke="#aaa" stroke-width="0.5"/>
-  <text x="22.86" y="102.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">AMOUNT</text>
-  <circle cx="38.1" cy="97.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="38.1" y1="97.0" x2="38.1" y2="94.5" stroke="#aaa" stroke-width="0.5"/>
-  <text x="38.1" y="102.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">OFFSET</text>
-  <circle cx="22.86" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="22.86" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="22.86" y="119.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">MOD IN</text>
-  <circle cx="38.1" cy="112.0" r="1.2" fill="#441111" stroke="#cc2222" stroke-width="0.4"/>
-  <text x="38.1" y="119.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">MOD</text>
+  <circle cx="20.955" cy="97.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="20.955" y1="97.0" x2="20.955" y2="94.5" stroke="#aaa" stroke-width="0.5"/>
+  <text x="20.955" y="102.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">AMOUNT</text>
+  <circle cx="32.385" cy="97.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="32.385" y1="97.0" x2="32.385" y2="94.5" stroke="#aaa" stroke-width="0.5"/>
+  <text x="32.385" y="102.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">OFFSET</text>
+  <circle cx="20.955" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="20.955" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="20.955" y="119.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">MOD IN</text>
+  <circle cx="32.385" cy="112.0" r="1.2" fill="#441111" stroke="#cc2222" stroke-width="0.4"/>
+  <text x="32.385" y="119.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">MOD</text>
 
 </svg>

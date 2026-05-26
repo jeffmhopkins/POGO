@@ -140,11 +140,13 @@ zones:
 
   # ── Section 0b: LFO ───────────────────────────────────────────────────────
   # Two independent LFOs: speed trimpot → LED → output jack, each in its own column
-  # col 0 → cx = 22.86mm (LFO 1), col 1 → cx = 38.10mm (LFO 2)
+  # col_pitch = 11.43 (2.25HP) — matches zone_input column centrelines
+  # col 0 → cx = 20.955mm (LFO 1), col 1 → cx = 32.385mm (LFO 2)
+  # LFO2 trimpot rotated 180° so Alpha pot pins face outward — prevents CrtYd x-overlap
   - id: zone_lfo
     label: "Zone 0b — LFO"
     x_start: 15.24
-    col_pitch: 15.24
+    col_pitch: 11.43
     cols: 2
     components:
       - id: LFO1_SPEED
@@ -158,6 +160,7 @@ zones:
         type: trimpot
         col: 1
         cy: 60
+        rotate: 180
         label: "SPEED"
         label_font_size: 1.8
         cpp_param: "LFO2_SPEED_PARAM"
@@ -188,11 +191,13 @@ zones:
 
   # ── Section 0c: MOD BUS ───────────────────────────────────────────────────
   # Mod bus processor: amount + offset trimpots, mod input jack, activity LED
-  # att_cy = 96.5, cv_jack_cy = 105.0 (from design_rules)
+  # col_pitch = 11.43 (2.25HP) — matches zone_input/zone_lfo column centrelines
+  # col 0 → cx = 20.955mm, col 1 → cx = 32.385mm
+  # MOD_OFFSET rotated 180° (same reason as LFO2_SPEED — prevents CrtYd x-overlap)
   - id: zone_modbus
     label: "Zone 0c — MOD BUS"
     x_start: 15.24
-    col_pitch: 15.24
+    col_pitch: 11.43
     cols: 2
     components:
       - id: MOD_AMOUNT
@@ -206,6 +211,7 @@ zones:
         type: trimpot
         col: 1
         cy: _att_cy_
+        rotate: 180
         label: "OFFSET"
         label_font_size: 1.8
         cpp_param: "MOD_OFFSET_PARAM"
