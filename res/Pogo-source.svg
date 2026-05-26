@@ -29,7 +29,7 @@
   <text x="101.60" y="127.5" fill="#4a6070" font-family="monospace" font-size="2.4" text-anchor="middle" letter-spacing="0.15">SPACE COAST SYNTHESIZERS  ·  SCS</text>
 
   <!-- ── MAIN ZONE SEPARATOR LINES (cyan) ──────────────────────────────────── -->
-  <line x1="45.72" y1="4.5" x2="45.72" y2="124.0" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
+  <line x1="35.56" y1="4.5" x2="35.56" y2="124.0" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
 
   <!-- ── ZONE 0 MINI-ZONE DIVIDERS (dim gray horizontal) ───────────────────── -->
 
@@ -42,10 +42,10 @@
   <!-- ════════════════════════════════════════════════════════════════════════ -->
 
   <!-- INPUT / GAIN -->
-  <text x="11.43" y="12.0" fill="#00d4ff" font-family="monospace" font-size="2.4" text-anchor="middle" font-weight="bold">INPUT / GAIN</text>
+  <text x="17.145" y="12.0" fill="#00d4ff" font-family="monospace" font-size="2.4" text-anchor="middle" font-weight="bold">INPUT / GAIN</text>
 
   <!-- LFO -->
-  <text x="11.43" y="47.0" fill="#00d4ff" font-family="monospace" font-size="2.4" text-anchor="middle" font-weight="bold">LFO</text>
+  <text x="17.145" y="47.0" fill="#00d4ff" font-family="monospace" font-size="2.4" text-anchor="middle" font-weight="bold">LFO</text>
 
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- Zone 0a — INPUT / GAIN                                                   -->
