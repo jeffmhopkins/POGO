@@ -58,7 +58,7 @@
 
   <!-- ── ZONE 0 MINI-ZONE DIVIDERS (dim gray horizontal) ───────────────────── -->
   <line x1="0.5"  y1="38.5" x2="19.82" y2="38.5" stroke="#2d2d2d" stroke-width="0.5"/>
-  <line x1="0.5"  y1="91.0" x2="19.82" y2="91.0" stroke="#2d2d2d" stroke-width="0.5"/>
+  <line x1="0.5"  y1="94.2" x2="19.82" y2="94.2" stroke="#2d2d2d" stroke-width="0.5"/>
 
   <!-- ── ZONE 1: BAND / DIST SUBSECTION DIVIDER (horizontal) ──────────────── -->
   <line x1="20.82" y1="76" x2="50.30" y2="76" stroke="#2d2d2d" stroke-width="0.5"/>
@@ -81,7 +81,7 @@
         text-anchor="middle" font-weight="bold">LFO</text>
 
   <!-- Zone 0c: MOD BUS -->
-  <text x="10.16" y="96.0" fill="#00d4ff" font-family="monospace" font-size="2.4"
+  <text x="10.16" y="99.2" fill="#00d4ff" font-family="monospace" font-size="2.4"
         text-anchor="middle" font-weight="bold">MOD BUS</text>
 
   <!-- Zone 1: CONTROL -->

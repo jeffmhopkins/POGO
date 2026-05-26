@@ -4,32 +4,11 @@
 <meta charset="UTF-8">
 <title>POGO Panel Preview</title>
 <style>
-  body {
-    background: #1a1a1a;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 40px 20px;
-    font-family: monospace;
-    color: #aaa;
-  }
-  h1 { font-size: 14px; letter-spacing: 2px; color: #555; margin-bottom: 24px; }
-  .panel-wrap {
-    background: #111;
-    border: 1px solid #333;
-    padding: 20px;
-    border-radius: 4px;
-  }
-  .panel-wrap svg {
-    width: 812px;
-    height: 514px;
-    display: block;
-  }
-  .note {
-    margin-top: 16px;
-    font-size: 11px;
-    color: #444;
-  }
+  body { background:#1a1a1a; display:flex; flex-direction:column; align-items:center; padding:40px 20px; font-family:monospace; color:#aaa; }
+  h1 { font-size:14px; letter-spacing:2px; color:#555; margin-bottom:24px; }
+  .panel-wrap { background:#111; border:1px solid #333; padding:20px; border-radius:4px; }
+  .panel-wrap svg { width:812px; height:514px; display:block; }
+  .note { margin-top:16px; font-size:11px; color:#444; }
 </style>
 </head>
 <body>
@@ -95,7 +74,7 @@
 
   <!-- ── ZONE 0 MINI-ZONE DIVIDERS (dim gray horizontal) ───────────────────── -->
   <line x1="0.5"  y1="38.5" x2="19.82" y2="38.5" stroke="#2d2d2d" stroke-width="0.5"/>
-  <line x1="0.5"  y1="91.0" x2="19.82" y2="91.0" stroke="#2d2d2d" stroke-width="0.5"/>
+  <line x1="0.5"  y1="94.2" x2="19.82" y2="94.2" stroke="#2d2d2d" stroke-width="0.5"/>
 
   <!-- ── ZONE 1: BAND / DIST SUBSECTION DIVIDER (horizontal) ──────────────── -->
   <line x1="20.82" y1="76" x2="50.30" y2="76" stroke="#2d2d2d" stroke-width="0.5"/>
@@ -118,7 +97,7 @@
         text-anchor="middle" font-weight="bold">LFO</text>
 
   <!-- Zone 0c: MOD BUS -->
-  <text x="10.16" y="96.0" fill="#00d4ff" font-family="monospace" font-size="2.4"
+  <text x="10.16" y="99.2" fill="#00d4ff" font-family="monospace" font-size="2.4"
         text-anchor="middle" font-weight="bold">MOD BUS</text>
 
   <!-- Zone 1: CONTROL -->
@@ -541,6 +520,6 @@
 
 </svg>
 </div>
-<p class="note">Source: res/Pogo-source.svg — text labels rendered natively by browser. VCV Rack uses res/Pogo.svg (path-outlined glyphs).</p>
+<p class="note">Source: res/Pogo-source.svg</p>
 </body>
 </html>
