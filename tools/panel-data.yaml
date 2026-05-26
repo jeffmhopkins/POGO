@@ -115,10 +115,10 @@ zones:
       - id: GAIN
         type: switch_H2
         cx: 11.43
-        cy: 32
+        cy: 28.5
         pos_labels: ["1×", "5×"]
         pos_xs: [6.93, 15.93]
-        pos_y: 41.5
+        pos_y: 38.0
         cpp_param: "GAIN_PARAM"
       - id: BP3_L
         type: jack_input
