@@ -444,47 +444,124 @@ def _scale_svg_for_html(svg_content: str, scale: float = 4.0) -> str:
     return svg_content
 
 
-def _wrap_svg_in_layers(svg_content: str, rules: DesignRules, scale: float = 4.0) -> str:
-    """Inject named <g> layer groups and DRC/footprint overlay circles into the SVG."""
-    # Strip the opening and closing svg tags so we can reassemble
+def _collect_overlay_positions(data: dict, rules: DesignRules) -> dict:
+    """Return component positions grouped by type for overlay rendering."""
+    jacks: list[tuple[float, float]] = []
+    pots:  list[tuple[float, float]] = []
+    knobs: list[tuple[float, float, float]] = []  # cx, cy, r_mm
+
+    r_map = {"knob_medium": 4.5, "knob_large": 7.0, "knob_xl": 9.0}
+
+    for comp in resolve_components(data, rules):
+        cx    = float(comp.get("cx", 0))
+        cy    = float(comp.get("cy", 0))
+        ctype = comp.get("type", "")
+
+        if ctype in ("jack_input", "jack_output"):
+            jacks.append((cx, cy))
+        elif ctype == "trimpot":
+            pots.append((cx, cy))
+        elif ctype in r_map:
+            knobs.append((cx, cy, r_map[ctype]))
+
+    return {"jacks": jacks, "pots": pots, "knobs": knobs}
+
+
+def _wrap_svg_in_layers(
+    svg_content: str,
+    rules: DesignRules,
+    overlay: dict | None = None,
+    scale: float = 4.0,
+) -> str:
+    """Inject named <g> layer groups and DRC/footprint overlays into the SVG."""
     import re
 
-    # Extract everything between <svg ...> and </svg>
     m = re.search(r"<svg[^>]*>(.*)</svg>", svg_content, re.DOTALL)
     if not m:
         return svg_content
-    inner = m.group(1)
-    svg_open = svg_content[: m.start(1)]
-    svg_open = svg_open.rstrip()
+    inner    = m.group(1)
+    svg_open = svg_content[: m.start(1)].rstrip()
 
-    # Scale helpers
-    ko_top   = rules.top_keepout * scale
-    ko_bot_y = rules.bot_keepout_start * scale
-    H_px     = round(128.5 * scale)
-    W_px     = round(203.20 * scale)
+    if overlay is None:
+        overlay = {"jacks": [], "pots": [], "knobs": []}
 
-    # Keep-out overlay (semi-transparent red bars, scale transform handles mm→px)
+    # All coordinates are in mm (same coordinate system as the SVG viewBox).
+    W   = 203.20
+    H   = 128.5
+    kot = rules.top_keepout        # 10.0
+    kob = rules.bot_keepout_start  # 118.5
+
+    # ── Keep-out layer ────────────────────────────────────────────────────────
+    dash = "1 0.7"  # ~4px dash at 4px/mm
     keepout_layer = f"""
   <g id="layer-keepout" style="display:none;">
-    <rect x="0" y="0" width="{W_px}" height="{ko_top}" fill="rgba(255,0,0,0.18)"/>
-    <rect x="0" y="{ko_bot_y}" width="{W_px}" height="{H_px - ko_bot_y}" fill="rgba(255,0,0,0.18)"/>
-    <line x1="0" y1="{ko_top}" x2="{W_px}" y2="{ko_top}" stroke="#ff4444" stroke-width="1" stroke-dasharray="4,3"/>
-    <line x1="0" y1="{ko_bot_y}" x2="{W_px}" y2="{ko_bot_y}" stroke="#ff4444" stroke-width="1" stroke-dasharray="4,3"/>
-    <text x="4" y="{ko_top - 1}" fill="#ff4444" font-family="monospace" font-size="9">TOP KEEP-OUT</text>
-    <text x="4" y="{ko_bot_y - 2}" fill="#ff4444" font-family="monospace" font-size="9">BOT KEEP-OUT</text>
+    <rect x="0" y="0" width="{W}" height="{kot}" fill="rgba(255,0,0,0.18)"/>
+    <rect x="0" y="{kob}" width="{W}" height="{H - kob}" fill="rgba(255,0,0,0.18)"/>
+    <line x1="0" y1="{kot}" x2="{W}" y2="{kot}" stroke="#ff4444" stroke-width="0.35" stroke-dasharray="{dash}"/>
+    <line x1="0" y1="{kob}" x2="{W}" y2="{kob}" stroke="#ff4444" stroke-width="0.35" stroke-dasharray="{dash}"/>
+    <text x="1" y="{kot - 0.4}" fill="#ff4444" font-family="monospace" font-size="1.8">TOP KEEP-OUT</text>
+    <text x="1" y="{kob - 0.5}" fill="#ff4444" font-family="monospace" font-size="1.8">BOT KEEP-OUT</text>
   </g>"""
+
+    # ── Nuts / knob-caps layer ─────────────────────────────────────────────────
+    nuts_parts: list[str] = []
+    for cx, cy in overlay["jacks"]:
+        nuts_parts.append(
+            f'    <circle cx="{cx}" cy="{cy}" r="5" fill="rgba(255,204,0,0.35)" stroke="#ffcc00" stroke-width="0.25"/>'
+        )
+    for cx, cy in overlay["pots"]:
+        nuts_parts.append(
+            f'    <circle cx="{cx}" cy="{cy}" r="5.5" fill="rgba(100,180,255,0.35)" stroke="#64b4ff" stroke-width="0.25"/>'
+        )
+    for cx, cy, r in overlay["knobs"]:
+        nuts_parts.append(
+            f'    <circle cx="{cx}" cy="{cy}" r="{r}" fill="rgba(255,140,0,0.25)" stroke="#ff8c00" stroke-width="0.25"/>'
+        )
+    nuts_layer = (
+        '\n  <g id="layer-nuts" style="display:none;">\n'
+        + "\n".join(nuts_parts)
+        + "\n  </g>"
+    )
+
+    # ── PCB footprints layer (KiCad courtyard projected onto panel plane) ──────
+    # Thonkiconn PJ301M-12: courtyard x∈[-5,5] y∈[-1.42,12.98] (origin = panel hole)
+    # Alpha RD901F 9mm:     courtyard relative to shaft center x∈[-8.65,5.1] y∈[-6.67,6.67]
+    pcb_parts: list[str] = []
+    for cx, cy in overlay["jacks"]:
+        pcb_parts.append(
+            f'    <rect x="{cx - 5}" y="{cy - 1.42}" width="10" height="14.4"'
+            f' fill="rgba(255,204,0,0.15)" stroke="#ffcc00" stroke-width="0.2" stroke-dasharray="0.8 0.4"/>'
+        )
+    for cx, cy in overlay["pots"]:
+        pcb_parts.append(
+            f'    <rect x="{cx - 8.65}" y="{cy - 6.67}" width="13.75" height="13.34"'
+            f' fill="rgba(100,180,255,0.15)" stroke="#64b4ff" stroke-width="0.2" stroke-dasharray="0.8 0.4"/>'
+        )
+    for cx, cy, r in overlay["knobs"]:
+        pcb_parts.append(
+            f'    <rect x="{cx - 8.65}" y="{cy - 6.67}" width="13.75" height="13.34"'
+            f' fill="rgba(255,140,0,0.12)" stroke="#ff8c00" stroke-width="0.2" stroke-dasharray="0.8 0.4"/>'
+        )
+    pcb_layer = (
+        '\n  <g id="layer-pcb" style="display:none;">\n'
+        + "\n".join(pcb_parts)
+        + "\n  </g>"
+    )
 
     assembled = svg_open + "\n"
     assembled += f'  <g id="layer-panel">\n{inner}\n  </g>\n'
     assembled += keepout_layer + "\n"
+    assembled += nuts_layer    + "\n"
+    assembled += pcb_layer     + "\n"
     assembled += "</svg>"
     return assembled
 
 
-def build_html(svg_content: str, rules: DesignRules, violations: list[str]) -> str:
+def build_html(svg_content: str, rules: DesignRules, violations: list[str], data: dict | None = None) -> str:
     """Build the debug HTML with layer-toggle checkboxes."""
-    svg_scaled = _scale_svg_for_html(svg_content, scale=4.0)
-    svg_layered = _wrap_svg_in_layers(svg_scaled, rules, scale=4.0)
+    overlay     = _collect_overlay_positions(data, rules) if data else None
+    svg_scaled  = _scale_svg_for_html(svg_content, scale=4.0)
+    svg_layered = _wrap_svg_in_layers(svg_scaled, rules, overlay=overlay, scale=4.0)
 
     # Build DRC violation overlay text
     if violations:
@@ -496,8 +573,10 @@ def build_html(svg_content: str, rules: DesignRules, violations: list[str]) -> s
         vio_label = "DRC: PASS"
 
     layers = [
-        ("layer-panel",   "Panel (front)",       True),
-        ("layer-keepout", "Rail Keep-Out",        False),
+        ("layer-panel",   "Panel (front)",               True),
+        ("layer-keepout", "Rail Keep-Out",                False),
+        ("layer-nuts",    "Nuts / Knob Caps",             False),
+        ("layer-pcb",     "PCB Footprints (backside)",    False),
     ]
 
     checkboxes_html = ""
@@ -588,7 +667,7 @@ def main() -> int:
         print(f"Wrote {SVG_SOURCE.relative_to(REPO_ROOT)}")
 
     if args.design:
-        html_content = build_html(svg_content, rules, violations)
+        html_content = build_html(svg_content, rules, violations, data=data)
         HTML_DEBUG.parent.mkdir(parents=True, exist_ok=True)
         HTML_DEBUG.write_text(html_content, encoding="utf-8")
         vio_msg = f"  ({len(violations)} DRC violation(s))" if violations else "  (DRC PASS)"
