@@ -165,16 +165,29 @@ def _load_footprint(rel_path: str) -> list[dict]:
 
 # ── SVG emitter ────────────────────────────────────────────────────────────────
 
-def _prims_to_svg(prims: list[dict], tx: float, ty: float, rotate: int) -> str:
-    """Render primitives as an SVG <g> group translated to (tx,ty) and rotated."""
+def _prims_to_svg(
+    prims: list[dict],
+    cx: float, cy: float,
+    ox: float, oy: float,
+    rotate: int,
+) -> str:
+    """Render primitives as an SVG <g> positioned so footprint anchor (ox,oy) lands at (cx,cy).
+
+    rotate (CW degrees) rotates around the anchor point (cx,cy), not around the
+    footprint's pin-1 origin.  SVG equivalent:
+        translate(cx,cy) rotate(r) translate(-ox,-oy)
+    This keeps the visual anchor fixed at (cx,cy) for all rotation values.
+    """
     parts: list[str] = []
 
-    # SVG transform: first rotate (around footprint origin), then translate.
-    # KiCad rotate convention: CW degrees; SVG rotate() is also CW for y-down coords.
     if rotate:
-        transform = f'transform="translate({tx:.3f},{ty:.3f}) rotate({rotate})"'
+        transform = (
+            f'transform="translate({cx:.3f},{cy:.3f})'
+            f' rotate({rotate})'
+            f' translate({-ox:.3f},{-oy:.3f})"'
+        )
     else:
-        transform = f'transform="translate({tx:.3f},{ty:.3f})"'
+        transform = f'transform="translate({cx-ox:.3f},{cy-oy:.3f})"'
 
     parts.append(f'<g {transform}>')
 
@@ -238,13 +251,7 @@ def build_kicad_layer(components: list[dict[str, Any]]) -> str:
         cy     = float(comp.get("cy", 0))
         rotate = int(comp.get("rotate", 0))
 
-        # Translate so that the visual centre of the footprint lands at (cx, cy).
-        # For jacks: barrel body circle (at footprint 0,6.48) → panel hole (cx,cy).
-        # For pots:  shaft circle (at footprint 7.5,2.5) → shaft centre (cx,cy).
-        tx = cx - ox
-        ty = cy - oy
-
-        pieces.append(_prims_to_svg(prims, tx, ty, rotate))
+        pieces.append(_prims_to_svg(prims, cx, cy, ox, oy, rotate))
 
         # Green cross-hair marks the panel anchor (cx, cy) regardless of footprint offset.
         pieces.append(
