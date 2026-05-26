@@ -42,8 +42,8 @@ colors:
 design_rules:
   top_keepout:       10.0
   bot_keepout_start: 118.5
-  cv_jack_cy:        108.0   # PCB courtyard bottom = 114.50 mm → 4.00 mm clear of rail keepout
-  att_offset:        -15.0   # att_cy = cv_jack_cy + att_offset = 93.0
+  cv_jack_cy:        112.0   # PCB courtyard bottom = 118.50 mm — at rail keepout floor
+  att_offset:        -15.0   # att_cy = cv_jack_cy + att_offset = 97.0
   jack_label_dy:      7.0    # label_y = cy + 7.0
   output_rect_dy:    -1.76
   output_rect_h:      2.26
@@ -139,7 +139,8 @@ zones:
         cpp_id: "ALT_BP_R_INPUT"
 
   # ── Section 0b: LFO ───────────────────────────────────────────────────────
-  # Two independent LFOs: speed trimpot + LED + output jack each
+  # Two independent LFOs: speed trimpot → LED → output jack, each in its own column
+  # col 0 → cx = 22.86mm (LFO 1), col 1 → cx = 38.10mm (LFO 2)
   - id: zone_lfo
     label: "Zone 0b — LFO"
     x_start: 15.24
@@ -149,41 +150,41 @@ zones:
       - id: LFO1_SPEED
         type: trimpot
         col: 0
-        cy: 64
+        cy: 60
         label: "SPEED"
         label_font_size: 1.8
         cpp_param: "LFO1_SPEED_PARAM"
       - id: LFO2_SPEED
         type: trimpot
         col: 1
-        cy: 64
+        cy: 60
         label: "SPEED"
         label_font_size: 1.8
         cpp_param: "LFO2_SPEED_PARAM"
+      - id: LFO1_LED
+        type: led
+        col: 0
+        cy: 69
+        cpp_light: "LFO1_LIGHT"
+      - id: LFO2_LED
+        type: led
+        col: 1
+        cy: 69
+        cpp_light: "LFO2_LIGHT"
       - id: LFO1_OUT
         type: jack_output
         col: 0
-        cy: 79
+        cy: 82
         label: "LFO 1"
         font_size: 1.8
         cpp_id: "LFO1_OUTPUT"
       - id: LFO2_OUT
         type: jack_output
         col: 1
-        cy: 79
+        cy: 82
         label: "LFO 2"
         font_size: 1.8
         cpp_id: "LFO2_OUTPUT"
-      - id: LFO1_LED
-        type: led
-        cx: 30.48    # centred in x-gap between jack columns (27.86–33.10mm)
-        cy: 76
-        cpp_light: "LFO1_LIGHT"
-      - id: LFO2_LED
-        type: led
-        cx: 30.48    # centred in x-gap between jack columns
-        cy: 82
-        cpp_light: "LFO2_LIGHT"
 
   # ── Section 0c: MOD BUS ───────────────────────────────────────────────────
   # Mod bus processor: amount + offset trimpots, mod input jack, activity LED
