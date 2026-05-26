@@ -205,14 +205,18 @@ class DesignRules:
         top_edge = cy - self.jack_nut_r
         bot_edge = cy + self.jack_nut_r
         if top_edge < self.top_keepout:
+            excess = self.top_keepout - top_edge
             return (
-                f"JACK '{label}' at cy={cy:.2f}: nut top={top_edge:.2f} "
-                f"encroaches TOP keepout ({self.top_keepout:.2f})"
+                f"JACK '{label}' @ cx={cx:.2f},cy={cy:.2f}:"
+                f" nut top={top_edge:.2f}mm breaches TOP keepout ({self.top_keepout:.2f}mm)"
+                f" — move down by ≥{excess:.2f}mm"
             )
         if bot_edge > self.bot_keepout_start:
+            excess = bot_edge - self.bot_keepout_start
             return (
-                f"JACK '{label}' at cy={cy:.2f}: nut bottom={bot_edge:.2f} "
-                f"exceeds BOT keepout start ({self.bot_keepout_start:.2f})"
+                f"JACK '{label}' @ cx={cx:.2f},cy={cy:.2f}:"
+                f" nut bottom={bot_edge:.2f}mm breaches BOT keepout ({self.bot_keepout_start:.2f}mm)"
+                f" — move up by ≥{excess:.2f}mm"
             )
         return None
 
@@ -221,14 +225,18 @@ class DesignRules:
         top_edge = cy - self.pot_nut_r
         bot_edge = cy + self.pot_nut_r
         if top_edge < self.top_keepout:
+            excess = self.top_keepout - top_edge
             return (
-                f"POT '{label}' at cy={cy:.2f}: nut top={top_edge:.2f} "
-                f"encroaches TOP keepout ({self.top_keepout:.2f})"
+                f"POT '{label}' @ cx={cx:.2f},cy={cy:.2f}:"
+                f" nut top={top_edge:.2f}mm breaches TOP keepout ({self.top_keepout:.2f}mm)"
+                f" — move down by ≥{excess:.2f}mm"
             )
         if bot_edge > self.bot_keepout_start:
+            excess = bot_edge - self.bot_keepout_start
             return (
-                f"POT '{label}' at cy={cy:.2f}: nut bottom={bot_edge:.2f} "
-                f"exceeds BOT keepout start ({self.bot_keepout_start:.2f})"
+                f"POT '{label}' @ cx={cx:.2f},cy={cy:.2f}:"
+                f" nut bottom={bot_edge:.2f}mm breaches BOT keepout ({self.bot_keepout_start:.2f}mm)"
+                f" — move up by ≥{excess:.2f}mm"
             )
         return None
 
@@ -241,10 +249,11 @@ class DesignRules:
 
         Returns a list of violation strings (empty = no violations).
         Violations are prefixed with a category tag, e.g. [NUT KEEPOUT].
-        [PCB KEEPOUT] entries are informational warnings (not blocking errors).
+        All violations are blocking errors.
         """
         violations: list[str] = []
         violations.extend(self._check_nut_keepout(components))
+        violations.extend(self._check_panel_clearance(components))
         violations.extend(self._check_pcb_overlaps(components))
         if mounting_holes:
             violations.extend(self._check_mounting_clearance(components, mounting_holes))
@@ -298,10 +307,43 @@ class DesignRules:
                     )
         return out
 
+    def _check_panel_clearance(self, components: list[dict[str, Any]]) -> list[str]:
+        """Panel-face nut / hole circles must not overlap each other.
+
+        Each component has a circular nut (jacks, pots) or hole (switches, LEDs) on
+        the panel face. If two circles overlap the hardware will physically clash —
+        nuts can't be tightened and holes may intersect.
+        """
+        out: list[str] = []
+        circles: list[tuple] = []
+        for comp in components:
+            ctype = comp.get("type", "")
+            cx    = float(comp.get("cx", 0))
+            cy    = float(comp.get("cy", 0))
+            r     = get_panel_r(ctype, self)
+            if r > 0:
+                circles.append((cx, cy, r, _comp_label(comp), ctype))
+
+        for i in range(len(circles)):
+            for j in range(i + 1, len(circles)):
+                cx1, cy1, r1, l1, t1 = circles[i]
+                cx2, cy2, r2, l2, t2 = circles[j]
+                dist     = ((cx2 - cx1) ** 2 + (cy2 - cy1) ** 2) ** 0.5
+                min_dist = r1 + r2
+                if dist < min_dist:
+                    overlap = min_dist - dist
+                    out.append(
+                        f"[NUT CLEARANCE] '{l1}' ({t1} @ cx={cx1:.2f},cy={cy1:.2f}, r={r1}mm)"
+                        f" ↔ '{l2}' ({t2} @ cx={cx2:.2f},cy={cy2:.2f}, r={r2}mm)"
+                        f" — panel circles overlap {overlap:.2f}mm"
+                        f" (centre-to-centre={dist:.2f}mm, need≥{min_dist:.2f}mm;"
+                        f" increase separation by ≥{overlap:.2f}mm)"
+                    )
+        return out
+
     def _check_pcb_overlaps(self, components: list[dict[str, Any]]) -> list[str]:
         """PCB courtyard rectangles must not overlap each other."""
         out: list[str] = []
-        # Build index of components that have PCB footprints
         footprinted = []
         for comp in components:
             ctype = comp.get("type", "")
@@ -320,11 +362,15 @@ class DesignRules:
                 cb, rb = footprinted[j]
                 dx, dy = _rect_overlap(ra, rb)
                 if dx > 0 and dy > 0:
-                    la = _comp_label(ca)
-                    lb = _comp_label(cb)
+                    la  = _comp_label(ca)
+                    lb  = _comp_label(cb)
+                    cxa = float(ca.get("cx", 0)); cya = float(ca.get("cy", 0))
+                    cxb = float(cb.get("cx", 0)); cyb = float(cb.get("cy", 0))
+                    gap = _rect_min_gap(ra, rb)
                     out.append(
-                        f"[PCB OVERLAP] '{la}' ({ca['type']}) ↔ '{lb}' ({cb['type']})"
-                        f" — overlap {dx:.2f}×{dy:.2f}mm"
+                        f"[PCB OVERLAP] '{la}' ({ca['type']} @ cx={cxa:.2f},cy={cya:.2f})"
+                        f" ↔ '{lb}' ({cb['type']} @ cx={cxb:.2f},cy={cyb:.2f})"
+                        f" — courtyard overlap {dx:.2f}×{dy:.2f}mm (gap={gap:.2f}mm)"
                     )
         return out
 
@@ -346,15 +392,20 @@ class DesignRules:
                 continue
             rx1, ry1, rx2, ry2 = rect
             label = _comp_label(comp)
+            rot_s = f" rotate={rotate}°" if rotate else ""
             if ry1 < self.top_keepout:
+                excess = self.top_keepout - ry1
                 out.append(
-                    f"[PCB KEEPOUT] '{label}' ({ctype}) courtyard top={ry1:.2f}"
-                    f" extends into TOP keepout ({self.top_keepout:.2f})"
+                    f"[PCB KEEPOUT] '{label}' ({ctype} @ cx={cx:.2f},cy={cy:.2f}{rot_s})"
+                    f" courtyard top={ry1:.2f}mm breaches TOP keepout ({self.top_keepout:.2f}mm)"
+                    f" by {excess:.2f}mm — move component down by ≥{excess:.2f}mm"
                 )
             if ry2 > self.bot_keepout_start:
+                excess = ry2 - self.bot_keepout_start
                 out.append(
-                    f"[PCB KEEPOUT] '{label}' ({ctype}) courtyard bottom={ry2:.2f}"
-                    f" exceeds BOT keepout ({self.bot_keepout_start:.2f})"
+                    f"[PCB KEEPOUT] '{label}' ({ctype} @ cx={cx:.2f},cy={cy:.2f}{rot_s})"
+                    f" courtyard bottom={ry2:.2f}mm breaches BOT keepout ({self.bot_keepout_start:.2f}mm)"
+                    f" by {excess:.2f}mm — move up by ≥{excess:.2f}mm or add rotate:180"
                 )
         return out
 
@@ -377,15 +428,15 @@ class DesignRules:
             cx1, cy1, cx2, cy2 = rect
             for mh in mounting_holes:
                 hx, hy = float(mh["cx"]), float(mh["cy"])
-                # Closest point on rect to hole centre
                 near_x = max(cx1, min(hx, cx2))
                 near_y = max(cy1, min(hy, cy2))
                 dist   = ((hx - near_x) ** 2 + (hy - near_y) ** 2) ** 0.5
                 if dist < r:
-                    label = _comp_label(comp)
+                    label   = _comp_label(comp)
+                    deficit = r - dist
                     out.append(
-                        f"[MH CLEARANCE] '{label}' ({ctype}) footprint"
-                        f" {dist:.2f}mm from mounting hole ({hx},{hy})"
-                        f" — min {r:.1f}mm required"
+                        f"[MH CLEARANCE] '{label}' ({ctype} @ cx={cx:.2f},cy={cy:.2f})"
+                        f" PCB courtyard is {dist:.2f}mm from mounting hole M3 @ ({hx},{hy})"
+                        f" — need ≥{r:.1f}mm; move component away by ≥{deficit:.2f}mm"
                     )
         return out

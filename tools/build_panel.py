@@ -800,6 +800,7 @@ def build_html(svg_content: str, rules: DesignRules, violations: list[str], data
 
         _CAT_COLOR = {
             "NUT KEEPOUT":    "#ff6666",
+            "NUT CLEARANCE":  "#ff88aa",
             "PCB OVERLAP":    "#ffaa44",
             "MH CLEARANCE":   "#ffdd55",
             "PCB KEEPOUT":    "#88aaff",
@@ -838,6 +839,24 @@ def build_html(svg_content: str, rules: DesignRules, violations: list[str], data
             f'{lname}</label>\n'
         )
 
+    legend_items = [
+        ("#ffcc00", "●", "Jack nut / hole  r=5.0mm"),
+        ("#64b4ff", "●", "Pot / trimpot nut  r=5.5mm"),
+        ("#ff8c00", "●", "Knob cap  (visual radius)"),
+        ("#dc64ff", "●", "Switch hole  r=3.15mm"),
+        ("#64dc64", "●", "LED hole  r=1.6mm"),
+        ("#ffcc00", "⬚", "PCB courtyard outline  (dashed; same hue as nut)"),
+        ("rgba(255,60,60,0.7)", "■", "Rail keep-out zone  y&lt;10mm / y&gt;118.5mm"),
+    ]
+    legend_html = '<div style="margin-top:8px;padding:7px 14px;background:#161616;border:1px solid #2a2a2a;border-radius:4px;max-width:812px;font-size:0.82em;color:#999;">'
+    legend_html += '<span style="color:#aaa;font-weight:bold;">Overlay legend: </span>'
+    for color, sym, desc in legend_items:
+        legend_html += (
+            f'<span style="margin-right:18px;white-space:nowrap;">'
+            f'<span style="color:{color};">{sym}</span> {desc}</span>'
+        )
+    legend_html += '</div>'
+
     html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -858,6 +877,7 @@ def build_html(svg_content: str, rules: DesignRules, violations: list[str], data
   <div class="controls">
     {checkboxes_html}
   </div>
+  {legend_html}
   <div id="svg-wrap">
     {svg_layered}
   </div>

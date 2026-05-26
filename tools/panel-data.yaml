@@ -43,7 +43,7 @@ design_rules:
   top_keepout:       10.0
   bot_keepout_start: 118.5
   cv_jack_cy:        105.0   # PCB courtyard bottom = 117.98 mm → 0.52 mm clear of rail keepout
-  att_offset:        -8.5   # att_cy = cv_jack_cy + att_offset = 96.5
+  att_offset:        -10.75  # att_cy = cv_jack_cy + att_offset = 94.25
   jack_label_dy:      7.0    # label_y = cy + 7.0
   output_rect_dy:    -1.76
   output_rect_h:      2.26
@@ -160,30 +160,30 @@ zones:
         label: "SPEED"
         label_font_size: 1.8
         cpp_param: "LFO2_SPEED_PARAM"
-      - id: LFO1_LED
-        type: led
-        cx: 28.36
-        cy: 76
-        cpp_light: "LFO1_LIGHT"
-      - id: LFO2_LED
-        type: led
-        cx: 32.60
-        cy: 76
-        cpp_light: "LFO2_LIGHT"
       - id: LFO1_OUT
         type: jack_output
         col: 0
-        cy: 76
+        cy: 74.5
         label: "LFO 1"
         font_size: 1.8
         cpp_id: "LFO1_OUTPUT"
       - id: LFO2_OUT
         type: jack_output
         col: 1
-        cy: 76
+        cy: 74.5
         label: "LFO 2"
         font_size: 1.8
         cpp_id: "LFO2_OUTPUT"
+      - id: LFO1_LED
+        type: led
+        col: 0
+        cy: 82
+        cpp_light: "LFO1_LIGHT"
+      - id: LFO2_LED
+        type: led
+        col: 1
+        cy: 82
+        cpp_light: "LFO2_LIGHT"
 
   # ── Section 0c: MOD BUS ───────────────────────────────────────────────────
   # Mod bus processor: amount + offset trimpots, mod input jack, activity LED
