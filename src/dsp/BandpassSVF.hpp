@@ -54,6 +54,7 @@ struct TripleBandpass {
 			f0 = clamp(f0, 10.f, sampleRate * 0.48f);
 			float Q  = 0.5f + qParam[i] * 49.5f;
 			float y  = groups[i].process(x, f0, Q, sampleRate);
+			y *= 1.f / (Q * Q);  // normalize 4-pole BP peak to unity; Q shapes bandwidth only
 			prevOut[i] = y;
 			sum += pol * y;
 		}
