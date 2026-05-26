@@ -35,6 +35,7 @@ sys.path.insert(0, str(REPO_ROOT / "tools"))
 from panel_rules import DesignRules   # noqa: E402
 import panel_svg as svg               # noqa: E402
 from panel_cpp import generate_cpp_stubs  # noqa: E402
+from panel_kicad import build_kicad_layer  # noqa: E402
 
 
 # ── YAML loader ───────────────────────────────────────────────────────────────
@@ -673,7 +674,11 @@ def _collect_overlay_positions(data: dict, rules: DesignRules) -> dict:
         elif ctype in LED_TYPES:
             leds.append((cx, cy, rotate))
 
-    return {"jacks": jacks, "pots": pots, "knobs": knobs, "switches": switches, "leds": leds}
+    return {
+        "jacks": jacks, "pots": pots, "knobs": knobs,
+        "switches": switches, "leds": leds,
+        "_components": list(resolve_components(data, rules)),
+    }
 
 
 def _wrap_svg_in_layers(
@@ -775,11 +780,21 @@ def _wrap_svg_in_layers(
         + "\n  </g>"
     )
 
+    # ── KiCad footprint layer ───────────────────────────────────────────────────
+    if overlay:
+        # Rebuild resolved component list from overlay tuples (not stored separately)
+        # — pass the raw resolved list in via overlay["_components"] if available
+        raw_comps = overlay.get("_components", [])
+        kicad_svg = build_kicad_layer(raw_comps)
+    else:
+        kicad_svg = '<g id="layer-kicad" style="display:none;"></g>'
+
     assembled = svg_open + "\n"
     assembled += f'  <g id="layer-panel">\n{inner}\n  </g>\n'
     assembled += keepout_layer + "\n"
     assembled += nuts_layer    + "\n"
     assembled += pcb_layer     + "\n"
+    assembled += "\n" + kicad_svg + "\n"
     assembled += "</svg>"
     return assembled
 
@@ -827,7 +842,8 @@ def build_html(svg_content: str, rules: DesignRules, violations: list[str], data
         ("layer-panel",   "Panel (front)",               True),
         ("layer-keepout", "Rail Keep-Out",                False),
         ("layer-nuts",    "Nuts / Knob Caps",             False),
-        ("layer-pcb",     "PCB Footprints (backside)",    False),
+        ("layer-pcb",     "PCB Courtyards (simplified)",  False),
+        ("layer-kicad",   "KiCad Footprints (actual)",    False),
     ]
 
     checkboxes_html = ""
@@ -840,13 +856,17 @@ def build_html(svg_content: str, rules: DesignRules, violations: list[str], data
         )
 
     legend_items = [
-        ("#ffcc00", "●", "Jack nut / hole  r=5.0mm"),
+        ("#ffcc00", "●", "Jack nut  r=5.0mm"),
         ("#64b4ff", "●", "Pot / trimpot nut  r=5.5mm"),
-        ("#ff8c00", "●", "Knob cap  (visual radius)"),
+        ("#ff8c00", "●", "Knob cap  (visual)"),
         ("#dc64ff", "●", "Switch hole  r=3.15mm"),
         ("#64dc64", "●", "LED hole  r=1.6mm"),
-        ("#ffcc00", "⬚", "PCB courtyard outline  (dashed; same hue as nut)"),
-        ("rgba(255,60,60,0.7)", "■", "Rail keep-out zone  y&lt;10mm / y&gt;118.5mm"),
+        ("#ffcc00", "⬚", "PCB courtyard  (simplified bbox; dashed)"),
+        ("#00d4ff", "⬚", "KiCad courtyard  F.CrtYd (actual; dashed)"),
+        ("#f5a623", "⬚", "KiCad fab outline  F.Fab"),
+        ("#cccccc", "⬚", "KiCad silkscreen  F.SilkS"),
+        ("#ff44ff", "●", "KiCad pad  (through-hole marker)"),
+        ("rgba(255,60,60,0.7)", "■", "Rail keep-out  y&lt;10 / y&gt;118.5mm"),
     ]
     legend_html = '<div style="margin-top:8px;padding:7px 14px;background:#161616;border:1px solid #2a2a2a;border-radius:4px;max-width:812px;font-size:0.82em;color:#999;">'
     legend_html += '<span style="color:#aaa;font-weight:bold;">Overlay legend: </span>'
