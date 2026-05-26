@@ -76,13 +76,13 @@ mounting_holes:
 separators:
   # Section 0 right boundary — cyan vertical
   - {type: v, x: 45.72, y1: 4.5, y2: 124.0, style: main_cyan}
-  # INPUT / GAIN → LFO boundary (BP3 labels land at y=57; separator below at 62)
-  - {type: h, x1: 1.0, x2: 45.22, y: 62.0, style: zone_div}
+  # INPUT / GAIN → LFO boundary (BP3 labels land at y=54; separator below at 58)
+  - {type: h, x1: 1.0, x2: 45.22, y: 58.0, style: zone_div}
 
 # ── Zone labels ───────────────────────────────────────────────────────────────
 zone_labels:
   - {x: 11.43, y: 12.0, text: "INPUT / GAIN"}
-  - {x: 11.43, y: 66.0, text: "LFO"}
+  - {x: 11.43, y: 62.0, text: "LFO"}
 
 # ── Zones ─────────────────────────────────────────────────────────────────────
 zones:
@@ -99,36 +99,40 @@ zones:
       - id: L_IN
         type: jack_input
         col: 0
-        cy: 18
+        cy: 17
+        rotate: 180
         label: "L IN"
         font_size: 1.8
         cpp_id: "L_IN_INPUT"
       - id: R_IN
         type: jack_input
         col: 1
-        cy: 18
+        cy: 17
+        rotate: 180
         label: "R IN"
         font_size: 1.8
         cpp_id: "R_IN_INPUT"
       - id: GAIN
         type: switch_H2
         cx: 11.43
-        cy: 34
+        cy: 32
         pos_labels: ["1×", "5×"]
         pos_xs: [6.93, 15.93]
-        pos_y: 43.0
+        pos_y: 41.5
         cpp_param: "GAIN_PARAM"
       - id: BP3_L
         type: jack_input
         col: 0
-        cy: 50
+        cy: 47
+        rotate: 180
         label: "BP3 L"
         font_size: 1.6
         cpp_id: "ALT_BP_L_INPUT"
       - id: BP3_R
         type: jack_input
         col: 1
-        cy: 50
+        cy: 47
+        rotate: 180
         label: "BP3 R"
         font_size: 1.6
         cpp_id: "ALT_BP_R_INPUT"
