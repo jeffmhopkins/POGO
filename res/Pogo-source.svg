@@ -40,8 +40,8 @@
   <!-- ZONE LABELS                                                              -->
   <!-- ════════════════════════════════════════════════════════════════════════ -->
 
-  <!-- INPUT / GAIN -->
-  <text x="17.78" y="8.25" fill="#00d4ff" font-family="monospace" font-size="2.4" text-anchor="middle" font-weight="bold">INPUT / GAIN</text>
+  <!-- INPUT -->
+  <text x="17.78" y="8.25" fill="#00d4ff" font-family="monospace" font-size="2.4" text-anchor="middle" font-weight="bold">INPUT</text>
 
   <!-- LFOs -->
   <text x="17.145" y="47.0" fill="#00d4ff" font-family="monospace" font-size="2.4" text-anchor="middle" font-weight="bold">LFOs</text>
