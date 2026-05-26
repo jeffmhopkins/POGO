@@ -1,7 +1,7 @@
 #include "plugin.hpp"
 #include "dsp/InputBuffer.hpp"
 #include "dsp/PreGain.hpp"
-#include "dsp/EnvelopeFollower.hpp"
+#include "dsp/LFO.hpp"
 #include "dsp/ModBus.hpp"
 #include "dsp/BandpassSVF.hpp"
 #include "dsp/Distortion.hpp"
@@ -123,10 +123,9 @@ struct Pogo : Module {
 	enum ParamId {
 		// Zone 0a — INPUT / GAIN
 		GAIN_PARAM,
-		// Zone 0b — ENVELOPE
-		MOD_SRC_PARAM,
-		ATTACK_PARAM,
-		RELEASE_PARAM,
+		// Zone 0b — LFO
+		LFO1_SPEED_PARAM,
+		LFO2_SPEED_PARAM,
 		// Zone 0c — MOD BUS
 		MOD_AMOUNT_PARAM,
 		MOD_OFFSET_PARAM,
@@ -188,6 +187,8 @@ struct Pogo : Module {
 		// Audio
 		L_IN_INPUT,
 		R_IN_INPUT,
+		ALT_BP_L_INPUT,   // Alt BP3 input L — when patched, replaces BP3 input
+		ALT_BP_R_INPUT,   // Alt BP3 input R (normalizes to L alt if only L patched)
 		// Mod source
 		MOD_IN_INPUT,
 		// Zone 1 CV override jacks
@@ -221,8 +222,8 @@ struct Pogo : Module {
 	};
 
 	enum OutputId {
-		ENV_L_OUTPUT,
-		ENV_R_OUTPUT,
+		LFO1_OUTPUT,
+		LFO2_OUTPUT,
 		BAND_L_OUTPUT,   // HP bandpass tap L (BAND OUT)
 		BAND_R_OUTPUT,   // HP bandpass tap R (BAND OUT)
 		L_OUTPUT,
@@ -231,6 +232,9 @@ struct Pogo : Module {
 	};
 
 	enum LightId {
+		LFO1_LIGHT,
+		LFO2_LIGHT,
+		MOD_LIGHT,
 		NUM_LIGHTS
 	};
 
@@ -241,9 +245,8 @@ struct Pogo : Module {
 		configSwitch(GAIN_PARAM, 0.f, 1.f, 0.f, "Gain", {"1\xc3\x97", "5\xc3\x97"});
 
 		// Zone 0b
-		configSwitch(MOD_SRC_PARAM, 0.f, 2.f, 1.f, "Mod Source Select", {"L", "Max(L,R)", "Avg(L,R)"});
-		configParam(ATTACK_PARAM, 0.f, 1.f, 0.3f, "Attack");
-		configParam(RELEASE_PARAM, 0.f, 1.f, 0.5f, "Release");
+		configParam(LFO1_SPEED_PARAM, 0.f, 1.f, 0.3f, "LFO 1 Speed");
+		configParam(LFO2_SPEED_PARAM, 0.f, 1.f, 0.3f, "LFO 2 Speed");
 
 		// Zone 0c
 		configParam(MOD_AMOUNT_PARAM, 0.f, 1.f, 0.5f, "Mod Amount");
@@ -313,6 +316,8 @@ struct Pogo : Module {
 		// Inputs
 		configInput(L_IN_INPUT, "Audio L");
 		configInput(R_IN_INPUT, "Audio R");
+		configInput(ALT_BP_L_INPUT, "Alt BP3 L");
+		configInput(ALT_BP_R_INPUT, "Alt BP3 R");
 		configInput(MOD_IN_INPUT, "Mod Source");
 		configInput(BYPASS_CV_INPUT, "Comb Bypass CV");
 		configInput(MASTER_OFFSET_CV_INPUT, "Master Offset CV");
@@ -335,10 +340,15 @@ struct Pogo : Module {
 		configInput(HP_RES_CV_INPUT, "HP Resonance CV");
 
 		// Outputs
-		configOutput(ENV_L_OUTPUT, "Envelope CV L");
-		configOutput(ENV_R_OUTPUT, "Envelope CV R");
+		configOutput(LFO1_OUTPUT, "LFO 1");
+		configOutput(LFO2_OUTPUT, "LFO 2");
 		configOutput(BAND_L_OUTPUT, "HP Bandpass L");
 		configOutput(BAND_R_OUTPUT, "HP Bandpass R");
+
+		// Lights
+		configLight<RedLight>(LFO1_LIGHT, "LFO 1 value");
+		configLight<RedLight>(LFO2_LIGHT, "LFO 2 value");
+		configLight<RedLight>(MOD_LIGHT, "Mod bus signal");
 		configOutput(L_OUTPUT, "Audio L");
 		configOutput(R_OUTPUT, "Audio R");
 
@@ -346,8 +356,8 @@ struct Pogo : Module {
 	}
 
 	// ── DSP state ────────────────────────────────────────────────────────────
-	EnvelopeFollower envL, envR;
-	TripleBandpass   bandpassL, bandpassR;
+	LFO lfo1, lfo2;
+	TripleBandpass bandpassL, bandpassR;
 	// Distortion taps — post-SVF output fed into Block 4; not routed back into SVF input.
 	float distTapL[3] = {}, distTapR[3] = {};
 	LPFilter lp1L, lp1R;
@@ -362,7 +372,7 @@ struct Pogo : Module {
 	dsp::Decimator<OS, OS_QUALITY> decL, decR;
 
 	void onReset() override {
-		envL.reset(); envR.reset();
+		lfo1.reset(); lfo2.reset();
 		bandpassL.reset(); bandpassR.reset();
 		for (int i = 0; i < 3; i++) distTapL[i] = distTapR[i] = 0.f;
 		lp1L.reset(); lp1R.reset();
@@ -393,26 +403,17 @@ struct Pogo : Module {
 		float pgL = PreGain::process(inL, gainParam);
 		float pgR = PreGain::process(inR, gainParam);
 
-		// ── Block 2: envelope follower ────────────────────────────────────────
-		// Each channel follows its own audio (independent stereo envelopes).
-		float atkP = params[ATTACK_PARAM].getValue();
-		float relP = params[RELEASE_PARAM].getValue();
-		float envOutL = envL.process(pgL, atkP, relP, dt);
-		float envOutR = envR.process(pgR, atkP, relP, dt);
-
-		// MOD SRC switch selects which combination feeds the mod bus normalling.
-		float modSrc = params[MOD_SRC_PARAM].getValue(); // 0=L, 1=max(L,R), 2=avg
-		float modSrcEnv;
-		if (modSrc < 0.5f)       modSrcEnv = envOutL;
-		else if (modSrc < 1.5f)  modSrcEnv = std::max(envOutL, envOutR);
-		else                      modSrcEnv = (envOutL + envOutR) * 0.5f;
+		// ── Block 2: LFOs ────────────────────────────────────────────────────
+		float lfo1Raw = lfo1.process(params[LFO1_SPEED_PARAM].getValue(), dt);
+		float lfo2Raw = lfo2.process(params[LFO2_SPEED_PARAM].getValue(), dt);
+		float lfo1V   = lfo1Raw * 5.f;   // ±5V
+		float lfo2V   = lfo2Raw * 5.f;   // ±5V
 
 		// ── Mod bus ───────────────────────────────────────────────────────────
-		float modSrcV;
-		if (inputs[MOD_IN_INPUT].isConnected())
-			modSrcV = inputs[MOD_IN_INPUT].getVoltage();
-		else
-			modSrcV = modSrcEnv; // normalise to selected envelope combination
+		// LFO1 normalizes to mod bus; MOD_IN jack overrides when patched
+		float modSrcV = inputs[MOD_IN_INPUT].isConnected()
+		                ? inputs[MOD_IN_INPUT].getVoltage()
+		                : lfo1V;
 
 		float busV = ModBusProcessor::process(modSrcV,
 		                                      params[MOD_AMOUNT_PARAM].getValue(),
@@ -460,9 +461,18 @@ struct Pogo : Module {
 			clamp(params[DRIVE_3_PARAM].getValue() + modDest(DRIVE_CV_3_INPUT, DRIVE_ATT_3_PARAM), 0.f, 1.f),
 		};
 
+		// Alt BP3 inputs: when patched, replace pgL/pgR as SVF input only.
+		// R normalizes to L alt if only L is patched.
+		bool altLConn = inputs[ALT_BP_L_INPUT].isConnected();
+		bool altRConn = inputs[ALT_BP_R_INPUT].isConnected();
+		float bpInL = altLConn ? inputs[ALT_BP_L_INPUT].getVoltage() : pgL;
+		float bpInR = altRConn ? inputs[ALT_BP_R_INPUT].getVoltage()
+		            : altLConn ? inputs[ALT_BP_L_INPUT].getVoltage()
+		            : pgR;
+
 		float upBufL[OS], upBufR[OS];
-		upL.process(pgL, upBufL);
-		upR.process(pgR, upBufR);
+		upL.process(bpInL, upBufL);
+		upR.process(bpInR, upBufR);
 
 		float postL[OS], postR[OS];
 		const float fs2 = 2.f * fs;
@@ -529,8 +539,13 @@ struct Pogo : Module {
 		outputs[R_OUTPUT].setVoltage(clamp(outR, -11.0f, 11.0f));
 		outputs[BAND_L_OUTPUT].setVoltage(clamp(hpL.prevBP, -11.0f, 11.0f));
 		outputs[BAND_R_OUTPUT].setVoltage(clamp(hpR.prevBP, -11.0f, 11.0f));
-		outputs[ENV_L_OUTPUT].setVoltage(envOutL);
-		outputs[ENV_R_OUTPUT].setVoltage(envOutR);
+		outputs[LFO1_OUTPUT].setVoltage(lfo1V);
+		outputs[LFO2_OUTPUT].setVoltage(lfo2V);
+
+		// LEDs: LFO [-1,+1] → [0,1]; MOD ±5V → [0,1]
+		lights[LFO1_LIGHT].setBrightness((lfo1Raw + 1.f) * 0.5f);
+		lights[LFO2_LIGHT].setBrightness((lfo2Raw + 1.f) * 0.5f);
+		lights[MOD_LIGHT].setBrightness(clamp((modSrcV / 5.f + 1.f) * 0.5f, 0.f, 1.f));
 	}
 };
 
@@ -544,20 +559,23 @@ struct PogoWidget : ModuleWidget {
 		// ── Zone 0a — INPUT / GAIN ──────────────────────────────────────
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(5.08f, 16.f)), module, Pogo::L_IN_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(15.24f, 16.f)), module, Pogo::R_IN_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(5.08f, 24.f)), module, Pogo::ALT_BP_L_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(15.24f, 24.f)), module, Pogo::ALT_BP_R_INPUT));
 		// GAIN: 2-pos horizontal switch
 		addParam(createParamCentered<PogoSwitchH2>(mm2px(Vec(10.16f, 30.2f)), module, Pogo::GAIN_PARAM));
 
-		// ── Zone 0b — ENVELOPE ─────────────────────────────────────────────
-		// MOD SRC: 3-pos horizontal switch
-		addParam(createParamCentered<PogoSwitchH3>(mm2px(Vec(10.16f, 53.f)), module, Pogo::MOD_SRC_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(5.08f, 66.f)), module, Pogo::ATTACK_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(15.24f, 66.f)), module, Pogo::RELEASE_PARAM));
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(5.08f, 82.f)), module, Pogo::ENV_L_OUTPUT));
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(15.24f, 82.f)), module, Pogo::ENV_R_OUTPUT));
+		// ── Zone 0b — LFO ──────────────────────────────────────────────────
+		addLight(createLightCentered<SmallLight<RedLight>>(mm2px(Vec(5.08f, 61.f)), module, Pogo::LFO1_LIGHT));
+		addLight(createLightCentered<SmallLight<RedLight>>(mm2px(Vec(15.24f, 61.f)), module, Pogo::LFO2_LIGHT));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(5.08f, 66.f)), module, Pogo::LFO1_SPEED_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(15.24f, 66.f)), module, Pogo::LFO2_SPEED_PARAM));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(5.08f, 82.f)), module, Pogo::LFO1_OUTPUT));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(15.24f, 82.f)), module, Pogo::LFO2_OUTPUT));
 
 		// ── Zone 0c — MOD BUS ──────────────────────────────────────────────
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(5.08f, 105.f)), module, Pogo::MOD_AMOUNT_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(15.24f, 105.f)), module, Pogo::MOD_OFFSET_PARAM));
+		addLight(createLightCentered<SmallLight<RedLight>>(mm2px(Vec(10.16f, 113.f)), module, Pogo::MOD_LIGHT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(10.16f, 118.f)), module, Pogo::MOD_IN_INPUT));
 
 		// ── Zone 1 — CONTROL / COMB ────────────────────────────────────────
