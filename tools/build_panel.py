@@ -111,8 +111,9 @@ def _resolve_band_components(zone: dict, rules: DesignRules) -> list[dict]:
 # ── DRC ───────────────────────────────────────────────────────────────────────
 
 def run_drc(data: dict, rules: DesignRules) -> list[str]:
-    components = resolve_components(data, rules)
-    return rules.check_all(components)
+    components    = resolve_components(data, rules)
+    mh            = data.get("mounting_holes", [])
+    return rules.check_all(components, mounting_holes=mh)
 
 
 # ── SVG generation ────────────────────────────────────────────────────────────
@@ -563,11 +564,33 @@ def build_html(svg_content: str, rules: DesignRules, violations: list[str], data
     svg_scaled  = _scale_svg_for_html(svg_content, scale=4.0)
     svg_layered = _wrap_svg_in_layers(svg_scaled, rules, overlay=overlay, scale=4.0)
 
-    # Build DRC violation overlay text
+    # Build DRC violation report, grouped by category tag
     if violations:
-        vio_items = "".join(f"<li style='color:#ff6666'>{v}</li>" for v in violations)
-        vio_html  = f"<ul>{vio_items}</ul>"
-        vio_label = f"DRC Violations ({len(violations)})"
+        from collections import defaultdict
+        groups: dict[str, list[str]] = defaultdict(list)
+        for v in violations:
+            tag = v.split("]")[0].lstrip("[") if v.startswith("[") else "OTHER"
+            groups[tag].append(v)
+
+        _CAT_COLOR = {
+            "NUT KEEPOUT":    "#ff6666",
+            "PCB OVERLAP":    "#ffaa44",
+            "MH CLEARANCE":   "#ffdd55",
+            "OTHER":          "#cc99ff",
+        }
+        parts = []
+        for tag, items in sorted(groups.items()):
+            color = _CAT_COLOR.get(tag, "#cc99ff")
+            parts.append(
+                f'<details open><summary style="color:{color};cursor:pointer;">'
+                f'{tag} ({len(items)})</summary><ul>'
+            )
+            for item in items:
+                parts.append(f"<li style='color:{color}'>{item}</li>")
+            parts.append("</ul></details>")
+
+        vio_html  = "\n".join(parts)
+        vio_label = f"DRC — {len(violations)} violation(s)"
     else:
         vio_html  = "<p style='color:#44ff44'>No DRC violations.</p>"
         vio_label = "DRC: PASS"
@@ -652,9 +675,16 @@ def main() -> int:
 
     if args.check:
         if violations:
-            print(f"DRC FAILED — {len(violations)} violation(s):", file=sys.stderr)
+            from collections import defaultdict
+            groups: dict[str, list[str]] = defaultdict(list)
             for v in violations:
-                print(f"  {v}", file=sys.stderr)
+                tag = v.split("]")[0].lstrip("[") if v.startswith("[") else "OTHER"
+                groups[tag].append(v)
+            print(f"DRC FAILED — {len(violations)} violation(s):", file=sys.stderr)
+            for tag, items in sorted(groups.items()):
+                print(f"\n  [{tag}] ({len(items)})", file=sys.stderr)
+                for v in items:
+                    print(f"    {v}", file=sys.stderr)
             return 1
         print("DRC PASS — no violations.")
         return 0

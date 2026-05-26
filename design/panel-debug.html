@@ -615,8 +615,55 @@
 </svg>
   </div>
   <div class="drc">
-    <h2>DRC: PASS</h2>
-    <p style='color:#44ff44'>No DRC violations.</p>
+    <h2>DRC — 44 violation(s)</h2>
+    <details open><summary style="color:#ffdd55;cursor:pointer;">MH CLEARANCE (3)</summary><ul>
+<li style='color:#ffdd55'>[MH CLEARANCE] 'MOD_IN' (jack_input) footprint 0.00mm from mounting hole (7.5,123.4) — min 3.5mm required</li>
+<li style='color:#ffdd55'>[MH CLEARANCE] 'HP_CUT_CV' (jack_input) footprint 2.74mm from mounting hole (195.7,123.4) — min 3.5mm required</li>
+<li style='color:#ffdd55'>[MH CLEARANCE] 'HP_RES_CV' (jack_input) footprint 0.00mm from mounting hole (195.7,123.4) — min 3.5mm required</li>
+</ul></details>
+<details open><summary style="color:#ffaa44;cursor:pointer;">PCB OVERLAP (41)</summary><ul>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'BP3_L' (jack_input) ↔ 'LFO1_SPEED' (trimpot) — overlap 10.00×0.05mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'BP3_L' (jack_input) ↔ 'LFO2_SPEED' (trimpot) — overlap 3.49×0.05mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'BP3_R' (jack_input) ↔ 'LFO2_SPEED' (trimpot) — overlap 10.00×0.05mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'LFO1_SPEED' (trimpot) ↔ 'LFO2_SPEED' (trimpot) — overlap 3.59×13.34mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'MOD_AMOUNT' (trimpot) ↔ 'MOD_OFFSET' (trimpot) — overlap 3.59×13.34mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'MOD_OFFSET' (trimpot) ↔ 'BYPASS_ATT' (trimpot) — overlap 3.59×13.34mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'COMB_BYPASS' (knob_medium) ↔ 'WIDTH' (knob_medium) — overlap 0.61×13.34mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'FB_DIST_BLEND' (knob_medium) ↔ 'MASTER_OFFSET_ATT' (trimpot) — overlap 9.31×0.59mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'FB_DIST_BLEND' (knob_medium) ↔ 'BLEND_ATT' (trimpot) — overlap 8.03×0.59mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'BYPASS_ATT' (trimpot) ↔ 'MASTER_OFFSET_ATT' (trimpot) — overlap 3.59×13.34mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'MASTER_OFFSET_ATT' (trimpot) ↔ 'BLEND_ATT' (trimpot) — overlap 3.59×13.34mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'BLEND_ATT' (trimpot) ↔ 'FREQ_ATT_1_PARAM' (trimpot) — overlap 3.59×13.34mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'drive_1' (knob_large) ↔ 'FREQ_ATT_1_PARAM' (trimpot) — overlap 3.59×0.59mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'drive_1' (knob_large) ↔ 'FB_ATT_1_PARAM' (trimpot) — overlap 13.75×0.59mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'drive_1' (knob_large) ↔ 'DRIVE_ATT_1_PARAM' (trimpot) — overlap 3.59×0.59mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'FREQ_ATT_1_PARAM' (trimpot) ↔ 'FB_ATT_1_PARAM' (trimpot) — overlap 3.59×13.34mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'FB_ATT_1_PARAM' (trimpot) ↔ 'DRIVE_ATT_1_PARAM' (trimpot) — overlap 3.59×13.34mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'DRIVE_ATT_1_PARAM' (trimpot) ↔ 'FREQ_ATT_2_PARAM' (trimpot) — overlap 3.59×13.34mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'drive_2' (knob_large) ↔ 'FREQ_ATT_2_PARAM' (trimpot) — overlap 3.59×0.59mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'drive_2' (knob_large) ↔ 'FB_ATT_2_PARAM' (trimpot) — overlap 13.75×0.59mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'drive_2' (knob_large) ↔ 'DRIVE_ATT_2_PARAM' (trimpot) — overlap 3.59×0.59mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'FREQ_ATT_2_PARAM' (trimpot) ↔ 'FB_ATT_2_PARAM' (trimpot) — overlap 3.59×13.34mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'FB_ATT_2_PARAM' (trimpot) ↔ 'DRIVE_ATT_2_PARAM' (trimpot) — overlap 3.59×13.34mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'DRIVE_ATT_2_PARAM' (trimpot) ↔ 'FREQ_ATT_3_PARAM' (trimpot) — overlap 3.59×13.34mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'drive_3' (knob_large) ↔ 'FREQ_ATT_3_PARAM' (trimpot) — overlap 3.59×0.59mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'drive_3' (knob_large) ↔ 'FB_ATT_3_PARAM' (trimpot) — overlap 13.75×0.59mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'drive_3' (knob_large) ↔ 'DRIVE_ATT_3_PARAM' (trimpot) — overlap 3.59×0.59mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'FREQ_ATT_3_PARAM' (trimpot) ↔ 'FB_ATT_3_PARAM' (trimpot) — overlap 3.59×13.34mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'FB_ATT_3_PARAM' (trimpot) ↔ 'DRIVE_ATT_3_PARAM' (trimpot) — overlap 3.59×13.34mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'DRIVE_ATT_3_PARAM' (trimpot) ↔ 'LP1_CUT_ATT' (trimpot) — overlap 3.59×13.34mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'LP1_RESONANCE' (knob_medium) ↔ 'LP1_CUT_ATT' (trimpot) — overlap 8.67×6.59mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'LP1_RESONANCE' (knob_medium) ↔ 'LP1_RES_ATT' (trimpot) — overlap 8.67×6.59mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'LP1_CUT_ATT' (trimpot) ↔ 'LP1_RES_ATT' (trimpot) — overlap 3.59×13.34mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'LP1_RES_ATT' (trimpot) ↔ 'LP2_CUT_ATT' (trimpot) — overlap 3.59×13.34mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'LP2_RESONANCE' (knob_medium) ↔ 'LP2_CUT_ATT' (trimpot) — overlap 8.67×6.59mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'LP2_RESONANCE' (knob_medium) ↔ 'LP2_RES_ATT' (trimpot) — overlap 8.67×6.59mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'LP2_CUT_ATT' (trimpot) ↔ 'LP2_RES_ATT' (trimpot) — overlap 3.59×13.34mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'LP2_RES_ATT' (trimpot) ↔ 'HP_CUT_ATT' (trimpot) — overlap 3.59×13.34mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'HP_RESONANCE' (knob_medium) ↔ 'HP_CUT_ATT' (trimpot) — overlap 8.67×6.59mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'HP_RESONANCE' (knob_medium) ↔ 'HP_RES_ATT' (trimpot) — overlap 8.67×6.59mm</li>
+<li style='color:#ffaa44'>[PCB OVERLAP] 'HP_CUT_ATT' (trimpot) ↔ 'HP_RES_ATT' (trimpot) — overlap 3.59×13.34mm</li>
+</ul></details>
   </div>
   <script>
     function toggleLayer(id, visible) {

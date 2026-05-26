@@ -8,6 +8,52 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+# ── PCB courtyard dimensions (mm, relative to component origin) ───────────────
+# Thonkiconn PJ301M-12: origin = panel hole centre
+#   Source: Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles.kicad_mod
+JACK_CY = (-5.0, -1.42, 5.0, 12.98)   # (x1, y1, x2, y2)
+
+# Alpha RD901F 9mm: origin = shaft centre (derived from footprint pin 1 origin)
+#   Source: Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles.kicad_mod
+#   Footprint origin = pin1; shaft centre = (7.5, 2.5) in footprint coords
+#   Courtyard footprint coords: x∈[-1.15, 12.6], y∈[-4.17, 9.17]
+#   → relative to shaft: x∈[-8.65, 5.1], y∈[-6.67, 6.67]
+POT_CY  = (-8.65, -6.67, 5.1, 6.67)
+
+# Minimum clearance from PCB courtyard edge to mounting hole centre (M3, r≈3.5mm)
+MOUNTING_HOLE_CLEARANCE_MM = 3.5
+
+JACK_TYPES = {"jack_input", "jack_output"}
+POT_TYPES  = {"trimpot", "knob_medium", "knob_large", "knob_xl"}
+
+
+def _get_courtyard(cx: float, cy: float, ctype: str) -> tuple[float, float, float, float] | None:
+    """Return (x1, y1, x2, y2) PCB courtyard rect or None if the type has no footprint."""
+    if ctype in JACK_TYPES:
+        x1, y1, x2, y2 = JACK_CY
+        return (cx + x1, cy + y1, cx + x2, cy + y2)
+    if ctype in POT_TYPES:
+        x1, y1, x2, y2 = POT_CY
+        return (cx + x1, cy + y1, cx + x2, cy + y2)
+    return None
+
+
+def _rect_overlap(r1: tuple, r2: tuple) -> tuple[float, float]:
+    """Return (x_overlap_mm, y_overlap_mm); positive = overlap in that axis."""
+    dx = min(r1[2], r2[2]) - max(r1[0], r2[0])
+    dy = min(r1[3], r2[3]) - max(r1[1], r2[1])
+    return dx, dy
+
+
+def _comp_label(comp: dict) -> str:
+    return (
+        comp.get("id")
+        or comp.get("label")
+        or comp.get("cpp_id")
+        or comp.get("cpp_param")
+        or "?"
+    )
+
 
 @dataclass
 class DesignRules:
@@ -99,42 +145,100 @@ class DesignRules:
             )
         return None
 
-    def check_all(self, components: list[dict[str, Any]]) -> list[str]:
-        """Run DRC on a flat list of component dicts.
-
-        Each dict must have at least: type, cx, cy (or y for slider_label),
-        and optionally label/id for the violation message.
+    def check_all(
+        self,
+        components: list[dict[str, Any]],
+        mounting_holes: list[dict[str, Any]] | None = None,
+    ) -> list[str]:
+        """Run all DRC checks on a flat list of resolved component dicts.
 
         Returns a list of violation strings (empty = no violations).
+        Violations are prefixed with a category tag, e.g. [NUT KEEPOUT].
         """
         violations: list[str] = []
+        violations.extend(self._check_nut_keepout(components))
+        violations.extend(self._check_pcb_overlaps(components))
+        if mounting_holes:
+            violations.extend(self._check_mounting_clearance(components, mounting_holes))
+        return violations
 
-        JACK_TYPES = {"jack_input", "jack_output"}
-        POT_TYPES  = {"trimpot", "knob_medium", "knob_large", "knob_xl"}
+    # ── Individual check passes ───────────────────────────────────────────────
 
+    def _check_nut_keepout(self, components: list[dict[str, Any]]) -> list[str]:
+        """Panel-face nut circles must not enter the rail keep-out zones."""
+        out: list[str] = []
         for comp in components:
             ctype = comp.get("type", "")
-            label = comp.get("label") or comp.get("id") or comp.get("cpp_id") or comp.get("cpp_param") or "?"
+            label = _comp_label(comp)
             cx    = float(comp.get("cx", 0))
-            cy    = comp.get("cy")
-
-            if cy is None or str(cy).startswith("_"):
-                # Placeholder — resolve before checking
-                if ctype in JACK_TYPES:
-                    cy = self.cv_jack_cy
-                elif ctype in POT_TYPES:
-                    cy = self.att_cy
-                else:
-                    continue
-            cy = float(cy)
+            cy    = float(comp.get("cy", 0))
 
             if ctype in JACK_TYPES:
                 v = self._jack_keepout_violation(cx, cy, label)
                 if v:
-                    violations.append(v)
+                    out.append(f"[NUT KEEPOUT] {v}")
             elif ctype in POT_TYPES:
                 v = self._pot_keepout_violation(cx, cy, label)
                 if v:
-                    violations.append(v)
+                    out.append(f"[NUT KEEPOUT] {v}")
+        return out
 
-        return violations
+    def _check_pcb_overlaps(self, components: list[dict[str, Any]]) -> list[str]:
+        """PCB courtyard rectangles must not overlap each other."""
+        out: list[str] = []
+        # Build index of components that have PCB footprints
+        footprinted = []
+        for comp in components:
+            ctype = comp.get("type", "")
+            if ctype not in JACK_TYPES and ctype not in POT_TYPES:
+                continue
+            cx = float(comp.get("cx", 0))
+            cy = float(comp.get("cy", 0))
+            rect = _get_courtyard(cx, cy, ctype)
+            if rect:
+                footprinted.append((comp, rect))
+
+        for i in range(len(footprinted)):
+            for j in range(i + 1, len(footprinted)):
+                ca, ra = footprinted[i]
+                cb, rb = footprinted[j]
+                dx, dy = _rect_overlap(ra, rb)
+                if dx > 0 and dy > 0:
+                    la = _comp_label(ca)
+                    lb = _comp_label(cb)
+                    out.append(
+                        f"[PCB OVERLAP] '{la}' ({ca['type']}) ↔ '{lb}' ({cb['type']})"
+                        f" — overlap {dx:.2f}×{dy:.2f}mm"
+                    )
+        return out
+
+    def _check_mounting_clearance(
+        self,
+        components: list[dict[str, Any]],
+        mounting_holes: list[dict[str, Any]],
+    ) -> list[str]:
+        """PCB courtyard must not intrude within MOUNTING_HOLE_CLEARANCE_MM of each mounting hole."""
+        out: list[str] = []
+        r = MOUNTING_HOLE_CLEARANCE_MM
+        for comp in components:
+            ctype = comp.get("type", "")
+            cx = float(comp.get("cx", 0))
+            cy = float(comp.get("cy", 0))
+            rect = _get_courtyard(cx, cy, ctype)
+            if rect is None:
+                continue
+            cx1, cy1, cx2, cy2 = rect
+            for mh in mounting_holes:
+                hx, hy = float(mh["cx"]), float(mh["cy"])
+                # Closest point on rect to hole centre
+                near_x = max(cx1, min(hx, cx2))
+                near_y = max(cy1, min(hy, cy2))
+                dist   = ((hx - near_x) ** 2 + (hy - near_y) ** 2) ** 0.5
+                if dist < r:
+                    label = _comp_label(comp)
+                    out.append(
+                        f"[MH CLEARANCE] '{label}' ({ctype}) footprint"
+                        f" {dist:.2f}mm from mounting hole ({hx},{hy})"
+                        f" — min {r:.1f}mm required"
+                    )
+        return out
