@@ -141,10 +141,12 @@ def svg_knob(
 
 # ── LED ───────────────────────────────────────────────────────────────────────
 
-def svg_led(cx: float, cy: float, colors: dict) -> str:
+def svg_led(cx: float, cy: float, colors: dict, fill: str = "", stroke: str = "") -> str:
+    f = fill or colors["led_fill"]
+    s = stroke or colors["led_stroke"]
     return (
         f'<circle cx="{cx}" cy="{cy}" r="1.2" '
-        f'fill="{colors["led_fill"]}" stroke="{colors["led_stroke"]}" stroke-width="0.4"/>'
+        f'fill="{f}" stroke="{s}" stroke-width="0.4"/>'
     )
 
 
@@ -156,10 +158,12 @@ def svg_led_labeled(
     rules: Any,
     colors: dict,
     font_size: float = 1.8,
+    fill: str = "",
+    stroke: str = "",
 ) -> str:
     label_y = cy + rules.jack_label_dy
     parts = [
-        svg_led(cx, cy, colors),
+        svg_led(cx, cy, colors, fill=fill, stroke=stroke),
         f'<text x="{cx}" y="{label_y:.1f}" fill="{label_fill}" '
         f'{_FONT} font-size="{font_size}" text-anchor="middle">{label}</text>',
     ]

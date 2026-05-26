@@ -74,4 +74,25 @@
   <text x="24.075" y="35.5" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">1×</text>
   <text x="33.075" y="35.5" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">5×</text>
 
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- Zone 0b — LFO                                                            -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+
+  <circle cx="5.715" cy="57.0" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="5.715" y1="57.0" x2="5.715" y2="52.5" stroke="#aaa" stroke-width="0.6"/>
+  <text x="5.715" y="64.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">RATE</text>
+  <circle cx="17.145" cy="57.0" r="1.2" fill="#112244" stroke="#2255cc" stroke-width="0.4"/>
+  <circle cx="28.575" cy="57.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="28.575" cy="57.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <rect x="25.07" y="62.24" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
+  <text x="28.575" y="64.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">LFO 1</text>
+  <circle cx="5.715" cy="72.0" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="5.715" y1="72.0" x2="5.715" y2="67.5" stroke="#aaa" stroke-width="0.6"/>
+  <text x="5.715" y="79.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">RATE</text>
+  <circle cx="17.145" cy="72.0" r="1.2" fill="#112244" stroke="#2255cc" stroke-width="0.4"/>
+  <circle cx="28.575" cy="72.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="28.575" cy="72.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <rect x="25.07" y="77.24" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
+  <text x="28.575" y="79.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">LFO 2</text>
+
 </svg>

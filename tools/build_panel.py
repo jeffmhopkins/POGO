@@ -875,12 +875,16 @@ def _component_svg(comp: dict, rules: DesignRules, colors: dict) -> str:
         )
 
     elif ctype == "led":
-        return svg.svg_led(cx, cy, colors)
+        return svg.svg_led(cx, cy, colors,
+                           fill=comp.get("led_fill", ""),
+                           stroke=comp.get("led_stroke", ""))
 
     elif ctype == "led_labeled":
         lbl_fill = comp.get("label_fill", colors["jack_text"])
         lbl      = comp.get("label", "")
-        return svg.svg_led_labeled(cx, cy, lbl, lbl_fill, rules, colors)
+        return svg.svg_led_labeled(cx, cy, lbl, lbl_fill, rules, colors,
+                                   fill=comp.get("led_fill", ""),
+                                   stroke=comp.get("led_stroke", ""))
 
     return ""
 
