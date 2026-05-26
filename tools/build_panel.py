@@ -138,37 +138,22 @@ def _build_svg_lines(data: dict, rules: DesignRules) -> list[str]:
     lines.append("  <!-- ── PANEL BACKGROUND ─────────────────────────────────────────────────── -->")
     lines.append("  " + svg.svg_panel_background(W, H, colors).replace("\n", "\n  "))
 
-    # ── Comment block (zone map) ──────────────────────────────────────────
-    lines.append("""
+    # ── Comment block (spacing reference) ────────────────────────────────
+    hp   = float(meta.get("width_mm", W)) / float(meta.get("hp", round(W / 5.08)))
+    lines.append(f"""
   <!--
-    JACK SPACING STANDARD: 1 jack per 2 HP = 10.16 mm pitch
-    Jack centers in a 4 HP zone: x_zone + 5.08,  x_zone + 15.24
-    Jack centers in a 6 HP zone: x_zone + 5.08,  x_zone + 15.24,  x_zone + 25.40
-
-    HP ZONE BOUNDARIES
-      Zone 0  (4 HP):  x =   0.00 –  20.32
-      Zone 1  (6 HP):  x =  20.32 –  50.80
-      Band 1  (6 HP):  x =  50.80 –  81.28
-      Band 2  (6 HP):  x =  81.28 – 111.76
-      Band 3  (6 HP):  x = 111.76 – 142.24
-      LP 1    (4 HP):  x = 142.24 – 162.56
-      LP 2    (4 HP):  x = 162.56 – 182.88
-      HP+OUT  (4 HP):  x = 182.88 – 203.20
-
-    JACK POSITIONS (absolute x)
-      Zone 0  (2 j per row):          5.08,  15.24
-      Zone 1  (3 j, unified row):    25.40,  35.56,  45.72
-      Band 1  (3 j):                 55.88,  66.04,  76.20
-      Band 2  (3 j):                 86.36,  96.52, 106.68
-      Band 3  (3 j):                116.84, 127.00, 137.16
-      LP 1    (2 j):                147.32, 157.48
-      LP 2    (2 j per row):        167.64, 177.80
-      HP+OUT  (2 j per row):        187.96, 198.12
+    PANEL: {W:.2f} mm wide × {H:.2f} mm tall
+    1 HP = 5.08 mm   jack pitch = 10.16 mm (2 HP)
+    Jack x centres in an N-HP zone starting at x0:
+      2 HP (1 j): x0+5.08
+      4 HP (2 j): x0+5.08, x0+15.24
+      6 HP (3 j): x0+5.08, x0+15.24, x0+25.40
+      8 HP (4 j): x0+5.08, x0+15.24, x0+25.40, x0+35.56
   -->""")
 
     # ── Mounting holes ─────────────────────────────────────────────────────
     lines.append("")
-    lines.append("  <!-- Mounting holes: M3, x=7.5 and x=195.70, y=5.1 and y=123.4 -->")
+    lines.append("  <!-- Mounting holes: M3 -->")
     for mh in data.get("mounting_holes", []):
         lines.append("  " + svg.svg_mounting_hole(mh["cx"], mh["cy"]))
 
@@ -435,8 +420,10 @@ def build_svg(data: dict, rules: DesignRules) -> str:
 def _scale_svg_for_html(svg_content: str, scale: float = 4.0) -> str:
     """Replace mm dimensions in the SVG root element with px for screen display."""
     import re
-    W_px = round(203.20 * scale)
-    H_px = round(128.5  * scale)
+    m_w = re.search(r'<svg[^>]*\swidth="([\d.]+)mm"', svg_content)
+    m_h = re.search(r'<svg[^>]*\sheight="([\d.]+)mm"', svg_content)
+    W_px = round(float(m_w.group(1)) * scale) if m_w else round(203.20 * scale)
+    H_px = round(float(m_h.group(1)) * scale) if m_h else round(128.5  * scale)
     svg_content = re.sub(
         r'<svg([^>]*?)width="[^"]*"([^>]*?)height="[^"]*"',
         f'<svg\\1width="{W_px}px"\\2height="{H_px}px"',
@@ -486,9 +473,13 @@ def _wrap_svg_in_layers(
     if overlay is None:
         overlay = {"jacks": [], "pots": [], "knobs": []}
 
-    # All coordinates are in mm (same coordinate system as the SVG viewBox).
-    W   = 203.20
-    H   = 128.5
+    # Extract panel dimensions from SVG attributes (works for any HP width).
+    import re as _re
+    m_w = _re.search(r'width="([\d.]+)px"', svg_content)
+    m_h = _re.search(r'height="([\d.]+)px"', svg_content)
+    scale_used = scale  # SVG has already been scaled by _scale_svg_for_html
+    W = float(m_w.group(1)) / scale_used if m_w else 203.20
+    H = float(m_h.group(1)) / scale_used if m_h else 128.5
     kot = rules.top_keepout        # 10.0
     kob = rules.bot_keepout_start  # 118.5
 
