@@ -565,8 +565,8 @@ struct PogoWidget : ModuleWidget {
 		addParam(createParamCentered<PogoSwitchH2>(mm2px(Vec(10.16f, 30.2f)), module, Pogo::GAIN_PARAM));
 
 		// ── Zone 0b — LFO ──────────────────────────────────────────────────
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(5.08f, 64.7f)), module, Pogo::LFO1_SPEED_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(15.24f, 64.7f)), module, Pogo::LFO2_SPEED_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(5.08f, 62.6f)), module, Pogo::LFO1_SPEED_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(15.24f, 62.6f)), module, Pogo::LFO2_SPEED_PARAM));
 		addChild(createLightCentered<SmallLight<RedLight>>(mm2px(Vec(5.08f, 73.3f)), module, Pogo::LFO1_LIGHT));
 		addChild(createLightCentered<SmallLight<RedLight>>(mm2px(Vec(15.24f, 73.3f)), module, Pogo::LFO2_LIGHT));
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(5.08f, 82.f)), module, Pogo::LFO1_OUTPUT));
