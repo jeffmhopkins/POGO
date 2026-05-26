@@ -60,7 +60,7 @@ standard cases; no right-angle bus connector required.
 |---|---|---|
 | Control board | 2-layer | No analog ICs; only jack/pot/switch routing to connector. 2-layer FR4 1.2 mm sufficient. |
 | Utility board | **4-layer** | THAT340 expo converters are extremely noise-sensitive. Power + GND planes under expo area are essential. 60+ mod bus signals running in parallel benefit from reference plane between layers. Stack: Signal / GND / PWR / Signal. |
-| Combined audio board | **4-layer** | APF chains (9× LM13700 per channel) have long feedback traces; distortion chains have hot signals. Solid GND plane (L2) dramatically improves decoupling and shielding. Also provides the ground reference for the 4 mm center GND guard strip separating L and R signal areas. Stack: Signal / GND / PWR / Signal. |
+| Combined audio board | **4-layer** | SVF resonators (6× LM13700 per channel) plus distortion chains have hot signals. Solid GND plane (L2) dramatically improves decoupling and shielding. Also provides the ground reference for the 4 mm center GND guard strip separating L and R signal areas. Stack: Signal / GND / PWR / Signal. |
 
 Standard JLCPCB 4-layer stack: 1.6 mm, 0.2 mm prepreg between L1–L2 and L3–L4.
 Power plane (L3) carries +12 V and −12 V as separate copper pours; GND is full pour on L2.
@@ -105,11 +105,11 @@ WIDTH, POLARITY).
 | Audio jack input buffers (protection) | TL074 ×2 | Buffered after BAT54+100Ω at each audio jack: L IN, R IN (+ ENV, BAND, LEFT, RIGHT jacks are outputs — protection not needed there) |
 | Mod bus processor | TL072 ×1 | AMOUNT scaling summer + OFFSET adder; one op-amp per function |
 | Mod destination attenuverters | TL074 ×5 | 19 destinations × attenuverter buffer (one TL072 half per destination; ~10 halves → 5 TL074); BAT54+100Ω at each override jack input |
-| APF expo converters (groups 1, 2, 3) | THAT340 ×3, TL072 ×3 | One THAT340 per APF group; each drives both L and R audio boards; TL072 for Vbe reference voltage and temperature compensation per converter |
+| SVF expo converters (groups 1, 2, 3) | THAT340 ×3, TL072 ×3 | One THAT340 per SVF group; each drives both L and R audio boards; TL072 for Vbe reference voltage and temperature compensation per converter |
 | LP1 expo converter | THAT340 ×1, TL072 ×1 | THAT340 Q1 = L channel base current; Q2 = R channel (with V_spread added at summing node before Q2 base); STEREO SPREAD OFFSET pot wiper routes here via CN_CTRL |
 | LP2 expo converter | THAT340 ×1, TL072 ×1 | Both LP2 channels share one THAT340 |
 | HP expo converter | THAT340 ×1, TL072 ×1 | Both HP channels share one THAT340 |
-| FB DIST BLEND crossfade | TL072 ×1 | Receives post-dist taps from L+R audio boards (3 chains × 2 channels = 6 signals); crossfades with internal APF feedback; output routes back to L+R audio boards |
+| FB DIST BLEND scaler | TL072 ×1 | Receives post-dist taps from L+R audio boards (3 chains × 2 channels = 6 signals); scales by BLEND knob; output routes back to L+R audio boards to sum additively into each SVF group's input |
 | COMB BYPASS VCA | TL072 ×1 | Buffer/level set for VCA_CB control voltage driving Block 3 COMB BYPASS VCA cells on each audio board |
 | WIDTH + POLARITY | TL074 ×1 | Pan/polarity processing for CONTROL section; output goes to L+R audio boards |
 | **Total on utility board** | **~17 ICs** | (THAT340 ×6, TL072 ×10, TL074 ×6) |
@@ -126,7 +126,7 @@ single PCB. L-channel occupies the left half (~96 mm), R-channel occupies the ri
 signal traces).
 
 **Estimated size**: ~200 mm × 100 mm, 4-layer.
-Densest board in the system — Block 3 APF chains dominate component count per channel.
+Block 3 SVF resonators and Block 4 distortion chains are the primary ICs per channel.
 
 #### L-channel (left half)
 
@@ -135,33 +135,37 @@ Densest board in the system — Block 3 APF chains dominate component count per 
 | Block A L: Input buffer | LM4562 (half A + BAT54 clamp) | LM4562 ×1 |
 | Block 1 L: Pre-gain | NE5532 (half B), gain switch resistors | NE5532 ×1 |
 | Block 2 L: Envelope follower | TL074 ×1 (full-wave rectifier + peak detector), TL072 ×1 (buffer + MOD SEL diode-OR) | TL074 ×1, TL072 ×1 |
-| Block 3 L: APF chains 1+2+3 | LM13700M ×9 (6 stages × 3 chains; 2 LM13700 cells per stage = 9 ICs), LM13700M ×1 (**LM13700_CB1** = COMB BYPASS VCA), TL072 ×9 (stage buffers + comb tap) | LM13700 ×10, TL072 ×9 |
+| Block 3 L: SVF groups 1+2+3 | LM13700M ×3 (1 per group; 2 OTA cells = 2 integrators), LM13700M ×2 (Q VCA: 3 cells across 2 ICs; 1 spare cell), LM13700M ×1 (**LM13700_CB1** = COMB BYPASS VCA), TL074 ×1 (3-group summing amp) | LM13700 ×6, TL074 ×1 |
 | Block 4 L: Distortion | TL072 ×3 (soft clip), TL072 ×3 (hard clip), TL074 ×3 (wavefold), TL074 ×1 (sum amp) | TL072 ×6, TL074 ×4 |
 | Block VCA L: Pre-LP1 VCA | **THAT_VCA_L** (THAT 2180, SOIC-8) — 1 per channel; no IC sharing | THAT 2180 ×1 |
 | Block 5 L: LP Filter 1 | LM13700M ×1 (2 OTA integrators), TL074 ×1 (SVF sum amp + buffers), **IC_Q_AB_L** cell A (LP1 L Q; cell B = LP2 L Q) | LM13700 ×1, TL074 ×1 |
 | Block 6 L: LP Filter 2 | LM13700M ×1, TL074 ×1, **IC_Q_AB_L** cell B (LP2 L Q — same IC as LP1 Q) | LM13700 ×1, TL074 ×1, (IC_Q_AB_L shared) |
 | Block 7 L: HP Filter | LM13700M ×1 (2 OTA integrators), TL072 ×1, **IC_Q_C_L** cell A (HP L Q; cell B = spare) | LM13700 ×2, TL072 ×1 |
 | Block B L: Output buffers | TL072 ×1 (BAND OUT L + LEFT OUT) | TL072 ×1 |
-| **L-channel total** | | **LM13700 ×15, TL072 ×22, TL074 ×7, THAT 2180 ×1, LM4562 ×1, NE5532 ×1** |
+| **L-channel total** | | **LM13700 ×11, TL072 ×13, TL074 ×8, THAT 2180 ×1, LM4562 ×1, NE5532 ×1** |
 
 LM13700 allocation, L-channel:
-- **Block 3 APF ×9** + **LM13700_CB1 ×1** (COMB BYPASS VCA) = 10 for Block 3
+- **Block 3 SVF integrators ×3** + **Block 3 Q VCA ×2** + **LM13700_CB1 ×1** (COMB BYPASS VCA) = 6 for Block 3
 - **LP1 integrators ×1** + **IC_Q_AB_L ×1** (LP1+LP2 Q shared) + **LP2 integrators ×1** = 3 for Blocks 5+6
 - **HP integrators ×1** + **IC_Q_C_L ×1** (HP Q) = 2 for Block 7
 
 LM13700 Q VCA allocation, L-channel:
+- **IC_SVF_Q1_L**: Cell A = SVF Group 1 L Q; Cell B = SVF Group 2 L Q
+- **IC_SVF_Q2_L**: Cell A = SVF Group 3 L Q; Cell B = spare
 - **IC_Q_AB_L**: Cell A = LP1 L Q feedback; Cell B = LP2 L Q feedback
 - **IC_Q_C_L**: Cell A = HP L Q feedback; Cell B = spare
 
 #### R-channel (right half)
 
-Identical IC inventory to L-channel (**LM13700 ×15, TL072 ×22, TL074 ×7, THAT 2180 ×1,
+Identical IC inventory to L-channel (**LM13700 ×11, TL072 ×13, TL074 ×8, THAT 2180 ×1,
 LM4562 ×1, NE5532 ×1** — includes LM13700_CB2 COMB BYPASS VCA). Component placement mirrors
 the L-channel layout. Not electrically identical: STEREO SPREAD OFFSET adds V_spread to the
 R-channel LP1 expo converter on the utility board before the Iabc signal arrives, so the
 R-channel LP1 circuit on the audio board is structurally identical to L.
 
 LM13700 Q VCA allocation, R-channel:
+- **IC_SVF_Q1_R**: Cell A = SVF Group 1 R Q; Cell B = SVF Group 2 R Q
+- **IC_SVF_Q2_R**: Cell A = SVF Group 3 R Q; Cell B = spare
 - **IC_Q_AB_R**: Cell A = LP1 R Q feedback; Cell B = LP2 R Q feedback
 - **IC_Q_C_R**: Cell A = HP R Q feedback; Cell B = spare
 
@@ -178,12 +182,16 @@ to a 4 mm air gap shielded on all layers.
 
 V2164D has been **removed from the design** (specialty Eurorack-only sourcing). Replaced with:
 - **THAT 2180** (SOIC-8): signal-path VCA in Block VCA — 1 per channel (Mouser stock)
-- **LM13700** (SOIC-16): Q feedback OTA cells — already used throughout Block 3 APF
+- **LM13700** (SOIC-16): Q feedback OTA cells — already used throughout Block 3 SVF
 
-LM13700 Q VCA allocation: **4× LM13700** for Q control (2 per channel).
+LM13700 Q VCA allocation: **8× LM13700** for Q control (4 per channel): 2 for Block 3 SVF resonance + 2 for LP1/LP2/HP resonance.
 
 | IC | Board | Cell A | Cell B |
 |---|---|---|---|
+| IC_SVF_Q1_L | Combined audio (L-channel) | SVF Group 1 L Q | SVF Group 2 L Q |
+| IC_SVF_Q2_L | Combined audio (L-channel) | SVF Group 3 L Q | spare |
+| IC_SVF_Q1_R | Combined audio (R-channel) | SVF Group 1 R Q | SVF Group 2 R Q |
+| IC_SVF_Q2_R | Combined audio (R-channel) | SVF Group 3 R Q | spare |
 | IC_Q_AB_L | Combined audio (L-channel) | LP1 L Q (resonance BP feedback) | LP2 L Q (resonance BP feedback) |
 | IC_Q_AB_R | Combined audio (R-channel) | LP1 R Q (resonance BP feedback) | LP2 R Q (resonance BP feedback) |
 | IC_Q_C_L | Combined audio (L-channel) | HP L Q (resonance BP feedback) | spare |
@@ -305,13 +313,13 @@ feedback depth, etc.
 | 3 | ATTACK wiper | ← ctrl | RV1; 0–+12 V → utility board envelope follower τ_attack |
 | 4 | RELEASE wiper | ← ctrl | RV2; 0–+12 V → utility board envelope follower τ_release |
 | 5 | COMB BYPASS wiper | ← ctrl | RV5; 0–+12 V → utility board COMB BYPASS VCA level |
-| 6 | WIDTH wiper | ← ctrl | RV6; bipolar → utility board APF R-channel freq offset |
-| 7 | MASTER OFFSET wiper | ← ctrl | RV7; bipolar → utility board APF global freq offset |
-| 8 | FB DIST BLEND wiper | ← ctrl | RV8; 0–+12 V → utility board FB DIST BLEND crossfade |
-| 9 | FREQ 1 wiper | ← ctrl | RV12; bipolar → utility board APF group 1 expo converter |
-| 10 | FREQ 2 wiper | ← ctrl | RV18; bipolar → APF group 2 expo converter |
-| 11 | FREQ 3 wiper | ← ctrl | RV24; bipolar → APF group 3 expo converter |
-| 12 | FB 1 wiper | ← ctrl | RV13; 0–+12 V → utility board APF FB1 CV |
+| 6 | WIDTH wiper | ← ctrl | RV6; bipolar → utility board SVF R-channel freq offset |
+| 7 | MASTER OFFSET wiper | ← ctrl | RV7; bipolar → utility board SVF global freq offset |
+| 8 | FB DIST BLEND wiper | ← ctrl | RV8; 0–+12 V → utility board FB DIST BLEND scaler |
+| 9 | FREQ 1 wiper | ← ctrl | RV12; bipolar → utility board SVF group 1 expo converter |
+| 10 | FREQ 2 wiper | ← ctrl | RV18; bipolar → SVF group 2 expo converter |
+| 11 | FREQ 3 wiper | ← ctrl | RV24; bipolar → SVF group 3 expo converter |
+| 12 | FB 1 wiper | ← ctrl | RV13; 0–+12 V → utility board SVF Resonance 1 Q CV |
 | 13 | FB 2 wiper | ← ctrl | RV19 |
 | 14 | FB 3 wiper | ← ctrl | RV25 |
 | 15 | DRIVE 1 wiper | ← ctrl | RV14; 0–+12 V → audio board Block 4 chain 1 |
@@ -346,10 +354,10 @@ GND guard pins retained from original design for I_abc signal integrity (noise-a
 | 9 | BAND OUT L | ← L audio | LP1 L output → utility board → CN_CTRL_1 |
 | 10 | LEFT OUT | ← L audio | HP L output → utility board → CN_CTRL_1 |
 | 11 | **GND guard** | — | Ground return adjacent to I_abc group; reduces capacitive coupling onto expo current lines |
-| 12 | APF FREQ 1 expo out | → L audio | I_abc for APF group 1 L (from THAT340-1) |
-| 13 | APF FREQ 2 expo out | → L audio | I_abc for APF group 2 L |
+| 12 | SVF FREQ 1 expo out | → L audio | I_abc for SVF group 1 L integrators (from THAT340-1) |
+| 13 | SVF FREQ 2 expo out | → L audio | I_abc for SVF group 2 L integrators |
 | 14 | **GND guard** | — | |
-| 15 | APF FREQ 3 expo out | → L audio | I_abc for APF group 3 L |
+| 15 | SVF FREQ 3 expo out | → L audio | I_abc for SVF group 3 L integrators |
 | 16 | LP1 L expo out | → L audio | I_abc for LP1 L integrators (from THAT340-LP1 Q1) |
 | 17 | **GND guard** | — | |
 | 18 | LP2 L expo out | → L audio | I_abc for LP2 L |
@@ -362,9 +370,9 @@ GND guard pins retained from original design for I_abc signal integrity (noise-a
 | 25 | HP RES Q CV | → L audio | IC_Q_C_L cell A Iabc drive |
 | 26 | VCA Level CV | → L audio | THAT_VCA_L GAIN pin drive (via R_gain) |
 | 27 | COMB BYPASS CV | → L audio | Block 3 COMB BYPASS VCA control |
-| 28 | APF FB 1 CV | → L audio | Feedback depth CV for APF chain 1 |
-| 29 | APF FB 2 CV | → L audio | |
-| 30 | APF FB 3 CV | → L audio | |
+| 28 | SVF Resonance 1 CV | → L audio | Q drive CV for SVF group 1 L (IC_SVF_Q1_L cell A Iabc) |
+| 29 | SVF Resonance 2 CV | → L audio | Q drive CV for SVF group 2 L (IC_SVF_Q1_L cell B Iabc) |
+| 30 | SVF Resonance 3 CV | → L audio | Q drive CV for SVF group 3 L (IC_SVF_Q2_L cell A Iabc) |
 | 31 | DRIVE 1 CV | → L audio | Distortion chain 1 drive CV |
 | 32 | DRIVE 2 CV | → L audio | |
 | 33 | DRIVE 3 CV | → L audio | |
@@ -372,7 +380,7 @@ GND guard pins retained from original design for I_abc signal integrity (noise-a
 | 35 | Post-dist tap L chain 1 | ← L audio | Post-dist audio → utility board FB DIST BLEND. Add 100 pF C0G to GND at utility board entry (EMI only; do NOT use 100 nF — audio signal) |
 | 36 | Post-dist tap L chain 2 | ← L audio | Same |
 | 37 | Post-dist tap L chain 3 | ← L audio | Same |
-| 38 | FB DIST BLEND out (to L APF) | → L audio | Crossfaded feedback → Block 3 L. Add 100 pF C0G to GND at audio board entry |
+| 38 | FB DIST BLEND out (to L SVF) | → L audio | Post-dist blend signal → Block 3 L SVF inputs. Add 100 pF C0G to GND at audio board entry |
 | 39–40 | spare | — | |
 
 **I_abc group routing note:** Add 10 nF C0G 0402 bypass cap from each I_abc trace to GND
@@ -418,7 +426,7 @@ and IC_Q_AB_L/IC_Q_C_L references replaced by IC_Q_AB_R/IC_Q_C_R.
   one place; opening JP_CHASSIS allows floating chassis ground for noise troubleshooting.
 - **No split ground plane**: POGO is fully analog. No digital signals are present; no split
   plane is needed or beneficial.
-- **APF expo converters**: place THAT340 group at least 15 mm from power entry ferrite beads
+- **SVF expo converters**: place THAT340 group at least 15 mm from power entry ferrite beads
   and at least 10 mm from power header. The expo area on the utility board should have an
   uninterrupted GND pour on L2 directly beneath all THAT340 footprints.
 
@@ -441,24 +449,23 @@ and IC_Q_AB_L/IC_Q_C_L references replaced by IC_Q_AB_R/IC_Q_C_R.
    header zones (post-dist tap signals arrive here; crossfaded result routes back on same headers).
 
 ### Combined audio board
-6. Block 3 APF chains: within each channel half, arrange in 3 columns (chains 1–3).
-   Within each column: LM13700 stages in series order top-to-bottom (stage 1 nearest input,
-   stage 6 nearest output). This minimizes feedback trace length (critical for APF stability).
-   Mirror the column layout symmetrically between L and R halves across the center GND strip.
+6. Block 3 SVF resonators: within each channel half, arrange in 3 columns (groups 1–3).
+   Within each column: LM13700 integrator IC + Q VCA IC in close proximity. Short integrator
+   capacitor traces minimize parasitic inductance. Mirror the column layout symmetrically between
+   L and R halves across the center GND strip.
 7. Post-distortion tap traces (Block 4 output to top-edge STK_AUDIO connector): route on L4
-   (bottom signal layer) with adjacent GND pour to shield from APF feedback traces.
+   (bottom signal layer) with adjacent GND pour to shield from SVF feedback signal traces.
 8. LM13700 Q VCA ICs (IC_Q_AB, IC_Q_C): place adjacent to their respective filter OTAs
    (IC_Q_AB near LP1+LP2 OTA cluster; IC_Q_C near HP OTAs). Keep Iabc drive traces short.
    THAT 2180 VCA: place between Block 4 distortion output and LP1 OTA input.
 9. Trim pots: place on the top edge of each audio board (pins 1 and 3 accessible by
    screwdriver without removing the board).
 10. **L/R signal isolation rule (M1):** The center GND guard strip provides primary L/R
-    isolation. Within each channel half, APF chain signal traces must maintain ≥3 mm separation
+    isolation. Within each channel half, SVF group signal traces must maintain ≥3 mm separation
     from the nearest traces in the other channel's half. No signal trace crosses the center strip.
     Prefer routing L-channel signals on L1 (top) and R-channel signals on L4 (bottom) where
     traces from both halves approach the center — the L2 GND plane then acts as an additional
-    inter-channel shield. Applies to all 36 LM13700 signal nodes (18 per channel) and TL072
-    APF amp outputs. See noise-audit.md M1.
+    inter-channel shield. See noise-audit.md M1.
 11. **OTA HF suppression cap placement rule (M4):** The 22 pF C0G HF-suppression cap at each
     LM13700 OTA output pin (pin 4 per cell) must be placed within 1 mm of the pin, with the
     GND via on the cap's second pad. Do not route through any shared trace before the cap.

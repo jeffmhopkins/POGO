@@ -142,7 +142,7 @@ POGO/
 │       ├── InputBuffer.hpp       ← Block A
 │       ├── PreGain.hpp           ← Block 1
 │       ├── EnvelopeFollower.hpp  ← Block 2
-│       ├── AllPassComb.hpp       ← Block 3
+│       ├── BandpassSVF.hpp       ← Block 3
 │       ├── Distortion.hpp        ← Block 4
 │       ├── VcaBlock.hpp          ← Block VCA
 │       ├── LPFilter.hpp          ← Blocks 5 & 6
@@ -204,7 +204,6 @@ Model the *ideal* analog behavior before choosing any circuit. Record in `specs/
 
 ### Frequency response
 - Filter slope in dB/octave, passband ripple, stopband attenuation
-- For APF/comb: number, depth, and approximate placement of notches across the audio band
 - Describe the Bode diagram (magnitude AND phase response)
 
 ### Dynamic / time-domain behavior
@@ -244,7 +243,7 @@ Name the topology and explain why it was chosen over alternatives:
 - **SMD preferred** throughout; through-hole only where mechanical reliability demands it
 - **Passives:** 0603 (best balance of density and hand-solderability)
 - **Op-amps (SOIC-8/14):** TL072 (general purpose), LM4562 (low noise), NE5532 (audio)
-- **OTAs (SOIC-16):** LM13700 (general; used throughout for APF integrators and Q VCA cells)
+- **OTAs (SOIC-16):** LM13700 (general; used throughout for SVF integrators and Q VCA cells)
 - **Signal-path VCA (SOIC-8):** THAT 2180 (current-controlled exponential VCA; Block VCA)
 - **Analog switches (SOIC-14/16):** CD4066, DG408 for CV-selected gain or routing
 - **Protection diodes (SOT-23):** BAT54 dual Schottky for rail clamping at all inputs
@@ -324,7 +323,7 @@ Template:
 | Block A: Input Buffer        | [ ]                 | [ ]                   | [ ]              | (module-level) | (module-level)  | [ ]           |
 | Block 1: Pre-Gain            | [ ]                 | [ ]                   | [ ]              | (module-level) | (module-level)  | [ ]           |
 | Block 2: Envelope Follower   | [ ]                 | [ ]                   | [ ]              | (module-level) | (module-level)  | [ ]           |
-| Block 3: Triple APF Comb     | [ ]                 | [ ]                   | [ ]              | (module-level) | (module-level)  | [ ]           |
+| Block 3: Triple Bandpass SVF | [ ]                 | [ ]                   | [ ]              | (module-level) | (module-level)  | [ ]           |
 | Block 4: Distortion          | [ ]                 | [ ]                   | [ ]              | (module-level) | (module-level)  | [ ]           |
 | Block VCA: Pre-LP1 VCA       | [ ]                 | [ ]                   | [ ]              | (module-level) | (module-level)  | [ ]           |
 | Block 5: LP Filter 1         | [ ]                 | [ ]                   | [ ]              | (module-level) | (module-level)  | [ ]           |
@@ -449,15 +448,15 @@ MOD BUS  →  100Ω + BAT54 clamp  →  ATTENUVERTER (−1× to +1×)  →  para
 
 | Destination | Block | CV Range | Notes |
 |---|---|---|---|
-| APF Master Offset | 3 | ±5 V, 1V/oct | Sums into all three FREQ CV nodes simultaneously |
-| APF Freq 1 | 3 | ±5 V, 1V/oct | Group 1 independent |
-| APF Freq 2 | 3 | ±5 V, 1V/oct | Group 2 independent |
-| APF Freq 3 | 3 | ±5 V, 1V/oct | Group 3 independent |
-| APF Feedback 1 | 3 | 0–10 V | Group 1 feedback depth |
-| APF Feedback 2 | 3 | 0–10 V | Group 2 feedback depth |
-| APF Feedback 3 | 3 | 0–10 V | Group 3 feedback depth |
-| APF FB Dist Blend | 3 | 0–10 V | Crossfade: 0% = clean APF fb, 100% = post-dist fb |
-| APF Comb Bypass | 3 | 0–10 V | Pre-comb VCA level; 0 V = bypassed, 10 V = full comb |
+| SVF Master Offset | 3 | ±5 V, 1V/oct | Sums into all three FREQ CV nodes simultaneously |
+| SVF Freq 1 | 3 | ±5 V, 1V/oct | Group 1 independent |
+| SVF Freq 2 | 3 | ±5 V, 1V/oct | Group 2 independent |
+| SVF Freq 3 | 3 | ±5 V, 1V/oct | Group 3 independent |
+| SVF Resonance 1 | 3 | 0–10 V | Group 1 Q (0 V = flat, 10 V = self-oscillation) |
+| SVF Resonance 2 | 3 | 0–10 V | Group 2 Q |
+| SVF Resonance 3 | 3 | 0–10 V | Group 3 Q |
+| FB Dist Blend | 3 | 0–10 V | Additive post-dist mix into SVF input: 0% = clean, 100% = full post-dist added |
+| Comb Bypass | 3 | 0–10 V | Pre-SVF VCA level; 0 V = bypassed, 10 V = full SVF signal |
 | Distortion Drive 1 | 4 | 0–10 V | Group 1 chain |
 | Distortion Drive 2 | 4 | 0–10 V | Group 2 chain |
 | Distortion Drive 3 | 4 | 0–10 V | Group 3 chain |
@@ -500,7 +499,7 @@ Standard Eurorack 16-pin IDC (Doepfer A-100 compatible):
 | Block A: Input buffers | 5 mA | 5 mA |
 | Block 1: Pre-Gain | 5 mA | 5 mA |
 | Block 2: Envelope Follower | 12 mA | 12 mA |
-| Block 3: Triple APF Comb | 25 mA | 25 mA |
+| Block 3: Triple Bandpass SVF | 12 mA | 12 mA |
 | Block 4: Distortion | 25 mA | 25 mA |
 | Block VCA: Pre-LP1 VCA | 5 mA | 5 mA |
 | Block 5: LP Filter 1 | 15 mA | 15 mA |

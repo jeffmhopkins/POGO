@@ -35,7 +35,7 @@ address this specifically.
 | Block A input buffer | LM4562 (changed from TL072) | 2.7 nV/√Hz | First-in-chain — sets noise floor for all downstream processing |
 | Block 1 unity mode | NE5532 (changed from TL072) | 5 nV/√Hz × 1 = 5 nV/√Hz at output | Inaudible above Block A contribution |
 | Block 1 boost (×5) | NE5532 | 5 nV/√Hz → 25 nV/√Hz at Block 1 output | 5× noise penalty; acceptable |
-| Block 3 APF (18 stages) | 18× TL072 + 18× LM13700 | Each stage adds noise in quadrature | Noise accumulation partially offset by unity-gain nature of APF; dominated by first stage |
+| Block 3 SVF (3 groups) | 1× TL074 (summing) + 6× LM13700 | BP peak amplifies noise at formant freq by Q | Same OTA-C noise characteristic as LP/HP; at high Q formant tone masks noise floor |
 | LP1/LP2/HP SVF | TL074 summing amps | 18 nV/√Hz at unity Q | Noise floor rises at high Q due to regenerative feedback — inherent to OTA-C topology (see D1) |
 
 **Key finding:** TL072 in Block A was the primary noise concern as the first active element.
@@ -58,7 +58,7 @@ accepted limitation in block-5-lp1/spec.md (see D1 below).
 
 **Problem:** TL072 (18 nV/√Hz) in Block A is the first active stage; all downstream noise
 accumulation originates here. In boost mode (Block 1 at 5×), this noise is amplified before
-entering Block 3's 36 OTA stages.
+entering Block 3's SVF resonators.
 **Resolution:** TL072CDT replaced with **LM4562** (SOIC-8, pin-compatible) in Block A.
 - Noise: 2.7 nV/√Hz (6.7× improvement)
 - Same SOIC-8 footprint, ±15V supply, GBW ~55 MHz
@@ -66,7 +66,7 @@ entering Block 3's 36 OTA stages.
 
 ### H2: STK_AUDIO_L/R — 40-pin with GND guard pins for I_abc signals
 
-**Problem:** The six I_abc exponential current signals (APF FREQ 1/2/3, LP1/LP2/HP expo
+**Problem:** The six I_abc exponential current signals (SVF FREQ 1/2/3, LP1/LP2/HP expo
 outputs) require adjacent GND guard pins to prevent capacitive coupling of noise onto these
 frequency-sensitive current lines. I_abc noise directly modulates filter pitch.
 **Resolution:** STK_AUDIO_L/R stacking headers use 40-pin pinout with 3 GND guard pins
@@ -135,7 +135,7 @@ belt-and-suspenders protection given the signal's route through the regenerative
 
 **Problem:** Block 1 gain stage TL072 (18 nV/√Hz) amplifies its own noise by 5× in boost mode,
 producing 90 nV/√Hz at the Block 1 output. Combined with Block A noise (also amplified),
-the noise entering Block 3 in boost mode was significantly elevated.
+the noise entering Block 3's SVF resonators in boost mode was significantly elevated.
 **Resolution:** Replace TL072CDT with **NE5532** (SOIC-8, pin-compatible) in Block 1.
 - Noise: 5 nV/√Hz → 25 nV/√Hz at 5× boost (3.6× improvement over TL072)
 - Same SOIC-8 footprint, ±15V supply, 10 MHz GBW (vs. TL072 3 MHz — no audio impact)
@@ -147,7 +147,7 @@ the noise entering Block 3 in boost mode was significantly elevated.
 
 ### M1: L/R signal trace separation
 
-APF chain L-channel signal traces must maintain ≥3 mm separation from corresponding R-channel
+SVF group L-channel signal traces must maintain ≥3 mm separation from corresponding R-channel
 traces on the same layer. Prefer routing one channel on L1 (top) and the other on L4 (bottom)
 so the L2 GND plane provides shielding between them.
 **Added to:** `specs/board-layout/layout-notes.md` Section 7

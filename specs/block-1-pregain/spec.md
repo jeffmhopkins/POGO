@@ -12,7 +12,7 @@
 ### Sonic Intent
 A switchable gain boost placed right at the input, before any filtering or distortion. At unity
 the signal passes through clean and transparent. At 5× (~14 dB) the input gain is high enough
-to push quieter sources harder into the comb filter and distortion stages — adding apparent
+to push quieter sources harder into the SVF resonators and distortion stages — adding apparent
 saturation and density to the signal chain downstream without changing the filter parameters.
 
 The toggle switch should feel intentional and definitive, like toggling between "signal" and
@@ -41,7 +41,7 @@ share the same gain state at all times. True stereo signal path (independent op-
 ### Edge Cases
 - At 5× gain with a full-scale ±5 V input: theoretical output ±25 V, clamped to ~±10.5 V by
   op-amp output swing limits. This soft saturation is a feature, not a bug — it adds harmonic
-  content before the comb filter.
+  content before the SVF resonators.
 - Signal near silence in boost mode: NE5532 noise (5 nV/√Hz) × 5× gain = 25 nV/√Hz at Block 1
   output — equivalent input-referred noise is 5 nV/√Hz, lower than any downstream stage. The
   noise floor contribution of Block 1 boost is dominated by Block A's LM4562 output (2.7 nV/√Hz

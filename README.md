@@ -1,4 +1,4 @@
-# POGO — Stereo Triple Comb Filter
+# POGO — Complex Stereo Eurorack Filter
 
 **POGO** is a complex stereo Eurorack filter module being developed by Space Coast Synthesizers.
 This repository contains the complete hardware design specification (Phases 1–5) and the
@@ -9,10 +9,10 @@ hardware construction begins.
 
 ## What It Does
 
-POGO routes stereo audio through three independent 6-stage all-pass comb filter chains,
-each with its own frequency, feedback depth, and distortion drive control. The output
-feeds a resonant LP filter stack (LP1 + LP2), then an HP filter — the full signal chain
-is voltage-controlled and deeply modulatable.
+POGO routes stereo audio through three independent 2-pole bandpass SVF resonators (formant
+groups F1/F2/F3), each with its own center frequency, resonance (Q), and distortion drive
+control. The output feeds a resonant LP filter stack (LP1 + LP2), then an HP filter — the
+full signal chain is voltage-controlled and deeply modulatable.
 
 **Signal chain:**
 
@@ -20,9 +20,9 @@ is voltage-controlled and deeply modulatable.
 Stereo In → Input Buffer → Pre-Gain → Envelope Follower
                                               ↓
                           ┌───────────────────────────────┐
-                          │   Triple 6-Stage APF Comb     │
-                          │   (3 independent groups,       │
-                          │    each: Freq / FB / Drive)    │
+                          │   Triple Bandpass SVF         │
+                          │   (3 SVF formant resonators,  │
+                          │    each: Freq / Q / Drive)    │
                           └───────────────────────────────┘
                                               ↓
                                         Distortion
@@ -75,7 +75,7 @@ implemented block by block.
 | Stage 3 | Block 2: Envelope follower (0–10 V CV) | ✅ Done |
 | Stage 4 | Blocks 5/6/7: LP1, LP2, HP filters (OTA-C SVF, bilinear transform) | ✅ Done |
 | Stage 5 | Block VCA: Pre-LP1 VCA (THAT 2180 gain law) | ✅ Done |
-| Stage 6 | Block 3: Triple APF comb filter (6-stage per-group all-pass chain) | ✅ Done |
+| Stage 6 | Block 3: Triple SVF bandpass resonators (F1/F2/F3 formant groups, 2-pole OTA-C) | ✅ Done |
 | Stage 7 | Block 4: Distortion (soft clip / hard clip / wavefold, 2× oversampled) | ✅ Done |
 | Stage 8 | Mod architecture: mod bus processor + 19 attenuverter destinations | ✅ Done |
 | Stage 9 | Full integration and signal-chain verification | 🔄 In Progress |
@@ -118,7 +118,7 @@ POGO/
 │       ├── InputBuffer.hpp        ← Block A
 │       ├── PreGain.hpp            ← Block 1
 │       ├── EnvelopeFollower.hpp   ← Block 2
-│       ├── AllPassComb.hpp        ← Block 3
+│       ├── BandpassSVF.hpp        ← Block 3
 │       ├── Distortion.hpp         ← Block 4
 │       ├── VcaBlock.hpp           ← Block VCA
 │       ├── LPFilter.hpp           ← Blocks 5 & 6
@@ -314,7 +314,7 @@ readable page with block diagrams, schematics, parts lists, and design notes.
 Key design decisions documented:
 - OTA-C state-variable filter (LM13700) with correct Q = 2V_T / (Iabc × R_in) formula
   and inverted Iabc driver (more RESONANCE → less Iabc → higher Q → self-oscillation)
-- All-pass comb filter capacitor values: 33 nF / 6.8 nF / 1.5 nF (Groups 1/2/3)
+- SVF bandpass resonator integrator capacitors: 150 nF / 22 nF / 4.7 nF (Groups 1/2/3; OTA-C, f_ref = 200 / 1500 / 6000 Hz)
 - Modulation bus: 19 destinations, each with override jack and bipolar attenuverter
 - 3-board hardware split: control + utility + combined audio (L-channel left half, R-channel right half)
 
@@ -324,7 +324,7 @@ Key design decisions documented:
 
 POGO is designed for hardware construction after the VCV Rack prototype validates the DSP.
 Circuit specs:
-- **ICs**: LM13700 OTA (15 per channel), THAT 2180 VCA, THAT340 expo converters, LM4562 (Block A), NE5532 (Block 1), TL072/TL074 op-amps
+- **ICs**: LM13700 OTA (11 per channel), THAT 2180 VCA, THAT340 expo converters, LM4562 (Block A), NE5532 (Block 1), TL072/TL074 op-amps
 - **Power**: ±12 V Eurorack, ~167 mA per rail
 - **Format**: 40 HP, 3U, 3-PCB split
 - **CV protection**: 100 Ω series + BAT54S clamp on every input jack (see `specs/shared/cv-input-protection.md`)

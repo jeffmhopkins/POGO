@@ -73,7 +73,7 @@ For each modulation destination:
    it reaches the parameter's CV summing node. Full CCW: inverts the mod signal at full scale.
    Center: cuts mod to zero. Full CW: passes mod signal at full scale.
 4. **CV summing node**: attenuverter output sums with the parameter's panel knob voltage at the
-   filter/distortion/APF control input.
+   filter/distortion/SVF control input.
 
 ---
 
@@ -163,24 +163,24 @@ Use TL074 (quad, 4 halves each): **10× TL074** for all 19 attenuverter circuits
 
 ### Modulation Destinations
 
-SOURCE switch removed: the APF feedback crossfade is now controlled continuously by the
-FB DIST BLEND knob (replaces the 3-position SOURCE switch INT/BLD/PST). The CD4053 mux is
-replaced with a resistive op-amp crossfade driven by FB DIST BLEND + its CV attenuverter (see Block 3).
+SOURCE switch removed: FB DIST BLEND knob continuously scales the post-distortion signal
+added to each SVF group's input (replaces the 3-position SOURCE switch INT/BLD/PST).
+Additive blend — post-dist tap sums directly into SVF input; not a feedback crossfade (see Block 3).
 
 | Destination | Block | Panel Label | CV Type | Override Jack | Notes |
 |---|---|---|---|---|---|
-| APF Master Offset | 3 | OFFSET | ±5 V, 1V/oct | Yes | Sums into all three FREQ CV nodes simultaneously |
-| APF Freq 1 | 3 | FREQ (Comb 1) | ±5 V, 1V/oct | Yes | |
-| APF Freq 2 | 3 | FREQ (Comb 2) | ±5 V, 1V/oct | Yes | |
-| APF Freq 3 | 3 | FREQ (Comb 3) | ±5 V, 1V/oct | Yes | |
-| APF Feedback 1 | 3 | FB (Comb 1) | 0–10 V | Yes | Panel abbreviation: FB |
-| APF Feedback 2 | 3 | FB (Comb 2) | 0–10 V | Yes | |
-| APF Feedback 3 | 3 | FB (Comb 3) | 0–10 V | Yes | |
-| APF FB Dist Blend | 3 | FB DIST BLEND | 0–10 V | Yes | Continuous crossfade: 0% = clean APF fb, 100% = post-dist fb |
-| APF Comb Bypass | 3 | BYPASS | 0–10 V | Yes | Pre-comb VCA level; 0 V = comb bypassed, 10 V = full comb |
-| Distortion Drive 1 | 4 | DRIVE (Comb 1) | 0–10 V | Yes | 0V = mute, 2V = unity/clean (9am), 10V = full distortion |
-| Distortion Drive 2 | 4 | DRIVE (Comb 2) | 0–10 V | Yes | 0V = mute, 2V = unity/clean (9am), 10V = full distortion |
-| Distortion Drive 3 | 4 | DRIVE (Comb 3) | 0–10 V | Yes | 0V = mute, 2V = unity/clean (9am), 10V = full distortion |
+| SVF Master Offset | 3 | OFFSET | ±5 V, 1V/oct | Yes | Sums into all three FREQ CV nodes simultaneously |
+| SVF Freq 1 | 3 | FREQ (Group 1) | ±5 V, 1V/oct | Yes | |
+| SVF Freq 2 | 3 | FREQ (Group 2) | ±5 V, 1V/oct | Yes | |
+| SVF Freq 3 | 3 | FREQ (Group 3) | ±5 V, 1V/oct | Yes | |
+| SVF Resonance 1 | 3 | FB (Group 1) | 0–10 V | Yes | 0 V = Q 0.5 (flat); 10 V = Q 50 (self-oscillation) |
+| SVF Resonance 2 | 3 | FB (Group 2) | 0–10 V | Yes | Same as Resonance 1 for Group 2 |
+| SVF Resonance 3 | 3 | FB (Group 3) | 0–10 V | Yes | Same as Resonance 1 for Group 3 |
+| FB Dist Blend | 3 | FB DIST BLEND | 0–10 V | Yes | Additive post-dist mix into SVF input: 0% = clean, 100% = post-dist added to input |
+| Comb Bypass | 3 | BYPASS | 0–10 V | Yes | Pre-SVF VCA level; 0 V = bypassed, 10 V = full SVF wet signal |
+| Distortion Drive 1 | 4 | DRIVE (Group 1) | 0–10 V | Yes | 0V = mute, 2V = unity/clean (9am), 10V = full distortion |
+| Distortion Drive 2 | 4 | DRIVE (Group 2) | 0–10 V | Yes | 0V = mute, 2V = unity/clean (9am), 10V = full distortion |
+| Distortion Drive 3 | 4 | DRIVE (Group 3) | 0–10 V | Yes | 0V = mute, 2V = unity/clean (9am), 10V = full distortion |
 | VCA Level | VCA | AMT | 0–10 V | Yes | Pre-LP1 VCA; AMT attenuverter on panel |
 | LP1 Cutoff | 5 | CUT | ±5 V, 1V/oct | Yes | |
 | LP1 Resonance | 5 | RES | 0–10 V | Yes | |
@@ -213,10 +213,9 @@ replaced with a resistive op-amp crossfade driven by FB DIST BLEND + its CV atte
 - +12 V: ~40 mA | −12 V: ~40 mA
 
 ### Known Circuit Challenges
-- 14 attenuverter pots is a very large number for a single module. Evaluate during panel
-  layout whether all 14 can fit. If space is constrained, group modulation targets (e.g., a
-  single APF attenuverter for all three APF freq destinations) and add sub-routing switches.
-- Tip-switch normalling for 14 jacks: all jacks must be TS type with sleeve-switching lug
+- 19 attenuverter pots is a very large number for a single module. Panel layout (Phase 4) has
+  confirmed all 19 fit at 40 HP — see specs/panel-design/panel-notes.md for placement.
+- Tip-switch normalling for 19 jacks: all jacks must be TS type with sleeve-switching lug
   connected to the mod bus. Verify jack footprint (Thonkiconn) has switching lug accessible
   in PCB layout.
 - Op-amp count in mod architecture alone: ~8 TL074 ICs. Total op-amp count for the full module

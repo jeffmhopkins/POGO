@@ -9,7 +9,7 @@ No Phase 6 (code) work begins until every row shows ✅ for Phases 1–3
 | Block A: Input Buffer        | ✅                  | ✅                    | ✅                      | ✅                    | ✅                    | ✅             |
 | Block 1: Pre-Gain            | ✅                  | ✅                    | ✅                      | ✅                    | ✅                    | ✅             |
 | Block 2: Envelope Follower   | ✅                  | ✅                    | ✅                      | ✅                    | ✅                    | ✅             |
-| Block 3: Triple APF Comb     | ✅                  | ✅                    | ✅                      | ✅                    | ✅                    | ✅             |
+| Block 3: Triple Bandpass SVF | ✅                  | ✅                    | ✅                      | ✅                    | ✅                    | ✅             |
 | Block 4: Distortion          | ✅                  | ✅                    | ✅                      | ✅                    | ✅                    | ✅             |
 | Block VCA (pre-LP1)          | ✅                  | ✅                    | ✅                      | ✅                    | ✅                    | ✅             |
 | Block 5: LP Filter 1         | ✅                  | ✅                    | ✅                      | ✅                    | ✅                    | ✅             |

@@ -10,15 +10,15 @@
 ## Phase 1: Audio / Functional Specification
 
 ### Sonic Intent
-Three independent distortion instances — one per APF group output — each with its own mode
-and drive level. Each instance processes the stereo (L+R) output of its APF chain equally.
+Three independent distortion instances — one per SVF group output — each with its own mode
+and drive level. Each instance processes the stereo (L+R) output of its SVF group equally.
 The three distorted group signals are summed after processing and passed to LP1.
 
-This per-chain arrangement means each formant band can be distorted differently:
+This per-group arrangement means each formant band can be distorted differently:
 Group 1 (low) wavefolded for complex sub-harmonic content, Group 2 (mid) soft-clipped for
 warmth, Group 3 (high) hard-clipped for bright edge — or any combination. The distortion
-is also tapped and routed to Block 3's FB DIST BLEND crossfade circuit, where it can
-drive resonance feedback at any blend ratio from 0% (clean APF feedback) to 100% (post-dist).
+is also tapped and routed back to Block 3 via the FB DIST BLEND control, where it is
+additively mixed into each SVF group's input (0% = clean SVF input, 100% = full post-dist added).
 
 - **Soft Clip**: Gentle, musical saturation. Adds warmth and odd harmonics. Sweet spot: 30–60%.
 - **Hard Clip**: Aggressive transistor-style clipping, strong odd harmonics. Sweet spot: 20–50%.
@@ -28,9 +28,9 @@ drive resonance feedback at any blend ratio from 0% (clean APF feedback) to 100%
 
 | Name | Range | Default | Taper | Description |
 |---|---|---|---|---|
-| MODE 1 | Switch: SC / HC / WF | SC | N/A | Distortion type for APF Group 1: Soft Clip / Hard Clip / Wavefold |
-| MODE 2 | Switch: SC / HC / WF | SC | N/A | Distortion type for APF Group 2 |
-| MODE 3 | Switch: SC / HC / WF | SC | N/A | Distortion type for APF Group 3 |
+| MODE 1 | Switch: SC / HC / WF | SC | N/A | Distortion type for SVF Group 1: Soft Clip / Hard Clip / Wavefold |
+| MODE 2 | Switch: SC / HC / WF | SC | N/A | Distortion type for SVF Group 2 |
+| MODE 3 | Switch: SC / HC / WF | SC | N/A | Distortion type for SVF Group 3 |
 | DRIVE 1 | 0% (mute) – 100% (full distortion) | ~20% (9am = unity/clean) | Linear (dual-zone: 0–20% = volume, 20–100% = distortion drive) | CCW = mute; 9am = unity/clean; CW = full drive; applies equally to L and R |
 | DRIVE 2 | 0% (mute) – 100% (full distortion) | ~20% (9am = unity/clean) | Linear (dual-zone: 0–20% = volume, 20–100% = distortion drive) | Same as DRIVE 1 for Group 2; applies equally to L and R |
 | DRIVE 3 | 0% (mute) – 100% (full distortion) | ~20% (9am = unity/clean) | Linear (dual-zone: 0–20% = volume, 20–100% = distortion drive) | Same as DRIVE 1 for Group 3; applies equally to L and R |
@@ -45,7 +45,7 @@ drive resonance feedback at any blend ratio from 0% (clean APF feedback) to 100%
 | MODE 1/2/3 | — | None | Switch only; no CV |
 
 ### Signal Levels (I/O)
-- Input: three independent stereo signals, one per APF group (±5 V each; APF is unity gain)
+- Input: three independent stereo signals, one per SVF group (±5 V each)
 - Output: three distorted signals summed into one stereo signal → ±5 V nominal, up to ±10 V
   at high drive from multiple chains; summing stage must not clip before LP1
 
@@ -56,11 +56,11 @@ No independent L/R controls. No cross-chain linking of MODE or DRIVE.
 
 ### Signal Flow
 ```
-APF Group 1 (L+R) ──► [Distortion Chain 1: MODE 1, DRIVE 1] ──► DST1 out (L+R) ──┐
-APF Group 2 (L+R) ──► [Distortion Chain 2: MODE 2, DRIVE 2] ──► DST2 out (L+R) ──┼──► sum ──► Block VCA ──► LP1
-APF Group 3 (L+R) ──► [Distortion Chain 3: MODE 3, DRIVE 3] ──► DST3 out (L+R) ──┘
+SVF Group 1 (L+R) ──► [Distortion Chain 1: MODE 1, DRIVE 1] ──► DST1 out (L+R) ──┐
+SVF Group 2 (L+R) ──► [Distortion Chain 2: MODE 2, DRIVE 2] ──► DST2 out (L+R) ──┼──► sum ──► Block VCA ──► LP1
+SVF Group 3 (L+R) ──► [Distortion Chain 3: MODE 3, DRIVE 3] ──► DST3 out (L+R) ──┘
 ```
-Each chain's output is also tapped and routed to Block 3's FB DIST BLEND crossfade circuit for that group.
+Each chain's output is also tapped and routed back to Block 3 via FB DIST BLEND (additive input mix to each SVF group).
 
 ### Edge Cases
 - DRIVE CCW (0%) = mute: chain output is silenced. Useful for gating individual formant bands.
@@ -164,7 +164,7 @@ interest of this mode.
 ## Phase 3: Circuit Design
 
 ### Topology
-Three independent distortion instances (one per APF chain) followed by a summing stage.
+Three independent distortion instances (one per SVF group) followed by a summing stage.
 Each instance contains three parallel mode sub-circuits (Soft Clip, Hard Clip, Wavefold)
 switched by its own 3-position panel switch via a CD4053 analog mux.
 
@@ -265,7 +265,7 @@ Unity gain at 9am requires 20% of the pot's full resistance at the wiper:
 - **CD4053 series resistance**: ~100 Ω at ±5 V supply. Buffer each CD4053 output with a
   unity-gain op-amp half before the summing stage.
 - **Post-Dist feedback routing**: each chain's output (before the summing amp) must be tapped
-  and routed back to Block 3's FB DIST BLEND crossfade circuit for that group. Label these tap points clearly
-  on the schematic; route as shielded traces to avoid inter-chain crosstalk.
+  and routed back to Block 3 via the FB DIST BLEND circuit (additive mix into SVF input). Label
+  these tap points clearly on the schematic; route as shielded traces to avoid inter-chain crosstalk.
 - **Diode and zener matching per chain**: use components from the same batch within each chain.
   Cross-chain matching is less critical since the chains process different formant bands.

@@ -139,12 +139,12 @@ Switch position labels right of POLARITY body: **POS** (top), **OFF** (middle), 
 #### Subsection: DIST (bottom portion, y = 74–128.85, above CV row)
 
 SOURCE switch removed. The continuous FB DIST BLEND knob now handles the full range from
-clean APF feedback (0%) through blend to post-distortion feedback (100%).
+clean signal (0%) through blend to post-distortion signal additively mixed into each SVF group input (100%).
 
 | Control | Type | Notes |
 |---|---|---|
 | MODE | 3-pos vertical toggle | Distortion mode; cx = 28, body y = 81–93; SFT / HRD / WFD |
-| FB DIST BLEND | Knob — medium (r = 4.5) | APF↔post-dist feedback crossfade; cx = 40, cy = 87 |
+| FB DIST BLEND | Knob — medium (r = 4.5) | Post-dist additive blend into SVF input; cx = 40, cy = 87 |
 
 Switch position labels right of MODE body: **SFT** (top), **HRD** (middle), **WFD** (bottom).
 Full names: Soft Clip / Hard Clip / Wavefold.

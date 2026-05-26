@@ -3,9 +3,9 @@
 ## Description
 
 POGO is a complex stereo Eurorack filter module. It processes stereo audio through a carefully
-ordered signal chain combining a formant-style all-pass comb filter, three distortion modes, and
-two independent lowpass stages plus a highpass stage — all with an extensive per-destination
-modulation system rooted in an on-board envelope follower.
+ordered signal chain combining three independent bandpass SVF resonators (formant F1/F2/F3),
+three distortion modes, and two independent lowpass stages plus a highpass stage — all with an
+extensive per-destination modulation system rooted in an on-board envelope follower.
 
 ## Signal Chain
 
@@ -23,24 +23,24 @@ Stereo Input (L + R)  ←  ±5 V audio
            Derives CV from post-gain audio; normalizes into Mod Bus input
            ENV OUT jack available as patch source
   ↓
-[Block 3]  Triple 6-Stage All-Pass Comb Filter  (stereo)
-           18 all-pass stages per channel (3 groups of 6)
-           3 independent FREQ knobs + shared SPREAD + shared FREQ OFFSET
-           Creates formant-like resonances across the full audio range
+[Block 3]  Triple Bandpass SVF  (stereo)
+           3 independent 2-pole OTA-C SVF resonators (formant groups F1/F2/F3)
+           3 independent FREQ knobs + shared WIDTH + shared MASTER OFFSET
+           Vocal formant peaks; sharp resonances (Q 0.5–50); self-oscillating at max FB
   ↓
 [Block 4]  Distortion  (stereo)
            3 modes: Soft Clip / Hard Clip / Wavefold
            MODE switch + DRIVE knob (dual-zone: CCW=mute, 9am=unity/clean, CW=full drive)
   ↓
 [Block VCA] Pre-LP1 Voltage-Controlled Amplifier  (stereo)
-           V2164 quad VCA cells 3+4 (cells 1+2 shared with LP1 resonance)
+           THAT 2180 stereo VCA (1 per channel)
            AMT attenuverter + CV IN jack (normalizes to mod bus)
            Unity gain at AMT center; accent/duck via envelope or external CV
   ↓
-[Block 5]  LP Filter 1  (stereo, 2-pole Sallen-Key)
+[Block 5]  LP Filter 1  (stereo, 2-pole OTA-C SVF)
            Independent CUTOFF + RESONANCE + CV modulation
   ↓
-[Block 6]  LP Filter 2  (stereo, 2-pole Sallen-Key — duplicate of LP1)
+[Block 6]  LP Filter 2  (stereo, 2-pole OTA-C SVF — duplicate of LP1)
            Independent CUTOFF + RESONANCE + CV modulation
   ↓
 [Block 7]  HP Filter  (stereo, 2-pole, self-oscillating)
@@ -66,8 +66,8 @@ MOD BUS SIGNAL
   ↓ (to each destination via attenuverter + override jack)
 
 Destinations (19 total):
-  APF Master Offset     APF Freq 1 / 2 / 3     APF Feedback 1 / 2 / 3
-  APF FB Dist Blend     APF Comb Bypass     Distortion Drive 1 / 2 / 3
+  SVF Master Offset     SVF Freq 1 / 2 / 3     SVF Resonance 1 / 2 / 3
+  FB Dist Blend         Comb Bypass             Distortion Drive 1 / 2 / 3
   VCA Level
   LP1 Cutoff / Resonance     LP2 Cutoff / Resonance     HP Cutoff / Resonance
 ```
@@ -83,7 +83,7 @@ Destinations (19 total):
 | Block A: Input buffers | 5 mA | 5 mA |
 | Block 1: Pre-Gain | 5 mA | 5 mA |
 | Block 2: Envelope Follower | 12 mA | 12 mA |
-| Block 3: Triple APF Comb | 25 mA | 25 mA |
+| Block 3: Triple Bandpass SVF | 12 mA | 12 mA |
 | Block 4: Distortion | 25 mA | 25 mA |
 | Block VCA: Pre-LP1 VCA | 5 mA | 5 mA |
 | Block 5: LP Filter 1 | 15 mA | 15 mA |
@@ -92,7 +92,7 @@ Destinations (19 total):
 | Mod Bus Processor | 5 mA | 5 mA |
 | Per-destination mod (×19 attenuverters) | 40 mA | 40 mA |
 | Block B: Output buffers | 5 mA | 5 mA |
-| **Total estimate** | **~167 mA** | **~167 mA** |
+| **Total estimate** | **~154 mA** | **~154 mA** |
 
 Board-level view by PCB (utility + both audio boards, different aggregation): see
 `specs/board-layout/layout-notes.md` §11 (~195 mA — utility board overhead accounts for
