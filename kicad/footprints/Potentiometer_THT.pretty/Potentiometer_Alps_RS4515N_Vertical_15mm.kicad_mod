@@ -1,0 +1,60 @@
+(module Potentiometer_Alps_RS4515N_Vertical_15mm (layer F.Cu) (tedit 67432100)
+  (descr "ALPS RS4515N slide potentiometer, single-unit vertical, 15mm travel, 3-terminal, 20mm pin span, 2mm row offset. Source: ALPS Alpine catalog RV06_RS1 series, Drawing No.1. All dimensions from datasheet, unit mm.")
+  (tags "ALPS Alps RS4515N slide potentiometer 15mm vertical slider Eurorack")
+
+  (fp_text reference "RV**" (at 0 -17.5) (layer F.SilkS)
+    (effects (font (size 1 1) (thickness 0.15))))
+  (fp_text value "SLIDER_15mm" (at 0 17.5) (layer F.Fab)
+    (effects (font (size 1 1) (thickness 0.15))))
+
+  ; Body silkscreen — 30mm (Y, travel) x 8mm (X, width), origin at body center
+  ; Front (panel-facing) edge at X=+4; back edge at X=-4
+  ; Travel runs Y=-15 to Y=+15
+  (fp_line (start -4 -15) (end  4 -15) (layer F.SilkS) (width 0.12))
+  (fp_line (start  4 -15) (end  4  15) (layer F.SilkS) (width 0.12))
+  (fp_line (start  4  15) (end -4  15) (layer F.SilkS) (width 0.12))
+  (fp_line (start -4  15) (end -4 -15) (layer F.SilkS) (width 0.12))
+
+  ; F.Fab outline (assembly layer)
+  (fp_line (start -4 -15) (end  4 -15) (layer F.Fab) (width 0.1))
+  (fp_line (start  4 -15) (end  4  15) (layer F.Fab) (width 0.1))
+  (fp_line (start  4  15) (end -4  15) (layer F.Fab) (width 0.1))
+  (fp_line (start -4  15) (end -4 -15) (layer F.Fab) (width 0.1))
+
+  ; Travel direction indicator on F.Fab (arrow pointing from pin1 end to pin3 end)
+  (fp_line (start 0 -9) (end 0 9) (layer F.Fab) (width 0.1))
+  (fp_line (start 0 9) (end -0.5 8) (layer F.Fab) (width 0.1))
+  (fp_line (start 0 9) (end  0.5 8) (layer F.Fab) (width 0.1))
+
+  ; Courtyard — 1mm clearance on all sides
+  (fp_line (start -5 -16) (end  5 -16) (layer F.CrtYd) (width 0.05))
+  (fp_line (start  5 -16) (end  5  16) (layer F.CrtYd) (width 0.05))
+  (fp_line (start  5  16) (end -5  16) (layer F.CrtYd) (width 0.05))
+  (fp_line (start -5  16) (end -5 -16) (layer F.CrtYd) (width 0.05))
+
+  ; ── Terminal pins ─────────────────────────────────────────────────────────
+  ; Coordinate derivation from ALPS datasheet Drawing No.1:
+  ;   Pin column from each body end:  5mm  → Y = ±10 from body center
+  ;   Outer pin span (pin1 to pin3):  20mm → confirmed (-10 to +10)
+  ;   Distance front edge to pin2:    3.75mm → X = +4 - 3.75 = +0.25
+  ;   Row separation (pin2 to pin1):  2mm   → X = +0.25 - 2.00 = -1.75
+  ;   Drill hole (datasheet):         φ1.5mm
+  ;   Pin conductor:                  0.4mm square
+  ;   Pad: 2.5mm diameter (0.5mm annular ring per side for hand soldering)
+  ;
+  ; Pin 2 (wiper) is in the front row (+X), aligned with pin 1 in Y.
+  ; Pins 1 and 3 are in the back row (-X side), at opposite ends of travel.
+
+  ; Pin 1 — CCW end, back row, bottom (rectangular pad for polarity ID)
+  (pad 1 thru_hole rect (at -1.75 -10) (size 2.5 2.5) (drill 1.5)
+    (layers *.Cu *.Mask))
+
+  ; Pin 2 — Wiper, front row (panel-facing side), same Y as pin 1
+  (pad 2 thru_hole oval (at 0.25 -10) (size 2.5 2.5) (drill 1.5)
+    (layers *.Cu *.Mask))
+
+  ; Pin 3 — CW end, back row, top; 20mm from pin 1 along travel (Y)
+  (pad 3 thru_hole oval (at -1.75 10) (size 2.5 2.5) (drill 1.5)
+    (layers *.Cu *.Mask))
+
+)
