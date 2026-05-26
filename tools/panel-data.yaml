@@ -76,13 +76,13 @@ mounting_holes:
 separators:
   # Section 0 right boundary — cyan vertical
   - {type: v, x: 45.72, y1: 4.5, y2: 124.0, style: main_cyan}
-  # INPUT / GAIN → LFO boundary
-  - {type: h, x1: 1.0, x2: 45.22, y: 56.0, style: zone_div}
+  # INPUT / GAIN → LFO boundary (BP3 labels land at y=57; separator below at 62)
+  - {type: h, x1: 1.0, x2: 45.22, y: 62.0, style: zone_div}
 
 # ── Zone labels ───────────────────────────────────────────────────────────────
 zone_labels:
   - {x: 11.43, y: 12.0, text: "INPUT / GAIN"}
-  - {x: 11.43, y: 60.0, text: "LFO"}
+  - {x: 11.43, y: 66.0, text: "LFO"}
 
 # ── Zones ─────────────────────────────────────────────────────────────────────
 zones:
@@ -113,24 +113,22 @@ zones:
       - id: GAIN
         type: switch_H2
         cx: 11.43
-        cy: 28
-        label_above: "GAIN"
-        label_above_y: 22.0
+        cy: 34
         pos_labels: ["1×", "5×"]
         pos_xs: [6.93, 15.93]
-        pos_y: 33.0
+        pos_y: 43.0
         cpp_param: "GAIN_PARAM"
       - id: BP3_L
         type: jack_input
         col: 0
-        cy: 44
+        cy: 50
         label: "BP3 L"
         font_size: 1.6
         cpp_id: "ALT_BP_L_INPUT"
       - id: BP3_R
         type: jack_input
         col: 1
-        cy: 44
+        cy: 50
         label: "BP3 R"
         font_size: 1.6
         cpp_id: "ALT_BP_R_INPUT"
