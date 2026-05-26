@@ -126,12 +126,12 @@
   <!-- L IN -->
   <circle cx="5.08" cy="16" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="5.08" cy="16" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="5.08" y="24.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">L IN</text>
+  <text x="5.08" y="22.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">L IN</text>
 
   <!-- R IN -->
   <circle cx="15.24" cy="16" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="15.24" cy="16" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="15.24" y="24.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">R IN</text>
+  <text x="15.24" y="22.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">R IN</text>
 
   <!-- GAIN switch — 2-pos HORIZONTAL, 9mm body centered at x=10.16, cy=32 -->
   <text x="10.16" y="28.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">GAIN</text>
@@ -174,14 +174,14 @@
   <!-- LFO 1 output jack, cy=82 -->
   <circle cx="5.08" cy="82" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="5.08" cy="82" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <rect x="1.58" y="87.24" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
-  <text x="5.08" y="89.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">LFO 1</text>
+  <rect x="1.58" y="86.74" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
+  <text x="5.08" y="88.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">LFO 1</text>
 
   <!-- LFO 2 output jack, cy=82 -->
   <circle cx="15.24" cy="82" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="15.24" cy="82" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <rect x="11.74" y="87.24" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
-  <text x="15.24" y="89.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">LFO 2</text>
+  <rect x="11.74" y="86.74" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
+  <text x="15.24" y="88.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">LFO 2</text>
 
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 3 — ZONE 0c: MOD BUS  (y:91–124)                               -->
@@ -201,11 +201,11 @@
   <!-- MOD IN jack, cy=118, left column -->
   <circle cx="5.08" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="5.08" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="5.08" y="123.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">MOD IN</text>
+  <text x="5.08" y="124.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">MOD IN</text>
 
   <!-- MOD LED indicator, cy=118, right column (same row as jack) -->
   <circle cx="15.24" cy="118" r="1.2" fill="#441111" stroke="#cc2222" stroke-width="0.4"/>
-  <text x="15.24" y="123.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">MOD</text>
+  <text x="15.24" y="124.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">MOD</text>
 
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 4a — SHARED BAND  (x:20.32–50.80, y:4.5–76)                    -->
@@ -267,13 +267,13 @@
   <!-- Unified bottom row CV — cy=118, label y=123 -->
   <circle cx="25.40" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="25.40" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="25.40" y="123" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">BYPASS</text>
+  <text x="25.40" y="124.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">BYPASS</text>
   <circle cx="35.56" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="35.56" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="35.56" y="123" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">OFFSET</text>
+  <text x="35.56" y="124.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">OFFSET</text>
   <circle cx="45.72" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="45.72" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="45.72" y="123" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">BLEND</text>
+  <text x="45.72" y="124.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">BLEND</text>
 
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 5 — BAND 1  (x:50.80–81.28, center x=66.04)                    -->
@@ -307,13 +307,13 @@
   <!-- CV jacks cy=118, labels y=123 -->
   <circle cx="55.88" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="55.88" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="55.88" y="123" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
+  <text x="55.88" y="124.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
   <circle cx="66.04" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="66.04" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="66.04" y="123" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">FOCUS</text>
+  <text x="66.04" y="124.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">FOCUS</text>
   <circle cx="76.20" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="76.20" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="76.20" y="123" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">DRIVE</text>
+  <text x="76.20" y="124.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">DRIVE</text>
 
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 6 — BAND 2  (x:81.28–111.76, center x=96.52)                   -->
@@ -340,13 +340,13 @@
 
   <circle cx="86.36" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="86.36" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="86.36" y="123" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
+  <text x="86.36" y="124.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
   <circle cx="96.52" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="96.52" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="96.52" y="123" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">FOCUS</text>
+  <text x="96.52" y="124.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">FOCUS</text>
   <circle cx="106.68" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="106.68" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="106.68" y="123" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">DRIVE</text>
+  <text x="106.68" y="124.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">DRIVE</text>
 
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 7 — BAND 3  (x:111.76–142.24, center x=127.00)                 -->
@@ -373,13 +373,13 @@
 
   <circle cx="116.84" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="116.84" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="116.84" y="123" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
+  <text x="116.84" y="124.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
   <circle cx="127.00" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="127.00" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="127.00" y="123" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">FOCUS</text>
+  <text x="127.00" y="124.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">FOCUS</text>
   <circle cx="137.16" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="137.16" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="137.16" y="123" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">DRIVE</text>
+  <text x="137.16" y="124.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">DRIVE</text>
 
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 8a — VCA TOP STRIP  (x:142.24–162.56, y:4.5–28)                -->
@@ -393,7 +393,7 @@
   <!-- VCA CV IN jack, cy=16 -->
   <circle cx="157.48" cy="16" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="157.48" cy="16" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="157.48" y="24.5" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">CV IN</text>
+  <text x="157.48" y="22.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">CV IN</text>
 
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 8b — LP 1 FILTER  (x:142.24–162.56, y:28–124)                  -->
@@ -420,10 +420,10 @@
 
   <circle cx="147.32" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="147.32" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="147.32" y="123" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">CUT</text>
+  <text x="147.32" y="124.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">CUT</text>
   <circle cx="157.48" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="157.48" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="157.48" y="123" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">RES</text>
+  <text x="157.48" y="124.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">RES</text>
 
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 9a — BAND OUT TOP STRIP  (x:162.56–182.88, y:4.5–28)           -->
@@ -432,13 +432,13 @@
 
   <circle cx="167.64" cy="16" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="167.64" cy="16" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <rect x="164.14" y="22.74" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
-  <text x="167.64" y="24.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">HP BP L</text>
+  <rect x="164.14" y="20.74" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
+  <text x="167.64" y="22.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">HP BP L</text>
 
   <circle cx="177.80" cy="16" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="177.80" cy="16" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <rect x="174.30" y="22.74" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
-  <text x="177.80" y="24.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">HP BP R</text>
+  <rect x="174.30" y="20.74" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
+  <text x="177.80" y="22.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">HP BP R</text>
 
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 9b — LP 2 FILTER  (x:162.56–182.88, y:28–124)                  -->
@@ -458,10 +458,10 @@
 
   <circle cx="167.64" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="167.64" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="167.64" y="123" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">CUT</text>
+  <text x="167.64" y="124.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">CUT</text>
   <circle cx="177.80" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="177.80" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="177.80" y="123" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">RES</text>
+  <text x="177.80" y="124.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">RES</text>
 
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 10a — OUT TOP STRIP  (x:182.88–203.20, y:4.5–28)               -->
@@ -469,13 +469,13 @@
 
   <circle cx="187.96" cy="16" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="187.96" cy="16" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <rect x="185.00" y="22.74" width="5.92" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
-  <text x="187.96" y="24.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">LEFT</text>
+  <rect x="185.00" y="20.74" width="5.92" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
+  <text x="187.96" y="22.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">LEFT</text>
 
   <circle cx="198.12" cy="16" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="198.12" cy="16" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <rect x="194.62" y="22.74" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
-  <text x="198.12" y="24.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">RIGHT</text>
+  <rect x="194.62" y="20.74" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
+  <text x="198.12" y="22.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">RIGHT</text>
 
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 10b — HP FILTER  (x:182.88–203.20, y:28–124)                   -->
@@ -495,9 +495,9 @@
 
   <circle cx="187.96" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="187.96" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="187.96" y="123" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">CUT</text>
+  <text x="187.96" y="124.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">CUT</text>
   <circle cx="198.12" cy="118" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="198.12" cy="118" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="198.12" y="123" fill="#777" font-family="monospace" font-size="1.8" text-anchor="middle">RES</text>
+  <text x="198.12" y="124.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">RES</text>
 
 </svg>
