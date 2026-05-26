@@ -83,7 +83,7 @@ separators:
 # x=17.145 is the geometric centre of the 3-column section (col 1 cx)
 zone_labels:
   - {x: 17.78, y: 8.25, text: "INPUT / GAIN"}
-  - {x: 17.145, y: 47.0, text: "LFO"}
+  - {x: 17.145, y: 47.0, text: "LFOs"}
 
 # ── Zones ─────────────────────────────────────────────────────────────────────
 zones:
