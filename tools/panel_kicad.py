@@ -4,11 +4,13 @@ Parses .kicad_mod files and emits SVG <g> elements positioned at each component'
 panel-hole (or shaft) centre so the real PCB geometry is visible in the debug viewer.
 
 Supports: fp_line, fp_circle, pad (thru_hole)
-Layers rendered: F.CrtYd, F.Fab, F.SilkS, plus pad markers.
+Layers rendered: F.Fab, F.SilkS, plus pad markers.
 
 Footprint origin notes
 ──────────────────────
-Jack  (WQP-PJ398SM): origin = panel hole centre → no offset needed.
+Jack  (WQP-PJ398SM): footprint origin = sleeve S pad at (0,0); barrel centre (panel
+      hole axis) = (0, 6.48) per datasheet (WQP-PJ398SM PCB layout, "6.48" dim).
+      Offset (0, 6.48) aligns the barrel circle with cx,cy.
 Pot   (Alpha RD901F): origin = pin 1; shaft centre is at (7.5, 2.5) in footprint
       coords → subtract (7.5, 2.5) to align shaft with cx,cy.
 """
@@ -30,21 +32,21 @@ _FP_ROOT = _REPO / "kicad" / "footprints"
 # The SVG transform becomes: translate(cx-ox, cy-oy), so any footprint point (px,py)
 # renders at panel position (px+cx-ox, py+cy-oy).
 #
-# Jack (WQP-PJ398SM): origin = sleeve S pad = panel hole centre.
-#   F.Fab barrel body circle at footprint (0, 6.48) renders at (cx, cy+6.48) — the body
-#   extends behind the panel surface, which is physically correct.
-#   The green origin cross-hair marks (cx, cy) = panel hole.
+# Jack (WQP-PJ398SM): footprint origin = sleeve S pad at (0,0); barrel centre (panel hole
+#   axis) at footprint (0, 6.48). Offset (0, 6.48): barrel circle renders at (cx, cy).
+#   Sleeve S pad renders at panel (cx, cy-6.48) — behind the panel face, physically correct.
+#   The green origin cross-hair marks (cx, cy) = panel hole axis = barrel centre.
 #
 # Pot (Alpha RD901F): footprint origin = pin1; shaft centre = (7.5, 2.5).
 #   F.Fab shaft circle is at (center 7.5 2.5) → setting ox=7.5, oy=2.5 aligns it to (cx,cy).
 _FOOTPRINT_MAP: dict[str, tuple[str, float, float]] = {
     "jack_input": (
         "Connector_Audio.pretty/Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles.kicad_mod",
-        0.0, 0.0,   # origin = sleeve S pad = panel hole centre
+        0.0, 6.48,  # origin offset = barrel centre (panel hole) at footprint (0, 6.48)
     ),
     "jack_output": (
         "Connector_Audio.pretty/Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles.kicad_mod",
-        0.0, 0.0,
+        0.0, 6.48,
     ),
     "trimpot": (
         "Potentiometer_THT.pretty/Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles.kicad_mod",

@@ -9,9 +9,10 @@ from dataclasses import dataclass, field
 from typing import Any
 
 # ── PCB courtyard dimensions (mm, relative to component origin) ───────────────
-# Thonkiconn PJ301M-12: origin = panel hole centre
-#   Source: Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles.kicad_mod
-JACK_CY = (-5.0, -1.42, 5.0, 12.98)   # (x1, y1, x2, y2)
+# WQP-PJ398SM: origin = barrel centre = panel hole axis (footprint coord 0,6.48)
+#   Footprint CrtYd: (-5,-1.42) to (5,12.98) relative to sleeve (footprint origin).
+#   Shift by -6.48 in y → relative to barrel centre (panel hole):
+JACK_CY = (-5.0, -7.90, 5.0, 6.50)    # (x1, y1, x2, y2)
 
 # Alpha RD901F 9mm: origin = shaft centre (derived from footprint pin 1 origin)
 #   Source: Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles.kicad_mod

@@ -42,8 +42,8 @@ colors:
 design_rules:
   top_keepout:       10.0
   bot_keepout_start: 118.5
-  cv_jack_cy:        105.0   # PCB courtyard bottom = 117.98 mm → 0.52 mm clear of rail keepout
-  att_offset:        -10.75  # att_cy = cv_jack_cy + att_offset = 94.25
+  cv_jack_cy:        108.0   # PCB courtyard bottom = 114.50 mm → 4.00 mm clear of rail keepout
+  att_offset:        -15.0   # att_cy = cv_jack_cy + att_offset = 93.0
   jack_label_dy:      7.0    # label_y = cy + 7.0
   output_rect_dy:    -1.76
   output_rect_h:      2.26
@@ -84,7 +84,7 @@ separators:
 zone_labels:
   - {x: 30.48, y: 12.0, text: "INPUT / GAIN"}
   - {x: 30.48, y: 55.0, text: "LFO"}
-  - {x: 30.48, y: 90.0, text: "MOD BUS"}
+  - {x: 30.48, y: 88.0, text: "MOD BUS"}
 
 # ── Zones ─────────────────────────────────────────────────────────────────────
 zones:
@@ -102,26 +102,26 @@ zones:
       - id: L_IN
         type: jack_input
         col: 0
-        cy: 16
+        cy: 18
         label: "L IN"
         font_size: 1.8
         cpp_id: "L_IN_INPUT"
       - id: R_IN
         type: jack_input
         col: 1
-        cy: 16
+        cy: 18
         label: "R IN"
         font_size: 1.8
         cpp_id: "R_IN_INPUT"
       - id: GAIN
         type: switch_H2
         cx: 30.48
-        cy: 34
+        cy: 28
         label_above: "GAIN"
-        label_above_y: 30.0
+        label_above_y: 22.0
         pos_labels: ["1×", "5×"]
         pos_xs: [25.98, 34.98]
-        pos_y: 39.0
+        pos_y: 33.0
         cpp_param: "GAIN_PARAM"
       - id: BP3_L
         type: jack_input
@@ -163,14 +163,14 @@ zones:
       - id: LFO1_OUT
         type: jack_output
         col: 0
-        cy: 74.5
+        cy: 79
         label: "LFO 1"
         font_size: 1.8
         cpp_id: "LFO1_OUTPUT"
       - id: LFO2_OUT
         type: jack_output
         col: 1
-        cy: 74.5
+        cy: 79
         label: "LFO 2"
         font_size: 1.8
         cpp_id: "LFO2_OUTPUT"
