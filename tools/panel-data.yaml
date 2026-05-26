@@ -146,21 +146,20 @@ zones:
         cpp_param: "ALT_GAIN_PARAM"
 
   # ── Section 0b: LFO ───────────────────────────────────────────────────────
-  # Same 3-col layout: col 0 knob | col 1 LED | col 2 jack
-  # col 0 rotate=180 keeps Alpha CrtYd inside panel left edge
+  # col 0 jack | col 1 LED | col 2 knob
   - id: zone_lfo
     label: "Zone 0b — LFO"
     x_start: 0
     col_pitch: 11.43
     cols: 3
     components:
-      - id: LFO1_RATE
-        type: knob_medium
+      - id: LFO1_OUT
+        type: jack_output
         col: 0
         cy: 57
-        rotate: 180
-        label: "RATE"
-        cpp_param: "LFO1_RATE_PARAM"
+        label: "LFO 1"
+        font_size: 1.6
+        cpp_id: "LFO1_OUTPUT"
       - id: LFO1_LED
         type: led
         col: 1
@@ -168,20 +167,19 @@ zones:
         led_fill:   "#112244"
         led_stroke: "#2255cc"
         cpp_id: "LFO1_LED"
-      - id: LFO1_OUT
-        type: jack_output
+      - id: LFO1_RATE
+        type: knob_medium
         col: 2
         cy: 57
-        label: "LFO 1"
-        font_size: 1.6
-        cpp_id: "LFO1_OUTPUT"
-      - id: LFO2_RATE
-        type: knob_medium
+        label: "Rate 1"
+        cpp_param: "LFO1_RATE_PARAM"
+      - id: LFO2_OUT
+        type: jack_output
         col: 0
         cy: 72
-        rotate: 180
-        label: "RATE"
-        cpp_param: "LFO2_RATE_PARAM"
+        label: "LFO 2"
+        font_size: 1.6
+        cpp_id: "LFO2_OUTPUT"
       - id: LFO2_LED
         type: led
         col: 1
@@ -189,10 +187,9 @@ zones:
         led_fill:   "#112244"
         led_stroke: "#2255cc"
         cpp_id: "LFO2_LED"
-      - id: LFO2_OUT
-        type: jack_output
+      - id: LFO2_RATE
+        type: knob_medium
         col: 2
         cy: 72
-        label: "LFO 2"
-        font_size: 1.6
-        cpp_id: "LFO2_OUTPUT"
+        label: "Rate 2"
+        cpp_param: "LFO2_RATE_PARAM"
