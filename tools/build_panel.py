@@ -744,31 +744,19 @@ def main() -> int:
     violations = run_drc(data, rules)
 
     if args.check:
-        blocking = [v for v in violations if not v.startswith("[PCB KEEPOUT]")]
-        informational = [v for v in violations if v.startswith("[PCB KEEPOUT]")]
-        if blocking:
+        if violations:
             from collections import defaultdict
             groups: dict[str, list[str]] = defaultdict(list)
-            for v in blocking:
+            for v in violations:
                 tag = v.split("]")[0].lstrip("[") if v.startswith("[") else "OTHER"
                 groups[tag].append(v)
-            print(f"DRC FAILED — {len(blocking)} violation(s):", file=sys.stderr)
+            print(f"DRC FAILED — {len(violations)} violation(s):", file=sys.stderr)
             for tag, items in sorted(groups.items()):
                 print(f"\n  [{tag}] ({len(items)})", file=sys.stderr)
                 for v in items:
                     print(f"    {v}", file=sys.stderr)
-            if informational:
-                print(f"\n  [PCB KEEPOUT] ({len(informational)}) — informational only:",
-                      file=sys.stderr)
-                for v in informational:
-                    print(f"    {v}", file=sys.stderr)
             return 1
-        if informational:
-            print(f"DRC PASS (with {len(informational)} [PCB KEEPOUT] informational warning(s)):")
-            for v in informational:
-                print(f"  {v}")
-        else:
-            print("DRC PASS — no violations.")
+        print("DRC PASS — no violations.")
         return 0
 
     if args.list:

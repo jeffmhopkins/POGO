@@ -42,8 +42,8 @@ colors:
 design_rules:
   top_keepout:       10.0
   bot_keepout_start: 118.5
-  cv_jack_cy:        112.5   # nut bottom = 117.5 mm → 1 mm clear of keepout
-  att_offset:       -10.75   # att_cy = cv_jack_cy + att_offset = 101.75
+  cv_jack_cy:        105.0   # PCB courtyard bottom = 117.98 mm → 0.52 mm clear of rail keepout
+  att_offset:        -8.5   # att_cy = cv_jack_cy + att_offset = 96.5
   jack_label_dy:      7.0    # label_y = cy + 7.0
   output_rect_dy:    -1.76
   output_rect_h:      2.26
@@ -78,13 +78,13 @@ separators:
   - {type: v, x: 45.72, y1: 4.5, y2: 124.0, style: main_cyan}
   # Sub-section dividers within Section 0
   - {type: h, x1: 15.24, x2: 45.22, y: 52.0, style: zone_div}
-  - {type: h, x1: 15.24, x2: 45.22, y: 94.0, style: zone_div}
+  - {type: h, x1: 15.24, x2: 45.22, y: 86.0, style: zone_div}
 
 # ── Zone labels ───────────────────────────────────────────────────────────────
 zone_labels:
   - {x: 30.48, y: 12.0, text: "INPUT / GAIN"}
   - {x: 30.48, y: 55.0, text: "LFO"}
-  - {x: 30.48, y: 97.5, text: "MOD BUS"}
+  - {x: 30.48, y: 90.0, text: "MOD BUS"}
 
 # ── Zones ─────────────────────────────────────────────────────────────────────
 zones:
@@ -149,45 +149,45 @@ zones:
       - id: LFO1_SPEED
         type: trimpot
         col: 0
-        cy: 66
+        cy: 64
         label: "SPEED"
         label_font_size: 1.8
         cpp_param: "LFO1_SPEED_PARAM"
       - id: LFO2_SPEED
         type: trimpot
         col: 1
-        cy: 66
+        cy: 64
         label: "SPEED"
         label_font_size: 1.8
         cpp_param: "LFO2_SPEED_PARAM"
       - id: LFO1_LED
         type: led
-        col: 0
-        cy: 75
+        cx: 28.36
+        cy: 76
         cpp_light: "LFO1_LIGHT"
       - id: LFO2_LED
         type: led
-        col: 1
-        cy: 75
+        cx: 32.60
+        cy: 76
         cpp_light: "LFO2_LIGHT"
       - id: LFO1_OUT
         type: jack_output
         col: 0
-        cy: 82
+        cy: 76
         label: "LFO 1"
         font_size: 1.8
         cpp_id: "LFO1_OUTPUT"
       - id: LFO2_OUT
         type: jack_output
         col: 1
-        cy: 82
+        cy: 76
         label: "LFO 2"
         font_size: 1.8
         cpp_id: "LFO2_OUTPUT"
 
   # ── Section 0c: MOD BUS ───────────────────────────────────────────────────
   # Mod bus processor: amount + offset trimpots, mod input jack, activity LED
-  # att_cy = 101.75, cv_jack_cy = 112.5 (from design_rules)
+  # att_cy = 96.5, cv_jack_cy = 105.0 (from design_rules)
   - id: zone_modbus
     label: "Zone 0c — MOD BUS"
     x_start: 15.24

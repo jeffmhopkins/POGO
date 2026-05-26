@@ -264,8 +264,9 @@ class DesignRules:
     def _check_pcb_keepout(self, components: list[dict[str, Any]]) -> list[str]:
         """PCB courtyard rectangles that extend into top/bottom keep-out zones.
 
-        These are informational [PCB KEEPOUT] warnings — expected for through-panel
-        components near panel edges — not blocking errors.
+        The PCB is physically bounded by the Eurorack rails, so any courtyard
+        rectangle that extends past the keep-out boundary is a real placement error —
+        the component body would be inside the rail and cannot be manufactured.
         """
         out: list[str] = []
         for comp in components:
@@ -280,12 +281,12 @@ class DesignRules:
             if ry1 < self.top_keepout:
                 out.append(
                     f"[PCB KEEPOUT] '{label}' ({ctype}) courtyard top={ry1:.2f}"
-                    f" extends into TOP keepout ({self.top_keepout:.2f}) — informational"
+                    f" extends into TOP keepout ({self.top_keepout:.2f})"
                 )
             if ry2 > self.bot_keepout_start:
                 out.append(
                     f"[PCB KEEPOUT] '{label}' ({ctype}) courtyard bottom={ry2:.2f}"
-                    f" extends into BOT keepout ({self.bot_keepout_start:.2f}) — informational"
+                    f" exceeds BOT keepout ({self.bot_keepout_start:.2f})"
                 )
         return out
 
