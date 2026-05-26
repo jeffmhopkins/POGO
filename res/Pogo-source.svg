@@ -174,10 +174,14 @@
   <!-- LFO 1 output jack, cy=82 -->
   <circle cx="5.08" cy="82" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="5.08" cy="82" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <rect x="1.58" y="87.24" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
+  <text x="5.08" y="89.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">LFO 1</text>
 
   <!-- LFO 2 output jack, cy=82 -->
   <circle cx="15.24" cy="82" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="15.24" cy="82" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <rect x="11.74" y="87.24" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
+  <text x="15.24" y="89.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">LFO 2</text>
 
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 3 — ZONE 0c: MOD BUS  (y:91–124)                               -->
