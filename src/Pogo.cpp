@@ -3,7 +3,7 @@
 #include "dsp/PreGain.hpp"
 #include "dsp/EnvelopeFollower.hpp"
 #include "dsp/ModBus.hpp"
-#include "dsp/AllPassComb.hpp"
+#include "dsp/BandpassSVF.hpp"
 #include "dsp/Distortion.hpp"
 #include "dsp/VcaBlock.hpp"
 #include "dsp/LPFilter.hpp"
@@ -336,8 +336,8 @@ struct Pogo : Module {
 
 	// ── DSP state ────────────────────────────────────────────────────────────
 	EnvelopeFollower envL, envR;
-	TripleAPF        combL, combR;
-	// Distortion taps from previous sample (needed for APF feedback blend)
+	TripleBandpass   bandpassL, bandpassR;
+	// Distortion taps from previous OS step (fed back into SVF input via FB_DIST_BLEND)
 	float distTapL[3] = {}, distTapR[3] = {};
 	LPFilter lp1L, lp1R;
 	LPFilter lp2L, lp2R;
@@ -352,7 +352,7 @@ struct Pogo : Module {
 
 	void onReset() override {
 		envL.reset(); envR.reset();
-		combL.reset(); combR.reset();
+		bandpassL.reset(); bandpassR.reset();
 		for (int i = 0; i < 3; i++) distTapL[i] = distTapR[i] = 0.f;
 		lp1L.reset(); lp1R.reset();
 		lp2L.reset(); lp2R.reset();
@@ -428,27 +428,23 @@ struct Pogo : Module {
 		                  + modDest(MASTER_OFFSET_CV_INPUT, MASTER_OFFSET_ATT_PARAM);
 		for (int i = 0; i < 3; i++) freqV[i] += masterOff;
 
-		float fbGain[3] = {
+		float fbParam[3] = {
 			clamp(params[FB_1_PARAM].getValue() + modDest(FB_CV_1_INPUT, FB_ATT_1_PARAM), 0.f, 1.f),
 			clamp(params[FB_2_PARAM].getValue() + modDest(FB_CV_2_INPUT, FB_ATT_2_PARAM), 0.f, 1.f),
 			clamp(params[FB_3_PARAM].getValue() + modDest(FB_CV_3_INPUT, FB_ATT_3_PARAM), 0.f, 1.f),
 		};
 
 		int polSwitch = (int)std::round(params[POLARITY_PARAM].getValue()); // 0=pos, 1=off, 2=neg
-		float polarity[3];
-		float polVal = (polSwitch == 0) ? 1.f : (polSwitch == 2) ? -1.f : 0.f;
-		for (int i = 0; i < 3; i++) polarity[i] = polVal;
+		int polarityVal = (polSwitch == 0) ? 1 : (polSwitch == 2) ? -1 : 0;
 
-		float blendParam = clamp(params[FB_DIST_BLEND_PARAM].getValue()
-		                         + modDest(BLEND_CV_INPUT, BLEND_ATT_PARAM), 0.f, 1.f);
-		float blendArr[3] = {blendParam, blendParam, blendParam};
+		float blend = clamp(params[FB_DIST_BLEND_PARAM].getValue()
+		                    + modDest(BLEND_CV_INPUT, BLEND_ATT_PARAM), 0.f, 1.f);
 
 		float combBypass = clamp(params[COMB_BYPASS_PARAM].getValue()
 		                         + modDest(BYPASS_CV_INPUT, BYPASS_ATT_PARAM), 0.f, 1.f);
 		float widthParam = params[WIDTH_PARAM].getValue(); // ±1 V/oct offset on R
 
-		// ── Blocks 3+4: 2× oversampled APF comb + distortion ────────────────
-		// Upsample pre-gain signal to 2× rate
+		// ── Blocks 3+4: 2× oversampled SVF bandpass + distortion ───────────
 		int distMode = (int)std::round(params[DIST_MODE_PARAM].getValue());
 		float driveCV[3] = {
 			clamp(params[DRIVE_1_PARAM].getValue() + modDest(DRIVE_CV_1_INPUT, DRIVE_ATT_1_PARAM), 0.f, 1.f),
@@ -461,21 +457,21 @@ struct Pogo : Module {
 		upR.process(pgR, upBufR);
 
 		float postL[OS], postR[OS];
-		const float fs2 = 2.f * fs; // APF coefficients at oversampled rate
+		const float fs2 = 2.f * fs;
 		for (int s = 0; s < OS; s++) {
-			// APF at 2× rate; distTapL/R carry feedback from previous OS step
-			combL.process(upBufL[s], freqV, fbGain, polarity, distTapL, blendArr, 1.f, 0.f,       fs2);
-			combR.process(upBufR[s], freqV, fbGain, polarity, distTapR, blendArr, 1.f, widthParam, fs2);
+			// SVF at 2× rate; distTapL/R carry post-dist feedback from previous OS step
+			bandpassL.process(upBufL[s], freqV, fbParam, polarityVal, distTapL, blend, 0.f,       fs2);
+			bandpassR.process(upBufR[s], freqV, fbParam, polarityVal, distTapR, blend, widthParam, fs2);
 
-			// Distortion per group; update distTap for next OS step's APF blend
+			// Distortion per group; update distTap for next OS step's SVF blend
 			float dSumL = 0.f, dSumR = 0.f;
 			for (int i = 0; i < 3; i++) {
-				distTapL[i] = Distortion::process(combL.groups[i].prevOut, driveCV[i], distMode);
-				distTapR[i] = Distortion::process(combR.groups[i].prevOut, driveCV[i], distMode);
+				distTapL[i] = Distortion::process(bandpassL.groups[i].prevOut, driveCV[i], distMode);
+				distTapR[i] = Distortion::process(bandpassR.groups[i].prevOut, driveCV[i], distMode);
 				dSumL += distTapL[i] * 0.5f;
 				dSumR += distTapR[i] * 0.5f;
 			}
-			// combBypass crossfade at oversampled rate
+			// COMB BYPASS crossfade at oversampled rate
 			postL[s] = clamp(upBufL[s] * (1.f - combBypass) + dSumL * combBypass, -10.5f, 10.5f);
 			postR[s] = clamp(upBufR[s] * (1.f - combBypass) + dSumR * combBypass, -10.5f, 10.5f);
 		}

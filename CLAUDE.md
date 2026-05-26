@@ -18,10 +18,9 @@ Stereo Input (L + R)
 [Block 2]  Envelope Follower                post-gain / pre-comb audio → envelope signal
            Envelope output jack             also normalizes into Mod Bus input
   ↓
-[Block 3]  Triple 6-Stage All-Pass          stereo, 3 independent APF chains (phaser / comb)
-           Comb Filter
+[Block 3]  Triple Bandpass SVF               stereo, 3 independent 2-pole OTA-C SVF resonators (formant F1/F2/F3)
   ↓
-[Block 4]  Distortion                       3 selectable modes (SC/HC/WF per APF group)
+[Block 4]  Distortion                       3 selectable modes (SC/HC/WF per SVF group)
   ↓
 [Block VCA] Pre-LP1 VCA                     THAT 2180, envelope-driven accent/gate/duck
   ↓

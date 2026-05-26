@@ -1,4 +1,4 @@
-# Block 3: Triple 6-Stage All-Pass Comb Filter (APCF)
+# Block 3: Triple Bandpass SVF Resonators
 
 ## Status
 - Phase 1 (Audio Spec): [x] complete
@@ -10,383 +10,284 @@
 ## Phase 1: Audio / Functional Specification
 
 ### Sonic Intent
-Three independent groups of 6 first-order all-pass stages cascaded in series per stereo channel
-— 18 all-pass stages total per channel. Mixed with the dry signal, they create the classic phaser
-comb: a sweep of notches and peaks across the frequency spectrum. With three independent groups
-tuned to different frequency ranges, the comb pattern spreads across the full audio band, producing
-rich, formant-like resonances — like a vowel filter that breathes with modulation.
+Three independent 2-pole OTA-C state-variable filters in bandpass mode — one resonator per
+formant group (F1/F2/F3). Each resonator produces a sharp, tuneable peak at its center
+frequency, independently controllable in both frequency and Q/resonance.
 
-Each group covers a different zone:
-- **Group 1**: Low formant (~100 Hz – 1 kHz)
-- **Group 2**: Mid formant (~500 Hz – 5 kHz)
-- **Group 3**: High formant (~2 kHz – 20 kHz)
+Each group covers a distinct part of the vocal spectrum:
+- **Group 1**: Low formant, F1 — centered around 200 Hz at 0 V
+- **Group 2**: Mid formant, F2 — centered around 1.5 kHz at 0 V
+- **Group 3**: High formant, F3 — centered around 6 kHz at 0 V
 
-With feedback, each group develops a distinct resonant peak at its center frequency. Sweeping
-SPREAD opens or closes the distance between the three formants. Sweeping MASTER OFFSET moves all
-three together like a filter sweep. STEREO WIDTH drifts the R channel's formants relative to L,
-creating a shifting, spacious stereo field.
+At low resonance (FB ≈ 0): each SVF acts as a broad bandpass shelf — gentle formant coloring.
+At high resonance (FB near max): narrow, resonant peaks — distinctly vocal, "talking" character.
+At maximum resonance: self-oscillation at the center frequency — clean sine tone output from each group.
 
-At minimum COMB BYPASS (pre-comb VCA fully closed): comb effect is off, signal passes through
-via dry path only.
-At maximum COMB BYPASS (pre-comb VCA fully open): all 18 stages always in circuit; maximum
-notch depth.
-At mid COMB BYPASS: classic phaser blend — notches audible but signal retains body.
+Sweeping MASTER OFFSET moves all three formants together (vowel gesture). Independent FREQ
+knobs set the vowel shape (F1/F2/F3 spacing determines the perceived vowel). STEREO WIDTH
+drifts R channel formants relative to L, creating a wide, animated stereo field.
 
 ### Parameters
 
 | Name | Range | Default | Taper | Description |
 |---|---|---|---|---|
-| FREQ 1 | 20 Hz – 2 kHz center | 200 Hz | Logarithmic | Center frequency of Group 1 (low formant) |
-| FREQ 2 | 200 Hz – 8 kHz center | 1.5 kHz | Logarithmic | Center frequency of Group 2 (mid formant) |
-| FREQ 3 | 1 kHz – 20 kHz center | 6 kHz | Logarithmic | Center frequency of Group 3 (high formant) |
-| SPREAD | 0 – 100% | 50% | Linear | Multiplies spacing between groups; 0% collapses all groups to same frequency |
-| MASTER OFFSET | ±5 V equivalent | 0 | Linear | Shifts all 3 groups up or down together; acts as a master sweep (panel: MASTER OFFSET large knob) |
-| FB 1 | 0 – 95% | 0% | Linear | Resonance depth of Group 1; >95% risks instability |
-| FB 2 | 0 – 95% | 0% | Linear | Resonance depth of Group 2 |
-| FB 3 | 0 – 95% | 0% | Linear | Resonance depth of Group 3 |
-| FB DIST BLEND | 0 – 100% | 0% | Linear | Continuous crossfade: 0% = clean APF feedback (internal), 100% = post-distortion feedback |
-| POLARITY | Switch: Positive / Off / Negative | Positive | N/A | Positive: standard notch deepening; Off: cuts all feedback regardless of FB knobs; Negative: phase-inverts feedback, turning notches into peaks |
-| STEREO WIDTH | 0 – 100% | 0% | Linear | Frequency offset of R channel groups relative to L; 0% = mono, 100% = maximum stereo spread |
-| COMB BYPASS | 0 – 100% | 50% | Linear | Pre-comb VCA level: 0% = signal bypasses comb (dry only), 100% = full comb in signal path |
+| FREQ 1 | f_ref=200 Hz at 0 V; ±5 V sweep | 0 V (200 Hz) | Logarithmic (1V/oct) | Center frequency of Group 1 (low formant F1) |
+| FREQ 2 | f_ref=1500 Hz at 0 V; ±5 V sweep | 0 V (1.5 kHz) | Logarithmic (1V/oct) | Center frequency of Group 2 (mid formant F2) |
+| FREQ 3 | f_ref=6000 Hz at 0 V; ±5 V sweep | 0 V (6 kHz) | Logarithmic (1V/oct) | Center frequency of Group 3 (high formant F3) |
+| MASTER OFFSET | ±5 V | 0 | Linear | Shifts all 3 group frequencies simultaneously (1V/oct); master vowel sweep |
+| FB 1 | 0 – 100% | 0% | Linear | Q/resonance for Group 1; 0% = flat (Q≈0.5), 100% = self-oscillation (Q≈50) |
+| FB 2 | 0 – 100% | 0% | Linear | Q/resonance for Group 2 |
+| FB 3 | 0 – 100% | 0% | Linear | Q/resonance for Group 3 |
+| FB DIST BLEND | 0 – 100% | 0% | Linear | Blends post-distortion signal into SVF input: 0% = clean input only, 100% = post-distortion signal added |
+| POLARITY | Switch: Positive / Off / Negative | Positive | N/A | Positive: SVF output sums normally; Off: SVF outputs silenced (dry pass only); Negative: SVF output phase-inverted before summing |
+| STEREO WIDTH | 0 – 100% | 0% | Linear | Per-octave offset of R channel group frequencies vs. L |
+| COMB BYPASS | 0 – 100% | 100% | Linear | Wet/dry mix: 0% = dry only (no SVF), 100% = full SVF wet signal |
 
 ### CV Modulation Targets
 
 | Target | CV Range | Attenuverter | Notes |
 |---|---|---|---|
-| FREQ 1 | ±5 V (1V/oct) | Yes | Sweeps Group 1 center frequency exponentially |
-| FREQ 2 | ±5 V (1V/oct) | Yes | Sweeps Group 2 center frequency exponentially |
-| FREQ 3 | ±5 V (1V/oct) | Yes | Sweeps Group 3 center frequency exponentially |
-| FB 1 | 0–10 V | Yes | Group 1 feedback depth independently |
-| FB 2 | 0–10 V | Yes | Group 2 feedback depth independently |
-| FB 3 | 0–10 V | Yes | Group 3 feedback depth independently |
-| FB DIST BLEND | 0–10 V | Yes | Crossfade ratio; always active |
-| COMB BYPASS | 0–10 V | Yes | Pre-comb VCA level; sweeps from bypassed to full comb |
-| MASTER OFFSET | ±5 V (1V/oct) | Yes | Shifts all 3 group frequencies simultaneously; sums at each FREQ CV node |
+| FREQ 1 | ±5 V (1V/oct) | Yes | Exponential; sweeps Group 1 center frequency |
+| FREQ 2 | ±5 V (1V/oct) | Yes | Exponential; sweeps Group 2 center frequency |
+| FREQ 3 | ±5 V (1V/oct) | Yes | Exponential; sweeps Group 3 center frequency |
+| FB 1 | 0–10 V | Yes | Group 1 Q/resonance |
+| FB 2 | 0–10 V | Yes | Group 2 Q/resonance |
+| FB 3 | 0–10 V | Yes | Group 3 Q/resonance |
+| FB DIST BLEND | 0–10 V | Yes | Post-distortion blend into SVF input |
+| COMB BYPASS | 0–10 V | Yes | Wet/dry level |
+| MASTER OFFSET | ±5 V (1V/oct) | Yes | Shifts all 3 center frequencies simultaneously |
 | POLARITY | — | None | Switch only; no CV |
 
 ### Signal Levels (I/O)
-- Input: ±5 V audio (from Block 2; up to ±10.5 V if Block 1 is in BOOST mode)
-- Output: ±5 V audio (all-pass stages are unity gain by definition; no signal level change)
-- With feedback: resonance can increase apparent level at the formant frequencies by several dB;
-  keep output stage headroom at ±10 V
+- Input: ±5 V audio (from Block 2; up to ±10.5 V in BOOST mode)
+- Output: ±5 V nominal; resonant peaks can boost level at formant frequencies by up to Q× the
+  input amplitude. At Q=50 and high input level, instantaneous peaks are clamped by op-amp rails.
+  COMB BYPASS at less than 100% reduces wet contribution.
+- COMB BYPASS = 0%: dry signal only, no SVF coloring
 
 ### Stereo Behavior
-True stereo: independent signal paths for L and R through all 18 stages per channel.
-FREQ 1/2/3 knobs and SPREAD control both channels identically.
-STEREO WIDTH offsets R channel group frequencies: `ω_R = ω_L × 2^(WIDTH_V / 1V)` where WIDTH_V
-is a small positive or negative voltage derived from the WIDTH knob.
-COMB BYPASS applies identically to both channels.
+True stereo: independent L and R SVF circuits (3 groups × 2 channels = 6 SVF instances).
+FREQ 1/2/3 and MASTER OFFSET apply identically to both channels.
+STEREO WIDTH offsets R channel center frequencies: `f_R = f_L × 2^(WIDTH_V / 1V)`.
+POLARITY and FB DIST BLEND apply identically to both channels.
 
 ### Edge Cases
-- FB at maximum (95%): near-self-oscillation; output level rises sharply. The 95% hard
-  limit in the circuit must be enforced by a resistor floor in the feedback path — do not allow
-  full 100% positive feedback.
-- COMB BYPASS at 0%: pre-comb VCA closed; signal bypasses phase-shift influence. When fully
-  bypassed, no op-amp noise from the wet path reaches the output.
-- SPREAD at 0%: all three groups are set to the same frequency; the three sets of notches align,
-  producing a deeper but narrower comb effect at one frequency region.
-- FB DIST BLEND at 0%: uses only the clean APF output as the feedback source (equivalent to
-  the former "Internal" SOURCE setting). At 100%: post-distortion signal drives all feedback
-  (equivalent to former "Post-Dist" setting). Intermediate values continuously interpolate.
+- All three FB knobs at max with POLARITY=Positive: each group self-oscillates independently
+  at its center frequency. Output is a chord of three sine tones at F1/F2/F3.
+- POLARITY=Off: all SVF outputs muted; COMB BYPASS routes dry signal only regardless of FB.
+- FB DIST BLEND at max with DRIVE high: distorted signal adds into SVF input, increasing
+  the harmonic content entering each resonator for a more aggressive formant character.
+- FREQ 1 and FREQ 2 converging (same CV): F1/F2 formants merge into one stronger peak.
+  No circuit problem — just a different tonal character (rounder, single-peak vowel).
 
 ---
 
 ## Phase 2: Analog Behavior Model
 
-### Transfer Function
+### Transfer Function (2-pole Bandpass SVF)
 
-**Single 1st-order all-pass stage:**
 ```
-H_APF(s) = (s − ω₀) / (s + ω₀)
-```
-- Magnitude: |H_APF(jω)| = 1 for all ω (unity gain — all-pass)
-- Phase: φ(ω) = π − 2 arctan(ω / ω₀)
-  - At ω → 0:   φ = π   (180° phase shift)
-  - At ω = ω₀:  φ = π/2 (90° phase shift)
-  - At ω → ∞:   φ = 0   (0° phase shift)
-
-**Six cascaded APF stages (one group), same center frequency ω₀:**
-```
-H_6(s) = [(s − ω₀) / (s + ω₀)]^6
-```
-- Magnitude: still unity for all ω
-- Phase: φ_6(ω) = 6 × [π − 2 arctan(ω / ω₀)]
-
-**Notch locations in the phaser output:**
-When H_6 is mixed with the dry signal (V_dry + V_wet), cancellation occurs where phase shift = (2n+1)π:
-```
-6 × [π − 2 arctan(ω_notch / ω₀)] = (2n+1)π
-arctan(ω_notch / ω₀) = (5 − 2n)π / 12
-ω_notch_n = ω₀ × tan((5 − 2n)π / 12)
-```
-For 6 stages (at equal COMB BYPASS), this produces 3 notch pairs across the spectrum.
-
-**Three groups, each with independent ω₀:**
-```
-Group 1: ω₀_1 = 2π × f₁,   f₁ controlled by FREQ 1 + MASTER OFFSET + modulation
-Group 2: ω₀_2 = 2π × f₂,   f₂ controlled by FREQ 2 + MASTER OFFSET + modulation
-Group 3: ω₀_3 = 2π × f₃,   f₃ controlled by FREQ 3 + MASTER OFFSET + modulation
+H_BP(s) = (ω₀/Q) × s / (s² + (ω₀/Q) × s + ω₀²)
 ```
 
-SPREAD scales the distances:
-```
-f₁_eff = f₁_base × 2^(−SPREAD × k)
-f₂_eff = f₂_base   (reference, unaffected)
-f₃_eff = f₃_base × 2^(+SPREAD × k)
-```
-where k is a scaling factor set so that at SPREAD = 100%, the groups are maximally spread
-(Group 1 near 20 Hz, Group 3 near 20 kHz).
+- At DC (s → 0): H_BP → 0 (blocks DC)
+- At high frequency (s → ∞): H_BP → 0 (blocks high frequencies)
+- At s = jω₀: |H_BP(jω₀)| = Q (resonance peak height, linear units)
+- Formant bandwidth: BW = f₀ / Q (3 dB bandwidth)
 
-**MASTER OFFSET:** shifts all three groups simultaneously by adding an exponential offset:
-```
-f_n_eff = f_n_base × 2^(V_offset / 1V)
-```
-This is a 1V/octave exponential relationship applied to all three groups in common.
+SVF simultaneously provides LP, BP, and HP outputs; only BP is used here.
 
-**STEREO WIDTH:** offsets R channel frequencies by a fixed ratio:
+### Parameter-to-Behavior Mapping
+
+**Frequency control (1V/oct, per group):**
+```
+f₀ = f_ref × 2^(V_ctrl / 1V)
+```
+- Group 1: f_ref = 200 Hz; at ±5 V: 6.25 Hz – 6.4 kHz
+- Group 2: f_ref = 1500 Hz; at ±5 V: 46.9 Hz – 48 kHz (clamped to 20 kHz)
+- Group 3: f_ref = 6000 Hz; at ±5 V: 187.5 Hz – 192 kHz (clamped to 20 kHz)
+
+**MASTER OFFSET:** sums exponentially with each group's individual frequency CV:
+```
+f_n_eff = f_ref_n × 2^((V_freq_n + V_master_offset) / 1V)
+```
+
+**STEREO WIDTH:** adds a fixed offset to R channel only:
 ```
 f_n_R = f_n_L × 2^(V_width / 1V)
 ```
-At WIDTH = 50%, approximately +2 semitones offset. At WIDTH = 100%, approximately +5 semitones.
 
-### Feedback (Resonance) Model
+**Q mapping:**
+```
+Q = 0.5 + fbParam × 49.5
+```
+- fbParam = 0 → Q = 0.5 (Butterworth, nearly flat Gaussian rolloff on each side)
+- fbParam = 0.5 → Q ≈ 25 (sharp, narrow formant peak)
+- fbParam → 1 → Q ≈ 50 (very narrow; near self-oscillation)
+- Self-oscillation occurs at Q → ∞ (Iabc → 0 in hardware); unlimited in DSP model
 
-Each group has an independent feedback path with gain g (0 ≤ g < 1):
+**FB DIST BLEND (input mixing):**
 ```
-V_fb_source = (1 − FB_DIST_BLEND) × V_apf_out + FB_DIST_BLEND × V_post_dist
-V_fb_signal = POLARITY_select(V_fb_source)   [+1, 0, or −1 × V_fb_source]
-V_out_group = H_6(s) × [V_in + g × V_fb_signal]
-V_out_group = H_6(s) × V_in / (1 − g × POLARITY × H_6(s))
+V_svf_in = V_audio + blend × V_post_dist
 ```
+Additive, not crossfade. At blend=1: distorted signal adds to clean input, increasing
+harmonic content entering each resonator. This is not a feedback loop — it's additive input mixing.
 
-FB DIST BLEND is always active and continuously selects the feedback source:
+**POLARITY (output inversion):**
 ```
-FB_DIST_BLEND = 0:    V_fb_source = V_apf_out        (clean APF feedback)
-FB_DIST_BLEND = 0.5:  V_fb_source = 0.5×V_apf_out + 0.5×V_post_dist  (equal blend)
-FB_DIST_BLEND = 1:    V_fb_source = V_post_dist       (post-distortion feedback)
-```
-
-**POLARITY selection:**
-```
-Positive:   V_fb_signal = +V_fb_source   (standard, deepens notches)
-Off:        V_fb_signal = 0              (g effectively = 0 regardless of FB knob)
-Negative:   V_fb_signal = −V_fb_source  (inverts feedback; notches become peaks)
+V_group_sum = polarity × (V_group1 + V_group2 + V_group3)
+  polarity = +1 (Positive), 0 (Off), −1 (Negative)
 ```
 
-At g → 1 with Positive polarity: self-oscillation at notch frequencies.
-At g → 1 with Negative polarity: self-oscillation at peak frequencies (inverse comb).
-Circuit must limit g ≤ 0.95 via resistor floor in the feedback summing network.
-
-### Frequency Response (Combined Output)
-
-With COMB BYPASS controlling pre-comb VCA level:
+**COMB BYPASS (wet/dry):**
 ```
-V_output = V_bypass_signal + V_comb_processed
+V_out = V_dry × (1 − bypass) + V_wet × bypass
+  V_wet = sum of distorted per-group SVF outputs
 ```
-Where the COMB BYPASS VCA controls how much of the comb-processed signal is passed.
-At COMB BYPASS = 0: fully bypassed, comb output muted.
-At a notch frequency with COMB BYPASS = 100%: maximum notch depth. With feedback, the peaks between
-notches are emphasized.
 
-### OTA-Based Voltage Control
+### Combined Three-Group Output
 
-Each all-pass stage uses an OTA (one cell of LM13700) as the variable element:
+The three BP outputs are summed (unity gain, no /3 normalization):
 ```
-ω₀ = g_m / C_apf
-g_m = I_abc / (2 × V_T)    where V_T ≈ 26 mV at room temperature
-     = I_abc × 19.2 (A/A)
+V_wet = Distortion(V_svf_group1) + Distortion(V_svf_group2) + Distortion(V_svf_group3)
 ```
-So `ω₀ = (I_abc × 19.2) / C_apf`
+COMB BYPASS level controls how much of this summed wet signal reaches the output.
+At typical settings (groups at different frequencies), the sum magnitude is similar to
+a single group since formant peaks are non-overlapping.
 
-The control voltage (from the FREQ knob + CV) is converted to an exponential current I_abc via
-an expo converter. This gives the 1V/octave exponential frequency sweep.
+### OTA-C SVF Voltage Control
+
+Identical to LP1/LP2/HP filters — same expo converter relationship:
+```
+ω₀ = g_m / C,    g_m = I_abc / (2 × V_T)
+I_abc = I_ref × e^(V_ctrl / V_T)    (THAT340 expo converter)
+```
+1V/oct: +1 V on V_ctrl doubles I_abc → doubles g_m → doubles ω₀ → one octave up.
 
 ---
 
 ## Phase 3: Circuit Design
 
-### Topology
-OTA-based first-order all-pass stages. Each stage uses one OTA cell of an LM13700 (dual OTA,
-SOIC-16) plus one op-amp half. Six stages per group, three groups, two channels = 36 OTA cells
-and 36 op-amp halves total.
+### Topology: OTA-C State-Variable Filter in Bandpass Mode
 
-**IC count per channel:**
-- 18 OTA cells needed → 9× LM13700 per channel → 18× LM13700 total (L + R)
-- 18 op-amp halves for all-pass stages per channel → 9× TL072 per channel → 18× TL072 total
-- 3× expo converter circuits (one per group, shared L/R since L and R track same ω₀)
-- 3× op-amp for expo converters → ~2× TL072 (with 2 halves spare)
-- 3× feedback summing amplifiers (one per group, L and R separate) → 3× TL072 per channel
-- COMB BYPASS VCA: V2164-based; 1× per channel
+**Identical circuit to LP1/LP2/HP filters** (same LM13700 integrators, same TL072/TL074 summing
+amp, same THAT340 expo converter, same Q VCA / IRES_AMP inverting driver). Only the output tap
+differs: LP1/LP2 tap the second integrator (V_LP); Block 3 taps the first integrator (V_BP).
 
-Total approximate IC count: 18× LM13700, ~24× TL072/TL074, expo transistors.
-This block is the most component-dense block in the module. Plan for 2–3 PCBs.
-
-#### Single All-Pass Stage (per OTA cell)
-
+Per group, per channel:
 ```
-V_in ──┬──[R_ref]──(−) TL072A ──── V_out
-       │                 (+)◄────────┤
-       └──[OTA_out]──[C_apf]────────┘
+V_in ──[R_in=100kΩ]──(−) SUM_AMP ──► V_HP ──[OTA1 integrator]──► V_BP
+                        (+)=GND                    │
+                                                   C1
+                                                   │
+                                       [OTA2 integrator] ──► V_LP
+                                                   │
+                                                   C2
+                                                   │
+                                                  GND
 
-OTA (LM13700 cell):
-  (+in): V_in
-  (−in): GND (or virtual ground via buffer)
-  (Iabc): exponential control current from expo converter
-  (out): OTA output current → charges C_apf
+BP output = V_BP (first integrator output, tapped before second integrator)
+V_HP = SUM_AMP output = V_in − (1/Q)×V_BP − V_LP
 ```
 
-Standard inverting all-pass op-amp topology with OTA as the time-constant element:
-- R_ref: fixed reference resistor (sets passband gain balance)
-- C_apf: sets frequency range; C_apf = g_m / ω₀_max
-
-**Component values (Group 1, range 100 Hz – 1 kHz):**
-- Use I_abc_nom = 10 µA (operating point, same as LP1/LP2/HP filters)
-- g_m = 10 µA / (2 × 26 mV) = 192 µS
-- ω₀_max = 2π × 1000 = 6283 rad/s
-- C_apf = g_m / ω₀_max = 192 µS / 6283 = 30.6 nF → use **33 nF** (C0G 0603) ✓ available
-
-For Group 2 (500 Hz – 5 kHz, ω₀_max = 31416 rad/s):
-  C_apf = 192 µS / 31416 = 6.1 nF → use **6.8 nF** (C0G 0603) ✓ available
-
-For Group 3 (2 kHz – 20 kHz, ω₀_max = 125664 rad/s):
-  C_apf = 192 µS / 125664 = 1.53 nF → use **1.5 nF** (C0G 0603) ✓ available
-
-Note: earlier derivation used I_abc_max = 500 µA, giving 1000× smaller values (nF instead of µF).
-The correct derivation uses the nominal operating current (10 µA). All three values are C0G 0603.
-R_ref = 1/g_m at nominal I_abc = 10 kΩ to 100 kΩ range (set empirically)
-
-#### Expo Converter (per group)
-
+Q VCA (resonance control), same as LP1:
 ```
-V_freq (from knob + CV sum) → [expo transistor pair] → I_abc → LM13700 Iabc pin
-```
-- Use matched NPN transistor pair (THAT340 or LM394) for temperature-stable expo conversion
-- Trim pot for 1V/oct tracking calibration
-- Reference current: set by resistor from +12 V to expo transistor base
+V_BP ──[linearizing diodes]──► Q_OTA IN+
+Q_OTA Iabc ◄── inverting Iabc driver (IRES_AMP; same as LP1)
+Q_OTA I_out ──► SUM_AMP (−) virtual-ground node
 
-#### Feedback Path (per group — FB DIST BLEND + POLARITY)
-
-Each group's feedback circuit has two stages: FB DIST BLEND crossfade → polarity → amount.
-
-**Stage 1: FB DIST BLEND continuous crossfade (shared across all 3 groups)**
-
-```
-V_apf_out ──[R_a]──┬──(−) BLEND_AMP ──(out)── V_fb_source
-V_post_dist ─[R_b]──┘
+Q = 52 mV / (Iabc × R_in)  (R_in = 100 kΩ)
+At Iabc = 0.74 µA: Q ≈ 0.7 (flat)
+At Iabc → 0:       Q → ∞ (self-oscillation at center frequency)
+RESONANCE must DECREASE Iabc as FB knob turns CW — same inverting IRES_AMP as LP1.
 ```
 
-Continuous resistive crossfade with op-amp buffer:
-- FB DIST BLEND pot wiper drives complementary summing: R_a and R_b vary inversely
-- At 0%: only V_apf_out active — clean APF feedback
-- At 50%: equal blend of both sources
-- At 100%: only V_post_dist active — post-distortion feedback
-- One BLEND_AMP op-amp serves all three groups simultaneously (FB DIST BLEND is global)
-- V_post_dist is tapped directly from Block 4's output stage; route as a shielded signal
+### Integrator Capacitor Values
 
-**Stage 2: POLARITY selection (shared across all 3 groups via one POLARITY switch)**
-
+Caps sized to place f_ref at the OTA nominal I_abc = 10 µA operating point:
 ```
-V_fb_source ──(+) POL_INV ──(out)── V_fb_pos   (unity gain buffer)
-V_fb_source ──(−) POL_INV ──(out)── V_fb_neg   (inverting, gain = −1)
-              [POLARITY switch selects: V_fb_pos / GND / V_fb_neg]
+C = g_m / ω₀_ref = 192 µS / (2π × f_ref)
 ```
 
-- Positive → routes V_fb_pos into per-group amount stage
-- Off → routes GND (no feedback signal regardless of FB knob)
-- Negative → routes V_fb_neg (phase-inverted)
+| Group | f_ref | Calculated C | Chosen C | Part |
+|---|---|---|---|---|
+| Group 1 (F1) | 200 Hz | 152.9 nF | **150 nF** (C0G 0603) | Murata GRM188 |
+| Group 2 (F2) | 1500 Hz | 20.4 nF | **22 nF** (C0G 0603) | Murata GRM188 |
+| Group 3 (F3) | 6000 Hz | 5.1 nF | **4.7 nF** (C0G 0603) | Murata GRM188 |
 
-One TL072 half as the inverter; the POLARITY switch is a 3-position panel switch routing
-the appropriate signal to all three per-group feedback amount stages.
+Both integrator capacitors (C1 = C2) use the same value per group.
+The 1V/oct trim pot (RV_Gn_1VOCT) corrects small deviations from these nominal values.
 
-**Stage 3: Feedback amount (independent per group, ×3)**
+**Note on old APF values**: The old topology used 33 nF / 6.8 nF / 1.5 nF for six APF stages
+with a different ω₀_max derivation. These values are no longer applicable to the SVF integrators.
 
-```
-V_fb_polar ──[R_fb_fixed]──┬──(−) summing amp ──► V_fb_sum → Group input
-                            │
-                        [FB knob pot + CV attenuverter]
-                            │
-                           GND
-```
+### IC / Component Selection
 
-FB knob and CV attenuverter set the effective gain g in the feedback path.
-End-stop resistor (R_fb_min) in the pot circuit ensures g ≤ 0.95 at maximum setting.
-Three independent summing amps — one per group (using TL072 halves).
-
-#### COMB BYPASS VCA
-
-Pre-comb VCA controls the level of signal entering the comb filter chain. At 0V (COMB BYPASS = 0),
-the comb-processed signal is muted and only the dry path passes. At 10V, full comb processing
-feeds into the signal path.
-
-LM13700 OTA crossfade — 2× LM13700 (4 OTA cells for L bypass, L comb, R bypass, R comb):
-
-```
-V_BYPASS_CV ──[complementary Iabc driver]──► Cell A Iabc (dry path, decreasing)
-                                          ──► Cell B Iabc (comb path, increasing)
-
-Dry path:    V_in ──► LM13700_CB1 cell A I_out ──► SUM_AMP → V_out
-Comb path:   V_comb ──► LM13700_CB1 cell B I_out ──► SUM_AMP (same node)
-(L channel — LM13700_CB1; R channel — LM13700_CB2, same structure)
-```
-
-Complementary Iabc driver: op-amp difference stage (TL072 half) generates:
-  Cell A Iabc = (V_ref − V_BYPASS_CV) / R_Iabc   (full at CV=0, zero at CV=V_ref)
-  Cell B Iabc = V_BYPASS_CV / R_Iabc               (zero at CV=0, full at CV=V_ref)
-Both cells sum current into the same SUM_AMP virtual-ground node for a smooth crossfade.
-
-#### STEREO WIDTH
-
-A simple exponential offset applied to the R channel expo converter reference only:
-- WIDTH knob → small DC offset voltage added to V_freq_R only (not V_freq_L)
-- Op-amp summer adds WIDTH_V to the R expo converter input
-- WIDTH = 0: R expo is same as L → mono
-- WIDTH max: R expo input is shifted, R ω₀ is higher (or lower) by several semitones
-
-### IC / Component Selection (key ICs)
+Per stereo pair (L+R):
 
 | Reference | Part Number | Package | Qty | Notes |
 |---|---|---|---|---|
-| OTA_x | LM13700M | SOIC-16 | 18 | Dual OTA; 1 per 2 APF stages; 9 per channel |
-| APF_AMP_x | TL072CDT | SOIC-8 | 18 | Dual op-amp; 1 per 2 APF stages; 9 per channel |
-| EXPO_x | THAT340 | SOIC-8 | 3 | Matched NPN pair for expo converter (1 per group); LM394 discontinued — THAT340 only |
-| LM13700_CB1 | LM13700M | SOIC-16 | 1 | COMB BYPASS VCA — L channel: cell A = L dry path, cell B = L comb path |
-| LM13700_CB2 | LM13700M | SOIC-16 | 1 | COMB BYPASS VCA — R channel: cell A = R dry path, cell B = R comb path |
-| FB_AMP_x | TL074CDT | SOIC-14 | 3 | Per-group feedback summing amp + BLEND_AMP + POL_INV (≈3 quads needed) |
-| MIX_AMP_x | TL074CDT | SOIC-14 | 2 | Summing, width offset, general purpose |
-| C_apf_G1 | C0G / NP0 | 0603 | 12 | 33 nF (6 per channel × 2 channels) — Group 1, 100 Hz–1 kHz |
-| C_apf_G2 | C0G / NP0 | 0603 | 12 | 6.8 nF — Group 2, 500 Hz–5 kHz |
-| C_apf_G3 | C0G / NP0 | 0603 | 12 | 1.5 nF — Group 3, 2 kHz–20 kHz |
-| C_hf_x | C0G / NP0 | 0603 | 36 | 22 pF HF-suppression at each OTA output node; 18 OTA cells per channel × 2 channels = 36 total. **Must be placed within 1 mm of OTA output pin** — see noise-audit.md M4 |
-| R_lin_x | — | 0603 | 72 | 1 kΩ linearizing resistors at each OTA differential input; 2 per cell × 18 cells × 2 channels = 72 total |
-| C_iabc_x | C0G / NP0 | 0402 | 36 | 10 nF bypass cap from each LM13700 Iabc pin to GND; 18 OTA cells per channel × 2 channels = 36 total. Place within 2 mm of Iabc pin. Filters HF noise on expo current lines from ribbon cable. See noise-audit.md H3 |
-| SW_POL | 3-pos panel switch | Panel | 1 | POLARITY: Positive / Off / Negative (mechanical) |
-| R_pol_bleed | — | 0603 | 10 kΩ | 1 | Bleeder resistor from POLARITY switch "Off" contact to GND. Prevents switch contact leakage current from appearing at feedback summing node when POLARITY = Off. See noise-audit.md H4 |
-| RV_FB_DIST_BLEND | Lin pot | 9mm | 1 | FB DIST BLEND crossfade: 0% = clean APF fb, 100% = post-dist fb |
+| G1_OTA_L, G1_OTA_R | LM13700M | SOIC-16 | 2 | Group 1 integrators: cell A = integrator 1, cell B = integrator 2 |
+| G2_OTA_L, G2_OTA_R | LM13700M | SOIC-16 | 2 | Group 2 integrators |
+| G3_OTA_L, G3_OTA_R | LM13700M | SOIC-16 | 2 | Group 3 integrators |
+| IC_Q_G1G2_L | LM13700M | SOIC-16 | 1 | Group 1+2 Q VCA: cell A = G1 L, cell B = G2 L |
+| IC_Q_G1G2_R | LM13700M | SOIC-16 | 1 | Group 1+2 Q VCA: cell A = G1 R, cell B = G2 R |
+| IC_Q_G3_L | LM13700M | SOIC-16 | 1 | Group 3 Q VCA: cell A = G3 L; cell B = spare |
+| IC_Q_G3_R | LM13700M | SOIC-16 | 1 | Group 3 Q VCA: cell A = G3 R; cell B = spare |
+| SUM_L, SUM_R | TL074CDT | SOIC-14 | 2 | SVF summing amps (3 per channel; 1 quad per channel) |
+| EXPO_G1 | THAT340 | SOIC-8 | 1 | Matched NPN pair for Group 1 expo converter |
+| EXPO_G2 | THAT340 | SOIC-8 | 1 | Matched NPN pair for Group 2 expo converter |
+| EXPO_G3 | THAT340 | SOIC-8 | 1 | Matched NPN pair for Group 3 expo converter |
+| C_int_G1 | C0G/NP0 | 0603 | 4 | 150 nF integrator caps (C1_L, C2_L, C1_R, C2_R) |
+| C_int_G2 | C0G/NP0 | 0603 | 4 | 22 nF integrator caps |
+| C_int_G3 | C0G/NP0 | 0603 | 4 | 4.7 nF integrator caps |
+| C_iabc | C0G/NP0 | 0402 | 18 | 10 nF Iabc bypass caps — 1 per OTA cell per channel (9 integrator cells × 2 channels = 18); place within 2 mm of Iabc pin. See noise-audit H3 |
+| SW_POL | 3-pos panel switch | Panel | 1 | POLARITY: Positive / Off / Negative |
+| R_pol_bleed | — | 0603 | 1 | 10 kΩ bleeder to GND at POLARITY Off contact. Prevents switch leakage at output summing node. See noise-audit H4 |
+
+**Component count reduction vs. old APF topology:**
+- LM13700: 8 total (was 20 including COMB BYPASS VCA — COMB BYPASS now handled by simple wet/dry mix)
+- TL072/TL074: 2 per channel (was 9+ per channel)
+- THAT340: 3 (unchanged)
+- Capacitors: 12 integrator caps total (was 36 APF stage caps + 36 22pF HF-suppress + 36 10nF Iabc bypass)
 
 ### Trim Pots
 
-| Reference | Range | Purpose | Adjustment Procedure |
+| Reference | Range | Purpose | Adjustment |
 |---|---|---|---|
-| RV_1VOCT_G1 | ±20% | Group 1 expo converter 1V/oct calibration | Sweep FREQ 1 CV by 1V; verify exact octave change in notch frequency |
-| RV_1VOCT_G2 | ±20% | Group 2 expo converter 1V/oct calibration | Same |
-| RV_1VOCT_G3 | ±20% | Group 3 expo converter 1V/oct calibration | Same |
-| RV_FB_MAX_1 | 0.90–0.99 | Max feedback limit for Group 1 | Set so oscillation onset is just barely reachable |
-| RV_FB_MAX_2 | 0.90–0.99 | Max feedback limit for Group 2 | Same |
-| RV_FB_MAX_3 | 0.90–0.99 | Max feedback limit for Group 3 | Same |
+| RV_G1_1VOCT | ±20% | Group 1 expo 1V/oct calibration | Step FREQ 1 by +1 V; verify center frequency doubles |
+| RV_G2_1VOCT | ±20% | Group 2 expo 1V/oct calibration | Same |
+| RV_G3_1VOCT | ±20% | Group 3 expo 1V/oct calibration | Same |
+| RV_G1_REF | ±20% | Group 1 f_ref at 0 V | Adjust until center freq at 0 V CV = 200 Hz |
+| RV_G2_REF | ±20% | Group 2 f_ref at 0 V | Adjust until center freq at 0 V CV = 1500 Hz |
+| RV_G3_REF | ±20% | Group 3 f_ref at 0 V | Adjust until center freq at 0 V CV = 6000 Hz |
+| RV_G1_QMAX | V_bias trim | Group 1 self-oscillation onset | Set FB to max; verify clean sine at center frequency; trim for stable onset |
+| RV_G2_QMAX | V_bias trim | Group 2 self-oscillation onset | Same |
+| RV_G3_QMAX | V_bias trim | Group 3 self-oscillation onset | Same |
 
 ### Power Draw Estimate
-- 18× LM13700 (APF stages) + 2× LM13700 (COMB BYPASS VCA) = 20× LM13700: ~68 mA
-- 18× TL072 + ~4× TL074: ~30 mA
-- +12 V: ~55 mA | −12 V: ~55 mA (significant — plan thermal management)
+- 8× LM13700 integrators + Q VCAs: ~32 mA
+- 2× TL074 summing amps: ~4 mA
+- 3× THAT340 expo converters: ~3 mA
+- +12 V: ~25 mA | −12 V: ~25 mA
+
+(Significant reduction from old 55 mA per rail — Block 3 is no longer the power-dominant block.)
 
 ### Known Circuit Challenges
-- **IC count**: 18 LM13700 + 18 TL072 is large. Plan 2–3 stacked PCBs with ribbon cable.
-- **Expo converter matching**: THAT340 matched NPN pair required for stable 1V/oct tracking across temperature. LM394 is discontinued — use THAT340 only. A single general-purpose transistor will drift.
-- **HF oscillation**: OTA stages at high Iabc (high frequency) can self-oscillate due to parasitic capacitance. Add small (22 pF) capacitors at each OTA output node and keep traces short.
-- **Crosstalk L/R**: L and R share the same group frequencies but have separate OTA signal paths. Route L and R ground planes separately; do not route L signal adjacent to R signal on PCB.
-- **V_post_dist routing**: the distortion output (Block 4) must be routed to the APF feedback section without picking up noise. Use a shielded wire or dedicated PCB trace with guard ring; keep away from OTA signal nodes.
-- **FB DIST BLEND crossfade**: the continuous crossfade replaces the CD4053 SOURCE switch. Use a complementary-gain resistive crossfade (pot + op-amp summer). The BLEND_AMP output must be buffered before the per-group feedback amp stages.
-- **COMB BYPASS complementary Iabc driver**: the op-amp difference stage that generates complementary Iabc currents must have matched resistors (0.1% preferred, 1% acceptable) to ensure dry+comb currents sum to a constant total — otherwise the output level changes as COMB BYPASS sweeps.
-- **POLARITY Off position (RESOLVED)**: when POLARITY = Off, GND must be cleanly connected to the feedback summing node. Switch contact leakage (1–10 nA typical for panel toggle switches) through R_fb_fixed (100 kΩ) = up to 1 mV at the summing node — audible bleed-through at high FB settings. **Fix**: R_pol_bleed = 10 kΩ to GND at the "Off" contact. 10 nA through 10 kΩ = 0.1 µV — inaudible. See noise-audit.md H4.
-- **Negative feedback stability**: with POLARITY = Negative, the feedback becomes degenerative in the normal sense but regenerative at the complementary frequencies. At high g, the system may still self-oscillate but at different frequencies than positive feedback — verify stability across the full FB range in simulation before PCB layout.
-- **Calibration burden**: 6 trim pots (3 expo + 3 feedback limits) plus 3 independent feedback CV attenuverters. Document calibration order clearly: expo converters first, then feedback limits.
+- **BP output level at high Q**: `|H_BP(jω₀)| = Q` — at Q=50, resonant peak is 50× the input
+  amplitude at that frequency. With ±5 V input, peak can reach ±250 V (clamped by op-amp rails
+  before that). Design summing amp headroom for ±12 V rail clamping at max Q; COMB BYPASS at
+  less than 100% in typical use.
+- **Independent expo calibration**: Three separate THAT340 expo converters must be calibrated
+  independently (RV_Gn_REF + RV_Gn_1VOCT). Same procedure as LP1/LP2/HP.
+- **Q VCA self-oscillation stability**: SVF is inherently stable at any Q (unlike APF feedback
+  which required FB_MAX clamp). No resistor floor needed — full range up to self-oscillation is safe.
+- **Group 1 large caps (150 nF)**: 150 nF C0G at 0603 is available (e.g., Murata GRM188R71E154K)
+  but verify sourcing before PCB layout. Alternatively use two 68 nF in parallel (both C0G 0603).
+- **FB DIST BLEND is additive, not crossfade**: Post-distortion signal adds to (not replaces)
+  the clean input. At blend=1 with full DRIVE, the SVF input level can be 2× the normal level —
+  ensure SUM_AMP R_in handles this without excessive headroom loss.
+- **Crosstalk L/R**: same routing rule as LP filters — route L and R signal traces on separate
+  PCB layers with GND plane between them.
+- **GND stitching at group boundaries**: add 3× GND stitching via array between each group's
+  OTA cluster on the audio board (same rule as LP1/LP2 boundary, noise-audit M5).
