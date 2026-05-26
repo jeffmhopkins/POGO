@@ -466,8 +466,8 @@ struct Pogo : Module {
 			// Distortion per group; update distTap for next OS step's SVF blend
 			float dSumL = 0.f, dSumR = 0.f;
 			for (int i = 0; i < 3; i++) {
-				distTapL[i] = Distortion::process(bandpassL.groups[i].prevOut, driveCV[i], distMode);
-				distTapR[i] = Distortion::process(bandpassR.groups[i].prevOut, driveCV[i], distMode);
+				distTapL[i] = Distortion::process(bandpassL.prevOut[i], driveCV[i], distMode);
+				distTapR[i] = Distortion::process(bandpassR.prevOut[i], driveCV[i], distMode);
 				dSumL += distTapL[i] * 0.5f;
 				dSumR += distTapR[i] * 0.5f;
 			}
