@@ -78,12 +78,15 @@ separators:
   - {type: v, x: 35.56, y1: 4.5, y2: 124.0, style: main_cyan}
   # INPUT / GAIN → LFO boundary (BP3 labels land at y=38.5; separator below at 43)
   - {type: h, x1: 1.0, x2: 35.06, y: 43.0, style: zone_div}
+  # LFO → MOD BUS boundary (LFO2 knob label ends ~y=75; separator below at 76)
+  - {type: h, x1: 1.0, x2: 35.06, y: 76.0, style: zone_div}
 
 # ── Zone labels ───────────────────────────────────────────────────────────────
 # x=17.145 is the geometric centre of the 3-column section (col 1 cx)
 zone_labels:
   - {x: 17.78, y: 8.25, text: "INPUT"}
   - {x: 17.145, y: 47.0, text: "LFOs"}
+  - {x: 17.78, y: 80.0, text: "MOD BUS"}
 
 # ── Zones ─────────────────────────────────────────────────────────────────────
 zones:
@@ -193,3 +196,34 @@ zones:
         cy: 65.775
         label: "Rate 2"
         cpp_param: "LFO2_RATE_PARAM"
+
+  # ── Section 0c: MOD BUS ───────────────────────────────────────────────────
+  # SCALE: col 0 (cx=5.715), rotate 180 to keep CrtYd inside left edge
+  # OFFSET: col 1 (cx=17.145), staggered 13.34mm below SCALE (min pot→pot gap)
+  # MOD IN: col 2 (cx=28.575), cv_jack_cy=112mm (CrtYd bottom=118.5mm)
+  - id: zone_mod
+    label: "Zone 0c — MOD BUS"
+    x_start: 0
+    col_pitch: 11.43
+    cols: 3
+    components:
+      - id: SCALE
+        type: knob_medium
+        col: 0
+        cy: 84.375
+        rotate: 180
+        label: "SCALE"
+        cpp_param: "MOD_SCALE_PARAM"
+      - id: OFFSET
+        type: knob_medium
+        col: 1
+        cy: 97.715
+        label: "OFFSET"
+        cpp_param: "MOD_OFFSET_PARAM"
+      - id: MOD_IN
+        type: jack_input
+        col: 2
+        cy: 112.0
+        label: "MOD IN"
+        font_size: 1.6
+        cpp_id: "MOD_INPUT"
