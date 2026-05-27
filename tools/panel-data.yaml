@@ -76,6 +76,9 @@ mounting_holes:
 separators:
   # Section 0 right boundary — cyan vertical (7 HP = 7 × 5.08 mm)
   - {type: v, x: 35.56, y1: 4.5, y2: 124.0, style: main_cyan}
+  # Top of INPUT zone — label breaks the line
+  # Perfect midpoint: strip bottom = 4.5mm, L_IN visual top = 13.5mm → mid = 9.0
+  - {type: h, x1: 1.0, x2: 35.06, y: 9.0, style: zone_div, label: "INPUT", label_x: 17.78}
   # INPUT / GAIN → LFO boundary — label breaks the line
   - {type: h, x1: 1.0, x2: 35.06, y: 43.0, style: zone_div, label: "LFOs", label_x: 17.145}
   # LFO → MOD BUS boundary — label breaks the line
@@ -84,8 +87,7 @@ separators:
 
 # ── Zone labels ───────────────────────────────────────────────────────────────
 # x=17.145 is the geometric centre of the 3-column section (col 1 cx)
-zone_labels:
-  - {x: 17.78, y: 8.25, text: "INPUT"}
+zone_labels: []
 
 # ── Zones ─────────────────────────────────────────────────────────────────────
 zones:
