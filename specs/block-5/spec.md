@@ -146,10 +146,10 @@ the virtual-ground termination for the SUM_AMP.
 **Linearizing resistors R_LIN_A, R_LIN_B (per OTA cell, per channel):** 1 kΩ — extends the OTA
 linear range from ±26 mV to ±(26mV + I_abc × 1kΩ/2) ≈ ±31 mV at 10 µA.
 
-**I_ref network R_IREF_A + RV_REF:** 750 kΩ (R_IREF_A, fixed 0603) in series with 500 kΩ (RV_REF, rheostat)
-gives R_total 750 kΩ–1250 kΩ, nominal 1000 kΩ at pot center → I_ref_baseline ≈ 12 µA from +12 V.
-±25% trim range covers ±10.8% worst-case component tolerance (R_IREF_A ±5% + C_int ±5%) with 2.3× margin.
-See aux-expo-converter.md.
+**I_ref network R_IREF_A + RV_REF:** 1 MΩ (R_IREF_A, fixed 0603) in series with 500 kΩ (RV_REF, rheostat)
+gives R_total 1000 kΩ–1500 kΩ, midpoint 1250 kΩ at pot center → I_ref ≈ 9.6 µA.
+Calibration target 9.69 µA requires R_total = 1238 kΩ → RV_REF ≈ 238 kΩ (47.6% of travel).
+Covers worst-case component stack (R_IREF_A ±5% + C_int ±5%) within pot range. See aux-expo-converter.md.
 
 **Q control resistors R_Iabc:** 1 MΩ per channel — converts V_ires (from IRES_AMP) to I_abc_q.
 At V_ires = 0.74 V: I_abc_q = 0.74 µA → Q = 0.70 (Butterworth).
@@ -238,8 +238,8 @@ Block-8 power estimate excludes IC_Q_AB accordingly.
 | R_QBIAS | resistor | 0603 | 100 kΩ | 1 | audio | block-5 | IRES_AMP bias input resistor (sets Butterworth Iabc) |
 | R_QINV | resistor | 0603 | 100 kΩ | 1 | audio | block-5 | IRES_AMP resonance CV input resistor |
 | R_f_q | resistor | 0603 | 100 kΩ | 1 | audio | block-5 | IRES_AMP feedback resistor |
-| R_IREF_A | resistor | 0603 | 750 kΩ | 1 | audio | block-5 | EXPO_LP1 fixed I_ref network R; in series with RV_REF; R_total nom = 1000 kΩ |
-| R_VOCT | resistor | 0603 | 56 kΩ | 1 | audio | block-5 | EXPO_LP1 V/oct scaling resistor (1% tolerance) |
+| R_IREF_A | resistor | 0603 | 1 MΩ | 1 | audio | block-5 | EXPO_LP1 fixed I_ref network R; in series with RV_REF; R_total at midpoint = 1250 kΩ → 9.6 µA |
+| R_VOCT | resistor | 0603 | 47 kΩ | 1 | audio | block-5 | EXPO_LP1 V/oct scaling R (1% tolerance); with R_E=1kΩ and RV_1VOCT≈7.5kΩ → 18.0 mV/V 1V/oct ratio |
 | R_E | resistor | 0603 | 1 kΩ | 1 | audio | block-5 | EXPO_LP1 emitter degeneration |
 | RV_REF | Bourns 3224W | SMD | 500 kΩ | 1 | audio | block-5 | EXPO_LP1 f_ref trim rheostat; in series with R_IREF_A; range ±25% |
 | RV_1VOCT | Bourns 3224W | SMD | 20 kΩ | 1 | audio | block-5 | EXPO_LP1 1V/oct tracking trim; ±10% range |

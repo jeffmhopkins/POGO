@@ -48,20 +48,21 @@ ASCII fallback:
 Simplified circuit detail:
 
 ```
- +12V ──[R_IREF_A 750kΩ]──[RV_REF 500kΩ rheostat]──► base of Q_ref (THAT340 Q2)
-                                                         collector → I_ref node
-                                                         emitter → −12V (or GND through R_E)
+ +12V ──[R_IREF_A 1MΩ]──[RV_REF 500kΩ rheostat]──► base of Q_ref (THAT340 Q2)
+                                                       collector → I_ref node
+                                                       emitter → −12V (or GND through R_E)
 
- V_ctrl ──[R_VOCT]──────────────────────────────────► base of Q_expo (THAT340 Q1)
-                                                       collector → I_abc output
-                                                       emitter → shared with Q_ref emitter
+ V_ctrl ──[R_VOCT 47kΩ]──[RV_1VOCT]─────────────► base of Q_expo (THAT340 Q1)
+                                                     collector → I_abc output
+                                                     emitter → shared with Q_ref emitter
 
  I_abc = I_ref × exp((V_ctrl − V_ref) / V_T)
 
- RV_REF (500kΩ rheostat in series with R_IREF_A 750kΩ): trims R_total (750kΩ–1250kΩ,
-   nominal 1000kΩ at pot center = 250kΩ added) to set I_ref and f₀ at 0V CV.
-   Range: ±25%; covers ±10.8% worst-case component tolerance with 2.3× margin.
- RV_1VOCT trims R_VOCT to set 1V/oct tracking slope
+ RV_REF (500kΩ rheostat in series with R_IREF_A 1MΩ): trims R_total (1000kΩ–1500kΩ,
+   midpoint 1250kΩ at pot center = 250kΩ added → I_ref = 9.6µA nominal).
+   All filter block calibration targets (9.21–10.78 µA) fall within 20–80% of pot travel.
+ RV_1VOCT (in series with R_VOCT 47kΩ + R_E 1kΩ): at RV_1VOCT = 7.5kΩ (37.5% travel),
+   total = 55.5kΩ → 1V/oct ratio = 1kΩ/55.5kΩ = 18.0 mV/V = V_T×ln(2) exactly.
 ```
 
 ## Transfer Function
@@ -129,13 +130,13 @@ Current spec: shared expo per block, document as Phase 3R open item for tilt.
 
 ### Trim Pots
 
-- R_IREF_A (0603, 750 kΩ) + RV_REF (Bourns 3224W 500 kΩ SMD rheostat): together set I_ref
+- R_IREF_A (0603, 1 MΩ) + RV_REF (Bourns 3224W 500 kΩ SMD rheostat): together set I_ref
   to hit the target f_ref at 0V CV. R_IREF_A is the fixed lower bound; RV_REF sweeps total
-  from 750 kΩ (CCW, RV_REF=0) to 1250 kΩ (CW, RV_REF=500 kΩ), nominal at pot center
-  (250 kΩ added) = 1000 kΩ. Gives ±25% adjustment range — sufficient to cover ±10.8%
-  worst-case component tolerance (R_IREF_A ±5% + integrator cap ±5%) with 2.3× margin.
-  Previous design (1 MΩ fixed + 100 kΩ series rheostat) gave only +9.1% range — insufficient
-  to correct downward-shifted f_ref.
+  from 1000 kΩ (CCW, RV_REF=0) to 1500 kΩ (CW, RV_REF=500 kΩ), midpoint at pot center
+  (250 kΩ added) = 1250 kΩ → I_ref ≈ 9.6 µA. All block calibration targets (9.21–10.78 µA)
+  fall within 20–80% of pot travel. Covers worst-case tolerance stack (R_IREF_A ±5% +
+  integrator cap ±5%) within the trim range for all blocks.
+  Previous design (1 MΩ fixed + 100 kΩ series rheostat) gave only +9.1% one-direction range.
 - RV_1VOCT (Bourns 3224W 20 kΩ SMD): adjusts the V_ctrl scaling ratio. ±10% range covers
   typical V_T drift and tolerance in R_VOCT; doubled from 10 kΩ for wider trim margin.
 
@@ -149,9 +150,9 @@ Calibration procedure:
 | Ref (generic) | Part | Package | Value | Notes |
 |---|---|---|---|---|
 | U_EXPO | THAT340S14-U | SOIC-8 | — | Matched NPN quad; use Q1+Q2 for expo pair |
-| R_IREF_A | Resistor | 0603 | 750 kΩ | Fixed lower bound of I_ref network; R_total = R_IREF_A + RV_REF (nom 1000 kΩ → ~12 µA) |
-| RV_REF | Bourns 3224W | SMD | 500 kΩ | f_ref trim rheostat; R_total range 750 kΩ–1250 kΩ; ±25% trim range |
-| R_VOCT | Resistor | 0603 | 56 kΩ | Nominal V/oct scaling resistor |
+| R_IREF_A | Resistor | 0603 | 1 MΩ | Fixed lower bound of I_ref network; R_total at midpoint = 1250 kΩ → ~9.6 µA |
+| RV_REF | Bourns 3224W | SMD | 500 kΩ | f_ref trim rheostat; R_total range 1000 kΩ–1500 kΩ; all block targets within 20–80% travel |
+| R_VOCT | Resistor | 0603 | 47 kΩ | V/oct scaling R; with R_E=1kΩ and RV_1VOCT=7.5kΩ: ratio=18.0 mV/V = V_T×ln(2) exactly |
 | RV_1VOCT | Bourns 3224W | SMD | 20 kΩ | 1V/oct tracking trim; ±10% range |
 | R_E | Resistor | 0603 | 1 kΩ | Emitter degeneration; stabilizes quiescent point |
 | C_IREF | Ceramic bypass | 0603 | 100 nF | Bypass on I_ref node to suppress HF on expo output |
@@ -159,16 +160,17 @@ Calibration procedure:
 
 ### f_ref Values by Block
 
-| Block | f_ref (DSP) | Target Iabc at 0V |
-|---|---|---|
-| block-5 LP1 | 632 Hz | 9.69 µA |
-| block-6 LP2 | 632 Hz | 9.69 µA |
-| block-7 HP | 632 Hz | 9.69 µA |
-| block-3 BP1 | 200 Hz | 3.06 µA |
-| block-3 BP2 | 1500 Hz | 23.0 µA |
-| block-3 BP3 | 6000 Hz | 91.9 µA |
+| Block | f_ref (DSP) | C_int | Target I_abc at 0V |
+|---|---|---|---|
+| block-5 LP1 | 632 Hz  | 47 nF  | 9.69 µA  |
+| block-8 LP2 | 632 Hz  | 47 nF  | 9.69 µA  |
+| block-7 HP  | 632 Hz  | 47 nF  | 9.69 µA  |
+| block-6 BP1 | 200 Hz  | 150 nF | 9.80 µA  |
+| block-6 BP2 | 1500 Hz | 22 nF  | 10.78 µA |
+| block-6 BP3 | 6000 Hz | 4.7 nF | 9.21 µA  |
 
-Iabc derived from: Iabc = f_ref × 2π × C / (1/(2V_T)) = f_ref × 2π × 47nF × 52mV
+I_abc_ref = f_ref × 2π × C_int × 52mV  (C_int varies per block; see block spec)
+All blocks target I_abc_ref ≈ 9–11 µA — C_int is chosen to achieve this consistent operating range.
 
 For BP blocks the same expo architecture applies; only RV_REF trim setpoint differs.
 

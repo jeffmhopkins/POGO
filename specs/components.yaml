@@ -10,11 +10,11 @@
 #
 # PRECISION RESISTORS — 1% or better required (functional, not cosmetic):
 #   R3, R4, R5, R6     block-1   NE5532D gain ratio (4.83×) — L/R matching; low i_n×R noise
-#   R_VOCT              block-5,6,7,8   56 kΩ THAT340 V/oct network — 1% error = 12 cents
+#   R_VOCT              block-5,6,7,8   47 kΩ THAT340 V/oct network — 1% error = 12 cents; with R_E+RV_1VOCT trims to 18.0 mV/V
 #   R_inv_in, R_inv_f  block-3 attenuverters (MB_INV_1–5)  10 kΩ — center null depth >60 dB
 #   R_MB_INV           block-3   100 kΩ — MB_INV inverter gain accuracy
 #   R_TILT_INV_IN/FB   block-5   100 kΩ — tilt inverter; mismatch shifts tilt center null
-#   R_IREF_A           blocks 5,6,7,8  750 kΩ — fixed part of I_ref network (R_total = R_IREF_A + RV_REF = 1 MΩ nom); 5% OK
+#   R_IREF_A           blocks 5,6,7,8  1 MΩ — fixed part of I_ref network (R_total midpoint = 1250 kΩ → 9.6 µA; all cal targets 9–11 µA); 5% OK
 #
 # boards: audio | control | utility | panel
 
@@ -73,7 +73,7 @@ components:
   - { ref: C14,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "47nF",   fn: "LP1 integrator C2 R (C0G/NP0)" }
   - { ref: R10,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "LP1 SUM_AMP R_in L" }
   - { ref: R11,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "LP1 SUM_AMP R_in R" }
-  - { ref: RV3,  board: audio,   block: block-5, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "LP1 f_ref trim rheostat; in series with R_IREF_A 750kΩ; ±25% range" }
+  - { ref: RV3,  board: audio,   block: block-5, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "LP1 f_ref trim rheostat; in series with R_IREF_A 1MΩ; ±25% range" }
   - { ref: RV4,  board: audio,   block: block-5, part: "Bourns 3224W", pkg: SMD,   val: "20kΩ",  fn: "LP1 1V/oct tracking trim; ±10% range" }
   - { ref: RV5,  board: audio,   block: block-5, part: ~,          pkg: SMD,      fn: "LP1 Q_max trim (IRES_AMP V_bias)" }
   - { ref: RV6,  board: audio,   block: block-5, part: ~,          pkg: SMD,      fn: "LP1 tilt null trim" }
@@ -121,13 +121,13 @@ components:
   - { ref: U48,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "BP_MIX output polarity buffer half A = L; half B = R" }
 
   # block-6: Calibration trim pots
-  - { ref: RV7,  board: audio,   block: block-6, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "BP1 f_ref trim rheostat; in series with R_IREF_A 750kΩ; target 200 Hz at 0V; ±25% range" }
+  - { ref: RV7,  board: audio,   block: block-6, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "BP1 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 200 Hz at 0V; ±25% range" }
   - { ref: RV8,  board: audio,   block: block-6, part: "Bourns 3224W", pkg: SMD,   val: "20kΩ",  fn: "BP1 1V/oct tracking trim; ±10% range" }
   - { ref: RV9,  board: audio,   block: block-6, part: ~,          pkg: SMD,      fn: "BP1 Q_max trim (Iabc V_bias)" }
-  - { ref: RV10, board: audio,   block: block-6, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "BP2 f_ref trim rheostat; in series with R_IREF_A 750kΩ; target 1500 Hz at 0V; ±25% range" }
+  - { ref: RV10, board: audio,   block: block-6, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "BP2 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 1500 Hz at 0V; ±25% range" }
   - { ref: RV11, board: audio,   block: block-6, part: "Bourns 3224W", pkg: SMD,   val: "20kΩ",  fn: "BP2 1V/oct tracking trim; ±10% range" }
   - { ref: RV12, board: audio,   block: block-6, part: ~,          pkg: SMD,      fn: "BP2 Q_max trim" }
-  - { ref: RV13, board: audio,   block: block-6, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "BP3 f_ref trim rheostat; in series with R_IREF_A 750kΩ; target 6000 Hz at 0V; ±25% range" }
+  - { ref: RV13, board: audio,   block: block-6, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "BP3 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 6000 Hz at 0V; ±25% range" }
   - { ref: RV14, board: audio,   block: block-6, part: "Bourns 3224W", pkg: SMD,   val: "20kΩ",  fn: "BP3 1V/oct tracking trim; ±10% range" }
   - { ref: RV15, board: audio,   block: block-6, part: ~,          pkg: SMD,      fn: "BP3 Q_max trim" }
 
@@ -189,7 +189,7 @@ components:
   - { ref: C29,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "47nF",   qty: 4, fn: "HP integrator caps (C0G; C1L/C2L/C1R/C2R)" }
   - { ref: R30,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "HP SUM_AMP R_in L" }
   - { ref: R31,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "HP SUM_AMP R_in R" }
-  - { ref: RV16, board: audio,   block: block-7, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "HP f_ref trim rheostat; in series with R_IREF_A 750kΩ; ±25% range" }
+  - { ref: RV16, board: audio,   block: block-7, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "HP f_ref trim rheostat; in series with R_IREF_A 1MΩ; ±25% range" }
   - { ref: RV17, board: audio,   block: block-7, part: "Bourns 3224W", pkg: SMD,   val: "20kΩ",  fn: "HP 1V/oct tracking trim; ±10% range" }
   - { ref: RV18, board: audio,   block: block-7, part: ~,          pkg: SMD,      fn: "HP Q_max trim" }
 
@@ -203,7 +203,7 @@ components:
   - { ref: C33,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "47nF",   qty: 4, fn: "LP2 integrator caps (C0G; 4 total)" }
   - { ref: R32,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "LP2 SUM_AMP R_in L" }
   - { ref: R33,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "LP2 SUM_AMP R_in R" }
-  - { ref: RV19, board: audio,   block: block-8, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "LP2 f_ref trim rheostat; in series with R_IREF_A 750kΩ; ±25% range" }
+  - { ref: RV19, board: audio,   block: block-8, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "LP2 f_ref trim rheostat; in series with R_IREF_A 1MΩ; ±25% range" }
   - { ref: RV20, board: audio,   block: block-8, part: "Bourns 3224W", pkg: SMD,   val: "20kΩ",  fn: "LP2 1V/oct tracking trim; ±10% range" }
   - { ref: RV21, board: audio,   block: block-8, part: ~,          pkg: SMD,      fn: "LP2 Q_max trim" }
 

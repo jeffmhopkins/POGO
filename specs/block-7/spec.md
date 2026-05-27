@@ -133,9 +133,10 @@ At V_ires = 0.74 V: I_abc_q = 0.74 µA → Q = 0.70 (Butterworth).
 **HP output buffer resistors R_HP_IN, R_HP_FB:** 100 kΩ each — unity-gain inverting buffer
 (R_in = R_f = 100 kΩ). Places the HP output at low impedance with correct polarity for LP2 input.
 
-**EXPO_HP I_ref network R_IREF_A + RV_REF:** R_IREF_A = 750 kΩ (fixed 0603) in series with RV_REF = 500 kΩ
-(rheostat), nominal R_total = 1000 kΩ at pot center. I_abc_ref = 9.69 µA at 0V CV for f_ref = 632 Hz.
-With V_ctrl = −3V at default: I_abc = 9.69µA × 2^(−3) = 1.21 µA → f₀ ≈ 79 Hz ✓. Trim range: ±25%.
+**EXPO_HP I_ref network R_IREF_A + RV_REF:** R_IREF_A = 1 MΩ (fixed 0603) in series with RV_REF = 500 kΩ
+(rheostat), midpoint R_total = 1250 kΩ at pot center → I_ref ≈ 9.6 µA. Calibration target: 9.69 µA
+at 0V CV → RV_REF ≈ 238 kΩ (47.6% of travel) for f_ref = 632 Hz.
+With V_ctrl = −3V at default: I_abc = 9.69µA × 2^(−3) = 1.21 µA → f₀ ≈ 79 Hz ✓.
 
 ### Q control IC sharing
 
@@ -206,8 +207,8 @@ HP_inv node.
 | R_QBIAS | resistor | 0603 | 100 kΩ | 1 | audio | block-7 | IRES_AMP bias input (sets Butterworth Iabc) |
 | R_QINV | resistor | 0603 | 100 kΩ | 1 | audio | block-7 | IRES_AMP resonance CV input resistor |
 | R_f_q | resistor | 0603 | 100 kΩ | 1 | audio | block-7 | IRES_AMP feedback resistor |
-| R_IREF_A | resistor | 0603 | 750 kΩ | 1 | audio | block-7 | EXPO_HP fixed I_ref network R; in series with RV_REF; R_total nom = 1000 kΩ |
-| R_VOCT | resistor | 0603 | 56 kΩ | 1 | audio | block-7 | EXPO_HP V/oct scaling resistor (1% tolerance) |
+| R_IREF_A | resistor | 0603 | 1 MΩ | 1 | audio | block-7 | EXPO_HP fixed I_ref network R; in series with RV_REF; R_total at midpoint = 1250 kΩ → 9.6 µA |
+| R_VOCT | resistor | 0603 | 47 kΩ | 1 | audio | block-7 | EXPO_HP V/oct scaling R (1% tolerance); with R_E=1kΩ and RV_1VOCT≈7.5kΩ → 18.0 mV/V 1V/oct ratio |
 | R_E | resistor | 0603 | 1 kΩ | 1 | audio | block-7 | EXPO_HP emitter degeneration |
 | RV_REF | Bourns 3224W | SMD | 500 kΩ | 1 | audio | block-7 | EXPO_HP f_ref trim rheostat; in series with R_IREF_A; range ±25% |
 | RV_1VOCT | Bourns 3224W | SMD | 20 kΩ | 1 | audio | block-7 | EXPO_HP 1V/oct tracking trim; ±10% range |

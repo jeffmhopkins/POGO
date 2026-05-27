@@ -196,8 +196,8 @@ both cell A (LP1 Q) and cell B (LP2 Q) are of comparable length.
 | R_QBIAS | resistor | 0603 | 100 kΩ | 1 | audio | block-8 | IRES_AMP_LP2 bias input (sets Butterworth Iabc) |
 | R_QINV | resistor | 0603 | 100 kΩ | 1 | audio | block-8 | IRES_AMP_LP2 resonance CV input resistor |
 | R_f_q | resistor | 0603 | 100 kΩ | 1 | audio | block-8 | IRES_AMP_LP2 feedback resistor |
-| R_IREF_A | resistor | 0603 | 750 kΩ | 1 | audio | block-8 | EXPO_LP2 fixed I_ref network R; in series with RV_REF; R_total nom = 1000 kΩ |
-| R_VOCT | resistor | 0603 | 56 kΩ | 1 | audio | block-8 | EXPO_LP2 V/oct scaling resistor (1% tolerance) |
+| R_IREF_A | resistor | 0603 | 1 MΩ | 1 | audio | block-8 | EXPO_LP2 fixed I_ref network R; in series with RV_REF; R_total at midpoint = 1250 kΩ → 9.6 µA |
+| R_VOCT | resistor | 0603 | 47 kΩ | 1 | audio | block-8 | EXPO_LP2 V/oct scaling R (1% tolerance); with R_E=1kΩ and RV_1VOCT≈7.5kΩ → 18.0 mV/V 1V/oct ratio |
 | R_E | resistor | 0603 | 1 kΩ | 1 | audio | block-8 | EXPO_LP2 emitter degeneration |
 | RV_REF | Bourns 3224W | SMD | 500 kΩ | 1 | audio | block-8 | EXPO_LP2 f_ref trim rheostat; in series with R_IREF_A; range ±25% |
 | RV_1VOCT | Bourns 3224W | SMD | 20 kΩ | 1 | audio | block-8 | EXPO_LP2 1V/oct tracking trim; ±10% range |
