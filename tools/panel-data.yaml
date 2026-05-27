@@ -413,12 +413,11 @@ zones:
     cols: 2
     components:
       # ── Polarity + Distortion switches — top of section ─────────────────────
-      # ── Switches: centred at row-1 (cy=24.80) — same as FREQ knob row in LP1/BP1
-      # Equal gaps above/between (4.53mm); larger gap below = visual row1→row2 break
+      # ── Switches: 3 equal free-space gaps of 4.91mm (zone_top→SW1, SW1↔SW2, SW2→knob_top)
       - id: BP_POL
         type: switch_H2
         cx: 80.01
-        cy: 17.03
+        cy: 17.41
         label_above: ""
         pos_labels: ["POS", "NEG"]
         pos_xs: [75.51, 84.51]
@@ -426,7 +425,7 @@ zones:
       - id: BP_DIST
         type: switch_H3
         cx: 80.01
-        cy: 32.57
+        cy: 33.32
         pos_labels: ["SOFT", "HARD", "FOLD"]
         pos_xs: [74.30, 80.01, 85.72]
         label_below: ""
