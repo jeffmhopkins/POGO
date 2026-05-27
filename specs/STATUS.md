@@ -51,7 +51,7 @@ Circuit diagrams in spec text must be self-sufficient.
 
 | File | Status |
 |---|---|
-| `specs/components.yaml` | 🚧 Partial — audio board + utility/control board populated; block-6 abbreviated; passive values TBD in some rows |
+| `specs/components.yaml` | ✅ Complete — 265 entries; all boards; all ICs, discretes, and key passives with values; qty field for repeated identical parts |
 
 ## Panels & Layout
 
