@@ -318,17 +318,17 @@ zones:
       # ── Attenuverters — compact pot (Bourns PTV09A style), no label ──────────
       # ATT_CY = ±5mm symmetric; fits 11.43mm pitch with 1.43mm x-gap each side
       - id: LP1_FREQ_ATT
-        type: attenuverter
+        type: trimpot
         col: 0
         cy: 97.0
         cpp_param: "LP1_FREQ_ATT_PARAM"
       - id: LP1_TILT_ATT
-        type: attenuverter
+        type: trimpot
         col: 1
         cy: 97.0
         cpp_param: "LP1_TILT_ATT_PARAM"
       - id: LP1_RES_ATT
-        type: attenuverter
+        type: trimpot
         col: 2
         cy: 97.0
         cpp_param: "LP1_RES_ATT_PARAM"
