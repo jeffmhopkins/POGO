@@ -128,18 +128,18 @@ separators:
   # Slider (cx=205.74) and RES knob (cx=205.74) share same centre line
   # Right boundary = 194.31 + 2×11.43 = 217.17mm
   - {type: v, x: 217.17, y1: 9.0, y2: 124.0, style: zone_div}
-  - {type: h, x1: 194.31, x2: 217.17, y: 9.0, style: zone_div, label: "HP", label_x: 205.74}
+  - {type: h, x1: 194.31, x2: 217.17, y: 9.0, style: zone_div, label: "BP3 Out", label_x: 205.74}
   # Grey divider between BP3 OUT jacks (cy=17) and HP slider (cy=54)
-  - {type: h, x1: 194.31, x2: 217.17, y: 26.0, style: zone_div}
+  - {type: h, x1: 194.31, x2: 217.17, y: 26.0, style: zone_div, label: "HP", label_x: 205.74}
 
   # ── MAIN OUT + LP2 right boundary ─────────────────────────────────────────────
   # Both zones share x_start=217.17, col_pitch=11.43mm, cols=2 (4.5HP total)
   # col0 cx=222.885, col1 cx=234.315
   # Slider (cx=228.60) and RES knob (cx=228.60) share same centre line
   # Right boundary = 217.17 + 2×11.43 = 240.03mm
-  - {type: h, x1: 217.17, x2: 240.03, y: 9.0, style: zone_div, label: "LP2", label_x: 228.60}
+  - {type: h, x1: 217.17, x2: 240.03, y: 9.0, style: zone_div, label: "Main Out", label_x: 228.60}
   # Grey divider between MAIN OUT jacks (cy=17) and LP2 slider (cy=54)
-  - {type: h, x1: 217.17, x2: 240.03, y: 26.0, style: zone_div}
+  - {type: h, x1: 217.17, x2: 240.03, y: 26.0, style: zone_div, label: "LP2", label_x: 228.60}
 
 # ── Zone labels ───────────────────────────────────────────────────────────────
 # x=17.145 is the geometric centre of the 3-column section (col 1 cx)
