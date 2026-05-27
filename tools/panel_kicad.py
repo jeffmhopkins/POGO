@@ -8,11 +8,13 @@ Layers rendered: F.Fab, F.SilkS, plus pad markers.
 
 Footprint origin notes
 ──────────────────────
-Jack  (WQP-PJ398SM): footprint origin = sleeve S pad at (0,0); barrel centre (panel
-      hole axis) = (0, 6.48) per datasheet (WQP-PJ398SM PCB layout, "6.48" dim).
-      Offset (0, 6.48) aligns the barrel circle with cx,cy.
-Pot   (Alpha RD901F): origin = pin 1; shaft centre is at (7.5, 2.5) in footprint
-      coords → subtract (7.5, 2.5) to align shaft with cx,cy.
+Jack     (WQP-PJ398SM): footprint origin = sleeve S pad at (0,0); barrel centre (panel
+         hole axis) = (0, 6.48) per datasheet (WQP-PJ398SM PCB layout, "6.48" dim).
+         Offset (0, 6.48) aligns the barrel circle with cx,cy.
+Pot      (Alpha RD901F): origin = pin 1; shaft centre is at (7.5, 2.5) in footprint
+         coords → subtract (7.5, 2.5) to align shaft with cx,cy.
+Trimpot  (Bourns 3296W Vertical): origin = pin 1 at (0,0); actuator centre = pin 2
+         (wiper) at (0, 2.5) → offset (0, 2.5) aligns actuator with cx,cy.
 """
 
 from __future__ import annotations
@@ -49,8 +51,8 @@ _FOOTPRINT_MAP: dict[str, tuple[str, float, float]] = {
         0.0, 6.48,
     ),
     "trimpot": (
-        "Potentiometer_THT.pretty/Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles.kicad_mod",
-        7.5, 2.5,   # footprint origin = pin1; shaft centre = (7.5, 2.5)
+        "Potentiometer_THT.pretty/Potentiometer_Bourns_3296W_Vertical.kicad_mod",
+        0.0, 2.5,   # footprint origin = pin1 (0,0); actuator/wiper centre = pin2 (0, 2.5)
     ),
     "knob_medium": (
         "Potentiometer_THT.pretty/Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles.kicad_mod",
