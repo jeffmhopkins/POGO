@@ -855,21 +855,25 @@ def _component_svg(comp: dict, rules: DesignRules, colors: dict) -> str:
         return svg.svg_slider_label(float(comp.get("cx", cx)), float(comp.get("y", 38)), colors)
 
     elif ctype == "switch_H2":
+        ox = rules.x_offset
+        pos_xs = [px + ox for px in comp.get("pos_xs", [])]
         return svg.svg_switch_H2(
             cx=cx, cy=cy,
             label_above=comp.get("label_above", ""),
             label_above_y=float(comp.get("label_above_y", cy - 3.5)),
             pos_labels=comp.get("pos_labels", []),
-            pos_xs=comp.get("pos_xs", []),
+            pos_xs=pos_xs,
             pos_y=float(comp.get("pos_y", cy + 4)),
             colors=colors,
         )
 
     elif ctype == "switch_H3":
+        ox = rules.x_offset
+        pos_xs = [px + ox for px in comp.get("pos_xs", [])]
         return svg.svg_switch_H3(
             cx=cx, cy=cy,
             pos_labels=comp.get("pos_labels", []),
-            pos_xs=comp.get("pos_xs", []),
+            pos_xs=pos_xs,
             pos_y=float(comp.get("pos_y", cy + 5.3)),
             label_below=comp.get("label_below", ""),
             label_below_y=float(comp.get("label_below_y", cy + 8.8)),
