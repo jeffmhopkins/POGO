@@ -222,6 +222,20 @@ zones:
         cy: 83.0
         label: "VCA AMT"
         cpp_param: "VCA_AMT_PARAM"
+      # 3-pos vertical slide switch — col 1 (cx=17.145), centred between the two knob rows
+      # SWITCH_V3_CY (±2mm wide) leaves 0.78mm gap to col 0 and col 2 knob courtyards
+      - id: MOD_SRC
+        type: switch_V3
+        col: 1
+        cy: 89.67
+        cy_body_top: 83.67
+        body_height: 12.0
+        slug_y_offset: 4.25
+        pos_labels: ["LFO 1", "SUM", "LFO 2"]
+        pos_ys: [85.5, 89.7, 93.9]
+        label_below: "SRC"
+        label_below_y: 97.5
+        cpp_param: "MOD_SRC_PARAM"
       - id: OFFSET
         type: knob_medium
         col: 0

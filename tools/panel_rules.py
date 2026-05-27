@@ -27,13 +27,21 @@ POT_CY  = (-8.65, -6.67, 5.1, 6.67)
 SWITCH_PANEL_R = 3.15
 SWITCH_CY      = (-4.5, -3.5, 4.5, 7.5)
 
+# 3-position vertical slide switch (e.g. Nidec Copal CAS-120R3)
+# Panel slot: ~1.5mm × 8mm for actuator → panel_r = 1.0mm (half slot width)
+# PCB courtyard: body ~4mm wide × 10mm tall, symmetric about centre
+SWITCH_V3_PANEL_R = 1.0
+SWITCH_V3_CY      = (-2.0, -5.0, 2.0, 5.0)
+
 # 3mm LED THT
 # Panel hole: 3.2mm Ø → r=1.6mm
 # PCB courtyard: relative to LED body centre
 LED_PANEL_R = 1.6
 LED_CY      = (-2.0, -1.5, 2.0, 4.0)
 
-SWITCH_TYPES = {"switch_H2", "switch_H3", "switch_V3"}
+H_SWITCH_TYPES = {"switch_H2", "switch_H3"}
+V3_SWITCH_TYPES = {"switch_V3"}
+SWITCH_TYPES = H_SWITCH_TYPES | V3_SWITCH_TYPES
 LED_TYPES    = {"led", "led_labeled"}
 
 # Minimum clearance from PCB courtyard edge to mounting hole centre (M3, r≈3.5mm)
@@ -86,7 +94,9 @@ def _get_courtyard(
         base = JACK_CY
     elif ctype in POT_TYPES:
         base = POT_CY
-    elif ctype in SWITCH_TYPES:
+    elif ctype in V3_SWITCH_TYPES:
+        base = SWITCH_V3_CY
+    elif ctype in H_SWITCH_TYPES:
         base = SWITCH_CY
     elif ctype in LED_TYPES:
         base = LED_CY
@@ -126,7 +136,9 @@ def get_panel_r(ctype: str, rules: Any) -> float:
         return rules.jack_nut_r
     if ctype in POT_TYPES:
         return rules.pot_nut_r
-    if ctype in SWITCH_TYPES:
+    if ctype in V3_SWITCH_TYPES:
+        return SWITCH_V3_PANEL_R
+    if ctype in H_SWITCH_TYPES:
         return SWITCH_PANEL_R
     if ctype in LED_TYPES:
         return LED_PANEL_R
