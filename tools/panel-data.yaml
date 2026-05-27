@@ -33,7 +33,7 @@ colors:
   switch_slug_s:  "#888"
   switch_label:   "#3d5260"
   subdiv:         "#2a2a2a"
-  zone_div:       "#555555"
+  zone_div:       "#3a3a3a"
   output_rect_s:  "#888"
   led_fill:       "#441111"
   led_stroke:     "#cc2222"
