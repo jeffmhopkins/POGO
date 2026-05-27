@@ -225,11 +225,13 @@ zones:
         label: "VCA AMT"
         cpp_param: "VCA_AMT_PARAM"
       - id: MOD_LED_R1
-        type: led
+        type: led_labeled
         col: 1
         cy: 83.0
-        led_fill:   "#112244"
-        led_stroke: "#2255cc"
+        label: "CLIP"
+        label_fill: "#cc2222"
+        led_fill:   "#441111"
+        led_stroke: "#cc2222"
         cpp_id: "MOD_LED_R1"
       - id: OFFSET
         type: trimpot
@@ -245,9 +247,11 @@ zones:
         label: "VCA OFS"
         cpp_param: "VCA_OFS_PARAM"
       - id: MOD_LED_R2
-        type: led
+        type: led_labeled
         col: 1
         cy: 96.34
+        label: "POS"
+        label_fill: "#2255cc"
         led_fill:   "#112244"
         led_stroke: "#2255cc"
         cpp_id: "MOD_LED_R2"
@@ -259,11 +263,13 @@ zones:
         font_size: 1.6
         cpp_id: "MOD_INPUT"
       - id: MOD_LED_R3
-        type: led
+        type: led_labeled
         col: 1
         cy: 112.0
-        led_fill:   "#112244"
-        led_stroke: "#2255cc"
+        label: "NEG"
+        label_fill: "#cc2222"
+        led_fill:   "#441111"
+        led_stroke: "#cc2222"
         cpp_id: "MOD_LED_R3"
       - id: VCA_IN
         type: jack_input
