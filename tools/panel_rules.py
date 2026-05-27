@@ -49,6 +49,12 @@ LED_CY      = (-2.0, -1.5, 2.0, 4.0)
 TRIMPOT_PANEL_R = 2.5
 TRIMPOT_CY      = (-2.665, -3.385, 2.665, 3.385)
 
+# Potentiometer_Slider_45mm_Vertical.kicad_mod — anchor at travel centre (0,0)
+# F.CrtYd: x∈[-7.0,7.0] y∈[-28.5,28.5] (body ±6.5mm, ±28mm; 0.5mm margin)
+SLIDER_V45_CY     = (-7.0, -28.5, 7.0, 28.5)
+SLIDER_V45_PANEL_W = 1.5   # panel slot half-width (for MH clearance overlay)
+SLIDER_TYPES = {"slider_V45"}
+
 H_SWITCH_TYPES = {"switch_H2", "switch_H3"}
 V3_SWITCH_TYPES = {"switch_V3"}
 SWITCH_TYPES = H_SWITCH_TYPES | V3_SWITCH_TYPES
@@ -106,6 +112,8 @@ def _get_courtyard(
         base = TRIMPOT_CY
     elif ctype in POT_TYPES:
         base = POT_CY
+    elif ctype in SLIDER_TYPES:
+        base = SLIDER_V45_CY
     elif ctype in V3_SWITCH_TYPES:
         base = SWITCH_V3_CY
     elif ctype in H_SWITCH_TYPES:
@@ -150,6 +158,8 @@ def get_panel_r(ctype: str, rules: Any) -> float:
         return TRIMPOT_PANEL_R
     if ctype in POT_TYPES:
         return rules.pot_nut_r
+    if ctype in SLIDER_TYPES:
+        return SLIDER_V45_PANEL_W
     if ctype in V3_SWITCH_TYPES:
         return SWITCH_V3_PANEL_R
     if ctype in H_SWITCH_TYPES:

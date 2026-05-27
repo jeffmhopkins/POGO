@@ -832,8 +832,11 @@ def _component_svg(comp: dict, rules: DesignRules, colors: dict) -> str:
         return svg.svg_knob(cx, cy, r, lbl, rules, colors,
                             label_lines=label_lines, label_fill=label_fill)
 
+    elif ctype == "slider_V45":
+        return svg.svg_slider_V45(cx, cy, comp.get("label", ""), colors)
+
     elif ctype == "slider":
-        # Slider widget drawn by VCV Rack; nothing to emit in SVG (label handled by slider_label)
+        # Legacy: slider widget drawn by VCV Rack only (no SVG body)
         return ""
 
     elif ctype == "slider_label":
@@ -956,10 +959,11 @@ def _collect_overlay_positions(data: dict, rules: DesignRules) -> dict:
     knobs:    list[tuple] = []  # (cx, cy, r_cap) — visual nut cap only
     switches: list[tuple] = []  # (cx, cy, rotate)
     leds:     list[tuple] = []  # (cx, cy, rotate)
+    sliders:  list[tuple] = []  # (cx, cy, rotate)
 
     r_cap_map = {"knob_medium": 4.5, "knob_large": 7.0, "knob_xl": 9.0}
 
-    from panel_rules import SWITCH_TYPES, LED_TYPES, JACK_TYPES, POT_TYPES  # noqa: E402
+    from panel_rules import SWITCH_TYPES, LED_TYPES, JACK_TYPES, POT_TYPES, SLIDER_TYPES  # noqa: E402
 
     for comp in resolve_components(data, rules):
         cx     = float(comp.get("cx", 0))
@@ -977,10 +981,12 @@ def _collect_overlay_positions(data: dict, rules: DesignRules) -> dict:
             switches.append((cx, cy, rotate))
         elif ctype in LED_TYPES:
             leds.append((cx, cy, rotate))
+        elif ctype in SLIDER_TYPES:
+            sliders.append((cx, cy, rotate))
 
     return {
         "jacks": jacks, "pots": pots, "knobs": knobs,
-        "switches": switches, "leds": leds,
+        "switches": switches, "leds": leds, "sliders": sliders,
         "_components": list(resolve_components(data, rules)),
     }
 
@@ -1057,11 +1063,13 @@ def _wrap_svg_in_layers(
     from panel_rules import _get_courtyard as _cy_rect, JACK_TYPES, POT_TYPES, SWITCH_TYPES, LED_TYPES  # noqa: E402
     pcb_parts: list[str] = []
 
+    from panel_rules import SLIDER_TYPES as _SLIDER_TYPES  # noqa: E402
     _PCB_FILL = {
         "jack":    ("rgba(255,204,0,0.15)",  "#ffcc00"),
         "pot":     ("rgba(100,180,255,0.15)", "#64b4ff"),
         "switch":  ("rgba(220,100,255,0.15)", "#dc64ff"),
         "led":     ("rgba(100,220,100,0.15)", "#64dc64"),
+        "slider":  ("rgba(0,210,180,0.15)",   "#00d4b4"),
     }
 
     for comp in overlay.get("_components", []):
@@ -1077,6 +1085,8 @@ def _wrap_svg_in_layers(
             fill, stroke = _PCB_FILL["switch"]
         elif ctype in LED_TYPES:
             fill, stroke = _PCB_FILL["led"]
+        elif ctype in _SLIDER_TYPES:
+            fill, stroke = _PCB_FILL["slider"]
         else:
             continue
         rect = _cy_rect(cx, cy, ctype, rotate)

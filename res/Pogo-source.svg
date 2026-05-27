@@ -307,4 +307,44 @@
   <circle cx="188.595" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
   <text x="188.595" y="119.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">DIST</text>
 
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- Zone — BP3 OUT                                                           -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+
+  <circle cx="200.025" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="200.025" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <rect x="196.53" y="117.24" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
+  <text x="200.025" y="119.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">BP3 L</text>
+  <circle cx="211.455" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="211.455" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <rect x="207.96" y="117.24" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
+  <text x="211.455" y="119.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">BP3 R</text>
+
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- Zone — HP                                                                -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+
+  <rect x="223.92" y="29.00" width="2.5" height="48.0" rx="1.2" fill="#1a1a1a" stroke="#555" stroke-width="0.4"/>
+  <line x1="221.67" y1="30.50" x2="228.67" y2="30.50" stroke="#555" stroke-width="0.5"/>
+  <line x1="221.67" y1="75.50" x2="228.67" y2="75.50" stroke="#555" stroke-width="0.5"/>
+  <line x1="223.17" y1="53.00" x2="227.17" y2="53.00" stroke="#aaa" stroke-width="0.35"/>
+  <rect x="220.67" y="50.75" width="9.0" height="4.5" rx="1.8" fill="#666" stroke="#888" stroke-width="0.35"/>
+  <line x1="221.67" y1="53.00" x2="228.67" y2="53.00" stroke="#aaa" stroke-width="0.6"/>
+  <text x="225.17" y="25.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
+  <circle cx="241.17" cy="78.0" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="241.17" y1="78.0" x2="241.17" y2="73.5" stroke="#aaa" stroke-width="0.6"/>
+  <text x="241.17" y="85.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">RES</text>
+  <circle cx="225.17" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="225.17" y1="100.0" x2="225.17" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
+  <text x="225.17" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="241.17" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="241.17" y1="100.0" x2="241.17" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
+  <text x="241.17" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="225.17" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="225.17" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="225.17" y="119.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
+  <circle cx="241.17" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="241.17" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="241.17" y="119.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">RES</text>
+
 </svg>

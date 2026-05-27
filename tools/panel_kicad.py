@@ -66,6 +66,10 @@ _FOOTPRINT_MAP: dict[str, tuple[str, float, float]] = {
         "Potentiometer_THT.pretty/Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles.kicad_mod",
         7.5, 2.5,
     ),
+    "slider_V45": (
+        "Potentiometer_THT.pretty/Potentiometer_Slider_45mm_Vertical.kicad_mod",
+        0.0, 0.0,   # origin = travel centre = panel slot centre
+    ),
     "led": (
         "LED_THT.pretty/LED_D3.0mm.kicad_mod",
         0.0, 0.0,   # origin = LED body centre = panel hole centre

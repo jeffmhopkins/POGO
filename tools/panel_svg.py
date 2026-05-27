@@ -285,6 +285,59 @@ def svg_slider_label(cx: float, y: float, colors: dict) -> str:
     )
 
 
+def svg_slider_V45(
+    cx: float,
+    cy: float,
+    label: str,
+    colors: dict,
+    travel: float = 45.0,
+) -> str:
+    """45mm travel vertical slide potentiometer panel symbol.
+
+    cx, cy = centre of travel (panel anchor).  The slot spans ±(travel/2+1.5)mm
+    vertically; the label appears above the slot.
+    """
+    half_travel = travel / 2.0          # 22.5 mm
+    slot_h = travel + 3.0               # 48 mm — 1.5 mm margin each end
+    slot_w = 2.5
+    slot_x = cx - slot_w / 2
+    slot_y = cy - slot_h / 2
+
+    handle_w, handle_h = 9.0, 4.5
+    hx = cx - handle_w / 2
+    hy = cy - handle_h / 2              # handle rests at centre (neutral)
+
+    top_y = cy - half_travel
+    bot_y = cy + half_travel
+    label_y = slot_y - 3.5
+
+    parts = [
+        # Slot body
+        f'<rect x="{slot_x:.2f}" y="{slot_y:.2f}" width="{slot_w}" height="{slot_h:.1f}"'
+        f' rx="1.2" fill="{colors["knob_fill"]}" stroke="{colors["knob_stroke"]}"'
+        f' stroke-width="0.4"/>',
+        # Travel-end tick marks
+        f'<line x1="{cx-3.5:.2f}" y1="{top_y:.2f}" x2="{cx+3.5:.2f}" y2="{top_y:.2f}"'
+        f' stroke="{colors["knob_stroke"]}" stroke-width="0.5"/>',
+        f'<line x1="{cx-3.5:.2f}" y1="{bot_y:.2f}" x2="{cx+3.5:.2f}" y2="{bot_y:.2f}"'
+        f' stroke="{colors["knob_stroke"]}" stroke-width="0.5"/>',
+        # Centre (neutral) tick
+        f'<line x1="{cx-2:.2f}" y1="{cy:.2f}" x2="{cx+2:.2f}" y2="{cy:.2f}"'
+        f' stroke="{colors["indicator"]}" stroke-width="0.35"/>',
+        # Slider handle (cap)
+        f'<rect x="{hx:.2f}" y="{hy:.2f}" width="{handle_w}" height="{handle_h}"'
+        f' rx="1.8" fill="{colors["switch_slug"]}" stroke="{colors["switch_slug_s"]}"'
+        f' stroke-width="0.35"/>',
+        # Handle centre line
+        f'<line x1="{cx-3.5:.2f}" y1="{cy:.2f}" x2="{cx+3.5:.2f}" y2="{cy:.2f}"'
+        f' stroke="{colors["indicator"]}" stroke-width="0.6"/>',
+        # Label above slot
+        f'<text x="{cx}" y="{label_y:.1f}" fill="{colors["jack_text"]}"'
+        f' {_FONT} font-size="1.8" text-anchor="middle">{label}</text>',
+    ]
+    return "\n".join(parts)
+
+
 # ── Separators ────────────────────────────────────────────────────────────────
 
 def svg_separator_v(
