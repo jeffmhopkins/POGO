@@ -137,7 +137,6 @@ separators:
   # col0 cx=222.885, col1 cx=234.315
   # Slider (cx=228.60) and RES knob (cx=228.60) share same centre line
   # Right boundary = 217.17 + 2×11.43 = 240.03mm
-  - {type: v, x: 240.03, y1: 9.0, y2: 124.0, style: main_cyan}
   - {type: h, x1: 218.17, x2: 239.53, y: 9.0, style: zone_div, label: "LP2", label_x: 228.60}
   # Grey divider between MAIN OUT jacks (cy=17) and LP2 slider (cy=54)
   - {type: h, x1: 218.17, x2: 239.53, y: 26.0, style: zone_div}
