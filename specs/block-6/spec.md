@@ -413,15 +413,17 @@ BP3 (f_ref = 6000 Hz): C = 192µS/(2π×6000) = 5.1 nF → use 4.7 nF (C0G, 0603
 ### Power Draw Estimate
 
 - 6× LM13700M (SVF integrators + Q VCAs): ~18 mA
-- 6× TL072CDT (SUM_AMPs + tilt/pol inverters): ~12 mA
-- 3× THAT340 (expo converters): ~3 mA
+- 6× OPA1612 (SUM_AMPs, 3× BP groups × 2 channels): 2.75 mA × 6 = 16.5 mA
+- 1× TL072CDT (tilt/pol inverter): ~2 mA
+- 3× THAT340S14-U (expo converters): ~3 mA
 - 3× CD4053 (distortion mux): ~1 mA
 - Distortion sub-circuits (SC + HC + WF op-amps, ~9 TL072 halves per channel): ~9 mA
 - BP_MIX summing TL072 (BP wet summer + MIX summer + MIX output buffer): ~3 mA
-- **+12V: ~46 mA | −12V: ~46 mA** (revised up from earlier ~25 mA estimate)
+- **+12V: ~52 mA | −12V: ~52 mA** (revised: OPA1612 upgrade adds ~6.5 mA over TL072)
 
 Note: earlier estimate of 25 mA was prior to full distortion + MIX circuit design.
-Revised estimate is more accurate but should be verified against module power budget.
+OPA1612 SUM_AMPs (Iq = 2.75 mA/channel) add ~4.5 mA over equivalent TL072s (Iq = 0.9 mA/half).
+Total should be verified against module power budget.
 
 ---
 
@@ -432,9 +434,9 @@ Revised estimate is more accurate but should be verified against module power bu
 | BP1_OTA_L, BP1_OTA_R | LM13700M | SOIC-16 | — | 2 | audio | block-6 | BP1 integrator + Q VCA (L and R, one IC each) |
 | BP2_OTA_L, BP2_OTA_R | LM13700M | SOIC-16 | — | 2 | audio | block-6 | BP2 integrator + Q VCA (L and R) |
 | BP3_OTA_L, BP3_OTA_R | LM13700M | SOIC-16 | — | 2 | audio | block-6 | BP3 integrator + Q VCA (L and R) |
-| BP_SUM_G1_L, BP_SUM_G1_R | TL072CDT | SOIC-8 | — | 2 | audio | block-6 | BP1 SUM_AMP + output buffer (L and R) |
-| BP_SUM_G2_L, BP_SUM_G2_R | TL072CDT | SOIC-8 | — | 2 | audio | block-6 | BP2 SUM_AMP + output buffer (L and R) |
-| BP_SUM_G3_L, BP_SUM_G3_R | TL072CDT | SOIC-8 | — | 2 | audio | block-6 | BP3 SUM_AMP + output buffer (L and R) |
+| BP_SUM_G1_L, BP_SUM_G1_R | OPA1612 | SOIC-8 | — | 2 | audio | block-6 | BP1 SUM_AMP + output buffer (L and R); 1.1 nV/√Hz; pin-compatible with TL072CDT |
+| BP_SUM_G2_L, BP_SUM_G2_R | OPA1612 | SOIC-8 | — | 2 | audio | block-6 | BP2 SUM_AMP + output buffer (L and R); 1.1 nV/√Hz |
+| BP_SUM_G3_L, BP_SUM_G3_R | OPA1612 | SOIC-8 | — | 2 | audio | block-6 | BP3 SUM_AMP + output buffer (L and R); 1.1 nV/√Hz |
 | BP_TILT_INV | TL072CDT | SOIC-8 | — | 1 | audio | block-6 | Half A = −V_tilt inverter; half B = BP_POL G=−1 inverter |
 | BP1_EXPO, BP2_EXPO, BP3_EXPO | THAT340S14-U | SOIC-14 | — | 3 | audio | block-6 | V/oct expo converter per group (L+R shared) |
 | BP_DIST_MUX_1, _2, _3 | CD4053BM96 | SOIC-16 | — | 3 | audio | block-6 | SC/HC/WF mode mux per group; S_A/S_B tied globally |

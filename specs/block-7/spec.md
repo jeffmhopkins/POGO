@@ -169,6 +169,15 @@ EXPO_HP (THAT340) placed centrally; IC_Q_C adjacent to HP OTA sections. The HP i
 (G = −1 TL072 half) should be close to the SUM_AMP to minimize trace capacitance on the
 HP_inv node.
 
+### Power Draw Estimate
+
+- 2× LM13700M (HP L/R integrators): ~3 mA × 2 = 6 mA
+- 1× IC_Q_C LM13700M (HP Q VCA): ~3 mA
+- 2× OPA1612 (SUM_AMP L/R): 2.75 mA × 2 = 5.5 mA
+- 1× TL072CDT (IRES_AMP): ~2 mA
+- 1× THAT340S14-U (EXPO_HP): ~1 mA
+- **+12V: ~18 mA | −12V: ~18 mA**
+
 ---
 
 ## 4. Component Requirements
@@ -178,8 +187,8 @@ HP_inv node.
 | U_OTA_HP_L | LM13700M | SOIC-16 | — | 1 | audio | block-7 | HP L-channel integrators (cells A+B = OTA-A1+OTA-A2) |
 | U_OTA_HP_R | LM13700M | SOIC-16 | — | 1 | audio | block-7 | HP R-channel integrators (cells A+B = OTA-B1+OTA-B2) |
 | IC_Q_C | LM13700M | SOIC-16 | — | 1 | audio | block-7 | Q VCA: cell A = HP Q (L+R); cell B = spare |
-| U_SUM_HP_L | TL072CDT | SOIC-8 | — | 1 | audio | block-7 | L-ch: half A = SUM_AMP, half B = HP inverting output buffer |
-| U_SUM_HP_R | TL072CDT | SOIC-8 | — | 1 | audio | block-7 | R-ch: half A = SUM_AMP, half B = HP inverting output buffer |
+| U_SUM_HP_L | OPA1612 | SOIC-8 | — | 1 | audio | block-7 | L-ch: half A = SUM_AMP, half B = HP inverting output buffer; 1.1 nV/√Hz |
+| U_SUM_HP_R | OPA1612 | SOIC-8 | — | 1 | audio | block-7 | R-ch: half A = SUM_AMP, half B = HP inverting output buffer; pin-compatible with TL072CDT |
 | U_IRES_HP | TL072CDT | SOIC-8 | — | 1 | audio | block-7 | Half A = IRES_AMP (Q control); half B = spare / utility |
 | EXPO_HP | THAT340S14-U | SOIC-14 | — | 1 | audio | block-7 | Expo V/oct converter; f_ref = 632 Hz; drives HP L+R Iabc |
 | C1_L, C2_L | C0G cap | 0603 | 47 nF | 2 | audio | block-7 | HP L integrator caps (C0G/NP0 mandatory) |

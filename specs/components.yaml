@@ -5,8 +5,16 @@
 #   - ref is unique within each board
 #   - board + ref = globally unique identifier
 #   - This file is source of truth for the future KiCad 48HP generator
-#   - Partial: populated as Phase 3R specs are completed per block
 #   - qty > 1 means N identical components share a ref slot; KiCad generator expands to individual refs
+#   - tol field (where present) = required resistor tolerance; all others: 5% OK unless noted
+#
+# PRECISION RESISTORS — 1% or better required (functional, not cosmetic):
+#   R3, R4, R5, R6     block-1   NE5532D gain ratio (4.83×) — L/R matching; low i_n×R noise
+#   R_VOCT              block-5,6,7,8   56 kΩ THAT340 V/oct network — 1% error = 12 cents
+#   R_inv_in, R_inv_f  block-3 attenuverters (MB_INV_1–5)  10 kΩ — center null depth >60 dB
+#   R_MB_INV           block-3   100 kΩ — MB_INV inverter gain accuracy
+#   R_TILT_INV_IN/FB   block-5   100 kΩ — tilt inverter; mismatch shifts tilt center null
+#   R_IREF             blocks 5,6,7,8  1 MΩ — sets f_ref current via THAT340; absorbed by RV_REF trim, 5% OK
 #
 # boards: audio | control | utility | panel
 
@@ -26,10 +34,10 @@ components:
   # block-1: Pre-Gain
   - { ref: U2,   board: audio,   block: block-1, part: NE5532D,    pkg: SOIC-8,   fn: "Main pre-gain amp L+R" }
   - { ref: U3,   board: audio,   block: block-1, part: NE5532D,    pkg: SOIC-8,   fn: "Alt BP pre-gain amp L+R" }
-  - { ref: R3,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "12kΩ",   fn: "R_in main gain stage (×2 ch)" }
-  - { ref: R4,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "47kΩ",   fn: "R_f main gain stage (×2 ch)" }
-  - { ref: R5,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "12kΩ",   fn: "R_in alt gain stage (×2 ch)" }
-  - { ref: R6,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "47kΩ",   fn: "R_f alt gain stage (×2 ch)" }
+  - { ref: R3,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "4.7kΩ",  tol: "1%", fn: "R_in main gain stage (×2 ch); lowers NE5532D current-noise contribution" }
+  - { ref: R4,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "18kΩ",   tol: "1%", fn: "R_f main gain stage (×2 ch); G = 1 + 18/4.7 = 4.83× ≈ 5×" }
+  - { ref: R5,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "4.7kΩ",  tol: "1%", fn: "R_in alt gain stage (×2 ch)" }
+  - { ref: R6,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "18kΩ",   tol: "1%", fn: "R_f alt gain stage (×2 ch)" }
   - { ref: C3,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "100nF",  fn: "U2 +12V decoupling" }
   - { ref: C4,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "100nF",  fn: "U2 -12V decoupling" }
   - { ref: C5,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "100nF",  fn: "U3 +12V decoupling" }
@@ -55,8 +63,8 @@ components:
   - { ref: U8,   board: audio,   block: block-5, part: LM13700M,   pkg: SOIC-16,  fn: "LP1 OTA integrators R" }
   - { ref: U9,   board: audio,   block: block-5, part: LM13700M,   pkg: SOIC-16,  fn: "LP1+LP2 Q VCA L (cell A=LP1, cell B=LP2)" }
   - { ref: U10,  board: audio,   block: block-5, part: LM13700M,   pkg: SOIC-16,  fn: "LP1+LP2 Q VCA R (cell A=LP1, cell B=LP2)" }
-  - { ref: U11,  board: audio,   block: block-5, part: TL072CDT,   pkg: SOIC-8,   fn: "LP1 SUM_AMP + output buffer L" }
-  - { ref: U12,  board: audio,   block: block-5, part: TL072CDT,   pkg: SOIC-8,   fn: "LP1 SUM_AMP + output buffer R" }
+  - { ref: U11,  board: audio,   block: block-5, part: OPA1612,   pkg: SOIC-8,   fn: "LP1 SUM_AMP + output buffer L" }
+  - { ref: U12,  board: audio,   block: block-5, part: OPA1612,   pkg: SOIC-8,   fn: "LP1 SUM_AMP + output buffer R" }
   - { ref: U13,  board: audio,   block: block-5, part: TL072CDT,   pkg: SOIC-8,   fn: "LP1 tilt inverter (−V_tilt for R)" }
   - { ref: U14,  board: audio,   block: block-5, part: THAT340S14-U, pkg: SOIC-14,   fn: "LP1 expo converter matched NPN (L+R shared)" }
   - { ref: C11,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "47nF",   fn: "LP1 integrator C1 L (C0G/NP0)" }
@@ -77,12 +85,12 @@ components:
   - { ref: U18,  board: audio,   block: block-6, part: LM13700M,   pkg: SOIC-16,  fn: "BP2 OTA integrators + Q R" }
   - { ref: U19,  board: audio,   block: block-6, part: LM13700M,   pkg: SOIC-16,  fn: "BP3 OTA integrators + Q L" }
   - { ref: U20,  board: audio,   block: block-6, part: LM13700M,   pkg: SOIC-16,  fn: "BP3 OTA integrators + Q R" }
-  - { ref: U21,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "BP1 SUM_AMP + buffer L" }
-  - { ref: U22,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "BP1 SUM_AMP + buffer R" }
-  - { ref: U23,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "BP2 SUM_AMP + buffer L" }
-  - { ref: U24,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "BP2 SUM_AMP + buffer R" }
-  - { ref: U25,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "BP3 SUM_AMP + buffer L" }
-  - { ref: U26,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "BP3 SUM_AMP + buffer R" }
+  - { ref: U21,  board: audio,   block: block-6, part: OPA1612,   pkg: SOIC-8,   fn: "BP1 SUM_AMP + buffer L" }
+  - { ref: U22,  board: audio,   block: block-6, part: OPA1612,   pkg: SOIC-8,   fn: "BP1 SUM_AMP + buffer R" }
+  - { ref: U23,  board: audio,   block: block-6, part: OPA1612,   pkg: SOIC-8,   fn: "BP2 SUM_AMP + buffer L" }
+  - { ref: U24,  board: audio,   block: block-6, part: OPA1612,   pkg: SOIC-8,   fn: "BP2 SUM_AMP + buffer R" }
+  - { ref: U25,  board: audio,   block: block-6, part: OPA1612,   pkg: SOIC-8,   fn: "BP3 SUM_AMP + buffer L" }
+  - { ref: U26,  board: audio,   block: block-6, part: OPA1612,   pkg: SOIC-8,   fn: "BP3 SUM_AMP + buffer R" }
   - { ref: U27,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "BP tilt inverter half A (−V_tilt for R); BP_POL G=−1 inverter half B" }
   - { ref: U28,  board: audio,   block: block-6, part: THAT340S14-U, pkg: SOIC-14,   fn: "BP1 expo converter" }
   - { ref: U29,  board: audio,   block: block-6, part: THAT340S14-U, pkg: SOIC-14,   fn: "BP2 expo converter" }
@@ -173,8 +181,8 @@ components:
   - { ref: U50,  board: audio,   block: block-7, part: LM13700M,   pkg: SOIC-16,  fn: "HP OTA integrators R" }
   - { ref: U51,  board: audio,   block: block-7, part: LM13700M,   pkg: SOIC-16,  fn: "HP Q VCA L (cell A; cell B spare)" }
   - { ref: U52,  board: audio,   block: block-7, part: LM13700M,   pkg: SOIC-16,  fn: "HP Q VCA R (cell A; cell B spare)" }
-  - { ref: U53,  board: audio,   block: block-7, part: TL072CDT,   pkg: SOIC-8,   fn: "HP SUM_AMP + inverting output buffer L" }
-  - { ref: U54,  board: audio,   block: block-7, part: TL072CDT,   pkg: SOIC-8,   fn: "HP SUM_AMP + inverting output buffer R" }
+  - { ref: U53,  board: audio,   block: block-7, part: OPA1612,   pkg: SOIC-8,   fn: "HP SUM_AMP + inverting output buffer L" }
+  - { ref: U54,  board: audio,   block: block-7, part: OPA1612,   pkg: SOIC-8,   fn: "HP SUM_AMP + inverting output buffer R" }
   - { ref: U55,  board: audio,   block: block-7, part: THAT340S14-U, pkg: SOIC-14,   fn: "HP expo converter (L+R shared)" }
   - { ref: C29,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "47nF",   qty: 4, fn: "HP integrator caps (C0G; C1L/C2L/C1R/C2R)" }
   - { ref: R30,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "HP SUM_AMP R_in L" }
@@ -187,8 +195,8 @@ components:
   - { ref: U56,  board: audio,   block: block-8, part: LM13700M,   pkg: SOIC-16,  fn: "LP2 OTA integrators L" }
   - { ref: U57,  board: audio,   block: block-8, part: LM13700M,   pkg: SOIC-16,  fn: "LP2 OTA integrators R" }
   # U9/U10 (cell B) also used by block-8 for Q VCA — see block-5 entries above
-  - { ref: U58,  board: audio,   block: block-8, part: TL072CDT,   pkg: SOIC-8,   fn: "LP2 SUM_AMP + output buffer L" }
-  - { ref: U59,  board: audio,   block: block-8, part: TL072CDT,   pkg: SOIC-8,   fn: "LP2 SUM_AMP + output buffer R" }
+  - { ref: U58,  board: audio,   block: block-8, part: OPA1612,   pkg: SOIC-8,   fn: "LP2 SUM_AMP + output buffer L" }
+  - { ref: U59,  board: audio,   block: block-8, part: OPA1612,   pkg: SOIC-8,   fn: "LP2 SUM_AMP + output buffer R" }
   - { ref: U60,  board: audio,   block: block-8, part: THAT340S14-U, pkg: SOIC-14,   fn: "LP2 expo converter (L+R shared; independent from LP1)" }
   - { ref: C33,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "47nF",   qty: 4, fn: "LP2 integrator caps (C0G; 4 total)" }
   - { ref: R32,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "LP2 SUM_AMP R_in L" }
@@ -244,7 +252,7 @@ components:
   - { ref: R13,  board: utility, block: block-3, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "R_MB_F: feedback R, MB summer stage" }
   - { ref: R14,  board: utility, block: block-3, part: ~,          pkg: "0603",   val: "22kΩ",   fn: "R_MB_SRC: floor input R for V_src; with 470kΩ SCALE pot → G range 0.20×–4.55×" }
   - { ref: R15,  board: utility, block: block-3, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "R_MB_OFF: offset pot input R" }
-  - { ref: R16,  board: utility, block: block-3, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2, fn: "R_MB_INV: equal R_in + R_fb for polarity inverter stage" }
+  - { ref: R16,  board: utility, block: block-3, part: ~,          pkg: "0603",   val: "100kΩ",  tol: "1%", qty: 2, fn: "R_MB_INV: equal R_in + R_fb for polarity inverter stage" }
 
   # block-3: Mod Bus passives — per-destination normalling and protection
   - { ref: R18,  board: utility, block: block-3, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 19, fn: "R_SRC_NORM: bus normalling R per destination jack (19 destinations)" }
@@ -295,7 +303,7 @@ components:
   - { ref: RV23, board: control, block: block-3, part: "lin pot",    pkg: "9mm",  fn: "LP2_RES_ATT" }
 
   # block-4 panel controls
-  - { ref: RV24, board: control, block: block-4, part: "bipolar pot", pkg: "9mm", fn: "VCA_AMT (-1 to +1)" }
+  - { ref: RV24, board: control, block: block-4, part: "bipolar pot", pkg: "9mm", val: "1kΩ",   fn: "VCA_AMT (-1 to +1); 1kΩ chosen to limit wiper impedance <250Ω (avoids 14% THAT2180 gain error at center travel)" }
   - { ref: RV25, board: control, block: block-4, part: "lin pot",    pkg: "9mm",  fn: "VCA_OFS (0 to 1)" }
 
   # block-5 panel controls

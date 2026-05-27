@@ -161,7 +161,7 @@ and RV_VCA_UNITY_R allow the two channels to be matched for DC offset and gain a
 | VCA_L | THAT 2180 | SOIC-8 | — | 1 | audio | 4 | L-channel dB-law VCA |
 | VCA_R | THAT 2180 | SOIC-8 | — | 1 | audio | 4 | R-channel dB-law VCA |
 | U_VCA_CV | TL072CDT | SOIC-8 | — | 1 | audio | 4 | CV summing (OFS) and inversion buffer, both channels |
-| RV_VCA_AMT | Bipolar pot, 9 mm, centre detent | panel | 10 kΩ | 1 | control | 4 | VCA_AMT attenuverter –1× to +1× |
+| RV_VCA_AMT | Bipolar pot, 9 mm, centre detent | panel | 1 kΩ | 1 | control | 4 | VCA_AMT attenuverter –1× to +1×; 1 kΩ limits wiper impedance to 250 Ω max → < 1.6 % THAT 2180 gain error |
 | RV_VCA_OFS | Linear pot, 9 mm | panel | 50 kΩ | 1 | control | 4 | VCA_OFS CV floor 0–5 V |
 | RV_VCA_UNITY_L | Bourns 3224W | SMD | 500 Ω | 1 | audio | 4 | L unity-gain trim (GAIN pin bias adjust) |
 | RV_VCA_UNITY_R | Bourns 3224W | SMD | 500 Ω | 1 | audio | 4 | R unity-gain trim |

@@ -29,7 +29,7 @@ MODULATION (parallel to signal chain)
 ────────────────────────────────────────────────────────────────────────────────────────
 LFO1 / LFO2  →  ±5V triangle, 0.05–20Hz; LFO1 normalizes into MOD_IN
 MOD_IN jack  →  Mod Bus Processor (SCALE exp 0.2–5×, OFFSET ±5V, clamp ±10V)
-Mod Bus      →  22 CV destinations (each: override jack + attenuverter trimpot)
+Mod Bus      →  19 CV destinations (each: override jack + attenuverter trimpot)
 Lights       →  MOD_CLIP, MOD_POS, MOD_NEG
 ```
 

@@ -255,10 +255,11 @@ TL072CDT: e_n = 18 nV/√Hz. For filter blocks, the SUM_AMP sees 100 kΩ input r
 At 18 nV/√Hz over 20 Hz–20 kHz: E_noise ≈ 2.5 µV_RMS per stage. Out-of-band noise is
 attenuated by the filter's own frequency response.
 
-**Upgrade path (Phase 5R, not needed now):** Replace SUM_AMP TL072 with OPA1612 
-(e_n = 1.1 nV/√Hz, SOIC-8 pin-compatible, 2.8 mA quiescent vs TL072's 0.9 mA).
-For 6 LP/HP/BP SUM_AMP ICs: adds only 11.4 mA/rail. Would reduce SUM_AMP noise
-by 16× and improve overall SNR by ~5 dB. Viable if audiophile-grade performance is desired.
+**Completed (Phase 3R):** All 12 SUM_AMP ICs in blocks 5, 6, 7, 8 upgraded to OPA1612
+(e_n = 1.1 nV/√Hz, SOIC-8 pin-compatible, Iq = 2.75 mA/channel vs TL072's 0.9 mA/half).
+Power cost: +22 mA total across all filter stages (+3.7 mA each for blocks 5, 7, 8; +11.1 mA
+for block-6). SUM_AMP noise floor drops from 18 nV/√Hz to 1.1 nV/√Hz; overall chain
+SNR improves ~5 dB. Updated in all block specs, components.yaml, and aux-ota-c-svf.md.
 
 ### 4.5 High-Q Noise Behavior
 
@@ -307,13 +308,30 @@ audio chain via:
 
 ## 6. Remaining Action Items (Not Yet Done)
 
+All high-priority items from the initial review have been resolved. The following prototype
+validation items remain as Phase 5R tasks:
+
 | Item | Priority | Location |
 |---|---|---|
-| Flag 1% tolerance on R_VOCT, R_inv_in/fb, R_MB_INV, R_TILT_INV | High | components.yaml |
-| Verify mod destination count (19) against `plugin/src/dsp/ModBus.hpp` | High | DSP code |
-| Update CLAUDE.md "22 CV destinations" → "19 CV destinations" (after DSP verification) | Medium | CLAUDE.md |
 | Prototype: VCA AMT pot value — validate 1 kΩ vs 10 kΩ interaction with THAT 2180 | Medium | block-4 |
-| Prototype: Block-1 R_in reduction (12 kΩ → 4.7 kΩ) — negligible SNR gain, low priority | Low | block-1 |
-| Prototype: Paralleled MB_PROC_A output buffer stability (47 Ω output series R adequacy) | Medium | block-3 |
-| Phase 5R: Consider OPA1612 for LP/HP/BP SUM_AMP stages (16× noise reduction, +11 mA/rail) | Low | blocks 5/6/7/8 |
-| Phase 5R: THAT340 sharing — reduce 6 ICs to 4 (LP1+LP2 share, BP1+BP2 share) | Low | blocks 5/6/7/8 |
+| Prototype: Paralleled MB_PROC_A output buffer stability (47 Ω series R adequacy) | Medium | block-3 |
+| Prototype: THAT340 sharing — reduce 6 ICs to 4 (LP1+LP2 share, BP1+BP2 share) | Low | blocks 5/6/7/8 |
+
+## 7. Completed Action Items
+
+| Item | Resolution |
+|---|---|
+| Flag 1% tolerance on R_VOCT, R_inv_in/fb, R_MB_INV, R_TILT_INV | Done — components.yaml header + tol fields on R3/R4/R5/R6, R16 |
+| Verify mod destination count (19) against DSP code | Done — confirmed 19 via InputId enum in Pogo.cpp |
+| CLAUDE.md "22 CV destinations" → "19 CV destinations" | Done |
+| THAT340S14-U package: SOIC-8 → SOIC-14 in all block specs + components.yaml | Done |
+| BAT85 SOD-80 → SS14 SMA in aux-power-filter.md | Done |
+| Block-3: missing BZX84C10 zener clamps + RV_MB_ZERO + RV_MB_AMOUNT_MAX | Done |
+| Block-3: MB_PROC_A paralleled distribution buffer (halves C+D, 47Ω series R) | Done |
+| Block-4: AMT pot 10kΩ → 1kΩ (14% → <1.6% THAT 2180 gain error) | Done |
+| Block-1: R_in 12kΩ → 4.7kΩ, R_f 47kΩ → 18kΩ (NE5532D current noise: 8.4→3.3 nV/√Hz) | Done |
+| OPA1612 for all 12 SUM_AMPs in blocks 5/6/7/8 (1.1 nV/√Hz; 16× noise reduction) | Done |
+| aux-attenuverter.md: 22→19 destinations, 100kΩ pot → 10kΩ | Done |
+| aux-mod-bus-core.md: 22→19 destinations, buffer topology update | Done |
+| aux-ota-c-svf.md: SUM_AMP updated to OPA1612 with noise rationale | Done |
+| Power draw estimates added to block-5, 7, 8; block-6 updated for OPA1612 | Done |

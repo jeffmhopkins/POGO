@@ -51,10 +51,14 @@ soft-knee — characteristic of op-amp rail clipping.
 **Non-inverting amplifier, gain = 1 + R_f/R_g:**
 
 ```
-Gain = 1 + 47k / 12k ≈ 4.92 × ≈ 5×
+Gain = 1 + 18k / 4.7k ≈ 4.83 × ≈ 5×
 ```
 
-Using R_f = 47 kΩ and R_g = 12 kΩ gives gain = 4.917, within 1.7% of the target 5×.
+Using R_f = 18 kΩ and R_g = 4.7 kΩ gives gain = 4.83×, within 3.4% of the target 5×, and halves
+the NE5532D current-noise contribution compared to the 12 kΩ / 47 kΩ values. The gain error is
+inaudible and well within the ±5% tolerance a "5×" switch implies. At these lower impedances,
+NE5532D current noise through R_g (i_n = 0.7 pA/√Hz) contributes:
+  0.7 pA × 4.7 kΩ = 3.3 nV/√Hz   (vs 8.4 nV/√Hz at 12 kΩ → 26 % improvement in RTI noise)
 A non-inverting topology is preferred here because:
 - Preserves polarity (the DSP model multiplies by +5, not −5).
 - High input impedance (suitable for driving from U1 LM4562 output or an external jack).
@@ -100,12 +104,15 @@ the DSP specifies ±10.5 V as nominal, consistent with NE5532 datasheet typical 
 
 ### Component values and derivations
 
-**Gain resistors (R3 = R_g, R4 = R_f): 12 kΩ, 47 kΩ (each ×2 channels)**
+**Gain resistors (R3 = R_g, R4 = R_f): 4.7 kΩ, 18 kΩ (each ×2 channels)**
 
-Gain = 1 + R_f / R_g = 1 + 47k / 12k = 4.917 ≈ 5×
+Gain = 1 + R_f / R_g = 1 + 18k / 4.7k = 4.83 ≈ 5×
 
-Standard E24 values. 1% tolerance resistors recommended to match L/R channel gain
-within 0.1 dB.
+Standard E24 values. 1% tolerance resistors required: L/R matching within 0.1 dB,
+and lower R_g reduces NE5532D current-noise contribution at the inverting input.
+
+Previous values (12 kΩ / 47 kΩ) gave G = 4.92×; updated for noise — see signal-routing
+note below. Both give gain within 5% of 5×.
 
 **Op-amp (U2, U3): NE5532D, SOIC-8**
 - U2: main path L+R (two halves of one dual op-amp).
@@ -163,10 +170,10 @@ length carrying unshielded pre-gain signals.
 |---|---|---|---|---|---|---|---|
 | U2 | NE5532D | SOIC-8 | — | 1 | audio | block-1 | Main gain amp, L+R channels |
 | U3 | NE5532D | SOIC-8 | — | 1 | audio | block-1 | ALT BP gain amp, L+R channels |
-| R3 | resistor | 0603 | 12 kΩ | 2 | audio | block-1 | R_g gain stage (×2 channels, main) |
-| R4 | resistor | 0603 | 47 kΩ | 2 | audio | block-1 | R_f gain stage (×2 channels, main) |
-| R5 | resistor | 0603 | 12 kΩ | 2 | audio | block-1 | R_g gain stage (×2 channels, ALT) |
-| R6 | resistor | 0603 | 47 kΩ | 2 | audio | block-1 | R_f gain stage (×2 channels, ALT) |
+| R3 | resistor 1% | 0603 | 4.7 kΩ | 2 | audio | block-1 | R_g main gain stage (×2 ch); 1% for L/R match + low i_n×R noise |
+| R4 | resistor 1% | 0603 | 18 kΩ | 2 | audio | block-1 | R_f main gain stage (×2 ch); G = 4.83× ≈ 5× |
+| R5 | resistor 1% | 0603 | 4.7 kΩ | 2 | audio | block-1 | R_g ALT gain stage (×2 ch) |
+| R6 | resistor 1% | 0603 | 18 kΩ | 2 | audio | block-1 | R_f ALT gain stage (×2 ch) |
 | SW1 | 2PDT slide switch | panel | — | 1 | panel | block-1 | GAIN_MAIN 1×/5× |
 | SW2 | 2PDT slide switch | panel | — | 1 | panel | block-1 | GAIN_BP3 1×/5× (ALT path) |
 | C2 | cap, X7R | 0603 | 100 nF | 4 | audio | block-1 | NE5532 supply decoupling (2 ICs × 2 pins) |

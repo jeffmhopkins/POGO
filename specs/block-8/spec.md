@@ -162,6 +162,15 @@ is a separate IC from EXPO_LP1, placed adjacent to LP2's V_ctrl summing network.
 IC_Q_AB is shared with LP1 and should be placed between the two filter sections so traces to
 both cell A (LP1 Q) and cell B (LP2 Q) are of comparable length.
 
+### Power Draw Estimate
+
+- 2× LM13700M (LP2 L/R integrators): ~3 mA × 2 = 6 mA
+- (IC_Q_AB shared with block-5 — counted in block-5 power estimate, not here)
+- 2× OPA1612 (SUM_AMP L/R): 2.75 mA × 2 = 5.5 mA
+- 1× TL072CDT (IRES_AMP): ~2 mA
+- 1× THAT340S14-U (EXPO_LP2): ~1 mA
+- **+12V: ~15 mA | −12V: ~15 mA**
+
 ---
 
 ## 4. Component Requirements
@@ -171,8 +180,8 @@ both cell A (LP1 Q) and cell B (LP2 Q) are of comparable length.
 | U_OTA_LP2_L | LM13700M | SOIC-16 | — | 1 | audio | block-8 | LP2 L-channel integrators (cells A+B = OTA-A1+OTA-A2) |
 | U_OTA_LP2_R | LM13700M | SOIC-16 | — | 1 | audio | block-8 | LP2 R-channel integrators (cells A+B = OTA-B1+OTA-B2) |
 | IC_Q_AB | LM13700M | SOIC-16 | — | (shared with block-5) | audio | block-5/8 | Q VCA shared: cell A = LP1 Q (L+R), cell B = LP2 Q (L+R) |
-| U_SUM_LP2_L | TL072CDT | SOIC-8 | — | 1 | audio | block-8 | L-ch: half A = SUM_AMP, half B = LP output buffer |
-| U_SUM_LP2_R | TL072CDT | SOIC-8 | — | 1 | audio | block-8 | R-ch: half A = SUM_AMP, half B = LP output buffer (HP buf unused) |
+| U_SUM_LP2_L | OPA1612 | SOIC-8 | — | 1 | audio | block-8 | L-ch: half A = SUM_AMP, half B = LP output buffer; 1.1 nV/√Hz |
+| U_SUM_LP2_R | OPA1612 | SOIC-8 | — | 1 | audio | block-8 | R-ch: half A = SUM_AMP, half B = LP output buffer; pin-compatible with TL072CDT |
 | U_IRES_LP2 | TL072CDT | SOIC-8 | — | 1 | audio | block-8 | Half A = IRES_AMP (Q control); half B = spare / utility |
 | EXPO_LP2 | THAT340S14-U | SOIC-14 | — | 1 | audio | block-8 | Expo V/oct converter; f_ref = 632 Hz; drives LP2 L+R Iabc; independent of EXPO_LP1 |
 | C1_L, C2_L | C0G cap | 0603 | 47 nF | 2 | audio | block-8 | LP2 L integrator caps (C0G/NP0 mandatory) |

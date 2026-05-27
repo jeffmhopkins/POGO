@@ -157,7 +157,7 @@ For BP groups: DSP is 4-pole, hardware is 2-pole — requires Phase 3R decision.
 | Ref (generic) | Part | Package | Value | Notes |
 |---|---|---|---|---|
 | U_OTA | LM13700M | SOIC-16 | — | Dual OTA; cells A+B = both integrators |
-| U_SUM | TL072CDT | SOIC-8 | — | Half A = SUM_AMP; half B = LP buffer or HP inv buf |
+| U_SUM | OPA1612 | SOIC-8 | — | Half A = SUM_AMP; half B = LP buffer or HP inv buf; 1.1 nV/√Hz (vs TL072 18 nV/√Hz); pin-compatible drop-in for all LP/HP/BP filter stages. Use TL072CDT only where board space cost or power budget is critical. |
 | C1, C2 | C0G ceramic | 0603 | 47 nF | Integrator caps; C0G mandatory for tuning stability |
 | R_IN_SUM | Resistor | 0603 | 100 kΩ | Signal input to SUM_AMP; sets g_m reference |
 | R_FB | Resistor | 0603 | 100 kΩ | Q feedback resistor into SUM_AMP |
