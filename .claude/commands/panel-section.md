@@ -1,6 +1,6 @@
 You are adding a new section to the POGO Eurorack panel.
 Source of truth: `tools/panel-data.yaml`. All commands run from repo root.
-Branch: `topology_change`.
+Branch: `dev`.
 
 ## Before you start
 

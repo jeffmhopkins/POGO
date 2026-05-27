@@ -305,14 +305,14 @@ python3 tools/build_panel.py
 
 ## Git Workflow
 
-Develop on the feature branch. Push to trigger CI (Linux/Windows/macOS plugin builds +
+Develop on `dev`. Push to trigger CI (Linux/Windows/macOS plugin builds +
 KiCad schematic validation + panel DRC check).
 
 ```bash
-git checkout claude/redesign-synth-panel-OXtmt
+git checkout dev
 # ... make changes ...
 git add -A && git commit -m "description"
-git push -u origin claude/redesign-synth-panel-OXtmt
+git push -u origin dev
 ```
 
 ---

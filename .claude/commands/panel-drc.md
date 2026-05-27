@@ -1,6 +1,6 @@
 Investigate and fix DRC violations in the POGO panel.
 Source of truth: `tools/panel-data.yaml`. All commands from repo root.
-Branch: `topology_change`.
+Branch: `dev`.
 
 ## Run the check first
 

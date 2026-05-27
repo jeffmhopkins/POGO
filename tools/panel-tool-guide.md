@@ -357,7 +357,7 @@ You are adding a new section to the POGO Eurorack panel build tool.
 The tool lives in tools/ and the source of truth is tools/panel-data.yaml.
 Run all commands from the repo root.
 
-Branch: topology_change
+Branch: dev
 
 TASK: Add a [SECTION_NAME] section at x_start=[X_START]mm ([HP_N] HP wide).
 
@@ -379,7 +379,7 @@ Workflow:
   5. Use --snap-to ID direction type gap to calculate positions relative to existing components
   6. When --check passes: run python3 tools/build_panel.py to rebuild SVG + HTML
   7. Run --list for the new zone and report the results
-  8. Commit and push to branch topology_change
+  8. Commit and push to branch dev
 
 Do NOT create a pull request.
 ```
@@ -391,7 +391,7 @@ Do NOT create a pull request.
 ```
 The POGO panel build tool has DRC violations that need to be resolved.
 The tool lives in tools/ and source of truth is tools/panel-data.yaml.
-Run all commands from the repo root. Branch: topology_change.
+Run all commands from the repo root. Branch: dev.
 
 TASK: Fix all DRC violations.
 
@@ -420,7 +420,7 @@ IMPORTANT: [PCB KEEPOUT] is a real blocking error — the PCB cannot extend into
 
 ```
 Add a CV jack with attenuverter to an existing zone in tools/panel-data.yaml.
-Run all commands from the repo root. Branch: topology_change.
+Run all commands from the repo root. Branch: dev.
 
 TASK: Add CV jack '[CV_JACK_ID]' and attenuverter '[ATT_ID]' to zone '[ZONE_ID]'.
   - CV jack at col [COL], cy = _cv_jack_cy_ (resolves to 105.0mm)
