@@ -201,12 +201,12 @@
   <text x="80.01" y="57.699999999999996" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">HARD</text>
   <text x="85.72" y="57.699999999999996" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">FOLD</text>
   <text x="81.915" y="61.2" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
-  <circle cx="81.915" cy="71.0" r="9.0" fill="#1a1a1a" stroke="#555" stroke-width="0.7"/>
-  <line x1="81.915" y1="71.0" x2="81.915" y2="62.0" stroke="#aaa" stroke-width="0.8"/>
-  <text x="81.915" y="83.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">OFFSET</text>
-  <circle cx="81.915" cy="85.0" r="7.0" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
-  <line x1="81.915" y1="85.0" x2="81.915" y2="78.0" stroke="#aaa" stroke-width="0.7"/>
-  <text x="81.915" y="95.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">MIX</text>
+  <circle cx="81.915" cy="70.0" r="9.0" fill="#1a1a1a" stroke="#555" stroke-width="0.7"/>
+  <line x1="81.915" y1="70.0" x2="81.915" y2="61.0" stroke="#aaa" stroke-width="0.8"/>
+  <text x="81.915" y="82.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">OFFSET</text>
+  <circle cx="81.915" cy="86.0" r="7.0" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="81.915" y1="86.0" x2="81.915" y2="79.0" stroke="#aaa" stroke-width="0.7"/>
+  <text x="81.915" y="96.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">MIX</text>
   <circle cx="76.2" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
   <line x1="76.2" y1="100.0" x2="76.2" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
   <text x="76.2" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>

@@ -433,13 +433,13 @@ zones:
       - id: BP_OFFSET
         type: knob_xl
         cx: 80.01
-        cy: 71.0
+        cy: 70.0
         label: "OFFSET"
         cpp_param: "BP_OFFSET_PARAM"
       - id: BP_MIX
         type: knob_large
         cx: 80.01
-        cy: 85.0
+        cy: 86.0
         label: "MIX"
         cpp_param: "BP_MIX_PARAM"
       # ── CV attenuverter trim pots ────────────────────────────────────────────
