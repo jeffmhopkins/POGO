@@ -39,10 +39,16 @@ SWITCH_V3_CY      = (-2.0, -5.0, 2.0, 5.0)
 LED_PANEL_R = 1.6
 LED_CY      = (-2.0, -1.5, 2.0, 4.0)
 
+# Compact attenuverter pot (e.g. Bourns PTV09A-4025U series)
+# Symmetric ±5mm courtyard fits 2.25HP (11.43mm) column pitch.
+ATT_PANEL_R = 4.5   # smaller nut than Alpha 9mm (≈9mm A/F hex)
+ATT_CY      = (-5.0, -5.0, 5.0, 5.0)
+
 H_SWITCH_TYPES = {"switch_H2", "switch_H3"}
 V3_SWITCH_TYPES = {"switch_V3"}
 SWITCH_TYPES = H_SWITCH_TYPES | V3_SWITCH_TYPES
 LED_TYPES    = {"led", "led_labeled"}
+ATT_TYPES    = {"attenuverter"}
 
 # Minimum clearance from PCB courtyard edge to mounting hole centre (M3, r≈3.5mm)
 MOUNTING_HOLE_CLEARANCE_MM = 3.5
@@ -92,6 +98,8 @@ def _get_courtyard(
     base: tuple[float, float, float, float] | None = None
     if ctype in JACK_TYPES:
         base = JACK_CY
+    elif ctype in ATT_TYPES:
+        base = ATT_CY
     elif ctype in POT_TYPES:
         base = POT_CY
     elif ctype in V3_SWITCH_TYPES:
@@ -134,6 +142,8 @@ def get_panel_r(ctype: str, rules: Any) -> float:
     """Return the panel-face nut / hole radius (mm) for a component type."""
     if ctype in JACK_TYPES:
         return rules.jack_nut_r
+    if ctype in ATT_TYPES:
+        return ATT_PANEL_R
     if ctype in POT_TYPES:
         return rules.pot_nut_r
     if ctype in V3_SWITCH_TYPES:
@@ -288,6 +298,13 @@ class DesignRules:
                 v = self._jack_keepout_violation(cx, cy, label)
                 if v:
                     out.append(f"[NUT KEEPOUT] {v}")
+            elif ctype in ATT_TYPES:
+                top_edge = cy - ATT_PANEL_R
+                bot_edge = cy + ATT_PANEL_R
+                if top_edge < self.top_keepout:
+                    out.append(f"[NUT KEEPOUT] ATT '{label}' at cy={cy:.2f}: hole top={top_edge:.2f} encroaches TOP keepout ({self.top_keepout:.2f})")
+                if bot_edge > self.bot_keepout_start:
+                    out.append(f"[NUT KEEPOUT] ATT '{label}' at cy={cy:.2f}: hole bottom={bot_edge:.2f} exceeds BOT keepout start ({self.bot_keepout_start:.2f})")
             elif ctype in POT_TYPES:
                 v = self._pot_keepout_violation(cx, cy, label)
                 if v:

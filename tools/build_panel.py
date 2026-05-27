@@ -825,8 +825,8 @@ def _component_svg(comp: dict, rules: DesignRules, colors: dict) -> str:
         lfs            = float(comp.get("label_font_size", 1.8))
         return svg.svg_trimpot(cx, cy, tp_label, rules, colors, label_font_size=lfs)
 
-    elif ctype in ("knob_medium", "knob_large", "knob_xl"):
-        r_map = {"knob_medium": 4.5, "knob_large": 7.0, "knob_xl": 9.0}
+    elif ctype in ("knob_medium", "knob_large", "knob_xl", "attenuverter"):
+        r_map = {"knob_medium": 4.5, "knob_large": 7.0, "knob_xl": 9.0, "attenuverter": 4.5}
         r     = r_map[ctype]
         lbl   = label if not label_lines else ""
         return svg.svg_knob(cx, cy, r, lbl, rules, colors,
@@ -953,13 +953,14 @@ def _collect_overlay_positions(data: dict, rules: DesignRules) -> dict:
     """
     jacks:    list[tuple] = []  # (cx, cy, rotate)
     pots:     list[tuple] = []  # (cx, cy, rotate)
+    atts:     list[tuple] = []  # (cx, cy, rotate) — compact attenuverter pots
     knobs:    list[tuple] = []  # (cx, cy, r_cap) — visual nut cap only
     switches: list[tuple] = []  # (cx, cy, rotate)
     leds:     list[tuple] = []  # (cx, cy, rotate)
 
-    r_cap_map = {"knob_medium": 4.5, "knob_large": 7.0, "knob_xl": 9.0}
+    r_cap_map = {"knob_medium": 4.5, "knob_large": 7.0, "knob_xl": 9.0, "attenuverter": 4.5}
 
-    from panel_rules import SWITCH_TYPES, LED_TYPES, JACK_TYPES, POT_TYPES  # noqa: E402
+    from panel_rules import SWITCH_TYPES, LED_TYPES, JACK_TYPES, POT_TYPES, ATT_TYPES  # noqa: E402
 
     for comp in resolve_components(data, rules):
         cx     = float(comp.get("cx", 0))
@@ -969,6 +970,9 @@ def _collect_overlay_positions(data: dict, rules: DesignRules) -> dict:
 
         if ctype in JACK_TYPES:
             jacks.append((cx, cy, rotate))
+        elif ctype in ATT_TYPES:
+            atts.append((cx, cy, rotate))
+            knobs.append((cx, cy, r_cap_map["attenuverter"]))
         elif ctype in POT_TYPES:
             pots.append((cx, cy, rotate))
             if ctype in r_cap_map:
@@ -979,7 +983,7 @@ def _collect_overlay_positions(data: dict, rules: DesignRules) -> dict:
             leds.append((cx, cy, rotate))
 
     return {
-        "jacks": jacks, "pots": pots, "knobs": knobs,
+        "jacks": jacks, "pots": pots, "atts": atts, "knobs": knobs,
         "switches": switches, "leds": leds,
         "_components": list(resolve_components(data, rules)),
     }
@@ -1070,6 +1074,8 @@ def _wrap_svg_in_layers(
         _pcb_rect(cx, cy, "jack_input", rotate, "rgba(255,204,0,0.15)", "#ffcc00")
     for cx, cy, rotate in overlay["pots"]:
         _pcb_rect(cx, cy, "trimpot", rotate, "rgba(100,180,255,0.15)", "#64b4ff")
+    for cx, cy, rotate in overlay.get("atts", []):
+        _pcb_rect(cx, cy, "attenuverter", rotate, "rgba(100,200,180,0.15)", "#64c8b4")
     for cx, cy, r in overlay["knobs"]:
         _pcb_rect(cx, cy, "knob_medium", 0, "rgba(255,140,0,0.12)", "#ff8c00")
     for cx, cy, rotate in overlay.get("switches", []):

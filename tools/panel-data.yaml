@@ -87,10 +87,10 @@ separators:
   # Perfect midpoint: LFO2 Rate 2 label baseline = 73.4mm, SCALE top = 80.5mm → mid = 76.95
   - {type: h, x1: 1.0, x2: 35.06, y: 77.0, style: zone_div, label: "MOD BUS", label_x: 17.78}
 
-  # ── LP1 (9 HP, x=35.56–81.28 mm, col_pitch=15.24 mm) ─────────────────────────
-  # col 0 cx=43.18  col 1 cx=58.42 (all main knobs)  col 2 cx=73.66
-  - {type: v, x: 81.28, y1: 9.0, y2: 124.0, style: main_cyan}
-  - {type: h, x1: 36.56, x2: 80.78, y: 9.0, style: zone_div, label: "LP1", label_x: 58.42}
+  # ── LP1 (7 HP, x=35.56–71.12 mm, col_pitch=11.43 mm = 2.25 HP) ──────────────
+  # Matches section-0 col pitch. col 0 cx=41.275  col 1 cx=52.705  col 2 cx=64.135
+  - {type: v, x: 71.12, y1: 9.0, y2: 124.0, style: main_cyan}
+  - {type: h, x1: 36.56, x2: 70.62, y: 9.0, style: zone_div, label: "LP1", label_x: 52.705}
 
 # ── Zone labels ───────────────────────────────────────────────────────────────
 # x=17.145 is the geometric centre of the 3-column section (col 1 cx)
@@ -293,10 +293,10 @@ zones:
   - id: zone_lp1
     label: "Zone — LP1 Low-Pass Filter"
     x_start: 35.56
-    col_pitch: 15.24
+    col_pitch: 11.43           # 2.25 HP/col — matches section-0 jack spacing
     cols: 3
     components:
-      # ── Main knobs (all col 1 = section centre) ──────────────────────────────
+      # ── Main knobs (all col 1 = section centre cx=52.705mm) ──────────────────
       - id: LP1_FREQ
         type: knob_xl
         col: 1
@@ -315,19 +315,20 @@ zones:
         cy: 81.0
         label: "RES"
         cpp_param: "LP1_RES_PARAM"
-      # ── Attenuverters (no label) ──────────────────────────────────────────────
+      # ── Attenuverters — compact pot (Bourns PTV09A style), no label ──────────
+      # ATT_CY = ±5mm symmetric; fits 11.43mm pitch with 1.43mm x-gap each side
       - id: LP1_FREQ_ATT
-        type: knob_medium
+        type: attenuverter
         col: 0
         cy: 97.0
         cpp_param: "LP1_FREQ_ATT_PARAM"
       - id: LP1_TILT_ATT
-        type: knob_medium
+        type: attenuverter
         col: 1
         cy: 97.0
         cpp_param: "LP1_TILT_ATT_PARAM"
       - id: LP1_RES_ATT
-        type: knob_medium
+        type: attenuverter
         col: 2
         cy: 97.0
         cpp_param: "LP1_RES_ATT_PARAM"
