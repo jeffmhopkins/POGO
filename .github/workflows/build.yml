@@ -39,14 +39,14 @@ jobs:
           apt-get update -qq && apt-get install -y python3-yaml -qq
           # DRC must pass before we compile — catches keepout/overlap violations early
           python3 tools/build_panel.py --check
-          # Regenerate res/Pogo-source.svg from panel-data.yaml (source of truth)
+          # Regenerate plugin/res/Pogo-source.svg from panel-data.yaml (source of truth)
           python3 tools/build_panel.py --resource
-          # res/Pogo.svg is what VCV Rack loads; copy source when Inkscape unavailable
-          cp res/Pogo-source.svg res/Pogo.svg
+          # plugin/res/Pogo.svg is what VCV Rack loads; copy source when Inkscape unavailable
+          cp plugin/res/Pogo-source.svg plugin/res/Pogo.svg
 
       - name: Build plugin
         run: |
-          export PLUGIN_DIR=$GITHUB_WORKSPACE
+          export PLUGIN_DIR=$GITHUB_WORKSPACE/plugin
           pushd ${{ env.rack-plugin-toolchain-dir }}
           make plugin-build-lin-x64
 
@@ -81,11 +81,11 @@ jobs:
           apt-get update -qq && apt-get install -y python3-yaml -qq
           python3 tools/build_panel.py --check
           python3 tools/build_panel.py --resource
-          cp res/Pogo-source.svg res/Pogo.svg
+          cp plugin/res/Pogo-source.svg plugin/res/Pogo.svg
 
       - name: Build plugin
         run: |
-          export PLUGIN_DIR=$GITHUB_WORKSPACE
+          export PLUGIN_DIR=$GITHUB_WORKSPACE/plugin
           pushd ${{ env.rack-plugin-toolchain-dir }}
           make plugin-build-win-x64
 
@@ -137,18 +137,19 @@ jobs:
           python3 -m pip install --break-system-packages pyyaml --quiet
           python3 tools/build_panel.py --check
           python3 tools/build_panel.py --resource
-          cp res/Pogo-source.svg res/Pogo.svg
+          cp plugin/res/Pogo-source.svg plugin/res/Pogo.svg
 
       - name: Build plugin
         run: |
           export RACK_DIR=$HOME/Rack-SDK
+          cd $GITHUB_WORKSPACE/plugin
           make dep
           make dist
 
       - name: Stage artifact
         run: |
           mkdir -p artifact
-          find dist -name "*.vcvplugin" | \
+          find $GITHUB_WORKSPACE/plugin/dist -name "*.vcvplugin" | \
             while read f; do zstd -d "$f" -c | tar -x -C artifact/; done
 
       - name: Upload macOS artifact

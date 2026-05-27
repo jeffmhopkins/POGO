@@ -3,9 +3,9 @@
 
 Usage (run from repo root):
     python3 tools/build_panel.py              # --resource + --design (default)
-    python3 tools/build_panel.py --resource   # writes res/Pogo-source.svg
+    python3 tools/build_panel.py --resource   # writes plugin/res/Pogo-source.svg
     python3 tools/build_panel.py --design     # writes design/panel-debug.html
-    python3 tools/build_panel.py --mfr        # writes res/Pogo.svg via inkscape
+    python3 tools/build_panel.py --mfr        # writes plugin/res/Pogo.svg via inkscape
     python3 tools/build_panel.py --cpp        # prints C++ stubs to stdout
     python3 tools/build_panel.py --check      # DRC only; exit 1 on violations
 """
@@ -25,8 +25,8 @@ import yaml  # PyYAML
 # ── Repo-relative paths ───────────────────────────────────────────────────────
 
 REPO_ROOT   = Path(__file__).resolve().parent.parent
-SVG_SOURCE  = REPO_ROOT / "res" / "Pogo-source.svg"
-SVG_MFR     = REPO_ROOT / "res" / "Pogo.svg"
+SVG_SOURCE  = REPO_ROOT / "plugin" / "res" / "Pogo-source.svg"
+SVG_MFR     = REPO_ROOT / "plugin" / "res" / "Pogo.svg"
 HTML_DEBUG  = REPO_ROOT / "design" / "panel-debug.html"
 DATA_FILE   = REPO_ROOT / "tools" / "panel-data.yaml"
 
@@ -1272,9 +1272,9 @@ Query commands (no files written):
   --apply                        Write --shift / --shift-select changes to panel-data.yaml
 """,
     )
-    parser.add_argument("--resource",  action="store_true", help="Write res/Pogo-source.svg")
+    parser.add_argument("--resource",  action="store_true", help="Write plugin/res/Pogo-source.svg")
     parser.add_argument("--design",    action="store_true", help="Write design/panel-debug.html")
-    parser.add_argument("--mfr",       action="store_true", help="Write res/Pogo.svg via inkscape")
+    parser.add_argument("--mfr",       action="store_true", help="Write plugin/res/Pogo.svg via inkscape")
     parser.add_argument("--cpp",       action="store_true", help="Print C++ stubs to stdout")
     parser.add_argument("--check",     action="store_true", help="DRC only; exit 1 on violations")
     parser.add_argument("--list",      action="store_true", help="Print table of all resolved components")
