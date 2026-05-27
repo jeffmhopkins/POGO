@@ -20,7 +20,7 @@ Last updated: 2026-05-27 | Topology: 48HP | Phase 3R: all blocks complete
 | A | Input Buffer | ✅ | ✅ | ✅ | LM4562 follower, BAT54S clamp |
 | 1 | Pre-Gain | ✅ | ✅ | ✅ | NE5532D, 1×/5× switch; ALT_BP path |
 | 2 | Dual LFO | ✅ | ✅ | ✅ | Integrator+Schmitt; 47nF C0G; 1MΩ log pot + end R |
-| 3 | Mod Bus | ✅ | ✅ | ✅ | 20 destinations; 7× TL074CDT; 470kΩ SCALE pot |
+| 3 | Mod Bus | ✅ | ✅ | ✅ | 19 destinations; 7× TL074CDT; 470kΩ SCALE pot |
 | 4 | VCA | ✅ | ✅ ⚠️ | ✅ | THAT 2180 dB-law vs DSP linear — intentional deviation |
 | 5 | LP Filter 1 | ✅ | ✅ | ✅ | OTA-C SVF; stereo tilt (symmetric ±V_tilt L/R) |
 | 6 | Triple BP + Dist | ✅ | ✅ | ✅ ⚠️ | SC/HC/WF sub-circuits + CD4053; BP_MIX+POL; Q norm deviation |
@@ -82,16 +82,15 @@ Circuit diagrams in spec text must be self-sufficient.
 **Phase 4R (Panel) — DONE.** `tools/panel-data.yaml` DRC-clean.
 
 **Analog design review complete** (`specs/analog-design-review.md` — 2026-05-27).
-Corrections applied: THAT340 package SOIC-8→SOIC-14 everywhere; BAT85 through-hole→SS14 SMD;
-block-3 missing clamp zeners and calibration trims added; mod bus distribution buffer topology
-corrected (paralleled MB_PROC_A halves C+D); destination count 22→19 in aux files;
-block-4 AMT pot loading design note added.
+All review findings resolved. See §7 Completed Action Items in that file for the full list.
+Key corrections: THAT340 SOIC-8→SOIC-14; BAT85→SS14 (SMD); block-3 clamp zeners + cal trims
+added; MB_PROC_A distribution buffer corrected; destination count 22→19; block-4 AMT pot
+loading addressed; block-1 NE5532D R_in lowered for noise; all 12 SUM_AMP ICs→OPA1612
+(1.1 nV/√Hz); OPA1612 Iq corrected (5.5 mA/dual-IC per rail); block-1 noise % corrected.
 
 **Remaining work before PCB layout:**
-1. **Flag 1% tolerance** in components.yaml for R_VOCT, R_inv_in/fb, R_MB_INV
-2. **Verify mod bus destination count** (19) against `plugin/src/dsp/ModBus.hpp`; update CLAUDE.md if confirmed
-3. **Write 48HP KiCad generator** — replaces 40HP-era stale generators; inputs from components.yaml + panel-data.yaml
-4. **Phase 6R** — VCV Rack signal-path smoke tests (CI integration)
+1. **Write 48HP KiCad generator** — replaces 40HP-era stale generators; inputs from components.yaml + panel-data.yaml
+2. **Phase 6R** — VCV Rack signal-path smoke tests (CI integration)
 
 **Open prototype questions (Phase 3R advisory, not blocking):**
 - block-2: WF fold stage stability (phase margin with diode feedback at all drive levels)
