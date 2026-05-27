@@ -74,7 +74,8 @@ mounting_holes:
 # Section 0: 7 HP (x = 0–35.56 mm), 3 cols at 2.25 HP pitch
 # col 0 cx = 5.715mm, col 1 cx = 17.145mm, col 2 cx = 28.575mm
 separators:
-  # Section 0 right boundary — cyan vertical (7 HP = 7 × 5.08 mm)
+  # ── Section 0 (7 HP) ──────────────────────────────────────────────────────────
+  # Right boundary — cyan vertical (7 HP = 7 × 5.08 mm)
   # y1 matches top strip bottom (9.0mm); y2 matches bot strip top (128.5-4.5=124.0mm)
   - {type: v, x: 35.56, y1: 9.0, y2: 124.0, style: main_cyan}
   # Top of INPUT zone — label breaks the line
@@ -85,6 +86,11 @@ separators:
   # LFO → MOD BUS boundary — label breaks the line
   # Perfect midpoint: LFO2 Rate 2 label baseline = 73.4mm, SCALE top = 80.5mm → mid = 76.95
   - {type: h, x1: 1.0, x2: 35.06, y: 77.0, style: zone_div, label: "MOD BUS", label_x: 17.78}
+
+  # ── LP1 (9 HP, x=35.56–81.28 mm, col_pitch=15.24 mm) ─────────────────────────
+  # col 0 cx=43.18  col 1 cx=58.42 (all main knobs)  col 2 cx=73.66
+  - {type: v, x: 81.28, y1: 9.0, y2: 124.0, style: main_cyan}
+  - {type: h, x1: 36.56, x2: 80.78, y: 9.0, style: zone_div, label: "LP1", label_x: 58.42}
 
 # ── Zone labels ───────────────────────────────────────────────────────────────
 # x=17.145 is the geometric centre of the 3-column section (col 1 cx)
@@ -277,3 +283,70 @@ zones:
         label: "VCA IN"
         font_size: 1.6
         cpp_id: "VCA_INPUT"
+
+  # ── LP1: Low-Pass Filter 1 ────────────────────────────────────────────────────
+  # 9 HP   x_start=35.56   col_pitch=15.24 (3 HP/col)
+  # col 0 cx=43.18  col 1 cx=58.42  col 2 cx=73.66
+  # All main knobs centred at col 1 (cx=58.42mm).
+  # Attenuverters spread across cols 0/1/2 at cy=97.0 (ATT-to-jack gap 0.43mm ✓).
+  # Adjacent ATT pots: 1.49mm x-gap (no PCB overlap). Bottom jacks cy=112.0 (matching sec 0).
+  - id: zone_lp1
+    label: "Zone — LP1 Low-Pass Filter"
+    x_start: 35.56
+    col_pitch: 15.24
+    cols: 3
+    components:
+      # ── Main knobs (all col 1 = section centre) ──────────────────────────────
+      - id: LP1_FREQ
+        type: knob_xl
+        col: 1
+        cy: 42.0
+        label: "FREQ"
+        cpp_param: "LP1_FREQ_PARAM"
+      - id: LP1_TILT
+        type: knob_large
+        col: 1
+        cy: 63.0
+        label: "TILT"
+        cpp_param: "LP1_TILT_PARAM"
+      - id: LP1_RES
+        type: knob_large
+        col: 1
+        cy: 81.0
+        label: "RES"
+        cpp_param: "LP1_RES_PARAM"
+      # ── Attenuverters (no label) ──────────────────────────────────────────────
+      - id: LP1_FREQ_ATT
+        type: knob_medium
+        col: 0
+        cy: 97.0
+        cpp_param: "LP1_FREQ_ATT_PARAM"
+      - id: LP1_TILT_ATT
+        type: knob_medium
+        col: 1
+        cy: 97.0
+        cpp_param: "LP1_TILT_ATT_PARAM"
+      - id: LP1_RES_ATT
+        type: knob_medium
+        col: 2
+        cy: 97.0
+        cpp_param: "LP1_RES_ATT_PARAM"
+      # ── CV input jacks (cy=112.0 matches section-0 bottom row) ───────────────
+      - id: LP1_FREQ_IN
+        type: jack_input
+        col: 0
+        cy: 112.0
+        label: "FREQ"
+        cpp_id: "LP1_FREQ_INPUT"
+      - id: LP1_TILT_IN
+        type: jack_input
+        col: 1
+        cy: 112.0
+        label: "TILT"
+        cpp_id: "LP1_TILT_INPUT"
+      - id: LP1_RES_IN
+        type: jack_input
+        col: 2
+        cy: 112.0
+        label: "RES"
+        cpp_id: "LP1_RES_INPUT"

@@ -30,6 +30,7 @@
 
   <!-- ── MAIN ZONE SEPARATOR LINES (cyan) ──────────────────────────────────── -->
   <line x1="35.56" y1="9.0" x2="35.56" y2="124.0" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
+  <line x1="81.28" y1="9.0" x2="81.28" y2="124.0" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
 
   <!-- ── ZONE DIVIDERS (dim gray horizontal) ──────────────────────────────── -->
   <line x1="1.0" y1="9.0" x2="12.53" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
@@ -41,6 +42,9 @@
   <line x1="1.0" y1="77.0" x2="11.23" y2="77.0" stroke="#3a3a3a" stroke-width="0.5"/>
   <line x1="24.33" y1="77.0" x2="35.06" y2="77.0" stroke="#3a3a3a" stroke-width="0.5"/>
   <text x="17.78" y="77.0" fill="#999" font-family="monospace" font-size="2.0" text-anchor="middle" dominant-baseline="middle">MOD BUS</text>
+  <line x1="36.56" y1="9.0" x2="54.47" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
+  <line x1="62.37" y1="9.0" x2="80.78" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
+  <text x="58.42" y="9.0" fill="#999" font-family="monospace" font-size="2.0" text-anchor="middle" dominant-baseline="middle">LP1</text>
 
   <!-- ── LP2+HP+OUT ZONE: TOP STRIP / FILTER SECTION DIVIDER ──────────────── -->
 
@@ -124,5 +128,37 @@
   <circle cx="28.575" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="28.575" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
   <text x="28.575" y="119.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">VCA IN</text>
+
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- Zone — LP1 Low-Pass Filter                                               -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+
+  <circle cx="58.42" cy="42.0" r="9.0" fill="#1a1a1a" stroke="#555" stroke-width="0.7"/>
+  <line x1="58.42" y1="42.0" x2="58.42" y2="33.0" stroke="#aaa" stroke-width="0.8"/>
+  <text x="58.42" y="54.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
+  <circle cx="58.42" cy="63.0" r="7.0" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="58.42" y1="63.0" x2="58.42" y2="56.0" stroke="#aaa" stroke-width="0.7"/>
+  <text x="58.42" y="73.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">TILT</text>
+  <circle cx="58.42" cy="81.0" r="7.0" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="58.42" y1="81.0" x2="58.42" y2="74.0" stroke="#aaa" stroke-width="0.7"/>
+  <text x="58.42" y="91.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">RES</text>
+  <circle cx="43.18" cy="97.0" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="43.18" y1="97.0" x2="43.18" y2="92.5" stroke="#aaa" stroke-width="0.6"/>
+  <text x="43.18" y="104.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="58.42" cy="97.0" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="58.42" y1="97.0" x2="58.42" y2="92.5" stroke="#aaa" stroke-width="0.6"/>
+  <text x="58.42" y="104.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="73.66" cy="97.0" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="73.66" y1="97.0" x2="73.66" y2="92.5" stroke="#aaa" stroke-width="0.6"/>
+  <text x="73.66" y="104.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="43.18" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="43.18" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="43.18" y="119.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
+  <circle cx="58.42" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="58.42" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="58.42" y="119.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">TILT</text>
+  <circle cx="73.66" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="73.66" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="73.66" y="119.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">RES</text>
 
 </svg>
