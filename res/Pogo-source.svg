@@ -35,7 +35,7 @@
   <line x1="125.73" y1="9.0" x2="125.73" y2="124.0" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
   <line x1="160.02" y1="9.0" x2="160.02" y2="124.0" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
   <line x1="194.31" y1="9.0" x2="194.31" y2="124.0" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
-  <line x1="226.31" y1="9.0" x2="226.31" y2="124.0" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
+  <line x1="228.6" y1="9.0" x2="228.6" y2="124.0" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
 
   <!-- ── ZONE DIVIDERS (dim gray horizontal) ──────────────────────────────── -->
   <line x1="1.0" y1="9.0" x2="11.89" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
@@ -62,9 +62,10 @@
   <line x1="161.02" y1="9.0" x2="172.56" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
   <line x1="181.76" y1="9.0" x2="193.81" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
   <text x="177.165" y="9.0" fill="#999" font-family="monospace" font-size="2.0" text-anchor="middle" dominant-baseline="middle">BP 3</text>
-  <line x1="195.31" y1="9.0" x2="207.01" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
-  <line x1="213.61" y1="9.0" x2="225.81" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
-  <text x="210.31" y="9.0" fill="#999" font-family="monospace" font-size="2.0" text-anchor="middle" dominant-baseline="middle">HP</text>
+  <line x1="195.31" y1="9.0" x2="208.16" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
+  <line x1="214.76" y1="9.0" x2="228.1" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
+  <text x="211.455" y="9.0" fill="#999" font-family="monospace" font-size="2.0" text-anchor="middle" dominant-baseline="middle">HP</text>
+  <line x1="195.31" y1="26.0" x2="228.1" y2="26.0" stroke="#3a3a3a" stroke-width="0.5"/>
 
   <!-- ── LP2+HP+OUT ZONE: TOP STRIP / FILTER SECTION DIVIDER ──────────────── -->
 
@@ -315,40 +316,40 @@
   <!-- Zone — BP3 OUT                                                           -->
   <!-- ════════════════════════════════════════════════════════════════════════ -->
 
-  <circle cx="202.31" cy="17.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="202.31" cy="17.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <rect x="198.81" y="22.24" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
-  <text x="202.31" y="24.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">BP3 L</text>
-  <circle cx="218.31" cy="17.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="218.31" cy="17.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <rect x="214.81" y="22.24" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
-  <text x="218.31" y="24.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">BP3 R</text>
+  <circle cx="200.025" cy="17.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="200.025" cy="17.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <rect x="196.53" y="22.24" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
+  <text x="200.025" y="24.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">BP3 L</text>
+  <circle cx="211.455" cy="17.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="211.455" cy="17.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <rect x="207.96" y="22.24" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
+  <text x="211.455" y="24.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">BP3 R</text>
 
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- Zone — HP                                                                -->
   <!-- ════════════════════════════════════════════════════════════════════════ -->
 
-  <rect x="201.06" y="31.00" width="2.5" height="48.0" rx="1.2" fill="#1a1a1a" stroke="#555" stroke-width="0.4"/>
-  <line x1="198.81" y1="32.50" x2="205.81" y2="32.50" stroke="#555" stroke-width="0.5"/>
-  <line x1="198.81" y1="77.50" x2="205.81" y2="77.50" stroke="#555" stroke-width="0.5"/>
-  <line x1="200.31" y1="55.00" x2="204.31" y2="55.00" stroke="#aaa" stroke-width="0.35"/>
-  <rect x="197.81" y="52.75" width="9.0" height="4.5" rx="1.8" fill="#666" stroke="#888" stroke-width="0.35"/>
-  <line x1="198.81" y1="55.00" x2="205.81" y2="55.00" stroke="#aaa" stroke-width="0.6"/>
-  <text x="202.31" y="27.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
-  <circle cx="218.31" cy="78.0" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
-  <line x1="218.31" y1="78.0" x2="218.31" y2="73.5" stroke="#aaa" stroke-width="0.6"/>
-  <text x="218.31" y="85.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">RES</text>
-  <circle cx="202.31" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="202.31" y1="100.0" x2="202.31" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
-  <text x="202.31" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
-  <circle cx="218.31" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="218.31" y1="100.0" x2="218.31" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
-  <text x="218.31" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
-  <circle cx="202.31" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="202.31" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="202.31" y="119.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
-  <circle cx="218.31" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="218.31" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="218.31" y="119.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">RES</text>
+  <rect x="204.49" y="31.00" width="2.5" height="48.0" rx="1.2" fill="#1a1a1a" stroke="#555" stroke-width="0.4"/>
+  <line x1="202.24" y1="32.50" x2="209.24" y2="32.50" stroke="#555" stroke-width="0.5"/>
+  <line x1="202.24" y1="77.50" x2="209.24" y2="77.50" stroke="#555" stroke-width="0.5"/>
+  <line x1="203.74" y1="55.00" x2="207.74" y2="55.00" stroke="#aaa" stroke-width="0.35"/>
+  <rect x="201.24" y="52.75" width="9.0" height="4.5" rx="1.8" fill="#666" stroke="#888" stroke-width="0.35"/>
+  <line x1="202.24" y1="55.00" x2="209.24" y2="55.00" stroke="#aaa" stroke-width="0.6"/>
+  <text x="205.74" y="27.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
+  <circle cx="222.885" cy="78.0" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="222.885" y1="78.0" x2="222.885" y2="73.5" stroke="#aaa" stroke-width="0.6"/>
+  <text x="222.885" y="85.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">RES</text>
+  <circle cx="200.025" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="200.025" y1="100.0" x2="200.025" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
+  <text x="200.025" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="222.885" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="222.885" y1="100.0" x2="222.885" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
+  <text x="222.885" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="200.025" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="200.025" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="200.025" y="119.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
+  <circle cx="222.885" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="222.885" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="222.885" y="119.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">RES</text>
 
 </svg>

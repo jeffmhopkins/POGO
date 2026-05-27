@@ -121,11 +121,13 @@ separators:
   - {type: h, x1: 161.02, x2: 193.81, y: 9.0, style: zone_div, label: "BP 3", label_x: 177.165}
 
   # ── BP3 OUT + HP right boundary ───────────────────────────────────────────────
-  # Both zones share x_start=194.31, col_pitch=16.0mm, cols=2
-  # col0 cx=202.31 (slider / BP3 L), col1 cx=218.31 (RES knob / BP3 R)
-  # Right boundary = 194.31 + 32.0 = 226.31mm
-  - {type: v, x: 226.31, y1: 9.0, y2: 124.0, style: main_cyan}
-  - {type: h, x1: 195.31, x2: 225.81, y: 9.0, style: zone_div, label: "HP", label_x: 210.31}
+  # Both zones share x_start=194.31, col_pitch=11.43mm, cols=3
+  # col0 cx=200.025, col1 cx=211.455, col2 cx=222.885
+  # Right boundary = 194.31 + 3×11.43 = 228.60mm
+  - {type: v, x: 228.60, y1: 9.0, y2: 124.0, style: main_cyan}
+  - {type: h, x1: 195.31, x2: 228.10, y: 9.0, style: zone_div, label: "HP", label_x: 211.455}
+  # Grey divider between BP3 OUT jacks (cy=17) and HP slider (cy=55)
+  - {type: h, x1: 195.31, x2: 228.10, y: 26.0, style: zone_div}
 
 # ── Zone labels ───────────────────────────────────────────────────────────────
 # x=17.145 is the geometric centre of the 3-column section (col 1 cx)
@@ -642,12 +644,12 @@ zones:
   # ── Zone: BP3 OUT ────────────────────────────────────────────────────────────
   # Stereo output jacks at top of column — stacked above HP zone (same x_start).
   # col_pitch=16.0mm so cols align with HP below; rotate=180 keeps PCB within keepout.
-  # col0 cx=202.31 (BP3 L), col1 cx=218.31 (BP3 R)
+  # col0 cx=200.025 (BP3 L), col1 cx=211.455 (BP3 R)
   # Jack PCB bottom = 17+7.9 = 24.9mm; HP slider PCB top = 55-28.5 = 26.5mm → gap=1.6mm ✓
   - id: zone_bp3_out
     label: "Zone — BP3 OUT"
     x_start: 194.31
-    col_pitch: 16.0
+    col_pitch: 11.43
     cols: 2
     components:
       - id: BP3_L_OUT
@@ -670,25 +672,27 @@ zones:
   # ── Zone: HP ─────────────────────────────────────────────────────────────────
   # 45mm slider (FREQ) + med knob (RES) + 2 trimpots + 2 jacks.
   # Same x_start + col_pitch as BP3 OUT above — components stack vertically.
-  # col0 cx=202.31 (slider), col1 cx=218.31 (RES knob)
-  # Slider/knob PCB gap: 202.31+7.0 = 209.31 vs 218.31-8.65 = 209.66 → 0.35mm ✓
+  # col0 cx=200.025 (FREQ att/jack), col1 cx=211.455 (unused),
+  # col2 cx=222.885 (RES knob/att/jack)
+  # Slider at explicit cx=205.74 (between col0 and col1):
+  #   right edge=212.74, RES knob left=222.885-8.65=214.235 → gap=1.495mm ✓
   # Slider cy=55: PCB top=26.5>24.9 (jack PCB bot) ✓, PCB bot=83.5<96.6mm ✓
   - id: zone_hp
     label: "Zone — HP"
     x_start: 194.31
-    col_pitch: 16.0
-    cols: 2
+    col_pitch: 11.43
+    cols: 3
     components:
-      # col0 cx=202.31  col1 cx=218.31
+      # Slider centred between col0 and col1 (explicit cx avoids col resolution)
       - id: HP_FREQ
         type: slider_V45
-        col: 0
+        cx: 205.74
         cy: 55.0
         label: "FREQ"
         cpp_param: "HP_FREQ_PARAM"
       - id: HP_RES
         type: knob_medium
-        col: 1
+        col: 2
         cy: 78.0
         label: "RES"
         cpp_param: "HP_RES_PARAM"
@@ -699,7 +703,7 @@ zones:
         cpp_param: "HP_FREQ_ATT_PARAM"
       - id: HP_RES_ATT
         type: trimpot
-        col: 1
+        col: 2
         cy: 100.0
         cpp_param: "HP_RES_ATT_PARAM"
       - id: HP_FREQ_IN
@@ -710,7 +714,7 @@ zones:
         cpp_id: "HP_FREQ_INPUT"
       - id: HP_RES_IN
         type: jack_input
-        col: 1
+        col: 2
         cy: 112.0
         label: "RES"
         cpp_id: "HP_RES_INPUT"
