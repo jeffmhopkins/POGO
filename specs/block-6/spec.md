@@ -418,15 +418,15 @@ BP3 (f_ref = 6000 Hz): C = 192µS/(2π×6000) = 5.1 nF → use 4.7 nF (C0G, 0603
 
 - 6× LM13700M (SVF integrators + Q VCAs): ~4 mA × 6 = ~24 mA  (TI: 4 mA typ per package)
 - 6× OPA1612 (SUM_AMPs, dual SOIC-8): 5.5 mA × 6 = 33 mA  (Iq = 2.75 mA/channel × 2 ch/IC)
-- Distortion op-amps — 18 TL072CDT ICs (6 SC + 6 HC + 6 WF; one SOIC-8 per group per channel; half A = signal path, half B = spare or shared): ~3 mA × 18 = ~54 mA
-- BP_MIX + tilt/pol — 5 TL072CDT ICs (1 tilt/pol inverter + 2 wet-summer + 2 MIX polarity buffer): ~3 mA × 5 = ~15 mA
+- Distortion op-amps — 12 TL072CDT ICs (6 SC+HC shared + 6 WF): ~2.6 mA × 12 = ~31 mA
+- BP_MIX + tilt/pol — 5 TL072CDT ICs (1 tilt/pol inverter + 2 wet-summer + 2 MIX polarity buffer): ~2.6 mA × 5 = ~13 mA
 - 3× THAT340S14-U (expo converters): ~3 mA
 - 3× CD4053BM96 (distortion mux, CMOS quiescent ≈ 0): ~0 mA
-- **+12V: ~129 mA | −12V: ~129 mA**
+- **+12V: ~104 mA | −12V: ~104 mA**
 
-Note: the dominant power draw is 23 TL072CDT packages (18 distortion + 5 MIX/tilt). Each IC
-draws ~2.8 mA quiescent regardless of how many of its two halves are active. This is the
-highest single-block draw in the module and must be accounted for in the bus power budget.
+Note: SC and HC distortion paths share one TL072CDT per group/channel (half A = SC, half B = HC).
+WF requires both halves of its own IC. Total distortion ICs reduced from 18 to 12 vs prior design.
+Icc figures use ±12V operating point (~2.6 mA/pkg), not the ±15V datasheet spec.
 
 ---
 
@@ -445,14 +445,12 @@ highest single-block draw in the module and must be accounted for in the bus pow
 | BP_DIST_MUX_1, _2, _3 | CD4053BM96 | SOIC-16 | — | 3 | audio | block-6 | SC/HC/WF mode mux per group; S_A/S_B tied globally |
 | R_5V_REG | resistor | 0603 | 1 kΩ | 1 | audio | block-6 | Series R for +5V logic rail (from +12V → 78L05 or zener) |
 | D_5V | BZX84C5V1 | SOT-23 | 5.1V | 1 | audio | block-6 | Zener shunt for CD4053 logic supply rail |
-| *— SC sub-circuit (per group, per channel: 6 sets) —* | | | | | | | |
-| BP_SC_AMP_G1–G3_L/R | TL072CDT | SOIC-8 | — | 6 | audio | block-6 | SC gain amp; half A per channel; half B spare or shared |
+| *— SC + HC sub-circuits (per group, per channel: 6 shared ICs) —* | | | | | | | |
+| BP_SC_HC_AMP_G1–G3_L/R | TL072CDT | SOIC-8 | — | 6 | audio | block-6 | Shared SC/HC amp IC: half A = SC gain stage, half B = HC gain stage; both paths always biased, CD4053 mux selects which output reaches the mix |
 | R_SC_in | resistor | 0603 | 10 kΩ | 12 | audio | block-6 | SC input resistor (1 per channel per group) |
 | R_SC_fb_fixed | resistor | 0603 | 10 kΩ | 12 | audio | block-6 | SC minimum feedback R (ensures G≥1× at zero drive) |
 | RV_DRIVE_SC_G1–G3 | log-taper pot | 9 mm | 470 kΩ | 6 | control | block-6 | SC DRIVE per group (shared with HC/WF; same pot) |
 | D_SC_1N4148 | 1N4148W | SOD-123 | — | 48 | audio | block-6 | SC diodes: 4 per path (2 antiparallel pairs), 12 paths |
-| *— HC sub-circuit (per group, per channel: 6 sets) —* | | | | | | | |
-| BP_HC_AMP_G1–G3_L/R | TL072CDT | SOIC-8 | — | 6 | audio | block-6 | HC gain amp; half A per channel; half B spare or shared |
 | R_HC_in | resistor | 0603 | 10 kΩ | 12 | audio | block-6 | HC input resistor |
 | R_HC_fb_fixed | resistor | 0603 | 10 kΩ | 12 | audio | block-6 | HC minimum feedback R |
 | RV_DRIVE_HC_G1–G3 | log-taper pot | 9 mm | 47 kΩ | 6 | control | block-6 | HC DRIVE per group (can share pot with SC if dual-gang) |

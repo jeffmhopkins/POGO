@@ -9,7 +9,7 @@
 #   - tol field (where present) = required resistor tolerance; all others: 5% OK unless noted
 #
 # PRECISION RESISTORS — 1% or better required (functional, not cosmetic):
-#   R3, R4, R5, R6     block-1   NE5532D gain ratio (4.83×) — L/R matching; low i_n×R noise
+#   R3, R4, R5, R6     block-1   OPA1612 gain ratio (4.83×) — L/R matching; low i_n×R noise
 #   R_VOCT              block-5,6,7,8   47 kΩ THAT340 V/oct network — 1% error = 12 cents; with R_E+RV_1VOCT trims to 18.0 mV/V
 #   R_inv_in, R_inv_f  block-3 attenuverters (MB_INV_1–5)  10 kΩ — center null depth >60 dB
 #   R_MB_INV           block-3   100 kΩ — MB_INV inverter gain accuracy
@@ -32,9 +32,9 @@ components:
   - { ref: C2,   board: audio,   block: block-A, part: ~,          pkg: "0603",   val: "100nF",  fn: "U1 -12V decoupling" }
 
   # block-1: Pre-Gain
-  - { ref: U2,   board: audio,   block: block-1, part: NE5532D,    pkg: SOIC-8,   fn: "Main pre-gain amp L+R" }
-  - { ref: U3,   board: audio,   block: block-1, part: NE5532D,    pkg: SOIC-8,   fn: "Alt BP pre-gain amp L+R" }
-  - { ref: R3,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "4.7kΩ",  tol: "1%", fn: "R_in main gain stage (×2 ch); lowers NE5532D current-noise contribution" }
+  - { ref: U2,   board: audio,   block: block-1, part: OPA1612,    pkg: SOIC-8,   fn: "Main pre-gain amp L+R; 1.1 nV/√Hz" }
+  - { ref: U3,   board: audio,   block: block-1, part: OPA1612,    pkg: SOIC-8,   fn: "Alt BP pre-gain amp L+R; 1.1 nV/√Hz" }
+  - { ref: R3,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "4.7kΩ",  tol: "1%", fn: "R_in main gain stage (×2 ch); 1% for L/R match; low i_n×R noise" }
   - { ref: R4,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "18kΩ",   tol: "1%", fn: "R_f main gain stage (×2 ch); G = 1 + 18/4.7 = 4.83× ≈ 5×" }
   - { ref: R5,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "4.7kΩ",  tol: "1%", fn: "R_in alt gain stage (×2 ch)" }
   - { ref: R6,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "18kΩ",   tol: "1%", fn: "R_f alt gain stage (×2 ch)" }

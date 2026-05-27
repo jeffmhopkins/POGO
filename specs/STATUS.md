@@ -17,8 +17,8 @@ Last updated: 2026-05-27 | Topology: 48HP | Phase 3R: all blocks complete
 
 | Block | Name | Phase 1R | Phase 2R | Phase 3R | Notes |
 |---|---|---|---|---|---|
-| A | Input Buffer | ✅ | ✅ | ✅ | LM4562 follower, BAT54S clamp |
-| 1 | Pre-Gain | ✅ | ✅ | ✅ | NE5532D, 1×/5× switch; ALT_BP path |
+| A | Input Buffer | ✅ | ✅ | ✅ | OPA1612 follower, BAT54S clamp |
+| 1 | Pre-Gain | ✅ | ✅ | ✅ | OPA1612, 1×/5× switch; ALT_BP path |
 | 2 | Dual LFO | ✅ | ✅ | ✅ | Integrator+Schmitt; 47nF C0G; 1MΩ log pot + end R |
 | 3 | Mod Bus | ✅ | ✅ | ✅ | 19 destinations; 7× TL074CDT; 470kΩ SCALE pot |
 | 4 | VCA | ✅ | ✅ | ✅ | THAT 2180 dB-law; DSP updated to match |
@@ -83,7 +83,7 @@ range (creative tool).
 All review findings resolved. See §7 Completed Action Items in that file for the full list.
 Key corrections: THAT340 SOIC-8→SOIC-14; BAT85→SS14 (SMD); block-3 clamp zeners + cal trims
 added; MB_PROC_A distribution buffer corrected; destination count 22→19; block-4 AMT pot
-loading addressed; block-1 NE5532D R_in lowered for noise; all 12 SUM_AMP ICs→OPA1612
+loading addressed; block-1 NE5532D→OPA1612 + R_g lowered for noise; all 12 SUM_AMP ICs→OPA1612
 (1.1 nV/√Hz); OPA1612 Iq corrected (5.5 mA/dual-IC per rail); block-1 noise % corrected;
 block-6 WF topology replaced with true symmetric precision folder (no prototype stability risk).
 

@@ -134,8 +134,8 @@ near the LFO output stage, but are logically Block B's responsibility.
 
 ### Power Draw Estimate
 
-- 2× TL072CDT (U_MAIN, U_BP3, dual SOIC-8): ~3 mA each = ~6 mA  (TI: 1.4 mA/ch × 2 = 2.8 mA)
-- **+12V: ~6 mA | −12V: ~6 mA**
+- 2× TL072CDT (U_MAIN, U_BP3, dual SOIC-8): ~2.6 mA each = ~5 mA  (TI: 1.3 mA/ch × 2 at ±12V)
+- **+12V: ~5 mA | −12V: ~5 mA**
 
 → References `aux/unity-buffer.svg` for op-amp follower schematic primitive.
 

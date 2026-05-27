@@ -81,7 +81,7 @@ passive mechanical normalling; no additional circuitry is required.
 
 ### Hardware deviations from DSP model
 
-The DSP clamp is symmetric at exactly ±11.0 V. In hardware the LM4562 output swing is
+The DSP clamp is symmetric at exactly ±11.0 V. In hardware the OPA1612 output swing is
 a function of load current and rail accuracy; it typically saturates at ±10.8 V to
 ±11.2 V. This is consistent with the DSP spec and requires no correction. There is no
 intentional nonlinearity in this block.
@@ -155,6 +155,6 @@ jacks are located to keep input traces short and shielded from digital noise.
 | D2 | BAT54S | SOT-23 | — | 1 | audio | block-A | R input protection clamp ±12 V |
 | R1 | resistor | 0603 | 100 Ω | 1 | audio | block-A | L series input protection |
 | R2 | resistor | 0603 | 100 Ω | 1 | audio | block-A | R series input protection |
-| C1 | cap, X7R | 0603 | 100 nF | 2 | audio | block-A | LM4562 supply decoupling (+12 V and −12 V) |
+| C1 | cap, X7R | 0603 | 100 nF | 2 | audio | block-A | OPA1612 supply decoupling (+12 V and −12 V) |
 | J1 | PJ301M-12 | panel | — | 1 | panel | block-A | L_IN jack |
 | J2 | PJ301M-12 | panel | — | 1 | panel | block-A | R_IN jack (tip-switching normalling to L) |

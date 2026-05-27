@@ -187,10 +187,10 @@ is logically a mod bus destination and is normalled to V_modbus.
 
 **Power estimate:**
 
-7× TL074CDT at ≈ 3.8 mA per IC (datasheet typical, ±15 V; slightly less at ±12 V).
+7× TL074CDT at ≈ 2.6 mA per IC (TI datasheet: 0.65 mA/ch × 4 ch at ±12 V).
 
-- +12 V: ~27 mA
-- −12 V: ~27 mA
+- +12 V: ~18 mA
+- −12 V: ~18 mA
 
 ---
 

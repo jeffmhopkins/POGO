@@ -41,7 +41,7 @@
 
 | Block | Reason no trim needed |
 |---|---|
-| block-A Input Buffer | LM4562 V_os < 0.2 mV; gain = 1 unity; no calibration needed |
+| block-A Input Buffer | OPA1612 V_os < 0.2 mV; gain = 1 unity; no calibration needed |
 | block-1 Pre-Gain | Resistor-ratio gain 1×/5×; 1% resistors give ±2% accuracy, acceptable for a switched gain |
 | block-2 Dual LFO | LFO rate accuracy not critical (±20% acceptable for musical use); log pot + end resistors adequate |
 | block-B Output Buffer | Unity-gain TL072 followers; no calibration |
@@ -67,8 +67,7 @@ Do not add unless prototype reveals audible issue.
 | LM13700M | LM13700M/NOPB | TI, Mouser, Digi-Key | Long-running TI part; ample stock |
 | TL072CDT | TL072CDT | STMicro, Digi-Key | Common; multiple sources |
 | TL074CDT | TL074CDT | STMicro, Digi-Key | Common; multiple sources |
-| NE5532D | NE5532D | TI, Digi-Key | In production |
-| LM4562MA | LM4562MA/NOPB | TI, Mouser | In production |
+| OPA1612 | OPA1612AIDR | TI, Digi-Key | In production; SOIC-8; replaced NE5532D (block-1) and LM4562MA (block-A) |
 | BAT54S | BAT54S | Vishay, Nexperia | SOT-23, multiple sources |
 | CD4053BM96 | CD4053BM96 | TI | SOIC-16 (bipolar supply variant); verify VDD/VSS ±12 V operation |
 | BZX84C10 | BZX84C10LT1G | OnSemi | SOT-23 10 V zener (mod bus clamp) |
@@ -151,7 +150,7 @@ current, leaving only ~±8–9 V).
 No additional ICs needed; MB_PROC_A was previously shown with 2 spare sections.
 
 **Alternative if paralleled TL074 proves unstable:** Replace U_MB_BUF with a single
-NE5532D half (output short-circuit current ≈ 38 mA; handles 526 Ω cleanly).
+OPA1612 half (output short-circuit current ≈ 38 mA; handles 526 Ω cleanly).
 
 ### 3.2 VCA AMT Pot Impedance Loading — **Design Note Added to block-4/spec.md**
 
@@ -199,8 +198,8 @@ below the TL072 SUM_AMP (18 nV/√Hz). Linearizing resistors are correctly sized
 
 | Stage | Device | e_n | Current noise @ Z_in | Total RTI |
 |---|---|---|---|---|
-| Block A | LM4562 | 2.7 nV/√Hz | i_n × 100 Ω = 0.2 nV/√Hz | **≈ 3.0 nV/√Hz** |
-| Block 1 (G = 5×) | NE5532D | 5 nV/√Hz | i_n (0.7 pA) × 12 kΩ = 8.4 nV/√Hz | **≈ 10 nV/√Hz** |
+| Block A | OPA1612 | 1.1 nV/√Hz | i_n × 100 Ω = 0.2 nV/√Hz | **≈ 1.1 nV/√Hz** |
+| Block 1 (G = 5×) | OPA1612 | 1.1 nV/√Hz | i_n (1.7 pA) × 4.7 kΩ = 8.0 nV/√Hz | **≈ 8.1 nV/√Hz** |
 | Block 4 (THAT 2180) | THAT 2180 | ~5 nV/√Hz | control path — not audio | **≈ 5 nV/√Hz** |
 | Block 5 (LP1 SUM_AMP) | TL072 | 18 nV/√Hz | i_n (0.01 pA) × 100 kΩ = 1 nV/√Hz | **≈ 18 nV/√Hz** |
 | Block 6 (BP SUM_AMPs + dist) | TL072 cascade | 18 nV/√Hz per stage; 3–5 stages | **≈ 25 nV/√Hz equiv** |
@@ -213,9 +212,9 @@ below the TL072 SUM_AMP (18 nV/√Hz). Linearizing resistors are correctly sized
 Assuming unity gain through each block, uncorrelated noise sources sum in quadrature:
 
 ```
-e_n_chain = √(3² + 10² + 5² + 18² + 25² + 18² + 18² + 18²)
-           = √(9 + 100 + 25 + 324 + 625 + 324 + 324 + 324)
-           = √2055 ≈ 45 nV/√Hz
+e_n_chain = √(1.1² + 8.1² + 5² + 18² + 25² + 18² + 18² + 18²)
+           = √(1.2 + 65.6 + 25 + 324 + 625 + 324 + 324 + 324)
+           = √2013 ≈ 45 nV/√Hz
 ```
 
 Integrated 20 Hz – 20 kHz:
@@ -233,21 +232,23 @@ SNR ≈ 20 × log(3.54 V / 6.4 µV) ≈ 115 dB
 The module's noise floor is set by the multi-stage filter topology, not a single weak stage.
 115 dB SNR is excellent for a complex analog filter module.
 
-### 4.3 Dominant Noise Source: Block 1 (NE5532D at G = 5×)
+### 4.3 Dominant Noise Source: Block 1 (OPA1612 at G = 5×)
 
-The largest single-stage contributor is block-1 at G = 5× mode: NE5532D current noise
-i_n = 0.7 pA/√Hz through R_in = 12 kΩ gives 8.4 nV/√Hz — larger than the op-amp's own
-voltage noise (5 nV/√Hz). Total RTI ≈ 10 nV/√Hz.
+The largest single-stage contributor is block-1 at G = 5× mode. OPA1612 (bipolar input)
+current noise i_n = 1.7 pA/√Hz through R_g = 4.7 kΩ gives 8.0 nV/√Hz — much larger than
+the op-amp's voltage noise (1.1 nV/√Hz). Total RTI ≈ 8.1 nV/√Hz.
 
-**Improvement available (optional):** Lower R_in to 4.7 kΩ with R_f = 18.2 kΩ (G = 4.87×):
 ```
-i_n × R_in = 0.7 pA × 4.7 kΩ = 3.3 nV/√Hz   (vs 8.4 nV currently)
-Total RTI ≈ √(5² + 3.3² + 4.7²) ≈ 7.4 nV/√Hz   (vs 10 nV currently)
+i_n × R_g = 1.7 pA × 4.7 kΩ = 8.0 nV/√Hz
+Total RTI ≈ √(1.1² + 8.0²) ≈ 8.1 nV/√Hz
 ```
-This reduces block-1 noise by ~26 %. The gain is 4.87× instead of 4.92× — well within
-tolerance. **This change is optional** (overall SNR improves from ~115 dB to ~116 dB —
-negligible in practice). Leave current 12 kΩ / 47 kΩ values unless block-1 noise
-proves audible on prototype.
+
+The previous design used NE5532D at R_g = 12 kΩ (RTI ≈ 10 nV/√Hz). The implemented
+improvement lowered R_g to 4.7 kΩ and replaced NE5532D with OPA1612, reducing RTI by
+~1.9 nV/√Hz (−1.8 dB) and saving 5 mA per rail. At R_g = 4.7 kΩ the OPA1612 bipolar
+current noise still dominates. Further reduction would require a FET-input op-amp, but
+all ±12V-compatible FET types (TL072, TL074) have e_n ≥ 18 nV/√Hz, which would worsen
+the total RTI significantly. No practical improvement remains.
 
 ### 4.4 TL072 SUM_AMP Noise (Blocks 5, 7, 8)
 
@@ -341,7 +342,7 @@ validation items remain as Phase 5R tasks:
 | Block-3: missing BZX84C10 zener clamps + RV_MB_ZERO + RV_MB_AMOUNT_MAX | Done |
 | Block-3: MB_PROC_A paralleled distribution buffer (halves C+D, 47Ω series R) | Done |
 | Block-4: AMT pot 10kΩ → 1kΩ (14% → <1.6% THAT 2180 gain error) | Done |
-| Block-1: R_in 12kΩ → 4.7kΩ, R_f 47kΩ → 18kΩ (NE5532D current noise: 8.4→3.3 nV/√Hz) | Done |
+| Block-1: R_g 12kΩ → 4.7kΩ, R_f 47kΩ → 18kΩ; NE5532D → OPA1612 (RTI: 10→8.1 nV/√Hz; −1.8 dB noise, 5 mA saved) | Done |
 | OPA1612 for all 12 SUM_AMPs in blocks 5/6/7/8 (1.1 nV/√Hz; 16× noise reduction) | Done |
 | aux-attenuverter.md: 22→19 destinations, 100kΩ pot → 10kΩ | Done |
 | aux-mod-bus-core.md: 22→19 destinations, buffer topology update | Done |

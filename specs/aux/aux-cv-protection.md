@@ -52,8 +52,8 @@ IN ──┬──(+)──[TL072 half]──(out)──── to internal signa
 - Input impedance: ~1 MΩ (op-amp input impedance)
 - Output impedance: ~75 Ω (open-loop output resistance of TL072)
 - Use one half of TL072 (SOIC-8) per channel; quad TL074 (SOIC-14) for 4 inputs per IC
-- **Block A exception**: uses LM4562 (SOIC-8, pin-compatible) instead of TL072 because Block A
-  is the first active stage — its noise is amplified by all downstream blocks. See `specs/shared/noise-audit.md` H1.
+- **Block A exception**: uses OPA1612 (SOIC-8, pin-compatible) instead of TL072 because Block A
+  is the first active stage — its noise is amplified by all downstream blocks. OPA1612: 1.1 nV/√Hz, 5.5 mA/pkg.
 
 ## Normalling
 
