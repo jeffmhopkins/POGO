@@ -160,35 +160,38 @@ jobs:
           retention-days: 30
 
   # ─── KiCad schematic generation + validation ──────────────────────────────
-  kicad-build:
-    name: KiCad · Generate & Validate
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Install kiutils
-        run: pip install kiutils
-
-      - name: Generate control board schematic
-        run: python3 kicad/generate_control_board.py
-
-      - name: Validate control board (9 checks, 326 pin assignments)
-        run: python3 kicad/validate_schematic.py kicad/pogo-control-board.kicad_sch
-
-      - name: Generate utility board schematic
-        run: python3 kicad/generate_utility_board.py
-
-      - name: Validate utility board (7 checks, 477 coordinate-verified pin assignments)
-        run: python3 kicad/validate_utility_board.py kicad/pogo-utility-board.kicad_sch
-
-      - name: Upload schematic artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: POGO-kicad-${{ github.run_number }}
-          path: |
-            kicad/*.kicad_sch
-            kicad/*.kicad_pro
-          if-no-files-found: error
-          retention-days: 30
+  # DISABLED: generators are 40HP-era (see kicad/README-STALE.md).
+  # Will be re-enabled when 48HP KiCad generators are written (after Phase 3R complete).
+  #
+  # kicad-build:
+  #   name: KiCad · Generate & Validate
+  #   runs-on: ubuntu-latest
+  #
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v6
+  #
+  #     - name: Install kiutils
+  #       run: pip install kiutils
+  #
+  #     - name: Generate control board schematic
+  #       run: python3 kicad/generate_control_board.py
+  #
+  #     - name: Validate control board (9 checks, 326 pin assignments)
+  #       run: python3 kicad/validate_schematic.py kicad/pogo-control-board.kicad_sch
+  #
+  #     - name: Generate utility board schematic
+  #       run: python3 kicad/generate_utility_board.py
+  #
+  #     - name: Validate utility board (7 checks, 477 coordinate-verified pin assignments)
+  #       run: python3 kicad/validate_utility_board.py kicad/pogo-utility-board.kicad_sch
+  #
+  #     - name: Upload schematic artifact
+  #       uses: actions/upload-artifact@v7
+  #       with:
+  #         name: POGO-kicad-${{ github.run_number }}
+  #         path: |
+  #           kicad/*.kicad_sch
+  #           kicad/*.kicad_pro
+  #         if-no-files-found: error
+  #         retention-days: 30

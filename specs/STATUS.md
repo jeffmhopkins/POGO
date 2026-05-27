@@ -1,78 +1,91 @@
-# POGO Design Status — 48HP Topology
+# POGO — Hardware Spec Status
 
-## Paradigm: Code-First Reverse Engineering
+Last updated: 2026-05-27 | Topology: 48HP
 
-The working VCV Rack plugin (`plugin/src/Pogo.cpp`) and panel (`tools/panel-data.yaml`)
-are the source of truth. Hardware design documentation is reverse-engineered from them.
+## Phase Key
 
-**Phases:**
-- **Phase 1R** — Extract functional spec from working plugin code
-- **Phase 2R** — Map DSP behavior to analog model (bilinear transform inverse)
-- **Phase 3R** — Circuit design constrained by Phase 2R spec
-- **Phase 4R** — Panel (DONE — `tools/panel-data.yaml` is source of truth, DRC clean)
-- **Phase 5R** — Board layout (48HP, architecture under review)
-- **Phase 6R** — Code validation (CI green, signal-path smoke tests)
-
----
-
-## Per-Block Status
-
-| Block | Phase 1R: Extract | Phase 2R: Analog | Phase 3R: Circuit | Phase 6R: Code |
-|---|---|---|---|---|
-| Mod Architecture | ✅ | [ ] | [ ] | ✅ |
-| Block A: Input Buffer | ✅ | ✅ | ✅ | ✅ |
-| Block 1: Pre-Gain | ✅ | ✅ | ✅ | ✅ |
-| Block LFO (dual triangle) | ✅ skeleton | [ ] | [ ] | ✅ |
-| Block VCA (+ VCA_OFS) | ✅ | [ ] | [ ] | ✅ |
-| Block LP1 (+ TILT) | ✅ | [ ] | [ ] | ✅ |
-| Block BP (Triple SVF, 2× OS) | ✅ skeleton | [ ] | [ ] | ✅ |
-| Block 4: Distortion | ✅ | ✅ | ✅ | ✅ |
-| Block HP | ✅ | [ ] | [ ] | ✅ |
-| Block LP2 | ✅ | [ ] | [ ] | ✅ |
-| Block B: Output Buffer | ✅ | ✅ | ✅ | ✅ |
-
-Legend: ✅ complete · ✅ skeleton = Phase 1R written, Phase 2R/3R are stubs · [ ] not started
-
-**Phase 1R notes:**
-- Block LFO and Block BP: spec files written with full functional detail and Phase 2R/3R
-  placeholders, but Phase 2R (analog math) and Phase 3R (circuit design) are not done
-- All other Phase 1R items: fully extracted from plugin code
-
----
-
-## Module-Level Phases
-
-- ✅ **Phase 4R: Panel** — `tools/panel-data.yaml` defines all 48HP positions; DRC clean;
-  CI regenerates `plugin/res/Pogo-source.svg` on every push.
-
-- 🔄 **Phase 5R: Board Layout** — Architecture under review for 48HP (243.84mm wide).
-  40HP 3-board split archived at `specs/archive/40hp-era-2026-05/layout-notes.md`.
-  Options documented in `specs/board-layout/layout-notes.md`.
-
-- ✅ **Phase 6R: Code** — CI passing on Linux/Windows/macOS. Plugin builds clean.
-
----
-
-## Next Up: Phase 2R
-
-All blocks need Phase 2R (analog behavior model). Suggested order:
-
-1. **Block LFO** — triangle oscillator; simplest analog model; good starting point
-2. **Block VCA** — THAT 2180 is well-documented; gain law derivation is straightforward
-3. **Block LP1 / LP2 / HP** — same OTA-C SVF topology; bilinear transform inverse; do once, apply three times
-4. **Block BP (Triple SVF)** — same SVF math as LP1/HP; main challenge is 1/Q² normalization and 3× group scaling
-5. **Block 4: Distortion** — nonlinear; tanh / clipping / arcsin(sin) analog equivalents
-6. **Mod Architecture** — op-amp summer + attenuverter; well-understood
-
----
-
-## Source of Truth References
-
-| Topic | File |
+| Symbol | Meaning |
 |---|---|
-| Plugin params / signal chain | `docs/plugin-topology.md` |
-| Panel positions / DRC | `tools/panel-data.yaml` |
-| Plugin code | `plugin/src/Pogo.cpp`, `plugin/src/dsp/*.hpp` |
-| Panel SVG (generated) | `plugin/res/Pogo-source.svg` |
+| ✅ | Complete |
+| ⚠️ | Complete with known deviation (documented) |
+| 🔲 | Not started |
+| 🚧 | In progress |
 
-Last updated: 2026-05-27
+---
+
+## Block Specs (`specs/block-N/spec.md`)
+
+| Block | Name | Phase 1R | Phase 2R | Phase 3R | Notes |
+|---|---|---|---|---|---|
+| A | Input Buffer | ✅ | ✅ | ✅ | LM4562 follower, BAT54S clamp |
+| 1 | Pre-Gain | ✅ | ✅ | ✅ | NE5532D, 1×/5× switch; ALT_BP path |
+| 2 | Dual LFO | ✅ | ✅ | 🔲 | Topology TBD (integrator+comparator vs VCO IC) |
+| 3 | Mod Bus | ✅ | ✅ | 🔲 | 20 destinations, 11× TL074; full IC count at Phase 3R |
+| 4 | VCA | ✅ | ✅ ⚠️ | ✅ | THAT 2180 dB-law vs DSP linear — intentional deviation |
+| 5 | LP Filter 1 | ✅ | ✅ | ✅ | OTA-C SVF; stereo tilt (symmetric ±V_tilt L/R) |
+| 6 | Triple BP + Dist | ✅ | ✅ | 🔲 | 3× OTA-C SVF + SC/HC/WF distortion; CD4053 mux |
+| 7 | HP Filter | ✅ | ✅ | ✅ | OTA-C SVF; G=−1 buffer corrects SUM_AMP inversion |
+| 8 | LP Filter 2 | ✅ | ✅ | ✅ | OTA-C SVF; independent from LP1; shares Q VCA LM13700 |
+| B | Output Buffer | ✅ | ✅ | ✅ | TL072; MAIN_L/R from LP2 + BP3_L/R tap |
+
+## aux/ Circuit Library (`specs/aux/aux-*.md`)
+
+| File | Status | Notes |
+|---|---|---|
+| aux-ota-c-svf | 🚧 | Written; SVG placeholder |
+| aux-expo-converter | 🚧 | Written; SVG placeholder |
+| aux-q-control | 🚧 | Written; SVG placeholder |
+| aux-vca-cell | 🚧 | Written; SVG placeholder |
+| aux-unity-buffer | 🚧 | Written; SVG placeholder |
+| aux-distortion | 🚧 | Written; SVG placeholder |
+| aux-attenuverter | 🚧 | Written; SVG placeholder |
+| aux-mod-bus-core | 🚧 | Written; SVG placeholder |
+| aux-lfo-core | 🚧 | Written; SVG placeholder |
+| aux-cv-protection | ✅ | Moved from shared/; content unchanged |
+| aux-power-filter | ✅ | Moved from shared/; content unchanged |
+
+SVG schematic diagrams: all placeholder (`.svg` files are empty). Fill in manually
+using KiCad SVG export or Inkscape as a separate session.
+
+## Global Component Registry
+
+| File | Status |
+|---|---|
+| `specs/components.yaml` | 🚧 Partial — audio board + utility/control board populated; block-6 abbreviated; passive values TBD in some rows |
+
+## Panels & Layout
+
+| File | Status |
+|---|---|
+| `tools/panel-data.yaml` | ✅ DRC-clean (48HP topology) |
+| `specs/board-layout/layout-notes.md` | ✅ |
+
+## KiCad Generators
+
+| File | Status |
+|---|---|
+| `kicad/generate_*.py` | ⚠️ 40HP-era STALE (see kicad/README-STALE.md) |
+| `kicad/validate_*.py` | ⚠️ 40HP-era STALE |
+| `.github/workflows/build.yml` KiCad step | Disabled |
+
+---
+
+## Next Up
+
+Phase 3R remaining work:
+1. **block-2** (LFO): Choose integrator+comparator topology; verify oscillation stability; add component values
+2. **block-3** (Mod Bus): Full IC placement; LED driver resistors; add attenuverter R_Iabc detail
+3. **block-6** (BP+Dist): Full distortion sub-circuit design; CD4053 wiring diagram; Q normalization network; power draw detail
+
+After Phase 3R complete for all blocks:
+- Replace aux/*.svg placeholders with real schematic diagrams (KiCad/Inkscape)
+- Finalize components.yaml (all passive values, all ref designators unique and checked)
+- Write 48HP KiCad generator (replaces 40HP-era generators)
+- Phase 6R: VCV Rack signal-path smoke tests
+
+---
+
+## Archive
+
+Old 40HP specs (envelope follower, APCF, COMB, FB_DIST_BLEND, old block numbering):
+`specs/archive/40hp-era-2026-05/`

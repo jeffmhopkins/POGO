@@ -91,34 +91,45 @@ POGO/
 ├── specs/                        ← Hardware design documentation
 │   ├── STATUS.md                 ← Phase completion checklist (the gate document)
 │   ├── module-overview.md        ← Signal chain, power budget, quick reference
-│   ├── mod-architecture.md       ← Modulation system spec
-│   ├── block-A-input-buffer/
-│   ├── block-1-pregain/
-│   ├── block-LFO/                ← Dual triangle LFO (new 48HP)
-│   ├── block-VCA/
-│   ├── block-3-triple-bp/        ← Triple bandpass SVF (new 48HP)
-│   ├── block-4-distortion/
-│   ├── block-5-lp1/
-│   ├── block-6-lp2/
-│   ├── block-7-hp/
-│   ├── block-B-output-buffer/
+│   ├── components.yaml           ← Global component registry (ref → block → board → part)
+│   │
+│   ├── aux/                      ← Circuit design library (shared building blocks)
+│   │   ├── aux-ota-c-svf.md + .svg    ← OTA-C SVF core (LP, HP, BP)
+│   │   ├── aux-expo-converter.md + .svg ← THAT340 V/oct expo converter
+│   │   ├── aux-q-control.md + .svg    ← LM13700 Iabc resonance control
+│   │   ├── aux-vca-cell.md + .svg     ← THAT 2180 VCA cell
+│   │   ├── aux-unity-buffer.md + .svg ← TL072 unity-gain buffer
+│   │   ├── aux-distortion.md + .svg   ← SC/HC/WF cells + CD4053 mux
+│   │   ├── aux-attenuverter.md + .svg ← Bipolar pot + inverter
+│   │   ├── aux-mod-bus-core.md + .svg ← Inverting summer + inverter
+│   │   ├── aux-lfo-core.md + .svg     ← Triangle oscillator (topology TBD)
+│   │   ├── aux-cv-protection.md       ← 100Ω + BAT54S clamp
+│   │   └── aux-power-filter.md        ← Board power filtering
+│   │
+│   ├── block-A/spec.md           ← Input Buffers (LM4562)
+│   ├── block-1/spec.md           ← Pre-Gain (NE5532D, 1×/5× switch)
+│   ├── block-2/spec.md           ← Dual LFO (triangle, 0.05–20 Hz)
+│   ├── block-3/spec.md           ← Mod Bus (20 destinations, attenuverters)
+│   ├── block-4/spec.md           ← VCA (THAT 2180, AMT + OFS)
+│   ├── block-5/spec.md           ← LP Filter 1 (OTA-C SVF, stereo tilt)
+│   ├── block-6/spec.md           ← Triple BP + Distortion (3× SVF + SC/HC/WF)
+│   ├── block-7/spec.md           ← HP Filter (OTA-C SVF)
+│   ├── block-8/spec.md           ← LP Filter 2 (OTA-C SVF, independent)
+│   ├── block-B/spec.md           ← Output Buffers (TL072, MAIN + BP3 jacks)
+│   │
 │   ├── panel-design/
 │   │   └── panel-notes.md        ← Points to tools/panel-data.yaml (source of truth)
 │   ├── board-layout/
 │   │   └── layout-notes.md       ← 48HP board architecture analysis
-│   ├── shared/
-│   │   ├── cv-input-protection.md
-│   │   ├── noise-audit.md
-│   │   └── power-filtering.md
-│   ├── kicad-process.md
 │   └── archive/
-│       └── 40hp-era-2026-05/     ← Superseded 40HP specs (envelope follower, APCF, etc.)
+│       └── 40hp-era-2026-05/     ← Superseded 40HP specs (envelope follower, old block names)
 │
-├── kicad/                        ← KiCad schematics (control + utility boards)
-│   ├── generate_control_board.py
-│   ├── generate_utility_board.py
-│   ├── validate_schematic.py
-│   └── validate_utility_board.py
+├── kicad/                        ← KiCad schematics (STALE — 40HP era; see kicad/README-STALE.md)
+│   ├── README-STALE.md           ← 40HP-era; do not regenerate until 48HP Phase 3R complete
+│   ├── generate_control_board.py ← 40HP STALE
+│   ├── generate_utility_board.py ← 40HP STALE
+│   ├── validate_schematic.py     ← 40HP STALE
+│   └── validate_utility_board.py ← 40HP STALE
 │
 └── design/                       ← Generated HTML (do not hand-edit)
     └── panel-debug.html          ← Interactive layer viewer (keepouts, footprints, DRC)
@@ -199,57 +210,58 @@ Only begin after Phase 2R is complete for the block. Design the actual circuit:
 
 ---
 
-## Spec File Template (`specs/block-N-name/spec.md`)
+## Spec File Template (`specs/block-N/spec.md`)
 
 ```markdown
-# Block N: [Name]
+# Block [N]: [Name]
+[One-line summary of role in signal chain]
 
-## Status
-- Phase 1R (Extract from code): [ ] complete
-- Phase 2R (Analog model): [ ] complete
-- Phase 3R (Circuit design): [ ] complete
+DSP source: `plugin/src/dsp/Foo.hpp`, `plugin/src/Pogo.cpp` (lines N–M)
 
 ---
 
-## Phase 1R: Functional Specification (from plugin code)
+## 1. Intent
+Sonic purpose. What the user hears. Where it sits. No circuit details.
 
-### Source
-`plugin/src/dsp/FileName.hpp`, `plugin/src/Pogo.cpp`
+## 2. Theoretical Design and Topology
+- DSP-to-analog mapping
+- Transfer functions (s-domain or time-domain)
+- Topology choice and rationale
+- Hardware deviations from DSP model (document explicitly)
+- → References aux/* for shared primitives
 
-### Parameters
-| Name | Enum | Range | Default | Taper | Description |
-...
+## 3. Physical Design
+- Component values with derivations
+- Calibration points (f_ref, 1V/oct, Q_max)
+- Trim pots and purpose
+- Signal routing (input/output nodes, connector pins)
+- Board assignment
+- → References aux/*.svg for circuit diagrams
 
-### CV Inputs
-| Name | Enum | Range | Attenuverter | Notes |
-...
+## 4. Component Requirements
+| Ref | Part | Package | Value | Qty | Board | Block | Function |
+|---|---|---|---|---|---|---|---|
+| U1 | LM13700M | SOIC-16 | — | 1 | audio | block-5 | LP1 integrators L+R |
+Ref must match components.yaml. Globally unique within board.
+```
 
-### Math / DSP Formula
-...
+## aux/ Library Template (`specs/aux/aux-name.md`)
 
-### Stereo Behavior
-...
+```markdown
+# aux: [Circuit Name]
+Design status: [ ] draft → [ ] reviewed → [ ] validated on prototype
 
----
-
-## Phase 2R: Analog Behavior Model
-
-### Transfer Function
-...
-
----
-
-## Phase 3R: Circuit Design
-
-### Topology
-...
-
-### Component Values
-...
-
-### Power Draw Estimate
-- +12V: ___ mA
-- −12V: ___ mA
+## Overview
+## Schematic
+![aux-name.svg](aux-name.svg)
+## Transfer Function
+## Design Choices & Rationale
+## Component Values (POGO-specific)
+| Ref (generic) | Part | Package | Value | Notes |
+## Performance Characteristics
+## Known Gotchas / Assembly Notes
+## Used By
+| Block | Instance | Board | Notes |
 ```
 
 ---
@@ -305,8 +317,10 @@ python3 tools/build_panel.py
 
 ## Git Workflow
 
-Develop on `dev`. Push to trigger CI (Linux/Windows/macOS plugin builds +
-KiCad schematic validation + panel DRC check).
+**All development happens on the `dev` branch. Never commit to any other branch without explicit permission.**
+
+Develop on `dev`. Push to trigger CI (Linux/Windows/macOS plugin builds + panel DRC check).
+The KiCad validation step is currently disabled (generators are 40HP-era; see `kicad/README-STALE.md`).
 
 ```bash
 git checkout dev
@@ -314,6 +328,9 @@ git checkout dev
 git add -A && git commit -m "description"
 git push -u origin dev
 ```
+
+> **For AI assistants:** Always verify you are on `dev` before committing:
+> `git branch --show-current` must return `dev`. If on any other branch, switch to `dev` first.
 
 ---
 

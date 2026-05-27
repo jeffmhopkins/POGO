@@ -1,129 +1,201 @@
-# POGO Module Overview — 48HP
+# POGO — Module Overview
+
+**48HP stereo Eurorack complex filter**  
+VCV Rack 2 plugin version is the design ground truth. Hardware specs are reverse-engineered from DSP code.
+
+---
 
 ## Signal Chain
 
 ```
 Stereo Input (L + R)
   │
-  ├── [Block A: Input Buffer]
-  │   LM4562 unity-gain buffer; clamp ±11V; R normalizes to L when unpatched
-  │
-  ├── [Block 1: Pre-Gain]
-  │   GAIN_MAIN switch: 1× (unity) or 5× (~14 dB); clip ±10.5V at 5×
-  │
-  ├── [Block VCA: Pre-LP1 VCA]
-  │   THAT 2180 linear VCA; AMT bipolar (−1→+1 accent/duck/unity)
-  │   VCA_OFS trimpot shifts CV floor; VCA_IN jack (normalizes to mod bus)
-  │
-  ├── [Block LP1: Lowpass Filter 1]
-  │   2-pole OTA-C SVF (Andrew Simper trapezoidal), LP output
-  │   LP1_FREQ (xl knob, ±5V/oct, f_ref=632Hz), LP1_TILT (stereo spread),
-  │   LP1_RES (resonance, Q 0.5–2000)
-  │
-  │   ← ALT path: ALT_BP_L/R → GAIN_BP3 switch (1×/5×) → bypasses VCA+LP1
-  │
-  ├── [Block BP: Triple Bandpass SVF]
-  │   Three independent 4-pole OTA-C SVF bandpass groups (BP1/BP2/BP3)
-  │   f_refs: 200/1500/6000Hz. 2× oversampled.
-  │   BP_OFFSET (master freq), BP_MIX (dry/wet), BP_POL (±polarity),
-  │   BP_DIST (global mode: soft/hard/fold)
-  │   Per-group: FREQ, FOCUS (Q), DIST (drive)
-  │   BP_TILT CV: stereo spread across all 3 formants
-  │   BP3_L/R_OUT: tap of BP3 formant after distortion
-  │
-  ├── [Block HP: Highpass Filter]
-  │   2-pole OTA-C SVF, HP output
-  │   HP_FREQ (slider, ±5V/oct), HP_RES (resonance)
-  │
-  ├── [Block LP2: Lowpass Filter 2]
-  │   2-pole OTA-C SVF, LP output (same topology as LP1)
-  │   LP2_FREQ (slider, ±5V/oct), LP2_RES (resonance)
-  │
-  └── [Block B: Output Buffer]
-      Low-impedance ~1kΩ output; clamp ±11V → MAIN_L/R_OUT
+  ├── [block-A]  Input Buffers       100Ω series + BAT54S clamp; LM4562 unity-gain followers
+  ├── [block-1]  Pre-Gain            GAIN_MAIN switch 1× / 5× (NE5532D); clip at ±10.5V
+  │              ALT_BP path ─────────────────────────────────────────────────────────────────┐
+  ├── [block-4]  VCA                 THAT 2180 dB-law; VCA_AMT bipolar att; VCA_OFS CV floor │
+  ├── [block-5]  LP Filter 1         OTA-C SVF; LP1_FREQ, LP1_TILT (±5V/oct stereo), LP1_RES│
+  │              ← ALT path joins here ←────────────────────────────────────────────────────┘
+  ├── [block-6]  Triple BP + Dist    3× 4→2-pole OTA-C SVF formant filters (F1/F2/F3)
+  │                                  BP_OFFSET (master), BP_MIX (dry/wet), BP_POL, BP_DIST
+  │                                  Per-group: FREQ, FOCUS (Q), DRIVE; BP_TILT (stereo spread)
+  │                                  Distortion: SC/HC/FOLD; CD4053 mux; 2× oversampled in DSP
+  │                                  BP3_L/R output tap (post-distortion, pre-mix)
+  ├── [block-7]  HP Filter           OTA-C SVF; HP_FREQ (slider, default −3V → ~80Hz), HP_RES
+  ├── [block-8]  LP Filter 2         OTA-C SVF; LP2_FREQ (slider, default +2V → ~2.5kHz), LP2_RES
+  └── [block-B]  Output Buffers      TL072 unity followers → 1kΩ → MAIN_L/R + BP3_L/R jacks
 
-───────────────────────────────────────────────────────────────────────────
-MODULATION (runs in parallel)
-
-LFO1 / LFO2: dual triangle LFO, 0.05–20Hz (exp)
-  LFO1 → LFO1_OUT; normalizes into MOD_IN when unpatched
-  LFO2 → LFO2_OUT (standalone)
-
-Mod Bus:
-  Source: MOD_IN jack (LFO1 when unpatched)
-  MOD_SCALE trimpot (0.2×–5× exp) + MOD_OFFSET trimpot (±5V)
-  → clamped ±10V → 22 CV destinations (each with override jack + attenuverter)
-  Lights: MOD_CLIP (|bus|≥9.9V), MOD_POS, MOD_NEG
+────────────────────────────────────────────────────────────────────────────────────────
+MODULATION (parallel)
+────────────────────────────────────────────────────────────────────────────────────────
+  [block-2]  Dual LFO  →  LFO1 (±5V triangle, 0.05–20 Hz), LFO2 (same, independent)
+  [block-3]  Mod Bus   →  LFO1 normalizes into MOD_IN; MOD_SCALE (0.2–5×), MOD_OFFSET (±5V)
+                          Bus → 20 CV destinations (each: override jack + attenuverter trimpot)
+                          LEDs: MOD_CLIP, MOD_POS, MOD_NEG
 ```
 
 ---
 
-## Panel Specifications
+## Block Summary
 
-| Property | Value |
-|---|---|
-| Width | 48HP (243.84mm) |
-| Height | 3U Eurorack (128.5mm usable) |
-| Params | 46 |
-| CV Inputs | 24 |
-| Outputs | 6 |
-| LEDs | 5 |
+| Block | Name | Board(s) | Phase 1R | Phase 2R | Phase 3R |
+|---|---|---|---|---|---|
+| A | Input Buffer | audio | ✅ | ✅ | ✅ |
+| 1 | Pre-Gain | audio | ✅ | ✅ | ✅ |
+| 2 | Dual LFO | utility | ✅ | ✅ | 🔲 |
+| 3 | Mod Bus | utility/control | ✅ | ✅ | 🔲 |
+| 4 | VCA | audio | ✅ | ✅ ⚠️ | ✅ |
+| 5 | LP Filter 1 | audio | ✅ | ✅ | ✅ |
+| 6 | Triple BP + Dist | audio | ✅ | ✅ | 🔲 |
+| 7 | HP Filter | audio | ✅ | ✅ | ✅ |
+| 8 | LP Filter 2 | audio | ✅ | ✅ | ✅ |
+| B | Output Buffer | audio | ✅ | ✅ | ✅ |
 
-Panel is generated from `tools/panel-data.yaml` via `tools/build_panel.py`.
-See `specs/panel-design/panel-notes.md` for workflow.
+⚠️ Block 4: DSP is linear VCA; hardware uses THAT 2180 (dB-law). Intentional deviation — documented in specs/block-4/spec.md.
 
 ---
 
-## Power Budget (estimate — measure on prototype)
+## Parameters (46 total)
+
+| Param | Block | Type | Range | Default |
+|---|---|---|---|---|
+| GAIN_MAIN_PARAM | 1 | switch | 0/1 | 0 (1×) |
+| GAIN_BP3_PARAM | 1 | switch | 0/1 | 0 (1×) |
+| LFO1_RATE_PARAM | 2 | knob | 0–1 | 0.3 |
+| LFO2_RATE_PARAM | 2 | knob | 0–1 | 0.3 |
+| MOD_SCALE_PARAM | 3 | trimpot | 0–1 | 0.5 (≈1×) |
+| MOD_OFFSET_PARAM | 3 | trimpot | −1–1 | 0 |
+| VCA_AMT_PARAM | 4 | trimpot | −1–1 | 0 |
+| VCA_OFS_PARAM | 4 | trimpot | 0–1 | 0.5 |
+| LP1_FREQ_PARAM | 5 | xl knob | −5–5 V/oct | 0 |
+| LP1_TILT_PARAM | 5 | large knob | −1–1 | 0 |
+| LP1_RES_PARAM | 5 | large knob | 0–1 | 0 |
+| LP1_FREQ_ATT_PARAM | 5 | trimpot | −1–1 | 0 |
+| LP1_TILT_ATT_PARAM | 5 | trimpot | −1–1 | 0 |
+| LP1_RES_ATT_PARAM | 5 | trimpot | −1–1 | 0 |
+| BP_POL_PARAM | 6 | switch | 0/1 | 0 (+) |
+| BP_DIST_PARAM | 6 | switch | 0/1/2 | 0 (Soft) |
+| BP_OFFSET_PARAM | 6 | xl knob | −5–5 V/oct | 0 |
+| BP_MIX_PARAM | 6 | large knob | 0–1 | 0.5 |
+| BP_FREQ_ATT_PARAM | 6 | trimpot | −1–1 | 0 |
+| BP_TILT_ATT_PARAM | 6 | trimpot | −1–1 | 0 |
+| BP1_FREQ_PARAM | 6 | knob | −5–5 V/oct | 0 (→200Hz) |
+| BP1_FOCUS_PARAM | 6 | knob | 0–1 | 0 |
+| BP1_DIST_PARAM | 6 | knob | 0–1 | 0.20 |
+| BP1_FREQ_ATT_PARAM | 6 | trimpot | −1–1 | 0 |
+| BP1_FOCUS_ATT_PARAM | 6 | trimpot | −1–1 | 0 |
+| BP1_DIST_ATT_PARAM | 6 | trimpot | −1–1 | 0 |
+| BP2_FREQ_PARAM | 6 | knob | −5–5 V/oct | 0 (→1500Hz) |
+| BP2_FOCUS_PARAM | 6 | knob | 0–1 | 0 |
+| BP2_DIST_PARAM | 6 | knob | 0–1 | 0.20 |
+| BP2_FREQ_ATT_PARAM | 6 | trimpot | −1–1 | 0 |
+| BP2_FOCUS_ATT_PARAM | 6 | trimpot | −1–1 | 0 |
+| BP2_DIST_ATT_PARAM | 6 | trimpot | −1–1 | 0 |
+| BP3_FREQ_PARAM | 6 | knob | −5–5 V/oct | 0 (→6000Hz) |
+| BP3_FOCUS_PARAM | 6 | knob | 0–1 | 0 |
+| BP3_DIST_PARAM | 6 | knob | 0–1 | 0.20 |
+| BP3_FREQ_ATT_PARAM | 6 | trimpot | −1–1 | 0 |
+| BP3_FOCUS_ATT_PARAM | 6 | trimpot | −1–1 | 0 |
+| BP3_DIST_ATT_PARAM | 6 | trimpot | −1–1 | 0 |
+| HP_FREQ_PARAM | 7 | slider | −5–5 V/oct | −3 (→~80Hz) |
+| HP_RES_PARAM | 7 | slider | 0–1 | 0 |
+| HP_FREQ_ATT_PARAM | 7 | trimpot | −1–1 | 0 |
+| HP_RES_ATT_PARAM | 7 | trimpot | −1–1 | 0 |
+| LP2_FREQ_PARAM | 8 | slider | −5–5 V/oct | +2 (→~2.5kHz) |
+| LP2_RES_PARAM | 8 | slider | 0–1 | 0 |
+| LP2_FREQ_ATT_PARAM | 8 | trimpot | −1–1 | 0 |
+| LP2_RES_ATT_PARAM | 8 | trimpot | −1–1 | 0 |
+
+---
+
+## I/O (24 inputs, 6 outputs, 5 lights)
+
+### Inputs
+| Input | Block | Notes |
+|---|---|---|
+| L_IN_INPUT, R_IN_INPUT | A | Audio; R normalizes to L |
+| ALT_BP_L_INPUT, ALT_BP_R_INPUT | 1 | Bypass VCA+LP1; feed BP directly |
+| MOD_INPUT | 3 | Normalizes to LFO1 when unpatched |
+| VCA_INPUT | 4 | Normalizes to mod bus |
+| LP1_FREQ_INPUT, LP1_TILT_INPUT, LP1_RES_INPUT | 5 | Mod bus override jacks |
+| BP_FREQ_INPUT, BP_TILT_INPUT | 6 | Master BP mod override jacks |
+| BP1_FREQ_INPUT, BP1_FOCUS_INPUT, BP1_DIST_INPUT | 6 | BP1 group override jacks |
+| BP2_FREQ_INPUT, BP2_FOCUS_INPUT, BP2_DIST_INPUT | 6 | BP2 group override jacks |
+| BP3_FREQ_INPUT, BP3_FOCUS_INPUT, BP3_DIST_INPUT | 6 | BP3 group override jacks |
+| HP_FREQ_INPUT, HP_RES_INPUT | 7 | HP mod override jacks |
+| LP2_FREQ_INPUT, LP2_RES_INPUT | 8 | LP2 mod override jacks |
+
+### Outputs
+| Output | Block | Notes |
+|---|---|---|
+| LFO1_OUTPUT, LFO2_OUTPUT | 2 | ±5V triangle |
+| BP3_L_OUTPUT, BP3_R_OUTPUT | B | BP3 post-distortion tap (before BP_MIX) |
+| MAIN_L_OUTPUT, MAIN_R_OUTPUT | B | Full signal chain output (LP2 → output buffer) |
+
+### Lights
+| Light | Block | Function |
+|---|---|---|
+| LFO1_LIGHT, LFO2_LIGHT | 2 | Brightness tracks LFO output |
+| MOD_CLIP_LIGHT | 3 | |busV| ≥ 9.9V |
+| MOD_POS_LIGHT | 3 | busV > 0 |
+| MOD_NEG_LIGHT | 3 | busV < 0 |
+
+---
+
+## Modulation Destinations (20 total)
+
+| # | Destination | Block | Param | Input | Att |
+|---|---|---|---|---|---|
+| 1 | VCA Level | 4 | VCA_AMT_PARAM | VCA_INPUT | (none — amt is the att) |
+| 2 | LP1 Freq | 5 | LP1_FREQ_PARAM | LP1_FREQ_INPUT | LP1_FREQ_ATT_PARAM |
+| 3 | LP1 Tilt | 5 | LP1_TILT_PARAM | LP1_TILT_INPUT | LP1_TILT_ATT_PARAM |
+| 4 | LP1 Res | 5 | LP1_RES_PARAM | LP1_RES_INPUT | LP1_RES_ATT_PARAM |
+| 5 | BP Offset | 6 | BP_OFFSET_PARAM | BP_FREQ_INPUT | BP_FREQ_ATT_PARAM |
+| 6 | BP Tilt | 6 | — | BP_TILT_INPUT | BP_TILT_ATT_PARAM |
+| 7 | BP1 Freq | 6 | BP1_FREQ_PARAM | BP1_FREQ_INPUT | BP1_FREQ_ATT_PARAM |
+| 8 | BP1 Focus | 6 | BP1_FOCUS_PARAM | BP1_FOCUS_INPUT | BP1_FOCUS_ATT_PARAM |
+| 9 | BP1 Drive | 6 | BP1_DIST_PARAM | BP1_DIST_INPUT | BP1_DIST_ATT_PARAM |
+| 10 | BP2 Freq | 6 | BP2_FREQ_PARAM | BP2_FREQ_INPUT | BP2_FREQ_ATT_PARAM |
+| 11 | BP2 Focus | 6 | BP2_FOCUS_PARAM | BP2_FOCUS_INPUT | BP2_FOCUS_ATT_PARAM |
+| 12 | BP2 Drive | 6 | BP2_DIST_PARAM | BP2_DIST_INPUT | BP2_DIST_ATT_PARAM |
+| 13 | BP3 Freq | 6 | BP3_FREQ_PARAM | BP3_FREQ_INPUT | BP3_FREQ_ATT_PARAM |
+| 14 | BP3 Focus | 6 | BP3_FOCUS_PARAM | BP3_FOCUS_INPUT | BP3_FOCUS_ATT_PARAM |
+| 15 | BP3 Drive | 6 | BP3_DIST_PARAM | BP3_DIST_INPUT | BP3_DIST_ATT_PARAM |
+| 16 | HP Freq | 7 | HP_FREQ_PARAM | HP_FREQ_INPUT | HP_FREQ_ATT_PARAM |
+| 17 | HP Res | 7 | HP_RES_PARAM | HP_RES_INPUT | HP_RES_ATT_PARAM |
+| 18 | LP2 Freq | 8 | LP2_FREQ_PARAM | LP2_FREQ_INPUT | LP2_FREQ_ATT_PARAM |
+| 19 | LP2 Res | 8 | LP2_RES_PARAM | LP2_RES_INPUT | LP2_RES_ATT_PARAM |
+
+VCA_OFS_PARAM is a fixed trimpot — no mod destination, no CV input.
+
+---
+
+## Power Budget (Estimate)
 
 | Block | +12V | −12V |
 |---|---|---|
-| Block A: Input buffers | 5 mA | 5 mA |
-| Block 1: Pre-Gain | 5 mA | 5 mA |
-| Block LFO (dual) | 10 mA | 10 mA |
-| Mod Bus + 22 attenuverters | 45 mA | 45 mA |
-| Block VCA | 5 mA | 5 mA |
-| Block LP1 | 15 mA | 15 mA |
-| Block BP (3 groups, stereo) | 50 mA | 50 mA |
-| Block 4: Distortion | 25 mA | 25 mA |
-| Block HP | 10 mA | 10 mA |
-| Block LP2 | 15 mA | 15 mA |
-| Block B: Output buffers | 5 mA | 5 mA |
-| **Total estimate** | **~190 mA** | **~190 mA** |
+| A (Input Buffer) | ~2 mA | ~2 mA |
+| 1 (Pre-Gain) | ~20 mA | ~20 mA |
+| 2 (Dual LFO) | ~4 mA | ~4 mA |
+| 3 (Mod Bus) | ~42 mA | ~42 mA |
+| 4 (VCA) | ~5 mA | ~5 mA |
+| 5 (LP1) | ~12 mA | ~12 mA |
+| 6 (BP + Dist) | ~25 mA | ~25 mA |
+| 7 (HP) | ~10 mA | ~10 mA |
+| 8 (LP2) | ~12 mA | ~12 mA |
+| B (Output Buffer) | ~4 mA | ~4 mA |
+| **Total** | **~136 mA** | **~136 mA** |
 
-Measure actual draw during prototype bring-up. Update this table.
-
----
-
-## DSP Implementation Summary
-
-The VCV Rack plugin (`plugin/src/Pogo.cpp`) is the functional reference.
-
-| Block | DSP Class | Notes |
-|---|---|---|
-| Input Buffer | `InputBuffer.hpp` | clamp ±11V |
-| Pre-Gain | `PreGain.hpp` | 1× or 5×, clip ±10.5V |
-| LFO | `LFO.hpp` | triangle, exp rate |
-| Mod Bus | `ModBus.hpp` | scale+offset+clamp |
-| VCA | `VcaBlock.hpp` | linear VCA, bipolar att |
-| LP1, LP2 | `LPFilter.hpp` | Simper trapezoidal SVF |
-| BP (triple) | `BandpassSVF.hpp` | 4-pole BP, 2× OS |
-| Distortion | `Distortion.hpp` | soft/hard/wavefold |
-| HP | `HPFilter.hpp` | Simper trapezoidal SVF |
-| Output Buffer | inline in Pogo.cpp | clamp ±11V |
+This is a high-current module. Use a powered bus with ≥250 mA capacity per rail.
 
 ---
 
-## Repository Quick Reference
+## Board Architecture
 
-| Path | Purpose |
-|---|---|
-| `plugin/` | VCV Rack plugin (src/, res/, Makefile, plugin.json) |
-| `tools/build_panel.py` | Panel SVG generator + DRC checker |
-| `tools/panel-data.yaml` | Panel source of truth (positions, types) |
-| `docs/plugin-topology.md` | Authoritative plugin parameter reference |
-| `kicad/` | KiCad schematics (control + utility boards) |
-| `specs/` | Hardware design documentation |
-| `design/panel-debug.html` | Interactive panel layer viewer |
+Three PCBs:
+- **Audio board**: all signal-path ICs (input buffer, pre-gain, VCA, LP1, BP+DIST, HP, LP2, output buffer)
+- **Control board**: all pots, switches, jacks facing the panel
+- **Utility board**: LFO circuits, mod bus processor, attenuverter stages
 
-Last updated: 2026-05-27
+See `specs/board-layout/layout-notes.md` for detailed board layout analysis.
+See `tools/panel-data.yaml` for panel positions (source of truth).
