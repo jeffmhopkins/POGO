@@ -709,7 +709,7 @@ zones:
       - id: HP_RES
         type: trimpot
         cx: 205.74
-        cy: 89.5
+        cy: 87.0
         label: "RES"
         cpp_param: "HP_RES_PARAM"
       - id: HP_FREQ_ATT
@@ -786,7 +786,7 @@ zones:
       - id: LP2_RES
         type: trimpot
         cx: 228.60
-        cy: 89.5
+        cy: 87.0
         label: "RES"
         cpp_param: "LP2_RES_PARAM"
       - id: LP2_FREQ_ATT
