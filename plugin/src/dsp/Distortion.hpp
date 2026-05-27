@@ -1,23 +1,14 @@
 #pragma once
 #include <rack.hpp>
 
-// Block 4: Distortion — three independent chains, one per APF group.
+// Block 4: Distortion — three independent chains, one per BP group.
 // Each chain implements the dual-zone drive mapping:
 //   driveParam ∈ [0,1]
 //   p ≤ 0.20: gain = p / 0.20  (mute → unity at 9am)
 //   p > 0.20: d = (p − 0.20) / 0.80  (0–1 drive zone)
 //
-// MODE: 0 = soft clip (tanh), 1 = hard clip, 2 = wavefold
+// MODE: 0 = soft clip (diode chain), 1 = hard clip, 2 = wavefold
 struct Distortion {
-	static float softClip(float x, float d) {
-		// drive=0 at d=0 (linear/clean) rising exponentially to ~54 at d=1.
-		// Spec: "DRIVE at 9am = unity gain, all modes: signal passes clean at 1:1."
-		float drive = std::exp(d * 4.f) - 1.f; // 0–54×
-		if (drive < 1e-6f) return x;
-		float denom = std::tanh(drive);
-		return (denom > 1e-6f) ? std::tanh(drive * x) / denom : x;
-	}
-
 	static float hardClip(float x, float d) {
 		float g = 1.f + d * 4.f; // 1–5× linear gain
 		// ±1.16 matches hardware: BZX84C5V1 zener (5.1V) + 1N4148W Vf (0.7V) = ±5.8V → 5.8/5.0
@@ -33,16 +24,24 @@ struct Distortion {
 		return Vth * std::asin(std::sin(float(M_PI) * 0.5f / Vth * y)) * float(2.0 / M_PI);
 	}
 
-	// v should be normalised to ±1 before calling; returns ±1 normalised
+	// v should be normalised to ±1 before calling; returns normalised result
 	static float processNorm(float v, float driveParam, int mode) {
-		if (driveParam <= 0.20f) {
-			return v * (driveParam / 0.20f);
+		if (mode == 0) {
+			// SC: hardware diode chain (2× 1N4148W/rail, Vth=±1.4V) is always in circuit.
+			// Output bounded to ±Vth = ±0.28 at all drive levels; linear below threshold.
+			// Gain: 0→1× in the gain-control zone, 1×→~55× in the drive zone.
+			constexpr float Vth = 0.28f;  // ±1.4V / 5V
+			float G = (driveParam <= 0.20f)
+				? (driveParam / 0.20f)
+				: std::exp((driveParam - 0.20f) / 0.80f * 4.f);
+			return Vth * std::tanh(G * v / Vth);
 		}
+		if (driveParam <= 0.20f) return v * (driveParam / 0.20f);
 		float d = (driveParam - 0.20f) / 0.80f;
 		switch (mode) {
-			case 0: default: return softClip(v, d);
-			case 1:          return hardClip(v, d);
-			case 2:          return wavefold(v, d);
+			case 1: return hardClip(v, d);
+			case 2: return wavefold(v, d);
+			default: return v;
 		}
 	}
 
