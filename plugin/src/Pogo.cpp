@@ -311,14 +311,6 @@ struct Pogo : Module {
 	LPFilter lp2L, lp2R;
 	HPFilter hpL, hpR;
 
-	// 2× oversampling for BP section (SVF + distortion).
-	// QUALITY=8 gives ~90 dB stopband attenuation, acceptable CPU on modern hw.
-	static constexpr int OS = 2;
-	static constexpr int OS_QUALITY = 8;
-	dsp::Upsampler<OS, OS_QUALITY>  upL, upR;
-	dsp::Decimator<OS, OS_QUALITY>  decL, decR;
-	dsp::Decimator<OS, OS_QUALITY>  decBP3L, decBP3R;   // separate tap for BP3 output
-
 	void onReset() override {
 		lfo1.reset(); lfo2.reset();
 		bandpassL.reset(); bandpassR.reset();
@@ -326,9 +318,6 @@ struct Pogo : Module {
 		lp1L.reset(); lp1R.reset();
 		lp2L.reset(); lp2R.reset();
 		hpL.reset();  hpR.reset();
-		upL.reset();  upR.reset();
-		decL.reset(); decR.reset();
-		decBP3L.reset(); decBP3R.reset();
 	}
 
 	void onSampleRateChange() override {
@@ -437,42 +426,25 @@ struct Pogo : Module {
 		float bpInL = altLConn ? altL : bandL;
 		float bpInR = (altLConn || altRConn) ? altR : bandR;
 
-		// 2× upsample
-		float upBufL[OS], upBufR[OS];
-		upL.process(bpInL, upBufL);
-		upR.process(bpInR, upBufR);
+		// Stereo tilt: L gets +bpTiltCv, R gets −bpTiltCv (widthOffset in TripleBandpass API)
+		bandpassL.process(bpInL, freqV, focusCv, polarityVal, +bpTiltCv, fs);
+		bandpassR.process(bpInR, freqV, focusCv, polarityVal, -bpTiltCv, fs);
 
-		float postL[OS], postR[OS];
-		float bp3BufL[OS], bp3BufR[OS];
-		const float fs2 = 2.f * fs;
-
-		for (int s = 0; s < OS; s++) {
-			// Stereo tilt: L gets +bpTiltCv, R gets −bpTiltCv (widthOffset in TripleBandpass API)
-			bandpassL.process(upBufL[s], freqV, focusCv, polarityVal, +bpTiltCv, fs2);
-			bandpassR.process(upBufR[s], freqV, focusCv, polarityVal, -bpTiltCv, fs2);
-
-			float dSumL = 0.f, dSumR = 0.f;
-			for (int i = 0; i < 3; i++) {
-				distTapL[i] = Distortion::process(bandpassL.prevOut[i], driveCv[i], distMode);
-				distTapR[i] = Distortion::process(bandpassR.prevOut[i], driveCv[i], distMode);
-				dSumL += distTapL[i];  // unity weight — level managed via BP_MIX
-				dSumR += distTapR[i];
-			}
-			postL[s]    = clamp(dSumL, -10.5f, 10.5f);
-			postR[s]    = clamp(dSumR, -10.5f, 10.5f);
-			bp3BufL[s]  = distTapL[2];   // BP3 formant distorted output tap
-			bp3BufR[s]  = distTapR[2];
+		float dSumL = 0.f, dSumR = 0.f;
+		for (int i = 0; i < 3; i++) {
+			distTapL[i] = Distortion::process(bandpassL.prevOut[i], driveCv[i], distMode);
+			distTapR[i] = Distortion::process(bandpassR.prevOut[i], driveCv[i], distMode);
+			dSumL += distTapL[i];
+			dSumR += distTapR[i];
 		}
+		float wetL    = clamp(dSumL, -10.5f, 10.5f);
+		float wetR    = clamp(dSumR, -10.5f, 10.5f);
+		float bp3OutL = distTapL[2];
+		float bp3OutR = distTapR[2];
 
-		// Decimate all oversampled signals
-		float wetL    = decL.process(postL);
-		float wetR    = decR.process(postR);
-		float bp3OutL = decBP3L.process(bp3BufL);
-		float bp3OutR = decBP3R.process(bp3BufR);
-
-		// BP_MIX dry/wet blend (at base rate; dry = LP1 output)
-		float bpOutL = bandL * (1.f - mix) + wetL * mix;
-		float bpOutR = bandR * (1.f - mix) + wetR * mix;
+		// BP_MIX: dry at unity + wet added on top (hardware inverting summer behavior)
+		float bpOutL = clamp(bandL + wetL * mix, -12.f, 12.f);
+		float bpOutR = clamp(bandR + wetR * mix, -12.f, 12.f);
 
 		// ── Block HP: 2-pole SVF HP ───────────────────────────────────────────
 		float hpFreqCv = params[HP_FREQ_PARAM].getValue()

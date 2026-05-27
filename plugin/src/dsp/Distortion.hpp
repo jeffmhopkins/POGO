@@ -20,15 +20,17 @@ struct Distortion {
 
 	static float hardClip(float x, float d) {
 		float g = 1.f + d * 4.f; // 1–5× linear gain
-		return clamp(g * x, -1.f, 1.f);
+		// ±1.16 matches hardware: BZX84C5V1 zener (5.1V) + 1N4148W Vf (0.7V) = ±5.8V → 5.8/5.0
+		return clamp(g * x, -1.16f, 1.16f);
 	}
 
-	// Buchla-style wavefold via arcsin(sin(π/2 × z))
+	// Buchla-style wavefold: passive diode clamp at ±Vth, then V_out = 2×V_clamp − V_in
+	// Vth = 0.28 (= 1.4V/5V; two 1N4148W per polarity in hardware passive clamp)
 	static float wavefold(float x, float d) {
+		constexpr float Vth = 0.28f;
 		float y = (1.f + d * 4.f) * x;
-		// Limit to avoid arcsin domain issues
-		y = clamp(y, -3.f, 3.f);
-		return std::asin(std::sin(float(M_PI) * 0.5f * y)) * float(2.0 / M_PI);
+		y = clamp(y, -20.f, 20.f); // ~35 folds headroom; hardware limited by op-amp rails
+		return Vth * std::asin(std::sin(float(M_PI) * 0.5f / Vth * y)) * float(2.0 / M_PI);
 	}
 
 	// v should be normalised to ±1 before calling; returns ±1 normalised

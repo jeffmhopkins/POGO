@@ -1,43 +1,31 @@
 #pragma once
 #include <rack.hpp>
 
-// Block 3: Triple 4-pole OTA-C SVF bandpass resonators (formant F1/F2/F3).
+// Block 3: Triple 2-pole OTA-C SVF bandpass resonators (formant F1/F2/F3).
 // Same Andrew Simper trapezoidal SVF as LPFilter/HPFilter; BP output = v1.
 //
 // freqV    [V/oct, bipolar]: 1V/oct CV. f_ref[3] = {200, 1500, 6000} Hz at 0 V.
 // qParam   [0,1]: exponential Q taper — Q = 0.5 × 400^qParam → [0.5, 200].
-//          Output normalized by 1/Q² so peak gain = 1/Q (bandwidth control only,
-//          not amplitude). Does NOT self-oscillate by design.
-// polarity: +1 = normal, 0 = silence, -1 = phase-inverted output before summing.
-//
-// TESTING: 4-pole (two cascaded 2-pole SVF stages). Spec says 2-pole; see STATUS.md.
-// TESTING: FB_DIST_BLEND path removed — SVF input is clean audio only; see STATUS.md.
+//          Peak gain = 1 (constant unity, hardware OTA-C SVF behavior).
+//          Does NOT self-oscillate by design.
 struct SVFGroup {
-	float ic1a = 0.f, ic2a = 0.f;  // stage 1
-	float ic1b = 0.f, ic2b = 0.f;  // stage 2
+	float ic1 = 0.f, ic2 = 0.f;
 
 	float process(float x, float f0, float Q, float sampleRate) {
-		float g = std::tan(M_PI * f0 / sampleRate);
-		float k = 1.f / Q;
+		float g  = std::tan(float(M_PI) * f0 / sampleRate);
+		float k  = 1.f / Q;
 		float a1 = 1.f / (1.f + g * (g + k));
 		float a2 = g * a1;
 		float a3 = g * a2;
-		// Stage 1
-		float v3 = x - ic2a;
-		float v1 = a1 * ic1a + a2 * v3;
-		float v2 = ic2a + a2 * ic1a + a3 * v3;
-		ic1a = 2.f * v1 - ic1a;
-		ic2a = 2.f * v2 - ic2a;
-		// Stage 2 — same coefficients, independent state
-		v3 = v1 - ic2b;
-		v1 = a1 * ic1b + a2 * v3;
-		v2 = ic2b + a2 * ic1b + a3 * v3;
-		ic1b = 2.f * v1 - ic1b;
-		ic2b = 2.f * v2 - ic2b;
-		return v1;  // 4-pole BP output
+		float v3 = x - ic2;
+		float v1 = a1 * ic1 + a2 * v3;
+		float v2 = ic2 + a2 * ic1 + a3 * v3;
+		ic1 = 2.f * v1 - ic1;
+		ic2 = 2.f * v2 - ic2;
+		return v1;  // 2-pole BP tap; peak gain = 1 at resonance
 	}
 
-	void reset() { ic1a = ic2a = ic1b = ic2b = 0.f; }
+	void reset() { ic1 = ic2 = 0.f; }
 };
 
 struct TripleBandpass {
@@ -54,11 +42,9 @@ struct TripleBandpass {
 		for (int i = 0; i < 3; i++) {
 			float f0 = F_REF[i] * std::pow(2.f, freqV[i] + widthOffset);
 			f0 = clamp(f0, 10.f, sampleRate * 0.48f);
-			// Exponential Q taper: 0.5 (flat) to 200 (very tight). 1/Q² normalizes
-			// peak to unity so Q shapes bandwidth only, not output level.
+			// Exponential Q taper: 0.5 (flat) to 200 (very tight). Peak gain = 1 (hardware SVF).
 			float Q  = 0.5f * std::pow(400.f, qParam[i]);
 			float y  = groups[i].process(x, f0, Q, sampleRate);
-			y *= 1.f / (Q * Q);
 			prevOut[i] = y;
 			sum += pol * y;
 		}
