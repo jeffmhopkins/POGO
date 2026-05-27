@@ -339,7 +339,7 @@
   <line x1="205.65" y1="54.00" x2="209.65" y2="54.00" stroke="#aaa" stroke-width="0.35"/>
   <rect x="203.15" y="51.75" width="9.0" height="4.5" rx="1.8" fill="#666" stroke="#888" stroke-width="0.35"/>
   <line x1="204.15" y1="54.00" x2="211.15" y2="54.00" stroke="#aaa" stroke-width="0.6"/>
-  <text x="207.645" y="26.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
+  <text x="207.645" y="26.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
   <circle cx="207.645" cy="89.5" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
   <line x1="207.645" y1="89.5" x2="207.645" y2="85.0" stroke="#aaa" stroke-width="0.6"/>
   <text x="207.645" y="97.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">RES</text>
@@ -379,7 +379,7 @@
   <line x1="228.50" y1="54.00" x2="232.50" y2="54.00" stroke="#aaa" stroke-width="0.35"/>
   <rect x="226.00" y="51.75" width="9.0" height="4.5" rx="1.8" fill="#666" stroke="#888" stroke-width="0.35"/>
   <line x1="227.00" y1="54.00" x2="234.00" y2="54.00" stroke="#aaa" stroke-width="0.6"/>
-  <text x="230.505" y="26.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
+  <text x="230.505" y="26.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
   <circle cx="230.505" cy="89.5" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
   <line x1="230.505" y1="89.5" x2="230.505" y2="85.0" stroke="#aaa" stroke-width="0.6"/>
   <text x="230.505" y="97.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">RES</text>

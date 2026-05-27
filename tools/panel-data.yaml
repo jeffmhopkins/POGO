@@ -702,7 +702,7 @@ zones:
         type: slider_V45
         cx: 205.74
         cy: 54.0
-        label: "FREQ"
+        label: ""
         cpp_param: "HP_FREQ_PARAM"
       - id: HP_RES
         type: knob_medium
@@ -779,7 +779,7 @@ zones:
         type: slider_V45
         cx: 228.60
         cy: 54.0
-        label: "FREQ"
+        label: ""
         cpp_param: "LP2_FREQ_PARAM"
       - id: LP2_RES
         type: knob_medium
