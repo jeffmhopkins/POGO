@@ -539,7 +539,7 @@
      stroke-width="0.3"
      id="rect124" />
   <text
-     x="25.325"
+     x="25.825"
      y="21.0"
      fill="#888"
      font-family="monospace"
@@ -547,7 +547,7 @@
      text-anchor="middle"
      id="text126">1×</text>
   <text
-     x="31.825"
+     x="31.325"
      y="21.0"
      fill="#888"
      font-family="monospace"
@@ -631,7 +631,7 @@
      stroke-width="0.3"
      id="rect146" />
   <text
-     x="25.325"
+     x="25.825"
      y="35.5"
      fill="#888"
      font-family="monospace"
@@ -639,7 +639,7 @@
      text-anchor="middle"
      id="text148">1×</text>
   <text
-     x="31.825"
+     x="31.325"
      y="35.5"
      fill="#888"
      font-family="monospace"
@@ -1227,7 +1227,7 @@
      stroke-width="0.3"
      id="rect290" />
   <text
-     x="76.76"
+     x="77.26"
      y="21.63"
      fill="#888"
      font-family="monospace"
@@ -1235,7 +1235,7 @@
      text-anchor="middle"
      id="text292">POS</text>
   <text
-     x="83.26"
+     x="82.76"
      y="21.63"
      fill="#888"
      font-family="monospace"
@@ -1263,7 +1263,7 @@
      stroke-width="0.3"
      id="rect298" />
   <text
-     x="74.76"
+     x="75.01"
      y="35.87"
      fill="#888"
      font-family="monospace"
@@ -1279,7 +1279,7 @@
      text-anchor="middle"
      id="text302">HARD</text>
   <text
-     x="85.26"
+     x="85.01"
      y="35.87"
      fill="#888"
      font-family="monospace"
