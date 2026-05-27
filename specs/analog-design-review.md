@@ -255,11 +255,22 @@ TL072CDT: e_n = 18 nV/√Hz. For filter blocks, the SUM_AMP sees 100 kΩ input r
 At 18 nV/√Hz over 20 Hz–20 kHz: E_noise ≈ 2.5 µV_RMS per stage. Out-of-band noise is
 attenuated by the filter's own frequency response.
 
-**Completed (Phase 3R):** All 12 SUM_AMP ICs in blocks 5, 6, 7, 8 upgraded to OPA1612
-(e_n = 1.1 nV/√Hz, SOIC-8 pin-compatible, Iq = 2.75 mA/channel vs TL072's 0.9 mA/half).
-Power cost: +22 mA total across all filter stages (+3.7 mA each for blocks 5, 7, 8; +11.1 mA
-for block-6). SUM_AMP noise floor drops from 18 nV/√Hz to 1.1 nV/√Hz; overall chain
-SNR improves ~5 dB. Updated in all block specs, components.yaml, and aux-ota-c-svf.md.
+**Completed (Phase 3R):** All 12 SUM_AMP ICs (SOIC-8 dual packages) in blocks 5, 6, 7, 8
+upgraded to OPA1612 (e_n = 1.1 nV/√Hz, SOIC-8 pin-compatible).
+
+OPA1612 Iq = **2.75 mA per channel** (per op-amp half); dual IC draws 5.5 mA per supply rail.
+TL072 Iq = 0.9 mA per channel; dual IC draws 1.8 mA per supply rail.
+Delta per dual IC = 5.5 − 1.8 = **3.7 mA per IC**.
+
+Power cost by block (counting IC packages, not channels):
+- Block-5: +7.4 mA (2 dual ICs × 3.7 mA/IC)
+- Block-7: +7.4 mA (2 dual ICs × 3.7 mA/IC)
+- Block-8: +7.4 mA (2 dual ICs × 3.7 mA/IC)
+- Block-6: +22 mA (6 dual ICs × 3.7 mA/IC)
+- **Total: +44 mA** across all filter stages
+
+SUM_AMP noise floor drops from 18 nV/√Hz to 1.1 nV/√Hz; overall chain SNR improves ~5 dB.
+Updated in all block specs, components.yaml, and aux-ota-c-svf.md.
 
 ### 4.5 High-Q Noise Behavior
 
@@ -335,3 +346,7 @@ validation items remain as Phase 5R tasks:
 | aux-mod-bus-core.md: 22→19 destinations, buffer topology update | Done |
 | aux-ota-c-svf.md: SUM_AMP updated to OPA1612 with noise rationale | Done |
 | Power draw estimates added to block-5, 7, 8; block-6 updated for OPA1612 | Done |
+| OPA1612 power: corrected 2× Iq underestimate (2.75 mA/channel ≠ per-IC; dual IC = 5.5 mA/rail) | Done — blocks 5/6/7/8 updated; review §4.4 corrected to +44 mA total |
+| Block-1 "26% RTI noise improvement" → "61%" (math: (8.4−3.3)/8.4 = 60.7%) | Done |
+| aux-attenuverter.md wiper impedance: "1 kΩ" → "2.5 kΩ" (= 10 kΩ/4 at center travel) | Done |
+| README.md: "22 CV destinations" → "19"; stale phase status and directory structure updated | Done |

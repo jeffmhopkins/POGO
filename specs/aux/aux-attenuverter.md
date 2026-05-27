@@ -127,7 +127,7 @@ section. These are 0603-compatible in SOT-23; manageable board area.
 | U_ATT_1..5 | TL074CDT | SOIC-14 | — | Quad op-amp; 4 inverters per IC; 5 ICs for 19 dest (MB_INV_1–5 per block-3/spec.md) |
 | R_inv_in | Resistor | 0603 | 10 kΩ | Inverter input resistor; 1% tolerance |
 | R_inv_f | Resistor | 0603 | 10 kΩ | Inverter feedback resistor; 1% tolerance; must match R_inv_in |
-| RV_ATT | Pot | 9mm T18 | 10 kΩ | Panel attenuverter pot; linear taper with center detent; 1 kΩ max wiper impedance |
+| RV_ATT | Pot | 9mm T18 | 10 kΩ | Panel attenuverter pot; linear taper with center detent; 2.5 kΩ max wiper impedance (= 10 kΩ/4 at center travel) |
 | R_cv_mb | Resistor | 0603 | 100 Ω | Mod bus path series protection |
 | R_cv_ov | Resistor | 0603 | 100 Ω | Override jack path series protection |
 | D_mb | BAT54S | SOT-23 | — | Mod bus input clamp |

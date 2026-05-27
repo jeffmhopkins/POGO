@@ -58,7 +58,7 @@ Using R_f = 18 kΩ and R_g = 4.7 kΩ gives gain = 4.83×, within 3.4% of the tar
 the NE5532D current-noise contribution compared to the 12 kΩ / 47 kΩ values. The gain error is
 inaudible and well within the ±5% tolerance a "5×" switch implies. At these lower impedances,
 NE5532D current noise through R_g (i_n = 0.7 pA/√Hz) contributes:
-  0.7 pA × 4.7 kΩ = 3.3 nV/√Hz   (vs 8.4 nV/√Hz at 12 kΩ → 26 % improvement in RTI noise)
+  0.7 pA × 4.7 kΩ = 3.3 nV/√Hz   (vs 8.4 nV/√Hz at 12 kΩ → 61% improvement in RTI noise)
 A non-inverting topology is preferred here because:
 - Preserves polarity (the DSP model multiplies by +5, not −5).
 - High input impedance (suitable for driving from U1 LM4562 output or an external jack).

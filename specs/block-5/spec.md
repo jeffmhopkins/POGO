@@ -198,10 +198,10 @@ I_abc routing. IC_Q_AB placed between LP1 and LP2 OTA sections (shared Q VCA).
 
 - 2× LM13700M (LP1 L/R integrators): ~3 mA × 2 = 6 mA
 - 1× IC_Q_AB LM13700M (shared LP1+LP2 Q VCA, counted here): ~3 mA
-- 2× OPA1612 (SUM_AMP L/R): 2.75 mA × 2 = 5.5 mA
+- 2× OPA1612 (SUM_AMP L/R, dual SOIC-8): 5.5 mA × 2 = 11 mA  (Iq = 2.75 mA/channel × 2 ch/IC)
 - 1× TL072CDT (IRES_AMP + tilt inverter): ~2 mA
 - 1× THAT340S14-U (EXPO_LP1): ~1 mA
-- **+12V: ~18 mA | −12V: ~18 mA**
+- **+12V: ~23 mA | −12V: ~23 mA**
 
 Note: IC_Q_AB is shared with block-8 (LP2 Q cell B). It is counted once here (block-5).
 Block-8 power estimate excludes IC_Q_AB accordingly.

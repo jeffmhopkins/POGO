@@ -173,10 +173,10 @@ HP_inv node.
 
 - 2× LM13700M (HP L/R integrators): ~3 mA × 2 = 6 mA
 - 1× IC_Q_C LM13700M (HP Q VCA): ~3 mA
-- 2× OPA1612 (SUM_AMP L/R): 2.75 mA × 2 = 5.5 mA
+- 2× OPA1612 (SUM_AMP L/R, dual SOIC-8): 5.5 mA × 2 = 11 mA  (Iq = 2.75 mA/channel × 2 ch/IC)
 - 1× TL072CDT (IRES_AMP): ~2 mA
 - 1× THAT340S14-U (EXPO_HP): ~1 mA
-- **+12V: ~18 mA | −12V: ~18 mA**
+- **+12V: ~23 mA | −12V: ~23 mA**
 
 ---
 

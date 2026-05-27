@@ -11,7 +11,7 @@ and ground truth. Analog hardware design is reverse-engineered from it.
 POGO routes stereo audio through a deeply modulated filter chain: a pre-gain stage, a
 voltage-controlled VCA, a stereo LP filter with tilt EQ (LP1), three independent 4-pole
 bandpass resonators (BP1/BP2/BP3) with per-group distortion, a HP filter, and a final LP
-filter (LP2). A dual triangle LFO feeds a central mod bus with 22 CV destinations — every
+filter (LP2). A dual triangle LFO feeds a central mod bus with 19 CV destinations — every
 key parameter is voltage-controllable.
 
 **Signal chain (48HP topology):**
@@ -40,24 +40,24 @@ Stereo In → Input Buffer → Pre-Gain (1×/5×)
                              Stereo Out
 
 LFO1 / LFO2  →  ±5V triangle, 0.05–20Hz
-Mod Bus      →  22 CV destinations (each: override jack + attenuverter)
+Mod Bus      →  19 CV destinations (each: override jack + attenuverter)
 ```
 
-**Hardware target:** 48HP, ±12V Eurorack. Board architecture under review
-(3-board vs 2-board split). Power budget ~190 mA per rail (estimate).
+**Hardware target:** 48HP, ±12V Eurorack. Power budget ~190 mA per rail (estimate; under
+revision as block-level estimates are refined).
 
 ---
 
 ## Project State
 
-The plugin and panel are complete and CI-passing. Hardware design documentation is being
-reverse-engineered from the working plugin (code-first paradigm).
+The plugin and panel are complete and CI-passing. Circuit design (Phase 3R) is complete
+for all blocks; board layout (Phase 5R) is in progress.
 
 | Phase | Description | Status |
 |---|---|---|
-| Phase 1R | Extract functional spec from plugin code (all blocks) | 🔄 In Progress |
-| Phase 2R | Analog behavior model (bilinear transform inverse) | ⬜ Not Started |
-| Phase 3R | Circuit design (constrained by Phase 2R) | ⬜ Not Started |
+| Phase 1R | Extract functional spec from plugin code (all blocks) | ✅ Complete |
+| Phase 2R | Analog behavior model (bilinear transform inverse) | ✅ Complete |
+| Phase 3R | Circuit design — all 10 blocks + components.yaml finalized | ✅ Complete |
 | Phase 4R | Panel — 48HP, DRC-clean, CI-verified | ✅ Complete |
 | Phase 5R | Board layout — 48HP, architecture under review | 🔄 In Progress |
 | Phase 6R | Code validation — CI green, signal-path smoke tests | ✅ Complete |
@@ -90,33 +90,47 @@ POGO/
 ├── specs/                         ← Hardware design documentation
 │   ├── STATUS.md                  ← Phase completion checklist
 │   ├── module-overview.md         ← Signal chain, power budget
-│   ├── mod-architecture.md        ← 22-destination mod bus spec
-│   ├── block-LFO/                 ← Dual triangle LFO
-│   ├── block-A-input-buffer/
-│   ├── block-1-pregain/
-│   ├── block-VCA/
-│   ├── block-5-lp1/
-│   ├── block-3-triple-bp/         ← Triple bandpass SVF
-│   ├── block-4-distortion/
-│   ├── block-7-hp/
-│   ├── block-6-lp2/
-│   ├── block-B-output-buffer/
+│   ├── components.yaml            ← Global component registry (265 entries)
+│   ├── analog-design-review.md    ← Trim pots, parts availability, noise analysis
+│   │
+│   ├── aux/                       ← Circuit design library (shared building blocks)
+│   │   ├── aux-ota-c-svf.md       ← OTA-C SVF (LM13700M + OPA1612 SUM_AMP)
+│   │   ├── aux-expo-converter.md  ← THAT340S14-U V/oct expo converter
+│   │   ├── aux-q-control.md       ← LM13700 resonance control
+│   │   ├── aux-vca-cell.md        ← THAT 2180 VCA cell
+│   │   ├── aux-unity-buffer.md    ← Unity-gain buffer
+│   │   ├── aux-distortion.md      ← SC/HC/WF cells + CD4053 mux
+│   │   ├── aux-attenuverter.md    ← Bipolar pot + inverter (mod bus destinations)
+│   │   ├── aux-mod-bus-core.md    ← Inverting summer + distribution buffer
+│   │   ├── aux-lfo-core.md        ← Triangle oscillator core
+│   │   ├── aux-cv-protection.md   ← 100Ω + BAT54S clamp
+│   │   └── aux-power-filter.md    ← Board power filtering
+│   │
+│   ├── block-A/spec.md            ← Input Buffers (LM4562)
+│   ├── block-1/spec.md            ← Pre-Gain (NE5532D, 1×/5× switch)
+│   ├── block-2/spec.md            ← Dual LFO (triangle, 0.05–20 Hz)
+│   ├── block-3/spec.md            ← Mod Bus (19 destinations, attenuverters)
+│   ├── block-4/spec.md            ← VCA (THAT 2180, AMT + OFS)
+│   ├── block-5/spec.md            ← LP Filter 1 (OTA-C SVF, stereo tilt)
+│   ├── block-6/spec.md            ← Triple BP + Distortion (3× SVF + SC/HC/WF)
+│   ├── block-7/spec.md            ← HP Filter (OTA-C SVF)
+│   ├── block-8/spec.md            ← LP Filter 2 (OTA-C SVF, independent)
+│   ├── block-B/spec.md            ← Output Buffers
+│   │
 │   ├── panel-design/panel-notes.md
 │   ├── board-layout/layout-notes.md
-│   ├── shared/                    ← CV protection, noise audit, power filtering
-│   ├── kicad-process.md
 │   └── archive/40hp-era-2026-05/  ← Superseded 40HP specs
 │
-├── kicad/                         ← KiCad schematic generation
-│   ├── generate_control_board.py
-│   ├── generate_utility_board.py
-│   ├── validate_schematic.py
-│   └── validate_utility_board.py
+├── kicad/                         ← KiCad schematics — STALE (40HP era)
+│   ├── README-STALE.md            ← Do not regenerate until Phase 5R complete
+│   ├── generate_control_board.py  ← 40HP era — not current topology
+│   ├── generate_utility_board.py  ← 40HP era — not current topology
+│   └── validate_*.py              ← 40HP era — KiCad CI step is disabled
 │
 ├── design/
 │   └── panel-debug.html           ← Interactive panel layer viewer (keepouts, DRC)
 │
-└── .github/workflows/build.yml    ← CI: Linux/Win/macOS builds + KiCad + panel DRC
+└── .github/workflows/build.yml    ← CI: Linux/Win/macOS builds + panel DRC check
 ```
 
 ---
@@ -146,20 +160,12 @@ open design/panel-debug.html
 
 ## KiCad Schematic Generation
 
-EDA files are code-generated — no hand-drawn schematics. CI validates every push.
+The KiCad generators (`kicad/generate_*.py`) are **40HP-era and stale** — they reference
+the old block topology and are not compatible with the current 48HP design. The KiCad
+validation step in CI is currently disabled. New schematics will be generated in Phase 5R
+once board architecture is finalized.
 
-| Board | Generator | Validator | Status |
-|---|---|---|---|
-| Control board | `generate_control_board.py` | `validate_schematic.py` (9 checks, 326 pins) | ✅ CI-passing |
-| Utility board | `generate_utility_board.py` | `validate_utility_board.py` (7 checks, 477 pins) | ✅ CI-passing |
-| Audio board | — | — | ⬜ Not started (awaiting Phase 3R) |
-
-```bash
-cd kicad
-python3 generate_control_board.py   # writes + validates pogo-control-board.kicad_sch
-python3 generate_utility_board.py   # writes pogo-utility-board.kicad_sch
-python3 validate_utility_board.py pogo-utility-board.kicad_sch
-```
+See `kicad/README-STALE.md` for details.
 
 ---
 
@@ -197,6 +203,6 @@ plugin is the ground truth; specs are extracted from it.
 
 - **Phase 1R**: Functional spec extracted from plugin code (params, signal flow, DSP math)
 - **Phase 2R**: Analog behavior model (bilinear transform inverse, component values)
-- **Phase 3R**: Circuit design (topology, IC selection, component values)
+- **Phase 3R**: Circuit design (topology, IC selection, component values, BOM)
 
 See `CLAUDE.md` for the full development paradigm and workflow.

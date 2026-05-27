@@ -413,17 +413,17 @@ BP3 (f_ref = 6000 Hz): C = 192µS/(2π×6000) = 5.1 nF → use 4.7 nF (C0G, 0603
 ### Power Draw Estimate
 
 - 6× LM13700M (SVF integrators + Q VCAs): ~18 mA
-- 6× OPA1612 (SUM_AMPs, 3× BP groups × 2 channels): 2.75 mA × 6 = 16.5 mA
+- 6× OPA1612 (SUM_AMPs, dual SOIC-8): 5.5 mA × 6 = 33 mA  (Iq = 2.75 mA/channel × 2 ch/IC)
 - 1× TL072CDT (tilt/pol inverter): ~2 mA
 - 3× THAT340S14-U (expo converters): ~3 mA
 - 3× CD4053 (distortion mux): ~1 mA
 - Distortion sub-circuits (SC + HC + WF op-amps, ~9 TL072 halves per channel): ~9 mA
 - BP_MIX summing TL072 (BP wet summer + MIX summer + MIX output buffer): ~3 mA
-- **+12V: ~52 mA | −12V: ~52 mA** (revised: OPA1612 upgrade adds ~6.5 mA over TL072)
+- **+12V: ~69 mA | −12V: ~69 mA**
 
 Note: earlier estimate of 25 mA was prior to full distortion + MIX circuit design.
-OPA1612 SUM_AMPs (Iq = 2.75 mA/channel) add ~4.5 mA over equivalent TL072s (Iq = 0.9 mA/half).
-Total should be verified against module power budget.
+OPA1612 SUM_AMPs (Iq = 2.75 mA/channel = 5.5 mA per dual IC) add ~22 mA over equivalent TL072s
+(6 ICs × (5.5 − 1.8) mA = 22.2 mA). Total should be verified against module power budget.
 
 ---
 
