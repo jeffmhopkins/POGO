@@ -79,7 +79,8 @@ separators:
   # INPUT / GAIN → LFO boundary — label breaks the line
   - {type: h, x1: 1.0, x2: 35.06, y: 43.0, style: zone_div, label: "LFOs", label_x: 17.145}
   # LFO → MOD BUS boundary — label breaks the line
-  - {type: h, x1: 1.0, x2: 35.06, y: 75.5, style: zone_div, label: "MOD BUS", label_x: 17.78}
+  # Perfect midpoint: LFO2 Rate 2 label baseline = 73.4mm, SCALE top = 80.5mm → mid = 76.95
+  - {type: h, x1: 1.0, x2: 35.06, y: 77.0, style: zone_div, label: "MOD BUS", label_x: 17.78}
 
 # ── Zone labels ───────────────────────────────────────────────────────────────
 # x=17.145 is the geometric centre of the 3-column section (col 1 cx)
