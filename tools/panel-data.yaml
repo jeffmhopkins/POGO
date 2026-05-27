@@ -108,6 +108,18 @@ separators:
   - {type: v, x: 125.73, y1: 9.0, y2: 124.0, style: main_cyan}
   - {type: h, x1: 92.44, x2: 125.23, y: 9.0, style: zone_div, label: "BP 1", label_x: 108.585}
 
+  # ── BP 2 right boundary ────────────────────────────────────────────────────────
+  # x_start=125.73, col1 cx=142.875
+  # x = midpoint(BP2 col2 jack=154.305, next col0=165.735) = 160.02mm
+  - {type: v, x: 160.02, y1: 9.0, y2: 124.0, style: main_cyan}
+  - {type: h, x1: 126.73, x2: 159.52, y: 9.0, style: zone_div, label: "BP 2", label_x: 142.875}
+
+  # ── BP 3 right boundary ────────────────────────────────────────────────────────
+  # x_start=160.02, col1 cx=177.165
+  # x = midpoint(BP3 col2 jack=188.595, next col0=200.025) = 194.31mm
+  - {type: v, x: 194.31, y1: 9.0, y2: 124.0, style: main_cyan}
+  - {type: h, x1: 161.02, x2: 193.81, y: 9.0, style: zone_div, label: "BP 3", label_x: 177.165}
+
 # ── Zone labels ───────────────────────────────────────────────────────────────
 # x=17.145 is the geometric centre of the 3-column section (col 1 cx)
 zone_labels: []
@@ -497,3 +509,123 @@ zones:
         cy: 112.0
         label: "DIST"
         cpp_id: "BP1_DIST_INPUT"
+
+  # ── Zone: BP 2 ───────────────────────────────────────────────────────────────
+  - id: zone_bp2
+    label: "Zone — BP 2"
+    x_start: 125.73
+    col_pitch: 11.43
+    cols: 3
+    components:
+      # col0 cx=131.445  col1 cx=142.875  col2 cx=154.305
+      - id: BP2_FREQ
+        type: knob_xl
+        col: 1
+        cy: 24.80
+        label: "FREQ"
+        cpp_param: "BP2_FREQ_PARAM"
+      - id: BP2_FOCUS
+        type: knob_large
+        col: 1
+        cy: 52.40
+        label: "FOCUS"
+        cpp_param: "BP2_FOCUS_PARAM"
+      - id: BP2_DIST
+        type: knob_large
+        col: 1
+        cy: 78.00
+        label: "DIST"
+        cpp_param: "BP2_DIST_PARAM"
+      - id: BP2_FREQ_ATT
+        type: trimpot
+        col: 0
+        cy: 100.0
+        cpp_param: "BP2_FREQ_ATT_PARAM"
+      - id: BP2_FOCUS_ATT
+        type: trimpot
+        col: 1
+        cy: 100.0
+        cpp_param: "BP2_FOCUS_ATT_PARAM"
+      - id: BP2_DIST_ATT
+        type: trimpot
+        col: 2
+        cy: 100.0
+        cpp_param: "BP2_DIST_ATT_PARAM"
+      - id: BP2_FREQ_IN
+        type: jack_input
+        col: 0
+        cy: 112.0
+        label: "FREQ"
+        cpp_id: "BP2_FREQ_INPUT"
+      - id: BP2_FOCUS_IN
+        type: jack_input
+        col: 1
+        cy: 112.0
+        label: "FOCUS"
+        cpp_id: "BP2_FOCUS_INPUT"
+      - id: BP2_DIST_IN
+        type: jack_input
+        col: 2
+        cy: 112.0
+        label: "DIST"
+        cpp_id: "BP2_DIST_INPUT"
+
+  # ── Zone: BP 3 ───────────────────────────────────────────────────────────────
+  - id: zone_bp3
+    label: "Zone — BP 3"
+    x_start: 160.02
+    col_pitch: 11.43
+    cols: 3
+    components:
+      # col0 cx=165.735  col1 cx=177.165  col2 cx=188.595
+      - id: BP3_FREQ
+        type: knob_xl
+        col: 1
+        cy: 24.80
+        label: "FREQ"
+        cpp_param: "BP3_FREQ_PARAM"
+      - id: BP3_FOCUS
+        type: knob_large
+        col: 1
+        cy: 52.40
+        label: "FOCUS"
+        cpp_param: "BP3_FOCUS_PARAM"
+      - id: BP3_DIST
+        type: knob_large
+        col: 1
+        cy: 78.00
+        label: "DIST"
+        cpp_param: "BP3_DIST_PARAM"
+      - id: BP3_FREQ_ATT
+        type: trimpot
+        col: 0
+        cy: 100.0
+        cpp_param: "BP3_FREQ_ATT_PARAM"
+      - id: BP3_FOCUS_ATT
+        type: trimpot
+        col: 1
+        cy: 100.0
+        cpp_param: "BP3_FOCUS_ATT_PARAM"
+      - id: BP3_DIST_ATT
+        type: trimpot
+        col: 2
+        cy: 100.0
+        cpp_param: "BP3_DIST_ATT_PARAM"
+      - id: BP3_FREQ_IN
+        type: jack_input
+        col: 0
+        cy: 112.0
+        label: "FREQ"
+        cpp_id: "BP3_FREQ_INPUT"
+      - id: BP3_FOCUS_IN
+        type: jack_input
+        col: 1
+        cy: 112.0
+        label: "FOCUS"
+        cpp_id: "BP3_FOCUS_INPUT"
+      - id: BP3_DIST_IN
+        type: jack_input
+        col: 2
+        cy: 112.0
+        label: "DIST"
+        cpp_id: "BP3_DIST_INPUT"
