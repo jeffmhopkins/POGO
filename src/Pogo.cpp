@@ -122,254 +122,202 @@ struct FormantFreqQuantity : ParamQuantity {
 struct Pogo : Module {
 	enum ParamId {
 		// Zone 0a — INPUT / GAIN
-		GAIN_PARAM,
+		GAIN_MAIN_PARAM,        // switch 0/1: 1× / 5×
+		GAIN_BP3_PARAM,         // switch 0/1: 1× / 5× (ALT path pre-gain)
 		// Zone 0b — LFO
-		LFO1_SPEED_PARAM,
-		LFO2_SPEED_PARAM,
-		// Zone 0c — MOD BUS
-		MOD_AMOUNT_PARAM,
-		MOD_OFFSET_PARAM,
-		// Zone 1 — CONTROL / COMB
-		COMB_BYPASS_PARAM,
-		WIDTH_PARAM,
-		POLARITY_PARAM,
-		MASTER_OFFSET_PARAM,
-		// Zone 1 — CONTROL / DIST
-		DIST_MODE_PARAM,
-		FB_DIST_BLEND_PARAM,
-		// Zone 1 — unified bottom row attenuverters (19 mod destinations start here)
-		BYPASS_ATT_PARAM,           // APF Comb Bypass
-		MASTER_OFFSET_ATT_PARAM,    // APF Master Offset
-		BLEND_ATT_PARAM,            // APF FB Dist Blend
-		// Zone 2a — Comb 1
-		FREQ_1_PARAM,
-		FB_1_PARAM,
-		DRIVE_1_PARAM,
-		FREQ_ATT_1_PARAM,
-		FB_ATT_1_PARAM,
-		DRIVE_ATT_1_PARAM,
-		// Zone 2b — Comb 2
-		FREQ_2_PARAM,
-		FB_2_PARAM,
-		DRIVE_2_PARAM,
-		FREQ_ATT_2_PARAM,
-		FB_ATT_2_PARAM,
-		DRIVE_ATT_2_PARAM,
-		// Zone 2c — Comb 3
-		FREQ_3_PARAM,
-		FB_3_PARAM,
-		DRIVE_3_PARAM,
-		FREQ_ATT_3_PARAM,
-		FB_ATT_3_PARAM,
-		DRIVE_ATT_3_PARAM,
-		// Zone 3 — VCA
-		VCA_AMT_PARAM,
-		// Zone 3 — LP1
-		LP1_CUTOFF_PARAM,
-		LP1_SPREAD_PARAM,
-		LP1_RESONANCE_PARAM,
-		LP1_CUT_ATT_PARAM,
+		LFO1_RATE_PARAM,
+		LFO2_RATE_PARAM,
+		// Zone 0c — MOD BUS / VCA
+		MOD_SCALE_PARAM,        // trimpot 0–1 → 0.2×–5×
+		MOD_OFFSET_PARAM,       // trimpot −1–1 → ±5 V
+		VCA_AMT_PARAM,          // trimpot −1–1 (bipolar attenuverter)
+		VCA_OFS_PARAM,          // trimpot 0–1  (CV floor offset)
+		// LP1
+		LP1_FREQ_PARAM,         // xl knob −5–5 V/oct
+		LP1_TILT_PARAM,         // large knob −1–1 → ±5 V/oct stereo tilt
+		LP1_RES_PARAM,          // large knob 0–1
+		LP1_FREQ_ATT_PARAM,
+		LP1_TILT_ATT_PARAM,
 		LP1_RES_ATT_PARAM,
-		// Zone 4 — LP2
-		LP2_CUTOFF_PARAM,
-		LP2_RESONANCE_PARAM,
-		LP2_CUT_ATT_PARAM,
-		LP2_RES_ATT_PARAM,
-		// Zone 5 — HP
-		HP_CUTOFF_PARAM,
-		HP_RESONANCE_PARAM,
-		HP_CUT_ATT_PARAM,
-		HP_RES_ATT_PARAM,
-		NUM_PARAMS
+		// BP Control (global)
+		BP_POL_PARAM,           // switch 0/1: POS(+1) / NEG(−1)
+		BP_DIST_PARAM,          // switch 0/1/2: SOFT / HARD / FOLD
+		BP_OFFSET_PARAM,        // xl knob −5–5 V/oct
+		BP_MIX_PARAM,           // large knob 0–1 dry/wet
+		BP_FREQ_ATT_PARAM,
+		BP_TILT_ATT_PARAM,
+		// BP1
+		BP1_FREQ_PARAM, BP1_FOCUS_PARAM, BP1_DIST_PARAM,
+		BP1_FREQ_ATT_PARAM, BP1_FOCUS_ATT_PARAM, BP1_DIST_ATT_PARAM,
+		// BP2
+		BP2_FREQ_PARAM, BP2_FOCUS_PARAM, BP2_DIST_PARAM,
+		BP2_FREQ_ATT_PARAM, BP2_FOCUS_ATT_PARAM, BP2_DIST_ATT_PARAM,
+		// BP3
+		BP3_FREQ_PARAM, BP3_FOCUS_PARAM, BP3_DIST_PARAM,
+		BP3_FREQ_ATT_PARAM, BP3_FOCUS_ATT_PARAM, BP3_DIST_ATT_PARAM,
+		// HP
+		HP_FREQ_PARAM, HP_RES_PARAM,
+		HP_FREQ_ATT_PARAM, HP_RES_ATT_PARAM,
+		// LP2
+		LP2_FREQ_PARAM, LP2_RES_PARAM,
+		LP2_FREQ_ATT_PARAM, LP2_RES_ATT_PARAM,
+		NUM_PARAMS   // 46
 	};
 
 	enum InputId {
-		// Audio
-		L_IN_INPUT,
-		R_IN_INPUT,
-		ALT_BP_L_INPUT,   // Alt BP3 input L — when patched, replaces BP3 input
-		ALT_BP_R_INPUT,   // Alt BP3 input R (normalizes to L alt if only L patched)
-		// Mod source
-		MOD_IN_INPUT,
-		// Zone 1 CV override jacks
-		BYPASS_CV_INPUT,
-		MASTER_OFFSET_CV_INPUT,
-		BLEND_CV_INPUT,
-		// Comb 1 CV override jacks
-		FREQ_CV_1_INPUT,
-		FB_CV_1_INPUT,
-		DRIVE_CV_1_INPUT,
-		// Comb 2 CV override jacks
-		FREQ_CV_2_INPUT,
-		FB_CV_2_INPUT,
-		DRIVE_CV_2_INPUT,
-		// Comb 3 CV override jacks
-		FREQ_CV_3_INPUT,
-		FB_CV_3_INPUT,
-		DRIVE_CV_3_INPUT,
-		// VCA CV
-		VCA_CV_INPUT,
-		// LP1 CV override jacks
-		LP1_CUT_CV_INPUT,
-		LP1_RES_CV_INPUT,
-		// LP2 CV override jacks
-		LP2_CUT_CV_INPUT,
-		LP2_RES_CV_INPUT,
-		// HP CV override jacks
-		HP_CUT_CV_INPUT,
-		HP_RES_CV_INPUT,
-		NUM_INPUTS
+		L_IN_INPUT, R_IN_INPUT,
+		ALT_BP_L_INPUT, ALT_BP_R_INPUT,
+		MOD_INPUT, VCA_INPUT,
+		LP1_FREQ_INPUT, LP1_TILT_INPUT, LP1_RES_INPUT,
+		BP_FREQ_INPUT, BP_TILT_INPUT,
+		BP1_FREQ_INPUT, BP1_FOCUS_INPUT, BP1_DIST_INPUT,
+		BP2_FREQ_INPUT, BP2_FOCUS_INPUT, BP2_DIST_INPUT,
+		BP3_FREQ_INPUT, BP3_FOCUS_INPUT, BP3_DIST_INPUT,
+		HP_FREQ_INPUT, HP_RES_INPUT,
+		LP2_FREQ_INPUT, LP2_RES_INPUT,
+		NUM_INPUTS   // 24
 	};
 
 	enum OutputId {
-		LFO1_OUTPUT,
-		LFO2_OUTPUT,
-		BAND_L_OUTPUT,   // HP bandpass tap L (BAND OUT)
-		BAND_R_OUTPUT,   // HP bandpass tap R (BAND OUT)
-		L_OUTPUT,
-		R_OUTPUT,
-		NUM_OUTPUTS
+		LFO1_OUTPUT, LFO2_OUTPUT,
+		BP3_L_OUTPUT, BP3_R_OUTPUT,
+		MAIN_L_OUTPUT, MAIN_R_OUTPUT,
+		NUM_OUTPUTS   // 6
 	};
 
 	enum LightId {
-		LFO1_LIGHT,
-		LFO2_LIGHT,
-		MOD_LIGHT,
-		NUM_LIGHTS
+		LFO1_LIGHT, LFO2_LIGHT,
+		MOD_CLIP_LIGHT, MOD_POS_LIGHT, MOD_NEG_LIGHT,
+		NUM_LIGHTS   // 5
 	};
 
 	Pogo() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 
 		// Zone 0a
-		configSwitch(GAIN_PARAM, 0.f, 1.f, 0.f, "Gain", {"1\xc3\x97", "5\xc3\x97"});
+		configSwitch(GAIN_MAIN_PARAM, 0.f, 1.f, 0.f, "Main Gain", {"1\xc3\x97", "5\xc3\x97"});
+		configSwitch(GAIN_BP3_PARAM,  0.f, 1.f, 0.f, "Alt BP3 Gain", {"1\xc3\x97", "5\xc3\x97"});
 
 		// Zone 0b
-		configParam(LFO1_SPEED_PARAM, 0.f, 1.f, 0.3f, "LFO 1 Speed");
-		configParam(LFO2_SPEED_PARAM, 0.f, 1.f, 0.3f, "LFO 2 Speed");
+		configParam(LFO1_RATE_PARAM, 0.f, 1.f, 0.3f, "LFO 1 Rate");
+		configParam(LFO2_RATE_PARAM, 0.f, 1.f, 0.3f, "LFO 2 Rate");
 
 		// Zone 0c
-		configParam(MOD_AMOUNT_PARAM, 0.f, 1.f, 0.5f, "Mod Amount");
-		configParam(MOD_OFFSET_PARAM, -1.f, 1.f, 0.f, "Mod Offset");
-
-		// Zone 1 COMB
-		configParam(COMB_BYPASS_PARAM, 0.f, 1.f, 1.f, "Comb Bypass");
-		configParam(WIDTH_PARAM, 0.f, 1.f, 0.f, "Stereo Width");
-		configSwitch(POLARITY_PARAM, 0.f, 2.f, 1.f, "APF Feedback Polarity", {"Positive", "Off", "Negative"});
-		configParam(MASTER_OFFSET_PARAM, -5.f, 5.f, 0.f, "Master Offset", " V");
-
-		// Zone 1 DIST
-		configSwitch(DIST_MODE_PARAM, 0.f, 2.f, 0.f, "Distortion Mode", {"Soft Clip", "Hard Clip", "Wavefold"});
-		configParam(FB_DIST_BLEND_PARAM, 0.f, 1.f, 0.f, "FB Dist Blend");
-
-		// Zone 1 bottom row attenuverters
-		configParam(BYPASS_ATT_PARAM, -1.f, 1.f, 0.f, "Comb Bypass CV Depth");
-		configParam(MASTER_OFFSET_ATT_PARAM, -1.f, 1.f, 0.f, "Master Offset CV Depth");
-		configParam(BLEND_ATT_PARAM, -1.f, 1.f, 0.f, "FB Dist Blend CV Depth");
-
-		// Formant 1
-		configParam<FormantFreqQuantity>(FREQ_1_PARAM, -5.f, 5.f, 0.f, "Formant 1 Freq")->fref = 200.f;
-		configParam(FB_1_PARAM, 0.f, 1.f, 0.f, "Formant 1 Q");
-		configParam(DRIVE_1_PARAM, 0.f, 1.f, 0.20f, "Formant 1 Drive");
-		configParam(FREQ_ATT_1_PARAM, -1.f, 1.f, 0.f, "Formant 1 Freq CV Depth");
-		configParam(FB_ATT_1_PARAM, -1.f, 1.f, 0.f, "Formant 1 Q CV Depth");
-		configParam(DRIVE_ATT_1_PARAM, -1.f, 1.f, 0.f, "Formant 1 Drive CV Depth");
-
-		// Formant 2
-		configParam<FormantFreqQuantity>(FREQ_2_PARAM, -5.f, 5.f, 0.f, "Formant 2 Freq")->fref = 1500.f;
-		configParam(FB_2_PARAM, 0.f, 1.f, 0.f, "Formant 2 Q");
-		configParam(DRIVE_2_PARAM, 0.f, 1.f, 0.20f, "Formant 2 Drive");
-		configParam(FREQ_ATT_2_PARAM, -1.f, 1.f, 0.f, "Formant 2 Freq CV Depth");
-		configParam(FB_ATT_2_PARAM, -1.f, 1.f, 0.f, "Formant 2 Q CV Depth");
-		configParam(DRIVE_ATT_2_PARAM, -1.f, 1.f, 0.f, "Formant 2 Drive CV Depth");
-
-		// Formant 3
-		configParam<FormantFreqQuantity>(FREQ_3_PARAM, -5.f, 5.f, 0.f, "Formant 3 Freq")->fref = 6000.f;
-		configParam(FB_3_PARAM, 0.f, 1.f, 0.f, "Formant 3 Q");
-		configParam(DRIVE_3_PARAM, 0.f, 1.f, 0.20f, "Formant 3 Drive");
-		configParam(FREQ_ATT_3_PARAM, -1.f, 1.f, 0.f, "Formant 3 Freq CV Depth");
-		configParam(FB_ATT_3_PARAM, -1.f, 1.f, 0.f, "Formant 3 Q CV Depth");
-		configParam(DRIVE_ATT_3_PARAM, -1.f, 1.f, 0.f, "Formant 3 Drive CV Depth");
-
-		// VCA
-		configParam(VCA_AMT_PARAM, -1.f, 1.f, 0.f, "VCA CV Depth");
+		configParam(MOD_SCALE_PARAM,  0.f,  1.f, 0.5f, "Mod Scale");
+		configParam(MOD_OFFSET_PARAM, -1.f, 1.f, 0.f,  "Mod Offset");
+		configParam(VCA_AMT_PARAM,    -1.f, 1.f, 0.f,  "VCA Depth");
+		configParam(VCA_OFS_PARAM,     0.f, 1.f, 0.5f, "VCA Floor Offset");
 
 		// LP1
-		configParam(LP1_CUTOFF_PARAM, -5.f, 5.f, 0.f, "LP1 Cutoff", " V/oct");
-		configParam(LP1_SPREAD_PARAM, -1.f, 1.f, 0.f, "LP1 Stereo Spread Offset", " V/oct");
-		configParam(LP1_RESONANCE_PARAM, 0.f, 1.f, 0.f, "LP1 Resonance");
-		configParam(LP1_CUT_ATT_PARAM, -1.f, 1.f, 0.f, "LP1 Cutoff CV Depth");
-		configParam(LP1_RES_ATT_PARAM, -1.f, 1.f, 0.f, "LP1 Resonance CV Depth");
+		configParam(LP1_FREQ_PARAM, -5.f, 5.f, 0.f, "LP1 Freq", " V/oct");
+		configParam(LP1_TILT_PARAM, -1.f, 1.f, 0.f, "LP1 Stereo Tilt");
+		configParam(LP1_RES_PARAM,   0.f, 1.f, 0.f, "LP1 Resonance");
+		configParam(LP1_FREQ_ATT_PARAM, -1.f, 1.f, 0.f, "LP1 Freq CV Depth");
+		configParam(LP1_TILT_ATT_PARAM, -1.f, 1.f, 0.f, "LP1 Tilt CV Depth");
+		configParam(LP1_RES_ATT_PARAM,  -1.f, 1.f, 0.f, "LP1 Res CV Depth");
 
-		// LP2
-		configParam(LP2_CUTOFF_PARAM, -5.f, 5.f, 2.0f, "LP2 Cutoff", " V/oct");
-		configParam(LP2_RESONANCE_PARAM, 0.f, 1.f, 0.f, "LP2 Resonance");
-		configParam(LP2_CUT_ATT_PARAM, -1.f, 1.f, 0.f, "LP2 Cutoff CV Depth");
-		configParam(LP2_RES_ATT_PARAM, -1.f, 1.f, 0.f, "LP2 Resonance CV Depth");
+		// BP Control
+		configSwitch(BP_POL_PARAM,  0.f, 1.f, 0.f, "BP Polarity", {"Positive", "Negative"});
+		configSwitch(BP_DIST_PARAM, 0.f, 2.f, 0.f, "BP Distortion Mode", {"Soft Clip", "Hard Clip", "Wavefold"});
+		configParam(BP_OFFSET_PARAM, -5.f, 5.f, 0.f, "BP Master Offset", " V/oct");
+		configParam(BP_MIX_PARAM,    0.f, 1.f, 0.5f, "BP Mix");
+		configParam(BP_FREQ_ATT_PARAM, -1.f, 1.f, 0.f, "BP Offset CV Depth");
+		configParam(BP_TILT_ATT_PARAM, -1.f, 1.f, 0.f, "BP Tilt CV Depth");
+
+		// BP1
+		configParam<FormantFreqQuantity>(BP1_FREQ_PARAM,  -5.f, 5.f, 0.f, "BP1 Freq")->fref = 200.f;
+		configParam(BP1_FOCUS_PARAM,  0.f, 1.f, 0.f,   "BP1 Focus");
+		configParam(BP1_DIST_PARAM,   0.f, 1.f, 0.20f, "BP1 Drive");
+		configParam(BP1_FREQ_ATT_PARAM,  -1.f, 1.f, 0.f, "BP1 Freq CV Depth");
+		configParam(BP1_FOCUS_ATT_PARAM, -1.f, 1.f, 0.f, "BP1 Focus CV Depth");
+		configParam(BP1_DIST_ATT_PARAM,  -1.f, 1.f, 0.f, "BP1 Drive CV Depth");
+
+		// BP2
+		configParam<FormantFreqQuantity>(BP2_FREQ_PARAM,  -5.f, 5.f, 0.f, "BP2 Freq")->fref = 1500.f;
+		configParam(BP2_FOCUS_PARAM,  0.f, 1.f, 0.f,   "BP2 Focus");
+		configParam(BP2_DIST_PARAM,   0.f, 1.f, 0.20f, "BP2 Drive");
+		configParam(BP2_FREQ_ATT_PARAM,  -1.f, 1.f, 0.f, "BP2 Freq CV Depth");
+		configParam(BP2_FOCUS_ATT_PARAM, -1.f, 1.f, 0.f, "BP2 Focus CV Depth");
+		configParam(BP2_DIST_ATT_PARAM,  -1.f, 1.f, 0.f, "BP2 Drive CV Depth");
+
+		// BP3
+		configParam<FormantFreqQuantity>(BP3_FREQ_PARAM,  -5.f, 5.f, 0.f, "BP3 Freq")->fref = 6000.f;
+		configParam(BP3_FOCUS_PARAM,  0.f, 1.f, 0.f,   "BP3 Focus");
+		configParam(BP3_DIST_PARAM,   0.f, 1.f, 0.20f, "BP3 Drive");
+		configParam(BP3_FREQ_ATT_PARAM,  -1.f, 1.f, 0.f, "BP3 Freq CV Depth");
+		configParam(BP3_FOCUS_ATT_PARAM, -1.f, 1.f, 0.f, "BP3 Focus CV Depth");
+		configParam(BP3_DIST_ATT_PARAM,  -1.f, 1.f, 0.f, "BP3 Drive CV Depth");
 
 		// HP
-		configParam(HP_CUTOFF_PARAM, -5.f, 5.f, -3.0f, "HP Cutoff", " V/oct");
-		configParam(HP_RESONANCE_PARAM, 0.f, 1.f, 0.f, "HP Resonance");
-		configParam(HP_CUT_ATT_PARAM, -1.f, 1.f, 0.f, "HP Cutoff CV Depth");
-		configParam(HP_RES_ATT_PARAM, -1.f, 1.f, 0.f, "HP Resonance CV Depth");
+		configParam(HP_FREQ_PARAM, -5.f, 5.f, -3.f, "HP Freq", " V/oct");
+		configParam(HP_RES_PARAM,   0.f, 1.f,  0.f, "HP Resonance");
+		configParam(HP_FREQ_ATT_PARAM, -1.f, 1.f, 0.f, "HP Freq CV Depth");
+		configParam(HP_RES_ATT_PARAM,  -1.f, 1.f, 0.f, "HP Res CV Depth");
 
-		// Inputs
-		configInput(L_IN_INPUT, "Audio L");
-		configInput(R_IN_INPUT, "Audio R");
-		configInput(ALT_BP_L_INPUT, "Alt BP3 L");
-		configInput(ALT_BP_R_INPUT, "Alt BP3 R");
-		configInput(MOD_IN_INPUT, "Mod Source");
-		configInput(BYPASS_CV_INPUT, "Comb Bypass CV");
-		configInput(MASTER_OFFSET_CV_INPUT, "Master Offset CV");
-		configInput(BLEND_CV_INPUT, "FB Dist Blend CV");
-		configInput(FREQ_CV_1_INPUT, "Comb 1 Freq CV");
-		configInput(FB_CV_1_INPUT, "Comb 1 Feedback CV");
-		configInput(DRIVE_CV_1_INPUT, "Comb 1 Drive CV");
-		configInput(FREQ_CV_2_INPUT, "Comb 2 Freq CV");
-		configInput(FB_CV_2_INPUT, "Comb 2 Feedback CV");
-		configInput(DRIVE_CV_2_INPUT, "Comb 2 Drive CV");
-		configInput(FREQ_CV_3_INPUT, "Comb 3 Freq CV");
-		configInput(FB_CV_3_INPUT, "Comb 3 Feedback CV");
-		configInput(DRIVE_CV_3_INPUT, "Comb 3 Drive CV");
-		configInput(VCA_CV_INPUT, "VCA CV");
-		configInput(LP1_CUT_CV_INPUT, "LP1 Cutoff CV");
-		configInput(LP1_RES_CV_INPUT, "LP1 Resonance CV");
-		configInput(LP2_CUT_CV_INPUT, "LP2 Cutoff CV");
-		configInput(LP2_RES_CV_INPUT, "LP2 Resonance CV");
-		configInput(HP_CUT_CV_INPUT, "HP Cutoff CV");
-		configInput(HP_RES_CV_INPUT, "HP Resonance CV");
+		// LP2
+		configParam(LP2_FREQ_PARAM, -5.f, 5.f, 2.f, "LP2 Freq", " V/oct");
+		configParam(LP2_RES_PARAM,   0.f, 1.f, 0.f, "LP2 Resonance");
+		configParam(LP2_FREQ_ATT_PARAM, -1.f, 1.f, 0.f, "LP2 Freq CV Depth");
+		configParam(LP2_RES_ATT_PARAM,  -1.f, 1.f, 0.f, "LP2 Res CV Depth");
 
-		// Outputs
-		configOutput(LFO1_OUTPUT, "LFO 1");
-		configOutput(LFO2_OUTPUT, "LFO 2");
-		configOutput(BAND_L_OUTPUT, "HP Bandpass L");
-		configOutput(BAND_R_OUTPUT, "HP Bandpass R");
+		// Inputs (24)
+		configInput(L_IN_INPUT,      "Audio L");
+		configInput(R_IN_INPUT,      "Audio R");
+		configInput(ALT_BP_L_INPUT,  "Alt BP L");
+		configInput(ALT_BP_R_INPUT,  "Alt BP R");
+		configInput(MOD_INPUT,       "Mod Source");
+		configInput(VCA_INPUT,       "VCA CV");
+		configInput(LP1_FREQ_INPUT,  "LP1 Freq CV");
+		configInput(LP1_TILT_INPUT,  "LP1 Tilt CV");
+		configInput(LP1_RES_INPUT,   "LP1 Res CV");
+		configInput(BP_FREQ_INPUT,   "BP Offset CV");
+		configInput(BP_TILT_INPUT,   "BP Tilt CV");
+		configInput(BP1_FREQ_INPUT,  "BP1 Freq CV");
+		configInput(BP1_FOCUS_INPUT, "BP1 Focus CV");
+		configInput(BP1_DIST_INPUT,  "BP1 Drive CV");
+		configInput(BP2_FREQ_INPUT,  "BP2 Freq CV");
+		configInput(BP2_FOCUS_INPUT, "BP2 Focus CV");
+		configInput(BP2_DIST_INPUT,  "BP2 Drive CV");
+		configInput(BP3_FREQ_INPUT,  "BP3 Freq CV");
+		configInput(BP3_FOCUS_INPUT, "BP3 Focus CV");
+		configInput(BP3_DIST_INPUT,  "BP3 Drive CV");
+		configInput(HP_FREQ_INPUT,   "HP Freq CV");
+		configInput(HP_RES_INPUT,    "HP Res CV");
+		configInput(LP2_FREQ_INPUT,  "LP2 Freq CV");
+		configInput(LP2_RES_INPUT,   "LP2 Res CV");
 
-		// Lights
-		configLight(LFO1_LIGHT, "LFO 1 value");
-		configLight(LFO2_LIGHT, "LFO 2 value");
-		configLight(MOD_LIGHT, "Mod bus signal");
-		configOutput(L_OUTPUT, "Audio L");
-		configOutput(R_OUTPUT, "Audio R");
+		// Outputs (6)
+		configOutput(LFO1_OUTPUT,   "LFO 1");
+		configOutput(LFO2_OUTPUT,   "LFO 2");
+		configOutput(BP3_L_OUTPUT,  "BP3 L");
+		configOutput(BP3_R_OUTPUT,  "BP3 R");
+		configOutput(MAIN_L_OUTPUT, "Audio L");
+		configOutput(MAIN_R_OUTPUT, "Audio R");
 
-		// LP1, LP2, and HP all use f_ref = 632 Hz at 0 V (struct defaults; no override needed)
+		// Lights (5)
+		configLight(LFO1_LIGHT,     "LFO 1");
+		configLight(LFO2_LIGHT,     "LFO 2");
+		configLight(MOD_CLIP_LIGHT, "Mod Clip");
+		configLight(MOD_POS_LIGHT,  "Mod +");
+		configLight(MOD_NEG_LIGHT,  "Mod \xe2\x88\x92");
 	}
 
 	// ── DSP state ────────────────────────────────────────────────────────────
 	LFO lfo1, lfo2;
 	TripleBandpass bandpassL, bandpassR;
-	// Distortion taps — post-SVF output fed into Block 4; not routed back into SVF input.
+	// Distortion taps — post-SVF per-group distorted outputs
 	float distTapL[3] = {}, distTapR[3] = {};
 	LPFilter lp1L, lp1R;
 	LPFilter lp2L, lp2R;
 	HPFilter hpL, hpR;
 
-	// 2× oversampling for Blocks 3+4 (APF comb + distortion).
+	// 2× oversampling for BP section (SVF + distortion).
 	// QUALITY=8 gives ~90 dB stopband attenuation, acceptable CPU on modern hw.
 	static constexpr int OS = 2;
 	static constexpr int OS_QUALITY = 8;
-	dsp::Upsampler<OS, OS_QUALITY> upL, upR;
-	dsp::Decimator<OS, OS_QUALITY> decL, decR;
+	dsp::Upsampler<OS, OS_QUALITY>  upL, upR;
+	dsp::Decimator<OS, OS_QUALITY>  decL, decR;
+	dsp::Decimator<OS, OS_QUALITY>  decBP3L, decBP3R;   // separate tap for BP3 output
 
 	void onReset() override {
 		lfo1.reset(); lfo2.reset();
@@ -380,6 +328,7 @@ struct Pogo : Module {
 		hpL.reset();  hpR.reset();
 		upL.reset();  upR.reset();
 		decL.reset(); decR.reset();
+		decBP3L.reset(); decBP3R.reset();
 	}
 
 	void onSampleRateChange() override {
@@ -398,28 +347,37 @@ struct Pogo : Module {
 		                                 ? inputs[R_IN_INPUT].getVoltage()
 		                                 : inL); // normalise R to L if unpatched
 
-		// ── Block 1: pre-gain boost ───────────────────────────────────────────
-		float gainParam = params[GAIN_PARAM].getValue();
-		float pgL = PreGain::process(inL, gainParam);
-		float pgR = PreGain::process(inR, gainParam);
+		// ── Block 1: pre-gain boost (main path) ──────────────────────────────
+		float pgL = PreGain::process(inL, params[GAIN_MAIN_PARAM].getValue());
+		float pgR = PreGain::process(inR, params[GAIN_MAIN_PARAM].getValue());
 
-		// ── Block 2: LFOs ────────────────────────────────────────────────────
-		float lfo1Raw = lfo1.process(params[LFO1_SPEED_PARAM].getValue(), dt);
-		float lfo2Raw = lfo2.process(params[LFO2_SPEED_PARAM].getValue(), dt);
-		float lfo1V   = lfo1Raw * 5.f;   // ±5V
-		float lfo2V   = lfo2Raw * 5.f;   // ±5V
+		// ALT path: ALT_BP_L/R → GAIN_BP3 → bypasses VCA+LP1, feeds BP directly
+		bool altLConn = inputs[ALT_BP_L_INPUT].isConnected();
+		bool altRConn = inputs[ALT_BP_R_INPUT].isConnected();
+		float altL = altLConn
+		    ? PreGain::process(inputs[ALT_BP_L_INPUT].getVoltage(), params[GAIN_BP3_PARAM].getValue())
+		    : 0.f;
+		float altR = altRConn
+		    ? PreGain::process(inputs[ALT_BP_R_INPUT].getVoltage(), params[GAIN_BP3_PARAM].getValue())
+		    : (altLConn ? altL : 0.f); // normalise R to L alt if only L patched
+
+		// ── LFOs ─────────────────────────────────────────────────────────────
+		float lfo1Raw = lfo1.process(params[LFO1_RATE_PARAM].getValue(), dt);
+		float lfo2Raw = lfo2.process(params[LFO2_RATE_PARAM].getValue(), dt);
+		float lfo1V   = lfo1Raw * 5.f;   // ±5 V
+		float lfo2V   = lfo2Raw * 5.f;   // ±5 V
 
 		// ── Mod bus ───────────────────────────────────────────────────────────
-		// LFO1 normalizes to mod bus; MOD_IN jack overrides when patched
-		float modSrcV = inputs[MOD_IN_INPUT].isConnected()
-		                ? inputs[MOD_IN_INPUT].getVoltage()
+		// LFO1 normalises to mod bus; MOD_INPUT jack overrides when patched
+		float modSrcV = inputs[MOD_INPUT].isConnected()
+		                ? inputs[MOD_INPUT].getVoltage()
 		                : lfo1V;
 
 		float busV = ModBusProcessor::process(modSrcV,
-		                                      params[MOD_AMOUNT_PARAM].getValue(),
+		                                      params[MOD_SCALE_PARAM].getValue(),
 		                                      params[MOD_OFFSET_PARAM].getValue());
 
-		// Helper: resolve one mod destination
+		// Helper: resolve one mod destination (bus normalised to CV override + att)
 		auto modDest = [&](int cvInput, int attParam) -> float {
 			bool has = inputs[cvInput].isConnected();
 			return applyDestination(busV,
@@ -428,124 +386,124 @@ struct Pogo : Module {
 			                        params[attParam].getValue());
 		};
 
-		// ── Block 3: triple bandpass SVF (formant F1/F2/F3) ─────────────────
-		// Per-group parameters
-		float freqV[3] = {
-			params[FREQ_1_PARAM].getValue() + modDest(FREQ_CV_1_INPUT, FREQ_ATT_1_PARAM),
-			params[FREQ_2_PARAM].getValue() + modDest(FREQ_CV_2_INPUT, FREQ_ATT_2_PARAM),
-			params[FREQ_3_PARAM].getValue() + modDest(FREQ_CV_3_INPUT, FREQ_ATT_3_PARAM),
-		};
-		// MASTER OFFSET adds to all three simultaneously
-		float masterOff = params[MASTER_OFFSET_PARAM].getValue()
-		                  + modDest(MASTER_OFFSET_CV_INPUT, MASTER_OFFSET_ATT_PARAM);
-		for (int i = 0; i < 3; i++) freqV[i] += masterOff;
-
-		float qParam[3] = {
-			clamp(params[FB_1_PARAM].getValue() + modDest(FB_CV_1_INPUT, FB_ATT_1_PARAM), 0.f, 1.f),
-			clamp(params[FB_2_PARAM].getValue() + modDest(FB_CV_2_INPUT, FB_ATT_2_PARAM), 0.f, 1.f),
-			clamp(params[FB_3_PARAM].getValue() + modDest(FB_CV_3_INPUT, FB_ATT_3_PARAM), 0.f, 1.f),
-		};
-
-		int polSwitch = (int)std::round(params[POLARITY_PARAM].getValue()); // 0=pos, 1=off, 2=neg
-		int polarityVal = (polSwitch == 0) ? 1 : (polSwitch == 2) ? -1 : 0;
-
 		// ── Block VCA ─────────────────────────────────────────────────────────
-		float vcaCV  = inputs[VCA_CV_INPUT].isConnected()
-		               ? inputs[VCA_CV_INPUT].getVoltage()
-		               : busV; // normalise to mod bus
+		// VCA_INPUT normalises to mod bus; VCA_OFS shifts effective CV floor.
+		float vcaCVraw = inputs[VCA_INPUT].isConnected()
+		                 ? inputs[VCA_INPUT].getVoltage()
+		                 : busV;
+		float vcaCV = clamp(vcaCVraw + params[VCA_OFS_PARAM].getValue() * 5.f, 0.f, 10.f);
 		float vcaAmt = params[VCA_AMT_PARAM].getValue();
-		float vcaL   = VcaBlock::process(pgL, vcaAmt, vcaCV);
-		float vcaR   = VcaBlock::process(pgR, vcaAmt, vcaCV);
+		float vcaOutL = VcaBlock::process(pgL, vcaAmt, vcaCV);
+		float vcaOutR = VcaBlock::process(pgR, vcaAmt, vcaCV);
 
-		// ── Block 5: LP Filter 1 ─────────────────────────────────────────────
-		float lp1CV  = params[LP1_CUTOFF_PARAM].getValue()
-		               + modDest(LP1_CUT_CV_INPUT, LP1_CUT_ATT_PARAM);
-		float lp1Res = clamp(params[LP1_RESONANCE_PARAM].getValue()
-		                     + modDest(LP1_RES_CV_INPUT, LP1_RES_ATT_PARAM) / 10.f,
-		                     0.f, 1.f);
-		float spreadV = params[LP1_SPREAD_PARAM].getValue();
-		float bandL = lp1L.process(vcaL, lp1CV,          lp1Res, fs);
-		float bandR = lp1R.process(vcaR, lp1CV + spreadV, lp1Res, fs);
+		// ── Block LP1: 2-pole SVF LP (stereo tilt) ───────────────────────────
+		// L cutoff = base + tiltV;  R cutoff = base − tiltV
+		float lp1FreqBase = params[LP1_FREQ_PARAM].getValue()
+		                    + modDest(LP1_FREQ_INPUT, LP1_FREQ_ATT_PARAM);
+		float lp1TiltV    = params[LP1_TILT_PARAM].getValue() * 5.f   // −1→+1 knob → ±5 V/oct
+		                    + modDest(LP1_TILT_INPUT, LP1_TILT_ATT_PARAM);
+		float lp1Res      = clamp(params[LP1_RES_PARAM].getValue()
+		                    + modDest(LP1_RES_INPUT, LP1_RES_ATT_PARAM) / 10.f, 0.f, 1.f);
+		float bandL = lp1L.process(vcaOutL, lp1FreqBase + lp1TiltV, lp1Res, fs);
+		float bandR = lp1R.process(vcaOutR, lp1FreqBase - lp1TiltV, lp1Res, fs);
 
-		float combBypass = clamp(params[COMB_BYPASS_PARAM].getValue()
-		                         + modDest(BYPASS_CV_INPUT, BYPASS_ATT_PARAM), 0.f, 1.f);
-		float widthParam = params[WIDTH_PARAM].getValue(); // ±1 V/oct offset on R
+		// ── Block BP: 2× oversampled triple bandpass + distortion ────────────
+		// Pre-compute all BP CVs at base rate
+		float bpOffsetCv = params[BP_OFFSET_PARAM].getValue()
+		                   + modDest(BP_FREQ_INPUT, BP_FREQ_ATT_PARAM);
+		float bpTiltCv   = modDest(BP_TILT_INPUT, BP_TILT_ATT_PARAM); // stereo tilt: L+=, R-=
 
-		// ── Blocks 3+4: 2× oversampled SVF bandpass + distortion ───────────
-		int distMode = (int)std::round(params[DIST_MODE_PARAM].getValue());
-		float driveCV[3] = {
-			clamp(params[DRIVE_1_PARAM].getValue() + modDest(DRIVE_CV_1_INPUT, DRIVE_ATT_1_PARAM), 0.f, 1.f),
-			clamp(params[DRIVE_2_PARAM].getValue() + modDest(DRIVE_CV_2_INPUT, DRIVE_ATT_2_PARAM), 0.f, 1.f),
-			clamp(params[DRIVE_3_PARAM].getValue() + modDest(DRIVE_CV_3_INPUT, DRIVE_ATT_3_PARAM), 0.f, 1.f),
+		int polarityVal = (params[BP_POL_PARAM].getValue() >= 0.5f) ? -1 : 1;
+		int distMode    = (int)std::round(params[BP_DIST_PARAM].getValue());
+		float mix       = params[BP_MIX_PARAM].getValue();
+
+		float freqV[3] = {
+			bpOffsetCv + params[BP1_FREQ_PARAM].getValue() + modDest(BP1_FREQ_INPUT, BP1_FREQ_ATT_PARAM),
+			bpOffsetCv + params[BP2_FREQ_PARAM].getValue() + modDest(BP2_FREQ_INPUT, BP2_FREQ_ATT_PARAM),
+			bpOffsetCv + params[BP3_FREQ_PARAM].getValue() + modDest(BP3_FREQ_INPUT, BP3_FREQ_ATT_PARAM),
+		};
+		float focusCv[3] = {
+			clamp(params[BP1_FOCUS_PARAM].getValue() + modDest(BP1_FOCUS_INPUT, BP1_FOCUS_ATT_PARAM), 0.f, 1.f),
+			clamp(params[BP2_FOCUS_PARAM].getValue() + modDest(BP2_FOCUS_INPUT, BP2_FOCUS_ATT_PARAM), 0.f, 1.f),
+			clamp(params[BP3_FOCUS_PARAM].getValue() + modDest(BP3_FOCUS_INPUT, BP3_FOCUS_ATT_PARAM), 0.f, 1.f),
+		};
+		float driveCv[3] = {
+			clamp(params[BP1_DIST_PARAM].getValue() + modDest(BP1_DIST_INPUT, BP1_DIST_ATT_PARAM), 0.f, 1.f),
+			clamp(params[BP2_DIST_PARAM].getValue() + modDest(BP2_DIST_INPUT, BP2_DIST_ATT_PARAM), 0.f, 1.f),
+			clamp(params[BP3_DIST_PARAM].getValue() + modDest(BP3_DIST_INPUT, BP3_DIST_ATT_PARAM), 0.f, 1.f),
 		};
 
-		// Alt BP3 inputs: when patched, bypass VCA+LP1 and feed directly into SVF.
-		// R normalizes to L alt if only L is patched.
-		bool altLConn = inputs[ALT_BP_L_INPUT].isConnected();
-		bool altRConn = inputs[ALT_BP_R_INPUT].isConnected();
-		float bpInL = altLConn ? inputs[ALT_BP_L_INPUT].getVoltage() : bandL;
-		float bpInR = altRConn ? inputs[ALT_BP_R_INPUT].getVoltage()
-		            : altLConn ? inputs[ALT_BP_L_INPUT].getVoltage()
-		            : bandR;
+		// BP input: ALT when patched, else LP1 output
+		float bpInL = altLConn ? altL : bandL;
+		float bpInR = (altLConn || altRConn) ? altR : bandR;
 
+		// 2× upsample
 		float upBufL[OS], upBufR[OS];
 		upL.process(bpInL, upBufL);
 		upR.process(bpInR, upBufR);
 
 		float postL[OS], postR[OS];
+		float bp3BufL[OS], bp3BufR[OS];
 		const float fs2 = 2.f * fs;
-		for (int s = 0; s < OS; s++) {
-			// SVF at 2× rate; clean audio in, no distortion feedback path
-			bandpassL.process(upBufL[s], freqV, qParam, polarityVal, 0.f,        fs2);
-			bandpassR.process(upBufR[s], freqV, qParam, polarityVal, widthParam, fs2);
 
-			// Distortion per group; update distTap for next OS step's SVF blend
+		for (int s = 0; s < OS; s++) {
+			// Stereo tilt: L gets +bpTiltCv, R gets −bpTiltCv (widthOffset in TripleBandpass API)
+			bandpassL.process(upBufL[s], freqV, focusCv, polarityVal, +bpTiltCv, fs2);
+			bandpassR.process(upBufR[s], freqV, focusCv, polarityVal, -bpTiltCv, fs2);
+
 			float dSumL = 0.f, dSumR = 0.f;
 			for (int i = 0; i < 3; i++) {
-				distTapL[i] = Distortion::process(bandpassL.prevOut[i], driveCV[i], distMode);
-				distTapR[i] = Distortion::process(bandpassR.prevOut[i], driveCV[i], distMode);
-				dSumL += distTapL[i] * 0.5f;
-				dSumR += distTapR[i] * 0.5f;
+				distTapL[i] = Distortion::process(bandpassL.prevOut[i], driveCv[i], distMode);
+				distTapR[i] = Distortion::process(bandpassR.prevOut[i], driveCv[i], distMode);
+				dSumL += distTapL[i];  // unity weight — level managed via BP_MIX
+				dSumR += distTapR[i];
 			}
-			// COMB BYPASS crossfade at oversampled rate
-			postL[s] = clamp(upBufL[s] * (1.f - combBypass) + dSumL * combBypass, -10.5f, 10.5f);
-			postR[s] = clamp(upBufR[s] * (1.f - combBypass) + dSumR * combBypass, -10.5f, 10.5f);
+			postL[s]    = clamp(dSumL, -10.5f, 10.5f);
+			postR[s]    = clamp(dSumR, -10.5f, 10.5f);
+			bp3BufL[s]  = distTapL[2];   // BP3 formant distorted output tap
+			bp3BufR[s]  = distTapR[2];
 		}
 
-		// Decimate back to base rate
-		float distSumL = decL.process(postL);
-		float distSumR = decR.process(postR);
+		// Decimate all oversampled signals
+		float wetL    = decL.process(postL);
+		float wetR    = decR.process(postR);
+		float bp3OutL = decBP3L.process(bp3BufL);
+		float bp3OutR = decBP3R.process(bp3BufR);
 
-		// ── Block 7: HP Filter ────────────────────────────────────────────────
-		float hpCV  = params[HP_CUTOFF_PARAM].getValue()
-		              + modDest(HP_CUT_CV_INPUT, HP_CUT_ATT_PARAM);
-		float hpRes = clamp(params[HP_RESONANCE_PARAM].getValue()
-		                    + modDest(HP_RES_CV_INPUT, HP_RES_ATT_PARAM) / 10.f,
-		                    0.f, 1.f);
-		float hpOutL = hpL.process(distSumL, hpCV, hpRes, fs);
-		float hpOutR = hpR.process(distSumR, hpCV, hpRes, fs);
+		// BP_MIX dry/wet blend (at base rate; dry = LP1 output)
+		float bpOutL = bandL * (1.f - mix) + wetL * mix;
+		float bpOutR = bandR * (1.f - mix) + wetR * mix;
 
-		// ── Block 6: LP Filter 2 ─────────────────────────────────────────────
-		float lp2CV  = params[LP2_CUTOFF_PARAM].getValue()
-		               + modDest(LP2_CUT_CV_INPUT, LP2_CUT_ATT_PARAM);
-		float lp2Res = clamp(params[LP2_RESONANCE_PARAM].getValue()
-		                     + modDest(LP2_RES_CV_INPUT, LP2_RES_ATT_PARAM) / 10.f,
-		                     0.f, 1.f);
-		float outL = lp2L.process(hpOutL, lp2CV, lp2Res, fs);
-		float outR = lp2R.process(hpOutR, lp2CV, lp2Res, fs);
+		// ── Block HP: 2-pole SVF HP ───────────────────────────────────────────
+		float hpFreqCv = params[HP_FREQ_PARAM].getValue()
+		                 + modDest(HP_FREQ_INPUT, HP_FREQ_ATT_PARAM);
+		float hpResCv  = clamp(params[HP_RES_PARAM].getValue()
+		                 + modDest(HP_RES_INPUT, HP_RES_ATT_PARAM) / 10.f, 0.f, 1.f);
+		float hpOutL = hpL.process(bpOutL, hpFreqCv, hpResCv, fs);
+		float hpOutR = hpR.process(bpOutR, hpFreqCv, hpResCv, fs);
 
-		// ── Block B: output buffers (LM4562, ±11 V swing on ±12 V rails) ─────
-		outputs[L_OUTPUT].setVoltage(clamp(outL, -11.0f, 11.0f));
-		outputs[R_OUTPUT].setVoltage(clamp(outR, -11.0f, 11.0f));
-		outputs[BAND_L_OUTPUT].setVoltage(clamp(hpL.prevBP, -11.0f, 11.0f));
-		outputs[BAND_R_OUTPUT].setVoltage(clamp(hpR.prevBP, -11.0f, 11.0f));
-		outputs[LFO1_OUTPUT].setVoltage(lfo1V);
-		outputs[LFO2_OUTPUT].setVoltage(lfo2V);
+		// ── Block LP2: 2-pole SVF LP ──────────────────────────────────────────
+		float lp2FreqCv = params[LP2_FREQ_PARAM].getValue()
+		                  + modDest(LP2_FREQ_INPUT, LP2_FREQ_ATT_PARAM);
+		float lp2ResCv  = clamp(params[LP2_RES_PARAM].getValue()
+		                  + modDest(LP2_RES_INPUT, LP2_RES_ATT_PARAM) / 10.f, 0.f, 1.f);
+		float outL = lp2L.process(hpOutL, lp2FreqCv, lp2ResCv, fs);
+		float outR = lp2R.process(hpOutR, lp2FreqCv, lp2ResCv, fs);
 
-		// LEDs: LFO [-1,+1] → [0,1]; MOD ±5V → [0,1]
-		lights[LFO1_LIGHT].setBrightness((lfo1Raw + 1.f) * 0.5f);
-		lights[LFO2_LIGHT].setBrightness((lfo2Raw + 1.f) * 0.5f);
-		lights[MOD_LIGHT].setBrightness(clamp((modSrcV / 5.f + 1.f) * 0.5f, 0.f, 1.f));
+		// ── Block B: output buffers ───────────────────────────────────────────
+		outputs[MAIN_L_OUTPUT].setVoltage(clamp(outL,    -11.f, 11.f));
+		outputs[MAIN_R_OUTPUT].setVoltage(clamp(outR,    -11.f, 11.f));
+		outputs[BP3_L_OUTPUT ].setVoltage(clamp(bp3OutL, -11.f, 11.f));
+		outputs[BP3_R_OUTPUT ].setVoltage(clamp(bp3OutR, -11.f, 11.f));
+		outputs[LFO1_OUTPUT  ].setVoltage(lfo1V);
+		outputs[LFO2_OUTPUT  ].setVoltage(lfo2V);
+
+		// LEDs
+		lights[LFO1_LIGHT    ].setBrightness((lfo1Raw + 1.f) * 0.5f);
+		lights[LFO2_LIGHT    ].setBrightness((lfo2Raw + 1.f) * 0.5f);
+		lights[MOD_CLIP_LIGHT].setBrightness(std::abs(busV) >= 9.9f ? 1.f : 0.f);
+		lights[MOD_POS_LIGHT ].setBrightness(busV >  0.f ? clamp( busV / 10.f, 0.f, 1.f) : 0.f);
+		lights[MOD_NEG_LIGHT ].setBrightness(busV < 0.f ? clamp(-busV / 10.f, 0.f, 1.f) : 0.f);
 	}
 };
 
@@ -556,118 +514,110 @@ struct PogoWidget : ModuleWidget {
 		setPanel(createPanel(asset::plugin(pluginInstance, "res/Pogo.svg")));
 		// All text labels are in res/Pogo.svg — no addLabel() calls needed.
 
-		// ── Zone 0a — INPUT / GAIN ──────────────────────────────────────
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(5.08f, 16.f)), module, Pogo::L_IN_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(15.24f, 16.f)), module, Pogo::R_IN_INPUT));
-		addParam(createParamCentered<PogoSwitchH2>(mm2px(Vec(10.16f, 32.f)), module, Pogo::GAIN_PARAM));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(5.08f, 43.f)), module, Pogo::ALT_BP_L_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(15.24f, 43.f)), module, Pogo::ALT_BP_R_INPUT));
+		// ── Zone 0a — INPUT / GAIN ─────────────────────────────────────
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.62f, 17.00f)), module, Pogo::L_IN_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(19.05f, 17.00f)), module, Pogo::R_IN_INPUT));
+		addParam(createParamCentered<PogoSwitchH2>(mm2px(Vec(30.48f, 17.00f)), module, Pogo::GAIN_MAIN_PARAM));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.62f, 31.50f)), module, Pogo::ALT_BP_L_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(19.05f, 31.50f)), module, Pogo::ALT_BP_R_INPUT));
+		addParam(createParamCentered<PogoSwitchH2>(mm2px(Vec(30.48f, 31.50f)), module, Pogo::GAIN_BP3_PARAM));
 
-		// ── Zone 0b — LFO ──────────────────────────────────────────────────
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(5.08f, 62.6f)), module, Pogo::LFO1_SPEED_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(15.24f, 62.6f)), module, Pogo::LFO2_SPEED_PARAM));
-		addChild(createLightCentered<SmallLight<RedLight>>(mm2px(Vec(5.08f, 73.3f)), module, Pogo::LFO1_LIGHT));
-		addChild(createLightCentered<SmallLight<RedLight>>(mm2px(Vec(15.24f, 73.3f)), module, Pogo::LFO2_LIGHT));
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(5.08f, 82.f)), module, Pogo::LFO1_OUTPUT));
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(15.24f, 82.f)), module, Pogo::LFO2_OUTPUT));
+		// ── Zone 0b — LFO ──────────────────────────────────────────────
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(7.62f, 51.50f)), module, Pogo::LFO1_OUTPUT));
+		addChild(createLightCentered<SmallLight<GreenLight>>(mm2px(Vec(19.05f, 51.50f)), module, Pogo::LFO1_LIGHT));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(30.48f, 51.50f)), module, Pogo::LFO1_RATE_PARAM));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(7.62f, 65.90f)), module, Pogo::LFO2_OUTPUT));
+		addChild(createLightCentered<SmallLight<GreenLight>>(mm2px(Vec(19.05f, 65.90f)), module, Pogo::LFO2_LIGHT));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(30.48f, 65.90f)), module, Pogo::LFO2_RATE_PARAM));
 
-		// ── Zone 0c — MOD BUS ──────────────────────────────────────────────
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(5.08f, 105.f)), module, Pogo::MOD_AMOUNT_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(15.24f, 105.f)), module, Pogo::MOD_OFFSET_PARAM));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(5.08f, 118.f)), module, Pogo::MOD_IN_INPUT));
-		addChild(createLightCentered<SmallLight<RedLight>>(mm2px(Vec(15.24f, 118.f)), module, Pogo::MOD_LIGHT));
+		// ── Zone 0c — MOD BUS / VCA ────────────────────────────────────
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(7.62f, 83.00f)), module, Pogo::MOD_SCALE_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(30.48f, 83.00f)), module, Pogo::VCA_AMT_PARAM));
+		addChild(createLightCentered<SmallLight<GreenLight>>(mm2px(Vec(19.05f, 83.00f)), module, Pogo::MOD_CLIP_LIGHT));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(7.62f, 96.34f)), module, Pogo::MOD_OFFSET_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(30.48f, 96.34f)), module, Pogo::VCA_OFS_PARAM));
+		addChild(createLightCentered<SmallLight<GreenLight>>(mm2px(Vec(19.05f, 96.34f)), module, Pogo::MOD_POS_LIGHT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.62f, 112.00f)), module, Pogo::MOD_INPUT));
+		addChild(createLightCentered<SmallLight<GreenLight>>(mm2px(Vec(19.05f, 112.00f)), module, Pogo::MOD_NEG_LIGHT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(30.48f, 112.00f)), module, Pogo::VCA_INPUT));
 
-		// ── Zone 1 — CONTROL / COMB ────────────────────────────────────────
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(29.0f, 23.f)), module, Pogo::COMB_BYPASS_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(42.14f, 23.f)), module, Pogo::WIDTH_PARAM));
-		// POLARITY: 3-pos horizontal switch
-		addParam(createParamCentered<PogoSwitchH3>(mm2px(Vec(35.56f, 37.2f)), module, Pogo::POLARITY_PARAM));
-		addParam(createParamCentered<RoundHugeBlackKnob>(mm2px(Vec(35.56f, 59.f)), module, Pogo::MASTER_OFFSET_PARAM));
+		// ── Zone — LP1 Low-Pass Filter ─────────────────────────────────
+		addParam(createParamCentered<RoundHugeBlackKnob>(mm2px(Vec(53.34f, 24.80f)), module, Pogo::LP1_FREQ_PARAM));
+		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(53.34f, 52.40f)), module, Pogo::LP1_TILT_PARAM));
+		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(53.34f, 78.00f)), module, Pogo::LP1_RES_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(41.91f, 100.00f)), module, Pogo::LP1_FREQ_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(53.34f, 100.00f)), module, Pogo::LP1_TILT_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(64.77f, 100.00f)), module, Pogo::LP1_RES_ATT_PARAM));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(41.91f, 112.00f)), module, Pogo::LP1_FREQ_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(53.34f, 112.00f)), module, Pogo::LP1_TILT_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(64.77f, 112.00f)), module, Pogo::LP1_RES_INPUT));
 
-		// ── Zone 1 — CONTROL / DIST ────────────────────────────────────────
-		// MODE: 3-pos vertical switch (correct orientation)
-		addParam(createParamCentered<CKSSThree>(mm2px(Vec(28.f, 89.f)), module, Pogo::DIST_MODE_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(40.f, 89.f)), module, Pogo::FB_DIST_BLEND_PARAM));
+		// ── Zone — BP CONTROL ──────────────────────────────────────────
+		addParam(createParamCentered<PogoSwitchH2>(mm2px(Vec(81.92f, 17.63f)), module, Pogo::BP_POL_PARAM));
+		addParam(createParamCentered<PogoSwitchH3>(mm2px(Vec(81.92f, 30.57f)), module, Pogo::BP_DIST_PARAM));
+		addParam(createParamCentered<RoundHugeBlackKnob>(mm2px(Vec(81.92f, 52.40f)), module, Pogo::BP_OFFSET_PARAM));
+		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(81.92f, 78.00f)), module, Pogo::BP_MIX_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(76.20f, 100.00f)), module, Pogo::BP_FREQ_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(87.63f, 100.00f)), module, Pogo::BP_TILT_ATT_PARAM));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(76.20f, 112.00f)), module, Pogo::BP_FREQ_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(87.63f, 112.00f)), module, Pogo::BP_TILT_INPUT));
 
-		// ── Zone 1 — unified bottom row ────────────────────────────────────
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(25.40f, 107.25f)), module, Pogo::BYPASS_ATT_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(35.56f, 107.25f)), module, Pogo::MASTER_OFFSET_ATT_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(45.72f, 107.25f)), module, Pogo::BLEND_ATT_PARAM));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(25.40f, 118.f)), module, Pogo::BYPASS_CV_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(35.56f, 118.f)), module, Pogo::MASTER_OFFSET_CV_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(45.72f, 118.f)), module, Pogo::BLEND_CV_INPUT));
+		// ── Zone — BP 1 ────────────────────────────────────────────────
+		addParam(createParamCentered<RoundHugeBlackKnob>(mm2px(Vec(110.49f, 24.80f)), module, Pogo::BP1_FREQ_PARAM));
+		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(110.49f, 52.40f)), module, Pogo::BP1_FOCUS_PARAM));
+		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(110.49f, 78.00f)), module, Pogo::BP1_DIST_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(99.06f, 100.00f)), module, Pogo::BP1_FREQ_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(110.49f, 100.00f)), module, Pogo::BP1_FOCUS_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(121.92f, 100.00f)), module, Pogo::BP1_DIST_ATT_PARAM));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(99.06f, 112.00f)), module, Pogo::BP1_FREQ_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(110.49f, 112.00f)), module, Pogo::BP1_FOCUS_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(121.92f, 112.00f)), module, Pogo::BP1_DIST_INPUT));
 
-		// ── Zone 2a — COMB 1 ───────────────────────────────────────────────
-		addParam(createParamCentered<RoundHugeBlackKnob>(mm2px(Vec(66.04f, 34.f)), module, Pogo::FREQ_1_PARAM));
-		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(66.04f, 63.f)), module, Pogo::FB_1_PARAM));
-		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(66.04f, 89.f)), module, Pogo::DRIVE_1_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(55.88f, 107.25f)), module, Pogo::FREQ_ATT_1_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(66.04f, 107.25f)), module, Pogo::FB_ATT_1_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(76.20f, 107.25f)), module, Pogo::DRIVE_ATT_1_PARAM));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(55.88f, 118.f)), module, Pogo::FREQ_CV_1_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(66.04f, 118.f)), module, Pogo::FB_CV_1_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(76.20f, 118.f)), module, Pogo::DRIVE_CV_1_INPUT));
+		// ── Zone — BP 2 ────────────────────────────────────────────────
+		addParam(createParamCentered<RoundHugeBlackKnob>(mm2px(Vec(144.78f, 24.80f)), module, Pogo::BP2_FREQ_PARAM));
+		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(144.78f, 52.40f)), module, Pogo::BP2_FOCUS_PARAM));
+		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(144.78f, 78.00f)), module, Pogo::BP2_DIST_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(133.35f, 100.00f)), module, Pogo::BP2_FREQ_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(144.78f, 100.00f)), module, Pogo::BP2_FOCUS_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(156.21f, 100.00f)), module, Pogo::BP2_DIST_ATT_PARAM));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(133.35f, 112.00f)), module, Pogo::BP2_FREQ_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(144.78f, 112.00f)), module, Pogo::BP2_FOCUS_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(156.21f, 112.00f)), module, Pogo::BP2_DIST_INPUT));
 
-		// ── Zone 2b — COMB 2 ───────────────────────────────────────────────
-		addParam(createParamCentered<RoundHugeBlackKnob>(mm2px(Vec(96.52f, 34.f)), module, Pogo::FREQ_2_PARAM));
-		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(96.52f, 63.f)), module, Pogo::FB_2_PARAM));
-		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(96.52f, 89.f)), module, Pogo::DRIVE_2_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(86.36f, 107.25f)), module, Pogo::FREQ_ATT_2_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(96.52f, 107.25f)), module, Pogo::FB_ATT_2_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(106.68f, 107.25f)), module, Pogo::DRIVE_ATT_2_PARAM));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(86.36f, 118.f)), module, Pogo::FREQ_CV_2_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(96.52f, 118.f)), module, Pogo::FB_CV_2_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(106.68f, 118.f)), module, Pogo::DRIVE_CV_2_INPUT));
+		// ── Zone — BP 3 ────────────────────────────────────────────────
+		addParam(createParamCentered<RoundHugeBlackKnob>(mm2px(Vec(179.07f, 24.80f)), module, Pogo::BP3_FREQ_PARAM));
+		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(179.07f, 52.40f)), module, Pogo::BP3_FOCUS_PARAM));
+		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(179.07f, 78.00f)), module, Pogo::BP3_DIST_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(167.64f, 100.00f)), module, Pogo::BP3_FREQ_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(179.07f, 100.00f)), module, Pogo::BP3_FOCUS_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(190.50f, 100.00f)), module, Pogo::BP3_DIST_ATT_PARAM));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(167.64f, 112.00f)), module, Pogo::BP3_FREQ_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(179.07f, 112.00f)), module, Pogo::BP3_FOCUS_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(190.50f, 112.00f)), module, Pogo::BP3_DIST_INPUT));
 
-		// ── Zone 2c — COMB 3 ───────────────────────────────────────────────
-		addParam(createParamCentered<RoundHugeBlackKnob>(mm2px(Vec(127.00f, 34.f)), module, Pogo::FREQ_3_PARAM));
-		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(127.00f, 63.f)), module, Pogo::FB_3_PARAM));
-		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(127.00f, 89.f)), module, Pogo::DRIVE_3_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(116.84f, 107.25f)), module, Pogo::FREQ_ATT_3_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(127.00f, 107.25f)), module, Pogo::FB_ATT_3_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(137.16f, 107.25f)), module, Pogo::DRIVE_ATT_3_PARAM));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(116.84f, 118.f)), module, Pogo::FREQ_CV_3_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(127.00f, 118.f)), module, Pogo::FB_CV_3_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(137.16f, 118.f)), module, Pogo::DRIVE_CV_3_INPUT));
+		// ── Zone — BP3 OUT ─────────────────────────────────────────────
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(201.93f, 17.00f)), module, Pogo::BP3_L_OUTPUT));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(213.36f, 17.00f)), module, Pogo::BP3_R_OUTPUT));
 
-		// ── Zone 3 — VCA (top strip) ───────────────────────────────────────
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(147.32f, 16.f)), module, Pogo::VCA_AMT_PARAM));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(157.48f, 16.f)), module, Pogo::VCA_CV_INPUT));
+		// ── Zone — HP ──────────────────────────────────────────────────
+		addParam(createParamCentered<PogoSlider>(mm2px(Vec(207.65f, 54.00f)), module, Pogo::HP_FREQ_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(207.65f, 89.50f)), module, Pogo::HP_RES_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(201.93f, 100.00f)), module, Pogo::HP_FREQ_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(213.36f, 100.00f)), module, Pogo::HP_RES_ATT_PARAM));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(201.93f, 112.00f)), module, Pogo::HP_FREQ_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(213.36f, 112.00f)), module, Pogo::HP_RES_INPUT));
 
-		// ── Zone 3 — LP1 ───────────────────────────────────────────────────
-		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(152.40f, 49.f)), module, Pogo::LP1_CUTOFF_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(152.40f, 72.f)), module, Pogo::LP1_SPREAD_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(152.40f, 95.f)), module, Pogo::LP1_RESONANCE_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(147.32f, 107.25f)), module, Pogo::LP1_CUT_ATT_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(157.48f, 107.25f)), module, Pogo::LP1_RES_ATT_PARAM));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(147.32f, 118.f)), module, Pogo::LP1_CUT_CV_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(157.48f, 118.f)), module, Pogo::LP1_RES_CV_INPUT));
+		// ── Zone — MAIN OUT ────────────────────────────────────────────
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(224.79f, 17.00f)), module, Pogo::MAIN_L_OUTPUT));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(236.22f, 17.00f)), module, Pogo::MAIN_R_OUTPUT));
 
-		// ── Zone 4 — BAND OUT (top strip) ─────────────────────────────────
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(167.64f, 16.f)), module, Pogo::BAND_L_OUTPUT));
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(177.80f, 16.f)), module, Pogo::BAND_R_OUTPUT));
-
-		// ── Zone 4 — LP2 ───────────────────────────────────────────────────
-		// LP2 CUTOFF: vertical slider, 13mm x 45mm, center at track midpoint
-		addParam(createParamCentered<PogoSlider>(mm2px(Vec(172.72f, 64.5f)), module, Pogo::LP2_CUTOFF_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(172.72f, 95.f)), module, Pogo::LP2_RESONANCE_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(167.64f, 107.25f)), module, Pogo::LP2_CUT_ATT_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(177.80f, 107.25f)), module, Pogo::LP2_RES_ATT_PARAM));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(167.64f, 118.f)), module, Pogo::LP2_CUT_CV_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(177.80f, 118.f)), module, Pogo::LP2_RES_CV_INPUT));
-
-		// ── Zone 5 — OUT (top strip) ───────────────────────────────────────
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(187.96f, 16.f)), module, Pogo::L_OUTPUT));
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(198.12f, 16.f)), module, Pogo::R_OUTPUT));
-
-		// ── Zone 5 — HP ────────────────────────────────────────────────────
-		// HP CUTOFF: vertical slider, matching LP2 geometry
-		addParam(createParamCentered<PogoSlider>(mm2px(Vec(193.04f, 64.5f)), module, Pogo::HP_CUTOFF_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(193.04f, 95.f)), module, Pogo::HP_RESONANCE_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(187.96f, 107.25f)), module, Pogo::HP_CUT_ATT_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(198.12f, 107.25f)), module, Pogo::HP_RES_ATT_PARAM));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(187.96f, 118.f)), module, Pogo::HP_CUT_CV_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(198.12f, 118.f)), module, Pogo::HP_RES_CV_INPUT));
+		// ── Zone — LP2 ─────────────────────────────────────────────────
+		addParam(createParamCentered<PogoSlider>(mm2px(Vec(230.50f, 54.00f)), module, Pogo::LP2_FREQ_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(230.50f, 89.50f)), module, Pogo::LP2_RES_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(224.79f, 100.00f)), module, Pogo::LP2_FREQ_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(236.22f, 100.00f)), module, Pogo::LP2_RES_ATT_PARAM));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(224.79f, 112.00f)), module, Pogo::LP2_FREQ_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(236.22f, 112.00f)), module, Pogo::LP2_RES_INPUT));
 	}
 };
 
