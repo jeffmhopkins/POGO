@@ -671,13 +671,13 @@ def _build_svg_lines(data: dict, rules: DesignRules) -> list[str]:
     if "·" in title:
         before_dot, after_dot = title.split("·", 1)
         title_svg = (
-            f'<text x="101.60" y="3.5" fill="{colors["cyan"]}" {_FONT} font-size="3.5" '
+            f'<text x="101.60" y="5.75" fill="{colors["cyan"]}" {_FONT} font-size="3.5" '
             f'font-weight="bold" text-anchor="middle">'
             f'{before_dot}<tspan fill="{dot_color}">·</tspan>{after_dot}</text>'
         )
     else:
         title_svg = (
-            f'<text x="101.60" y="3.5" fill="{colors["cyan"]}" {_FONT} font-size="3.5" '
+            f'<text x="101.60" y="5.75" fill="{colors["cyan"]}" {_FONT} font-size="3.5" '
             f'font-weight="bold" text-anchor="middle">{title}</text>'
         )
     lines.append("")

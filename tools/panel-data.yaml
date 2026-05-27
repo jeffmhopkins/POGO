@@ -75,7 +75,8 @@ mounting_holes:
 # col 0 cx = 5.715mm, col 1 cx = 17.145mm, col 2 cx = 28.575mm
 separators:
   # Section 0 right boundary — cyan vertical (7 HP = 7 × 5.08 mm)
-  - {type: v, x: 35.56, y1: 4.5, y2: 124.0, style: main_cyan}
+  # y1 matches top strip bottom (9.0mm); y2 matches bot strip top (128.5-4.5=124.0mm)
+  - {type: v, x: 35.56, y1: 9.0, y2: 124.0, style: main_cyan}
   # Top of INPUT zone — label breaks the line
   # Perfect midpoint: strip bottom = 4.5mm, L_IN visual top = 13.5mm → mid = 9.0
   - {type: h, x1: 1.0, x2: 35.06, y: 9.0, style: zone_div, label: "INPUT", label_x: 17.78}

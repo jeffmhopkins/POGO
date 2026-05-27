@@ -410,11 +410,12 @@ def svg_mounting_hole(cx: float, cy: float) -> str:
 # ── Panel background ──────────────────────────────────────────────────────────
 
 def svg_panel_background(w: float, h: float, colors: dict) -> str:
-    strip_h = 4.5
-    bottom_y = h - strip_h
+    top_strip_h = 9.0   # extends to the INPUT zone separator line
+    bot_strip_h = 4.5
+    bottom_y = h - bot_strip_h
     parts = [
         f'<rect x="0" y="0" width="{w}" height="{h}" fill="{colors["panel_bg"]}"/>',
-        f'<rect x="0" y="0" width="{w}" height="{strip_h}" fill="{colors["panel_strip"]}"/>',
-        f'<rect x="0" y="{bottom_y}" width="{w}" height="{strip_h}" fill="{colors["panel_strip"]}"/>',
+        f'<rect x="0" y="0" width="{w}" height="{top_strip_h}" fill="{colors["panel_strip"]}"/>',
+        f'<rect x="0" y="{bottom_y}" width="{w}" height="{bot_strip_h}" fill="{colors["panel_strip"]}"/>',
     ]
     return "\n".join(parts)
