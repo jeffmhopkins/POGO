@@ -33,7 +33,7 @@
 
   <!-- ── ZONE DIVIDERS (dim gray horizontal) ──────────────────────────────── -->
   <line x1="1.0" y1="43.0" x2="35.06" y2="43.0" stroke="#555555" stroke-width="0.5"/>
-  <line x1="1.0" y1="76.0" x2="35.06" y2="76.0" stroke="#555555" stroke-width="0.5"/>
+  <line x1="1.0" y1="75.5" x2="35.06" y2="75.5" stroke="#555555" stroke-width="0.5"/>
 
   <!-- ── LP2+HP+OUT ZONE: TOP STRIP / FILTER SECTION DIVIDER ──────────────── -->
 
@@ -45,7 +45,7 @@
   <text x="17.78" y="8.25" fill="#00d4ff" font-family="monospace" font-size="2.4" text-anchor="middle" font-weight="bold">INPUT</text>
 
   <!-- LFOs -->
-  <text x="17.145" y="47.0" fill="#00d4ff" font-family="monospace" font-size="2.4" text-anchor="middle" font-weight="bold">LFOs</text>
+  <text x="17.145" y="45.5" fill="#00d4ff" font-family="monospace" font-size="2.4" text-anchor="middle" font-weight="bold">LFOs</text>
 
   <!-- MOD BUS -->
   <text x="17.78" y="78.0" fill="#00d4ff" font-family="monospace" font-size="2.4" text-anchor="middle" font-weight="bold">MOD BUS</text>
@@ -81,22 +81,22 @@
   <!-- Zone 0b — LFO                                                            -->
   <!-- ════════════════════════════════════════════════════════════════════════ -->
 
-  <circle cx="5.715" cy="51.375" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="5.715" cy="51.375" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <rect x="2.21" y="56.62" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
-  <text x="5.715" y="58.4" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">LFO 1</text>
-  <circle cx="17.145" cy="51.375" r="1.2" fill="#112244" stroke="#2255cc" stroke-width="0.4"/>
-  <circle cx="28.575" cy="51.375" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
-  <line x1="28.575" y1="51.375" x2="28.575" y2="46.875" stroke="#aaa" stroke-width="0.6"/>
-  <text x="28.575" y="58.9" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">Rate 1</text>
-  <circle cx="5.715" cy="65.775" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="5.715" cy="65.775" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <rect x="2.21" y="71.02" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
-  <text x="5.715" y="72.8" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">LFO 2</text>
-  <circle cx="17.145" cy="65.775" r="1.2" fill="#112244" stroke="#2255cc" stroke-width="0.4"/>
-  <circle cx="28.575" cy="65.775" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
-  <line x1="28.575" y1="65.775" x2="28.575" y2="61.275000000000006" stroke="#aaa" stroke-width="0.6"/>
-  <text x="28.575" y="73.3" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">Rate 2</text>
+  <circle cx="5.715" cy="51.5" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="5.715" cy="51.5" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <rect x="2.21" y="56.74" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
+  <text x="5.715" y="58.5" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">LFO 1</text>
+  <circle cx="17.145" cy="51.5" r="1.2" fill="#112244" stroke="#2255cc" stroke-width="0.4"/>
+  <circle cx="28.575" cy="51.5" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="28.575" y1="51.5" x2="28.575" y2="47.0" stroke="#aaa" stroke-width="0.6"/>
+  <text x="28.575" y="59.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">Rate 1</text>
+  <circle cx="5.715" cy="65.9" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="5.715" cy="65.9" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <rect x="2.21" y="71.14" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
+  <text x="5.715" y="72.9" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">LFO 2</text>
+  <circle cx="17.145" cy="65.9" r="1.2" fill="#112244" stroke="#2255cc" stroke-width="0.4"/>
+  <circle cx="28.575" cy="65.9" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="28.575" y1="65.9" x2="28.575" y2="61.400000000000006" stroke="#aaa" stroke-width="0.6"/>
+  <text x="28.575" y="73.4" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">Rate 2</text>
 
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- Zone 0c — MOD BUS                                                        -->
