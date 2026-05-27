@@ -101,25 +101,25 @@ separators:
   # ── BP CONTROL right boundary ─────────────────────────────────────────────────
   # 2-col section (2 × 11.43mm = 22.86mm); jacks continue 2.25HP grid
   # x = midpoint(BP_TILT_IN=85.725, next col0=97.155) = 91.44mm
-  - {type: v, x: 91.44, y1: 9.0, y2: 124.0, style: main_cyan}
+  - {type: v, x: 91.44, y1: 9.0, y2: 124.0, style: zone_div}
   - {type: h, x1: 69.58, x2: 90.94, y: 9.0, style: zone_div, label: "BP", label_x: 80.01}
 
   # ── BP 1 right boundary ────────────────────────────────────────────────────────
   # 3-col section (3 × 11.43mm = 34.29mm); x_start=91.44, col1 cx=108.585
   # x = midpoint(BP1 col2 jack=120.015, next col0=131.445) = 125.73mm
-  - {type: v, x: 125.73, y1: 9.0, y2: 124.0, style: main_cyan}
+  - {type: v, x: 125.73, y1: 9.0, y2: 124.0, style: zone_div}
   - {type: h, x1: 92.44, x2: 125.23, y: 9.0, style: zone_div, label: "BP 1", label_x: 108.585}
 
   # ── BP 2 right boundary ────────────────────────────────────────────────────────
   # x_start=125.73, col1 cx=142.875
   # x = midpoint(BP2 col2 jack=154.305, next col0=165.735) = 160.02mm
-  - {type: v, x: 160.02, y1: 9.0, y2: 124.0, style: main_cyan}
+  - {type: v, x: 160.02, y1: 9.0, y2: 124.0, style: zone_div}
   - {type: h, x1: 126.73, x2: 159.52, y: 9.0, style: zone_div, label: "BP 2", label_x: 142.875}
 
   # ── BP 3 right boundary ────────────────────────────────────────────────────────
   # x_start=160.02, col1 cx=177.165
   # x = midpoint(BP3 col2 jack=188.595, next col0=200.025) = 194.31mm
-  - {type: v, x: 194.31, y1: 9.0, y2: 124.0, style: main_cyan}
+  - {type: v, x: 194.31, y1: 9.0, y2: 124.0, style: zone_div}
   - {type: h, x1: 161.02, x2: 193.81, y: 9.0, style: zone_div, label: "BP 3", label_x: 177.165}
 
   # ── BP3 OUT + HP right boundary ───────────────────────────────────────────────

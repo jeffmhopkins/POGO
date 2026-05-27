@@ -716,6 +716,11 @@ def _build_svg_lines(data: dict, rules: DesignRules) -> list[str]:
             lines.append(
                 "  " + svg.svg_separator_v(sep["x"] + ox, sep["y1"], sep["y2"], sep["style"], colors)
             )
+    for sep in data.get("separators", []):
+        if sep["style"] == "zone_div" and sep["type"] == "v":
+            lines.append(
+                "  " + svg.svg_separator_v(sep["x"] + ox, sep["y1"], sep["y2"], "zone_div", colors)
+            )
 
     lines.append("")
     lines.append("  <!-- ── ZONE DIVIDERS (dim gray horizontal) ──────────────────────────────── -->")
