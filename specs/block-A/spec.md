@@ -29,7 +29,7 @@ The DSP model is a single-line hard clamp:
 V_out = clamp(V_in, −11.0 V, +11.0 V)
 ```
 
-The ±11 V limit reflects the LM4562 output swing on ±12 V rails (typ. ±11 V). In
+The ±11 V limit reflects the OPA1612 output swing on ±12 V rails (typ. ±11 V). In
 hardware the clamp is not a software limit but a consequence of op-amp output saturation
 combined with upstream Schottky diode protection. The analog realization therefore maps
 directly: the clamp is the op-amp's natural output ceiling, and the series resistor plus
@@ -43,7 +43,7 @@ In the linear region (|V_in| < 11 V):
 H(s) = 1      (ideal voltage follower, unity gain, zero phase shift at audio frequencies)
 ```
 
-The LM4562 has a gain-bandwidth product of ~55 MHz; configured as a voltage follower
+The OPA1612 has a gain-bandwidth product of ~80 MHz; configured as a voltage follower
 (100% feedback) the −3 dB corner is well above 1 MHz, invisible to audio.
 
 ### Topology choice and rationale
@@ -52,9 +52,11 @@ Non-inverting voltage follower (gain = +1). Chosen because:
 - Unity gain — no resistor ratio to trim or drift.
 - Non-inverting — preserves signal polarity; no phantom inversion to track through the chain.
 - Lowest possible output impedance for driving the next stage's 10 kΩ input.
-- LM4562 selected over TL072 for noise floor: 2.7 nV/√Hz vs. 18 nV/√Hz. Because Block A
-  sits at the head of the entire chain, its noise contribution is amplified by every
-  subsequent gain stage. The extra cost is justified.
+- OPA1612 selected for noise floor: 1.1 nV/√Hz vs. TL072's 18 nV/√Hz and LM4562's 2.7 nV/√Hz.
+  Because Block A sits at the head of the entire chain, its noise contribution is amplified by
+  every subsequent gain stage. OPA1612 is the superior choice: it has lower noise than LM4562
+  and draws half the quiescent current (2.75 mA/ch vs. 5.5 mA/ch), avoiding SOIC-8 thermal
+  stress (LM4562 at 11 mA total = 264 mW in SOIC-8 exceeds the ~200 mW conservative limit).
 
 ### Input protection network
 
@@ -103,12 +105,14 @@ intentional nonlinearity in this block.
   connects to signal node; cathode to +12 V. Cathode of D_lower connects to −12 V;
   anode to signal node. This holds the op-amp (+) input within ±(12 + 0.3) = ±12.3 V.
 
-**Op-amp (U1): LM4562MA, SOIC-8**
+**Op-amp (U1): OPA1612, SOIC-8**
 - Dual: one package serves both L and R channels.
 - Configured as voltage followers: (+) = signal input, (−) tied to output, no external
   resistors.
 - Supply decoupling: 100 nF X7R 0603 from each supply pin (V+ and V−) to ground,
   placed within 2 mm of IC pins.
+- Iq = 2.75 mA/channel × 2 = 5.5 mA total; P_diss = 24 V × 5.5 mA = 132 mW — within
+  SOIC-8 practical limit.
 
 ### Signal routing
 
@@ -121,7 +125,7 @@ J2 (empty) → tip-switch normalling → routes U1A output to U1B (+) input
 ### Calibration points
 
 No calibration is needed for this block. Voltage followers have no adjustable gain.
-The ±11 V clamp is set by the LM4562 rail swing — a property of the IC, not a tunable
+The ±11 V clamp is set by the OPA1612 rail swing — a property of the IC, not a tunable
 parameter.
 
 ### Trim pots
@@ -133,6 +137,11 @@ None.
 Audio board. Both channels are on a single SOIC-8. Place near the panel edge where the
 jacks are located to keep input traces short and shielded from digital noise.
 
+### Power Draw Estimate
+
+- 1× OPA1612 (U1, dual SOIC-8): ~6 mA  (Iq = 2.75 mA/channel × 2 channels = 5.5 mA)
+- **+12V: ~6 mA | −12V: ~6 mA**
+
 → References `aux/unity-buffer.svg` for op-amp follower schematic primitive.
 
 ---
@@ -141,7 +150,7 @@ jacks are located to keep input traces short and shielded from digital noise.
 
 | Ref | Part | Package | Value | Qty | Board | Block | Function |
 |---|---|---|---|---|---|---|---|
-| U1 | LM4562MA | SOIC-8 | — | 1 | audio | block-A | Input buffers L+R (dual op-amp) |
+| U1 | OPA1612 | SOIC-8 | — | 1 | audio | block-A | Input buffers L+R (dual op-amp); 1.1 nV/√Hz |
 | D1 | BAT54S | SOT-23 | — | 1 | audio | block-A | L input protection clamp ±12 V |
 | D2 | BAT54S | SOT-23 | — | 1 | audio | block-A | R input protection clamp ±12 V |
 | R1 | resistor | 0603 | 100 Ω | 1 | audio | block-A | L series input protection |

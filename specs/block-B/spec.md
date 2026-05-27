@@ -53,7 +53,7 @@ buffer stage in Block B.
 
 TL072 is chosen here (not LM4562 or NE5532) because:
 - Block B is at the end of the chain; its noise contribution is not amplified further.
-- TL072 quiescent current (~1.5 mA/rail per package) is lower, conserving power budget.
+- TL072 quiescent current (~1.4 mA/channel = 2.8 mA per package) is lower, conserving power budget.
 - Output swing on ±12 V rails is ±11 V typical — consistent with the DSP clamp value.
 - The application is a low-gain output driver, not a noise-sensitive amplifier.
 
@@ -131,6 +131,11 @@ None.
 Audio board (U_MAIN, U_BP3 and their associated resistors). Panel jacks are on the
 panel board. LFO series resistors (R_LFO1, R_LFO2) are placed on the utility board
 near the LFO output stage, but are logically Block B's responsibility.
+
+### Power Draw Estimate
+
+- 2× TL072CDT (U_MAIN, U_BP3, dual SOIC-8): ~3 mA each = ~6 mA  (TI: 1.4 mA/ch × 2 = 2.8 mA)
+- **+12V: ~6 mA | −12V: ~6 mA**
 
 → References `aux/unity-buffer.svg` for op-amp follower schematic primitive.
 

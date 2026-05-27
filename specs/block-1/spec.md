@@ -160,6 +160,15 @@ None. The gain ratio is fixed at 5×; the intentional clip is the NE5532 rail sw
 Audio board. Place U2 and U3 close to the panel jacks (Block A) to minimize trace
 length carrying unshielded pre-gain signals.
 
+### Power Draw Estimate
+
+- 2× NE5532D (U2, U3, dual SOIC-8): ~8 mA each = ~16 mA  (TI datasheet: Icc = 8 mA typ per package)
+- **+12V: ~16 mA | −12V: ~16 mA**
+
+Thermal note: each NE5532D dissipates 24 V × 8 mA = 192 mW in SOIC-8 (practical conservative
+limit ≈ 200 mW). U2 and U3 are adjacent on the audio board; specify copper pour thermal
+relief pads around both ICs to extend the safe dissipation limit to ≥350 mW.
+
 → References `aux/unity-buffer.svg` for op-amp gain stage schematic primitive.
 
 ---

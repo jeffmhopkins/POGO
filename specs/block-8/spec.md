@@ -164,12 +164,12 @@ both cell A (LP1 Q) and cell B (LP2 Q) are of comparable length.
 
 ### Power Draw Estimate
 
-- 2× LM13700M (LP2 L/R integrators): ~3 mA × 2 = 6 mA
+- 2× LM13700M (LP2 L/R integrators): ~4 mA × 2 = 8 mA  (TI: 4 mA typ per package)
 - (IC_Q_AB shared with block-5 — counted in block-5 power estimate, not here)
 - 2× OPA1612 (SUM_AMP L/R, dual SOIC-8): 5.5 mA × 2 = 11 mA  (Iq = 2.75 mA/channel × 2 ch/IC)
-- 1× TL072CDT (IRES_AMP): ~2 mA
+- 1× TL072CDT (IRES_AMP): ~3 mA  (TI: 1.4 mA/ch × 2 = 2.8 mA)
 - 1× THAT340S14-U (EXPO_LP2): ~1 mA
-- **+12V: ~20 mA | −12V: ~20 mA**
+- **+12V: ~23 mA | −12V: ~23 mA**
 
 ---
 

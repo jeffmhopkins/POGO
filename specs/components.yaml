@@ -23,7 +23,7 @@ components:
   # ── AUDIO BOARD ─────────────────────────────────────────────────────────────
 
   # block-A: Input Buffers
-  - { ref: U1,   board: audio,   block: block-A, part: LM4562MA,   pkg: SOIC-8,   fn: "Input buffers L+R (non-inv followers)" }
+  - { ref: U1,   board: audio,   block: block-A, part: OPA1612,    pkg: SOIC-8,   fn: "Input buffers L+R (non-inv followers); 1.1 nV/√Hz" }
   - { ref: D1,   board: audio,   block: block-A, part: BAT54S,     pkg: SOT-23,   fn: "L input clamp ±12V" }
   - { ref: D2,   board: audio,   block: block-A, part: BAT54S,     pkg: SOT-23,   fn: "R input clamp ±12V" }
   - { ref: R1,   board: audio,   block: block-A, part: ~,          pkg: "0603",   val: "100Ω",   fn: "L series protection" }

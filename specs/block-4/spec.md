@@ -147,9 +147,9 @@ and RV_VCA_UNITY_R allow the two channels to be matched for DC offset and gain a
 
 **Power estimate:**
 
-- 2× THAT 2180: ~2.5 mA each = ~5 mA per rail.
-- 1× TL072 (dual): ~1.8 mA per rail.
-- Total: +12 V ~7 mA, –12 V ~7 mA.
+- 2× THAT 2180: ~4 mA each = ~8 mA per rail.  (THAT Corp datasheet: Icc = 4 mA typ)
+- 1× TL072CDT (dual): ~3 mA per rail.  (TI: 1.4 mA/ch × 2 = 2.8 mA)
+- Total: +12 V ~11 mA, −12 V ~11 mA.
 
 ---
 

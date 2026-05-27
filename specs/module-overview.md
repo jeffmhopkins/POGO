@@ -10,7 +10,7 @@ VCV Rack 2 plugin version is the design ground truth. Hardware specs are reverse
 ```
 Stereo Input (L + R)
   │
-  ├── [block-A]  Input Buffers       100Ω series + BAT54S clamp; LM4562 unity-gain followers
+  ├── [block-A]  Input Buffers       100Ω series + BAT54S clamp; OPA1612 unity-gain followers
   ├── [block-1]  Pre-Gain            GAIN_MAIN switch 1× / 5× (NE5532D); clip at ±10.5V
   │              ALT_BP path ─────────────────────────────────────────────────────────────────┐
   ├── [block-4]  VCA                 THAT 2180 dB-law; VCA_AMT bipolar att; VCA_OFS CV floor │
@@ -172,21 +172,28 @@ VCA_OFS_PARAM is a fixed trimpot — no mod destination, no CV input.
 
 ## Power Budget (Estimate)
 
-| Block | +12V | −12V |
-|---|---|---|
-| A (Input Buffer) | ~2 mA | ~2 mA |
-| 1 (Pre-Gain) | ~20 mA | ~20 mA |
-| 2 (Dual LFO) | ~4 mA | ~4 mA |
-| 3 (Mod Bus) | ~42 mA | ~42 mA |
-| 4 (VCA) | ~5 mA | ~5 mA |
-| 5 (LP1) | ~12 mA | ~12 mA |
-| 6 (BP + Dist) | ~25 mA | ~25 mA |
-| 7 (HP) | ~10 mA | ~10 mA |
-| 8 (LP2) | ~12 mA | ~12 mA |
-| B (Output Buffer) | ~4 mA | ~4 mA |
-| **Total** | **~136 mA** | **~136 mA** |
+| Block | +12V | −12V | Dominant draw |
+|---|---|---|---|
+| A (Input Buffer) | ~6 mA | ~6 mA | 1× OPA1612 |
+| 1 (Pre-Gain) | ~16 mA | ~16 mA | 2× NE5532D @ 8 mA ea |
+| 2 (Dual LFO) | ~6 mA | ~6 mA | 2× TL072CDT |
+| 3 (Mod Bus) | ~27 mA | ~27 mA | 7× TL074CDT @ 3.8 mA ea |
+| 4 (VCA) | ~11 mA | ~11 mA | 2× THAT 2180 @ 4 mA ea |
+| 5 (LP1) | ~27 mA | ~27 mA | 3× LM13700M + 2× OPA1612 |
+| 6 (BP + Dist) | ~129 mA | ~129 mA | 23× TL072CDT (distortion) + 6× OPA1612 |
+| 7 (HP) | ~27 mA | ~27 mA | 3× LM13700M + 2× OPA1612 |
+| 8 (LP2) | ~23 mA | ~23 mA | 2× LM13700M + 2× OPA1612 |
+| B (Output Buffer) | ~6 mA | ~6 mA | 2× TL072CDT |
+| **Total** | **~278 mA** | **~278 mA** | |
 
-This is a high-current module. Use a powered bus with ≥250 mA capacity per rail.
+This is a very high-current module. Block 6 alone draws ~129 mA due to 23 TL072CDT packages
+in the distortion sub-circuits (each IC draws quiescent current regardless of how many of its
+two halves are in the signal path). Use a powered bus with **≥350 mA capacity per rail**;
+400 mA preferred for headroom. Per-block details in each block spec's Power Draw Estimate section.
+
+Thermal notes:
+- NE5532D (block-1, U2/U3): 192 mW in SOIC-8 — specify copper pour around both ICs.
+- OPA1612 throughout: 132 mW per SOIC-8 — within limits; standard copper pour adequate.
 
 ---
 

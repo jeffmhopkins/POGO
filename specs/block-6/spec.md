@@ -416,18 +416,17 @@ BP3 (f_ref = 6000 Hz): C = 192µS/(2π×6000) = 5.1 nF → use 4.7 nF (C0G, 0603
 
 ### Power Draw Estimate
 
-- 6× LM13700M (SVF integrators + Q VCAs): ~18 mA
+- 6× LM13700M (SVF integrators + Q VCAs): ~4 mA × 6 = ~24 mA  (TI: 4 mA typ per package)
 - 6× OPA1612 (SUM_AMPs, dual SOIC-8): 5.5 mA × 6 = 33 mA  (Iq = 2.75 mA/channel × 2 ch/IC)
-- 1× TL072CDT (tilt/pol inverter): ~2 mA
+- Distortion op-amps — 18 TL072CDT ICs (6 SC + 6 HC + 6 WF; one SOIC-8 per group per channel; half A = signal path, half B = spare or shared): ~3 mA × 18 = ~54 mA
+- BP_MIX + tilt/pol — 5 TL072CDT ICs (1 tilt/pol inverter + 2 wet-summer + 2 MIX polarity buffer): ~3 mA × 5 = ~15 mA
 - 3× THAT340S14-U (expo converters): ~3 mA
-- 3× CD4053 (distortion mux): ~1 mA
-- Distortion sub-circuits (SC + HC + WF op-amps, ~9 TL072 halves per channel): ~9 mA
-- BP_MIX summing TL072 (BP wet summer + MIX summer + MIX output buffer): ~3 mA
-- **+12V: ~69 mA | −12V: ~69 mA**
+- 3× CD4053BM96 (distortion mux, CMOS quiescent ≈ 0): ~0 mA
+- **+12V: ~129 mA | −12V: ~129 mA**
 
-Note: earlier estimate of 25 mA was prior to full distortion + MIX circuit design.
-OPA1612 SUM_AMPs (Iq = 2.75 mA/channel = 5.5 mA per dual IC) add ~22 mA over equivalent TL072s
-(6 ICs × (5.5 − 1.8) mA = 22.2 mA). Total should be verified against module power budget.
+Note: the dominant power draw is 23 TL072CDT packages (18 distortion + 5 MIX/tilt). Each IC
+draws ~2.8 mA quiescent regardless of how many of its two halves are active. This is the
+highest single-block draw in the module and must be accounted for in the bus power budget.
 
 ---
 
