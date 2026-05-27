@@ -130,6 +130,16 @@ separators:
   # Grey divider between BP3 OUT jacks (cy=17) and HP slider (cy=54)
   - {type: h, x1: 195.31, x2: 216.67, y: 26.0, style: zone_div}
 
+  # ── MAIN OUT + LP2 right boundary ─────────────────────────────────────────────
+  # Both zones share x_start=217.17, col_pitch=11.43mm, cols=2 (4.5HP total)
+  # col0 cx=222.885, col1 cx=234.315
+  # Slider (cx=228.60) and RES knob (cx=228.60) share same centre line
+  # Right boundary = 217.17 + 2×11.43 = 240.03mm
+  - {type: v, x: 240.03, y1: 9.0, y2: 124.0, style: main_cyan}
+  - {type: h, x1: 218.17, x2: 239.53, y: 9.0, style: zone_div, label: "LP2", label_x: 228.60}
+  # Grey divider between MAIN OUT jacks (cy=17) and LP2 slider (cy=54)
+  - {type: h, x1: 218.17, x2: 239.53, y: 26.0, style: zone_div}
+
 # ── Zone labels ───────────────────────────────────────────────────────────────
 # x=17.145 is the geometric centre of the 3-column section (col 1 cx)
 zone_labels: []
@@ -723,3 +733,80 @@ zones:
         cy: 112.0
         label: "RES"
         cpp_id: "HP_RES_INPUT"
+
+  # ── Zone: MAIN OUT (stereo main outputs) ──────────────────────────────────────
+  # col0 cx=222.885 (MAIN L), col1 cx=234.315 (MAIN R)
+  # Jack PCB bottom = 17+7.9 = 24.9mm; LP2 slider PCB top = 54-28.5 = 25.5mm → gap=0.6mm ✓
+  - id: zone_main_out
+    label: "Zone — MAIN OUT"
+    x_start: 217.17
+    col_pitch: 11.43
+    cols: 2
+    components:
+      - id: MAIN_L_OUT
+        type: jack_output
+        col: 0
+        cy: 17.0
+        rotate: 180
+        label: "MAIN L"
+        font_size: 1.6
+        cpp_id: "MAIN_L_OUTPUT"
+      - id: MAIN_R_OUT
+        type: jack_output
+        col: 1
+        cy: 17.0
+        rotate: 180
+        label: "MAIN R"
+        font_size: 1.6
+        cpp_id: "MAIN_R_OUTPUT"
+
+  # ── Zone: LP2 ─────────────────────────────────────────────────────────────────
+  # 45mm slider (FREQ) + med knob (RES, same centre line) + 2 trimpots + 2 jacks.
+  # Mirrors HP zone exactly; cx=228.60 is the shared centre line.
+  #
+  # PCB gap chain (mirrors HP; all positive → DRC PASS):
+  #   MAIN OUT jack bottom(24.9) → slider top(25.5): gap=0.600mm ✓
+  #   Slider bottom(82.5) → RES knob top(82.83): gap=0.330mm ✓
+  #   RES knob bottom(96.17) → trimpot top(96.62): gap=0.445mm ✓
+  #   Trimpot bottom(103.39) → jack PCB top(104.1): gap=0.715mm ✓
+  #   Jack nut bottom(117mm) < keepout(118.5mm) ✓
+  - id: zone_lp2
+    label: "Zone — LP2"
+    x_start: 217.17
+    col_pitch: 11.43
+    cols: 2
+    components:
+      - id: LP2_FREQ
+        type: slider_V45
+        cx: 228.60
+        cy: 54.0
+        label: "FREQ"
+        cpp_param: "LP2_FREQ_PARAM"
+      - id: LP2_RES
+        type: knob_medium
+        cx: 228.60
+        cy: 89.5
+        label: "RES"
+        cpp_param: "LP2_RES_PARAM"
+      - id: LP2_FREQ_ATT
+        type: trimpot
+        col: 0
+        cy: 100.0
+        cpp_param: "LP2_FREQ_ATT_PARAM"
+      - id: LP2_RES_ATT
+        type: trimpot
+        col: 1
+        cy: 100.0
+        cpp_param: "LP2_RES_ATT_PARAM"
+      - id: LP2_FREQ_IN
+        type: jack_input
+        col: 0
+        cy: 112.0
+        label: "FREQ"
+        cpp_id: "LP2_FREQ_INPUT"
+      - id: LP2_RES_IN
+        type: jack_input
+        col: 1
+        cy: 112.0
+        label: "RES"
+        cpp_id: "LP2_RES_INPUT"

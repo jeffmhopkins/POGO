@@ -36,6 +36,7 @@
   <line x1="160.02" y1="9.0" x2="160.02" y2="124.0" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
   <line x1="194.31" y1="9.0" x2="194.31" y2="124.0" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
   <line x1="217.17" y1="9.0" x2="217.17" y2="124.0" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
+  <line x1="240.03" y1="9.0" x2="240.03" y2="124.0" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
 
   <!-- ── ZONE DIVIDERS (dim gray horizontal) ──────────────────────────────── -->
   <line x1="1.0" y1="9.0" x2="11.89" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
@@ -66,6 +67,10 @@
   <line x1="209.04" y1="9.0" x2="216.67" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
   <text x="205.74" y="9.0" fill="#999" font-family="monospace" font-size="2.0" text-anchor="middle" dominant-baseline="middle">HP</text>
   <line x1="195.31" y1="26.0" x2="216.67" y2="26.0" stroke="#3a3a3a" stroke-width="0.5"/>
+  <line x1="218.17" y1="9.0" x2="224.65" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
+  <line x1="232.55" y1="9.0" x2="239.53" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
+  <text x="228.6" y="9.0" fill="#999" font-family="monospace" font-size="2.0" text-anchor="middle" dominant-baseline="middle">LP2</text>
+  <line x1="218.17" y1="26.0" x2="239.53" y2="26.0" stroke="#3a3a3a" stroke-width="0.5"/>
 
   <!-- ── LP2+HP+OUT ZONE: TOP STRIP / FILTER SECTION DIVIDER ──────────────── -->
 
@@ -351,5 +356,45 @@
   <circle cx="211.455" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="211.455" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
   <text x="211.455" y="119.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">RES</text>
+
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- Zone — MAIN OUT                                                          -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+
+  <circle cx="222.885" cy="17.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="222.885" cy="17.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <rect x="219.38" y="22.24" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
+  <text x="222.885" y="24.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">MAIN L</text>
+  <circle cx="234.315" cy="17.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="234.315" cy="17.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <rect x="230.81" y="22.24" width="7.0" height="2.26" rx="0.6" fill="none" stroke="#888" stroke-width="0.3"/>
+  <text x="234.315" y="24.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">MAIN R</text>
+
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- Zone — LP2                                                               -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+
+  <rect x="227.35" y="30.00" width="2.5" height="48.0" rx="1.2" fill="#1a1a1a" stroke="#555" stroke-width="0.4"/>
+  <line x1="225.10" y1="31.50" x2="232.10" y2="31.50" stroke="#555" stroke-width="0.5"/>
+  <line x1="225.10" y1="76.50" x2="232.10" y2="76.50" stroke="#555" stroke-width="0.5"/>
+  <line x1="226.60" y1="54.00" x2="230.60" y2="54.00" stroke="#aaa" stroke-width="0.35"/>
+  <rect x="224.10" y="51.75" width="9.0" height="4.5" rx="1.8" fill="#666" stroke="#888" stroke-width="0.35"/>
+  <line x1="225.10" y1="54.00" x2="232.10" y2="54.00" stroke="#aaa" stroke-width="0.6"/>
+  <text x="228.6" y="26.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
+  <circle cx="228.6" cy="89.5" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="228.6" y1="89.5" x2="228.6" y2="85.0" stroke="#aaa" stroke-width="0.6"/>
+  <text x="228.6" y="97.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">RES</text>
+  <circle cx="222.885" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="222.885" y1="100.0" x2="222.885" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
+  <text x="222.885" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="234.315" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="234.315" y1="100.0" x2="234.315" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
+  <text x="234.315" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="222.885" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="222.885" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="222.885" y="119.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
+  <circle cx="234.315" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="234.315" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="234.315" y="119.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">RES</text>
 
 </svg>
