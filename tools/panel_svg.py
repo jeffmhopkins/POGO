@@ -232,7 +232,7 @@ def svg_switch_H3(
     ]
     for px, pl in zip(pos_xs, pos_labels):
         parts.append(
-            f'<text x="{px}" y="{pos_y}" fill="{colors["switch_label"]}" '
+            f'<text x="{px}" y="{pos_y}" fill="{colors["jack_text"]}" '
             f'{_FONT} font-size="1.6" text-anchor="middle">{pl}</text>'
         )
     parts.append(

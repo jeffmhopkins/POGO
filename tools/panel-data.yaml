@@ -380,39 +380,39 @@ zones:
         cy: 21.0
         label: "OFFSET"
         cpp_param: "BP_OFFSET_PARAM"
-      # ── BP Mix + Tilt medium knobs — staggered to avoid 9mm pot PCB overlap ─
-      # Alpha 9mm at 11.43mm pitch → 2.32mm x-overlap → must stagger ≥13.34mm
-      # MIX at col 0 (cx=74.295), TILT at col 1 (cx=85.725), dy=14.0mm ✓
+      # ── BP Mix + Tilt medium knobs — both centred, stacked vertically ────────
+      # Same cx=80.01 → full x-overlap → must stagger ≥13.34mm (PCB) = 14.0mm used
       - id: BP_MIX
         type: knob_medium
-        col: 0
-        cy: 43.0
+        cx: 80.01
+        cy: 41.0
         label: "MIX"
         cpp_param: "BP_MIX_PARAM"
       - id: BP_TILT
         type: knob_medium
-        col: 1
-        cy: 57.0
+        cx: 80.01
+        cy: 55.0
         label: "TILT"
         cpp_param: "BP_TILT_PARAM"
-      # ── Polarity switch (H2) — centred on section, label above ──────────────
+      # ── Polarity switch (H2) — centred on section, no section label ─────────
       - id: BP_POL
         type: switch_H2
         cx: 80.01
-        cy: 74.0
-        label_above: "POL"
+        cy: 70.0
+        label_above: ""
         pos_labels: ["POS", "NEG"]
         pos_xs: [75.51, 84.51]
         cpp_param: "BP_POL_PARAM"
       # ── Distortion switch (H3) — centred on section, no section label ────────
       # Must be ≥11.0mm below H2 (same cx, full x-overlap)
-      # H2 bottom = 81.5mm, H3 top = 83.0mm → gap = 1.5mm ✓
+      # H2 bottom = 77.5mm, H3 top = 78.5mm → gap = 1.0mm ✓
+      # pos_xs use col centres (74.30/80.01/85.72) for readable spread
       - id: BP_DIST
         type: switch_H3
         cx: 80.01
-        cy: 86.5
-        pos_labels: ["SOFT", "HARD", "CLIP"]
-        pos_xs: [76.01, 80.01, 84.01]
+        cy: 82.0
+        pos_labels: ["SOFT", "HARD", "FOLD"]
+        pos_xs: [74.30, 80.01, 85.72]
         label_below: ""
         cpp_param: "BP_DIST_PARAM"
       # ── CV attenuverter trim pots ────────────────────────────────────────────
