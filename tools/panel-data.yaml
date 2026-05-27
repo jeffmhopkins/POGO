@@ -210,14 +210,14 @@ zones:
     cols: 3
     components:
       - id: SCALE
-        type: knob_medium
+        type: trimpot
         col: 0
         cy: 83.0
         rotate: 180
         label: "SCALE"
         cpp_param: "MOD_SCALE_PARAM"
       - id: VCA_AMT
-        type: knob_medium
+        type: trimpot
         col: 2
         cy: 83.0
         label: "VCA AMT"
@@ -237,14 +237,14 @@ zones:
         label_below_y: 97.5
         cpp_param: "MOD_SRC_PARAM"
       - id: OFFSET
-        type: knob_medium
+        type: trimpot
         col: 0
         cy: 96.34
         rotate: 180
         label: "OFFSET"
         cpp_param: "MOD_OFFSET_PARAM"
       - id: VCA_OFS
-        type: knob_medium
+        type: trimpot
         col: 2
         cy: 96.34
         label: "VCA OFS"
