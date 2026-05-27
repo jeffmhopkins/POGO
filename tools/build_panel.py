@@ -68,6 +68,9 @@ def _resolve_comp(comp: dict, rules: DesignRules, zone: dict | None = None) -> d
         x_start   = float(zone['x_start'])
         col_pitch = float(zone.get('col_pitch', rules.jack_pitch))
         c['cx'] = x_start + (float(c['col']) + 0.5) * col_pitch
+    # Apply global panel x_offset (centres content within panel width)
+    if rules.x_offset and 'cx' in c:
+        c['cx'] = float(c['cx']) + rules.x_offset
     cy = c.get("cy")
     if cy == "_cv_jack_cy_" or cy is None and c.get("type", "") in {"jack_input", "jack_output"}:
         c["cy"] = rules.cv_jack_cy
@@ -668,16 +671,17 @@ def _build_svg_lines(data: dict, rules: DesignRules) -> list[str]:
     title      = meta["title"]
     dot_color  = meta["title_dot_color"]
     # Split title at the · dot so we can colour it
+    tx = W / 2   # title / brand x — always centred on panel width
     if "·" in title:
         before_dot, after_dot = title.split("·", 1)
         title_svg = (
-            f'<text x="101.60" y="5.75" fill="{colors["cyan"]}" {_FONT} font-size="3.5" '
+            f'<text x="{tx:.2f}" y="5.75" fill="{colors["cyan"]}" {_FONT} font-size="3.5" '
             f'font-weight="bold" text-anchor="middle">'
             f'{before_dot}<tspan fill="{dot_color}">·</tspan>{after_dot}</text>'
         )
     else:
         title_svg = (
-            f'<text x="101.60" y="5.75" fill="{colors["cyan"]}" {_FONT} font-size="3.5" '
+            f'<text x="{tx:.2f}" y="5.75" fill="{colors["cyan"]}" {_FONT} font-size="3.5" '
             f'font-weight="bold" text-anchor="middle">{title}</text>'
         )
     lines.append("")
@@ -688,11 +692,12 @@ def _build_svg_lines(data: dict, rules: DesignRules) -> list[str]:
     lines.append("")
     lines.append("  <!-- ── BOTTOM STRIP ───────────────────────────────────────────────────────── -->")
     lines.append(
-        f'  <text x="101.60" y="127.5" fill="{colors["brand_text"]}" {_FONT} font-size="2.4" '
+        f'  <text x="{tx:.2f}" y="127.5" fill="{colors["brand_text"]}" {_FONT} font-size="2.4" '
         f'text-anchor="middle" letter-spacing="0.15">{brand}</text>'
     )
 
     # ── Separators ─────────────────────────────────────────────────────────
+    ox = rules.x_offset   # panel centering offset applied to all zone x coordinates
     lines.append("")
     lines.append("  <!-- ── MAIN ZONE SEPARATOR LINES (cyan) ──────────────────────────────────── -->")
     main_cyan_done = False
@@ -700,7 +705,7 @@ def _build_svg_lines(data: dict, rules: DesignRules) -> list[str]:
         s = sep["style"]
         if s == "main_cyan" and sep["type"] == "v":
             lines.append(
-                "  " + svg.svg_separator_v(sep["x"], sep["y1"], sep["y2"], s, colors)
+                "  " + svg.svg_separator_v(sep["x"] + ox, sep["y1"], sep["y2"], s, colors)
             )
         elif s == "subdiv_gray" and not main_cyan_done:
             main_cyan_done = True
@@ -709,23 +714,25 @@ def _build_svg_lines(data: dict, rules: DesignRules) -> list[str]:
     for sep in data.get("separators", []):
         if sep["style"] == "subdiv_gray" and sep["type"] == "v":
             lines.append(
-                "  " + svg.svg_separator_v(sep["x"], sep["y1"], sep["y2"], sep["style"], colors)
+                "  " + svg.svg_separator_v(sep["x"] + ox, sep["y1"], sep["y2"], sep["style"], colors)
             )
 
     lines.append("")
     lines.append("  <!-- ── ZONE DIVIDERS (dim gray horizontal) ──────────────────────────────── -->")
     for sep in data.get("separators", []):
         if sep["type"] == "h" and sep["style"] == "zone_div":
+            x1 = sep["x1"] + ox
+            x2 = sep["x2"] + ox
             if "label" in sep:
-                lx = sep.get("label_x", (sep["x1"] + sep["x2"]) / 2)
+                lx = sep.get("label_x", (sep["x1"] + sep["x2"]) / 2) + ox
                 chunk = svg.svg_separator_h_labeled(
-                    sep["x1"], sep["x2"], sep["y"],
+                    x1, x2, sep["y"],
                     sep["label"], lx, sep["style"], colors,
                 )
                 lines.append("  " + chunk.replace("\n", "\n  "))
             else:
                 lines.append(
-                    "  " + svg.svg_separator_h(sep["x1"], sep["x2"], sep["y"], sep["style"], colors)
+                    "  " + svg.svg_separator_h(x1, x2, sep["y"], sep["style"], colors)
                 )
 
     lines.append("")
@@ -733,7 +740,7 @@ def _build_svg_lines(data: dict, rules: DesignRules) -> list[str]:
     for sep in data.get("separators", []):
         if sep["type"] == "h" and sep["style"] == "main_cyan":
             lines.append(
-                "  " + svg.svg_separator_h(sep["x1"], sep["x2"], sep["y"], sep["style"], colors)
+                "  " + svg.svg_separator_h(sep["x1"] + ox, sep["x2"] + ox, sep["y"], sep["style"], colors)
             )
 
     # ── Zone labels ────────────────────────────────────────────────────────

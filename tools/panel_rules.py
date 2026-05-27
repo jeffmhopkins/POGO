@@ -191,6 +191,7 @@ class DesignRules:
     output_rect_rx: float = 0.6
     jack_pitch: float = 10.16
     indicator_length: float = 2.5
+    x_offset: float = 0.0       # mm to shift all zone/component x coords inside panel
 
     # Footprint radii (loaded separately from footprints block)
     jack_nut_r: float = 5.0
@@ -227,6 +228,7 @@ class DesignRules:
             output_rect_rx=float(dr.get("output_rect_rx", cls.output_rect_rx)),
             jack_pitch=float(dr.get("jack_pitch", cls.jack_pitch)),
             indicator_length=float(dr.get("indicator_length", cls.indicator_length)),
+            x_offset=float(dr.get("x_offset", cls.x_offset)),
         )
         # Pull nut radii from footprints sub-block
         jack_fp = fp.get("jack_thonkiconn", {})

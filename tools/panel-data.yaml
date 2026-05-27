@@ -6,10 +6,10 @@
 
 # ── Meta ─────────────────────────────────────────────────────────────────────
 meta:
-  hp:         60
-  width_mm:   304.80        # 60 HP × 5.08 mm/HP
+  hp:         48
+  width_mm:   243.84        # 48 HP × 5.08 mm/HP
   height_mm:  128.5
-  viewBox:    "0 0 304.80 128.5"
+  viewBox:    "0 0 243.84 128.5"
   title:      "POGO  · STEREO TRIPLE BANDPASS FILTER"
   title_dot_color: "#ff8800"
   brand:      "SPACE COAST SYNTHESIZERS  ·  SCS"
@@ -50,6 +50,8 @@ design_rules:
   output_rect_rx:     0.6
   jack_pitch:        15.24   # 1 jack per 3 HP
   indicator_length:   2.5
+  # Panel centering: content spans 0–240.03mm; 48HP = 243.84mm → offset = (243.84-240.03)/2
+  x_offset:           1.905  # shifts all zone/separator x coords right to centre in 48HP
 
 # ── Hardware footprints (for DRC overlay) ────────────────────────────────────
 footprints:
@@ -63,12 +65,12 @@ footprints:
     body_r_mm: 1.5
 
 # ── Mounting holes ────────────────────────────────────────────────────────────
-# 60 HP: left holes at x=7.5, right holes at x=304.80-7.5=297.30
+# 48 HP: left holes at x=7.5, right holes at x=243.84-7.5=236.34
 mounting_holes:
   - {cx:   7.50, cy:   5.1}
-  - {cx: 297.30, cy:   5.1}
+  - {cx: 236.34, cy:   5.1}
   - {cx:   7.50, cy: 123.4}
-  - {cx: 297.30, cy: 123.4}
+  - {cx: 236.34, cy: 123.4}
 
 # ── Separator lines ───────────────────────────────────────────────────────────
 # Jack grid: uniform 2.25 HP (11.43 mm) pitch across all bottom-row jacks.
