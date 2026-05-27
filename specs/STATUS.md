@@ -81,10 +81,17 @@ Circuit diagrams in spec text must be self-sufficient.
 
 **Phase 4R (Panel) — DONE.** `tools/panel-data.yaml` DRC-clean.
 
+**Analog design review complete** (`specs/analog-design-review.md` — 2026-05-27).
+Corrections applied: THAT340 package SOIC-8→SOIC-14 everywhere; BAT85 through-hole→SS14 SMD;
+block-3 missing clamp zeners and calibration trims added; mod bus distribution buffer topology
+corrected (paralleled MB_PROC_A halves C+D); destination count 22→19 in aux files;
+block-4 AMT pot loading design note added.
+
 **Remaining work before PCB layout:**
-1. **Finalize components.yaml** — fill all passive values (R, C); verify ref designator uniqueness per board; cross-check block-6 distortion BOM (abbreviated in first pass)
-2. **Write 48HP KiCad generator** — replaces 40HP-era stale generators; inputs from components.yaml + panel-data.yaml
-3. **Phase 6R** — VCV Rack signal-path smoke tests (CI integration)
+1. **Flag 1% tolerance** in components.yaml for R_VOCT, R_inv_in/fb, R_MB_INV
+2. **Verify mod bus destination count** (19) against `plugin/src/dsp/ModBus.hpp`; update CLAUDE.md if confirmed
+3. **Write 48HP KiCad generator** — replaces 40HP-era stale generators; inputs from components.yaml + panel-data.yaml
+4. **Phase 6R** — VCV Rack signal-path smoke tests (CI integration)
 
 **Open prototype questions (Phase 3R advisory, not blocking):**
 - block-2: WF fold stage stability (phase margin with diode feedback at all drive levels)

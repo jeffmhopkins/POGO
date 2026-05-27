@@ -58,7 +58,7 @@ components:
   - { ref: U11,  board: audio,   block: block-5, part: TL072CDT,   pkg: SOIC-8,   fn: "LP1 SUM_AMP + output buffer L" }
   - { ref: U12,  board: audio,   block: block-5, part: TL072CDT,   pkg: SOIC-8,   fn: "LP1 SUM_AMP + output buffer R" }
   - { ref: U13,  board: audio,   block: block-5, part: TL072CDT,   pkg: SOIC-8,   fn: "LP1 tilt inverter (−V_tilt for R)" }
-  - { ref: U14,  board: audio,   block: block-5, part: THAT340,    pkg: SOIC-8,   fn: "LP1 expo converter matched NPN (L+R shared)" }
+  - { ref: U14,  board: audio,   block: block-5, part: THAT340S14-U, pkg: SOIC-14,   fn: "LP1 expo converter matched NPN (L+R shared)" }
   - { ref: C11,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "47nF",   fn: "LP1 integrator C1 L (C0G/NP0)" }
   - { ref: C12,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "47nF",   fn: "LP1 integrator C2 L (C0G/NP0)" }
   - { ref: C13,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "47nF",   fn: "LP1 integrator C1 R (C0G/NP0)" }
@@ -84,9 +84,9 @@ components:
   - { ref: U25,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "BP3 SUM_AMP + buffer L" }
   - { ref: U26,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "BP3 SUM_AMP + buffer R" }
   - { ref: U27,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "BP tilt inverter half A (−V_tilt for R); BP_POL G=−1 inverter half B" }
-  - { ref: U28,  board: audio,   block: block-6, part: THAT340,    pkg: SOIC-8,   fn: "BP1 expo converter" }
-  - { ref: U29,  board: audio,   block: block-6, part: THAT340,    pkg: SOIC-8,   fn: "BP2 expo converter" }
-  - { ref: U30,  board: audio,   block: block-6, part: THAT340,    pkg: SOIC-8,   fn: "BP3 expo converter" }
+  - { ref: U28,  board: audio,   block: block-6, part: THAT340S14-U, pkg: SOIC-14,   fn: "BP1 expo converter" }
+  - { ref: U29,  board: audio,   block: block-6, part: THAT340S14-U, pkg: SOIC-14,   fn: "BP2 expo converter" }
+  - { ref: U30,  board: audio,   block: block-6, part: THAT340S14-U, pkg: SOIC-14,   fn: "BP3 expo converter" }
   - { ref: U31,  board: audio,   block: block-6, part: CD4053,     pkg: SOIC-16,  fn: "BP1 distortion mux (SC/HC/WF select)" }
   - { ref: U32,  board: audio,   block: block-6, part: CD4053,     pkg: SOIC-16,  fn: "BP2 distortion mux" }
   - { ref: U33,  board: audio,   block: block-6, part: CD4053,     pkg: SOIC-16,  fn: "BP3 distortion mux" }
@@ -175,7 +175,7 @@ components:
   - { ref: U52,  board: audio,   block: block-7, part: LM13700M,   pkg: SOIC-16,  fn: "HP Q VCA R (cell A; cell B spare)" }
   - { ref: U53,  board: audio,   block: block-7, part: TL072CDT,   pkg: SOIC-8,   fn: "HP SUM_AMP + inverting output buffer L" }
   - { ref: U54,  board: audio,   block: block-7, part: TL072CDT,   pkg: SOIC-8,   fn: "HP SUM_AMP + inverting output buffer R" }
-  - { ref: U55,  board: audio,   block: block-7, part: THAT340,    pkg: SOIC-8,   fn: "HP expo converter (L+R shared)" }
+  - { ref: U55,  board: audio,   block: block-7, part: THAT340S14-U, pkg: SOIC-14,   fn: "HP expo converter (L+R shared)" }
   - { ref: C29,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "47nF",   qty: 4, fn: "HP integrator caps (C0G; C1L/C2L/C1R/C2R)" }
   - { ref: R30,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "HP SUM_AMP R_in L" }
   - { ref: R31,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "HP SUM_AMP R_in R" }
@@ -189,7 +189,7 @@ components:
   # U9/U10 (cell B) also used by block-8 for Q VCA — see block-5 entries above
   - { ref: U58,  board: audio,   block: block-8, part: TL072CDT,   pkg: SOIC-8,   fn: "LP2 SUM_AMP + output buffer L" }
   - { ref: U59,  board: audio,   block: block-8, part: TL072CDT,   pkg: SOIC-8,   fn: "LP2 SUM_AMP + output buffer R" }
-  - { ref: U60,  board: audio,   block: block-8, part: THAT340,    pkg: SOIC-8,   fn: "LP2 expo converter (L+R shared; independent from LP1)" }
+  - { ref: U60,  board: audio,   block: block-8, part: THAT340S14-U, pkg: SOIC-14,   fn: "LP2 expo converter (L+R shared; independent from LP1)" }
   - { ref: C33,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "47nF",   qty: 4, fn: "LP2 integrator caps (C0G; 4 total)" }
   - { ref: R32,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "LP2 SUM_AMP R_in L" }
   - { ref: R33,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "LP2 SUM_AMP R_in R" }

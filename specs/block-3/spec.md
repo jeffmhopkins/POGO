@@ -112,18 +112,32 @@ using the remaining 2 sections of a sixth TL074. Total: 6× TL074CDT.
   |V_bus| ≥ 9.9 V.
 - All three LED drivers fit in one additional TL074CDT. Total with LED drivers: 7× TL074CDT.
 
+**Mod bus output clamp (±10 V):** Back-to-back 10 V zeners (BZX84C10, SOT-23)
+in the MB_INV feedback path. When V_modbus_inv exceeds ±10 V, the zeners conduct and
+clamp the output. Zener tolerance = ±5 %, so clamp onset is 9.5–10.5 V; MOD_CLIP
+LED activates at the zener knee.
+
+**Distribution buffer:** V_modbus drives 19 × 10 kΩ attenuverter pots in parallel
+(10 kΩ ÷ 19 ≈ 526 Ω total load). At V_modbus = ±10 V this requires ~19 mA.
+To achieve reliable ±10 V swing at this load, MB_PROC_A uses both of its two spare
+sections (halves C and D) wired in parallel as a unity-gain buffer — each half drives
+~9.5 mA, well within TL074 limits. A 47 Ω series resistor on each output before
+the join prevents oscillation from unequal saturation times.
+
 **IC count summary:**
 
 | Function | Op-amp sections used | TL074CDT | Ref |
 |---|---|---|---|
-| MB summer + polarity inverter | 2 (2 spare) | 1× | MB_PROC_A |
+| MB summer + polarity inverter | 2 | 1× | MB_PROC_A (halves A+B) |
+| Distribution buffer (paralleled ×2) | 2 (halves C+D) | — | MB_PROC_A (uses all 4 halves) |
 | LED drivers (POS, NEG, CLIP) | 3 (1 spare) | 1× | MB_PROC_B |
 | Destination inverters (−V_src for bipolar pots) | 19 (+1 spare) | 5× | MB_INV_1–5 |
-| **Total** | **24 sections used** | **7× TL074CDT** | |
+| **Total** | **26 sections used** | **7× TL074CDT** | |
 
-Note: MB_PROC_A and MB_PROC_B are distinct physical ICs. A single TL074CDT has only
-4 op-amp sections; the processor (2 sections) and LED drivers (3 sections) together
-require 5 sections and therefore span two ICs.
+Note: MB_PROC_A now uses all 4 sections: summer, inverter, and two paralleled buffer
+outputs. MB_PROC_B has 1 spare section. A single TL074CDT has 4 op-amp sections;
+the processor (2 sections) and LED drivers (3 sections) together need 5 sections and
+therefore span two ICs.
 
 ---
 
@@ -184,7 +198,7 @@ is logically a mod bus destination and is normalled to V_modbus.
 
 | Ref | Part | Package | Value | Qty | Board | Block | Function |
 |---|---|---|---|---|---|---|---|
-| MB_PROC_A | TL074CDT | SOIC-14 | — | 1 | utility | 3 | Mod bus summer (1 section) + polarity inverter (1 section); 2 sections spare |
+| MB_PROC_A | TL074CDT | SOIC-14 | — | 1 | utility | 3 | Mod bus summer (1 section) + polarity inverter (1 section) + distribution buffer (1 section, paralleled with half-D for drive); 0 sections spare |
 | MB_PROC_B | TL074CDT | SOIC-14 | — | 1 | utility | 3 | LED drivers: MOD_POS (1) + MOD_NEG (1) + MOD_CLIP (1); 1 section spare |
 | MB_INV_1 | TL074CDT | SOIC-14 | — | 1 | utility | 3 | −V_src inverters for destinations 1–4 |
 | MB_INV_2 | TL074CDT | SOIC-14 | — | 1 | utility | 3 | –V_src inverters for destinations 5–8 |
@@ -211,4 +225,8 @@ is logically a mod bus destination and is normalled to V_modbus.
 | LED_CLIP | White LED, 3 mm | panel | — | 1 | panel | 3 | MOD_CLIP indicator |
 | J_MOD_IN | PJ301M-12 | panel | — | 1 | panel | 3 | MOD_INPUT jack (LFO1 normalled) |
 | J_DEST_1–19 | PJ301M-12 | panel | — | 19 | panel | 3 | Destination override jacks |
+| D_MB_CLAMP_P | BZX84C10 | SOT-23 | 10 V | 1 | utility | 3 | +10 V zener; back-to-back with D_MB_CLAMP_N in MB_INV feedback (±10 V output clamp) |
+| D_MB_CLAMP_N | BZX84C10 | SOT-23 | 10 V | 1 | utility | 3 | −10 V zener; back-to-back with D_MB_CLAMP_P in MB_INV feedback |
+| RV_MB_ZERO | Bourns 3224W | SMD | 10 kΩ | 1 | utility | 3 | Offset null trim: zero V_modbus when SCALE = 0 and OFFSET = center (< 10 mV residual) |
+| RV_MB_AMOUNT_MAX | Bourns 3224W | SMD | 10 kΩ | 1 | utility | 3 | 5× gain calibration: adjust until V_modbus = 5 × V_src at SCALE = max |
 | C_BYPASS | Capacitor | 0603 | 100 nF | 14 | utility | 3 | Supply bypass, one per op-amp supply pin (7 ICs × 2) |

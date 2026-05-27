@@ -103,6 +103,19 @@ In practice, the AMT pot wiper voltage drives the GAIN pin through R_gain. A TL0
 amp (one per channel) handles the OFS summing and inversion buffer. Two TL072s total (one per
 channel) are required; they can be combined as one TL072 dual op-amp (SOIC-8) package.
 
+**AMT pot loading note:** The AMT pot (10 kΩ) wiper has a source impedance of up to
+R_pot / 4 = 2.5 kΩ at mid-travel. In series with R_GAIN (15 kΩ), this creates a
+position-dependent gain error of up to 2.5 / (2.5 + 15) = 14 %. This shifts the
+THAT 2180 gain law and must be absorbed by the RV_VCA_UNITY trim — but the error
+varies with pot position, creating a non-uniform gain law.
+
+Recommended fix: reduce the AMT pot value to **1 kΩ** (max wiper impedance = 250 Ω;
+error < 1.6 %). The 1 kΩ pot must be driven from the TL072 output (low impedance);
+connect the pot CW lug to eff_CV and CCW lug to −eff_CV (from the inverter), then
+route the wiper through a 47 Ω series resistor directly to R_GAIN. Alternatively,
+add a TL072 unity-gain follower between the wiper and R_GAIN, but this requires a
+third IC half; lowering the pot value is simpler.
+
 ---
 
 ## 3. Physical Design

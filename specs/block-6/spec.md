@@ -436,7 +436,7 @@ Revised estimate is more accurate but should be verified against module power bu
 | BP_SUM_G2_L, BP_SUM_G2_R | TL072CDT | SOIC-8 | — | 2 | audio | block-6 | BP2 SUM_AMP + output buffer (L and R) |
 | BP_SUM_G3_L, BP_SUM_G3_R | TL072CDT | SOIC-8 | — | 2 | audio | block-6 | BP3 SUM_AMP + output buffer (L and R) |
 | BP_TILT_INV | TL072CDT | SOIC-8 | — | 1 | audio | block-6 | Half A = −V_tilt inverter; half B = BP_POL G=−1 inverter |
-| BP1_EXPO, BP2_EXPO, BP3_EXPO | THAT340 | SOIC-8 | — | 3 | audio | block-6 | V/oct expo converter per group (L+R shared) |
+| BP1_EXPO, BP2_EXPO, BP3_EXPO | THAT340S14-U | SOIC-14 | — | 3 | audio | block-6 | V/oct expo converter per group (L+R shared) |
 | BP_DIST_MUX_1, _2, _3 | CD4053BM96 | SOIC-16 | — | 3 | audio | block-6 | SC/HC/WF mode mux per group; S_A/S_B tied globally |
 | R_5V_REG | resistor | 0603 | 1 kΩ | 1 | audio | block-6 | Series R for +5V logic rail (from +12V → 78L05 or zener) |
 | D_5V | BZX84C5V1 | SOT-23 | 5.1V | 1 | audio | block-6 | Zener shunt for CD4053 logic supply rail |

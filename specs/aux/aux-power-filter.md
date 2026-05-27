@@ -16,9 +16,12 @@ Verify pinout against your busboard before PCB layout — orientation errors des
 ## Reverse Polarity Protection
 
 Series Schottky diode on each rail at the power header:
-- Part: BAT85 (SOD-80, 200 mA) or similar
+- Part: **SS14** (SMA/DO-214AC, 1 A, 40 V) — SMD recommended for this all-SMD design
+  - Alternatives: MBR0520LT1G (SOD-123, 500 mA), B320A (SMA, 3 A for extra margin)
+  - Do NOT use BAT85 (SOD-80): that is an axial through-hole package, incompatible with SMD board
 - Adds ~0.3 V forward drop — choose op-amps that tolerate (11.7 V / −11.7 V rails)
 - TL072/TL074: rated ±18 V, tolerates this headroom reduction without issue
+- Two diodes required per board (one +12 V rail, one −12 V rail)
 
 Power-on indicator: red LED + 1 kΩ series resistor across the +12 V rail (after the diode).
 

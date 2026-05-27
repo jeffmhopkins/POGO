@@ -7,7 +7,7 @@ Design status: [ ] draft → [ ] reviewed → [ ] validated on prototype
 Analog implementation of the DSP ModBusProcessor. Takes the module's primary modulation
 source (LFO1 when unpatched; external CV when MOD_INPUT is patched), applies an
 exponential-taper gain (0.2×–5×) and a bipolar offset (±5V), then clamps the output
-to ±10V. Drives the mod bus distribution rail that feeds all 22 attenuverter destinations.
+to ±10V. Drives the mod bus distribution rail that feeds all 19 attenuverter destinations.
 
 Also drives three indicator LEDs: MOD_CLIP (|V_bus| ≥ 9.9V), MOD_POS (V_bus > 0),
 MOD_NEG (V_bus < 0).
@@ -150,16 +150,15 @@ mod bus processor as a single IC plus passives on a small board section.
 
 ### Mod Bus Distribution
 
-V_modbus drives 22 attenuverter inputs in parallel. Each attenuverter input impedance
-is R_inv_in = 10 kΩ (from aux-attenuverter). Total load on mod bus:
-  22 × 10 kΩ in parallel = 10kΩ / 22 = 455 Ω
+V_modbus drives 19 attenuverter inputs in parallel. Each attenuverter pot is 10 kΩ
+wired across V_modbus and −V_modbus (bipolar). Total load on V_modbus:
+  19 × 10 kΩ in parallel = 10 kΩ / 19 ≈ 526 Ω
 
-The TL074 output can source/sink ~25 mA — far more than needed:
-  At V_modbus = 10V and 455 Ω load: I = 10V / 455Ω = 22 mA ← near limit.
-
-Add a unity-gain buffer (TL072 half) between MB_INV output and the mod bus
-distribution rail to protect the TL074 from the combined load. This also
-provides a clean low-impedance drive point for the LED circuits.
+At V_modbus = ±10 V and 526 Ω load: I = ±19 mA — marginal for a single TL074 output.
+To achieve reliable ±10 V swing, MB_PROC_A uses both spare sections (halves C and D)
+paralleled as the distribution buffer (each carries ~9.5 mA). A 47 Ω series resistor
+on each output before the join prevents oscillation. This is entirely within the four
+sections of MB_PROC_A; no additional IC is needed. See block-3/spec.md for details.
 
 ### Offset Reference
 
@@ -172,12 +171,12 @@ is consistent with the mod bus gain calibration.
 
 | Ref (generic) | Part | Package | Value | Notes |
 |---|---|---|---|---|
-| U_MB | TL074CDT | SOIC-14 | — | MB_AMP (A), MB_INV (B), LED comp (C), spare (D) |
-| U_MB_BUF | TL072CDT | SOIC-8 | — | Mod bus distribution buffer (half A); half B spare |
+| MB_PROC_A | TL074CDT | SOIC-14 | — | Half A = MB_AMP, Half B = MB_INV, Halves C+D = distribution buffer (paralleled) |
+| MB_PROC_B | TL074CDT | SOIC-14 | — | Halves A/B/C = LED comparators (POS, NEG, CLIP); half D spare |
 | R_f | Resistor | 0603 | 100 kΩ | MB_AMP feedback; sets gain denominator |
-| R_src | Pot + end R | Panel | 500 kΩ total | AMOUNT pot: log taper; end resistors set 0.2×–5× range |
-| R_src_min | Resistor | 0603 | 20 kΩ | CW end resistor (limits max gain to 5×) |
-| R_src_max | Resistor | 0603 | 0 Ω | CCW end resistor (allows max attenuation to 0.2×) |
+| R_src | Pot + end R | Panel | 492 kΩ total | AMOUNT pot: 470 kΩ log taper + 22 kΩ floor resistor; sets 0.2×–4.55× (≈0.2×–5×) range |
+| R_src_floor | Resistor | 0603 | 22 kΩ | Floor input resistor in series with pot; limits max gain to 100/22 = 4.55× |
+| R_47k | Resistor | 0603 | 47 Ω | Series resistor on each paralleled buffer output (×2) before joining; prevents oscillation |
 | R_off | Resistor | 0603 | 100 kΩ | Offset input resistor; R_f/R_off = 1 → ±5V offset |
 | R_inv_in | Resistor | 0603 | 100 kΩ | MB_INV input resistor |
 | R_inv_f | Resistor | 0603 | 100 kΩ | MB_INV feedback; 1% tolerance |

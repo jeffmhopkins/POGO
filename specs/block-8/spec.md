@@ -174,7 +174,7 @@ both cell A (LP1 Q) and cell B (LP2 Q) are of comparable length.
 | U_SUM_LP2_L | TL072CDT | SOIC-8 | — | 1 | audio | block-8 | L-ch: half A = SUM_AMP, half B = LP output buffer |
 | U_SUM_LP2_R | TL072CDT | SOIC-8 | — | 1 | audio | block-8 | R-ch: half A = SUM_AMP, half B = LP output buffer (HP buf unused) |
 | U_IRES_LP2 | TL072CDT | SOIC-8 | — | 1 | audio | block-8 | Half A = IRES_AMP (Q control); half B = spare / utility |
-| EXPO_LP2 | THAT340S14-U | SOIC-8 | — | 1 | audio | block-8 | Expo V/oct converter; f_ref = 632 Hz; drives LP2 L+R Iabc; independent of EXPO_LP1 |
+| EXPO_LP2 | THAT340S14-U | SOIC-14 | — | 1 | audio | block-8 | Expo V/oct converter; f_ref = 632 Hz; drives LP2 L+R Iabc; independent of EXPO_LP1 |
 | C1_L, C2_L | C0G cap | 0603 | 47 nF | 2 | audio | block-8 | LP2 L integrator caps (C0G/NP0 mandatory) |
 | C1_R, C2_R | C0G cap | 0603 | 47 nF | 2 | audio | block-8 | LP2 R integrator caps (C0G/NP0 mandatory) |
 | R_IN_L, R_IN_R | resistor | 0603 | 100 kΩ | 2 | audio | block-8 | SUM_AMP input resistors |
