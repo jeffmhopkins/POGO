@@ -396,12 +396,12 @@ wiring routes to control board via ribbon connector.
 
 | Ref | Range | Purpose |
 |---|---|---|
-| RV_BP1_REF | ±20% f_ref | BP1 cutoff reference (target: 200 Hz at 0V) |
-| RV_BP2_REF | ±20% f_ref | BP2 cutoff reference (target: 1500 Hz at 0V) |
-| RV_BP3_REF | ±20% f_ref | BP3 cutoff reference (target: 6000 Hz at 0V) |
-| RV_BP1_1VOCT | ±5% tracking | BP1 expo 1V/oct calibration |
-| RV_BP2_1VOCT | ±5% tracking | BP2 expo 1V/oct calibration |
-| RV_BP3_1VOCT | ±5% tracking | BP3 expo 1V/oct calibration |
+| RV_BP1_REF | 500 kΩ; ±25% f_ref | BP1 cutoff reference (target: 200 Hz at 0V); in series with R_IREF_A 750 kΩ |
+| RV_BP2_REF | 500 kΩ; ±25% f_ref | BP2 cutoff reference (target: 1500 Hz at 0V); in series with R_IREF_A 750 kΩ |
+| RV_BP3_REF | 500 kΩ; ±25% f_ref | BP3 cutoff reference (target: 6000 Hz at 0V); in series with R_IREF_A 750 kΩ |
+| RV_BP1_1VOCT | 20 kΩ; ±10% tracking | BP1 expo 1V/oct calibration |
+| RV_BP2_1VOCT | 20 kΩ; ±10% tracking | BP2 expo 1V/oct calibration |
+| RV_BP3_1VOCT | 20 kΩ; ±10% tracking | BP3 expo 1V/oct calibration |
 | RV_BP1_QMAX | V_bias | BP1 Q maximum point |
 | RV_BP2_QMAX | V_bias | BP2 Q maximum point |
 | RV_BP3_QMAX | V_bias | BP3 Q maximum point |
@@ -482,8 +482,9 @@ OPA1612 SUM_AMPs (Iq = 2.75 mA/channel = 5.5 mA per dual IC) add ~22 mA over equ
 | R_in_BP | resistor | 0603 | 100 kΩ | 6 | audio | block-6 | SUM_AMP input R (one per group per channel) |
 | R_lin_BP | resistor | 0603 | 1 kΩ | 12 | audio | block-6 | OTA linearizing R (one per OTA cell, 2 cells × 6 ICs) |
 | *— Calibration trimmers —* | | | | | | | |
-| RV_BP1_REF, _2, _3 | trimpot, SMD | 3296W | — | 3 | audio | block-6 | f_ref calibration per group |
-| RV_BP1_1VOCT, _2, _3 | trimpot, SMD | 3296W | — | 3 | audio | block-6 | 1V/oct tracking per group |
+| R_IREF_A_BP1, _2, _3 | resistor | 0603 | 750 kΩ | 3 | audio | block-6 | Fixed I_ref network R per group; in series with RV_BPx_REF; R_total nom = 1000 kΩ |
+| RV_BP1_REF, _2, _3 | Bourns 3224W | SMD | 500 kΩ | 3 | audio | block-6 | f_ref trim rheostat per group; in series with R_IREF_A; ±25% range |
+| RV_BP1_1VOCT, _2, _3 | Bourns 3224W | SMD | 20 kΩ | 3 | audio | block-6 | 1V/oct tracking trim per group; ±10% range |
 | RV_BP1_QMAX, _2, _3 | trimpot, SMD | 3296W | — | 3 | audio | block-6 | Q maximum bias per group |
 | *— Panel controls —* | | | | | | | |
 | SW_DIST | 3-pos slide | panel | — | 1 | panel | block-6 | BP_DIST: Soft/Hard/Fold; drives S_A + S_B to all CD4053 |

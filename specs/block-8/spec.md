@@ -136,8 +136,8 @@ unpopulated on LP2. The TL072 half can be repurposed as an additional buffer or 
 
 | Ref | Value | Purpose | Procedure |
 |---|---|---|---|
-| RV_REF | 100 kΩ | f_ref calibration | Apply 0V CV; trim until f₀ = 632 Hz |
-| RV_1VOCT | 10 kΩ | 1V/oct tracking | Apply +5V CV; trim until f₀ = 632 × 32 = 20.2 kHz |
+| RV_REF | 500 kΩ | f_ref calibration | Apply 0V CV; trim until f₀ = 632 Hz; in series with R_IREF_A 750 kΩ |
+| RV_1VOCT | 20 kΩ | 1V/oct tracking | Apply +5V CV; trim until f₀ = 632 × 32 = 20.2 kHz |
 | RV_QMAX | 100 kΩ | Self-osc onset | Full CW resonance; trim for stable self-oscillation |
 
 Calibration is independent of LP1. Perform LP2 calibration with LP1 set to a known passing state
@@ -196,11 +196,11 @@ both cell A (LP1 Q) and cell B (LP2 Q) are of comparable length.
 | R_QBIAS | resistor | 0603 | 100 kΩ | 1 | audio | block-8 | IRES_AMP_LP2 bias input (sets Butterworth Iabc) |
 | R_QINV | resistor | 0603 | 100 kΩ | 1 | audio | block-8 | IRES_AMP_LP2 resonance CV input resistor |
 | R_f_q | resistor | 0603 | 100 kΩ | 1 | audio | block-8 | IRES_AMP_LP2 feedback resistor |
-| R_IREF | resistor | 0603 | 1 MΩ | 1 | audio | block-8 | EXPO_LP2 I_ref setting resistor (+12V → THAT340) |
+| R_IREF_A | resistor | 0603 | 750 kΩ | 1 | audio | block-8 | EXPO_LP2 fixed I_ref network R; in series with RV_REF; R_total nom = 1000 kΩ |
 | R_VOCT | resistor | 0603 | 56 kΩ | 1 | audio | block-8 | EXPO_LP2 V/oct scaling resistor (1% tolerance) |
 | R_E | resistor | 0603 | 1 kΩ | 1 | audio | block-8 | EXPO_LP2 emitter degeneration |
-| RV_REF | Bourns 3224W | SMD | 100 kΩ | 1 | audio | block-8 | EXPO_LP2 f_ref trim (target 632 Hz at 0V CV) |
-| RV_1VOCT | Bourns 3224W | SMD | 10 kΩ | 1 | audio | block-8 | EXPO_LP2 1V/oct tracking trim |
+| RV_REF | Bourns 3224W | SMD | 500 kΩ | 1 | audio | block-8 | EXPO_LP2 f_ref trim rheostat; in series with R_IREF_A; range ±25% |
+| RV_1VOCT | Bourns 3224W | SMD | 20 kΩ | 1 | audio | block-8 | EXPO_LP2 1V/oct tracking trim; ±10% range |
 | RV_QMAX | Bourns 3224W | SMD | 100 kΩ | 1 | audio | block-8 | LP2 Q max / self-oscillation onset trim |
 | D_IRES | BAT54 | SOT-23 | — | 1 | audio | block-8 | Clamp V_ires ≥ 0 (prevents reverse Iabc into IC_Q_AB cell B) |
 | C_IREF | C0G cap | 0603 | 100 nF | 1 | audio | block-8 | EXPO_LP2 I_ref node bypass |

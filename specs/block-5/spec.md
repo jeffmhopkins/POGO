@@ -146,8 +146,10 @@ the virtual-ground termination for the SUM_AMP.
 **Linearizing resistors R_LIN_A, R_LIN_B (per OTA cell, per channel):** 1 kΩ — extends the OTA
 linear range from ±26 mV to ±(26mV + I_abc × 1kΩ/2) ≈ ±31 mV at 10 µA.
 
-**I_abc reference resistor R_IREF:** 1 MΩ (EXPO_LP1 expo converter; see aux-expo-converter.md).
-Sets I_ref_baseline ≈ 12 µA from +12 V; trimmed to 9.69 µA by RV_REF.
+**I_ref network R_IREF_A + RV_REF:** 750 kΩ (R_IREF_A, fixed 0603) in series with 500 kΩ (RV_REF, rheostat)
+gives R_total 750 kΩ–1250 kΩ, nominal 1000 kΩ at pot center → I_ref_baseline ≈ 12 µA from +12 V.
+±25% trim range covers ±10.8% worst-case component tolerance (R_IREF_A ±5% + C_int ±5%) with 2.3× margin.
+See aux-expo-converter.md.
 
 **Q control resistors R_Iabc:** 1 MΩ per channel — converts V_ires (from IRES_AMP) to I_abc_q.
 At V_ires = 0.74 V: I_abc_q = 0.74 µA → Q = 0.70 (Butterworth).
@@ -165,8 +167,8 @@ at self-oscillation).
 
 | Ref | Value | Purpose | Procedure |
 |---|---|---|---|
-| RV_REF | 100 kΩ | f_ref calibration | Apply 0V CV; trim until f₀ = 632 Hz (measure or listen) |
-| RV_1VOCT | 10 kΩ | 1V/oct tracking | Apply +5V CV; trim until f₀ = 632 × 2⁵ = 20.2 kHz |
+| RV_REF | 500 kΩ | f_ref calibration | Apply 0V CV; trim until f₀ = 632 Hz; in series with R_IREF_A 750 kΩ |
+| RV_1VOCT | 20 kΩ | 1V/oct tracking | Apply +5V CV; trim until f₀ = 632 × 2⁵ = 20.2 kHz |
 | RV_QMAX | 100 kΩ | Self-osc onset | Turn RES to max; trim for clean stable self-oscillation at full CW |
 | RV_LP1_TILT_NULL | 10 kΩ | Tilt center null | Tilt knob at center; trim until L and R cutoffs match |
 
@@ -236,11 +238,11 @@ Block-8 power estimate excludes IC_Q_AB accordingly.
 | R_QBIAS | resistor | 0603 | 100 kΩ | 1 | audio | block-5 | IRES_AMP bias input resistor (sets Butterworth Iabc) |
 | R_QINV | resistor | 0603 | 100 kΩ | 1 | audio | block-5 | IRES_AMP resonance CV input resistor |
 | R_f_q | resistor | 0603 | 100 kΩ | 1 | audio | block-5 | IRES_AMP feedback resistor |
-| R_IREF | resistor | 0603 | 1 MΩ | 1 | audio | block-5 | EXPO_LP1 I_ref setting resistor (+12V → THAT340) |
+| R_IREF_A | resistor | 0603 | 750 kΩ | 1 | audio | block-5 | EXPO_LP1 fixed I_ref network R; in series with RV_REF; R_total nom = 1000 kΩ |
 | R_VOCT | resistor | 0603 | 56 kΩ | 1 | audio | block-5 | EXPO_LP1 V/oct scaling resistor (1% tolerance) |
 | R_E | resistor | 0603 | 1 kΩ | 1 | audio | block-5 | EXPO_LP1 emitter degeneration |
-| RV_REF | Bourns 3224W | SMD | 100 kΩ | 1 | audio | block-5 | EXPO_LP1 f_ref trim (target 632 Hz at 0V CV) |
-| RV_1VOCT | Bourns 3224W | SMD | 10 kΩ | 1 | audio | block-5 | EXPO_LP1 1V/oct tracking trim |
+| RV_REF | Bourns 3224W | SMD | 500 kΩ | 1 | audio | block-5 | EXPO_LP1 f_ref trim rheostat; in series with R_IREF_A; range ±25% |
+| RV_1VOCT | Bourns 3224W | SMD | 20 kΩ | 1 | audio | block-5 | EXPO_LP1 1V/oct tracking trim; ±10% range |
 | RV_QMAX | Bourns 3224W | SMD | 100 kΩ | 1 | audio | block-5 | LP1 Q max / Butterworth point trim |
 | RV_LP1_TILT_NULL | Bourns 3224W | SMD | 10 kΩ | 1 | audio | block-5 | Tilt center-detent null (L=R at tilt=0) |
 | D_IRES | BAT54 | SOT-23 | — | 1 | audio | block-5 | Clamp V_ires ≥ 0 (prevents reverse Iabc) |

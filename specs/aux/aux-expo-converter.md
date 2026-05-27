@@ -48,17 +48,19 @@ ASCII fallback:
 Simplified circuit detail:
 
 ```
- +12V ──[R_IREF 1MΩ]──┬──► base of Q_ref (THAT340 Q2)
-                       │    collector → I_ref node
-                       │    emitter → −12V (or GND through R_E)
-                       │
- V_ctrl ──[R_VOCT]─────┴──► base of Q_expo (THAT340 Q1)
-                             collector → I_abc output
-                             emitter → shared with Q_ref emitter
+ +12V ──[R_IREF_A 750kΩ]──[RV_REF 500kΩ rheostat]──► base of Q_ref (THAT340 Q2)
+                                                         collector → I_ref node
+                                                         emitter → −12V (or GND through R_E)
+
+ V_ctrl ──[R_VOCT]──────────────────────────────────► base of Q_expo (THAT340 Q1)
+                                                       collector → I_abc output
+                                                       emitter → shared with Q_ref emitter
 
  I_abc = I_ref × exp((V_ctrl − V_ref) / V_T)
 
- RV_REF trims V_ref to set f₀ at 0V CV
+ RV_REF (500kΩ rheostat in series with R_IREF_A 750kΩ): trims R_total (750kΩ–1250kΩ,
+   nominal 1000kΩ at pot center = 250kΩ added) to set I_ref and f₀ at 0V CV.
+   Range: ±25%; covers ±10.8% worst-case component tolerance with 2.3× margin.
  RV_1VOCT trims R_VOCT to set 1V/oct tracking slope
 ```
 
@@ -127,10 +129,15 @@ Current spec: shared expo per block, document as Phase 3R open item for tilt.
 
 ### Trim Pots
 
-- RV_REF (Bourns 3224W 100 kΩ SMD): adjusts I_ref to hit the target f_ref at 0V CV.
-  ±20% range required to cover component tolerances in R_IREF and V_be spread.
-- RV_1VOCT (Bourns 3224W 10 kΩ SMD): adjusts the V_ctrl scaling ratio. ±5% range
-  covers typical V_T drift and tolerance in R_VOCT.
+- R_IREF_A (0603, 750 kΩ) + RV_REF (Bourns 3224W 500 kΩ SMD rheostat): together set I_ref
+  to hit the target f_ref at 0V CV. R_IREF_A is the fixed lower bound; RV_REF sweeps total
+  from 750 kΩ (CCW, RV_REF=0) to 1250 kΩ (CW, RV_REF=500 kΩ), nominal at pot center
+  (250 kΩ added) = 1000 kΩ. Gives ±25% adjustment range — sufficient to cover ±10.8%
+  worst-case component tolerance (R_IREF_A ±5% + integrator cap ±5%) with 2.3× margin.
+  Previous design (1 MΩ fixed + 100 kΩ series rheostat) gave only +9.1% range — insufficient
+  to correct downward-shifted f_ref.
+- RV_1VOCT (Bourns 3224W 20 kΩ SMD): adjusts the V_ctrl scaling ratio. ±10% range covers
+  typical V_T drift and tolerance in R_VOCT; doubled from 10 kΩ for wider trim margin.
 
 Calibration procedure:
 1. Apply 0V CV, trim RV_REF until output frequency = f_ref (listen or measure)
@@ -142,10 +149,10 @@ Calibration procedure:
 | Ref (generic) | Part | Package | Value | Notes |
 |---|---|---|---|---|
 | U_EXPO | THAT340S14-U | SOIC-8 | — | Matched NPN quad; use Q1+Q2 for expo pair |
-| R_IREF | Resistor | 0603 | 1 MΩ | Sets I_ref baseline (~12µA from +12V); adjust with RV_REF |
-| RV_REF | Bourns 3224W | SMD | 100 kΩ | f_ref trim; ±20% range |
+| R_IREF_A | Resistor | 0603 | 750 kΩ | Fixed lower bound of I_ref network; R_total = R_IREF_A + RV_REF (nom 1000 kΩ → ~12 µA) |
+| RV_REF | Bourns 3224W | SMD | 500 kΩ | f_ref trim rheostat; R_total range 750 kΩ–1250 kΩ; ±25% trim range |
 | R_VOCT | Resistor | 0603 | 56 kΩ | Nominal V/oct scaling resistor |
-| RV_1VOCT | Bourns 3224W | SMD | 10 kΩ | 1V/oct tracking trim; ±5% range |
+| RV_1VOCT | Bourns 3224W | SMD | 20 kΩ | 1V/oct tracking trim; ±10% range |
 | R_E | Resistor | 0603 | 1 kΩ | Emitter degeneration; stabilizes quiescent point |
 | C_IREF | Ceramic bypass | 0603 | 100 nF | Bypass on I_ref node to suppress HF on expo output |
 | C_VCC, C_VEE | Ceramic bypass | 0603 | 100 nF | Per IC supply pin |
