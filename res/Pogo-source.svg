@@ -169,15 +169,12 @@
   <!-- Zone — BP CONTROL                                                        -->
   <!-- ════════════════════════════════════════════════════════════════════════ -->
 
-  <circle cx="80.01" cy="21.0" r="9.0" fill="#1a1a1a" stroke="#555" stroke-width="0.7"/>
-  <line x1="80.01" y1="21.0" x2="80.01" y2="12.0" stroke="#aaa" stroke-width="0.8"/>
-  <text x="80.01" y="33.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">OFFSET</text>
-  <circle cx="80.01" cy="41.0" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
-  <line x1="80.01" y1="41.0" x2="80.01" y2="36.5" stroke="#aaa" stroke-width="0.6"/>
-  <text x="80.01" y="48.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">MIX</text>
-  <circle cx="80.01" cy="55.0" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
-  <line x1="80.01" y1="55.0" x2="80.01" y2="50.5" stroke="#aaa" stroke-width="0.6"/>
-  <text x="80.01" y="62.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">TILT</text>
+  <circle cx="80.01" cy="24.8" r="9.0" fill="#1a1a1a" stroke="#555" stroke-width="0.7"/>
+  <line x1="80.01" y1="24.8" x2="80.01" y2="15.8" stroke="#aaa" stroke-width="0.8"/>
+  <text x="80.01" y="36.8" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">OFFSET</text>
+  <circle cx="80.01" cy="52.4" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="80.01" y1="52.4" x2="80.01" y2="47.9" stroke="#aaa" stroke-width="0.6"/>
+  <text x="80.01" y="59.9" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">MIX</text>
   <text x="80.01" y="66.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
   <rect x="75.51" y="68.80" width="9" height="2.4" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
   <rect x="76.01" y="68.60" width="3.5" height="2.8" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>

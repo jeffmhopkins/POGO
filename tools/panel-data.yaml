@@ -373,27 +373,20 @@ zones:
     col_pitch: 11.43
     cols: 2
     components:
-      # ── Master Offset xl knob — centred on section ──────────────────────────
+      # ── Master Offset xl knob — centred on section; cy matches LP1_FREQ ────────
       - id: BP_OFFSET
         type: knob_xl
         cx: 80.01
-        cy: 21.0
+        cy: 24.80
         label: "OFFSET"
         cpp_param: "BP_OFFSET_PARAM"
-      # ── BP Mix + Tilt medium knobs — both centred, stacked vertically ────────
-      # Same cx=80.01 → full x-overlap → must stagger ≥13.34mm (PCB) = 14.0mm used
+      # ── BP Mix medium knob — centred; cy matches LP1_TILT ────────────────────
       - id: BP_MIX
         type: knob_medium
         cx: 80.01
-        cy: 41.0
+        cy: 52.40
         label: "MIX"
         cpp_param: "BP_MIX_PARAM"
-      - id: BP_TILT
-        type: knob_medium
-        cx: 80.01
-        cy: 55.0
-        label: "TILT"
-        cpp_param: "BP_TILT_PARAM"
       # ── Polarity switch (H2) — centred on section, no section label ─────────
       - id: BP_POL
         type: switch_H2
