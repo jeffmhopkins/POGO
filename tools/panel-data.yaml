@@ -413,11 +413,12 @@ zones:
     cols: 2
     components:
       # ── Polarity + Distortion switches — top of section ─────────────────────
-      # ── Switches: 3 equal free-space gaps of 4.91mm (zone_top→SW1, SW1↔SW2, SW2→knob_top)
+      # ── Switches: 3 equal VISUAL gaps of 7.23mm
+      # (zone_top→SW1_track_top, SW1_label_bot→SW2_track_top, SW2_label_bot→OFFSET_circle_top)
       - id: BP_POL
         type: switch_H2
         cx: 80.01
-        cy: 17.41
+        cy: 17.63
         label_above: ""
         pos_labels: ["POS", "NEG"]
         pos_xs: [75.51, 84.51]
@@ -425,7 +426,7 @@ zones:
       - id: BP_DIST
         type: switch_H3
         cx: 80.01
-        cy: 33.32
+        cy: 30.57
         pos_labels: ["SOFT", "HARD", "FOLD"]
         pos_xs: [74.30, 80.01, 85.72]
         label_below: ""
