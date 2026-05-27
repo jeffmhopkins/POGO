@@ -36,7 +36,7 @@ jobs:
 
       - name: Generate panel SVG from YAML
         run: |
-          apt-get install -y python3-yaml -qq
+          apt-get update -qq && apt-get install -y python3-yaml -qq
           # DRC must pass before we compile — catches keepout/overlap violations early
           python3 tools/build_panel.py --check
           # Regenerate res/Pogo-source.svg from panel-data.yaml (source of truth)
@@ -78,7 +78,7 @@ jobs:
 
       - name: Generate panel SVG from YAML
         run: |
-          apt-get install -y python3-yaml -qq
+          apt-get update -qq && apt-get install -y python3-yaml -qq
           python3 tools/build_panel.py --check
           python3 tools/build_panel.py --resource
           cp res/Pogo-source.svg res/Pogo.svg
@@ -134,7 +134,7 @@ jobs:
 
       - name: Generate panel SVG from YAML
         run: |
-          python3 -m pip install pyyaml --quiet
+          python3 -m pip install --break-system-packages pyyaml --quiet
           python3 tools/build_panel.py --check
           python3 tools/build_panel.py --resource
           cp res/Pogo-source.svg res/Pogo.svg
