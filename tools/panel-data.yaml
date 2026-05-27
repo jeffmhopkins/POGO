@@ -228,7 +228,7 @@ zones:
         led_stroke: "#2255cc"
         cpp_id: "LFO1_LED"
       - id: LFO1_RATE
-        type: knob_medium
+        type: trimpot
         col: 2
         cy: 51.5
         label: "Rate 1"
@@ -248,7 +248,7 @@ zones:
         led_stroke: "#2255cc"
         cpp_id: "LFO2_LED"
       - id: LFO2_RATE
-        type: knob_medium
+        type: trimpot
         col: 2
         cy: 65.9
         label: "Rate 2"
@@ -707,7 +707,7 @@ zones:
         label: ""
         cpp_param: "HP_FREQ_PARAM"
       - id: HP_RES
-        type: knob_medium
+        type: trimpot
         cx: 205.74
         cy: 89.5
         label: "RES"
@@ -784,7 +784,7 @@ zones:
         label: ""
         cpp_param: "LP2_FREQ_PARAM"
       - id: LP2_RES
-        type: knob_medium
+        type: trimpot
         cx: 228.60
         cy: 89.5
         label: "RES"
