@@ -21,7 +21,7 @@ R_IN ──┤  [A: Input Buffer]  clamp ±11 V; R normalises to L when unpatche
                                                               ↕ BP_MIX (0=dry, 1=wet)
 ALT_BP_L/R → GAIN_BP3 → ────────────┐
                                      ↓
-                          [BP: 2× oversampled]
+                          [BP]
                             global: BP_OFFSET (V/oct), BP_TILT (stereo CV), BP_POL, BP_DIST mode
                             per group (×3): FREQ + FOCUS (Q) + DIST (drive)
                             formant ref: BP1=200 Hz, BP2=1500 Hz, BP3=6000 Hz
@@ -235,6 +235,8 @@ LFO2_LIGHT = (lfo2V / 5 + 1) × 0.5
 ```
 Rate taper (unchanged from old code): `f = 0.05 × 400^param` Hz
 
+One-pole LP at 10× the LFO rate is applied to model hardware integrator slew and Schmitt peak rounding.
+
 ### Mod Bus
 ```
 srcV = MOD_INPUT connected ? MOD_INPUT : lfo1V
@@ -253,10 +255,15 @@ vcaCV    = clamp(vcaCVraw + VCA_OFS_PARAM × 5, 0, 10)   // OFS shifts floor
 vcaOut   = VcaBlock::process(pgL/pgR, VCA_AMT_PARAM, vcaCV)
 ```
 
-VCA gain law (unchanged from `VcaBlock.hpp`):
-- `AMT = 0` → unity always  
-- `AMT > 0` → accent: `g = clamp((1 − AMT) + AMT × (vcaCV / 5), 0, 1)` (mute at CV=0, unity at CV=5)
-- `AMT < 0` → duck:   `g = clamp(1 + AMT × (vcaCV / 5), 0, 1)` (unity at CV=0, mute at CV=5)
+VCA gain law (dB-law, from `VcaBlock.hpp`):
+```
+normCV   = clamp(vcaCV / 5, 0, 1)                           // 0–1 from 0–5 V
+control  = (amtParam >= 0) ? 1 − amtParam×(1−normCV) : 1 + amtParam×normCV
+G        = 10^(2×(control−1))   // dB-law: 0 dB at control=1, −40 dB at control=0
+```
+- `AMT = 0` → control = 1 → G = 1 (unity always)
+- `AMT > 0` → accent: control = 1 at CV=5, 1−AMT at CV=0 (mute when AMT=1 and CV=0)
+- `AMT < 0` → duck:   control = 1 at CV=0, 1+AMT at CV=5 (mute when AMT=−1 and CV=5)
 
 ### Block LP1
 ```
@@ -276,7 +283,7 @@ LP1 filter parameters (unchanged from `LPFilter.hpp`):
 - f_ref = 632 Hz; ω₀ = 2π × 632 × 2^(freqCv)
 - Q taper: `Q = 0.5 × 4000^resParam`
 
-### Block BP (2× oversampled, Simper trapezoidal SVF)
+### Block BP (Simper trapezoidal SVF)
 
 **Pre-computation (once per base-rate sample):**
 ```
@@ -298,40 +305,53 @@ bpInL = ALT_BP_L connected ? altL : lp1L
 bpInR = ALT_BP_R connected ? altR : lp1R
 ```
 
-**2× upsample → per-oversampled-sample loop:**
+**Per-sample processing:**
 ```
-for s in {0, 1}:   // 2× oversampling
-    for n in {1, 2, 3}:
-        // Stereo tilt: L gets +tilt, R gets −tilt
-        bpL[n] = TripleBandpass[n].processL(bpIn_up[s], freqCv[n] + bpTiltCv, focusCv[n], polarity, fs×2)
-        bpR[n] = TripleBandpass[n].processR(bpIn_up[s], freqCv[n] − bpTiltCv, focusCv[n], polarity, fs×2)
+// Stereo tilt: L gets +tilt, R gets −tilt
+for n in {1, 2, 3}:
+    bpL[n] = SVFGroup[n].process(bpInL, freqCv[n] + bpTiltCv, focusCv[n], polarity, fs)
+    bpR[n] = SVFGroup[n].process(bpInR, freqCv[n] − bpTiltCv, focusCv[n], polarity, fs)
 
-        // Distortion (mode shared; drive per group)
-        distL[n] = Distortion::process(bpL[n], driveCv[n], distMode)
-        distR[n] = Distortion::process(bpR[n], driveCv[n], distMode)
+    // Distortion (mode shared; drive per group)
+    distL[n] = Distortion::processNorm(bpL[n] / 5, driveCv[n], distMode) × 5
+    distR[n] = Distortion::processNorm(bpR[n] / 5, driveCv[n], distMode) × 5
 
-    // Sum all groups at unity (no per-group weighting)
-    wetL = distL[1] + distL[2] + distL[3]
-    wetR = distR[1] + distR[2] + distR[3]
-
-    // Clamp (SVF integrator limits)
-    wetL = clamp(wetL, −10.5, +10.5)
-    wetR = clamp(wetR, −10.5, +10.5)
-
-→ decimate back to base rate → wetL_base, wetR_base
+// Sum all groups
+wetL = clamp(distL[1] + distL[2] + distL[3], −10.5, +10.5)
+wetR = clamp(distR[1] + distR[2] + distR[3], −10.5, +10.5)
 ```
 
-**BP3 output tap (captured before decimation, or equivalently post-decimate from BP3 only):**
+**BP3 output tap (post-distortion, pre-mix):**
 ```
-BP3_L_OUTPUT = distL[3]_decimated
-BP3_R_OUTPUT = distR[3]_decimated
+BP3_L_OUTPUT = distL[3]
+BP3_R_OUTPUT = distR[3]
 ```
 
-**BP_MIX dry/wet:**
+**BP_MIX (additive — dry at unity, wet added on top):**
 ```
-// Dry = LP1 output (regardless of whether ALT is patched — LP1 is always the dry reference)
-bpOutL = lp1L × (1 − mix) + wetL_base × mix
-bpOutR = lp1R × (1 − mix) + wetR_base × mix
+// Dry is always LP1 output at unity. Wet is added. Hardware inverting summer behavior.
+bpOutL = clamp(lp1L + wetL × mix, −12, +12)
+bpOutR = clamp(lp1R + wetR × mix, −12, +12)
+```
+
+**Distortion modes** (input `x` and output `y` normalized to ±1; `d` = driveCv[n] ∈ [0, 1]):
+
+- **SC (SOFT)** — diode chain; always clips to ±Vth = ±0.28 (±1.4 V):
+```
+G = driveParam ≤ 0.20 ? (driveParam/0.20) : exp((driveParam−0.20)/0.80 × 4)
+y = Vth × tanh(G × x / Vth)    Vth = 0.28
+```
+
+- **HC (HARD)** — zener + diode clamp (±1.16 = ±5.8 V/5 V):
+```
+y = clamp(g × x, −1.16, +1.16)    // ±5.8V/5V (zener + diode Vf)
+```
+
+- **WF (FOLD)** — triangle wavefolder at ±1.4 V:
+```
+Vth = 0.28    // 1.4V/5V; two 1N4148W per polarity
+y = (1 + d × 4) × x
+output = Vth × asin(sin(π/2 / Vth × y)) × 2/π    // folds at ±1.4V, ~18 folds at max
 ```
 
 ### Block HP

@@ -124,15 +124,18 @@ input. When a cable is inserted into MOD_IN, the tip-switch disconnects LFO1 and
 external signal takes over. This is a passive mechanical normalling, requiring only a
 physical PCB/panel trace connection.
 
-### Hardware deviations from DSP model
+### Hardware behavior notes
+
+Items 1 and 3 below are intentional DSP advantages kept by design. Item 2 is now modeled in DSP.
 
 1. **Phase reset:** The DSP `reset()` method zeroes the phase accumulator. There is no
    hardware phase reset circuit; LFOs free-run from power-on. This is acceptable for a
    modulation source.
 
-2. **Waveform linearity:** The DSP triangle is perfectly linear. The hardware triangle
-   has slight rounding near the peaks due to integrator slew rate and comparator switching
-   delay. This is inaudible and sonically desirable (softer modulation edges).
+2. **Waveform peak rounding:** The hardware triangle has slight rounding near the peaks
+   due to integrator slew rate and Schmitt comparator switching delay. The DSP models
+   this with a one-pole LP filter at 10× the LFO rate, producing the same characteristic
+   soft peak rounding. This is sonically desirable (softer modulation edges).
 
 3. **Rate law:** The DSP uses a precise exponential: `0.05 × 400^param`. A log-taper
    pot approximates this but does not match it exactly. For a modulation rate control

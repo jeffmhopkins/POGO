@@ -21,9 +21,9 @@ Last updated: 2026-05-27 | Topology: 48HP | Phase 3R: all blocks complete
 | 1 | Pre-Gain | ✅ | ✅ | ✅ | NE5532D, 1×/5× switch; ALT_BP path |
 | 2 | Dual LFO | ✅ | ✅ | ✅ | Integrator+Schmitt; 47nF C0G; 1MΩ log pot + end R |
 | 3 | Mod Bus | ✅ | ✅ | ✅ | 19 destinations; 7× TL074CDT; 470kΩ SCALE pot |
-| 4 | VCA | ✅ | ✅ ⚠️ | ✅ | THAT 2180 dB-law vs DSP linear — intentional deviation |
+| 4 | VCA | ✅ | ✅ | ✅ | THAT 2180 dB-law; DSP updated to match |
 | 5 | LP Filter 1 | ✅ | ✅ | ✅ | OTA-C SVF; stereo tilt (symmetric ±V_tilt L/R) |
-| 6 | Triple BP + Dist | ✅ | ✅ | ✅ ⚠️ | SC/HC/WF sub-circuits + CD4053; BP_MIX+POL; Q norm deviation |
+| 6 | Triple BP + Dist | ✅ | ✅ | ✅ | SC/HC/WF sub-circuits + CD4053; BP_MIX+POL; DSP aligned |
 | 7 | HP Filter | ✅ | ✅ | ✅ | OTA-C SVF; G=−1 buffer corrects SUM_AMP inversion |
 | 8 | LP Filter 2 | ✅ | ✅ | ✅ | OTA-C SVF; independent from LP1; shares Q VCA LM13700 |
 | B | Output Buffer | ✅ | ✅ | ✅ | TL072; MAIN_L/R from LP2 + BP3_L/R tap |
@@ -35,7 +35,7 @@ Last updated: 2026-05-27 | Topology: 48HP | Phase 3R: all blocks complete
 | aux-ota-c-svf | ✅ | ASCII schematic + full derivations |
 | aux-expo-converter | ✅ | Component values + trim procedure |
 | aux-q-control | ✅ | IRES_AMP driver + IC sharing plan |
-| aux-vca-cell | ✅ | THAT 2180; DSP deviation documented |
+| aux-vca-cell | ✅ | THAT 2180 dB-law; DSP matches |
 | aux-unity-buffer | ✅ | G=+1 and G=−1 variants |
 | aux-distortion | ✅ | SC/HC/WF + CD4053 mux wiring |
 | aux-attenuverter | ✅ | Bipolar pot + TL074 inverter |
@@ -51,7 +51,7 @@ Circuit diagrams in spec text must be self-sufficient.
 
 | File | Status |
 |---|---|
-| `specs/components.yaml` | ✅ Complete — 265 entries; all boards; all ICs, discretes, and key passives with values; qty field for repeated identical parts |
+| `specs/components.yaml` | ✅ Complete — 267 entries; all boards; all ICs, discretes, and key passives with values; qty field for repeated identical parts |
 
 ## Panels & Layout
 
@@ -72,12 +72,10 @@ Circuit diagrams in spec text must be self-sufficient.
 
 ## Next Up
 
-**Phase 3R is complete for all blocks.** Known deviations documented:
-- block-4: THAT 2180 dB-law vs DSP linear VCA (intentional)
-- block-6: Q normalization: hardware peak = 1 (constant), DSP peak = 1/Q (no hardware compensation)
-- block-6: BP_MIX: hardware adds wet on top of dry; DSP crossfades (acceptable)
-- block-6: HC clip threshold ±5.8V vs DSP ±5V (zener tolerance, acceptable)
-- block-6: WF fold threshold Vth ≈ ±1.4V (diode Vf-dependent; soft onset by design)
+**Phase 3R is complete for all blocks.** All previously documented DSP/hardware deviations are
+now resolved — the plugin is a faithful behavioral model of the hardware. Intentional DSP
+advantages retained: exact 1V/oct tracking, exact LFO rate law, LFO phase reset, extended Q
+range (creative tool).
 
 **Phase 4R (Panel) — DONE.** `tools/panel-data.yaml` DRC-clean.
 
@@ -89,13 +87,19 @@ loading addressed; block-1 NE5532D R_in lowered for noise; all 12 SUM_AMP ICs→
 (1.1 nV/√Hz); OPA1612 Iq corrected (5.5 mA/dual-IC per rail); block-1 noise % corrected;
 block-6 WF topology replaced with true symmetric precision folder (no prototype stability risk).
 
+**DSP alignment complete** (2026-05-27). Plugin updated to match hardware:
+- VCA: dB-law G = 10^(2×(control−1)); THAT 2180 characteristic
+- BP: 2-pole SVF per group (was 4-pole); unity peak gain (was 1/Q²)
+- BP_MIX: additive dry+wet (was crossfade); no oversampling (was 2×)
+- Distortion: SC diode chain ±1.4V; HC ±5.8V; WF Vth=±1.4V (~18 folds)
+- LFO: one-pole peak rounding at 10× rate (integrator slew model)
+
 **Remaining work before PCB layout:**
 1. **Write 48HP KiCad generator** — replaces 40HP-era stale generators; inputs from components.yaml + panel-data.yaml
 2. **Phase 6R** — VCV Rack signal-path smoke tests (CI integration)
 
 **Open prototype questions (Phase 3R advisory, not blocking):**
 - block-2: LFO LED: confirm pulsing (half-wave rectified) vs breathing (no diode) — prototype preference
-- block-6: BP_MIX gain compensation resistor value (to match DSP level at MIX=max)
 - block-6: WF fold threshold Vth diode-current dependency — bench characterization of fold shape at various drive levels (informational; topology is correct)
 
 ---

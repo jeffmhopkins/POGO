@@ -29,36 +29,36 @@ VCA directly. Plugging into VCA_INPUT overrides this.
 Both channels (L, R) are processed identically — the same CV and parameter values are applied
 to both, maintaining stereo balance.
 
-**Intentional hardware deviation:** The DSP models a linear (amplitude-law) VCA for
-simplicity. The hardware implementation uses a THAT 2180 dB-law (exponential/log-domain) VCA.
-This produces a perceptually more natural response for accent and gate applications; a linear
-AM gain sweep sounds abrupt, while a dB-law sweep tracks human loudness perception. The
-deviation is musically beneficial and intentional.
-
 ---
 
 ## 2. Theoretical Design and Topology
 
-### DSP Gain Law (software model)
+### Gain Law (DSP and hardware)
 
 ```cpp
-float normCV = clamp(cvV / 5.f, 0.f, 1.f);          // 5 V = full scale
-float mod    = (amtParam >= 0.f) ? (1.f – normCV) : normCV;
-float g      = clamp(1.f – abs(amtParam) * mod, 0.f, 1.f);
-// output = input × g
+float normCV = clamp(cvV / 5.f, 0.f, 1.f);
+float control;
+if (amtParam >= 0.f)
+    control = 1.f - amtParam * (1.f - normCV);   // 1 − AMT×(1−CV)
+else
+    control = 1.f + amtParam * normCV;            // 1 − |AMT|×CV
+control = clamp(control, 0.f, 1.f);
+// dB-law: G = 10^(2*(control-1))  →  0 dB at control=1, −40 dB at control=0
+float G = (control <= 0.001f) ? 0.f : std::pow(10.f, 2.f * (control - 1.f));
+// output = input × G
 ```
 
 Key operating points:
 
-| AMT  | CV    | g (DSP) | Description |
-|------|-------|---------|-------------|
-| 0    | any   | 1.0     | Unity always (AMT at noon) |
-| +1   | 0 V   | 0.0     | Muted |
-| +1   | 5 V   | 1.0     | Accent: unity at 5 V |
-| +1   | 2.5 V | 0.5     | Half gain at mid CV |
-| –1   | 0 V   | 1.0     | Through (duck mode, no CV) |
-| –1   | 5 V   | 0.0     | Ducked fully at 5 V |
-| –1   | 2.5 V | 0.5     | Half gain at mid CV |
+| AMT  | CV    | control | G (dB-law) | Description |
+|------|-------|---------|------------|-------------|
+| 0    | any   | 1.0     | 1.00 (0 dB)   | Unity always (AMT at noon) |
+| +1   | 0 V   | 0.0     | 0.00 (−∞ dB)  | Muted |
+| +1   | 5 V   | 1.0     | 1.00 (0 dB)   | Accent: unity at 5 V |
+| +1   | 2.5 V | 0.5     | 0.10 (−20 dB) | Mid-CV accent; perceptually ~half loudness |
+| –1   | 0 V   | 1.0     | 1.00 (0 dB)   | Through (duck mode, no CV) |
+| –1   | 5 V   | 0.0     | 0.00 (−∞ dB)  | Ducked fully at 5 V |
+| –1   | 2.5 V | 0.5     | 0.10 (−20 dB) | Mid-CV duck; perceptually ~half loudness |
 
 The OFS floor is applied before this calculation:
 
@@ -79,8 +79,7 @@ Gain (dB) = –6 dB × I_gain / I_ref    (approximately, from THAT 2180 datashee
 ```
 
 The VCA_AMT pot and VCA_OFS resistor network are connected to the GAIN pin to implement a
-hardware equivalent of the DSP gain law. Because the THAT 2180 is exponential, the CV-to-gain
-relationship is intrinsically smoother than the linear DSP model at low-level transitions.
+hardware equivalent of the DSP gain law. The DSP dB-law matches the THAT 2180 exponential characteristic: equal control-voltage steps produce equal dB steps, tracking human loudness perception.
 
 **Unity gain calibration:** A Bourns 3224W SMD trimmer (500 Ω) in series with R_gain sets the
 exact bias current for 0 dB gain. One trimmer per channel allows the two channels to be

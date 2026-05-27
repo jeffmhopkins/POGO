@@ -1,5 +1,5 @@
 # Block 6: Triple Bandpass + Distortion
-Three independent 2-pole OTA-C SVF bandpass resonators (formant filters F1/F2/F3) with per-group drive and a global distortion mode switch; runs at 2× oversampling.
+Three independent 2-pole OTA-C SVF bandpass resonators (formant filters F1/F2/F3) with per-group drive and a global distortion mode switch.
 
 DSP source: `plugin/src/dsp/BandpassSVF.hpp`, `plugin/src/dsp/Distortion.hpp`, `plugin/src/Pogo.cpp` (lines 410–475)
 
@@ -13,11 +13,10 @@ Three bandpass resonators tuned to low (F1 ~200 Hz), mid (F2 ~1500 Hz), and high
 
 **BP_MIX** dry/wet blend allows dialing from pure LP1 output (dry) to full formant stack (wet). At 50% (default) the formants add to the underlying LP1 texture.
 
-**Distortion** runs inside the oversampled loop, post-SVF, pre-mix. One global `BP_DIST` switch selects Soft Clip / Hard Clip / Wavefold across all three groups simultaneously. Per-group `DRIVE` controls the distortion depth independently. The BP3 post-distortion tap (before mix) is available at `BP3_L/R_OUT` jacks.
+**Distortion** runs post-SVF, pre-mix. One global `BP_DIST` switch selects Soft Clip / Hard Clip / Wavefold across all three groups simultaneously. Per-group `DRIVE` controls the distortion depth independently. The BP3 post-distortion tap (before mix) is available at `BP3_L/R_OUT` jacks.
 
 **ALT path**: `ALT_BP_L/R` jacks feed the BP input directly (bypassing VCA + LP1), with `GAIN_BP3` pre-gain (1× or 5×). When ALT jacks are patched, BP processes the ALT signal instead of the LP1 output.
 
-**2× oversampling** is applied to the full BP + distortion section to reduce aliasing from the nonlinear distortion stages.
 
 ---
 
@@ -25,13 +24,13 @@ Three bandpass resonators tuned to low (F1 ~200 Hz), mid (F2 ~1500 Hz), and high
 
 ### SVF Groups (3 independent resonators)
 
-Each group is a 2-pole state-variable filter (BP output only). DSP uses 4-pole (two cascaded 2-pole stages per group) for testing; **hardware spec is 2-pole per group** (one OTA-C SVF per group per channel):
+Each group is a 2-pole state-variable filter (BP output only). Both DSP and hardware use one 2-pole OTA-C SVF per group per channel:
 
 ```
 H_BP(s) = (ω₀/Q · s) / (s² + ω₀/Q · s + ω₀²)
 ```
 
-Peak at s = jω₀: |H_BP| = 1/Q (before normalization); DSP normalizes by 1/Q² so peak gain = 1/Q regardless of Q setting. Hardware: resistor network at SUM_AMP input achieves 1/Q² normalization (see Physical Design).
+Peak at s = jω₀: |H_BP(jω₀)| = 1 (constant unity, regardless of Q). Q controls bandwidth only, not peak amplitude.
 
 **f_ref per group** (at 0V CV):
 | Group | f_ref | Formant |
@@ -53,55 +52,52 @@ Hardware: Q = 52mV / (Iabc × R_in)
 ```
 BP Q maximum is ~200 at hardware (Iabc → minimum before instability threshold). Self-oscillation is suppressed — BP groups are resonators, not oscillators.
 
-### Distortion (inside oversampled loop)
+### Distortion
 
 Three modes selected by `BP_DIST` (global switch, 0/1/2):
 
 **Soft Clip (mode 0):**
 ```
-drive = exp(d × 4) − 1       (0 to ~54×)
-y = tanh(drive × x) / tanh(drive)
+G = driveParam ≤ 0.20 ? (driveParam / 0.20)        (0→1× gain control)
+      : exp((driveParam − 0.20) / 0.80 × 4)         (1×→~55× drive, same exp law)
+y = Vth × tanh(G × x / Vth)    Vth = 0.28 (= 1.4V/5V; two 1N4148W per polarity)
 ```
-At d=0: unity. At d=1: heavy saturation. Preserves dynamics at low drive.
+Output bounded to ±Vth = ±1.4V at all drive levels. Linear below threshold; smooth tanh onset above. Diodes always in circuit; gain-control zone (≤9am) feeds the diode chain at reduced gain.
 
 **Hard Clip (mode 1):**
 ```
-g = 1 + d × 4    (1–5× gain)
-y = clamp(g × x, −1, +1)
+g = 1 + d × 4    (1–5× linear gain)
+y = clamp(g × x, −1.16, +1.16)    (±1.16 = ±5.8V/5V; zener 5.1V + 1N4148W Vf 0.7V)
 ```
-Linear gain into hard rails. Aggressive, brick-wall limiting.
+Linear gain into hard rails at ±5.8V. Aggressive, brick-wall limiting.
 
 **Wavefold (mode 2, Buchla-style):**
 ```
-y = asin(sin(π/2 × (1 + d × 4) × x)) × 2/π
+Vth = 0.28    (= 1.4V/5V; two 1N4148W per polarity in passive clamp)
+y = (1 + d × 4) × x                    (1–5× pre-gain)
+output = Vth × asin(sin(π/2 / Vth × y)) × 2/π
 ```
-Folds signal back on itself. Even harmonics, formant-like timbres at high drive.
-
-**Drive law (all modes):**
-```
-driveParam ≤ 0.20: y = x × (driveParam / 0.20)     (unity at driveParam=0.20 = 9-o'clock)
-driveParam >  0.20: d = (driveParam − 0.20) / 0.80  → above mode equations
-```
-Input normalized to ±1 (÷5V); output scaled back to ±5V. Input: SVF BP output per group.
+Passive diode clamp at ±Vth, then V_out = 2×V_clamp − V_in (slope reversal at ±1.4V). At max drive and full-scale input: ~18 folds vs ~3 folds at ±5V threshold. Dense Buchla-style folding.
 
 ### BP_MIX blend
 
 ```
-BP_out = (1 − mix) × LP1_output + mix × sum(distorted_groups)
+BP_out = clamp(LP1_output + mix × sum(distorted_groups), −12, +12)
 ```
-Dry (mix=0): LP1 output passes through unmodified. Wet (mix=1): full formant/distortion. Default mix=0.5.
+Dry is always present at unity. Wet adds on top. Mix=0: LP1 only. Mix=max: LP1 + full wet (up to 6 dB louder than a crossfade). Hardware op-amp rails limit output; DSP clamps at ±12V. Default mix=0.5.
 
-### 2× Oversampling
+### Oversampling
 
-Full BP+distortion runs at 2× sample rate. Upsampler quality=8 (~90 dB stopband). Decimator applied after distortion to return to base rate. Separate decimator for BP3 output tap.
+None. Hardware SVF and distortion run at audio rate; analog hardware is inherently alias-free. DSP matches: no oversampling applied to BP section.
 
-### Hardware Deviation from DSP
+### DSP/Hardware Alignment
 
-| DSP | Hardware |
-|---|---|
-| 4-pole BP (two cascaded SVF stages per group) | 2-pole BP (one OTA-C SVF per group per channel) — 4-pole doubles IC count and PCB area with marginal sonic benefit |
-| Integer polarity switch (±1) | Analog polarity inversion via CD4053 analog switch or inverting op-amp switch |
-| 2× oversampling in software | Hardware SVF runs at audio rate; oversampling implemented in ADC/DAC chain if needed (optional; analog SVF inherently alias-free) |
+DSP and hardware are aligned on all BP signal-processing behaviors:
+- 2-pole SVF per group per channel (both)
+- Unity BP peak gain regardless of Q (both)
+- Additive BP_MIX: dry at unity, wet added on top (both)
+- No oversampling (both)
+- Distortion thresholds: SC ±1.4V, HC ±5.8V, WF ±1.4V (both)
 
 → See aux-ota-c-svf.md for SVF topology; aux-distortion.md for distortion cells.
 
@@ -119,8 +115,8 @@ Grouping per IC:
 - Per group: `BP_OTA_G1_L`, `BP_OTA_G1_R` etc. — one LM13700 per group per channel (dual OTA: cell A + cell B = integrator + Q VCA, OR cell A/B for two channels of same group)
 - Conservative count: 3 groups × 2 channels × 1 LM13700 = **6× LM13700** for integrators + Q VCAs
 
-**Q normalization (1/Q² at SUM_AMP):**
-Standard SVF BP peak is 1× (ignores Q). To get 1/Q² normalization: add a second feedback path proportional to −v2 (LP output) at the SUM_AMP input. This effectively scales the SUM_AMP gain by 1/Q². Simpler approach: scale the BP output by 1/Q² in an external op-amp stage — preferred for hardware clarity.
+**Q (resonance) at SUM_AMP:**
+Standard SVF BP peak is 1× (constant unity, independent of Q). No normalization is applied. Q controls bandwidth only; high-Q formants have the same peak level as low-Q formants. This is the natural hardware OTA-C SVF behavior and is preserved in the DSP.
 
 **Stereo tilt implementation:**
 - BP_TILT generates +V_tilt (from mod bus via attenuverter)
@@ -141,27 +137,13 @@ Standard SVF BP peak is 1× (ignores Q). To get 1/Q² normalization: add a secon
 - BP3 output tap: taken after distortion stage on group 3, available at BP3_L/R_OUT jacks
 
 **Oversampling:**
-- Hardware runs at base rate (no analog oversampling); 2× oversampling is a software DSP artifact
-- Digital oversampling reduces aliasing from nonlinear distortion in software; analog hardware inherently alias-free
+- None. Hardware and DSP both run at base sample rate. Analog hardware is inherently alias-free; no oversampling required.
 
 **Board assignment:** BP SVF and distortion on audio board. BP control pots and jacks on control board. THAT340s on audio board near their respective SVF clusters.
 
-### Q Normalization — Hardware Deviation
+### Q Normalization — Design Decision
 
-The DSP computes `BP_peak_gain = 1/Q²` (normalized so the bandpass resonance peak is
-constant regardless of Q). The hardware OTA-C SVF naturally produces `|H_BP(jω₀)| = 1`
-(unity peak gain) — the Q only affects bandwidth, not peak amplitude.
-
-A second factor of 1/Q would require a voltage-controlled attenuator (VCA) on the BP
-output, driven by the same Q control signal. This is technically feasible but adds a VCA
-cell per group per channel (6 additional cells), significantly increasing IC count and
-complexity. For Phase 3R: accept the hardware un-normalized peak, document it as a
-deviation. The sonic effect is that higher-Q formants are louder; this is perceptible but
-musically useful (tight resonance peaks stand out in the mix), and is the behavior of most
-analog filter hardware.
-
-**Deviation:** Hardware BP peak = 1 (constant). DSP BP peak = 1/Q. Highest-Q setting will
-be approximately Q× louder relative to the DSP model. No hardware compensation circuit.
+Hardware OTA-C SVF produces |H_BP(jω₀)| = 1 (constant unity peak). Q controls bandwidth only. A 1/Q² normalization would require a VCA per group per channel (6 cells), significantly increasing complexity. Decision: hardware unity peak is preserved in both hardware and DSP. High-Q formants are louder — this is musically desirable (tight resonances stand out) and is the expected behavior of analog formant filters.
 
 ### Distortion Sub-Circuit Design (SC / HC / WF)
 
@@ -363,7 +345,7 @@ DIST_BP3_out ──[R_sum = 33 kΩ]──┘         │
 V_wet_inv = −(BP1 + BP2 + BP3) / 3 (normalized). Signal inverted; corrected at BP_POL stage or
 BP_MIX output buffer.
 
-**BP_MIX crossfade:**
+**BP_MIX summing amp:**
 
 A TL072 inverting summer with the MIX pot controlling the wet-to-dry ratio:
 ```
@@ -382,11 +364,7 @@ At MIX=max (R_wet = 100k): V_mix_inv = −V_dry − V_wet_inv = −V_dry + V_wet
 A unity-gain inverting buffer (TL072 half B) after the mix amp restores final polarity:
 V_bp_out_pre_pol = +V_dry when MIX=0, → dry + wet at MIX=max.
 
-**Hardware deviation:** The DSP crossfade reduces dry as wet increases (`(1−mix)×dry + mix×wet`);
-the hardware adds wet on top of dry (dry is always present at unity). At MIX=0.5: hardware
-output ≈ dry + 0.5×wet; DSP output ≈ 0.5×dry + 0.5×wet. Maximum MIX: hardware = dry + wet
-(may be 6 dB louder than DSP). Output attenuation (resistor divider at the final buffer input)
-compensates for this level increase if needed. Documented as acceptable deviation.
+**Note:** DSP matches hardware: dry is always present at unity, wet is added on top. At MIX=max: output = dry + wet (up to 6 dB louder than a crossfade at equal level). DSP clamps at ±12V; hardware limited by op-amp rails.
 
 ### BP_POL Polarity Switch
 
@@ -490,7 +468,7 @@ OPA1612 SUM_AMPs (Iq = 2.75 mA/channel = 5.5 mA per dual IC) add ~22 mA over equ
 | D_WF_1N4148 | 1N4148W | SOD-123 | — | 48 | audio | block-6 | WF passive clamp: 4 per path (2 per polarity); Vth = ±1.4V |
 | C_WF_wiper | ceramic, X7R | 0603 | 47 pF | 12 | audio | block-6 | RV_DRIVE wiper bypass cap; pole ≈288 kHz; anti-RF on each path |
 | *— BP_MIX circuit —* | | | | | | | |
-| BP_WET_SUM_L, _R | TL072CDT | SOIC-8 | — | 2 | audio | block-6 | Half A = BP1+BP2+BP3 wet summer; half B = MIX crossfade |
+| BP_WET_SUM_L, _R | TL072CDT | SOIC-8 | — | 2 | audio | block-6 | Half A = BP1+BP2+BP3 wet summer; half B = MIX output buffer |
 | BP_MIX_BUF_L, _R | TL072CDT | SOIC-8 | — | 2 | audio | block-6 | Half A = MIX output polarity buffer; half B = spare |
 | R_sum | resistor | 0603 | 33 kΩ | 12 | audio | block-6 | BP wet summer input R (3 inputs × L + R × 2 channels) |
 | R_dry | resistor | 0603 | 100 kΩ | 2 | audio | block-6 | MIX dry input R (L and R) |
