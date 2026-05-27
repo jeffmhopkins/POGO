@@ -1,6 +1,6 @@
 # POGO — Hardware Spec Status
 
-Last updated: 2026-05-27 | Topology: 48HP
+Last updated: 2026-05-27 | Topology: 48HP | Phase 3R: all blocks complete
 
 ## Phase Key
 
@@ -19,11 +19,11 @@ Last updated: 2026-05-27 | Topology: 48HP
 |---|---|---|---|---|---|
 | A | Input Buffer | ✅ | ✅ | ✅ | LM4562 follower, BAT54S clamp |
 | 1 | Pre-Gain | ✅ | ✅ | ✅ | NE5532D, 1×/5× switch; ALT_BP path |
-| 2 | Dual LFO | ✅ | ✅ | 🔲 | Topology TBD (integrator+comparator vs VCO IC) |
-| 3 | Mod Bus | ✅ | ✅ | 🔲 | 20 destinations, 11× TL074; full IC count at Phase 3R |
+| 2 | Dual LFO | ✅ | ✅ | ✅ | Integrator+Schmitt; 47nF C0G; 1MΩ log pot + end R |
+| 3 | Mod Bus | ✅ | ✅ | ✅ | 20 destinations; 7× TL074CDT; 470kΩ SCALE pot |
 | 4 | VCA | ✅ | ✅ ⚠️ | ✅ | THAT 2180 dB-law vs DSP linear — intentional deviation |
 | 5 | LP Filter 1 | ✅ | ✅ | ✅ | OTA-C SVF; stereo tilt (symmetric ±V_tilt L/R) |
-| 6 | Triple BP + Dist | ✅ | ✅ | 🔲 | 3× OTA-C SVF + SC/HC/WF distortion; CD4053 mux |
+| 6 | Triple BP + Dist | ✅ | ✅ | ✅ ⚠️ | SC/HC/WF sub-circuits + CD4053; BP_MIX+POL; Q norm deviation |
 | 7 | HP Filter | ✅ | ✅ | ✅ | OTA-C SVF; G=−1 buffer corrects SUM_AMP inversion |
 | 8 | LP Filter 2 | ✅ | ✅ | ✅ | OTA-C SVF; independent from LP1; shares Q VCA LM13700 |
 | B | Output Buffer | ✅ | ✅ | ✅ | TL072; MAIN_L/R from LP2 + BP3_L/R tap |
@@ -72,16 +72,25 @@ Circuit diagrams in spec text must be self-sufficient.
 
 ## Next Up
 
-Phase 3R remaining work:
-1. **block-2** (LFO): Choose integrator+comparator topology; verify oscillation stability; add component values
-2. **block-3** (Mod Bus): Full IC placement; LED driver resistors; add attenuverter R_Iabc detail
-3. **block-6** (BP+Dist): Full distortion sub-circuit design; CD4053 wiring diagram; Q normalization network; power draw detail
+**Phase 3R is complete for all blocks.** Known deviations documented:
+- block-4: THAT 2180 dB-law vs DSP linear VCA (intentional)
+- block-6: Q normalization: hardware peak = 1 (constant), DSP peak = 1/Q (no hardware compensation)
+- block-6: BP_MIX: hardware adds wet on top of dry; DSP crossfades (acceptable)
+- block-6: HC clip threshold ±5.8V vs DSP ±5V (zener tolerance, acceptable)
+- block-6: WF fold approximation requires prototype bench verification
 
-After Phase 3R complete for all blocks:
-- Replace aux/*.svg placeholders with real schematic diagrams (KiCad/Inkscape)
-- Finalize components.yaml (all passive values, all ref designators unique and checked)
-- Write 48HP KiCad generator (replaces 40HP-era generators)
-- Phase 6R: VCV Rack signal-path smoke tests
+**Phase 4R (Panel) — DONE.** `tools/panel-data.yaml` DRC-clean.
+
+**Remaining work before PCB layout:**
+1. **Finalize components.yaml** — fill all passive values (R, C); verify ref designator uniqueness per board; cross-check block-6 distortion BOM (abbreviated in first pass)
+2. **Write 48HP KiCad generator** — replaces 40HP-era stale generators; inputs from components.yaml + panel-data.yaml
+3. **Phase 6R** — VCV Rack signal-path smoke tests (CI integration)
+
+**Open prototype questions (Phase 3R advisory, not blocking):**
+- block-2: WF fold stage stability (phase margin with diode feedback at all drive levels)
+- block-2: LED: confirm pulsing (half-wave rectified) vs breathing (no diode) — prototype preference
+- block-6: WF transfer characteristic bench measurement vs DSP asin(sin(x)) reference
+- block-6: BP_MIX gain compensation resistor value (to match DSP level at MIX=max)
 
 ---
 

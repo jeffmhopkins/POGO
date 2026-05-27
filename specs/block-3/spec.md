@@ -49,14 +49,16 @@ as an exponential-law resistor network or a log-taper pot driving an inverting o
 fixed feedback.
 
 The simplest practical analog implementation is an inverting op-amp summer (U_MB_SUM) whose
-input resistor for V_src is set by the SCALE pot (log-taper, 50 kΩ), plus a second input
-resistor for the OFFSET pot (linear-taper, ±5 V supply tap). A second stage inverts to restore
-correct polarity. Both stages use one half of a TL074CDT quad op-amp.
+input resistor for V_src is set by the SCALE pot (log-taper, 470 kΩ) in series with a fixed
+floor resistor (R_MB_SRC = 22 kΩ), plus a second input resistor for the OFFSET pot
+(linear-taper, ±5 V supply tap). A second stage inverts to restore correct polarity.
+Both stages use one TL074CDT quad op-amp.
 
 **Gain range derivation:**  
-With R_f = 100 kΩ and R_src_min = 20 kΩ → G_max = 5×.  
-At R_src_max = 500 kΩ → G_min = 0.2×.  
-A log-taper 50 kΩ pot in series with a 20 kΩ fixed resistor achieves ≈ 0.2×–5× range.
+With R_f = 100 kΩ and R_src = R_MB_SRC + RV_MB_SCALE:  
+  R_src_min = 22 kΩ (pot at zero) → G_max = 100/22 = 4.55× ≈ 5× ✓  
+  R_src_max = 22 kΩ + 470 kΩ = 492 kΩ (pot fully CW) → G_min = 100/492 = 0.20× ✓  
+A 470 kΩ log-taper pot in series with a 22 kΩ fixed floor resistor achieves 0.20×–4.55× range.
 
 **Offset range:**  
 With R_off = 100 kΩ feeding a ±5 V rail tap through a linear pot, the offset contribution at
@@ -112,12 +114,16 @@ using the remaining 2 sections of a sixth TL074. Total: 6× TL074CDT.
 
 **IC count summary:**
 
-| Function | Op-amp sections used | TL074CDT count |
-|---|---|---|
-| MB summer + polarity inverter | 2 | shared in IC 1 |
-| LED drivers (POS, NEG, CLIP) | 3 (+ 1 spare in IC 1) | 1× |
-| Destination inverters (–V_src for bipolar pots) | 19 (+ 1 spare) | 5× |
-| **Total** | **24** | **6× TL074CDT** |
+| Function | Op-amp sections used | TL074CDT | Ref |
+|---|---|---|---|
+| MB summer + polarity inverter | 2 (2 spare) | 1× | MB_PROC_A |
+| LED drivers (POS, NEG, CLIP) | 3 (1 spare) | 1× | MB_PROC_B |
+| Destination inverters (−V_src for bipolar pots) | 19 (+1 spare) | 5× | MB_INV_1–5 |
+| **Total** | **24 sections used** | **7× TL074CDT** | |
+
+Note: MB_PROC_A and MB_PROC_B are distinct physical ICs. A single TL074CDT has only
+4 op-amp sections; the processor (2 sections) and LED drivers (3 sections) together
+require 5 sections and therefore span two ICs.
 
 ---
 
@@ -167,10 +173,10 @@ is logically a mod bus destination and is normalled to V_modbus.
 
 **Power estimate:**
 
-6× TL074CDT at ≈ 3.8 mA per IC (datasheet typical, ±15 V; slightly less at ±12 V).
+7× TL074CDT at ≈ 3.8 mA per IC (datasheet typical, ±15 V; slightly less at ±12 V).
 
-- +12 V: ~23 mA
-- −12 V: ~23 mA
+- +12 V: ~27 mA
+- −12 V: ~27 mA
 
 ---
 
@@ -178,17 +184,18 @@ is logically a mod bus destination and is normalled to V_modbus.
 
 | Ref | Part | Package | Value | Qty | Board | Block | Function |
 |---|---|---|---|---|---|---|---|
-| MB_PROC | TL074CDT | SOIC-14 | — | 1 | utility | 3 | Mod bus summer, polarity inverter, and LED drivers |
-| MB_INV_1 | TL074CDT | SOIC-14 | — | 1 | utility | 3 | –V_src inverters for destinations 1–4 |
+| MB_PROC_A | TL074CDT | SOIC-14 | — | 1 | utility | 3 | Mod bus summer (1 section) + polarity inverter (1 section); 2 sections spare |
+| MB_PROC_B | TL074CDT | SOIC-14 | — | 1 | utility | 3 | LED drivers: MOD_POS (1) + MOD_NEG (1) + MOD_CLIP (1); 1 section spare |
+| MB_INV_1 | TL074CDT | SOIC-14 | — | 1 | utility | 3 | −V_src inverters for destinations 1–4 |
 | MB_INV_2 | TL074CDT | SOIC-14 | — | 1 | utility | 3 | –V_src inverters for destinations 5–8 |
 | MB_INV_3 | TL074CDT | SOIC-14 | — | 1 | utility | 3 | –V_src inverters for destinations 9–12 |
 | MB_INV_4 | TL074CDT | SOIC-14 | — | 1 | utility | 3 | –V_src inverters for destinations 13–16 |
 | MB_INV_5 | TL074CDT | SOIC-14 | — | 1 | utility | 3 | –V_src inverters for destinations 17–19 (1 spare section) |
-| RV_MB_SCALE | Linear pot, 9 mm | panel | 50 kΩ | 1 | control | 3 | MOD_SCALE: sets V_src gain 0.2×–5× |
+| RV_MB_SCALE | Log-taper pot, 9 mm | panel | 470 kΩ | 1 | control | 3 | MOD_SCALE: sets V_src gain 0.20×–4.55× (≈0.2×–5×) |
 | RV_MB_OFFSET | Linear pot, 9 mm | panel | 50 kΩ | 1 | control | 3 | MOD_OFFSET: adds ±5 V DC to bus |
 | RV_ATT_1–19 | Bipolar pot, 9 mm, centre detent | panel | 10 kΩ | 19 | control | 3 | Destination attenuverters –1× to +1× |
 | R_MB_F | Resistor | 0603 | 100 kΩ | 1 | utility | 3 | Feedback resistor, MB summer stage |
-| R_MB_SRC | Resistor | 0603 | 20 kΩ | 1 | utility | 3 | Series input resistor for V_src (sets G_max = 5×) |
+| R_MB_SRC | Resistor | 0603 | 22 kΩ | 1 | utility | 3 | Floor input resistor for V_src (pot at zero → G_max = 100/22 = 4.55×) |
 | R_MB_OFF | Resistor | 0603 | 100 kΩ | 1 | utility | 3 | Input resistor for offset pot |
 | R_MB_INV | Resistor | 0603 | 100 kΩ | 2 | utility | 3 | Equal-value R in/fb for polarity inverter stage |
 | R_SRC_NORM | Resistor | 0603 | 100 kΩ | 19 | utility | 3 | Bus normalling resistor per destination jack |
@@ -204,4 +211,4 @@ is logically a mod bus destination and is normalled to V_modbus.
 | LED_CLIP | White LED, 3 mm | panel | — | 1 | panel | 3 | MOD_CLIP indicator |
 | J_MOD_IN | PJ301M-12 | panel | — | 1 | panel | 3 | MOD_INPUT jack (LFO1 normalled) |
 | J_DEST_1–19 | PJ301M-12 | panel | — | 19 | panel | 3 | Destination override jacks |
-| C_BYPASS | Capacitor | 0603 | 100 nF | 12 | utility | 3 | Supply bypass, one per op-amp supply pin (6 ICs × 2) |
+| C_BYPASS | Capacitor | 0603 | 100 nF | 14 | utility | 3 | Supply bypass, one per op-amp supply pin (7 ICs × 2) |

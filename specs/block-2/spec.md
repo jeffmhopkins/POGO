@@ -76,15 +76,27 @@ capacitor.
 ### Topology: integrator + Schmitt trigger
 
 ```
-┌──────────────── R_fb ────────────────────┐
-│                                          │
-─── [Rate pot → V-to-I] → R_int ─── [C_int] ─── [TL072 integrator] ─── Triangle out (±5 V)
-                                                         │
-                                                    [TL072 Schmitt trigger comparator]
-                                                    │                    │
-                                                  −V_th                +V_th (set by R_pos_fb)
-                                                    └──────────────── comparator output (square)
-                                                    feeds back to integrator input via sign switch
+Triangle oscillator — two op-amp halves per LFO (one TL072CDT):
+
+Half A — Integrator:
+  V_sq (comparator output) ──[R_INT]──►(−) TL072-A
+                                              │
+                                            C_INT  (to GND; op-amp (−) is virtual ground)
+                                              │
+                                         V_tri (op-amp output)
+  (+) input tied to AGND (signal ground)
+  Capacitor integrates: V_tri = −∫(V_sq / R_INT·C_INT) dt → linear ramp
+
+Half B — Schmitt trigger (non-inverting comparator with hysteresis):
+  V_tri ──────────────────────────────────►(−) TL072-B  ← inverting input follows triangle
+                 R_fb_sq                          │
+  V_sq ──[R_fb_sq]──►(+)──[R_HYS to GND]    V_sq (comparator output)
+                                           (positive feedback via R_fb_sq sets ±V_th)
+
+Feedback loop:
+  V_sq = +V_sat: integrator ramps UP until V_tri > +V_th → Schmitt flips → V_sq = −V_sat
+  V_sq = −V_sat: integrator ramps DOWN until V_tri < −V_th → Schmitt flips → V_sq = +V_sat
+  Steady-state: triangle at integrator output; square wave at comparator output.
 ```
 
 Two op-amp halves per LFO:
@@ -141,41 +153,51 @@ physical PCB/panel trace connection.
 
 **Target frequency range:** 0.05 Hz to 20 Hz.
 
-**Integrator time constant:** Choose a nominal mid-range frequency of ~1 Hz at
-pot center (50% rotation, consistent with DSP: `0.05 × 400^0.5 ≈ 1 Hz`).
+**Integrator capacitor:** C_INT = 47 nF C0G ceramic (0603). C0G mandatory —
+X7R will cause LFO rate drift with temperature (audible as wandering sweep rate).
 
-At f = 1 Hz, V_th = 5 V, V_sat = 11 V:
+**Required R_INT range** (from frequency equation f = V_sat / (4 × V_H × R_INT × C_INT)):
 ```
-R_int × C_int = 5 / (2 × 1 × 11) = 0.227 s
-```
+V_sat ≈ 11 V, V_H = 5 V, C_INT = 47 nF
 
-Choose C_int = 100 nF; then R_int_nominal = 2.27 MΩ at mid-rate.
-
-The rate pot varies R_int over the range required to span 0.05–20 Hz:
-```
-At f_min = 0.05 Hz:  R_int = 5 / (2 × 0.05 × 11) = 4.55 MΩ
-At f_max = 20 Hz:    R_int = 5 / (2 × 20 × 11)   = 11.4 kΩ
+At f_max = 20 Hz:   R_INT = 11 / (4 × 5 × 20 × 47n) = 293 kΩ
+At f_min = 0.05 Hz: R_INT = 11 / (4 × 5 × 0.05 × 47n) = 117 MΩ
 ```
 
-A 500 kΩ log-taper pot (RV_LFO) in series with a minimum resistance R_min = 10 kΩ
-(floor resistor to prevent zero impedance) achieves this range approximately. The
-log-taper mimics the exponential law; exact calibration is Phase 3R work.
+Full range (293 kΩ to 117 MΩ) requires an effective resistance ratio of 400:1. Achieved
+with a 1 MΩ log-taper pot (RV_LFO) plus two end resistors:
+- **R_CW_END = 270 kΩ** in parallel with the pot at the CW end — limits R_INT_min:
+  R_INT_min ≈ 270k || 0 = 270kΩ → f_max ≈ 11/(4×5×270k×47n) = 43 Hz  
+  (fast side is intentionally wider; the log pot's CW end compresses, trimmed by assembly)
+- **R_CCW_END = 10 MΩ** in series at the CCW end — limits R_INT_max ≈ 11 MΩ →  
+  f_min ≈ 11/(4×5×11M×47n) ≈ 0.053 Hz ≈ 0.05 Hz ✓
 
-**Schmitt trigger thresholds (±5 V):** Set by positive feedback resistor divider:
+Actual achievable range with these end resistors: ~0.05 Hz to ~25 Hz. The extra headroom
+at the fast end is acceptable for a modulation source.
+
+**Schmitt trigger thresholds (±5 V):** Positive feedback divider from comparator output
+to (+) input, with a lower resistor to GND:
 ```
-V_th = V_sat × R_lower / (R_upper + R_lower)
-5 V  = 11 V × R_lower / (R_upper + R_lower)
+V_H = V_sat × R_HYS / (R_fb_sq + R_HYS)    [R_fb_sq = top (output→(+)), R_HYS = bottom ((+)→GND)]
+5 V  = 11 × 82 kΩ / (100 kΩ + 82 kΩ)
+V_H  = 11 × 0.451 = 4.96 V ≈ 5 V  ✓
 ```
-Using R_upper = 120 kΩ, R_lower = 100 kΩ:
+Use R_fb_sq = 100 kΩ, R_HYS = 82 kΩ.
+
+**LED brightness and half-wave rectification:**
+
+A 1N4148W diode (SOD-123) in series with the LED anode ensures the LED only
+illuminates on positive half-cycles (pulsing lamp effect, easier to read rate by eye):
 ```
-V_th = 11 × 100 / 220 = 5.0 V  ✓
+V_tri_pos (>0) → D_LED (1N4148W, V_f ≈ 0.7V) → R_LED → LED → GND
+LED only drives when V_tri > V_f_LED + V_f_diode ≈ 2.7 V
 ```
 
-**LED current-limiting resistor (R_LED):**
+LED current-limiting resistor:
 ```
-I_LED_target = 2 mA (visible but not blinding)
-V_source = 5 V (peak positive triangle), V_f_LED ≈ 2.0 V (green)
-R_LED = (5 − 2.0) / 0.002 = 1.5 kΩ  → use 1.5 kΩ standard
+I_LED_target = 2 mA
+V_source = 5 V (peak), V_f_LED ≈ 2.0 V (green), V_f_diode ≈ 0.7 V
+R_LED = (5 − 2.0 − 0.7) / 0.002 = 1.15 kΩ  → use 1.2 kΩ standard
 ```
 
 ### Signal routing
@@ -201,7 +223,11 @@ can adjust the maximum frequency endpoint.
 
 ### Trim pots
 
-None specified at this phase. Revisit in Phase 3R.
+None required. The 1 MΩ log-taper pot with end resistors provides adequate
+rate-law approximation (±1 half-octave accuracy is sufficient for a modulation
+source). If tighter maximum-rate calibration is needed during assembly, a 10 kΩ–
+50 kΩ trimmer can be added in series with R_CW_END; this is not required for
+functionality and is omitted from the bill of materials.
 
 ### Board assignment
 
@@ -220,22 +246,28 @@ output protection but are physically placed on the utility board near the LFO ou
 |---|---|---|---|---|---|---|---|
 | U_LFO1 | TL072CDT | SOIC-8 | — | 1 | utility | block-2 | LFO1 integrator (half A) + Schmitt trigger (half B) |
 | U_LFO2 | TL072CDT | SOIC-8 | — | 1 | utility | block-2 | LFO2 integrator (half A) + Schmitt trigger (half B) |
-| RV_LFO1 | log-taper pot | 9 mm | 500 kΩ | 1 | control | block-2 | LFO1 rate (0.05–20 Hz) |
-| RV_LFO2 | log-taper pot | 9 mm | 500 kΩ | 1 | control | block-2 | LFO2 rate (0.05–20 Hz) |
-| C_INT1 | cap, C0G | 0603 | 100 nF | 1 | utility | block-2 | LFO1 integrator timing capacitor |
-| C_INT2 | cap, C0G | 0603 | 100 nF | 1 | utility | block-2 | LFO2 integrator timing capacitor |
-| R_MIN1 | resistor | 0603 | 10 kΩ | 1 | utility | block-2 | LFO1 minimum rate resistor (floor) |
-| R_MIN2 | resistor | 0603 | 10 kΩ | 1 | utility | block-2 | LFO2 minimum rate resistor (floor) |
-| R_TH1_U | resistor | 0603 | 120 kΩ | 1 | utility | block-2 | LFO1 Schmitt upper threshold resistor |
-| R_TH1_L | resistor | 0603 | 100 kΩ | 1 | utility | block-2 | LFO1 Schmitt lower threshold resistor |
-| R_TH2_U | resistor | 0603 | 120 kΩ | 1 | utility | block-2 | LFO2 Schmitt upper threshold resistor |
-| R_TH2_L | resistor | 0603 | 100 kΩ | 1 | utility | block-2 | LFO2 Schmitt lower threshold resistor |
-| R_LED1 | resistor | 0603 | 1.5 kΩ | 1 | utility | block-2 | LFO1 LED current limit |
-| R_LED2 | resistor | 0603 | 1.5 kΩ | 1 | utility | block-2 | LFO2 LED current limit |
-| LED_LFO1 | green LED | 3 mm | — | 1 | panel | block-2 | LFO1 rate/phase indicator |
-| LED_LFO2 | green LED | 3 mm | — | 1 | panel | block-2 | LFO2 rate/phase indicator |
-| C_LFO1 | cap, X7R | 0603 | 100 nF | 2 | utility | block-2 | U_LFO1 supply decoupling (+12 V and −12 V) |
-| C_LFO2 | cap, X7R | 0603 | 100 nF | 2 | utility | block-2 | U_LFO2 supply decoupling (+12 V and −12 V) |
+| RV_LFO1 | log-taper pot | 9 mm | 1 MΩ | 1 | control | block-2 | LFO1 rate (0.05–20 Hz); wiper → R_INT input |
+| RV_LFO2 | log-taper pot | 9 mm | 1 MΩ | 1 | control | block-2 | LFO2 rate (0.05–20 Hz) |
+| C_INT1 | cap, C0G | 0603 | 47 nF | 1 | utility | block-2 | LFO1 integrator timing cap; C0G mandatory |
+| C_INT2 | cap, C0G | 0603 | 47 nF | 1 | utility | block-2 | LFO2 integrator timing cap; C0G mandatory |
+| R_CW_END1 | resistor | 0603 | 270 kΩ | 1 | utility | block-2 | LFO1 CW end resistor; limits f_max ≈ 25 Hz |
+| R_CW_END2 | resistor | 0603 | 270 kΩ | 1 | utility | block-2 | LFO2 CW end resistor |
+| R_CCW_END1 | resistor | 0603 | 10 MΩ | 1 | utility | block-2 | LFO1 CCW end resistor; limits f_min ≈ 0.05 Hz |
+| R_CCW_END2 | resistor | 0603 | 10 MΩ | 1 | utility | block-2 | LFO2 CCW end resistor |
+| R_FB_SQ1 | resistor | 0603 | 100 kΩ | 1 | utility | block-2 | LFO1 Schmitt feedback (output → (+) input) |
+| R_HYS1 | resistor | 0603 | 82 kΩ | 1 | utility | block-2 | LFO1 Schmitt hysteresis ((+) input → GND); sets V_H = 5V |
+| R_FB_SQ2 | resistor | 0603 | 100 kΩ | 1 | utility | block-2 | LFO2 Schmitt feedback |
+| R_HYS2 | resistor | 0603 | 82 kΩ | 1 | utility | block-2 | LFO2 Schmitt hysteresis |
+| R_LED1 | resistor | 0603 | 1.2 kΩ | 1 | utility | block-2 | LFO1 LED current limit (≈2 mA at V_tri=+5V) |
+| R_LED2 | resistor | 0603 | 1.2 kΩ | 1 | utility | block-2 | LFO2 LED current limit |
+| D_LED1 | 1N4148W | SOD-123 | — | 1 | utility | block-2 | LFO1 LED half-wave rectifier (pulsing effect) |
+| D_LED2 | 1N4148W | SOD-123 | — | 1 | utility | block-2 | LFO2 LED half-wave rectifier |
+| LED_LFO1 | warm-white LED | 3 mm | — | 1 | panel | block-2 | LFO1 rate/phase indicator |
+| LED_LFO2 | warm-white LED | 3 mm | — | 1 | panel | block-2 | LFO2 rate/phase indicator |
+| R_OUT1 | resistor | 0603 | 1 kΩ | 1 | utility | block-2 | LFO1 output series protection to jack |
+| R_OUT2 | resistor | 0603 | 1 kΩ | 1 | utility | block-2 | LFO2 output series protection to jack |
+| C_BYPASS_LFO1 | cap, X7R | 0603 | 100 nF | 2 | utility | block-2 | U_LFO1 supply bypass (+12 V and −12 V pins) |
+| C_BYPASS_LFO2 | cap, X7R | 0603 | 100 nF | 2 | utility | block-2 | U_LFO2 supply bypass (+12 V and −12 V pins) |
 | J_LFO1 | PJ301M-12 | panel | — | 1 | panel | block-2 | LFO1 output jack |
 | J_LFO2 | PJ301M-12 | panel | — | 1 | panel | block-2 | LFO2 output jack |
-| J_MOD_IN | PJ301M-12 | panel | — | 1 | panel | block-2 | MOD_IN jack (LFO1 normalled via tip-switch) |
+| J_MOD_IN | PJ301M-12 | panel | — | 1 | panel | block-2 | MOD_IN jack (LFO1 normalled via NC tip-switch) |
