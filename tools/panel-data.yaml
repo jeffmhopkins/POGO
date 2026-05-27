@@ -222,6 +222,21 @@ zones:
         cy: 83.0
         label: "VCA AMT"
         cpp_param: "VCA_AMT_PARAM"
+      # LED pair — col 1 ± 2 mm (cx 15.145 / 19.145); corner-touches pot CrtYds (acceptable)
+      - id: MODLED1_R1
+        type: led
+        cx: 15.145
+        cy: 83.0
+        led_fill:   "#112244"
+        led_stroke: "#2255cc"
+        cpp_id: "MODLED1_R1"
+      - id: MODLED2_R1
+        type: led
+        cx: 19.145
+        cy: 83.0
+        led_fill:   "#112244"
+        led_stroke: "#2255cc"
+        cpp_id: "MODLED2_R1"
       - id: OFFSET
         type: trimpot
         col: 0
@@ -235,6 +250,21 @@ zones:
         cy: 96.34
         label: "VCA OFS"
         cpp_param: "VCA_OFS_PARAM"
+      # LED pair row 2
+      - id: MODLED1_R2
+        type: led
+        cx: 15.145
+        cy: 96.34
+        led_fill:   "#112244"
+        led_stroke: "#2255cc"
+        cpp_id: "MODLED1_R2"
+      - id: MODLED2_R2
+        type: led
+        cx: 19.145
+        cy: 96.34
+        led_fill:   "#112244"
+        led_stroke: "#2255cc"
+        cpp_id: "MODLED2_R2"
       - id: MOD_IN
         type: jack_input
         col: 0
@@ -242,13 +272,20 @@ zones:
         label: "MOD IN"
         font_size: 1.6
         cpp_id: "MOD_INPUT"
-      - id: MOD_LED
+      - id: MODLED1_R3
         type: led
-        col: 1
+        cx: 15.145
         cy: 112.0
         led_fill:   "#112244"
         led_stroke: "#2255cc"
-        cpp_id: "MOD_LED"
+        cpp_id: "MODLED1_R3"
+      - id: MODLED2_R3
+        type: led
+        cx: 19.145
+        cy: 112.0
+        led_fill:   "#112244"
+        led_stroke: "#2255cc"
+        cpp_id: "MODLED2_R3"
       - id: VCA_IN
         type: jack_input
         col: 2
