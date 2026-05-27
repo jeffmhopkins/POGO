@@ -19,7 +19,6 @@ Chosen because:
 
 ## Schematic
 
-![aux-q-control.svg](aux-q-control.svg)
 
 ASCII fallback (one filter stage shown):
 

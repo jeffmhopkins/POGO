@@ -17,7 +17,6 @@ Chosen because:
 
 ## Schematic
 
-![aux-ota-c-svf.svg](aux-ota-c-svf.svg)
 
 ASCII fallback (one channel shown):
 

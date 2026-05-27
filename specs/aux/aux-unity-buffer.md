@@ -18,7 +18,6 @@ IC selection:
 
 ## Schematic
 
-![aux-unity-buffer.svg](aux-unity-buffer.svg)
 
 ASCII fallback:
 

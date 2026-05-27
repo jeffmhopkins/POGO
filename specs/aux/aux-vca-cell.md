@@ -18,7 +18,6 @@ Chosen because:
 
 ## Schematic
 
-![aux-vca-cell.svg](aux-vca-cell.svg)
 
 ASCII fallback (one channel shown):
 

@@ -22,7 +22,6 @@ Chosen because:
 
 ## Schematic
 
-![aux-mod-bus-core.svg](aux-mod-bus-core.svg)
 
 ASCII fallback:
 

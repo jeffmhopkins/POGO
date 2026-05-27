@@ -32,20 +32,20 @@ Last updated: 2026-05-27 | Topology: 48HP
 
 | File | Status | Notes |
 |---|---|---|
-| aux-ota-c-svf | 🚧 | Written; SVG placeholder |
-| aux-expo-converter | 🚧 | Written; SVG placeholder |
-| aux-q-control | 🚧 | Written; SVG placeholder |
-| aux-vca-cell | 🚧 | Written; SVG placeholder |
-| aux-unity-buffer | 🚧 | Written; SVG placeholder |
-| aux-distortion | 🚧 | Written; SVG placeholder |
-| aux-attenuverter | 🚧 | Written; SVG placeholder |
-| aux-mod-bus-core | 🚧 | Written; SVG placeholder |
-| aux-lfo-core | 🚧 | Written; SVG placeholder |
+| aux-ota-c-svf | ✅ | ASCII schematic + full derivations |
+| aux-expo-converter | ✅ | Component values + trim procedure |
+| aux-q-control | ✅ | IRES_AMP driver + IC sharing plan |
+| aux-vca-cell | ✅ | THAT 2180; DSP deviation documented |
+| aux-unity-buffer | ✅ | G=+1 and G=−1 variants |
+| aux-distortion | ✅ | SC/HC/WF + CD4053 mux wiring |
+| aux-attenuverter | ✅ | Bipolar pot + TL074 inverter |
+| aux-mod-bus-core | ✅ | MB_AMP + MB_INV; ±10V clamp |
+| aux-lfo-core | ✅ | Integrator + Schmitt; 0.05–20 Hz |
 | aux-cv-protection | ✅ | Moved from shared/; content unchanged |
 | aux-power-filter | ✅ | Moved from shared/; content unchanged |
 
-SVG schematic diagrams: all placeholder (`.svg` files are empty). Fill in manually
-using KiCad SVG export or Inkscape as a separate session.
+No SVG files — ASCII schematics within each `.md` are the source of truth.
+Circuit diagrams in spec text must be self-sufficient.
 
 ## Global Component Registry
 

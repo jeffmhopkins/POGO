@@ -20,7 +20,6 @@ Chosen because:
 
 ## Schematic
 
-![aux-attenuverter.svg](aux-attenuverter.svg)
 
 ASCII fallback (one destination shown):
 

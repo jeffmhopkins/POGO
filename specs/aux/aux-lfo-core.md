@@ -24,7 +24,6 @@ Chosen because:
 
 ## Schematic
 
-![aux-lfo-core.svg](aux-lfo-core.svg)
 
 ASCII fallback (one LFO, component labels for LFO1):
 

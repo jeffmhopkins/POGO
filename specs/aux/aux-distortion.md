@@ -19,7 +19,6 @@ Chosen because:
 
 ## Schematic
 
-![aux-distortion.svg](aux-distortion.svg)
 
 ASCII fallback (one BP group, one channel shown):
 

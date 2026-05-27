@@ -94,17 +94,18 @@ POGO/
 │   ├── components.yaml           ← Global component registry (ref → block → board → part)
 │   │
 │   ├── aux/                      ← Circuit design library (shared building blocks)
-│   │   ├── aux-ota-c-svf.md + .svg    ← OTA-C SVF core (LP, HP, BP)
-│   │   ├── aux-expo-converter.md + .svg ← THAT340 V/oct expo converter
-│   │   ├── aux-q-control.md + .svg    ← LM13700 Iabc resonance control
-│   │   ├── aux-vca-cell.md + .svg     ← THAT 2180 VCA cell
-│   │   ├── aux-unity-buffer.md + .svg ← TL072 unity-gain buffer
-│   │   ├── aux-distortion.md + .svg   ← SC/HC/WF cells + CD4053 mux
-│   │   ├── aux-attenuverter.md + .svg ← Bipolar pot + inverter
-│   │   ├── aux-mod-bus-core.md + .svg ← Inverting summer + inverter
-│   │   ├── aux-lfo-core.md + .svg     ← Triangle oscillator (topology TBD)
-│   │   ├── aux-cv-protection.md       ← 100Ω + BAT54S clamp
-│   │   └── aux-power-filter.md        ← Board power filtering
+│   │   ├── aux-ota-c-svf.md       ← OTA-C SVF core (LP, HP, BP)
+│   │   ├── aux-expo-converter.md  ← THAT340 V/oct expo converter
+│   │   ├── aux-q-control.md       ← LM13700 Iabc resonance control
+│   │   ├── aux-vca-cell.md        ← THAT 2180 VCA cell
+│   │   ├── aux-unity-buffer.md    ← TL072/LM4562 unity-gain buffer
+│   │   ├── aux-distortion.md      ← SC/HC/WF cells + CD4053 mux
+│   │   ├── aux-attenuverter.md    ← Bipolar pot + inverter
+│   │   ├── aux-mod-bus-core.md    ← Inverting summer + inverter
+│   │   ├── aux-lfo-core.md        ← Triangle oscillator core
+│   │   ├── aux-cv-protection.md   ← 100Ω + BAT54S clamp
+│   │   └── aux-power-filter.md    ← Board power filtering
+│   │   (ASCII schematics in each .md; no SVG files)
 │   │
 │   ├── block-A/spec.md           ← Input Buffers (LM4562)
 │   ├── block-1/spec.md           ← Pre-Gain (NE5532D, 1×/5× switch)
@@ -198,7 +199,7 @@ Only begin after Phase 2R is complete for the block. Design the actual circuit:
 - Select topology (Sallen-Key, SVF, OTA-C, etc.)
 - Choose ICs (LM13700 for OTA, THAT 2180 for VCA, TL072/LM4562 for op-amps)
 - Derive component values from Phase 2R transfer function
-- Document schematic in `specs/block-N-name/schematic.svg`
+- Document circuits using ASCII schematics and prose in the block or aux spec files — no SVG files required
 
 ### Component philosophy (unchanged)
 - **SMD preferred**: 0603 passives, SOIC-8/14 ICs, SOT-23 discretes
@@ -236,7 +237,7 @@ Sonic purpose. What the user hears. Where it sits. No circuit details.
 - Trim pots and purpose
 - Signal routing (input/output nodes, connector pins)
 - Board assignment
-- → References aux/*.svg for circuit diagrams
+- → References aux/* for shared circuit designs
 
 ## 4. Component Requirements
 | Ref | Part | Package | Value | Qty | Board | Block | Function |
@@ -253,7 +254,8 @@ Design status: [ ] draft → [ ] reviewed → [ ] validated on prototype
 
 ## Overview
 ## Schematic
-![aux-name.svg](aux-name.svg)
+ASCII schematic — text description of the circuit topology is the source of truth.
+No SVG files are used; the spec text must be self-sufficient.
 ## Transfer Function
 ## Design Choices & Rationale
 ## Component Values (POGO-specific)

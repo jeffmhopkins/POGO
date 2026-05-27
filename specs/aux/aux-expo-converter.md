@@ -19,7 +19,6 @@ Chosen because:
 
 ## Schematic
 
-![aux-expo-converter.svg](aux-expo-converter.svg)
 
 ASCII fallback:
 
