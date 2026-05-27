@@ -71,26 +71,30 @@ mounting_holes:
   - {cx: 297.30, cy: 123.4}
 
 # ── Separator lines ───────────────────────────────────────────────────────────
-# Section 0: 7 HP (x = 0–35.56 mm), 3 cols at 2.25 HP pitch
-# col 0 cx = 5.715mm, col 1 cx = 17.145mm, col 2 cx = 28.575mm
+# Jack grid: uniform 2.25 HP (11.43 mm) pitch across all bottom-row jacks.
+# Cyan dividers land at the midpoint between adjacent jacks across zone boundaries:
+#   midpoint(col_last, col_first_next) = x_start_next  (since pitch is uniform)
+# Section 0: 3 cols at 2.25 HP → right edge = 3 × 11.43 = 34.29 mm
+#   col 0 cx = 5.715mm, col 1 cx = 17.145mm, col 2 cx = 28.575mm
+# LP1: x_start = 34.29mm, 3 cols → right edge = 34.29 + 34.29 = 68.58 mm
+#   col 0 cx = 40.005mm, col 1 cx = 51.435mm, col 2 cx = 62.865mm
 separators:
-  # ── Section 0 (7 HP) ──────────────────────────────────────────────────────────
-  # Right boundary — cyan vertical (7 HP = 7 × 5.08 mm)
-  # y1 matches top strip bottom (9.0mm); y2 matches bot strip top (128.5-4.5=124.0mm)
-  - {type: v, x: 35.56, y1: 9.0, y2: 124.0, style: main_cyan}
+  # ── Section 0 / LP1 boundary ──────────────────────────────────────────────────
+  # x = midpoint(VCA_IN=28.575, LP1_FREQ=40.005) = 34.29mm
+  - {type: v, x: 34.29, y1: 9.0, y2: 124.0, style: main_cyan}
   # Top of INPUT zone — label breaks the line
   # Perfect midpoint: strip bottom = 4.5mm, L_IN visual top = 13.5mm → mid = 9.0
-  - {type: h, x1: 1.0, x2: 35.06, y: 9.0, style: zone_div, label: "INPUT", label_x: 17.78}
+  - {type: h, x1: 1.0, x2: 33.79, y: 9.0, style: zone_div, label: "INPUT", label_x: 17.145}
   # INPUT / GAIN → LFO boundary — label breaks the line
-  - {type: h, x1: 1.0, x2: 35.06, y: 43.0, style: zone_div, label: "LFOs", label_x: 17.145}
+  - {type: h, x1: 1.0, x2: 33.79, y: 43.0, style: zone_div, label: "LFOs", label_x: 17.145}
   # LFO → MOD BUS boundary — label breaks the line
   # Perfect midpoint: LFO2 Rate 2 label baseline = 73.4mm, SCALE top = 80.5mm → mid = 76.95
-  - {type: h, x1: 1.0, x2: 35.06, y: 77.0, style: zone_div, label: "MOD BUS", label_x: 17.78}
+  - {type: h, x1: 1.0, x2: 33.79, y: 77.0, style: zone_div, label: "MOD BUS", label_x: 17.145}
 
-  # ── LP1 (7 HP, x=35.56–71.12 mm, col_pitch=11.43 mm = 2.25 HP) ──────────────
-  # Matches section-0 col pitch. col 0 cx=41.275  col 1 cx=52.705  col 2 cx=64.135
-  - {type: v, x: 71.12, y1: 9.0, y2: 124.0, style: main_cyan}
-  - {type: h, x1: 36.56, x2: 70.62, y: 9.0, style: zone_div, label: "LP1", label_x: 52.705}
+  # ── LP1 right boundary / LP2 boundary ────────────────────────────────────────
+  # x = midpoint(LP1_RES=62.865, next-zone col0=74.295) = 68.58mm
+  - {type: v, x: 68.58, y1: 9.0, y2: 124.0, style: main_cyan}
+  - {type: h, x1: 35.29, x2: 68.08, y: 9.0, style: zone_div, label: "LP1", label_x: 51.435}
 
 # ── Zone labels ───────────────────────────────────────────────────────────────
 # x=17.145 is the geometric centre of the 3-column section (col 1 cx)
@@ -292,8 +296,8 @@ zones:
   # Adjacent ATT pots: 1.49mm x-gap (no PCB overlap). Bottom jacks cy=112.0 (matching sec 0).
   - id: zone_lp1
     label: "Zone — LP1 Low-Pass Filter"
-    x_start: 35.56
-    col_pitch: 11.43           # 2.25 HP/col — matches section-0 jack spacing
+    x_start: 34.29             # = 3 × 11.43mm; aligns LP1 col0 jack at 40.005mm = 28.575 + 11.43
+    col_pitch: 11.43           # 2.25 HP/col — uniform grid with section-0
     cols: 3
     components:
       # ── Main knobs (all col 1 = section centre cx=52.705mm) ──────────────────
