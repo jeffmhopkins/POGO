@@ -413,10 +413,12 @@ zones:
     cols: 2
     components:
       # ── Polarity + Distortion switches — top of section ─────────────────────
+      # ── Switches: evenly distributed between zone top (9mm) and OFFSET knob top ─
+      # Space = 45.73 - 9.0 = 36.73mm; 3 equal gaps of 4.91mm around 2×11mm switches
       - id: BP_POL
         type: switch_H2
         cx: 80.01
-        cy: 24.80
+        cy: 17.41
         label_above: ""
         pos_labels: ["POS", "NEG"]
         pos_xs: [75.51, 84.51]
@@ -424,22 +426,22 @@ zones:
       - id: BP_DIST
         type: switch_H3
         cx: 80.01
-        cy: 52.40
+        cy: 33.32
         pos_labels: ["SOFT", "HARD", "FOLD"]
         pos_xs: [74.30, 80.01, 85.72]
         label_below: ""
         cpp_param: "BP_DIST_PARAM"
-      # ── Master Offset xl knob + BP Mix large knob — below switches ───────────
+      # ── Knobs: aligned with LP1/BP1 rows 2 and 3 ────────────────────────────
       - id: BP_OFFSET
         type: knob_xl
         cx: 80.01
-        cy: 70.0
+        cy: 52.40
         label: "OFFSET"
         cpp_param: "BP_OFFSET_PARAM"
       - id: BP_MIX
         type: knob_large
         cx: 80.01
-        cy: 86.0
+        cy: 78.00
         label: "MIX"
         cpp_param: "BP_MIX_PARAM"
       # ── CV attenuverter trim pots ────────────────────────────────────────────

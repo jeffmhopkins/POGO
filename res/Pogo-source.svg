@@ -190,23 +190,23 @@
   <!-- Zone — BP CONTROL                                                        -->
   <!-- ════════════════════════════════════════════════════════════════════════ -->
 
-  <text x="81.915" y="21.3" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
-  <rect x="77.42" y="23.60" width="9" height="2.4" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
-  <rect x="77.92" y="23.40" width="3.5" height="2.8" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
-  <text x="75.51" y="28.8" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">POS</text>
-  <text x="84.51" y="28.8" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">NEG</text>
-  <rect x="75.92" y="51.20" width="12" height="2.4" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
-  <rect x="80.17" y="51.00" width="3.5" height="2.8" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
-  <text x="74.3" y="57.699999999999996" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">SOFT</text>
-  <text x="80.01" y="57.699999999999996" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">HARD</text>
-  <text x="85.72" y="57.699999999999996" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">FOLD</text>
-  <text x="81.915" y="61.2" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
-  <circle cx="81.915" cy="70.0" r="9.0" fill="#1a1a1a" stroke="#555" stroke-width="0.7"/>
-  <line x1="81.915" y1="70.0" x2="81.915" y2="61.0" stroke="#aaa" stroke-width="0.8"/>
-  <text x="81.915" y="82.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">OFFSET</text>
-  <circle cx="81.915" cy="86.0" r="7.0" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
-  <line x1="81.915" y1="86.0" x2="81.915" y2="79.0" stroke="#aaa" stroke-width="0.7"/>
-  <text x="81.915" y="96.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">MIX</text>
+  <text x="81.915" y="13.91" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <rect x="77.42" y="16.21" width="9" height="2.4" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
+  <rect x="77.92" y="16.01" width="3.5" height="2.8" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
+  <text x="75.51" y="21.41" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">POS</text>
+  <text x="84.51" y="21.41" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">NEG</text>
+  <rect x="75.92" y="32.12" width="12" height="2.4" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
+  <rect x="80.17" y="31.92" width="3.5" height="2.8" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
+  <text x="74.3" y="38.62" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">SOFT</text>
+  <text x="80.01" y="38.62" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">HARD</text>
+  <text x="85.72" y="38.62" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">FOLD</text>
+  <text x="81.915" y="42.120000000000005" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="81.915" cy="52.4" r="9.0" fill="#1a1a1a" stroke="#555" stroke-width="0.7"/>
+  <line x1="81.915" y1="52.4" x2="81.915" y2="43.4" stroke="#aaa" stroke-width="0.8"/>
+  <text x="81.915" y="64.4" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">OFFSET</text>
+  <circle cx="81.915" cy="78.0" r="7.0" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="81.915" y1="78.0" x2="81.915" y2="71.0" stroke="#aaa" stroke-width="0.7"/>
+  <text x="81.915" y="88.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">MIX</text>
   <circle cx="76.2" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
   <line x1="76.2" y1="100.0" x2="76.2" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
   <text x="76.2" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
