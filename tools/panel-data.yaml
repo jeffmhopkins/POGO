@@ -320,17 +320,17 @@ zones:
       - id: LP1_FREQ_ATT
         type: trimpot
         col: 0
-        cy: 97.0
+        cy: 100.0
         cpp_param: "LP1_FREQ_ATT_PARAM"
       - id: LP1_TILT_ATT
         type: trimpot
         col: 1
-        cy: 97.0
+        cy: 100.0
         cpp_param: "LP1_TILT_ATT_PARAM"
       - id: LP1_RES_ATT
         type: trimpot
         col: 2
-        cy: 97.0
+        cy: 100.0
         cpp_param: "LP1_RES_ATT_PARAM"
       # ── CV input jacks (cy=112.0 matches section-0 bottom row) ───────────────
       - id: LP1_FREQ_IN

@@ -41,9 +41,13 @@ LED_CY      = (-2.0, -1.5, 2.0, 4.0)
 
 # Bourns 3296W Vertical trimpot (used for attenuverters and VCA trim controls)
 # Panel hole: ~5mm Ø slotted hex actuator → r=2.5mm
-# PCB courtyard: compact body ~5mm wide × 10mm tall, symmetric about shaft centre
+# PCB courtyard derived from kicad/footprints/Potentiometer_THT.pretty/
+#   Potentiometer_Bourns_3296W_Vertical.kicad_mod
+#   F.CrtYd (footprint coords, pin1 at origin): x∈[-2.665,2.665] y∈[-0.885,5.885]
+#   Panel anchor = pin2 (wiper/actuator) at footprint (0, 2.5)
+#   → relative to anchor: x∈[-2.665,2.665]  y∈[-3.385,3.385]
 TRIMPOT_PANEL_R = 2.5
-TRIMPOT_CY      = (-2.5, -5.0, 2.5, 5.0)
+TRIMPOT_CY      = (-2.665, -3.385, 2.665, 3.385)
 
 H_SWITCH_TYPES = {"switch_H2", "switch_H3"}
 V3_SWITCH_TYPES = {"switch_V3"}
