@@ -300,23 +300,25 @@ zones:
     col_pitch: 11.43           # 2.25 HP/col — uniform grid with section-0
     cols: 3
     components:
-      # ── Main knobs (all col 1 = section centre cx=52.705mm) ──────────────────
+      # ── Main knobs (all col 1 = section centre cx=51.435mm) ──────────────────
+      # Evenly spaced between top label (y=9.0) and trimpot courtyard top (y=96.615):
+      #   gap = (87.615 − 60.4) / 4 = 6.80mm at top, between each, and below last label
       - id: LP1_FREQ
         type: knob_xl
         col: 1
-        cy: 42.0
+        cy: 24.8
         label: "FREQ"
         cpp_param: "LP1_FREQ_PARAM"
       - id: LP1_TILT
         type: knob_large
         col: 1
-        cy: 63.0
+        cy: 52.4
         label: "TILT"
         cpp_param: "LP1_TILT_PARAM"
       - id: LP1_RES
         type: knob_large
         col: 1
-        cy: 81.0
+        cy: 78.0
         label: "RES"
         cpp_param: "LP1_RES_PARAM"
       # ── Attenuverters — compact pot (Bourns PTV09A style), no label ──────────
