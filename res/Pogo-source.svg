@@ -32,6 +32,7 @@
   <line x1="34.29" y1="9.0" x2="34.29" y2="124.0" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
   <line x1="68.58" y1="9.0" x2="68.58" y2="124.0" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
   <line x1="91.44" y1="9.0" x2="91.44" y2="124.0" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
+  <line x1="125.73" y1="9.0" x2="125.73" y2="124.0" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
 
   <!-- ── ZONE DIVIDERS (dim gray horizontal) ──────────────────────────────── -->
   <line x1="1.0" y1="9.0" x2="11.89" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
@@ -49,6 +50,9 @@
   <line x1="69.58" y1="9.0" x2="76.71" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
   <line x1="83.31" y1="9.0" x2="90.94" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
   <text x="80.01" y="9.0" fill="#999" font-family="monospace" font-size="2.0" text-anchor="middle" dominant-baseline="middle">BP</text>
+  <line x1="92.44" y1="9.0" x2="103.98" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
+  <line x1="113.18" y1="9.0" x2="125.23" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
+  <text x="108.585" y="9.0" fill="#999" font-family="monospace" font-size="2.0" text-anchor="middle" dominant-baseline="middle">BP 1</text>
 
   <!-- ── LP2+HP+OUT ZONE: TOP STRIP / FILTER SECTION DIVIDER ──────────────── -->
 
@@ -198,5 +202,37 @@
   <circle cx="85.725" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="85.725" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
   <text x="85.725" y="119.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">TILT</text>
+
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- Zone — BP 1                                                              -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+
+  <circle cx="108.585" cy="24.8" r="9.0" fill="#1a1a1a" stroke="#555" stroke-width="0.7"/>
+  <line x1="108.585" y1="24.8" x2="108.585" y2="15.8" stroke="#aaa" stroke-width="0.8"/>
+  <text x="108.585" y="36.8" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
+  <circle cx="108.585" cy="52.4" r="7.0" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="108.585" y1="52.4" x2="108.585" y2="45.4" stroke="#aaa" stroke-width="0.7"/>
+  <text x="108.585" y="62.4" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">FOCUS</text>
+  <circle cx="108.585" cy="78.0" r="7.0" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="108.585" y1="78.0" x2="108.585" y2="71.0" stroke="#aaa" stroke-width="0.7"/>
+  <text x="108.585" y="88.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">DIST</text>
+  <circle cx="97.155" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="97.155" y1="100.0" x2="97.155" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
+  <text x="97.155" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="108.585" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="108.585" y1="100.0" x2="108.585" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
+  <text x="108.585" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="120.015" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="120.015" y1="100.0" x2="120.015" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
+  <text x="120.015" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="97.155" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="97.155" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="97.155" y="119.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
+  <circle cx="108.585" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="108.585" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="108.585" y="119.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">FOCUS</text>
+  <circle cx="120.015" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="120.015" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="120.015" y="119.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">DIST</text>
 
 </svg>

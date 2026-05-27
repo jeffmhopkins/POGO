@@ -102,6 +102,12 @@ separators:
   - {type: v, x: 91.44, y1: 9.0, y2: 124.0, style: main_cyan}
   - {type: h, x1: 69.58, x2: 90.94, y: 9.0, style: zone_div, label: "BP", label_x: 80.01}
 
+  # ── BP 1 right boundary ────────────────────────────────────────────────────────
+  # 3-col section (3 × 11.43mm = 34.29mm); x_start=91.44, col1 cx=108.585
+  # x = midpoint(BP1 col2 jack=120.015, next col0=131.445) = 125.73mm
+  - {type: v, x: 125.73, y1: 9.0, y2: 124.0, style: main_cyan}
+  - {type: h, x1: 92.44, x2: 125.23, y: 9.0, style: zone_div, label: "BP 1", label_x: 108.585}
+
 # ── Zone labels ───────────────────────────────────────────────────────────────
 # x=17.145 is the geometric centre of the 3-column section (col 1 cx)
 zone_labels: []
@@ -429,3 +435,65 @@ zones:
         cy: 112.0
         label: "TILT"
         cpp_id: "BP_TILT_INPUT"
+
+  # ── Zone: BP 1 ───────────────────────────────────────────────────────────────
+  # Mirror of LP1: xl + 2× large knobs on col1, 3 trimpots + 3 jacks across cols 0/1/2
+  # cy values match LP1 for visual alignment across rows
+  - id: zone_bp1
+    label: "Zone — BP 1"
+    x_start: 91.44
+    col_pitch: 11.43
+    cols: 3
+    components:
+      # col0 cx=97.155  col1 cx=108.585  col2 cx=120.015
+      - id: BP1_FREQ
+        type: knob_xl
+        col: 1
+        cy: 24.80
+        label: "FREQ"
+        cpp_param: "BP1_FREQ_PARAM"
+      - id: BP1_FOCUS
+        type: knob_large
+        col: 1
+        cy: 52.40
+        label: "FOCUS"
+        cpp_param: "BP1_FOCUS_PARAM"
+      - id: BP1_DIST
+        type: knob_large
+        col: 1
+        cy: 78.00
+        label: "DIST"
+        cpp_param: "BP1_DIST_PARAM"
+      - id: BP1_FREQ_ATT
+        type: trimpot
+        col: 0
+        cy: 100.0
+        cpp_param: "BP1_FREQ_ATT_PARAM"
+      - id: BP1_FOCUS_ATT
+        type: trimpot
+        col: 1
+        cy: 100.0
+        cpp_param: "BP1_FOCUS_ATT_PARAM"
+      - id: BP1_DIST_ATT
+        type: trimpot
+        col: 2
+        cy: 100.0
+        cpp_param: "BP1_DIST_ATT_PARAM"
+      - id: BP1_FREQ_IN
+        type: jack_input
+        col: 0
+        cy: 112.0
+        label: "FREQ"
+        cpp_id: "BP1_FREQ_INPUT"
+      - id: BP1_FOCUS_IN
+        type: jack_input
+        col: 1
+        cy: 112.0
+        label: "FOCUS"
+        cpp_id: "BP1_FOCUS_INPUT"
+      - id: BP1_DIST_IN
+        type: jack_input
+        col: 2
+        cy: 112.0
+        label: "DIST"
+        cpp_id: "BP1_DIST_INPUT"
