@@ -39,37 +39,37 @@
 
   <!-- ── ZONE DIVIDERS (dim gray horizontal) ──────────────────────────────── -->
   <line x1="2.9050000000000002" y1="9.0" x2="13.80" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
-  <line x1="24.30" y1="9.0" x2="35.695" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
+  <line x1="24.30" y1="9.0" x2="36.195" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
   <text x="19.05" y="9.0" fill="#999" font-family="monospace" font-size="2.0" text-anchor="middle" dominant-baseline="middle">INPUT</text>
   <line x1="2.9050000000000002" y1="43.0" x2="14.45" y2="43.0" stroke="#3a3a3a" stroke-width="0.5"/>
-  <line x1="23.65" y1="43.0" x2="35.695" y2="43.0" stroke="#3a3a3a" stroke-width="0.5"/>
+  <line x1="23.65" y1="43.0" x2="36.195" y2="43.0" stroke="#3a3a3a" stroke-width="0.5"/>
   <text x="19.05" y="43.0" fill="#999" font-family="monospace" font-size="2.0" text-anchor="middle" dominant-baseline="middle">LFOs</text>
   <line x1="2.9050000000000002" y1="77.0" x2="12.50" y2="77.0" stroke="#3a3a3a" stroke-width="0.5"/>
-  <line x1="25.60" y1="77.0" x2="35.695" y2="77.0" stroke="#3a3a3a" stroke-width="0.5"/>
+  <line x1="25.60" y1="77.0" x2="36.195" y2="77.0" stroke="#3a3a3a" stroke-width="0.5"/>
   <text x="19.05" y="77.0" fill="#999" font-family="monospace" font-size="2.0" text-anchor="middle" dominant-baseline="middle">MOD BUS</text>
-  <line x1="37.195" y1="9.0" x2="49.39" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
-  <line x1="57.29" y1="9.0" x2="69.985" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
+  <line x1="36.195" y1="9.0" x2="49.39" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
+  <line x1="57.29" y1="9.0" x2="70.485" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
   <text x="53.34" y="9.0" fill="#999" font-family="monospace" font-size="2.0" text-anchor="middle" dominant-baseline="middle">LP1</text>
-  <line x1="71.485" y1="9.0" x2="78.62" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
-  <line x1="85.22" y1="9.0" x2="92.845" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
+  <line x1="70.485" y1="9.0" x2="78.62" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
+  <line x1="85.22" y1="9.0" x2="93.345" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
   <text x="81.915" y="9.0" fill="#999" font-family="monospace" font-size="2.0" text-anchor="middle" dominant-baseline="middle">BP</text>
-  <line x1="94.345" y1="9.0" x2="105.89" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
-  <line x1="115.09" y1="9.0" x2="127.135" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
+  <line x1="93.345" y1="9.0" x2="105.89" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
+  <line x1="115.09" y1="9.0" x2="127.635" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
   <text x="110.49" y="9.0" fill="#999" font-family="monospace" font-size="2.0" text-anchor="middle" dominant-baseline="middle">BP 1</text>
-  <line x1="128.635" y1="9.0" x2="140.18" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
-  <line x1="149.38" y1="9.0" x2="161.425" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
+  <line x1="127.635" y1="9.0" x2="140.18" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
+  <line x1="149.38" y1="9.0" x2="161.925" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
   <text x="144.78" y="9.0" fill="#999" font-family="monospace" font-size="2.0" text-anchor="middle" dominant-baseline="middle">BP 2</text>
-  <line x1="162.925" y1="9.0" x2="174.47" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
-  <line x1="183.67" y1="9.0" x2="195.715" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
+  <line x1="161.925" y1="9.0" x2="174.47" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
+  <line x1="183.67" y1="9.0" x2="196.215" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
   <text x="179.07" y="9.0" fill="#999" font-family="monospace" font-size="2.0" text-anchor="middle" dominant-baseline="middle">BP 3</text>
-  <line x1="197.215" y1="9.0" x2="204.34" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
-  <line x1="210.95" y1="9.0" x2="218.575" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
+  <line x1="196.215" y1="9.0" x2="204.34" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
+  <line x1="210.95" y1="9.0" x2="219.075" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
   <text x="207.645" y="9.0" fill="#999" font-family="monospace" font-size="2.0" text-anchor="middle" dominant-baseline="middle">HP</text>
-  <line x1="197.215" y1="26.0" x2="218.575" y2="26.0" stroke="#3a3a3a" stroke-width="0.5"/>
-  <line x1="220.075" y1="9.0" x2="226.56" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
-  <line x1="234.45" y1="9.0" x2="241.435" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
+  <line x1="196.215" y1="26.0" x2="219.075" y2="26.0" stroke="#3a3a3a" stroke-width="0.5"/>
+  <line x1="219.075" y1="9.0" x2="226.56" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
+  <line x1="234.45" y1="9.0" x2="241.935" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
   <text x="230.505" y="9.0" fill="#999" font-family="monospace" font-size="2.0" text-anchor="middle" dominant-baseline="middle">LP2</text>
-  <line x1="220.075" y1="26.0" x2="241.435" y2="26.0" stroke="#3a3a3a" stroke-width="0.5"/>
+  <line x1="219.075" y1="26.0" x2="241.935" y2="26.0" stroke="#3a3a3a" stroke-width="0.5"/>
 
   <!-- ── LP2+HP+OUT ZONE: TOP STRIP / FILTER SECTION DIVIDER ──────────────── -->
 
