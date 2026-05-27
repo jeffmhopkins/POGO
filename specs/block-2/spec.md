@@ -8,7 +8,7 @@ DSP source: `plugin/src/dsp/LFO.hpp`, `plugin/src/Pogo.cpp` (lines 364–368)
 ## 1. Intent
 
 Block 2 provides two continuously running triangle-wave low-frequency oscillators. Each
-has a front-panel rate knob spanning 0.05 Hz (a 20-second period, useful for slow filter
+has a front-panel rate trimpot (screwdriver-set preset) spanning 0.05 Hz (a 20-second period, useful for slow filter
 sweeps) to 20 Hz (at the boundary of audio, approaching ring-modulation territory). Each
 LFO drives a front-panel LED that brightens on positive half-cycles and dims on negative
 half-cycles, giving a visual indication of rate and phase. Both LFOs have output jacks
@@ -61,17 +61,13 @@ TL072 on ±12 V). Rearranging for the integrator time constant:
 R_int × C_int = V_th / (2 × f × V_sat)
 ```
 
-**Rate control — exponential law:** The DSP uses `speedHz = 0.05 × 400^param`, which
-spans 0.05 to 20 Hz over the [0, 1] knob range — a ratio of 400, equivalent to ~8.6
-octaves. In hardware, an exponential (antilog) response over this range is achieved by
-combining a linear pot with an exponential converter (resistor-diode network biased for
-~10 mV/decade) or simply by selecting a logarithmic-taper potentiometer (which provides
-an approximate exponential response). A log-taper pot is the simpler implementation
-and is sufficient for a rate control where precise pitch tracking is not required.
-
-The rate control pot varies R_int by changing the current into the integrator, or
-alternatively varies the control current in a V-to-I stage ahead of the integrator
-capacitor.
+**Rate control — preset trimpot:** The DSP uses `speedHz = 0.05 × 400^param`, which
+spans 0.05 to 20 Hz over the [0, 1] range. The hardware rate control is a Bourns 3296W
+screwdriver trimpot (preset, not a performance knob). The trimpot wiper sets R_int,
+varying the integrator charge current and thus the oscillation rate. Because the trimpot
+is a fixed preset rather than a swept control, linear taper is acceptable — the user
+simply turns to the desired position during setup. The full 0.05–20 Hz range is
+accessible over the trimpot travel with the R_CW_END and R_CCW_END resistors (see below).
 
 ### Topology: integrator + Schmitt trigger
 
@@ -137,9 +133,9 @@ Items 1 and 3 below are intentional DSP advantages kept by design. Item 2 is now
    this with a one-pole LP filter at 10× the LFO rate, producing the same characteristic
    soft peak rounding. This is sonically desirable (softer modulation edges).
 
-3. **Rate law:** The DSP uses a precise exponential: `0.05 × 400^param`. A log-taper
-   pot approximates this but does not match it exactly. For a modulation rate control
-   (not a pitch-tracking application), this deviation is acceptable.
+3. **Rate law:** The DSP uses a precise exponential: `0.05 × 400^param`. The hardware
+   trimpot is linear-taper; the rate set corresponds to a specific wiper position during
+   setup, not a swept performance control. Exact exponential tracking is not required.
 
 4. **Frequency accuracy:** Component tolerances on R_int and C_int affect absolute
    frequency. A 10% tolerance capacitor produces ±10% frequency error at any given
@@ -168,7 +164,7 @@ At f_min = 0.05 Hz: R_INT = 11 / (4 × 5 × 0.05 × 47n) = 117 MΩ
 ```
 
 Full range (293 kΩ to 117 MΩ) requires an effective resistance ratio of 400:1. Achieved
-with a 1 MΩ log-taper pot (RV_LFO) plus two end resistors:
+with a 1 MΩ trimpot (Bourns 3296W; RV_LFO) plus two end resistors:
 - **R_CW_END = 270 kΩ** in parallel with the pot at the CW end — limits R_INT_min:
   R_INT_min ≈ 270k || 0 = 270kΩ → f_max ≈ 11/(4×5×270k×47n) = 43 Hz  
   (fast side is intentionally wider; the log pot's CW end compresses, trimmed by assembly)
@@ -249,8 +245,8 @@ output protection but are physically placed on the utility board near the LFO ou
 |---|---|---|---|---|---|---|---|
 | U_LFO1 | TL072CDT | SOIC-8 | — | 1 | utility | block-2 | LFO1 integrator (half A) + Schmitt trigger (half B) |
 | U_LFO2 | TL072CDT | SOIC-8 | — | 1 | utility | block-2 | LFO2 integrator (half A) + Schmitt trigger (half B) |
-| RV_LFO1 | log-taper pot | 9 mm | 1 MΩ | 1 | control | block-2 | LFO1 rate (0.05–20 Hz); wiper → R_INT input |
-| RV_LFO2 | log-taper pot | 9 mm | 1 MΩ | 1 | control | block-2 | LFO2 rate (0.05–20 Hz) |
+| RV_LFO1 | Bourns 3296W trimpot | through-hole | 1 MΩ | 1 | control | block-2 | LFO1 rate preset (0.05–20 Hz); wiper → R_INT input |
+| RV_LFO2 | Bourns 3296W trimpot | through-hole | 1 MΩ | 1 | control | block-2 | LFO2 rate preset (0.05–20 Hz) |
 | C_INT1 | cap, C0G | 0603 | 47 nF | 1 | utility | block-2 | LFO1 integrator timing cap; C0G mandatory |
 | C_INT2 | cap, C0G | 0603 | 47 nF | 1 | utility | block-2 | LFO2 integrator timing cap; C0G mandatory |
 | R_CW_END1 | resistor | 0603 | 270 kΩ | 1 | utility | block-2 | LFO1 CW end resistor; limits f_max ≈ 25 Hz |

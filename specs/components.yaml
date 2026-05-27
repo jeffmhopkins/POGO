@@ -278,8 +278,8 @@ components:
   - { ref: SW2,  board: control, block: block-1, part: "2-pos slide", pkg: panel,  fn: "GAIN_BP3 1×/5×" }
 
   # block-2 panel controls
-  - { ref: RV1,  board: control, block: block-2, part: "log pot",    pkg: "9mm",  val: "1MΩ",    fn: "LFO1_RATE (0.05–20 Hz; log taper)" }
-  - { ref: RV2,  board: control, block: block-2, part: "log pot",    pkg: "9mm",  val: "1MΩ",    fn: "LFO2_RATE (0.05–20 Hz; log taper)" }
+  - { ref: RV1,  board: control, block: block-2, part: "Bourns 3296W", pkg: "through-hole", val: "1MΩ", fn: "LFO1_RATE trimpot (preset; 0.05–20 Hz range)" }
+  - { ref: RV2,  board: control, block: block-2, part: "Bourns 3296W", pkg: "through-hole", val: "1MΩ", fn: "LFO2_RATE trimpot (preset; 0.05–20 Hz range)" }
 
   # block-3 panel controls
   - { ref: RV3,  board: control, block: block-3, part: "log pot",    pkg: "9mm",  val: "470kΩ",  fn: "MOD_SCALE (0.2×–5×; log taper; in series with 22kΩ R_MB_SRC on utility board)" }
@@ -330,11 +330,11 @@ components:
 
   # block-7 panel controls
   - { ref: RV40, board: control, block: block-7, part: "PogoSlider", pkg: panel,  fn: "HP_FREQ slider (±5V/oct, default -3V)" }
-  - { ref: RV41, board: control, block: block-7, part: "PogoSlider", pkg: panel,  fn: "HP_RES slider (0–1)" }
+  - { ref: RV41, board: control, block: block-7, part: "Bourns 3296W", pkg: "through-hole", val: ~, fn: "HP_RES trimpot (preset; 0–1)" }
 
   # block-8 panel controls
   - { ref: RV42, board: control, block: block-8, part: "PogoSlider", pkg: panel,  fn: "LP2_FREQ slider (±5V/oct, default +2V)" }
-  - { ref: RV43, board: control, block: block-8, part: "PogoSlider", pkg: panel,  fn: "LP2_RES slider (0–1)" }
+  - { ref: RV43, board: control, block: block-8, part: "Bourns 3296W", pkg: "through-hole", val: ~, fn: "LP2_RES trimpot (preset; 0–1)" }
 
   # ── PANEL JACKS ─────────────────────────────────────────────────────────────
 
