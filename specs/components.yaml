@@ -108,12 +108,12 @@ components:
   - { ref: U39,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "SC gain amp BP3_R (half A = SC amp; half B = HC amp)" }
 
   # block-6: Distortion sub-circuit ICs — WF paths (one TL072CDT per group per channel)
-  - { ref: U40,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "WF amps BP1_L (half A = pre-gain; half B = fold amp)" }
-  - { ref: U41,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "WF amps BP1_R (half A = pre-gain; half B = fold amp)" }
-  - { ref: U42,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "WF amps BP2_L (half A = pre-gain; half B = fold amp)" }
-  - { ref: U43,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "WF amps BP2_R (half A = pre-gain; half B = fold amp)" }
-  - { ref: U44,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "WF amps BP3_L (half A = pre-gain; half B = fold amp)" }
-  - { ref: U45,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "WF amps BP3_R (half A = pre-gain; half B = fold amp)" }
+  - { ref: U40,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "WF amps BP1_L (half A = pre-gain; half B = symmetric folder G=+2)" }
+  - { ref: U41,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "WF amps BP1_R (half A = pre-gain; half B = symmetric folder G=+2)" }
+  - { ref: U42,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "WF amps BP2_L (half A = pre-gain; half B = symmetric folder G=+2)" }
+  - { ref: U43,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "WF amps BP2_R (half A = pre-gain; half B = symmetric folder G=+2)" }
+  - { ref: U44,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "WF amps BP3_L (half A = pre-gain; half B = symmetric folder G=+2)" }
+  - { ref: U45,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "WF amps BP3_R (half A = pre-gain; half B = symmetric folder G=+2)" }
 
   # block-6: BP_MIX and BP_POL circuit ICs
   - { ref: U46,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "BP wet summer half A = L (BP1+BP2+BP3 inv sum); half B = MIX crossfade L" }
@@ -134,7 +134,7 @@ components:
   # block-6: Discrete semiconductors
   - { ref: D4,   board: audio,   block: block-6, part: 1N4148W,    pkg: SOD-123,  qty: 24, fn: "SC soft-clip diodes; 4 per path (2 antiparallel pairs) × 6 paths" }
   - { ref: D5,   board: audio,   block: block-6, part: BZX84C5V1,  pkg: SOT-23,   qty: 12, fn: "HC back-to-back zener clamps (±5.8V clip); 2 per path × 6 paths" }
-  - { ref: D6,   board: audio,   block: block-6, part: 1N4148W,    pkg: SOD-123,  qty: 12, fn: "WF fold diodes; 2 per path (antiparallel fold feedback) × 6 paths" }
+  - { ref: D6,   board: audio,   block: block-6, part: 1N4148W,    pkg: SOD-123,  qty: 48, fn: "WF passive clamp diodes; 4 per path (2 per polarity, Vth=±1.4V) × 6 paths; true symmetric fold" }
   - { ref: D7,   board: audio,   block: block-6, part: BZX84C5V1,  pkg: SOT-23,   fn: "CD4053 logic supply 5.1V zener shunt (from +12V with R_5V_logic)" }
 
   # block-6: Passives — SVF integrator caps
@@ -165,8 +165,10 @@ components:
   # block-6: Passives — WF distortion paths
   - { ref: R22,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 6,  fn: "R_WF_in; WF pre-gain input R; 1 per path × 6 paths" }
   - { ref: R23,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 6,  fn: "R_WF_fb_fixed; WF pre-gain minimum feedback R" }
-  - { ref: R24,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 6,  fn: "R_fold; WF fold amp input R; 1 per path" }
-  - { ref: R25,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "4.7kΩ",  qty: 6,  fn: "R_fold_limit; WF fold limiting R (diode series in fold feedback)" }
+  - { ref: R24,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 6,  fn: "R_clamp; WF passive clamp series R (limits diode current at threshold)" }
+  - { ref: R25,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 6,  fn: "R_g; WF folder (−) input R (was R_fold 10kΩ; value unchanged)" }
+  - { ref: R_f_wf, board: audio, block: block-6, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 6,  fn: "R_f; WF folder feedback R; R_g=R_f → gain +2 at (+) input" }
+  - { ref: C_WF, board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "47pF",   qty: 12, fn: "RV_DRIVE wiper bypass cap (anti-RF, anti-scratchiness); 1 per path × 6 paths" }
 
   # block-6: Passives — BP_MIX circuit
   - { ref: R26,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "33kΩ",   qty: 8,  fn: "R_sum; BP wet summer input R; 3 inputs + 1 fb per channel × 2 ch (U46/U47 half A)" }

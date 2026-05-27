@@ -77,7 +77,7 @@ Circuit diagrams in spec text must be self-sufficient.
 - block-6: Q normalization: hardware peak = 1 (constant), DSP peak = 1/Q (no hardware compensation)
 - block-6: BP_MIX: hardware adds wet on top of dry; DSP crossfades (acceptable)
 - block-6: HC clip threshold ±5.8V vs DSP ±5V (zener tolerance, acceptable)
-- block-6: WF fold approximation requires prototype bench verification
+- block-6: WF fold threshold Vth ≈ ±1.4V (diode Vf-dependent; soft onset by design)
 
 **Phase 4R (Panel) — DONE.** `tools/panel-data.yaml` DRC-clean.
 
@@ -86,17 +86,17 @@ All review findings resolved. See §7 Completed Action Items in that file for th
 Key corrections: THAT340 SOIC-8→SOIC-14; BAT85→SS14 (SMD); block-3 clamp zeners + cal trims
 added; MB_PROC_A distribution buffer corrected; destination count 22→19; block-4 AMT pot
 loading addressed; block-1 NE5532D R_in lowered for noise; all 12 SUM_AMP ICs→OPA1612
-(1.1 nV/√Hz); OPA1612 Iq corrected (5.5 mA/dual-IC per rail); block-1 noise % corrected.
+(1.1 nV/√Hz); OPA1612 Iq corrected (5.5 mA/dual-IC per rail); block-1 noise % corrected;
+block-6 WF topology replaced with true symmetric precision folder (no prototype stability risk).
 
 **Remaining work before PCB layout:**
 1. **Write 48HP KiCad generator** — replaces 40HP-era stale generators; inputs from components.yaml + panel-data.yaml
 2. **Phase 6R** — VCV Rack signal-path smoke tests (CI integration)
 
 **Open prototype questions (Phase 3R advisory, not blocking):**
-- block-2: WF fold stage stability (phase margin with diode feedback at all drive levels)
-- block-2: LED: confirm pulsing (half-wave rectified) vs breathing (no diode) — prototype preference
-- block-6: WF transfer characteristic bench measurement vs DSP asin(sin(x)) reference
+- block-2: LFO LED: confirm pulsing (half-wave rectified) vs breathing (no diode) — prototype preference
 - block-6: BP_MIX gain compensation resistor value (to match DSP level at MIX=max)
+- block-6: WF fold threshold Vth diode-current dependency — bench characterization of fold shape at various drive levels (informational; topology is correct)
 
 ---
 

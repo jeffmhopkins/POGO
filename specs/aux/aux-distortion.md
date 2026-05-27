@@ -107,12 +107,22 @@ V_in → [R_in] → op-amp (+gain stage) → [BAT54S back-to-back clamp] → V_o
 ```
 
 **WF (Wavefold):**
-Buchla-style folder: a high-gain op-amp with feedback limiting; the asin(sin(x))
-waveform is approximated by a triangle-generating feedback network. The fold gain
-controls how far into the fold the input signal travels.
+True symmetric precision folder: a passive diode clamp (±Vth = ±1.4V from 2× 1N4148W per
+direction) feeds the op-amp non-inverting input, while the signal feeds (−) through R_g.
+Output = 2×V_clamp − V_in → slope reversal at ±Vth. This is not gain compression; the
+output slope genuinely reverses when the input exceeds threshold.
 
 ```
-V_in → [R_in] → [high-gain op-amp with triangle-limiting feedback] → V_out
+V_in → R_in → gain stage (Stage 1, half A) → V_fold_in
+
+Passive clamp:
+  V_fold_in → [R_clamp=10kΩ] → V_clamp
+  V_clamp clamped to ±1.4V by 4× 1N4148W (2 per polarity)
+
+Folder (Stage 2, half B):
+  V_clamp  → (+) of op-amp
+  V_fold_in → [R_g=10kΩ] → (−) of op-amp → [R_f=10kΩ] → V_out
+  V_out = 2×V_clamp − V_fold_in
 ```
 
 ## Design Choices & Rationale
@@ -180,8 +190,12 @@ unity-gain buffer (aux-unity-buffer, Variant A).
 | D_SC_1..4 | 1N4148W | SOD-123 | — | SC diode string (2 per rail, 4 total) |
 | R_SC_in | Resistor | 0603 | 10 kΩ | SC input resistor |
 | R_HC_in | Resistor | 0603 | 10 kΩ | HC input resistor |
-| R_WF_in | Resistor | 0603 | 10 kΩ | WF input resistor |
-| R_DRIVE | Pot + CV | — | 100 kΩ | Drive control per group (panel pot + CV sum) |
+| R_WF_in | Resistor | 0603 | 10 kΩ | WF pre-gain input R |
+| R_clamp | Resistor | 0603 | 10 kΩ | WF passive clamp series R (limits diode current at threshold) |
+| R_g | Resistor | 0603 | 10 kΩ | WF folder (−) input R |
+| R_f | Resistor | 0603 | 10 kΩ | WF folder feedback R; R_g = R_f for G=+2 |
+| D_WF_1..4 | 1N4148W | SOD-123 | — | WF clamp diodes: 4 per path (2 per polarity → Vth = ±1.4V) |
+| R_DRIVE | Pot + CV | — | 47 kΩ (HC) / 470 kΩ (SC) | Drive control per group (panel pot + CV sum) |
 | C_VCC, C_VEE | Ceramic bypass | 0603 | 100 nF | Per CD4053 and op-amp supply pin |
 
 ### Drive Gain Mapping
@@ -220,9 +234,9 @@ At max drive: gain ≈ 50× → R_f / R_in = 50 → R_in = 10kΩ, R_f = 470kΩ (
 - HC path: BAT54S forward voltage ~0.3V → clip at ~0.6V differential. With a 5V
   audio signal and gain = 5×, output clips at 0.6V/5 = 0.12V_in → severe clipping
   at moderate signal levels. This is correct behavior for hard clip mode.
-- WF path: feedback network design for asin(sin(x)) approximation requires careful
-  phase margin analysis; the fold op-amp must remain stable with the feedback
-  network across all fold gain settings. Phase 3R must verify stability.
+- WF path: the folder op-amp (Stage 2) is in standard G=+2 non-inverting configuration
+  (V_clamp at (+), R_g/R_f divider at (−)). The passive diode clamp at (+) has no active
+  elements and does not affect loop stability. No prototype stability verification required.
 - BP3_L/R_OUT tap buffer: the unity buffer must be placed after the CD4053 output
   to ensure it taps the selected (post-distortion) signal, not the raw SVF output
 

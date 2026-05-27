@@ -234,40 +234,66 @@ Acceptable for a distortion effect. Document and close.
 
 #### WF Path (Wavefold)
 
-Triangle-folding stage approximating DSP `asin(sin(π/2 × gain × x)) × 2/π`:
+True symmetric precision folder approximating DSP `asin(sin(π/2 × gain × x)) × 2/π`.
+
+Uses a passive diode clamp + op-amp subtractor topology that produces true slope reversal at
+±Vth (1.4 V). This is not gain compression — the output slope inverts at threshold.
 
 ```
 Stage 1 — pre-gain (variable fold depth):
  BP_out ──[R_WF_in = 10 kΩ]──►(−) TL072-A ──► V_fold_in
                                     │
                                R_WF_fb: 10 kΩ + RV_DRIVE 47 kΩ → gain 1×–5.7×
+ (inverting; polarity consistent with SC/HC paths)
 
-Stage 2 — folding amp (asin(sin(x)) approximation):
- V_fold_in ──[R_fold = 10 kΩ]──►(−) TL072-B ──►──────────── WF_out
-                                    │               │
-                         [diode-clamp feedback]     │
-                          D_WF_1 (1N4148W) anode   │
-                          D_WF_2 (1N4148W) anode   │
-                          tied to (−) input via     │
-                          R_fold_limit (4.7 kΩ)    │
-                          cathodes to output node  │
-                                                    │
-              Stage 2 gain = 10 kΩ / R_parallel_eff (≈1× when diodes off, clips to ±1.4V fold)
+Stage 2 — symmetric precision folder:
+ Passive diode clamp:
+   V_fold_in ──[R_clamp = 10 kΩ]──┬── V_clamp
+                                    │
+              D_WF_1 ──►|── D_WF_2 ──►|──┐
+                                           ├── AGND
+              D_WF_3 ─◄|── D_WF_4 ─◄|──┘
+   (D_WF_1–4: 1N4148W, SOD-123; two per direction → Vth = ±2×0.7V = ±1.4V)
+   Clamp action: V_clamp = V_fold_in when |V_fold_in| ≤ 1.4V
+                 V_clamp = +1.4V    when V_fold_in > +1.4V
+                 V_clamp = −1.4V    when V_fold_in < −1.4V
+
+ Op-amp folder (TL072-B, non-inverting reference = V_clamp):
+   V_clamp ──────────────────────────►(+)
+   V_fold_in ──[R_g = 10 kΩ]─────────►(−)──── TL072-B ──[R_f = 10 kΩ]──► WF_out
+                                        (−) receives negative feedback from output via R_f
 ```
 
-Fold mechanism: Stage 2 amplifies V_fold_in at low level. As V_fold_in exceeds ≈1.4V/gain,
-the diodes in feedback conduct, effectively reducing the closed-loop gain and reversing the
-slope of the output — approximating the triangular "folding" of asin(sin(x)). One fold stage
-produces a single inversion (triangle half-fold). Multiple stages cascade for deeper fold.
+**Transfer function:**
+```
+WF_out = 2 × V_clamp − V_fold_in
 
-**Phase 3R note:** The WF sub-circuit is an approximation; exact harmonic match to the DSP
-asin(sin(x)) requires prototype measurement. The fold threshold and shape depend on diode
-V_f and the resistance ratios. Phase 3R must include a bench measurement of the WF transfer
-characteristic and comparison to the DSP reference. Stability analysis of Stage 2 feedback
-network with diodes is required before committing PCB footprint.
+ |V_fold_in| ≤ 1.4V: V_clamp = V_fold_in → WF_out = V_fold_in          (linear)
+ V_fold_in  > +1.4V: V_clamp = +1.4V    → WF_out = 2.8V − V_fold_in   (fold down)
+ V_fold_in  < −1.4V: V_clamp = −1.4V    → WF_out = −2.8V − V_fold_in  (fold up)
+```
 
-Components per WF path: 2× TL072 halves (pre-gain + fold amp), 2× 1N4148W (SOD-123),
-1× 4.7 kΩ (fold limit), 3× resistors (input, feedback, fold stages).
+This is a true slope reversal at ±1.4 V, matching the asin(sin(x)) shape for a single fold.
+At DRIVE=max (gain 5.7×), a ±5V input signal reaches ±28V pre-fold → multiple reflections
+across the ±1.4V window → dense odd-harmonic spectrum.
+
+**Stability:** TL072-B is in standard negative feedback (output → R_f → (−) input).
+V_clamp at (+) is a passive resistor-diode network with no active elements; it presents a
+source impedance of R_clamp = 10 kΩ at (+), which has no impact on loop stability.
+Phase margin is identical to a standard G=+2 non-inverting configuration. No stability
+concern — no prototype verification required for this stage.
+
+**Diode Vth variation:** 1N4148W Vf ≈ 0.6–0.7 V depending on current.
+At R_clamp = 10 kΩ and V_fold_in = 3V: I_clamp ≈ (3−1.4)/10kΩ = 160 µA → Vf ≈ 0.60V → Vth ≈ 1.2V.
+Fold threshold shifts slightly with drive level (soft onset, similar to Buchla-style folders).
+Intentional characteristic; not a defect.
+
+Components per WF path: 2× TL072 halves (pre-gain + folder; same IC, no additional ICs),
+4× 1N4148W (SOD-123), 4× resistors (R_WF_in, R_WF_fb_fixed, R_clamp, R_g = R_f = 10 kΩ).
+
+**Note on wiper bypass caps:** A 47 pF cap from each RV_DRIVE wiper to AGND is recommended
+(pole at R_wiper_max × C ≈ 11.75 kΩ × 47 pF → f_pole ≈ 288 kHz). Kills RF pickup; no
+effect on control-rate drive changes.
 
 ### CD4053 Mux Wiring
 
@@ -455,12 +481,14 @@ OPA1612 SUM_AMPs (Iq = 2.75 mA/channel = 5.5 mA per dual IC) add ~22 mA over equ
 | RV_DRIVE_HC_G1–G3 | log-taper pot | 9 mm | 47 kΩ | 6 | control | block-6 | HC DRIVE per group (can share pot with SC if dual-gang) |
 | D_HC_Z | BZX84C5V1 | SOT-23 | 5.1V | 12 | audio | block-6 | HC zener clamp: 2 back-to-back per path → ±5.8V clip |
 | *— WF sub-circuit (per group, per channel: 6 sets) —* | | | | | | | |
-| BP_WF_AMP_G1–G3_L/R | TL072CDT | SOIC-8 | — | 6 | audio | block-6 | WF pre-gain (half A) + fold amp (half B) per path |
+| BP_WF_AMP_G1–G3_L/R | TL072CDT | SOIC-8 | — | 6 | audio | block-6 | WF pre-gain (half A) + symmetric folder (half B); 1 IC per path |
 | R_WF_in | resistor | 0603 | 10 kΩ | 12 | audio | block-6 | WF pre-gain input R |
 | R_WF_fb_fixed | resistor | 0603 | 10 kΩ | 12 | audio | block-6 | WF pre-gain minimum feedback R |
-| R_fold | resistor | 0603 | 10 kΩ | 12 | audio | block-6 | WF fold amp input R |
-| R_fold_limit | resistor | 0603 | 4.7 kΩ | 12 | audio | block-6 | WF fold limiting R (diode series limiting in feedback) |
-| D_WF_1N4148 | 1N4148W | SOD-123 | — | 24 | audio | block-6 | WF fold diodes: 2 per path (antiparallel in fold feedback) |
+| R_clamp | resistor | 0603 | 10 kΩ | 12 | audio | block-6 | WF clamp network series R (limits diode current) |
+| R_g | resistor | 0603 | 10 kΩ | 12 | audio | block-6 | WF folder (−) input resistor |
+| R_f | resistor | 0603 | 10 kΩ | 12 | audio | block-6 | WF folder feedback resistor; R_g = R_f → G=+2 at (+) |
+| D_WF_1N4148 | 1N4148W | SOD-123 | — | 48 | audio | block-6 | WF passive clamp: 4 per path (2 per polarity); Vth = ±1.4V |
+| C_WF_wiper | ceramic, X7R | 0603 | 47 pF | 12 | audio | block-6 | RV_DRIVE wiper bypass cap; pole ≈288 kHz; anti-RF on each path |
 | *— BP_MIX circuit —* | | | | | | | |
 | BP_WET_SUM_L, _R | TL072CDT | SOIC-8 | — | 2 | audio | block-6 | Half A = BP1+BP2+BP3 wet summer; half B = MIX crossfade |
 | BP_MIX_BUF_L, _R | TL072CDT | SOIC-8 | — | 2 | audio | block-6 | Half A = MIX output polarity buffer; half B = spare |

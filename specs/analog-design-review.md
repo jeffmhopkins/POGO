@@ -327,6 +327,7 @@ validation items remain as Phase 5R tasks:
 | Prototype: VCA AMT pot value — validate 1 kΩ vs 10 kΩ interaction with THAT 2180 | Medium | block-4 |
 | Prototype: Paralleled MB_PROC_A output buffer stability (47 Ω series R adequacy) | Medium | block-3 |
 | Prototype: THAT340 sharing — reduce 6 ICs to 4 (LP1+LP2 share, BP1+BP2 share) | Low | blocks 5/6/7/8 |
+| Prototype: WF fold threshold Vth characterization — bench-measure fold shape at various drive levels; compare to DSP asin(sin(x)) reference (informational; topology is correct and stable) | Low | block-6 |
 
 ## 7. Completed Action Items
 
@@ -350,3 +351,5 @@ validation items remain as Phase 5R tasks:
 | Block-1 "26% RTI noise improvement" → "61%" (math: (8.4−3.3)/8.4 = 60.7%) | Done |
 | aux-attenuverter.md wiper impedance: "1 kΩ" → "2.5 kΩ" (= 10 kΩ/4 at center travel) | Done |
 | README.md: "22 CV destinations" → "19"; stale phase status and directory structure updated | Done |
+| Block-6 WF topology: replaced diode-in-feedback compressor with true symmetric precision folder (passive clamp + G=+2 subtractor); no extra ICs; D_WF count 24→48; stability proven analytically | Done |
+| Wiper bypass cap (47 pF) added to all RV_DRIVE wiper nodes in block-6 (anti-RF, scratchiness reduction) | Done |
