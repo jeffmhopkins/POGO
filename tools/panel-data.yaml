@@ -83,7 +83,7 @@ mounting_holes:
 separators:
   # ── Section 0 / LP1 boundary ──────────────────────────────────────────────────
   # x = midpoint(VCA_IN=28.575, LP1_FREQ=40.005) = 34.29mm
-  - {type: v, x: 34.29, y1: 9.0, y2: 124.0, style: main_cyan}
+  - {type: v, x: 34.29, y1: 9.0, y2: 124.0, style: zone_div}
   # Top of INPUT zone — label breaks the line
   # Perfect midpoint: strip bottom = 4.5mm, L_IN visual top = 13.5mm → mid = 9.0
   - {type: h, x1: 1.0, x2: 33.79, y: 9.0, style: zone_div, label: "INPUT", label_x: 17.145}
@@ -95,7 +95,7 @@ separators:
 
   # ── LP1 right boundary / LP2 boundary ────────────────────────────────────────
   # x = midpoint(LP1_RES=62.865, next-zone col0=74.295) = 68.58mm
-  - {type: v, x: 68.58, y1: 9.0, y2: 124.0, style: main_cyan}
+  - {type: v, x: 68.58, y1: 9.0, y2: 124.0, style: zone_div}
   - {type: h, x1: 35.29, x2: 68.08, y: 9.0, style: zone_div, label: "LP1", label_x: 51.435}
 
   # ── BP CONTROL right boundary ─────────────────────────────────────────────────
@@ -119,7 +119,7 @@ separators:
   # ── BP 3 right boundary ────────────────────────────────────────────────────────
   # x_start=160.02, col1 cx=177.165
   # x = midpoint(BP3 col2 jack=188.595, next col0=200.025) = 194.31mm
-  - {type: v, x: 194.31, y1: 9.0, y2: 124.0, style: main_cyan}
+  - {type: v, x: 194.31, y1: 9.0, y2: 124.0, style: zone_div}
   - {type: h, x1: 161.02, x2: 193.81, y: 9.0, style: zone_div, label: "BP 3", label_x: 177.165}
 
   # ── BP3 OUT + HP right boundary ───────────────────────────────────────────────
@@ -127,7 +127,7 @@ separators:
   # col0 cx=200.025, col1 cx=211.455
   # Slider (cx=205.74) and RES knob (cx=205.74) share same centre line
   # Right boundary = 194.31 + 2×11.43 = 217.17mm
-  - {type: v, x: 217.17, y1: 9.0, y2: 124.0, style: main_cyan}
+  - {type: v, x: 217.17, y1: 9.0, y2: 124.0, style: zone_div}
   - {type: h, x1: 195.31, x2: 216.67, y: 9.0, style: zone_div, label: "HP", label_x: 205.74}
   # Grey divider between BP3 OUT jacks (cy=17) and HP slider (cy=54)
   - {type: h, x1: 195.31, x2: 216.67, y: 26.0, style: zone_div}
