@@ -229,7 +229,7 @@ zones:
         col: 1
         cy: 83.0
         label: "CLIP"
-        label_fill: "#cc2222"
+        label_dy: 5.5
         led_fill:   "#441111"
         led_stroke: "#cc2222"
         cpp_id: "MOD_LED_R1"
@@ -251,7 +251,7 @@ zones:
         col: 1
         cy: 96.34
         label: "POS"
-        label_fill: "#2255cc"
+        label_dy: 5.5
         led_fill:   "#112244"
         led_stroke: "#2255cc"
         cpp_id: "MOD_LED_R2"
@@ -267,7 +267,6 @@ zones:
         col: 1
         cy: 112.0
         label: "NEG"
-        label_fill: "#cc2222"
         led_fill:   "#441111"
         led_stroke: "#cc2222"
         cpp_id: "MOD_LED_R3"

@@ -160,8 +160,10 @@ def svg_led_labeled(
     font_size: float = 1.8,
     fill: str = "",
     stroke: str = "",
+    label_dy: float | None = None,
 ) -> str:
-    label_y = cy + rules.jack_label_dy
+    dy = label_dy if label_dy is not None else rules.jack_label_dy
+    label_y = cy + dy
     parts = [
         svg_led(cx, cy, colors, fill=fill, stroke=stroke),
         f'<text x="{cx}" y="{label_y:.1f}" fill="{label_fill}" '
