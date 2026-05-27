@@ -94,8 +94,8 @@
   <text x="30.48" y="13.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">MAIN</text>
   <rect x="25.98" y="15.80" width="9" height="2.4" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
   <rect x="26.48" y="15.60" width="3.5" height="2.8" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
-  <text x="25.825" y="21.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">1×</text>
-  <text x="31.325" y="21.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">5×</text>
+  <text x="26.325" y="21.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">1×</text>
+  <text x="30.825" y="21.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">5×</text>
   <circle cx="7.62" cy="31.5" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="7.62" cy="31.5" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
   <text x="7.62" y="38.5" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">BP3 L</text>
@@ -105,8 +105,8 @@
   <text x="30.48" y="28.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">BP3</text>
   <rect x="25.98" y="30.30" width="9" height="2.4" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
   <rect x="26.48" y="30.10" width="3.5" height="2.8" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
-  <text x="25.825" y="35.5" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">1×</text>
-  <text x="31.325" y="35.5" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">5×</text>
+  <text x="26.325" y="35.5" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">1×</text>
+  <text x="30.825" y="35.5" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">5×</text>
 
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- Zone 0b — LFO                                                            -->
@@ -197,13 +197,13 @@
   <text x="81.915" y="14.129999999999999" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
   <rect x="77.42" y="16.43" width="9" height="2.4" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
   <rect x="77.92" y="16.23" width="3.5" height="2.8" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
-  <text x="77.26" y="21.63" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">POS</text>
-  <text x="82.76" y="21.63" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">NEG</text>
+  <text x="77.76" y="21.63" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">POS</text>
+  <text x="82.26" y="21.63" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">NEG</text>
   <rect x="75.92" y="29.37" width="12" height="2.4" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
   <rect x="80.17" y="29.17" width="3.5" height="2.8" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
-  <text x="75.01" y="35.87" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">SOFT</text>
+  <text x="76.01" y="35.87" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">SOFT</text>
   <text x="80.01" y="35.87" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">HARD</text>
-  <text x="85.01" y="35.87" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">FOLD</text>
+  <text x="84.01" y="35.87" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">FOLD</text>
   <text x="81.915" y="39.370000000000005" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
   <circle cx="81.915" cy="52.4" r="9.0" fill="#1a1a1a" stroke="#555" stroke-width="0.7"/>
   <line x1="81.915" y1="52.4" x2="81.915" y2="43.4" stroke="#aaa" stroke-width="0.8"/>
