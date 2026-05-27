@@ -716,9 +716,17 @@ def _build_svg_lines(data: dict, rules: DesignRules) -> list[str]:
     lines.append("  <!-- ── ZONE DIVIDERS (dim gray horizontal) ──────────────────────────────── -->")
     for sep in data.get("separators", []):
         if sep["type"] == "h" and sep["style"] == "zone_div":
-            lines.append(
-                "  " + svg.svg_separator_h(sep["x1"], sep["x2"], sep["y"], sep["style"], colors)
-            )
+            if "label" in sep:
+                lx = sep.get("label_x", (sep["x1"] + sep["x2"]) / 2)
+                chunk = svg.svg_separator_h_labeled(
+                    sep["x1"], sep["x2"], sep["y"],
+                    sep["label"], lx, sep["style"], colors,
+                )
+                lines.append("  " + chunk.replace("\n", "\n  "))
+            else:
+                lines.append(
+                    "  " + svg.svg_separator_h(sep["x1"], sep["x2"], sep["y"], sep["style"], colors)
+                )
 
     lines.append("")
     lines.append("  <!-- ── LP2+HP+OUT ZONE: TOP STRIP / FILTER SECTION DIVIDER ──────────────── -->")

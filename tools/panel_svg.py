@@ -328,6 +328,54 @@ def svg_separator_h(
         )
 
 
+def svg_separator_h_labeled(
+    x1: float,
+    x2: float,
+    y: float,
+    label: str,
+    label_x: float,
+    style: str,
+    colors: dict,
+    font_size: float = 2.0,
+    char_width_factor: float = 0.65,
+    gap: float = 2.0,
+) -> str:
+    """Horizontal separator with an inline label that breaks the line.
+
+    The line is drawn in two segments — left and right of the text — with
+    a small gap on each side.  The text sits centred on the line using
+    dominant-baseline="middle".
+    """
+    half_w = len(label) * font_size * char_width_factor / 2
+    x_gap_left  = label_x - half_w - gap
+    x_gap_right = label_x + half_w + gap
+
+    if style == "main_cyan":
+        stroke = colors["cyan"]
+        extra  = ' opacity="0.55"'
+    else:
+        stroke = colors["zone_div"]
+        extra  = ""
+
+    parts = []
+    if x1 < x_gap_left:
+        parts.append(
+            f'<line x1="{x1}" y1="{y}" x2="{x_gap_left:.2f}" y2="{y}" '
+            f'stroke="{stroke}" stroke-width="0.5"{extra}/>'
+        )
+    if x_gap_right < x2:
+        parts.append(
+            f'<line x1="{x_gap_right:.2f}" y1="{y}" x2="{x2}" y2="{y}" '
+            f'stroke="{stroke}" stroke-width="0.5"{extra}/>'
+        )
+    parts.append(
+        f'<text x="{label_x}" y="{y}" fill="{colors["control_text"]}" '
+        f'{_FONT} font-size="{font_size}" text-anchor="middle" '
+        f'dominant-baseline="middle">{label}</text>'
+    )
+    return "\n".join(parts)
+
+
 # ── Zone title ────────────────────────────────────────────────────────────────
 
 def svg_zone_title(

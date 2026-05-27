@@ -76,17 +76,15 @@ mounting_holes:
 separators:
   # Section 0 right boundary — cyan vertical (7 HP = 7 × 5.08 mm)
   - {type: v, x: 35.56, y1: 4.5, y2: 124.0, style: main_cyan}
-  # INPUT / GAIN → LFO boundary (BP3 labels land at y=38.5; separator below at 43)
-  - {type: h, x1: 1.0, x2: 35.06, y: 43.0, style: zone_div}
-  # LFO → MOD BUS boundary (LFO2 knob label baseline ~y=73.4; separator at 75.5)
-  - {type: h, x1: 1.0, x2: 35.06, y: 75.5, style: zone_div}
+  # INPUT / GAIN → LFO boundary — label breaks the line
+  - {type: h, x1: 1.0, x2: 35.06, y: 43.0, style: zone_div, label: "LFOs", label_x: 17.145}
+  # LFO → MOD BUS boundary — label breaks the line
+  - {type: h, x1: 1.0, x2: 35.06, y: 75.5, style: zone_div, label: "MOD BUS", label_x: 17.78}
 
 # ── Zone labels ───────────────────────────────────────────────────────────────
 # x=17.145 is the geometric centre of the 3-column section (col 1 cx)
 zone_labels:
   - {x: 17.78, y: 8.25, text: "INPUT"}
-  - {x: 17.145, y: 45.5, text: "LFOs"}
-  - {x: 17.78, y: 78.0, text: "MOD BUS"}
 
 # ── Zones ─────────────────────────────────────────────────────────────────────
 zones:
