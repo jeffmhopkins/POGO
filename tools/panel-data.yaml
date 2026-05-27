@@ -380,30 +380,27 @@ zones:
         cy: 24.80
         label: "OFFSET"
         cpp_param: "BP_OFFSET_PARAM"
-      # ── BP Mix medium knob — centred; cy matches LP1_TILT ────────────────────
+      # ── BP Mix large knob — centred; cy matches LP1_TILT ────────────────────
       - id: BP_MIX
-        type: knob_medium
+        type: knob_large
         cx: 80.01
         cy: 52.40
         label: "MIX"
         cpp_param: "BP_MIX_PARAM"
-      # ── Polarity switch (H2) — centred on section, no section label ─────────
+      # ── Polarity + Distortion switches — symmetric around LP1_RES cy=78.0 ──
+      # midpoint = 78.0; d=7.0 → H2=71.0, H3=85.0; gap=14mm (min 11mm) ✓
       - id: BP_POL
         type: switch_H2
         cx: 80.01
-        cy: 70.0
+        cy: 71.0
         label_above: ""
         pos_labels: ["POS", "NEG"]
         pos_xs: [75.51, 84.51]
         cpp_param: "BP_POL_PARAM"
-      # ── Distortion switch (H3) — centred on section, no section label ────────
-      # Must be ≥11.0mm below H2 (same cx, full x-overlap)
-      # H2 bottom = 77.5mm, H3 top = 78.5mm → gap = 1.0mm ✓
-      # pos_xs use col centres (74.30/80.01/85.72) for readable spread
       - id: BP_DIST
         type: switch_H3
         cx: 80.01
-        cy: 82.0
+        cy: 85.0
         pos_labels: ["SOFT", "HARD", "FOLD"]
         pos_xs: [74.30, 80.01, 85.72]
         label_below: ""

@@ -172,20 +172,20 @@
   <circle cx="80.01" cy="24.8" r="9.0" fill="#1a1a1a" stroke="#555" stroke-width="0.7"/>
   <line x1="80.01" y1="24.8" x2="80.01" y2="15.8" stroke="#aaa" stroke-width="0.8"/>
   <text x="80.01" y="36.8" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">OFFSET</text>
-  <circle cx="80.01" cy="52.4" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
-  <line x1="80.01" y1="52.4" x2="80.01" y2="47.9" stroke="#aaa" stroke-width="0.6"/>
-  <text x="80.01" y="59.9" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">MIX</text>
-  <text x="80.01" y="66.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
-  <rect x="75.51" y="68.80" width="9" height="2.4" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
-  <rect x="76.01" y="68.60" width="3.5" height="2.8" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
-  <text x="75.51" y="74.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">POS</text>
-  <text x="84.51" y="74.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">NEG</text>
-  <rect x="74.01" y="80.80" width="12" height="2.4" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
-  <rect x="78.26" y="80.60" width="3.5" height="2.8" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
-  <text x="74.3" y="87.3" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">SOFT</text>
-  <text x="80.01" y="87.3" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">HARD</text>
-  <text x="85.72" y="87.3" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">FOLD</text>
-  <text x="80.01" y="90.8" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="80.01" cy="52.4" r="7.0" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="80.01" y1="52.4" x2="80.01" y2="45.4" stroke="#aaa" stroke-width="0.7"/>
+  <text x="80.01" y="62.4" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">MIX</text>
+  <text x="80.01" y="67.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <rect x="75.51" y="69.80" width="9" height="2.4" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
+  <rect x="76.01" y="69.60" width="3.5" height="2.8" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
+  <text x="75.51" y="75.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">POS</text>
+  <text x="84.51" y="75.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">NEG</text>
+  <rect x="74.01" y="83.80" width="12" height="2.4" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
+  <rect x="78.26" y="83.60" width="3.5" height="2.8" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
+  <text x="74.3" y="90.3" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">SOFT</text>
+  <text x="80.01" y="90.3" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">HARD</text>
+  <text x="85.72" y="90.3" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">FOLD</text>
+  <text x="80.01" y="93.8" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
   <circle cx="74.295" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
   <line x1="74.295" y1="100.0" x2="74.295" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
   <text x="74.295" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
