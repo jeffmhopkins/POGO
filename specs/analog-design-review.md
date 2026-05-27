@@ -105,7 +105,7 @@ flag tolerance. These must be called out during BOM preparation:
 
 | Ref | Value | Location | Why |
 |---|---|---|---|
-| R_VOCT (block-5, 7, 8) | 56 kΩ | THAT340 V/oct network | 1% error = 12 cents pitch tracking error |
+| R_VOCT (block-5, 6, 7, 8) | 47 kΩ | THAT340 V/oct network | 1% error = 12 cents pitch tracking error; with R_E=1kΩ and RV_1VOCT≈7.5kΩ → 18.0 mV/V exact |
 | R_inv_in, R_inv_f (all attenuverters) | 10 kΩ | Attenuverter inverter | 1% mismatch → center null only ~40 dB |
 | R_MB_INV (block-3) | 100 kΩ | MB_INV stage | 1% mismatch → mod bus gain error at zero offset |
 | R_TILT_INV_IN/FB (block-5) | 100 kΩ | Tilt inverter | Mismatch shifts tilt center null |
@@ -180,8 +180,8 @@ both), so it appears as common-mode Q modulation, not audio noise.
 ### 3.4 THAT340 Base Loading
 
 Each THAT340 NPN base draws I_B ≈ I_C / h_FE ≈ 10 µA / 200 ≈ 50 nA from the V/oct
-resistor network. Through R_VOCT (56 kΩ): voltage drop = 50 nA × 56 kΩ = 2.8 mV.
-At 1 V/oct = 58 mV/octave ÷ ln(2) = 83.5 mV/octave, 2.8 mV = 0.034 octaves = 0.4 semitones.
+resistor network. Through R_VOCT (47 kΩ): voltage drop = 50 nA × 47 kΩ = 2.35 mV.
+At 1 V/oct = 58 mV/octave ÷ ln(2) = 83.5 mV/octave, 2.35 mV = 0.028 octaves = 0.34 semitones.
 This is absorbed entirely by the RV_REF calibration trim. No circuit change needed.
 
 ### 3.5 OTA Linearizing Resistors (1 kΩ)

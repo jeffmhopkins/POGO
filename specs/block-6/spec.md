@@ -396,9 +396,9 @@ wiring routes to control board via ribbon connector.
 
 | Ref | Range | Purpose |
 |---|---|---|
-| RV_BP1_REF | 500 kΩ; ±25% f_ref | BP1 cutoff reference (target: 200 Hz at 0V); in series with R_IREF_A 750 kΩ |
-| RV_BP2_REF | 500 kΩ; ±25% f_ref | BP2 cutoff reference (target: 1500 Hz at 0V); in series with R_IREF_A 750 kΩ |
-| RV_BP3_REF | 500 kΩ; ±25% f_ref | BP3 cutoff reference (target: 6000 Hz at 0V); in series with R_IREF_A 750 kΩ |
+| RV_BP1_REF | 500 kΩ; ±25% f_ref | BP1 cutoff reference (target: 200 Hz at 0V); in series with R_IREF_A 1 MΩ |
+| RV_BP2_REF | 500 kΩ; ±25% f_ref | BP2 cutoff reference (target: 1500 Hz at 0V); in series with R_IREF_A 1 MΩ |
+| RV_BP3_REF | 500 kΩ; ±25% f_ref | BP3 cutoff reference (target: 6000 Hz at 0V); in series with R_IREF_A 1 MΩ |
 | RV_BP1_1VOCT | 20 kΩ; ±10% tracking | BP1 expo 1V/oct calibration |
 | RV_BP2_1VOCT | 20 kΩ; ±10% tracking | BP2 expo 1V/oct calibration |
 | RV_BP3_1VOCT | 20 kΩ; ±10% tracking | BP3 expo 1V/oct calibration |

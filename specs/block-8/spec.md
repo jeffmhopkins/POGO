@@ -136,7 +136,7 @@ unpopulated on LP2. The TL072 half can be repurposed as an additional buffer or 
 
 | Ref | Value | Purpose | Procedure |
 |---|---|---|---|
-| RV_REF | 500 kΩ | f_ref calibration | Apply 0V CV; trim until f₀ = 632 Hz; in series with R_IREF_A 750 kΩ |
+| RV_REF | 500 kΩ | f_ref calibration | Apply 0V CV; trim until f₀ = 632 Hz; in series with R_IREF_A 1 MΩ; set to ~238 kΩ (47.6% CW) |
 | RV_1VOCT | 20 kΩ | 1V/oct tracking | Apply +5V CV; trim until f₀ = 632 × 32 = 20.2 kHz |
 | RV_QMAX | 100 kΩ | Self-osc onset | Full CW resonance; trim for stable self-oscillation |
 
