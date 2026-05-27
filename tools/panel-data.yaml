@@ -178,7 +178,7 @@ zones:
         cy: 17
         label_above: "MAIN"
         pos_labels: ["1×", "5×"]
-        pos_xs: [26.325, 30.825]
+        pos_xs: [25.325, 31.825]
         cpp_param: "GAIN_PARAM"
       - id: BP3_L
         type: jack_input
@@ -202,7 +202,7 @@ zones:
         cy: 31.5
         label_above: "BP3"
         pos_labels: ["1×", "5×"]
-        pos_xs: [26.325, 30.825]
+        pos_xs: [25.325, 31.825]
         cpp_param: "ALT_GAIN_PARAM"
 
   # ── Section 0b: LFO ───────────────────────────────────────────────────────
@@ -421,14 +421,14 @@ zones:
         cy: 17.63
         label_above: ""
         pos_labels: ["POS", "NEG"]
-        pos_xs: [77.76, 82.26]
+        pos_xs: [76.76, 83.26]
         cpp_param: "BP_POL_PARAM"
       - id: BP_DIST
         type: switch_H3
         cx: 80.01
         cy: 30.57
         pos_labels: ["SOFT", "HARD", "FOLD"]
-        pos_xs: [76.26, 80.01, 83.76]
+        pos_xs: [74.76, 80.01, 85.26]
         label_below: ""
         cpp_param: "BP_DIST_PARAM"
       # ── Knobs: aligned with LP1/BP1 rows 2 and 3 ────────────────────────────
