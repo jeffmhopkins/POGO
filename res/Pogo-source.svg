@@ -31,6 +31,7 @@
   <!-- ── MAIN ZONE SEPARATOR LINES (cyan) ──────────────────────────────────── -->
   <line x1="34.29" y1="9.0" x2="34.29" y2="124.0" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
   <line x1="68.58" y1="9.0" x2="68.58" y2="124.0" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
+  <line x1="91.44" y1="9.0" x2="91.44" y2="124.0" stroke="#00d4ff" stroke-width="0.5" opacity="0.55"/>
 
   <!-- ── ZONE DIVIDERS (dim gray horizontal) ──────────────────────────────── -->
   <line x1="1.0" y1="9.0" x2="11.89" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
@@ -45,6 +46,9 @@
   <line x1="35.29" y1="9.0" x2="47.48" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
   <line x1="55.39" y1="9.0" x2="68.08" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
   <text x="51.435" y="9.0" fill="#999" font-family="monospace" font-size="2.0" text-anchor="middle" dominant-baseline="middle">LP1</text>
+  <line x1="69.58" y1="9.0" x2="76.71" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
+  <line x1="83.31" y1="9.0" x2="90.94" y2="9.0" stroke="#3a3a3a" stroke-width="0.5"/>
+  <text x="80.01" y="9.0" fill="#999" font-family="monospace" font-size="2.0" text-anchor="middle" dominant-baseline="middle">BP</text>
 
   <!-- ── LP2+HP+OUT ZONE: TOP STRIP / FILTER SECTION DIVIDER ──────────────── -->
 
@@ -160,5 +164,42 @@
   <circle cx="62.864999999999995" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="62.864999999999995" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
   <text x="62.864999999999995" y="119.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">RES</text>
+
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- Zone — BP CONTROL                                                        -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+
+  <circle cx="80.01" cy="21.0" r="9.0" fill="#1a1a1a" stroke="#555" stroke-width="0.7"/>
+  <line x1="80.01" y1="21.0" x2="80.01" y2="12.0" stroke="#aaa" stroke-width="0.8"/>
+  <text x="80.01" y="33.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">OFFSET</text>
+  <circle cx="74.295" cy="43.0" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="74.295" y1="43.0" x2="74.295" y2="38.5" stroke="#aaa" stroke-width="0.6"/>
+  <text x="74.295" y="50.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">MIX</text>
+  <circle cx="85.725" cy="57.0" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="85.725" y1="57.0" x2="85.725" y2="52.5" stroke="#aaa" stroke-width="0.6"/>
+  <text x="85.725" y="64.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">TILT</text>
+  <text x="80.01" y="70.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">POL</text>
+  <rect x="75.51" y="72.80" width="9" height="2.4" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
+  <rect x="76.01" y="72.60" width="3.5" height="2.8" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
+  <text x="75.51" y="78.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">POS</text>
+  <text x="84.51" y="78.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">NEG</text>
+  <rect x="74.01" y="85.30" width="12" height="2.4" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
+  <rect x="78.26" y="85.10" width="3.5" height="2.8" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
+  <text x="76.01" y="91.8" fill="#3d5260" font-family="monospace" font-size="1.6" text-anchor="middle">SOFT</text>
+  <text x="80.01" y="91.8" fill="#3d5260" font-family="monospace" font-size="1.6" text-anchor="middle">HARD</text>
+  <text x="84.01" y="91.8" fill="#3d5260" font-family="monospace" font-size="1.6" text-anchor="middle">CLIP</text>
+  <text x="80.01" y="95.3" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="74.295" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="74.295" y1="100.0" x2="74.295" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
+  <text x="74.295" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="85.725" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="85.725" y1="100.0" x2="85.725" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
+  <text x="85.725" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="74.295" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="74.295" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="74.295" y="119.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
+  <circle cx="85.725" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="85.725" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="85.725" y="119.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">TILT</text>
 
 </svg>
