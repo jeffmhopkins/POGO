@@ -1,9 +1,12 @@
 # Block VCA: Pre-LP1 Voltage-Controlled Amplifier
 
 ## Status
-- Phase 1 (Audio Spec): [x] complete
-- Phase 2 (Analog Behavior): [x] complete
-- Phase 3 (Circuit Design): [x] complete
+- Phase 1R (Extract from code): [x] complete — updated for 48HP (added VCA_OFS)
+- Phase 2R (Analog model): [ ] complete
+- Phase 3R (Circuit design): [ ] complete
+
+> **48HP update (2026-05-27):** Added `VCA_OFS_PARAM` floor offset. Signal chain position
+> unchanged (before LP1, after Pre-Gain). Mod bus source is now LFO1 (not envelope follower).
 
 ---
 
@@ -20,23 +23,32 @@ At default (AMT = center, mod bus at rest): signal passes at unity gain.
 
 ### Parameters
 
-| Name | Range | Default | Taper | Description |
-|---|---|---|---|---|
-| AMT | −1× to +1× | 0 (center) | Linear | Attenuverter — controls how much the mod bus CV scales VCA gain |
+| Name | Enum | Range | Default | Taper | Description |
+|---|---|---|---|---|---|
+| VCA Depth (AMT) | `VCA_AMT_PARAM` | −1 to +1 | 0 (center) | Linear | Bipolar attenuverter — controls how mod CV scales VCA gain |
+| VCA Floor Offset | `VCA_OFS_PARAM` | 0–1 | 0.5 | Linear | Shifts the effective CV floor: 0=silent at 0V, 0.5=half floor, 1=full floor (unity regardless of CV) |
 
 No separate LEVEL knob. When AMT = 0 (center detent), the VCA passes at unity gain — the mod
 bus has no effect. Full CW: mod bus modulates gain from 0 to 1× as CV swings 0–10 V. Full CCW:
 inverted — higher CV reduces gain (ducking/gating).
 
+**VCA_OFS (floor offset):** Shifts the effective CV input before the gain law:
+`eff_cv = clamp(raw_cv + VCA_OFS × 5, 0, 10)`.
+- VCA_OFS=0: no shift (original behavior — signal fully muted when CV=0 and AMT>0)
+- VCA_OFS=0.5: adds 2.5V floor — minimum CV of 2.5V even when VCA_IN=0
+- VCA_OFS=1: adds 5V floor — equivalent to always having 5V on the CV input
+
 ### CV Modulation Targets
 
-| Target | CV Range | Attenuverter | Notes |
-|---|---|---|---|
-| VCA Level | 0–10 V | AMT knob (attenuverter) | CV IN jack normalizes to mod bus when unplugged |
+| Target | Enum | CV Range | Attenuverter | Notes |
+|---|---|---|---|---|
+| VCA Level | `VCA_INPUT` | 0–10 V | AMT (`VCA_AMT_PARAM`) | Normalizes to mod bus when unpatched |
+
+`VCA_OFS_PARAM` is a trimpot (no CV input) — sets a fixed floor offset on the effective CV.
 
 ### Signal Levels (I/O)
-- Input: summed stereo output from Block 4 Distortion, ±5 V nominal (up to ±10 V at high drive)
-- Output: same range, attenuated 0–1× by VCA CV; into LP Filter 1 (Block 5) input
+- Input: stereo output from Pre-Gain (Block 1), ±5 V nominal (up to ±10.5 V at 5× gain)
+- Output: same range, attenuated 0–1× by VCA CV; into LP Filter 1 (LP1) input
 - At unity (AMT=0, no CV modulation): signal passes unchanged
 
 ### Stereo Behavior

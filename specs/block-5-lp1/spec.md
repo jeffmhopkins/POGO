@@ -1,9 +1,14 @@
 # Block 5: LP Filter 1
 
 ## Status
-- Phase 1 (Audio Spec): [x] complete
-- Phase 2 (Analog Model): [x] complete
-- Phase 3 (Circuit Design): [x] complete — SVF (OTA-C, LP output tapped)
+- Phase 1R (Extract from code): [x] complete — updated for 48HP (TILT replaces SPREAD OFFSET)
+- Phase 2R (Analog model): [ ] complete
+- Phase 3R (Circuit design): [ ] complete
+
+> **48HP update (2026-05-27):** Control renamed STEREO SPREAD OFFSET → **LP1_TILT**. Signal
+> chain position unchanged (after VCA, before BP). BAND OUT tap removed — LP1 output is now
+> the dry reference for BP_MIX; BP3_L/R_OUT replaces the old BAND OUT tap. Self-oscillation
+> is still present but Q is clamped at 2000 (very high, not infinite) in the SVF model.
 
 ---
 
@@ -25,18 +30,32 @@ before it passes through LP2 and HP.
 
 ### Parameters
 
-| Name | Range | Default | Taper | Description |
-|---|---|---|---|---|
-| CUTOFF | 20 Hz – 20 kHz | 2 kHz | Logarithmic (1V/oct) | Lowpass cutoff frequency (shared L and R baseline) |
-| RESONANCE | 0 – 100% (self-osc) | 0% | Linear | Q from 0.5 to ∞; self-oscillation begins near 95–100% |
-| STEREO SPREAD OFFSET | ±5 V equivalent | 0 V (center) | Linear (bipolar) | Skews R channel cutoff relative to L; positive = R cutoff shifts up; negative = R cutoff shifts down |
+| Name | Enum | Range | Default | Taper | Description |
+|---|---|---|---|---|---|
+| LP1 Freq | `LP1_FREQ_PARAM` | −5–5 V/oct | 0 | Logarithmic (1V/oct) | Shared baseline cutoff for both channels; f_ref=632Hz at 0V |
+| LP1 Stereo Tilt | `LP1_TILT_PARAM` | −1 to +1 | 0 | Linear (bipolar) | Stereo tilt: L cutoff += TILT×5V/oct; R cutoff −= TILT×5V/oct |
+| LP1 Resonance | `LP1_RES_PARAM` | 0–1 | 0 | Exponential | Q from 0.5 to 2000; near top = high-Q ringing |
+| LP1 Freq CV Depth | `LP1_FREQ_ATT_PARAM` | −1 to +1 | 0 | Linear | Attenuverter for LP1_FREQ_INPUT |
+| LP1 Tilt CV Depth | `LP1_TILT_ATT_PARAM` | −1 to +1 | 0 | Linear | Attenuverter for LP1_TILT_INPUT |
+| LP1 Res CV Depth | `LP1_RES_ATT_PARAM` | −1 to +1 | 0 | Linear | Attenuverter for LP1_RES_INPUT |
+
+**LP1_TILT (stereo tilt):** Replaces old STEREO SPREAD OFFSET. Positive values raise L cutoff
+and lower R cutoff simultaneously (tilt CW = L brighter, R darker). Bipolar: −1→+1 maps to
+±5 V/oct stereo spread. Tilt+Freq are independent: both add to the same V/oct baseline.
+
+**Cutoff law:**
+```
+L_cutoff = 632 Hz × 2^(LP1_FREQ_cv + LP1_TILT_cv)
+R_cutoff = 632 Hz × 2^(LP1_FREQ_cv − LP1_TILT_cv)
+```
 
 ### CV Modulation Targets
 
-| Target | CV Range | Attenuverter | Notes |
-|---|---|---|---|
-| CUTOFF | ±5 V (1V/oct) | Yes | Exponential mapping; sweeps full 20 Hz–20 kHz range |
-| RESONANCE | 0–10 V | Yes | 10 V drives filter to self-oscillation |
+| Target | Enum | CV Range | Attenuverter | Notes |
+|---|---|---|---|---|
+| LP1 Freq | `LP1_FREQ_INPUT` | ±5 V (1V/oct) | `LP1_FREQ_ATT_PARAM` | Applies to both L and R |
+| LP1 Tilt | `LP1_TILT_INPUT` | ±5 V | `LP1_TILT_ATT_PARAM` | L gets +cv, R gets −cv |
+| LP1 Res | `LP1_RES_INPUT` | 0–10 V | `LP1_RES_ATT_PARAM` | Scaled /10 before adding to res param |
 
 ### Signal Levels (I/O)
 - Input: ±5 V audio from Block VCA (may be harmonically complex from Block 4 distortion)

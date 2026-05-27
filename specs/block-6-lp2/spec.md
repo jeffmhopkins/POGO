@@ -1,9 +1,14 @@
 # Block 6: LP Filter 2
 
 ## Status
-- Phase 1 (Audio Spec): [x] complete
-- Phase 2 (Analog Model): [x] complete
-- Phase 3 (Circuit Design): [x] complete — mirrors LP1 SVF topology
+- Phase 1R (Extract from code): [x] complete — chain position updated
+- Phase 2R (Analog model): [ ] complete
+- Phase 3R (Circuit design): [ ] complete
+
+> **48HP update (2026-05-27):** Signal chain position changed. LP2 now follows HP (was before HP).
+> New order: LP1 → BP → **HP → LP2** → Output. DSP parameters and circuit topology unchanged.
+> Controls: `LP2_FREQ_PARAM` (slider, −5–5 V/oct, f_ref=632Hz), `LP2_RES_PARAM` (0–1),
+> plus two attenuverters `LP2_FREQ_ATT_PARAM`, `LP2_RES_ATT_PARAM`.
 
 ---
 

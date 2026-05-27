@@ -1,9 +1,14 @@
 # Block 7: HP Filter
 
 ## Status
-- Phase 1 (Audio Spec): [x] complete
-- Phase 2 (Analog Model): [x] complete
-- Phase 3 (Circuit Design): [x] complete
+- Phase 1R (Extract from code): [x] complete — chain position updated
+- Phase 2R (Analog model): [ ] complete
+- Phase 3R (Circuit design): [ ] complete
+
+> **48HP update (2026-05-27):** Signal chain position changed. HP now comes before LP2 (was last).
+> New order: LP1 → BP → **HP** → LP2 → Output. DSP parameters and circuit topology unchanged.
+> Controls: `HP_FREQ_PARAM` (slider, −5–5 V/oct, f_ref=632Hz), `HP_RES_PARAM` (0–1, default 0),
+> plus two attenuverters `HP_FREQ_ATT_PARAM`, `HP_RES_ATT_PARAM`.
 
 ---
 
