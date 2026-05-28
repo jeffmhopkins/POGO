@@ -593,7 +593,7 @@ struct PogoWidget : ModuleWidget {
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(102.345f, 47.69f)), module, Pogo::BP1_FOCUS_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(118.635f, 63.85f)), module, Pogo::BP1_TILT_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(102.345f, 80.00f)), module, Pogo::BP1_DIST_PARAM));
-		addChild(createLightCentered<SmallLight<RedLight>>(mm2px(Vec(110.905f, 80.00f)), module, Pogo::BP1_CLIP_LIGHT));
+		addChild(createLightCentered<SmallLight<RedLight>>(mm2px(Vec(118.490f, 80.00f)), module, Pogo::BP1_CLIP_LIGHT));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(99.06f, 100.00f)), module, Pogo::BP1_FREQ_ATT_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(110.49f, 100.00f)), module, Pogo::BP1_TILT_ATT_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(121.92f, 100.00f)), module, Pogo::BP1_DIST_ATT_PARAM));
