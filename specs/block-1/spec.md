@@ -72,12 +72,12 @@ The bypass (1×) path routes around the op-amp entirely via the switch, presenti
 input directly to the next stage. This avoids any gain-of-1 op-amp buffer in the
 bypass path that could add its own noise floor.
 
-**Gain switch:** A DPDT slide switch shorts R_g to ground (feedback to inverting input)
-in the gain position, or opens the feedback network to connect the op-amp output directly
-back to the inverting input (unity-gain follower). Alternatively — and simpler for
-layout — the switch selects between two signal paths: the gain stage output vs. the
-input passed through directly. The DPDT routes both L and R channels simultaneously
-with a single switch actuator (one pole per channel).
+**Gain switch:** A Dailywell DW3 (2M-series DPDT ON-ON) sub-mini toggle shorts R_g to
+ground (feedback to inverting input) in the gain position, or opens the feedback network
+to connect the op-amp output directly back to the inverting input (unity-gain follower).
+Alternatively — and simpler for layout — the switch selects between two signal paths: the
+gain stage output vs. the input passed through directly. The DPDT routes both L and R
+channels simultaneously with a single toggle actuator (one pole per channel).
 
 **ALT path (GAIN_BP3):** An identical stage (second OPA1612) handles ALT_BP_L and
 ALT_BP_R. When neither ALT_BP_L nor ALT_BP_R is patched, the alt path outputs 0 V
@@ -129,10 +129,10 @@ note below. Both give gain within 5% of 5×.
 - Supply decoupling: 100 nF X7R 0603 on each supply pin, placed within 2 mm of IC.
 - Iq = 2.75 mA/ch × 2 = 5.5 mA/pkg; P_diss = 24 V × 5.5 mA = 132 mW — safe in SOIC-8.
 
-**Gain switches (SW1 = GAIN_MAIN, SW2 = GAIN_BP3): 2PDT slide switch**
+**Gain switches (SW1 = GAIN_MAIN, SW2 = GAIN_BP3): Dailywell DW3 (2M DPDT ON-ON) toggle**
 - One pole per channel (L and R switched simultaneously).
 - Switch selects: gain-stage output (5×) vs. direct input bypass (1×).
-- Panel-mount, horizontal slide, 2-position.
+- PCB-mount sub-mini toggle, 2.54mm pin pitch, 10-48 UNS bushing (Ø6.00mm) through a Ø4.95mm panel hole, 2-position.
 
 ### Signal routing
 
@@ -193,8 +193,8 @@ length carrying unshielded pre-gain signals.
 | R4 | resistor 1% | 0603 | 18 kΩ | 2 | audio | block-1 | R_f main gain stage (×2 ch); G = 4.83× ≈ 5× |
 | R5 | resistor 1% | 0603 | 4.7 kΩ | 2 | audio | block-1 | R_g ALT gain stage (×2 ch) |
 | R6 | resistor 1% | 0603 | 18 kΩ | 2 | audio | block-1 | R_f ALT gain stage (×2 ch) |
-| SW1 | 2PDT slide switch | panel | — | 1 | panel | block-1 | GAIN_MAIN 1×/5× |
-| SW2 | 2PDT slide switch | panel | — | 1 | panel | block-1 | GAIN_BP3 1×/5× (ALT path) |
+| SW1 | Dailywell DW3 | sub-mini toggle 2M | DPDT ON-ON | 1 | panel | block-1 | GAIN_MAIN 1×/5× |
+| SW2 | Dailywell DW3 | sub-mini toggle 2M | DPDT ON-ON | 1 | panel | block-1 | GAIN_BP3 1×/5× (ALT path) |
 | C2 | cap, X7R | 0603 | 100 nF | 4 | audio | block-1 | OPA1612 supply decoupling (2 ICs × 2 pins) |
 | J3 | PJ301M-12 | panel | — | 1 | panel | block-1 | ALT_BP_L input jack |
 | J4 | PJ301M-12 | panel | — | 1 | panel | block-1 | ALT_BP_R input jack (normalled to ALT_BP_L) |

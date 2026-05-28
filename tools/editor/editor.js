@@ -74,7 +74,7 @@
   const PALETTE_TYPES = [
     "jack_input", "jack_output", "trimpot",
     "knob_medium", "knob_large", "knob_xl",
-    "eg_2pos", "eg_3pos",
+    "toggle_dw3", "toggle_dw5",
     "led", "led_labeled", "slider_V45", "text",
   ];
 
@@ -126,11 +126,7 @@
     if (type === "trimpot") return CY.TRIMPOT_CY;
     if (C.type_sets.pot.includes(type)) return CY.POT_CY;
     if (C.type_sets.slider.includes(type)) return CY.SLIDER_V45_CY;
-    if (C.type_sets.switch_v3.includes(type)) return CY.SWITCH_V3_CY;
-    if (type === "switch_H3") return CY.SWITCH_H3_CY;
-    if (type === "switch_H2") return CY.SWITCH_CY;
-    if (C.type_sets.eg_2pos.includes(type)) return CY.EG1218_CY;
-    if (C.type_sets.eg_3pos.includes(type)) return CY.EG2301_V_CY;
+    if (C.type_sets.toggle_dw3.includes(type) || C.type_sets.toggle_dw5.includes(type)) return CY.TOGGLE_CY;
     if (C.type_sets.led.includes(type)) return CY.LED_CY;
     return null;
   }
@@ -157,8 +153,7 @@
     if (type === "trimpot") return P.trimpot;
     if (C.type_sets.pot.includes(type)) return P.pot;
     if (C.type_sets.slider.includes(type)) return P.slider;
-    if (C.type_sets.switch_v3.includes(type)) return P.switch_v3;
-    if (type === "switch_H2" || type === "switch_H3") return P.switch_h;
+    if (C.type_sets.toggle_dw3.includes(type) || C.type_sets.toggle_dw5.includes(type)) return P.toggle;
     if (C.type_sets.led.includes(type)) return P.led;
     return 0;
   }
@@ -223,19 +218,10 @@
     // 1 ── nut keep-out
     for (const o of comps) {
       const { cx, cy, type, label } = o;
-      // EG slide switches: rectangular slot, check y-extent against ±half-height
-      if (C.type_sets.eg_2pos.includes(type) || C.type_sets.eg_3pos.includes(type)) {
-        const tag = C.type_sets.eg_2pos.includes(type) ? "EG2POS" : "EG3POS";
-        const ph = C.eg_panel_h[type];
-        const top = cy - ph, bot = cy + ph;
-        if (top < topKO) rec(`[NUT KEEPOUT] ${tag} '${label}' at cy=${f2(cy)}: slot top=${f2(top)} encroaches TOP keepout (${f2(topKO)})`, o.c);
-        if (bot > botKO) rec(`[NUT KEEPOUT] ${tag} '${label}' at cy=${f2(cy)}: slot bottom=${f2(bot)} exceeds BOT keepout (${f2(botKO)})`, o.c);
-        continue;
-      }
       let r = null, kind = null;
       if (C.type_sets.jack.includes(type)) { r = DR.jack_nut_r; kind = "JACK"; }
       else if (C.type_sets.pot.includes(type)) { r = DR.pot_nut_r; kind = "POT"; }
-      else if (C.type_sets.switch_h.includes(type)) { r = C.panel_r.switch_h; kind = "SWITCH"; }
+      else if (C.type_sets.toggle_dw3.includes(type) || C.type_sets.toggle_dw5.includes(type)) { r = C.panel_r.toggle; kind = "SWITCH"; }
       else if (C.type_sets.led.includes(type)) { r = C.panel_r.led; kind = "LED"; }
       if (r == null) continue;
       const top = cy - r, bot = cy + r;
@@ -347,45 +333,6 @@
     return rLed(c) + (c.label_border ? labelBorderRect(c, dy) : "") +
       `<text y="${dy.toFixed(1)}" fill="${lf}" ${FONT} font-size="${fs}" text-anchor="middle">${esc(c.label || "")}</text>`;
   }
-  function rSwitchH(c, width, rawcx) {
-    const labels = c.pos_labels || [], xs = c.pos_xs || [];
-    const bx = -width / 2;
-    let s = "";
-    if (width === 9 && c.label_above != null) {
-      const ay = c.label_above_y != null ? Number(c.label_above_y) - resolve(c, zoneOf(c)).cy : -3.5;
-      s += `<text y="${ay}" fill="${COL.jack_text}" ${FONT} font-size="1.8" text-anchor="middle">${esc(c.label_above)}</text>`;
-    }
-    const slug = width === 9 ? bx + 0.5 : -1.75;
-    s += `<rect x="${bx.toFixed(2)}" y="-1.2" width="${width}" height="2.4" rx="1.2" fill="${COL.switch_body}" stroke="${COL.jack_outer}" stroke-width="0.5"/>`;
-    s += `<rect x="${slug.toFixed(2)}" y="-1.4" width="3.5" height="2.8" rx="0.8" fill="${COL.switch_slug}" stroke="${COL.switch_slug_s}" stroke-width="0.3"/>`;
-    const cy = resolve(c, zoneOf(c)).cy;
-    const posY = c.pos_y != null ? Number(c.pos_y) - cy : (width === 9 ? 4 : 5.3);
-    labels.forEach((pl, i) => {
-      const px = (xs[i] != null ? Number(xs[i]) - rawcx : 0);
-      s += `<text x="${px}" y="${posY}" fill="${COL.jack_text}" ${FONT} font-size="1.6" text-anchor="middle">${esc(pl)}</text>`;
-    });
-    if (width === 12) {
-      const lby = c.label_below_y != null ? Number(c.label_below_y) - cy : 8.8;
-      s += `<text y="${lby}" fill="${COL.control_text}" ${FONT} font-size="1.8" text-anchor="middle">${esc(c.label_below || c.label || "")}</text>`;
-    }
-    return s;
-  }
-  function rSwitchV3(c) {
-    const cy = resolve(c, zoneOf(c)).cy;
-    const bh = Number(c.body_height || 12);
-    const top = (c.cy_body_top != null ? Number(c.cy_body_top) - cy : -bh / 2);
-    const slugOff = Number(c.slug_y_offset != null ? c.slug_y_offset : 4.25);
-    let s = `<rect x="-1.2" y="${top.toFixed(2)}" width="2.4" height="${bh}" rx="1.2" fill="${COL.switch_body}" stroke="${COL.jack_outer}" stroke-width="0.5"/>`;
-    s += `<rect x="-1.4" y="${(top + slugOff).toFixed(2)}" width="2.8" height="3.5" rx="0.8" fill="${COL.switch_slug}" stroke="${COL.switch_slug_s}" stroke-width="0.3"/>`;
-    const labels = c.pos_labels || [], ys = c.pos_ys || [];
-    labels.forEach((pl, i) => {
-      const py = (ys[i] != null ? Number(ys[i]) - cy : (top + i * (bh / Math.max(1, labels.length - 1))));
-      s += `<text x="1.4" y="${py}" fill="${COL.switch_label}" ${FONT} font-size="1.4" text-anchor="start">${esc(pl)}</text>`;
-    });
-    const lby = c.label_below_y != null ? Number(c.label_below_y) - cy : (bh / 2 + 3);
-    s += `<text y="${lby}" fill="${COL.control_text}" ${FONT} font-size="1.8" text-anchor="middle">${esc(c.label_below || c.label || "")}</text>`;
-    return s;
-  }
   function rSlider(c) {
     const travel = 45.0, half = travel / 2, slotH = travel + 3.0, slotW = 2.5;
     let s = `<rect x="${(-slotW / 2).toFixed(2)}" y="${(-slotH / 2).toFixed(2)}" width="${slotW}" height="${slotH.toFixed(1)}" rx="1.2" fill="${COL.knob_fill}" stroke="${COL.knob_stroke}" stroke-width="0.4"/>`;
@@ -395,17 +342,25 @@
     s += `<text y="${(-slotH / 2 - 3.5).toFixed(1)}" fill="${COL.jack_text}" ${FONT} font-size="1.8" text-anchor="middle">${esc(c.label || "")}</text>`;
     return s;
   }
-  // E-Switch EG1218 — 2-pos horizontal slide (port of svg_eg_slide_h, anchor-relative).
-  function rEg2pos(c, rawcx) {
-    const bw = 11.6, bh = 4.0, pw = 3.5, ph = 4.8;
+  // Dailywell toggle helpers (mirror panel_svg._toggle_bushing / _toggle_lever).
+  const TOGGLE_NUT_R = 2.475, TOGGLE_LEVER = 2.2;
+  function toggleBushing() {
+    return `<circle cx="0" cy="0" r="${TOGGLE_NUT_R}" fill="${COL.switch_body}" stroke="${COL.jack_outer}" stroke-width="0.4"/>`;
+  }
+  function toggleLever(dx, dy) {
+    return `<line x1="0" y1="0" x2="${dx.toFixed(3)}" y2="${dy.toFixed(3)}" stroke="${COL.switch_slug_s}" stroke-width="1.0" stroke-linecap="round"/>`
+      + `<circle cx="${dx.toFixed(3)}" cy="${dy.toFixed(3)}" r="0.9" fill="${COL.switch_slug}" stroke="${COL.switch_slug_s}" stroke-width="0.3"/>`;
+  }
+  // Dailywell DW3 — 2-pos toggle (port of svg_toggle_2pos, anchor-relative).
+  function rToggle2(c, rawcx) {
     const cy = resolve(c, zoneOf(c)).cy;
     let s = "";
-    if (c.label_above != null) {
+    if (c.label_above != null || c.label != null) {
       const ay = c.label_above_y != null ? Number(c.label_above_y) - cy : -3.5;
-      s += `<text y="${ay}" fill="${COL.jack_text}" ${FONT} font-size="1.8" text-anchor="middle">${esc(c.label_above)}</text>`;
+      s += `<text y="${ay}" fill="${COL.jack_text}" ${FONT} font-size="1.8" text-anchor="middle">${esc(c.label_above != null ? c.label_above : c.label)}</text>`;
     }
-    s += `<rect x="${(-bw / 2).toFixed(2)}" y="${(-bh / 2).toFixed(2)}" width="${bw}" height="${bh}" rx="0.8" fill="${COL.switch_body}" stroke="${COL.jack_outer}" stroke-width="0.5"/>`;
-    s += `<rect x="${(-bw / 2 + 0.8).toFixed(2)}" y="${(-ph / 2).toFixed(2)}" width="${pw}" height="${ph}" rx="0.6" fill="${COL.switch_slug}" stroke="${COL.switch_slug_s}" stroke-width="0.3"/>`;
+    s += toggleBushing();
+    s += toggleLever(-TOGGLE_LEVER, 0);
     const labels = c.pos_labels || [], xs = c.pos_xs || [];
     const posY = c.pos_y != null ? Number(c.pos_y) - cy : 4;
     labels.forEach((pl, i) => {
@@ -414,20 +369,18 @@
     });
     return s;
   }
-  // E-Switch EG2301 — 3-pos vertical slide (port of svg_eg_slide_v, anchor-relative).
-  function rEg3pos(c) {
-    const bw = 6.5, bh = 16.0, tw = 2.0, pw = 7.3, ph = 4.0;
+  // Dailywell DW5 — 3-pos toggle (port of svg_toggle_3pos, anchor-relative).
+  function rToggle3(c) {
     const cy = resolve(c, zoneOf(c)).cy;
-    let s = `<rect x="${(-bw / 2).toFixed(2)}" y="${(-bh / 2).toFixed(2)}" width="${bw}" height="${bh}" rx="0.8" fill="${COL.switch_body}" stroke="${COL.jack_outer}" stroke-width="0.5"/>`;
-    s += `<rect x="${(-tw / 2).toFixed(2)}" y="${(-bh / 2).toFixed(2)}" width="${tw}" height="${bh}" rx="0.5" fill="${COL.panel_bg}" stroke="none"/>`;
-    s += `<rect x="${(-pw / 2).toFixed(2)}" y="${(-ph / 2).toFixed(2)}" width="${pw}" height="${ph}" rx="0.6" fill="${COL.switch_slug}" stroke="${COL.switch_slug_s}" stroke-width="0.3"/>`;
-    const lx = bw / 2 + 1.2;
+    let s = toggleBushing();
+    s += toggleLever(0, -TOGGLE_LEVER);
+    const lx = TOGGLE_NUT_R + 1.2;
     const labels = c.pos_labels || [], ys = c.pos_ys || [];
     labels.forEach((pl, i) => {
-      const py = ys[i] != null ? Number(ys[i]) - cy : (-bh / 2 + i * (bh / Math.max(1, labels.length - 1)));
+      const py = ys[i] != null ? Number(ys[i]) - cy : 0;
       s += `<text x="${lx.toFixed(2)}" y="${py}" fill="${COL.switch_label}" ${FONT} font-size="1.4" text-anchor="start">${esc(pl)}</text>`;
     });
-    const lby = c.label_below_y != null ? Number(c.label_below_y) - cy : (bh / 2 + 3);
+    const lby = c.label_below_y != null ? Number(c.label_below_y) - cy : 7;
     s += `<text y="${lby}" fill="${COL.control_text}" ${FONT} font-size="1.8" text-anchor="middle">${esc(c.label_below || c.label || "")}</text>`;
     return s;
   }
@@ -451,11 +404,8 @@
       case "knob_xl":     return rKnob(c, 9.0);
       case "led":         return rLed(c);
       case "led_labeled": return rLedLabeled(c);
-      case "eg_2pos":     return rEg2pos(c, rawCx(c, zoneOf(c)));
-      case "eg_3pos":     return rEg3pos(c);
-      case "switch_H2":   return rSwitchH(c, 9, rawCx(c, zoneOf(c)));
-      case "switch_H3":   return rSwitchH(c, 12, rawCx(c, zoneOf(c)));
-      case "switch_V3":   return rSwitchV3(c);
+      case "toggle_dw3":  return rToggle2(c, rawCx(c, zoneOf(c)));
+      case "toggle_dw5":  return rToggle3(c);
       case "slider_V45":  return rSlider(c);
       default:            return `<circle r="2" fill="none" stroke="#888"/>`;
     }

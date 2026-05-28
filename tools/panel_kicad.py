@@ -78,25 +78,13 @@ _FOOTPRINT_MAP: dict[str, tuple[str, float, float]] = {
         "LED_THT.pretty/LED_D3.0mm.kicad_mod",
         0.0, 0.0,
     ),
-    "switch_H2": (
-        "Button_Switch_THT.pretty/SW_SPDT_PanelMount.kicad_mod",
-        0.0, 0.0,   # origin = actuator centre = panel hole centre
+    "toggle_dw3": (
+        "Button_Switch_THT.pretty/SW_Dailywell_DW3_DPDT.kicad_mod",
+        0.0, 0.0,   # origin = bushing/actuator centre = panel hole centre
     ),
-    "switch_H3": (
-        "Button_Switch_THT.pretty/SW_SPDT_PanelMount.kicad_mod",
-        0.0, 0.0,
-    ),
-    "switch_V3": (
-        "Button_Switch_THT.pretty/SW_SPDT_PanelMount.kicad_mod",
-        0.0, 0.0,
-    ),
-    "eg_2pos": (
-        "Button_Switch_THT.pretty/SW_EG1218.kicad_mod",
-        0.0, 0.0,   # origin = actuator/slot centre = panel hole centre
-    ),
-    "eg_3pos": (
-        "Button_Switch_THT.pretty/SW_EG2301.kicad_mod",
-        0.0, 0.0,
+    "toggle_dw5": (
+        "Button_Switch_THT.pretty/SW_Dailywell_DW5_DPDT.kicad_mod",
+        0.0, 0.0,   # origin = bushing/actuator centre = panel hole centre
     ),
 }
 

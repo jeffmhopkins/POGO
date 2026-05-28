@@ -865,50 +865,10 @@ def _component_svg(comp: dict, rules: DesignRules, colors: dict) -> str:
     elif ctype == "slider_label":
         return svg.svg_slider_label(float(comp.get("cx", cx)), float(comp.get("y", 38)), colors)
 
-    elif ctype == "switch_H2":
+    elif ctype == "toggle_dw3":
         ox = rules.x_offset
         pos_xs = [px + ox for px in comp.get("pos_xs", [])]
-        return svg.svg_switch_H2(
-            cx=cx, cy=cy,
-            label_above=comp.get("label_above", ""),
-            label_above_y=float(comp.get("label_above_y", cy - 3.5)),
-            pos_labels=comp.get("pos_labels", []),
-            pos_xs=pos_xs,
-            pos_y=float(comp.get("pos_y", cy + 4)),
-            colors=colors,
-        )
-
-    elif ctype == "switch_H3":
-        ox = rules.x_offset
-        pos_xs = [px + ox for px in comp.get("pos_xs", [])]
-        return svg.svg_switch_H3(
-            cx=cx, cy=cy,
-            pos_labels=comp.get("pos_labels", []),
-            pos_xs=pos_xs,
-            pos_y=float(comp.get("pos_y", cy + 5.3)),
-            label_below=comp.get("label_below", comp.get("label", "")),
-            label_below_y=float(comp.get("label_below_y", cy + 8.8)),
-            colors=colors,
-        )
-
-    elif ctype == "switch_V3":
-        body_height = float(comp.get("body_height", 12))
-        return svg.svg_switch_V3(
-            cx=cx,
-            cy_body_top=float(comp.get("cy_body_top", cy - body_height / 2)),
-            body_height=body_height,
-            slug_y_offset=float(comp.get("slug_y_offset", 4.25)),
-            pos_labels=comp.get("pos_labels", []),
-            pos_ys=comp.get("pos_ys", []),
-            label_below=comp.get("label_below", comp.get("label", "")),
-            label_below_y=float(comp.get("label_below_y", cy + body_height / 2 + 3)),
-            colors=colors,
-        )
-
-    elif ctype == "eg_2pos":
-        ox = rules.x_offset
-        pos_xs = [px + ox for px in comp.get("pos_xs", [])]
-        return svg.svg_eg_slide_h(
+        return svg.svg_toggle_2pos(
             cx=cx, cy=cy,
             label_above=comp.get("label_above", comp.get("label", "")),
             label_above_y=float(comp.get("label_above_y", cy - 3.5)),
@@ -918,13 +878,13 @@ def _component_svg(comp: dict, rules: DesignRules, colors: dict) -> str:
             colors=colors,
         )
 
-    elif ctype == "eg_3pos":
-        return svg.svg_eg_slide_v(
+    elif ctype == "toggle_dw5":
+        return svg.svg_toggle_3pos(
             cx=cx, cy=cy,
             pos_labels=comp.get("pos_labels", []),
             pos_ys=comp.get("pos_ys", []),
             label_below=comp.get("label_below", comp.get("label", "")),
-            label_below_y=float(comp.get("label_below_y", cy + 11.25)),
+            label_below_y=float(comp.get("label_below_y", cy + 7.0)),
             colors=colors,
         )
 
@@ -1235,7 +1195,7 @@ def build_html(svg_content: str, rules: DesignRules, violations: list[str], data
         ("#ffcc00", "●", "Jack nut  r=5.0mm"),
         ("#64b4ff", "●", "Pot / trimpot nut  r=5.5mm"),
         ("#ff8c00", "●", "Knob cap  (visual)"),
-        ("#dc64ff", "●", "Switch hole  r=3.15mm"),
+        ("#dc64ff", "●", "Toggle washer  r=3.8mm"),
         ("#64dc64", "●", "LED hole  r=1.6mm"),
         ("#ffcc00", "⬚", "PCB courtyard  (simplified bbox; dashed)"),
         ("#f5a623", "⬚", "KiCad fab outline  F.Fab"),
@@ -1355,7 +1315,7 @@ Query commands (no files written):
   --dist ID1 ID2                 Center-to-center, nut-edge, and PCB courtyard distances
   --snap-to ID DIR TYPE GAP      cx/cy for TYPE with GAP mm nut-edge clearance from ID
                                  DIR: right | left | above | below
-                                 TYPE: jack_input | trimpot | knob_medium | switch_H2 | led | …
+                                 TYPE: jack_input | trimpot | knob_medium | toggle_dw3 | led | …
   --zone-bbox ZONE_ID            Component bounding box for a zone
   --select X1 Y1 X2 Y2           List components whose centres fall within the bbox
   --shift ZONE_ID DX DY          Preview bulk shift of all components in a zone

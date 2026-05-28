@@ -9,93 +9,58 @@
 #include "dsp/LPFilter.hpp"
 #include "dsp/HPFilter.hpp"
 
-// ── Horizontal 2-position slide switch ────────────────────────────────────
-struct PogoSwitchH2 : app::Switch {
-	PogoSwitchH2() { box.size = mm2px(Vec(9.f, 5.f)); }
+// ── Dailywell 2M sub-mini toggle widgets (top-view: round bushing + lever) ────
+// Drawn to mirror the panel SVG toggles (svg_toggle_2pos / svg_toggle_3pos).
+static void drawToggleBushing(NVGcontext* vg, float cx, float cy) {
+	nvgBeginPath(vg);
+	nvgCircle(vg, cx, cy, mm2px(2.475f));
+	nvgFillColor(vg, nvgRGB(0x22, 0x22, 0x22));
+	nvgFill(vg);
+	nvgStrokeColor(vg, nvgRGB(0x55, 0x55, 0x55));
+	nvgStrokeWidth(vg, 0.6f);
+	nvgStroke(vg);
+}
+
+static void drawToggleLever(NVGcontext* vg, float cx, float cy, float tx, float ty) {
+	nvgBeginPath(vg);
+	nvgMoveTo(vg, cx, cy);
+	nvgLineTo(vg, tx, ty);
+	nvgStrokeColor(vg, nvgRGB(0x88, 0x88, 0x88));
+	nvgStrokeWidth(vg, mm2px(1.0f));
+	nvgLineCap(vg, NVG_ROUND);
+	nvgStroke(vg);
+	nvgBeginPath(vg);
+	nvgCircle(vg, tx, ty, mm2px(0.9f));
+	nvgFillColor(vg, nvgRGB(0x66, 0x66, 0x66));
+	nvgFill(vg);
+}
+
+// 2-position toggle (Dailywell DW3, ON-ON): lever points left/right.
+struct PogoToggle2 : app::Switch {
+	PogoToggle2() { box.size = mm2px(Vec(6.f, 6.f)); }
 
 	void draw(const DrawArgs& args) override {
-		float w = box.size.x, h = box.size.y;
-		float cy = h * 0.5f;
-		float bodyH = mm2px(2.4f), slugW = mm2px(3.5f), slugH = mm2px(2.8f);
-
-		nvgBeginPath(args.vg);
-		nvgRoundedRect(args.vg, 0, cy - bodyH * 0.5f, w, bodyH, mm2px(1.2f));
-		nvgFillColor(args.vg, nvgRGB(0x22, 0x22, 0x22));
-		nvgFill(args.vg);
-		nvgStrokeColor(args.vg, nvgRGB(0x55, 0x55, 0x55));
-		nvgStrokeWidth(args.vg, 0.5f);
-		nvgStroke(args.vg);
-
+		float cx = box.size.x * 0.5f, cy = box.size.y * 0.5f;
+		drawToggleBushing(args.vg, cx, cy);
 		auto* pq = getParamQuantity();
 		float t = pq ? (pq->getValue() - pq->getMinValue()) / (pq->getMaxValue() - pq->getMinValue()) : 0.f;
-		float slugX = t * (w - slugW);
-		nvgBeginPath(args.vg);
-		nvgRoundedRect(args.vg, slugX, cy - slugH * 0.5f, slugW, slugH, mm2px(0.8f));
-		nvgFillColor(args.vg, nvgRGB(0x66, 0x66, 0x66));
-		nvgFill(args.vg);
-		nvgStrokeColor(args.vg, nvgRGB(0x88, 0x88, 0x88));
-		nvgStrokeWidth(args.vg, 0.3f);
-		nvgStroke(args.vg);
+		float dir = (t < 0.5f) ? -1.f : 1.f;   // pos 0 → left, pos 1 → right
+		drawToggleLever(args.vg, cx, cy, cx + dir * mm2px(2.2f), cy);
 	}
 };
 
-// ── Horizontal 3-position slide switch ────────────────────────────────────
-struct PogoSwitchV3 : app::Switch {
-	PogoSwitchV3() { box.size = mm2px(Vec(5.f, 12.f)); }
+// 3-position toggle (Dailywell DW5, ON-ON-ON): lever points down/centre/up.
+struct PogoToggle3 : app::Switch {
+	PogoToggle3() { box.size = mm2px(Vec(6.f, 6.f)); }
 
 	void draw(const DrawArgs& args) override {
-		float w = box.size.x, h = box.size.y;
-		float cx = w * 0.5f;
-		float bodyW = mm2px(2.4f), slugW = mm2px(2.8f), slugH = mm2px(3.5f);
-
-		nvgBeginPath(args.vg);
-		nvgRoundedRect(args.vg, cx - bodyW * 0.5f, 0, bodyW, h, mm2px(1.2f));
-		nvgFillColor(args.vg, nvgRGB(0x22, 0x22, 0x22));
-		nvgFill(args.vg);
-		nvgStrokeColor(args.vg, nvgRGB(0x55, 0x55, 0x55));
-		nvgStrokeWidth(args.vg, 0.5f);
-		nvgStroke(args.vg);
-
+		float cx = box.size.x * 0.5f, cy = box.size.y * 0.5f;
+		drawToggleBushing(args.vg, cx, cy);
 		auto* pq = getParamQuantity();
-		// t=0 → slug at bottom (soft), t=1 → slug at top (fold)
+		// t=0 (soft) → lever down, t=0.5 (hard) → centre, t=1 (fold) → lever up
 		float t = pq ? (pq->getValue() - pq->getMinValue()) / (pq->getMaxValue() - pq->getMinValue()) : 0.f;
-		float slugY = (1.f - t) * (h - slugH);
-		nvgBeginPath(args.vg);
-		nvgRoundedRect(args.vg, cx - slugW * 0.5f, slugY, slugW, slugH, mm2px(0.8f));
-		nvgFillColor(args.vg, nvgRGB(0x66, 0x66, 0x66));
-		nvgFill(args.vg);
-		nvgStrokeColor(args.vg, nvgRGB(0x88, 0x88, 0x88));
-		nvgStrokeWidth(args.vg, 0.3f);
-		nvgStroke(args.vg);
-	}
-};
-
-struct PogoSwitchH3 : app::Switch {
-	PogoSwitchH3() { box.size = mm2px(Vec(12.f, 5.f)); }
-
-	void draw(const DrawArgs& args) override {
-		float w = box.size.x, h = box.size.y;
-		float cy = h * 0.5f;
-		float bodyH = mm2px(2.4f), slugW = mm2px(3.5f), slugH = mm2px(2.8f);
-
-		nvgBeginPath(args.vg);
-		nvgRoundedRect(args.vg, 0, cy - bodyH * 0.5f, w, bodyH, mm2px(1.2f));
-		nvgFillColor(args.vg, nvgRGB(0x22, 0x22, 0x22));
-		nvgFill(args.vg);
-		nvgStrokeColor(args.vg, nvgRGB(0x55, 0x55, 0x55));
-		nvgStrokeWidth(args.vg, 0.5f);
-		nvgStroke(args.vg);
-
-		auto* pq = getParamQuantity();
-		float t = pq ? (pq->getValue() - pq->getMinValue()) / (pq->getMaxValue() - pq->getMinValue()) : 0.5f;
-		float slugX = t * (w - slugW);
-		nvgBeginPath(args.vg);
-		nvgRoundedRect(args.vg, slugX, cy - slugH * 0.5f, slugW, slugH, mm2px(0.8f));
-		nvgFillColor(args.vg, nvgRGB(0x66, 0x66, 0x66));
-		nvgFill(args.vg);
-		nvgStrokeColor(args.vg, nvgRGB(0x88, 0x88, 0x88));
-		nvgStrokeWidth(args.vg, 0.3f);
-		nvgStroke(args.vg);
+		float dy = (1.f - 2.f * t) * mm2px(2.2f);
+		drawToggleLever(args.vg, cx, cy, cx, cy + dy);
 	}
 };
 
@@ -542,10 +507,10 @@ struct PogoWidget : ModuleWidget {
 		// ── Zone 0a — INPUT / GAIN ─────────────────────────────────────
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.62f, 17.00f)), module, Pogo::L_IN_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(19.05f, 17.00f)), module, Pogo::R_IN_INPUT));
-		addParam(createParamCentered<PogoSwitchH2>(mm2px(Vec(30.48f, 17.00f)), module, Pogo::GAIN_PARAM));
+		addParam(createParamCentered<PogoToggle2>(mm2px(Vec(30.48f, 17.00f)), module, Pogo::GAIN_PARAM));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.62f, 31.50f)), module, Pogo::ALT_BP_L_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(19.05f, 31.50f)), module, Pogo::ALT_BP_R_INPUT));
-		addParam(createParamCentered<PogoSwitchH2>(mm2px(Vec(30.48f, 31.50f)), module, Pogo::ALT_GAIN_PARAM));
+		addParam(createParamCentered<PogoToggle2>(mm2px(Vec(30.48f, 31.50f)), module, Pogo::ALT_GAIN_PARAM));
 
 		// ── Zone 0b — LFO ──────────────────────────────────────────────
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(7.62f, 51.50f)), module, Pogo::LFO1_OUTPUT));
@@ -585,7 +550,7 @@ struct PogoWidget : ModuleWidget {
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(87.630f, 112.00f)), module, Pogo::BP_TILT_INPUT));
 
 		// ── Zone — BP 1 ────────────────────────────────────────────────
-		addParam(createParamCentered<PogoSwitchV3>(mm2px(Vec(97.905f, 24.80f)), module, Pogo::BP1_DIST_MODE_PARAM));
+		addParam(createParamCentered<PogoToggle3>(mm2px(Vec(97.905f, 24.80f)), module, Pogo::BP1_DIST_MODE_PARAM));
 		addParam(createParamCentered<RoundHugeBlackKnob>(mm2px(Vec(114.49f,  24.80f)), module, Pogo::BP1_FREQ_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(102.345f, 47.69f)), module, Pogo::BP1_FOCUS_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(118.635f, 63.85f)), module, Pogo::BP1_TILT_PARAM));
@@ -599,7 +564,7 @@ struct PogoWidget : ModuleWidget {
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(121.92f, 112.00f)), module, Pogo::BP1_DIST_INPUT));
 
 		// ── Zone — BP 2 ────────────────────────────────────────────────
-		addParam(createParamCentered<PogoSwitchV3>(mm2px(Vec(132.195f, 24.80f)), module, Pogo::BP2_DIST_MODE_PARAM));
+		addParam(createParamCentered<PogoToggle3>(mm2px(Vec(132.195f, 24.80f)), module, Pogo::BP2_DIST_MODE_PARAM));
 		addParam(createParamCentered<RoundHugeBlackKnob>(mm2px(Vec(148.780f, 24.80f)), module, Pogo::BP2_FREQ_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(136.635f, 47.69f)), module, Pogo::BP2_FOCUS_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(152.925f, 63.85f)), module, Pogo::BP2_TILT_PARAM));
@@ -613,7 +578,7 @@ struct PogoWidget : ModuleWidget {
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(156.21f, 112.00f)), module, Pogo::BP2_DIST_INPUT));
 
 		// ── Zone — BP 3 ────────────────────────────────────────────────
-		addParam(createParamCentered<PogoSwitchV3>(mm2px(Vec(166.485f, 24.80f)), module, Pogo::BP3_DIST_MODE_PARAM));
+		addParam(createParamCentered<PogoToggle3>(mm2px(Vec(166.485f, 24.80f)), module, Pogo::BP3_DIST_MODE_PARAM));
 		addParam(createParamCentered<RoundHugeBlackKnob>(mm2px(Vec(183.070f, 24.80f)), module, Pogo::BP3_FREQ_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(170.925f, 47.69f)), module, Pogo::BP3_FOCUS_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(187.215f, 63.85f)), module, Pogo::BP3_TILT_PARAM));

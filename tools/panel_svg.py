@@ -210,7 +210,31 @@ def svg_led_labeled(
 
 # ── Switches ──────────────────────────────────────────────────────────────────
 
-def svg_switch_H2(
+# Dailywell 2M sub-miniature toggles are rendered top-view: a round bushing/nut
+# with a short toggle lever. The lever rests toward the default position so the
+# panel mock-up reads as a toggle, not a slide.
+_TOGGLE_NUT_R = 2.475   # panel hole Ø4.95mm
+_TOGGLE_LEVER = 2.2     # lever length from bushing centre
+
+
+def _toggle_bushing(cx: float, cy: float, colors: dict) -> str:
+    return (
+        f'<circle cx="{cx:.3f}" cy="{cy:.3f}" r="{_TOGGLE_NUT_R}" '
+        f'fill="{colors["switch_body"]}" stroke="{colors["jack_outer"]}" stroke-width="0.4"/>'
+    )
+
+
+def _toggle_lever(cx: float, cy: float, dx: float, dy: float, colors: dict) -> str:
+    tx, ty = cx + dx, cy + dy
+    return (
+        f'<line x1="{cx:.3f}" y1="{cy:.3f}" x2="{tx:.3f}" y2="{ty:.3f}" '
+        f'stroke="{colors["switch_slug_s"]}" stroke-width="1.0" stroke-linecap="round"/>'
+        f'<circle cx="{tx:.3f}" cy="{ty:.3f}" r="0.9" '
+        f'fill="{colors["switch_slug"]}" stroke="{colors["switch_slug_s"]}" stroke-width="0.3"/>'
+    )
+
+
+def svg_toggle_2pos(
     cx: float,
     cy: float,
     label_above: str,
@@ -220,122 +244,13 @@ def svg_switch_H2(
     pos_y: float,
     colors: dict,
 ) -> str:
-    """2-position horizontal slide switch."""
-    # Body: 9mm wide, 2.4mm tall, centred at cx
-    bx = cx - 4.5
-    by = cy - 1.2
-    # Slug: 3.5mm wide, 2.8mm tall, left position (pos 0)
-    sx = bx + 0.5
-    sy = cy - 1.4
+    """Dailywell DW3 2-position (ON-ON) sub-mini toggle, top-view, lever horizontal."""
     parts = [
         f'<text x="{cx}" y="{label_above_y}" fill="{colors["jack_text"]}" '
         f'{_FONT} font-size="1.8" text-anchor="middle">{label_above}</text>',
-        f'<rect x="{bx:.2f}" y="{by:.2f}" width="9" height="2.4" rx="1.2" '
-        f'fill="{colors["switch_body"]}" stroke="{colors["jack_outer"]}" stroke-width="0.5"/>',
-        f'<rect x="{sx:.2f}" y="{sy:.2f}" width="3.5" height="2.8" rx="0.8" '
-        f'fill="{colors["switch_slug"]}" stroke="{colors["switch_slug_s"]}" stroke-width="0.3"/>',
-    ]
-    for px, pl in zip(pos_xs, pos_labels):
-        parts.append(
-            f'<text x="{px}" y="{pos_y}" fill="{colors["jack_text"]}" '
-            f'{_FONT} font-size="1.6" text-anchor="middle">{pl}</text>'
-        )
-    return "\n".join(parts)
-
-
-def svg_switch_H3(
-    cx: float,
-    cy: float,
-    pos_labels: list[str],
-    pos_xs: list[float],
-    pos_y: float,
-    label_below: str,
-    label_below_y: float,
-    colors: dict,
-) -> str:
-    """3-position horizontal slide switch."""
-    # Body: 12mm wide, 2.4mm tall, centred at cx
-    bx = cx - 6.0
-    by = cy - 1.2
-    # Slug starts at centre position
-    sx = cx - 1.75
-    sy = cy - 1.4
-    parts = [
-        f'<rect x="{bx:.2f}" y="{by:.2f}" width="12" height="2.4" rx="1.2" '
-        f'fill="{colors["switch_body"]}" stroke="{colors["jack_outer"]}" stroke-width="0.5"/>',
-        f'<rect x="{sx:.2f}" y="{sy:.2f}" width="3.5" height="2.8" rx="0.8" '
-        f'fill="{colors["switch_slug"]}" stroke="{colors["switch_slug_s"]}" stroke-width="0.3"/>',
-    ]
-    for px, pl in zip(pos_xs, pos_labels):
-        parts.append(
-            f'<text x="{px}" y="{pos_y}" fill="{colors["jack_text"]}" '
-            f'{_FONT} font-size="1.6" text-anchor="middle">{pl}</text>'
-        )
-    parts.append(
-        f'<text x="{cx}" y="{label_below_y}" fill="{colors["control_text"]}" '
-        f'{_FONT} font-size="1.8" text-anchor="middle">{label_below}</text>'
-    )
-    return "\n".join(parts)
-
-
-def svg_switch_V3(
-    cx: float,
-    cy_body_top: float,
-    body_height: float,
-    slug_y_offset: float,
-    pos_labels: list[str],
-    pos_ys: list[float],
-    label_below: str,
-    label_below_y: float,
-    colors: dict,
-) -> str:
-    """3-position vertical slide switch."""
-    bx = cx - 1.2
-    sx = cx - 1.4
-    sy = cy_body_top + slug_y_offset
-    parts = [
-        f'<rect x="{bx:.2f}" y="{cy_body_top}" width="2.4" height="{body_height}" rx="1.2" '
-        f'fill="{colors["switch_body"]}" stroke="{colors["jack_outer"]}" stroke-width="0.5"/>',
-        f'<rect x="{sx:.2f}" y="{sy:.2f}" width="2.8" height="3.5" rx="0.8" '
-        f'fill="{colors["switch_slug"]}" stroke="{colors["switch_slug_s"]}" stroke-width="0.3"/>',
-    ]
-    lx = cx + 1.4
-    for py, pl in zip(pos_ys, pos_labels):
-        parts.append(
-            f'<text x="{lx}" y="{py}" fill="{colors["switch_label"]}" '
-            f'{_FONT} font-size="1.4" text-anchor="start">{pl}</text>'
-        )
-    parts.append(
-        f'<text x="{cx}" y="{label_below_y}" fill="{colors["control_text"]}" '
-        f'{_FONT} font-size="1.8" text-anchor="middle">{label_below}</text>'
-    )
-    return "\n".join(parts)
-
-
-def svg_eg_slide_h(
-    cx: float,
-    cy: float,
-    label_above: str,
-    label_above_y: float,
-    pos_labels: list[str],
-    pos_xs: list[float],
-    pos_y: float,
-    colors: dict,
-) -> str:
-    """E-Switch EG1218 2-position horizontal slide switch (11.6 × 4.0mm body)."""
-    body_w, body_h = 11.6, 4.0
-    bx = cx - body_w / 2
-    by = cy - body_h / 2
-    paddle_w, paddle_h = 3.5, 4.8   # paddle protrudes 0.4mm above/below body
-    px = bx + 0.8                    # position 1 (left)
-    py = cy - paddle_h / 2
-    parts = [
-        f'<text x="{cx}" y="{label_above_y}" fill="{colors["jack_text"]}" '
-        f'{_FONT} font-size="1.8" text-anchor="middle">{label_above}</text>',
-        f'<rect x="{bx:.2f}" y="{by:.2f}" width="{body_w}" height="{body_h}" rx="0.8" '
-        f'fill="{colors["switch_body"]}" stroke="{colors["jack_outer"]}" stroke-width="0.5"/>',
-        f'<rect x="{px:.2f}" y="{py:.2f}" width="{paddle_w}" height="{paddle_h}" rx="0.6" '
-        f'fill="{colors["switch_slug"]}" stroke="{colors["switch_slug_s"]}" stroke-width="0.3"/>',
+        _toggle_bushing(cx, cy, colors),
+        # Lever rests toward position 0 (left).
+        _toggle_lever(cx, cy, -_TOGGLE_LEVER, 0.0, colors),
     ]
     for lx, pl in zip(pos_xs, pos_labels):
         parts.append(
@@ -345,7 +260,7 @@ def svg_eg_slide_h(
     return "\n".join(parts)
 
 
-def svg_eg_slide_v(
+def svg_toggle_3pos(
     cx: float,
     cy: float,
     pos_labels: list[str],
@@ -354,26 +269,13 @@ def svg_eg_slide_v(
     label_below_y: float,
     colors: dict,
 ) -> str:
-    """E-Switch EG2301 3-position vertical slide switch (6.5 × 16.0mm body)."""
-    body_w, body_h = 6.5, 16.0
-    bx = cx - body_w / 2
-    by = cy - body_h / 2
-    # Track groove inside body
-    track_w = 2.0
-    tx = cx - track_w / 2
-    # Paddle at middle position, protrudes 0.4mm left/right of body
-    paddle_w, paddle_h = 7.3, 4.0
-    px = cx - paddle_w / 2
-    py = cy - paddle_h / 2
-    lx = cx + body_w / 2 + 1.2    # position labels to the right
+    """Dailywell DW5 3-position (ON-ON-ON) sub-mini toggle, top-view, lever vertical."""
     parts = [
-        f'<rect x="{bx:.2f}" y="{by:.2f}" width="{body_w}" height="{body_h}" rx="0.8" '
-        f'fill="{colors["switch_body"]}" stroke="{colors["jack_outer"]}" stroke-width="0.5"/>',
-        f'<rect x="{tx:.2f}" y="{by:.2f}" width="{track_w}" height="{body_h}" rx="0.5" '
-        f'fill="{colors["panel_bg"]}" stroke="none"/>',
-        f'<rect x="{px:.2f}" y="{py:.2f}" width="{paddle_w}" height="{paddle_h}" rx="0.6" '
-        f'fill="{colors["switch_slug"]}" stroke="{colors["switch_slug_s"]}" stroke-width="0.3"/>',
+        _toggle_bushing(cx, cy, colors),
+        # Lever rests toward the top position.
+        _toggle_lever(cx, cy, 0.0, -_TOGGLE_LEVER, colors),
     ]
+    lx = cx + _TOGGLE_NUT_R + 1.2    # position labels to the right
     for ply, pl in zip(pos_ys, pos_labels):
         parts.append(
             f'<text x="{lx:.2f}" y="{ply}" fill="{colors["switch_label"]}" '
