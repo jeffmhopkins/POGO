@@ -490,6 +490,7 @@ zones:
         type: knob_large
         cx: 114.30
         cy: 65.20
+        rotate: 180
         label: "TILT"
         cpp_param: "BP1_TILT_PARAM"
       - id: BP1_DIST
