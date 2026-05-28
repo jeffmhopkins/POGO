@@ -52,8 +52,8 @@ def _export_rules_constants(rules: DesignRules) -> dict[str, Any]:
             "led":         rules_mod.LED_PANEL_R,
             "slider":      rules_mod.SLIDER_V45_PANEL_W,
         },
-        # Visual knob-cap radii (panel face)
-        "knob_cap_r": {"knob_medium": 4.5, "knob_large": 7.0, "knob_xl": 9.0},
+        # Knob cap default DIAMETER (mm); a knob's radius = (cap_mm or default)/2.
+        "knob_default_cap_mm": rules.knob_default_cap_mm,
         # Type-set membership
         "type_sets": {
             "jack":       sorted(rules_mod.JACK_TYPES),

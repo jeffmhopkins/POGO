@@ -141,81 +141,41 @@ class TestCourtyardVsDrawSize:
             "led and led_labeled should use the same PCB courtyard"
         )
 
-    # ── knob_medium ───────────────────────────────────────────────────────────
-    # svg_knob draws a circle with r=4.5 for knob_medium.
-    # POT_CY = (-8.65, -6.67, 5.1, 6.67) — the 9mm Alpha RD901F footprint.
-    # The rotary knob cap (r=4.5) is the PANEL-FACE component; the actual pot body
-    # below is much larger. POT_CY covers the full physical footprint, which
-    # should be larger than the panel symbol.
-    def test_knob_medium_courtyard_encompasses_svg_symbol(self):
-        """POT_CY must encompass the knob_medium visual cap (r=4.5mm)."""
-        svg_r = 4.5
+    # ── knob (single type, sized by cap_mm DIAMETER) ───────────────────────────
+    # svg_knob draws a circle of radius cap_mm/2. POT_CY = (-8.65,-6.67,5.1,6.67) is
+    # the 9mm Alpha RD901F pot footprint (centred on the shaft, offset from the nut),
+    # and is FIXED regardless of cap_mm — the cap is a panel-face visual only.
+    def test_knob_small_cap_within_courtyard(self):
+        """A small cap (⌀9mm → r=4.5) fits inside POT_CY on all sides."""
+        svg_r = 9.0 / 2.0
         x1, y1, x2, y2 = POT_CY
-        assert x1 <= -svg_r, f"POT_CY left ({x1}) tighter than knob_medium cap (-{svg_r})"
-        assert y1 <= -svg_r, f"POT_CY top ({y1}) tighter than knob_medium cap (-{svg_r})"
-        assert x2 >= svg_r,  f"POT_CY right ({x2}) tighter than knob_medium cap ({svg_r})"
-        assert y2 >= svg_r,  f"POT_CY bottom ({y2}) tighter than knob_medium cap ({svg_r})"
+        assert x1 <= -svg_r and y1 <= -svg_r and x2 >= svg_r and y2 >= svg_r, (
+            f"POT_CY {POT_CY} should encompass a ⌀9mm cap (r={svg_r})."
+        )
 
-    # ── knob_large ────────────────────────────────────────────────────────────
-    # svg_knob draws r=7.0 for knob_large.
-    # POT_CY right edge = 5.1mm. The knob cap extends to 7.0mm on the right.
-    # Also top/bottom: cap ±7.0mm vs CY ±6.67mm.
+    # Larger caps (⌀14 → r=7.0, ⌀18 → r=9.0) extend BEYOND the pot footprint. This is
+    # expected: the courtyard is the pot body, not the cap. Knob-to-knob spacing is
+    # gated by the panel-face nut radius (pot_nut_r), not the PCB courtyard.
     @pytest.mark.xfail(
         reason=(
-            "knob_large SVG cap circle has r=7.0mm but POT_CY right edge is only "
-            "5.1mm (1.9mm short) and top/bottom are ±6.67mm (0.33mm short each). "
-            "The Alpha RD901F 9mm pot footprint is centred on the shaft, not the nut, "
-            "so the courtyard is offset. The knob cap extends beyond the footprint "
-            "on the right side and slightly beyond on top/bottom. "
-            "Panel-face nut-clearance check (jack_nut_r, pot_nut_r) is the correct "
-            "gate for knob spacing — the PCB courtyard check cannot protect against "
-            "large knob cap collisions on the panel face."
+            "A ⌀14mm+ knob cap (r≥7.0) exceeds POT_CY (right edge 5.1mm, top/bottom "
+            "±6.67mm). The Alpha RD901F footprint is shaft-centred, so a large cap "
+            "overhangs it. The PCB-courtyard check cannot gate large-cap collisions; "
+            "pot_nut_r is the panel-face clearance gate. This documents the limitation."
         ),
         strict=True,
     )
-    def test_knob_large_courtyard_encompasses_svg_symbol_xfail(self):
-        """POT_CY must encompass the knob_large visual cap (r=7.0mm). KNOWN FAIL."""
-        svg_r = 7.0
+    def test_large_cap_exceeds_courtyard_xfail(self):
+        """A ⌀14mm cap (r=7.0) is NOT contained by POT_CY (documented limitation)."""
+        svg_r = 14.0 / 2.0
         x1, y1, x2, y2 = POT_CY
-        assert y1 <= -svg_r, (
-            f"POT_CY top ({y1}) is {y1 - (-svg_r):+.2f}mm tighter than knob_large top (-{svg_r})"
-        )
-        assert x2 >= svg_r, (
-            f"POT_CY right ({x2}) is {x2 - svg_r:+.2f}mm tighter than knob_large right ({svg_r})"
-        )
-        assert y2 >= svg_r, (
-            f"POT_CY bottom ({y2}) is {y2 - svg_r:+.2f}mm tighter than knob_large bottom ({svg_r})"
+        assert y1 <= -svg_r and x2 >= svg_r and y2 >= svg_r, (
+            f"POT_CY {POT_CY} cannot contain a ⌀14mm cap (r={svg_r})."
         )
 
-    # ── knob_xl ───────────────────────────────────────────────────────────────
-    # svg_knob draws r=9.0 for knob_xl.
-    # POT_CY = (-8.65, -6.67, 5.1, 6.67). All four edges are inside the cap circle.
-    @pytest.mark.xfail(
-        reason=(
-            "knob_xl SVG cap circle has r=9.0mm. POT_CY is 8.65mm on the left, "
-            "6.67mm top/bottom, and only 5.1mm on the right — all smaller than r=9.0. "
-            "The XL knob cap extends far beyond the pot footprint on all sides. "
-            "DRC PCB overlap checks cannot detect knob_xl collisions. "
-            "Rely on panel-face nut-clearance (pot_nut_r) for spacing enforcement."
-        ),
-        strict=True,
-    )
-    def test_knob_xl_courtyard_encompasses_svg_symbol_xfail(self):
-        """POT_CY must encompass the knob_xl visual cap (r=9.0mm). KNOWN FAIL."""
-        svg_r = 9.0
-        x1, y1, x2, y2 = POT_CY
-        assert x1 <= -svg_r, (
-            f"POT_CY left ({x1}) is {x1 - (-svg_r):+.2f}mm tighter than knob_xl (-{svg_r})"
-        )
-        assert y1 <= -svg_r, (
-            f"POT_CY top ({y1}) is {y1 - (-svg_r):+.2f}mm tighter than knob_xl (-{svg_r})"
-        )
-        assert x2 >= svg_r, (
-            f"POT_CY right ({x2}) is {x2 - svg_r:+.2f}mm tighter than knob_xl ({svg_r})"
-        )
-        assert y2 >= svg_r, (
-            f"POT_CY bottom ({y2}) is {y2 - svg_r:+.2f}mm tighter than knob_xl ({svg_r})"
-        )
+    def test_knob_type_has_pot_courtyard(self):
+        """The single `knob` type resolves to the pot footprint courtyard (POT_CY)."""
+        assert _get_courtyard(50, 50, "knob", 0) is not None, "knob must have a courtyard"
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -529,7 +489,7 @@ class TestGetCourtyardUnknownType:
     def test_all_known_footprinted_types_return_rect(self):
         footprinted = [
             "jack_input", "jack_output",
-            "trimpot", "knob_medium", "knob_large", "knob_xl",
+            "trimpot", "knob",
             "toggle_dw3", "toggle_dw5",
             "led", "led_labeled",
             "slider_V45",

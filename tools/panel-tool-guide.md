@@ -303,9 +303,7 @@ cx can also be set explicitly when a component doesn't fall on a column grid:
 |------|-------------|-------|
 | `jack_input`, `jack_output` | 5.0 (nut) | Thonkiconn PJ301M-12 |
 | `trimpot` | 5.5 (nut) | Alpha 9mm, small knob cap |
-| `knob_medium` | 5.5 (nut) | Alpha 9mm, 4.5mm cap radius |
-| `knob_large` | 5.5 (nut) | Alpha 9mm, 7.0mm cap radius |
-| `knob_xl` | 5.5 (nut) | Alpha 9mm, 9.0mm cap radius |
+| `knob` | 5.5 (nut) | Alpha 9mm; cap drawn from `cap_mm` (DIAMETER); defaults to `knobs.default_cap_mm` |
 | `toggle_dw3` | 3.8 (washer) | Dailywell DW3 2-pos toggle (ON-ON) |
 | `toggle_dw5` | 3.8 (washer) | Dailywell DW5 3-pos toggle (ON-ON-ON) |
 | `led` | 1.6 (hole) | 3mm LED, unlabeled |

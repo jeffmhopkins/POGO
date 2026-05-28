@@ -54,15 +54,9 @@ _FOOTPRINT_MAP: dict[str, tuple[str, float, float]] = {
         "Potentiometer_THT.pretty/Potentiometer_Bourns_3296W_Vertical.kicad_mod",
         0.0, 2.5,   # footprint origin = pin1 (0,0); actuator/wiper centre = pin2 (0, 2.5)
     ),
-    "knob_medium": (
-        "Potentiometer_THT.pretty/Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles.kicad_mod",
-        7.5, 2.5,
-    ),
-    "knob_large": (
-        "Potentiometer_THT.pretty/Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles.kicad_mod",
-        7.5, 2.5,
-    ),
-    "knob_xl": (
+    # All knobs share the Alpha RD901F 9mm pot footprint regardless of cap_mm
+    # (the cap diameter is a panel-face visual only, not a PCB feature).
+    "knob": (
         "Potentiometer_THT.pretty/Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles.kicad_mod",
         7.5, 2.5,
     ),

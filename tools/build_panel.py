@@ -97,14 +97,14 @@ def _resolve_band_components(zone: dict, rules: DesignRules) -> list[dict]:
     cv_cy   = rules.cv_jack_cy
 
     comps = []
-    for ctrl, ctype, cy_key in [
-        ("freq",  "knob_xl",    "cy"),
-        ("focus", "knob_large", "cy"),
-        ("drive", "knob_large", "cy"),
+    for ctrl, cap_mm, cy_key in [
+        ("freq",  18.0, "cy"),
+        ("focus", 14.0, "cy"),
+        ("drive", 14.0, "cy"),
     ]:
         ctrl_data = zone.get(ctrl, {})
         cy_val    = float(ctrl_data.get("cy", 34 if ctrl == "freq" else (63 if ctrl == "focus" else 89)))
-        comps.append({"type": ctype, "cx": cx_c, "cy": cy_val, "id": f"{ctrl}_{n}"})
+        comps.append({"type": "knob", "cap_mm": cap_mm, "cx": cx_c, "cy": cy_val, "id": f"{ctrl}_{n}"})
 
     cv_jacks = zone.get("cv_jacks", {})
     cv_labels = zone.get("cv_labels", ["FREQ", "FOCUS", "DRIVE"])
@@ -846,17 +846,20 @@ def _component_svg(comp: dict, rules: DesignRules, colors: dict) -> str:
     elif ctype == "trimpot":
         tp_label       = comp.get("label", "")
         lfs            = float(comp.get("label_font_size", 1.8))
-        return svg.svg_trimpot(cx, cy, tp_label, rules, colors, label_font_size=lfs)
+        return svg.svg_trimpot(cx, cy, tp_label, rules, colors, label_font_size=lfs,
+                               rotate=int(comp.get("rotate", 0)))
 
-    elif ctype in ("knob_medium", "knob_large", "knob_xl"):
-        r_map = {"knob_medium": 4.5, "knob_large": 7.0, "knob_xl": 9.0}
-        r     = r_map[ctype]
-        lbl   = label if not label_lines else ""
+    elif ctype == "knob":
+        # cap_mm = cap DIAMETER; the drawn circle radius is cap_mm / 2.
+        cap_mm = float(comp.get("cap_mm", rules.knob_default_cap_mm))
+        r      = cap_mm / 2.0
+        lbl    = label if not label_lines else ""
         return svg.svg_knob(cx, cy, r, lbl, rules, colors,
                             label_lines=label_lines, label_fill=label_fill)
 
     elif ctype == "slider_V45":
-        return svg.svg_slider_V45(cx, cy, comp.get("label", ""), colors)
+        return svg.svg_slider_V45(cx, cy, comp.get("label", ""), colors,
+                                  rotate=int(comp.get("rotate", 0)))
 
     elif ctype == "slider":
         # Legacy: slider widget drawn by VCV Rack only (no SVG body)
@@ -876,6 +879,7 @@ def _component_svg(comp: dict, rules: DesignRules, colors: dict) -> str:
             pos_xs=pos_xs,
             pos_y=float(comp.get("pos_y", cy + 4.0)),
             colors=colors,
+            rotate=int(comp.get("rotate", 0)),
         )
 
     elif ctype == "toggle_dw5":
@@ -886,6 +890,7 @@ def _component_svg(comp: dict, rules: DesignRules, colors: dict) -> str:
             label_below=comp.get("label_below", comp.get("label", "")),
             label_below_y=float(comp.get("label_below_y", cy + 7.0)),
             colors=colors,
+            rotate=int(comp.get("rotate", 0)),
         )
 
     elif ctype == "led":
@@ -974,8 +979,6 @@ def _collect_overlay_positions(data: dict, rules: DesignRules) -> dict:
     leds:     list[tuple] = []  # (cx, cy, rotate)
     sliders:  list[tuple] = []  # (cx, cy, rotate)
 
-    r_cap_map = {"knob_medium": 4.5, "knob_large": 7.0, "knob_xl": 9.0}
-
     from panel_rules import SWITCH_TYPES, LED_TYPES, JACK_TYPES, POT_TYPES, SLIDER_TYPES  # noqa: E402
 
     for comp in resolve_components(data, rules):
@@ -988,8 +991,9 @@ def _collect_overlay_positions(data: dict, rules: DesignRules) -> dict:
             jacks.append((cx, cy, rotate))
         elif ctype in POT_TYPES:
             pots.append((cx, cy, rotate))
-            if ctype in r_cap_map:
-                knobs.append((cx, cy, r_cap_map[ctype]))
+            if ctype == "knob":
+                cap_r = float(comp.get("cap_mm", rules.knob_default_cap_mm)) / 2.0
+                knobs.append((cx, cy, cap_r))
         elif ctype in SWITCH_TYPES:
             switches.append((cx, cy, rotate))
         elif ctype in LED_TYPES:
@@ -1315,7 +1319,7 @@ Query commands (no files written):
   --dist ID1 ID2                 Center-to-center, nut-edge, and PCB courtyard distances
   --snap-to ID DIR TYPE GAP      cx/cy for TYPE with GAP mm nut-edge clearance from ID
                                  DIR: right | left | above | below
-                                 TYPE: jack_input | trimpot | knob_medium | toggle_dw3 | led | …
+                                 TYPE: jack_input | trimpot | knob | toggle_dw3 | led | …
   --zone-bbox ZONE_ID            Component bounding box for a zone
   --select X1 Y1 X2 Y2           List components whose centres fall within the bbox
   --shift ZONE_ID DX DY          Preview bulk shift of all components in a zone
