@@ -38,9 +38,11 @@ TOGGLE_CY = _cy("toggle_dw3", (-4.32, -4.82, 4.32, 4.82))
 LED_PANEL_R = 1.6          # 3mm LED 3.2mm Ø hole
 TRIMPOT_PANEL_R = 2.5      # trimpot actuator hole
 SLIDER_V45_PANEL_W = 1.5   # 45mm slider slot half-width
-# Dailywell 2M toggle: round bushing, panel hole Ø4.95mm; nut ~Ø6mm across flats.
-# Use the nut/washer half-width for panel-face clearance (circular, like a pot/jack).
-TOGGLE_PANEL_R = 3.0
+# Dailywell 2M toggle: 10-48 UNS-2A threaded bushing (Ø6.00mm), mounted through a
+# Ø4.95mm panel hole, secured with two 10-48 nuts + an external-tooth locking washer
+# (Dailywell MNU-2M01/03). The toothed washer OD (~Ø7.6mm) is the largest panel-face
+# feature, so use its radius for circular nut/washer clearance (like a pot/jack nut).
+TOGGLE_PANEL_R = 3.8
 
 SLIDER_TYPES = {"slider_V45"}
 

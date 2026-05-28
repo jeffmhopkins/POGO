@@ -579,9 +579,9 @@ class TestDiscrepancySummary:
             f"TOGGLE_CY {TOGGLE_CY} smaller than drawn symbol half-extent {draw_half}mm."
         )
 
-    def test_toggle_panel_radius_clears_top_keepout(self):
-        """A toggle nut (r=TOGGLE_PANEL_R) at the top row must clear the 10mm top keepout."""
-        # Documented value: nut/washer half-width for the Dailywell 2M bushing.
-        assert TOGGLE_PANEL_R == 3.0, (
-            f"TOGGLE_PANEL_R changed: got {TOGGLE_PANEL_R}. Expected 3.0 (Dailywell 2M nut)."
+    def test_toggle_panel_radius_models_locking_washer(self):
+        """TOGGLE_PANEL_R models the Dailywell 2M external-tooth locking washer (~Ø7.6mm)."""
+        assert TOGGLE_PANEL_R == 3.8, (
+            f"TOGGLE_PANEL_R changed: got {TOGGLE_PANEL_R}. Expected 3.8 "
+            "(10-48 locking washer OD ~Ø7.6mm; panel hole is Ø4.95mm, bushing Ø6.00mm)."
         )

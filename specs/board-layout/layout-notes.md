@@ -36,6 +36,14 @@ Breakdown by type (from `tools/panel-data.yaml`):
 - Trimpots: ~10
 - DW3 toggles (2-pos): 3 (GAIN_MAIN, GAIN_BP3, BP_POL)
 - DW5 toggles (3-pos): 4 (BP1/2/3_DIST_MODE, MOD_SRC)
+
+> **Panel hardware — toggles vs pots.** All toggles are Thonk-sourced Dailywell 2M
+> sub-mini units (DW3/DW5) with a **10-48 UNS bushing (Ø6.00mm) through a Ø4.95mm
+> panel hole**, secured with their own 10-48 nuts + locking washer. This differs
+> from the 9mm Alpha pots' **M7×0.75 bushings** (Ø5.5mm nut). The two thread families
+> are independent — each part ships with its own nuts — so they coexist on the same
+> panel without conflict; only the panel cutout diameters differ (Ø4.95mm vs the pot
+> bushing hole). Panel DRC models the toggle washer at r=3.8mm, the pot nut at r=5.5mm.
 - Jacks total: 30 (24 inputs + 6 outputs)
 
 ---

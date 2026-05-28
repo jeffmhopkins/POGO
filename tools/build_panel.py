@@ -1195,7 +1195,7 @@ def build_html(svg_content: str, rules: DesignRules, violations: list[str], data
         ("#ffcc00", "●", "Jack nut  r=5.0mm"),
         ("#64b4ff", "●", "Pot / trimpot nut  r=5.5mm"),
         ("#ff8c00", "●", "Knob cap  (visual)"),
-        ("#dc64ff", "●", "Switch hole  r=3.15mm"),
+        ("#dc64ff", "●", "Toggle washer  r=3.8mm"),
         ("#64dc64", "●", "LED hole  r=1.6mm"),
         ("#ffcc00", "⬚", "PCB courtyard  (simplified bbox; dashed)"),
         ("#f5a623", "⬚", "KiCad fab outline  F.Fab"),

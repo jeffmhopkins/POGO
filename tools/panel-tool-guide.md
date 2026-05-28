@@ -306,8 +306,8 @@ cx can also be set explicitly when a component doesn't fall on a column grid:
 | `knob_medium` | 5.5 (nut) | Alpha 9mm, 4.5mm cap radius |
 | `knob_large` | 5.5 (nut) | Alpha 9mm, 7.0mm cap radius |
 | `knob_xl` | 5.5 (nut) | Alpha 9mm, 9.0mm cap radius |
-| `toggle_dw3` | 3.0 (nut) | Dailywell DW3 2-pos toggle (ON-ON) |
-| `toggle_dw5` | 3.0 (nut) | Dailywell DW5 3-pos toggle (ON-ON-ON) |
+| `toggle_dw3` | 3.8 (washer) | Dailywell DW3 2-pos toggle (ON-ON) |
+| `toggle_dw5` | 3.8 (washer) | Dailywell DW5 3-pos toggle (ON-ON-ON) |
 | `led` | 1.6 (hole) | 3mm LED, unlabeled |
 | `led_labeled` | 1.6 (hole) | 3mm LED with label below |
 
@@ -357,9 +357,10 @@ All distances in mm, measured from component panel-hole center.
 - PCB courtyard: x ∈ [−8.65, +5.1], y ∈ [−6.67, +6.67] (origin = shaft centre)
 - Nut radius: 5.5mm
 
-### Sub-mini toggle switch
-- PCB courtyard: x ∈ [−4.5, +4.5], y ∈ [−3.5, +7.5]
-- Panel hole radius: 3.15mm
+### Dailywell 2M sub-mini toggle (`toggle_dw3` / `toggle_dw5`)
+- PCB courtyard: x ∈ [−4.32, +4.32], y ∈ [−4.82, +4.82] (body 8.13 × 9.14mm + 0.25mm)
+- Panel hole: Ø4.95mm; 10-48 UNS bushing (Ø6.00mm). Washer-clearance radius: 3.8mm
+- DW3 = DPDT ON-ON (2-position); DW5 = DPDT ON-ON-ON (3-position); shared land pattern
 
 ### 3mm LED
 - PCB courtyard: x ∈ [−2.0, +2.0], y ∈ [−1.5, +4.0]

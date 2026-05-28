@@ -258,8 +258,8 @@ zones:
 
   # ── Section 0c: MOD BUS ───────────────────────────────────────────────────
   # 3-column grid: col 0 = single toggle_dw5 switch, col 1 = mod trimpots, col 2 = VCA trimpots.
-  # Single DW5 toggle at cy=89.5 — nut (r=3.0) top (86.5mm) clears SCALE top (83.75-2.5=81.25mm) ✓
-  #                              — nut bottom (92.5mm) clears OFFSET bottom (95.25+2.5=97.75mm) ✓
+  # Single DW5 toggle at cy=89.5 — washer (r=3.8) top (85.7mm) clears SCALE top (83.75-2.5=81.25mm) ✓
+  #                              — washer bottom (93.3mm) clears OFFSET bottom (95.25+2.5=97.75mm) ✓
   # Row A (cy=83.75): — | SCALE | VCA_AMT
   # Row SW (cy=89.5):  SW | — | —
   # Row B (cy=95.25): — | OFFSET | VCA_OFS

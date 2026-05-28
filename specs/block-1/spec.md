@@ -132,7 +132,7 @@ note below. Both give gain within 5% of 5×.
 **Gain switches (SW1 = GAIN_MAIN, SW2 = GAIN_BP3): Dailywell DW3 (2M DPDT ON-ON) toggle**
 - One pole per channel (L and R switched simultaneously).
 - Switch selects: gain-stage output (5×) vs. direct input bypass (1×).
-- PCB-mount sub-mini toggle, 2.54mm pin pitch, round M-series bushing, 2-position.
+- PCB-mount sub-mini toggle, 2.54mm pin pitch, 10-48 UNS bushing (Ø6.00mm) through a Ø4.95mm panel hole, 2-position.
 
 ### Signal routing
 
