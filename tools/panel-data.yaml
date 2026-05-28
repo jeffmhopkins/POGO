@@ -496,7 +496,7 @@ zones:
       - id: BP1_DIST
         type: knob_large
         cx: 99.44
-        cy: 78.00
+        cy: 80.00
         label: "DIST"
         cpp_param: "BP1_DIST_PARAM"
       - id: BP1_FREQ_ATT
