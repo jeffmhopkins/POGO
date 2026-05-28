@@ -19,9 +19,8 @@ _KNOB_TYPE = {
 }
 
 _SWITCH_TYPE = {
-    "switch_H2": "PogoSwitchH2",
-    "switch_H3": "PogoSwitchH3",
-    "switch_V3": "CKSSThree",
+    "toggle_dw3": "PogoToggle2",
+    "toggle_dw5": "PogoToggle3",
 }
 
 _JACK_TYPE = "PJ301MPort"

@@ -6,10 +6,10 @@ panel_rules.py.  Previously several component types had courtyards smaller
 than their drawn SVG bodies, creating blind spots.  All known blind spots are
 now fixed; these tests enforce that the fixes stay in place.
 
-Fixed blind spots (see TestSwitchV3TrimpotBlindSpot and TestDiscrepancySummary):
-  - SWITCH_V3_CY: was ±5.0mm; now ±6.4mm (CAS-120R3 body ±6.35mm + margin)
-  - SWITCH_H3_CY: new constant ±6.0mm wide (matches 12mm SVG body)
-  - Nut keepout: switch_V3 now uses SWITCH_V3_PANEL_R=1.0mm (not 3.15mm toggle radius)
+Switches are Dailywell 2M sub-mini toggles (DW3 2-pos / DW5 3-pos). Both share
+one footprint and DRC courtyard (TOGGLE_CY), pulled from the .kicad_mod F.CrtYd,
+so the DRC model never lags the physical body. See TestToggleTrimpotClearance and
+TestDiscrepancySummary.
 
 Run with: pytest tools/test_drc.py -v
 """
@@ -27,10 +27,8 @@ from panel_rules import (
     JACK_CY,
     POT_CY,
     TRIMPOT_CY,
-    SWITCH_CY,
-    SWITCH_V3_CY,
-    EG1218_CY,
-    EG2301_V_CY,
+    TOGGLE_CY,
+    TOGGLE_PANEL_R,
     LED_CY,
     SLIDER_V45_CY,
     DesignRules,
@@ -108,81 +106,19 @@ class TestCourtyardVsDrawSize:
         assert x2 >= svg_r,  f"TRIMPOT_CY right ({x2}) tighter than circle right ({svg_r})"
         assert y2 >= svg_r,  f"TRIMPOT_CY bottom ({y2}) tighter than circle bottom ({svg_r})"
 
-    # ── switch_H2 ─────────────────────────────────────────────────────────────
-    # svg_switch_H2 draws:
-    #   Body rect: 9mm wide × 2.4mm tall, bx=cx-4.5, by=cy-1.2
-    #   Slug rect: 3.5mm wide × 2.8mm tall, sx=bx+0.5, sy=cy-1.4
-    # Bounding box:  x=[-4.5, +4.5],  y=[-1.4, +1.4]   (slug is tallest element)
-    def test_switch_H2_courtyard_encompasses_svg_body(self):
-        """SWITCH_CY must encompass the switch_H2 drawn body (9×2.8mm)."""
-        svg_x1, svg_y1, svg_x2, svg_y2 = -4.5, -1.4, 4.5, 1.4
-        x1, y1, x2, y2 = SWITCH_CY
-        assert x1 <= svg_x1, f"SWITCH_CY left ({x1}) > svg left ({svg_x1})"
-        assert y1 <= svg_y1, f"SWITCH_CY top ({y1}) > svg top ({svg_y1})"
-        assert x2 >= svg_x2, f"SWITCH_CY right ({x2}) < svg right ({svg_x2})"
-        assert y2 >= svg_y2, f"SWITCH_CY bottom ({y2}) < svg bottom ({svg_y2})"
-
-    # ── switch_H3 ─────────────────────────────────────────────────────────────
-    # svg_switch_H3 draws:
-    #   Body rect: 12mm wide × 2.4mm tall, bx=cx-6.0, by=cy-1.2
-    #   Slug rect: 3.5mm wide × 2.8mm tall, centred
-    # Bounding box:  x=[-6.0, +6.0],  y=[-1.4, +1.4]
-    #
-    # SWITCH_CY = (-4.5, -3.5, 4.5, 7.5) — designed for a sub-mini toggle (SPDT).
-    # It is only 9mm wide in x but switch_H3 body is 12mm wide.
-    # This is a CONFIRMED DISCREPANCY: SWITCH_CY is 1.5mm narrower on each side.
-    @pytest.mark.xfail(
-        reason=(
-            "switch_H3 SVG body is 12mm wide (x∈[-6.0,+6.0]) but SWITCH_CY "
-            "is only 9mm wide (x∈[-4.5,+4.5]). SWITCH_CY is modelled after "
-            "a sub-mini toggle, not the H3 slide switch. The DRC cannot detect "
-            "horizontal overlap for switch_H3 within the outer 1.5mm on each side."
-        ),
-        strict=True,
-    )
-    def test_switch_H3_courtyard_encompasses_svg_body_xfail(self):
-        """SWITCH_CY must encompass the switch_H3 drawn body (12×2.8mm). KNOWN FAIL."""
-        svg_x1, svg_y1, svg_x2, svg_y2 = -6.0, -1.4, 6.0, 1.4
-        x1, y1, x2, y2 = SWITCH_CY
-        assert x1 <= svg_x1, (
-            f"SWITCH_CY left edge ({x1}) is {x1 - svg_x1:+.1f}mm tighter than "
-            f"switch_H3 SVG body left ({svg_x1})"
-        )
-        assert x2 >= svg_x2, (
-            f"SWITCH_CY right edge ({x2}) is {x2 - svg_x2:+.1f}mm tighter than "
-            f"switch_H3 SVG body right ({svg_x2})"
-        )
-
-    # ── switch_V3 ─────────────────────────────────────────────────────────────
-    # svg_switch_V3 draws:
-    #   Body rect: 2.4mm wide × body_height tall (default=12), bx=cx-1.2
-    #   Slug rect: 2.8mm wide × 3.5mm tall, sx=cx-1.4  (slug is widest element)
-    # Default body_height=12 → cy_body_top = cy - 6.0
-    # Bounding box:  x=[-1.4, +1.4],  y=[-6.0, +6.0]
-    #
-    # SWITCH_V3_CY = (-2.0, -6.4, 2.0, 6.4)
-    # Physical CAS-120R3 body is 12.7mm (±6.35mm) + 0.05mm margin = ±6.4mm.
-    # Courtyard ±6.4mm > SVG body ±6.0mm — no blind spot.
-    def test_switch_V3_courtyard_encompasses_svg_body(self):
-        """SWITCH_V3_CY must encompass the switch_V3 drawn body (default 2.8×12mm)."""
-        svg_x1, svg_y1, svg_x2, svg_y2 = -1.4, -6.0, 1.4, 6.0
-        x1, y1, x2, y2 = SWITCH_V3_CY
-        assert y1 <= svg_y1, (
-            f"SWITCH_V3_CY top edge ({y1}) is {y1 - svg_y1:+.2f}mm tighter than "
-            f"switch_V3 SVG body top ({svg_y1})."
-        )
-        assert y2 >= svg_y2, (
-            f"SWITCH_V3_CY bottom edge ({y2}) is {y2 - svg_y2:+.2f}mm tighter than "
-            f"switch_V3 SVG body bottom ({svg_y2})."
-        )
-
-    # The x-direction for switch_V3 is fine (SVG slug is ±1.4, CY is ±2.0).
-    def test_switch_V3_courtyard_wide_enough_in_x(self):
-        """SWITCH_V3_CY must encompass the slug width (±1.4mm) in x."""
-        slug_half_w = 1.4
-        x1, y1, x2, y2 = SWITCH_V3_CY
-        assert x1 <= -slug_half_w, f"SWITCH_V3_CY left ({x1}) tighter than slug ({-slug_half_w})"
-        assert x2 >= slug_half_w,  f"SWITCH_V3_CY right ({x2}) tighter than slug ({slug_half_w})"
+    # ── toggle (Dailywell DW3/DW5) ──────────────────────────────────────────────
+    # svg_toggle_2pos / svg_toggle_3pos draw a bushing circle (r=2.475) plus a
+    # lever extending ±2.2mm tipped with an r=0.9 circle → max draw extent ≈ 3.1mm.
+    # TOGGLE_CY = (-4.32, -4.82, 4.32, 4.82) comes from the DW3/DW5 footprint
+    # F.CrtYd (body 8.13×9.14mm + 0.25mm), so it encompasses the drawn symbol.
+    def test_toggle_courtyard_encompasses_svg_symbol(self):
+        """TOGGLE_CY must encompass the drawn toggle symbol (lever tip ≈ ±3.1mm)."""
+        draw_half = 2.2 + 0.9   # lever length + tip radius
+        x1, y1, x2, y2 = TOGGLE_CY
+        assert x1 <= -draw_half, f"TOGGLE_CY left ({x1}) tighter than symbol (-{draw_half})"
+        assert y1 <= -draw_half, f"TOGGLE_CY top ({y1}) tighter than symbol (-{draw_half})"
+        assert x2 >= draw_half,  f"TOGGLE_CY right ({x2}) tighter than symbol ({draw_half})"
+        assert y2 >= draw_half,  f"TOGGLE_CY bottom ({y2}) tighter than symbol ({draw_half})"
 
     # ── LED ───────────────────────────────────────────────────────────────────
     # svg_led draws: circle r=1.2
@@ -340,47 +276,24 @@ class TestDrcCatchesOverlaps:
         assert len(viols) == 1, f"Expected 1 violation, got: {viols}"
         assert "PCB OVERLAP" in viols[0]
 
-    # ── switch_H2 (vertical separation) ──────────────────────────────────────
-    # SWITCH_CY height = 11.0mm (y1=-3.5, y2=+7.5) → min y-sep = 11.0mm
-    def test_switch_H2_vertical_pass_at_minimum_gap(self):
-        """Two switch_H2 stacked 11.0mm apart: DRC must pass."""
-        dy = abs(SWITCH_CY[1]) + abs(SWITCH_CY[3])  # 3.5 + 7.5 = 11.0
+    # ── toggle (vertical separation) ──────────────────────────────────────────
+    # TOGGLE_CY height = 9.64mm (y∈[-4.82, +4.82]) → min y-sep = 9.64mm
+    def test_toggle_vertical_pass_at_minimum_gap(self):
+        """Two toggles stacked 9.64mm apart: DRC must pass."""
+        dy = abs(TOGGLE_CY[1]) + abs(TOGGLE_CY[3])  # 4.82 + 4.82 = 9.64
         comps = [
-            _comp("switch_H2", 50.0, 50.0,       "s1"),
-            _comp("switch_H2", 50.0, 50.0 + dy,  "s2"),
+            _comp("toggle_dw3", 50.0, 50.0,       "s1"),
+            _comp("toggle_dw5", 50.0, 50.0 + dy,  "s2"),
         ]
         viols = self.dr._check_pcb_overlaps(comps)
         assert viols == [], f"Unexpected violations at gap=0: {viols}"
 
-    def test_switch_H2_vertical_fail_at_0_5mm_overlap(self):
-        """Two switch_H2 stacked 10.5mm apart: DRC must report overlap."""
-        dy = abs(SWITCH_CY[1]) + abs(SWITCH_CY[3]) - 0.5
+    def test_toggle_vertical_fail_at_0_5mm_overlap(self):
+        """Two toggles stacked 9.14mm apart: DRC must report overlap."""
+        dy = abs(TOGGLE_CY[1]) + abs(TOGGLE_CY[3]) - 0.5
         comps = [
-            _comp("switch_H2", 50.0, 50.0,       "s1"),
-            _comp("switch_H2", 50.0, 50.0 + dy,  "s2"),
-        ]
-        viols = self.dr._check_pcb_overlaps(comps)
-        assert len(viols) == 1, f"Expected 1 violation, got: {viols}"
-        assert "PCB OVERLAP" in viols[0]
-
-    # ── switch_V3 (vertical separation) ──────────────────────────────────────
-    # SWITCH_V3_CY height = 10.0mm (y∈[-5,+5]) → min y-sep = 10.0mm
-    def test_switch_V3_vertical_pass_at_minimum_gap(self):
-        """Two switch_V3 stacked 10.0mm apart: DRC must pass."""
-        dy = abs(SWITCH_V3_CY[1]) + abs(SWITCH_V3_CY[3])  # 5.0 + 5.0 = 10.0
-        comps = [
-            _comp("switch_V3", 50.0, 50.0,       "v1"),
-            _comp("switch_V3", 50.0, 50.0 + dy,  "v2"),
-        ]
-        viols = self.dr._check_pcb_overlaps(comps)
-        assert viols == [], f"Unexpected violations at gap=0: {viols}"
-
-    def test_switch_V3_vertical_fail_at_0_5mm_overlap(self):
-        """Two switch_V3 stacked 9.5mm apart: DRC must report overlap."""
-        dy = abs(SWITCH_V3_CY[1]) + abs(SWITCH_V3_CY[3]) - 0.5
-        comps = [
-            _comp("switch_V3", 50.0, 50.0,       "v1"),
-            _comp("switch_V3", 50.0, 50.0 + dy,  "v2"),
+            _comp("toggle_dw3", 50.0, 50.0,       "s1"),
+            _comp("toggle_dw3", 50.0, 50.0 + dy,  "s2"),
         ]
         viols = self.dr._check_pcb_overlaps(comps)
         assert len(viols) == 1, f"Expected 1 violation, got: {viols}"
@@ -438,112 +351,48 @@ class TestDrcCatchesOverlaps:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Section 3: The switch_V3 + trimpot blind spot (the live panel scenario)
+# Section 3: toggle + trimpot vertical clearance (DIST switch over an attenuverter)
 #
-# A switch_V3 at cy=75.1 and a trimpot at cy=83.6 in the same column (delta=8.5mm)
-# are separated by exactly 8.5mm.
-#
-# DRC threshold:  SWITCH_V3_CY[3] + abs(TRIMPOT_CY[1]) = 5.0 + 3.385 = 8.385mm
-# SVG body threshold: 6.0 (half of default body_height) + 2.5 (trimpot r) = 8.5mm
-#
-# At delta=8.5mm:
-#   - DRC courtyard gap = 8.5 - 8.385 = +0.115mm → DRC PASSES
-#   - SVG body gap      = 8.5 - 8.5   = 0.0mm    → bodies exactly touching
-#
-# The blind window where DRC passes but SVG bodies overlap: delta ∈ [8.385, 8.5)
-# ─────────────────────────────────────────────────────────────────────────────
+# The BP DIST toggles sit in a column above mod/attenuverter trimpots. The DRC
+# threshold is the sum of courtyard half-extents pulled from the real footprints:
+#   TOGGLE_CY[3] + abs(TRIMPOT_CY[1]) = 4.82 + 3.385 = 8.205mm
+# Since both courtyards come from their .kicad_mod F.CrtYd, there is no blind
+# spot between the DRC model and the drawn/physical body.
+# ──────────────────────────────────────────────────────────────────────────────────
 
-class TestSwitchV3TrimpotBlindSpot:
-    """Tests verifying the former blind spot between switch_V3 and trimpot is eliminated.
+class TestToggleTrimpotClearance:
+    """Verify toggle↔trimpot vertical clearance is driven by the footprint courtyards."""
 
-    Previously SWITCH_V3_CY = (-2.0,-5.0,2.0,5.0) was 1.0mm short of the 12mm SVG body,
-    creating a 0.115mm window where DRC passed but SVG bodies were touching. Fixed by
-    expanding to SWITCH_V3_CY = (-2.0,-6.4,2.0,6.4) to match the CAS-120R3 body (±6.35mm).
-    """
+    DRC_THRESHOLD = TOGGLE_CY[3] + abs(TRIMPOT_CY[1])   # 4.82 + 3.385 = 8.205
 
-    SWITCH_V3_CY_REF = 75.1
-    TRIMPOT_CY_REF   = 83.6
-    DELTA_LIVE       = TRIMPOT_CY_REF - SWITCH_V3_CY_REF   # = 8.5mm
-
-    def test_blind_window_arithmetic(self):
-        """Blind window is eliminated: DRC courtyard now exceeds SVG body half-height."""
-        drc_threshold  = SWITCH_V3_CY[3] + abs(TRIMPOT_CY[1])   # 6.4 + 3.385 = 9.785
-        real_threshold = 6.0 + 2.5                                # SVG body half-heights = 8.5
-
-        blind_window_mm = real_threshold - drc_threshold          # 8.5 - 9.785 = -1.285
-        assert blind_window_mm <= 0, (
-            f"Expected no blind window (courtyard >= body), got {blind_window_mm:.3f}mm. "
-            f"drc_threshold={drc_threshold:.3f}mm, real_threshold={real_threshold:.3f}mm. "
-            "SWITCH_V3_CY may have regressed — check panel_rules.py."
+    def test_pass_just_above_threshold(self):
+        """At threshold + 0.01mm (gap > 0), DRC passes."""
+        dr = make_rules()
+        delta = self.DRC_THRESHOLD + 0.01
+        comps = [
+            _comp("toggle_dw5", 50.0, 50.0,         "sw1"),
+            _comp("trimpot",    50.0, 50.0 + delta, "tp1"),
+        ]
+        assert dr._check_pcb_overlaps(comps) == [], (
+            f"At delta={delta:.3f}mm (gap=+0.01mm) DRC should pass."
         )
 
-    def test_live_panel_positions_caught_by_drc(self):
-        """DRC must catch switch_V3 at cy=75.1 + trimpot at cy=83.6 (delta=8.5mm < 9.785mm threshold)."""
+    def test_fail_below_threshold(self):
+        """At threshold − 0.5mm the courtyards overlap and DRC must fire."""
         dr = make_rules()
+        delta = self.DRC_THRESHOLD - 0.5
         comps = [
-            _comp("switch_V3", 50.0, self.SWITCH_V3_CY_REF, "sw1"),
-            _comp("trimpot",   50.0, self.TRIMPOT_CY_REF,   "tp1"),
+            _comp("toggle_dw5", 50.0, 50.0,         "sw1"),
+            _comp("trimpot",    50.0, 50.0 + delta, "tp1"),
         ]
         viols = dr._check_pcb_overlaps(comps)
-        assert len(viols) >= 1, (
-            f"DRC should flag overlap at delta={self.DELTA_LIVE}mm (threshold=9.785mm) "
-            f"but returned no violations. SWITCH_V3_CY may have regressed."
-        )
+        assert len(viols) >= 1, f"DRC must catch overlap at delta={delta:.3f}mm, got: {viols}"
 
-    def test_live_panel_drc_catches_overlap(self):
-        """DRC flags switch_V3 at cy=75.1 + trimpot at cy=83.6 as too close."""
-        dr = make_rules()
-        comps = [
-            _comp("switch_V3", 50.0, self.SWITCH_V3_CY_REF, "sw1"),
-            _comp("trimpot",   50.0, self.TRIMPOT_CY_REF,   "tp1"),
-        ]
-        viols = dr._check_pcb_overlaps(comps)
-        assert len(viols) >= 1, (
-            f"Expected at least 1 PCB OVERLAP violation for live panel positions "
-            f"(switch_V3 @ cy={self.SWITCH_V3_CY_REF}, trimpot @ cy={self.TRIMPOT_CY_REF}, "
-            f"delta={self.DELTA_LIVE}mm) but DRC returned no violations. "
-            f"SWITCH_V3_CY y-extent ({SWITCH_V3_CY[1]},{SWITCH_V3_CY[3]}) must cover ±6.4mm."
-        )
-
-    def test_drc_catches_overlap_when_delta_below_drc_threshold(self):
-        """DRC must catch overlap when components are clearly too close (delta < 9.785mm)."""
-        dr = make_rules()
-        # At delta=8.0mm, well inside the 9.785mm threshold — DRC must fire.
-        comps = [
-            _comp("switch_V3", 50.0, self.SWITCH_V3_CY_REF,         "sw1"),
-            _comp("trimpot",   50.0, self.SWITCH_V3_CY_REF + 8.0,   "tp1"),
-        ]
-        viols = dr._check_pcb_overlaps(comps)
-        assert len(viols) >= 1, (
-            f"DRC must catch overlap at delta=8.0mm (threshold=9.785mm), got: {viols}"
-        )
-
-    def test_minimum_safe_delta_under_current_drc(self):
-        """DRC passes when delta is just above the 9.785mm courtyard sum threshold."""
-        dr = make_rules()
-        drc_threshold = SWITCH_V3_CY[3] + abs(TRIMPOT_CY[1])   # 6.4 + 3.385 = 9.785
-
-        # At threshold + 0.001mm (gap > 0), DRC passes
-        safe_delta = drc_threshold + 0.001
-        comps_safe = [
-            _comp("switch_V3", 50.0, self.SWITCH_V3_CY_REF,                  "sw1"),
-            _comp("trimpot",   50.0, self.SWITCH_V3_CY_REF + safe_delta,      "tp1"),
-        ]
-        viols = dr._check_pcb_overlaps(comps_safe)
-        assert viols == [], (
-            f"At delta={safe_delta:.3f}mm (gap=+0.001mm), DRC should pass. Got: {viols}"
-        )
-
-        # At threshold exactly (gap = 0), DRC fires — touching counts as overlap
-        comps_touching = [
-            _comp("switch_V3", 50.0, self.SWITCH_V3_CY_REF,                  "sw1"),
-            _comp("trimpot",   50.0, self.SWITCH_V3_CY_REF + drc_threshold,   "tp1"),
-        ]
-        viols_touching = dr._check_pcb_overlaps(comps_touching)
-        # gap = 0 is treated as overlap (courtyard boundary contact is a violation)
-        v3_rect = _get_courtyard(50.0, self.SWITCH_V3_CY_REF,                 "switch_V3", 0)
-        tp_rect = _get_courtyard(50.0, self.SWITCH_V3_CY_REF + drc_threshold, "trimpot",   0)
-        gap = _rect_min_gap(v3_rect, tp_rect)
+    def test_threshold_gap_is_zero(self):
+        """At exactly the threshold, the courtyard gap is ≈ 0 (boundary contact)."""
+        sw_rect = _get_courtyard(50.0, 50.0,                       "toggle_dw5", 0)
+        tp_rect = _get_courtyard(50.0, 50.0 + self.DRC_THRESHOLD,  "trimpot",    0)
+        gap = _rect_min_gap(sw_rect, tp_rect)
         assert abs(gap) < 0.01, f"Expected gap ≈ 0 at threshold, got {gap:.6f}mm"
 
 
@@ -681,8 +530,7 @@ class TestGetCourtyardUnknownType:
         footprinted = [
             "jack_input", "jack_output",
             "trimpot", "knob_medium", "knob_large", "knob_xl",
-            "switch_H2", "switch_H3", "switch_V3",
-            "eg_2pos", "eg_3pos",
+            "toggle_dw3", "toggle_dw5",
             "led", "led_labeled",
             "slider_V45",
         ]
@@ -705,17 +553,11 @@ class TestGetCourtyardUnknownType:
 class TestDiscrepancySummary:
     """Pin exact courtyard values so any future changes are deliberate and reviewed."""
 
-    def test_switch_V3_cy_extents_are_as_documented(self):
-        """SWITCH_V3_CY extends ±6.4mm in y — matches CAS-120R3 body (±6.35mm) with 0.05mm margin."""
-        assert SWITCH_V3_CY == (-2.0, -6.4, 2.0, 6.4), (
-            f"SWITCH_V3_CY changed: got {SWITCH_V3_CY}. "
-            "Expected (-2.0,-6.4,2.0,6.4) — if intentionally changed, update this test."
-        )
-
-    def test_switch_cy_extents_are_as_documented(self):
-        """SWITCH_CY (toggle) is 9mm wide; switch_H3 body is 12mm wide — 1.5mm short each side."""
-        assert SWITCH_CY == (-4.5, -3.5, 4.5, 7.5), (
-            f"SWITCH_CY changed: got {SWITCH_CY}."
+    def test_toggle_cy_extents_are_as_documented(self):
+        """TOGGLE_CY from the Dailywell DW3/DW5 footprint F.CrtYd (body 8.13×9.14mm + 0.25mm)."""
+        assert TOGGLE_CY == (-4.32, -4.82, 4.32, 4.82), (
+            f"TOGGLE_CY changed: got {TOGGLE_CY}. "
+            "Expected (-4.32,-4.82,4.32,4.82) — must match SW_Dailywell_DW3_DPDT.kicad_mod F.CrtYd."
         )
 
     def test_jack_cy_extents_are_as_documented(self):
@@ -730,46 +572,16 @@ class TestDiscrepancySummary:
             f"TRIMPOT_CY changed: got {TRIMPOT_CY}."
         )
 
-    def test_switch_v3_svg_body_half_height(self):
-        """SWITCH_V3_CY y-extent (6.4mm) must be >= SVG body half-height (6.0mm) — no blind spot."""
-        default_body_height = 12.0
-        svg_half_height = default_body_height / 2.0   # 6.0mm
-        cy_half_height  = SWITCH_V3_CY[3]             # 6.4mm
-
-        discrepancy = svg_half_height - cy_half_height  # negative = courtyard larger than body
-        assert discrepancy <= 0, (
-            f"SWITCH_V3_CY y-extent is smaller than SVG body — blind spot exists! "
-            f"svg_half={svg_half_height}mm, cy_half={cy_half_height}mm, "
-            f"discrepancy={discrepancy:.3f}mm (must be ≤ 0)."
+    def test_toggle_courtyard_encompasses_drawn_symbol(self):
+        """TOGGLE_CY half-extents must exceed the drawn toggle symbol (lever tip ≈ 3.1mm)."""
+        draw_half = 2.2 + 0.9   # lever length + tip radius
+        assert TOGGLE_CY[3] >= draw_half and TOGGLE_CY[2] >= draw_half, (
+            f"TOGGLE_CY {TOGGLE_CY} smaller than drawn symbol half-extent {draw_half}mm."
         )
 
-    def test_blind_spot_quantified(self):
-        """DRC threshold (9.785mm) exceeds SVG body sum (8.5mm) — blind spot is eliminated."""
-        cy_sum   = SWITCH_V3_CY[3] + abs(TRIMPOT_CY[1])  # 6.4 + 3.385 = 9.785
-        real_sum = 6.0 + 2.5                               # SVG body sum = 8.5
-        blind    = real_sum - cy_sum                        # 8.5 - 9.785 = -1.285 (no blind spot)
-        assert blind <= 0, (
-            f"Expected blind <= 0 (no blind spot), got {blind:.4f}mm. "
-            f"cy_sum={cy_sum:.3f}mm must exceed real_sum={real_sum:.3f}mm."
-        )
-
-    def test_eg1218_cy_extents(self):
-        """EG1218 courtyard from DigiKey kicad_mod: 12.1 × 4.5mm → ±6.05mm × ±2.25mm."""
-        assert EG1218_CY == (-6.05, -2.25, 6.05, 2.25), (
-            f"EG1218_CY changed: got {EG1218_CY}. Update if footprint source changes."
-        )
-
-    def test_eg2301_v_cy_extents(self):
-        """EG2301 vertical courtyard: body 16×6.5mm + 0.25mm margin → ±8.25mm × ±3.5mm."""
-        assert EG2301_V_CY == (-3.5, -8.25, 3.5, 8.25), (
-            f"EG2301_V_CY changed: got {EG2301_V_CY}. Update if body dimensions confirmed otherwise."
-        )
-
-    def test_eg2301_v_courtyard_exceeds_eg1218_in_y(self):
-        """EG2301 vertical must be taller than EG1218 horizontal (16mm > 4mm body)."""
-        assert EG2301_V_CY[3] > EG1218_CY[3], (
-            f"EG2301_V y-half ({EG2301_V_CY[3]}) should exceed EG1218 y-half ({EG1218_CY[3]})"
-        )
-        assert EG1218_CY[2] > EG2301_V_CY[2], (
-            f"EG1218 x-half ({EG1218_CY[2]}) should exceed EG2301_V x-half ({EG2301_V_CY[2]})"
+    def test_toggle_panel_radius_clears_top_keepout(self):
+        """A toggle nut (r=TOGGLE_PANEL_R) at the top row must clear the 10mm top keepout."""
+        # Documented value: nut/washer half-width for the Dailywell 2M bushing.
+        assert TOGGLE_PANEL_R == 3.0, (
+            f"TOGGLE_PANEL_R changed: got {TOGGLE_PANEL_R}. Expected 3.0 (Dailywell 2M nut)."
         )

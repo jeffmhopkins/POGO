@@ -460,8 +460,8 @@ scale the result (−1 to +1, bipolar). This is unchanged from the old architect
 | `knob_medium` | `RoundBlackKnob` |
 | `trimpot` | `PogoTrimPot` (custom, or `Trimpot`) |
 | `slider_V45` | `PogoSlider` (custom vertical 45mm fader) |
-| `switch_H2` | `PogoSwitchH2` (2-position horizontal) |
-| `switch_H3` | `PogoSwitchH3` (3-position horizontal) |
+| `toggle_dw3` | `PogoToggle2` (Dailywell DW3, 2-position) |
+| `toggle_dw5` | `PogoToggle3` (Dailywell DW5, 3-position) |
 | `jack_input` | `PJ301MPort` |
 | `jack_output` | `PJ301MPort` |
 | `led` | `MediumLight<GreenLight>` |

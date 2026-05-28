@@ -173,12 +173,12 @@ zones:
         font_size: 1.8
         cpp_id: "R_IN_INPUT"
       - id: GAIN_MAIN
-        type: eg_2pos
+        type: toggle_dw3
         cx: 28.575
         cy: 17
         label_above: "MAIN"
         pos_labels: ["1×", "5×"]
-        pos_xs: [23.775, 33.375]   # cx ± 4.8mm (EG1218 body half-length 5.8 minus 1mm margin)
+        pos_xs: [23.775, 33.375]   # cx ± 4.8mm (flank the DW3 toggle bushing)
         cpp_param: "GAIN_PARAM"
       - id: BP3_L
         type: jack_input
@@ -197,7 +197,7 @@ zones:
         font_size: 1.6
         cpp_id: "ALT_BP_R_INPUT"
       - id: GAIN_BP3
-        type: eg_2pos
+        type: toggle_dw3
         cx: 28.575
         cy: 31.5
         label_above: "BP3"
@@ -257,9 +257,9 @@ zones:
         cpp_param: "LFO2_RATE_PARAM"
 
   # ── Section 0c: MOD BUS ───────────────────────────────────────────────────
-  # 3-column grid: col 0 = single eg_3pos switch, col 1 = mod trimpots, col 2 = VCA trimpots.
-  # Single EG2301 at cy=89.5 — top (81.25mm) aligns with SCALE top (83.75-2.5=81.25mm) ✓
-  #                           — bottom (97.75mm) aligns with OFFSET bottom (95.25+2.5=97.75mm) ✓
+  # 3-column grid: col 0 = single toggle_dw5 switch, col 1 = mod trimpots, col 2 = VCA trimpots.
+  # Single DW5 toggle at cy=89.5 — nut (r=3.0) top (86.5mm) clears SCALE top (83.75-2.5=81.25mm) ✓
+  #                              — nut bottom (92.5mm) clears OFFSET bottom (95.25+2.5=97.75mm) ✓
   # Row A (cy=83.75): — | SCALE | VCA_AMT
   # Row SW (cy=89.5):  SW | — | —
   # Row B (cy=95.25): — | OFFSET | VCA_OFS
@@ -271,7 +271,7 @@ zones:
     cols: 3
     components:
       - id: MOD_SRC_SW
-        type: eg_3pos
+        type: toggle_dw5
         col: 0
         cy: 89.5
         label: "MOD SRC"
@@ -455,7 +455,7 @@ zones:
     components:
       # col0 cx=97.155  col1 cx=108.585  col2 cx=120.015
       - id: BP1_DIST_SW
-        type: eg_3pos
+        type: toggle_dw5
         cx: 96.0
         cy: 24.80
         label_below: "DIST"
@@ -537,7 +537,7 @@ zones:
     components:
       # col0 cx=131.445  col1 cx=142.875  col2 cx=154.305
       - id: BP2_DIST_SW
-        type: eg_3pos
+        type: toggle_dw5
         cx: 130.29
         cy: 24.80
         label_below: "DIST"
@@ -619,7 +619,7 @@ zones:
     components:
       # col0 cx=165.735  col1 cx=177.165  col2 cx=188.595
       - id: BP3_DIST_SW
-        type: eg_3pos
+        type: toggle_dw5
         cx: 164.58
         cy: 24.80
         label_below: "DIST"

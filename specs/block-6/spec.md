@@ -26,7 +26,7 @@ CV inputs for the master section: FREQ jack (+ attenuverter trimpot) modulates B
 ### Per-band controls (BP1, BP2, BP3 — identical architecture)
 
 Each band has:
-- **DIST switch** (3-position vertical): Soft Clip (bottom) / Hard Clip (middle) / Wavefold (top) — selects distortion character independently per band
+- **DIST switch** (Dailywell DW5, 3-position toggle): Soft Clip (down) / Hard Clip (centre) / Wavefold (up) — selects distortion character independently per band
 - **FREQ knob** (xl): per-band frequency offset in V/oct; F_REF = 400 Hz → range ~50 Hz–3.2 kHz
 - **FOCUS knob** (large): resonance (Q); `Q = 0.5 × 400^focus` → Q range 0.5–200; does not self-oscillate
 - **TILT knob** (large): per-band stereo spread, additive with global BP_TILT
@@ -165,7 +165,7 @@ Standard SVF BP peak is 1× (constant unity, independent of Q). No normalization
 - Three sub-circuit chains per group: SC / HC / WF all running simultaneously
 - CD4053 triple 2-channel analog mux per group selects which mode's output passes
 - All 3 CD4053 select pins tied together → BP_DIST switch controls all groups simultaneously
-- One 3-position slide switch (PogoSwitchH3) → 2 select lines to all 3 CD4053 ICs
+- One Dailywell DW5 (2M DPDT ON-ON-ON) toggle → its two poles give the 2 select lines to all 3 CD4053 ICs
 - Distortion runs post-SVF at audio rate (no oversampling in analog hardware)
 - BP3 output tap: taken after distortion stage on group 3, available at BP3_L/R_OUT jacks
 
@@ -366,7 +366,7 @@ Channel Z: spare (inputs tied to GND; output unused)
 When S_B = 1: Channel Y selects WF regardless of S_A — wavefold mode overrides.
 When S_B = 0: Channel Y passes Channel X output, which is SC or HC depending on S_A.
 
-SW_DIST is a 3-position slide switch (PogoSwitchH3) generating S_A and S_B:
+SW_DIST is a Dailywell DW5 (2M DPDT ON-ON-ON) toggle generating S_A and S_B:
 - Position 0 (Soft):  S_A=low, S_B=low   (0V = logic LOW; from GND)
 - Position 1 (Hard):  S_A=high, S_B=low  (+5V = logic HIGH; from +5V regulator or +12V with R+zener)
 - Position 2 (Fold):  S_A=low, S_B=high
@@ -430,7 +430,7 @@ rather than added at the BP output (V_dry − V_wet instead of V_dry + V_wet).
 
 The DSP applies BP_POL ∈ {+1, −1} to the BP output before summing into the signal chain.
 
-Hardware: SW_POL (2-position slide) selects between an inverting buffer (default, produces
+Hardware: SW_POL (Dailywell DW3, 2M DPDT ON-ON toggle; one pole used) selects between an inverting buffer (default, produces
 positive polarity) and the direct MIX amp output (negative polarity). The MIX amp output
 V_mix_inv is inherently negative-polarity (−V_dry − V_wet); the G=−1 stage inverts it
 to the expected positive-polarity output (+V_dry + V_wet).
@@ -561,8 +561,8 @@ Icc figures use ±12V operating point (~2.6 mA/pkg), not the ±15V datasheet spe
 | RV_BP1_1VOCT, _2, _3 | Bourns 3224W | SMD | 20 kΩ | 3 | audio | block-6 | 1V/oct tracking trim per group; ±10% range |
 | RV_BP1_QMAX, _2, _3 | trimpot, SMD | 3296W | — | 3 | audio | block-6 | Q maximum bias per group |
 | *— Panel controls —* | | | | | | | |
-| SW_DIST | 3-pos slide | panel | — | 1 | panel | block-6 | BP_DIST: Soft/Hard/Fold; drives S_A + S_B to all CD4053 |
-| SW_POL | 2-pos SPDT slide | panel | — | 1 | panel | block-6 | BP_POL: +/− polarity select |
+| SW_DIST | Dailywell DW5 | sub-mini toggle 2M | DPDT ON-ON-ON | 1 | panel | block-6 | BP_DIST: Soft/Hard/Fold; two poles drive S_A + S_B to all CD4053 (per-band SW4–SW6 in components.yaml) |
+| SW_POL | Dailywell DW3 | sub-mini toggle 2M | DPDT ON-ON | 1 | panel | block-6 | BP_POL: +/− polarity select (one pole used) |
 | RV_BP_OFFSET | XL knob | 9 mm | — | 1 | control | block-6 | BP_OFFSET master freq offset (±5V/oct) |
 | RV_BP_MIX | large knob, linear | 100 kΩ | — | 1 | control | block-6 | BP_MIX dry/wet level |
 | RV_BP_FREQ_ATT | trimpot | 9 mm | — | 1 | control | block-6 | BP_FREQ_ATT master attenuverter |

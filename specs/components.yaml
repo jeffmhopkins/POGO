@@ -282,8 +282,8 @@ components:
   # ── CONTROL BOARD ────────────────────────────────────────────────────────────
 
   # block-1 panel controls
-  - { ref: SW1,  board: control, block: block-1, part: "2-pos slide", pkg: panel,  fn: "GAIN_MAIN 1×/5×" }
-  - { ref: SW2,  board: control, block: block-1, part: "2-pos slide", pkg: panel,  fn: "GAIN_BP3 1×/5×" }
+  - { ref: SW1,  board: control, block: block-1, part: "Dailywell DW3 (2M DPDT ON-ON)", pkg: "sub-mini toggle 2M",  fn: "GAIN_MAIN 1×/5×" }
+  - { ref: SW2,  board: control, block: block-1, part: "Dailywell DW3 (2M DPDT ON-ON)", pkg: "sub-mini toggle 2M",  fn: "GAIN_BP3 1×/5×" }
 
   # block-2 panel controls
   - { ref: RV1,  board: control, block: block-2, part: "Bourns 3296W", pkg: "through-hole", val: "1MΩ", fn: "LFO1_RATE trimpot (preset; 0.05–20 Hz range)" }
@@ -322,8 +322,11 @@ components:
   - { ref: RV28, board: control, block: block-5, part: "large knob", pkg: "9mm",  fn: "LP1_RES (0–1)" }
 
   # block-6 panel controls
-  - { ref: SW3,  board: control, block: block-6, part: "2-pos slide", pkg: panel, fn: "BP_POL (Positive/Negative)" }
-  - { ref: SW4,  board: control, block: block-6, part: "3-pos slide", pkg: panel, fn: "BP_DIST (Soft/Hard/Fold)" }
+  - { ref: SW3,  board: control, block: block-6, part: "Dailywell DW3 (2M DPDT ON-ON)",    pkg: "sub-mini toggle 2M", fn: "BP_POL (Positive/Negative)" }
+  - { ref: SW4,  board: control, block: block-6, part: "Dailywell DW5 (2M DPDT ON-ON-ON)", pkg: "sub-mini toggle 2M", fn: "BP1_DIST_MODE (Soft/Hard/Fold)" }
+  - { ref: SW5,  board: control, block: block-6, part: "Dailywell DW5 (2M DPDT ON-ON-ON)", pkg: "sub-mini toggle 2M", fn: "BP2_DIST_MODE (Soft/Hard/Fold)" }
+  - { ref: SW6,  board: control, block: block-6, part: "Dailywell DW5 (2M DPDT ON-ON-ON)", pkg: "sub-mini toggle 2M", fn: "BP3_DIST_MODE (Soft/Hard/Fold)" }
+  - { ref: SW7,  board: control, block: block-3, part: "Dailywell DW5 (2M DPDT ON-ON-ON)", pkg: "sub-mini toggle 2M", fn: "MOD_SRC (3-way mod source select)" }
   - { ref: RV29, board: control, block: block-6, part: "xl knob",    pkg: "9mm",  fn: "BP_OFFSET master freq (±5V/oct)" }
   - { ref: RV30, board: control, block: block-6, part: "large knob", pkg: "9mm",  fn: "BP_MIX dry/wet (0–1)" }
   - { ref: RV31, board: control, block: block-6, part: "knob",       pkg: "9mm",  fn: "BP1_FREQ" }

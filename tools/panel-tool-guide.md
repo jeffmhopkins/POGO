@@ -63,7 +63,7 @@ in-browser DRC and footprint overlays match `build_panel.py` exactly (no drift).
 - **Sections** (click a zone name in the list): rename `id`/`label`, edit `x_start`, and move the whole section with the dx/dy buttons or arrow keys (mirrors `--shift`: `x_start` moves column-relative parts, explicit-`cx` parts shift with it).
 - **Add** drops the new component into the selected component's (or selected zone's) zone.
 - **Revert to build spec** resets a component to its original `panel-data.yaml` values (disabled for components added in the editor).
-- **Panel…** renames `meta.title` / `meta.brand`. EG slide switches (`eg_2pos`/`eg_3pos`) render and DRC-check exactly as the build tool does.
+- **Panel…** renames `meta.title` / `meta.brand`. Dailywell toggles (`toggle_dw3`/`toggle_dw5`) render and DRC-check exactly as the build tool does.
 - **Add Component / Divider / Zone** (left sidebar): the palette adds components (incl. a **text** annotation with fill/weight/anchor options); **+ Divider ▏/—** adds a vertical/horizontal divider; **+ Zone** adds a new column-relative section. New components drop into the selected component's/zone's zone.
 - **Dividers** are shown nested under the zone whose x-span contains them (not a separate category); ones outside every zone fall under "Other dividers". Click one to select it; drag its end handles on the panel to change length, or the middle handle to move it sideways; the inspector edits style/endpoints/label. Editing patches only that separator's line and adding appends one line — surrounding derivation comments are preserved.
 - **Vertical dividers are tied to zones**: there's no standalone "add vertical divider" — **+ Zone** creates a section *and* its left-edge vertical boundary, and moving a zone's `x_start` moves that boundary with it. **+ Divider —** adds a horizontal divider spanning the selected zone.
@@ -306,9 +306,8 @@ cx can also be set explicitly when a component doesn't fall on a column grid:
 | `knob_medium` | 5.5 (nut) | Alpha 9mm, 4.5mm cap radius |
 | `knob_large` | 5.5 (nut) | Alpha 9mm, 7.0mm cap radius |
 | `knob_xl` | 5.5 (nut) | Alpha 9mm, 9.0mm cap radius |
-| `switch_H2` | 3.15 (hole) | 2-pos horizontal slide |
-| `switch_H3` | 3.15 (hole) | 3-pos horizontal slide |
-| `switch_V3` | 3.15 (hole) | 3-pos vertical slide |
+| `toggle_dw3` | 3.0 (nut) | Dailywell DW3 2-pos toggle (ON-ON) |
+| `toggle_dw5` | 3.0 (nut) | Dailywell DW5 3-pos toggle (ON-ON-ON) |
 | `led` | 1.6 (hole) | 3mm LED, unlabeled |
 | `led_labeled` | 1.6 (hole) | 3mm LED with label below |
 

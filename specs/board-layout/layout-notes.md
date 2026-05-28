@@ -34,8 +34,8 @@ Breakdown by type (from `tools/panel-data.yaml`):
 - Large knobs: ~12
 - Sliders (V45°): 2 (HP_FREQ, LP2_FREQ)
 - Trimpots: ~10
-- H2 switches: 3 (GAIN_MAIN, GAIN_BP3, BP_POL)
-- H3 switch: 1 (BP_DIST)
+- DW3 toggles (2-pos): 3 (GAIN_MAIN, GAIN_BP3, BP_POL)
+- DW5 toggles (3-pos): 4 (BP1/2/3_DIST_MODE, MOD_SRC)
 - Jacks total: 30 (24 inputs + 6 outputs)
 
 ---
