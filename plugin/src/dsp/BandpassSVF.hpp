@@ -1,16 +1,14 @@
 #pragma once
 #include <rack.hpp>
 
-// Block 3: Triple 4-pole OTA-C SVF bandpass resonators (formant F1/F2/F3).
-// 4-pole = two cascaded 2-pole SVF stages (same f0, Q); unity peak gain preserved.
+// Block 3: Triple 2-pole OTA-C SVF bandpass resonators (formant F1/F2/F3).
 //
 // freqV    [V/oct, bipolar]: 1V/oct CV. f_ref[3] = {200, 1500, 6000} Hz at 0 V.
 // qParam   [0,1]: exponential Q taper — Q = 0.5 × 400^qParam → [0.5, 200].
 //          Peak gain = 1 (constant unity, hardware OTA-C SVF behavior).
 //          Does NOT self-oscillate by design.
 struct SVFGroup {
-	float ic1 = 0.f, ic2 = 0.f;   // stage 1 state
-	float ic1b = 0.f, ic2b = 0.f; // stage 2 state (4-pole cascade)
+	float ic1 = 0.f, ic2 = 0.f;
 
 	float process(float x, float f0, float Q, float sampleRate) {
 		float g  = std::tan(float(M_PI) * f0 / sampleRate);
@@ -18,22 +16,15 @@ struct SVFGroup {
 		float a1 = 1.f / (1.f + g * (g + k));
 		float a2 = g * a1;
 		float a3 = g * a2;
-		// Stage 1
 		float v3 = x - ic2;
 		float v1 = a1 * ic1 + a2 * v3;
 		float v2 = ic2 + a2 * ic1 + a3 * v3;
 		ic1 = 2.f * v1 - ic1;
 		ic2 = 2.f * v2 - ic2;
-		// Stage 2 — cascade with same coefficients
-		float v3b = v1 - ic2b;
-		float v1b = a1 * ic1b + a2 * v3b;
-		float v2b = ic2b + a2 * ic1b + a3 * v3b;
-		ic1b = 2.f * v1b - ic1b;
-		ic2b = 2.f * v2b - ic2b;
-		return v1b;  // 4-pole BP tap; peak gain = 1 at resonance
+		return v1;  // 2-pole BP tap; peak gain = 1 at resonance
 	}
 
-	void reset() { ic1 = ic2 = ic1b = ic2b = 0.f; }
+	void reset() { ic1 = ic2 = 0.f; }
 };
 
 struct TripleBandpass {
