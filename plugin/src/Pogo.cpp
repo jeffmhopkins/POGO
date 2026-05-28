@@ -220,9 +220,8 @@ struct Pogo : Module {
 
 	enum LightId {
 		LFO1_LIGHT, LFO2_LIGHT,
-		MOD_CLIP_LIGHT, MOD_POS_LIGHT, MOD_NEG_LIGHT,
 		BP1_CLIP_LIGHT, BP2_CLIP_LIGHT, BP3_CLIP_LIGHT,
-		NUM_LIGHTS   // 8
+		NUM_LIGHTS   // 5
 	};
 
 	Pogo() {
@@ -338,9 +337,6 @@ struct Pogo : Module {
 		// Lights (5)
 		configLight(LFO1_LIGHT,     "LFO 1");
 		configLight(LFO2_LIGHT,     "LFO 2");
-		configLight(MOD_CLIP_LIGHT, "Mod Clip");
-		configLight(MOD_POS_LIGHT,  "Mod +");
-		configLight(MOD_NEG_LIGHT,  "Mod \xe2\x88\x92");
 	}
 
 	// ── DSP state ────────────────────────────────────────────────────────────
@@ -533,9 +529,6 @@ struct Pogo : Module {
 		// LEDs
 		lights[LFO1_LIGHT    ].setBrightness((lfo1Raw + 1.f) * 0.5f);
 		lights[LFO2_LIGHT    ].setBrightness((lfo2Raw + 1.f) * 0.5f);
-		lights[MOD_CLIP_LIGHT].setBrightness(std::abs(busV) >= 9.9f ? 1.f : 0.f);
-		lights[MOD_POS_LIGHT ].setBrightness(busV >  0.f ? clamp( busV / 10.f, 0.f, 1.f) : 0.f);
-		lights[MOD_NEG_LIGHT ].setBrightness(busV < 0.f ? clamp(-busV / 10.f, 0.f, 1.f) : 0.f);
 	}
 };
 
@@ -565,12 +558,9 @@ struct PogoWidget : ModuleWidget {
 		// ── Zone 0c — MOD BUS / VCA ────────────────────────────────────
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(7.62f, 83.00f)), module, Pogo::MOD_SCALE_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(30.48f, 83.00f)), module, Pogo::VCA_AMT_PARAM));
-		addChild(createLightCentered<SmallLight<GreenLight>>(mm2px(Vec(19.05f, 83.00f)), module, Pogo::MOD_CLIP_LIGHT));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(7.62f, 96.34f)), module, Pogo::MOD_OFFSET_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(30.48f, 96.34f)), module, Pogo::VCA_OFS_PARAM));
-		addChild(createLightCentered<SmallLight<GreenLight>>(mm2px(Vec(19.05f, 96.34f)), module, Pogo::MOD_POS_LIGHT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.62f, 112.00f)), module, Pogo::MOD_INPUT));
-		addChild(createLightCentered<SmallLight<GreenLight>>(mm2px(Vec(19.05f, 112.00f)), module, Pogo::MOD_NEG_LIGHT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(30.48f, 112.00f)), module, Pogo::VCA_INPUT));
 
 		// ── Zone — LP1 Low-Pass Filter ─────────────────────────────────

@@ -139,21 +139,15 @@
   <circle cx="30.48" cy="83.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
   <line x1="30.48" y1="83.0" x2="30.48" y2="80.5" stroke="#aaa" stroke-width="0.5"/>
   <text x="30.48" y="88.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">VCA AMT</text>
-  <circle cx="19.05" cy="83.0" r="1.2" fill="#441111" stroke="#cc2222" stroke-width="0.4"/>
-  <text x="19.05" y="88.5" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">CLIP</text>
   <circle cx="7.62" cy="96.34" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
   <line x1="7.62" y1="96.34" x2="7.62" y2="93.84" stroke="#aaa" stroke-width="0.5"/>
   <text x="7.62" y="101.8" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">OFFSET</text>
   <circle cx="30.48" cy="96.34" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
   <line x1="30.48" y1="96.34" x2="30.48" y2="93.84" stroke="#aaa" stroke-width="0.5"/>
   <text x="30.48" y="101.8" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">VCA OFS</text>
-  <circle cx="19.05" cy="96.34" r="1.2" fill="#112244" stroke="#2255cc" stroke-width="0.4"/>
-  <text x="19.05" y="101.8" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">POS</text>
   <circle cx="7.62" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="7.62" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
   <text x="7.62" y="119.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">MOD IN</text>
-  <circle cx="19.05" cy="112.0" r="1.2" fill="#441111" stroke="#cc2222" stroke-width="0.4"/>
-  <text x="19.05" y="119.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">NEG</text>
   <circle cx="30.48" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="30.48" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
   <text x="30.48" y="119.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">VCA IN</text>
