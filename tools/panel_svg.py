@@ -569,7 +569,7 @@ def svg_mounting_hole(cx: float, cy: float) -> str:
 
 def svg_panel_background(w: float, h: float, colors: dict) -> str:
     top_strip_h = 9.0   # extends to the INPUT zone separator line
-    bot_strip_h = 4.5
+    bot_strip_h = top_strip_h   # symmetric with the top strip
     bottom_y = h - bot_strip_h
     parts = [
         f'<rect x="0" y="0" width="{w}" height="{h}" fill="{colors["panel_bg"]}"/>',

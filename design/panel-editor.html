@@ -627,7 +627,7 @@
     let s = "";
     s += `<rect x="0" y="0" width="${W}" height="${H}" fill="${COL.panel_bg}"/>`;
     s += `<rect x="0" y="0" width="${W}" height="9" fill="${COL.panel_strip}"/>`;
-    s += `<rect x="0" y="${H - 4.5}" width="${W}" height="4.5" fill="${COL.panel_strip}"/>`;
+    s += `<rect x="0" y="${H - 9}" width="${W}" height="9" fill="${COL.panel_strip}"/>`;   // symmetric with top strip
     for (const mh of D.mounting_holes || [])
       s += `<circle cx="${mh.cx}" cy="${mh.cy}" r="1.6" fill="#0d0d0d" stroke="#2a2a2a" stroke-width="0.5"/>`;
     // title
