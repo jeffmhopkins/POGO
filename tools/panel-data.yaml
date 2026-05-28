@@ -299,6 +299,13 @@ zones:
         label: "MOD IN"
         font_size: 1.6
         cpp_id: "MOD_INPUT"
+      - id: MOD_SRC_SW
+        type: switch_V3
+        col: 1
+        cy: 112.0
+        label: "LFO1·LFO2·ENV"
+        font_size: 1.4
+        cpp_param: "MOD_SRC_PARAM"
       - id: VCA_IN
         type: jack_input
         col: 2
