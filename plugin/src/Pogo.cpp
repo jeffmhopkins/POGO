@@ -527,10 +527,10 @@ struct PogoWidget : ModuleWidget {
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(64.77f, 112.00f)), module, Pogo::LP1_RES_INPUT));
 
 		// ── Zone — BP CONTROL ──────────────────────────────────────────
-		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(80.01f, 24.80f)), module, Pogo::BP_OFFSET_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(80.01f, 43.00f)), module, Pogo::BP_TILT_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(80.01f, 60.00f)), module, Pogo::BP_MIX_PARAM));
-		addParam(createParamCentered<PogoSwitchH3>(mm2px(Vec(80.01f, 78.00f)), module, Pogo::BP_DIST_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(80.01f, 24.80f)), module, Pogo::BP_OFFSET_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(80.01f, 43.20f)), module, Pogo::BP_TILT_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(80.01f, 61.60f)), module, Pogo::BP_MIX_PARAM));
+		addParam(createParamCentered<PogoSwitchH3>(mm2px(Vec(80.01f, 80.00f)), module, Pogo::BP_DIST_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(74.295f, 100.00f)), module, Pogo::BP_FREQ_ATT_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(85.725f, 100.00f)), module, Pogo::BP_TILT_ATT_PARAM));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(74.295f, 112.00f)), module, Pogo::BP_FREQ_INPUT));

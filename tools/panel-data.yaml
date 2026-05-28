@@ -411,9 +411,9 @@ zones:
     col_pitch: 11.43
     cols: 2
     components:
-      # ── Knobs: Offset (L) → Tilt (M) → Mix (M) ─────────────────────────────
+      # ── Knobs: Offset (M) → Tilt (M) → Mix (M), evenly spaced to switch ────
       - id: BP_OFFSET
-        type: knob_large
+        type: knob_medium
         cx: 80.01
         cy: 24.80
         label: "OFFSET"
@@ -421,20 +421,20 @@ zones:
       - id: BP_TILT
         type: knob_medium
         cx: 80.01
-        cy: 43.00
+        cy: 43.20
         label: "TILT"
         cpp_param: "BP_TILT_PARAM"
       - id: BP_MIX
         type: knob_medium
         cx: 80.01
-        cy: 60.00
+        cy: 61.60
         label: "MIX"
         cpp_param: "BP_MIX_PARAM"
       # ── Distortion type switch ───────────────────────────────────────────────
       - id: BP_DIST
         type: switch_H3
         cx: 80.01
-        cy: 78.00
+        cy: 80.00
         pos_labels: ["SOFT", "HARD", "FOLD"]
         pos_xs: [75.51, 80.01, 84.51]
         label_below: ""
