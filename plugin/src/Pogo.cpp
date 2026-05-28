@@ -422,15 +422,13 @@ struct Pogo : Module {
 			clamp(params[BP3_DIST_PARAM].getValue() + modDest(BP3_DIST_INPUT, BP3_DIST_ATT_PARAM), 0.f, 1.f),
 		};
 
-		// BP input: ALT (VCA-controlled) when patched, else LP1 output (already VCA-processed)
-		float altLVca = altLConn ? VcaBlock::process(altL, vcaAmt, vcaCV) : 0.f;
-		float altRVca = (altLConn || altRConn) ? VcaBlock::process(altR, vcaAmt, vcaCV) : 0.f;
-		float bpInL = altLConn ? altLVca : bandL;
-		float bpInR = (altLConn || altRConn) ? altRVca : bandR;
+		// ALT path feeds BP3 only (VCA-applied); BP1+BP2 always use LP1 output
+		float bp3InL = altLConn ? VcaBlock::process(altL, vcaAmt, vcaCV) : bandL;
+		float bp3InR = (altLConn || altRConn) ? VcaBlock::process(altR, vcaAmt, vcaCV) : bandR;
 
 		// Stereo tilt: L gets +bpTiltCv, R gets −bpTiltCv (widthOffset in TripleBandpass API)
-		bandpassL.process(bpInL, freqV, focusCv, polarityVal, +bpTiltCv, fs);
-		bandpassR.process(bpInR, freqV, focusCv, polarityVal, -bpTiltCv, fs);
+		bandpassL.process(bandL, bp3InL, freqV, focusCv, +bpTiltCv, fs);
+		bandpassR.process(bandR, bp3InR, freqV, focusCv, -bpTiltCv, fs);
 
 		float dSumL = 0.f, dSumR = 0.f;
 		for (int i = 0; i < 3; i++) {
@@ -439,14 +437,15 @@ struct Pogo : Module {
 			dSumL += distTapL[i];
 			dSumR += distTapR[i];
 		}
-		float wetL    = clamp(dSumL, -10.5f, 10.5f);
-		float wetR    = clamp(dSumR, -10.5f, 10.5f);
-		float bp3OutL = distTapL[2];
-		float bp3OutR = distTapR[2];
+		float pol     = (polarityVal == 1) ? 1.f : -1.f;
+		float wetL    = clamp(pol * dSumL, -10.5f, 10.5f);
+		float wetR    = clamp(pol * dSumR, -10.5f, 10.5f);
+		float bp3OutL = pol * distTapL[2];
+		float bp3OutR = pol * distTapR[2];
 
-		// BP_MIX: crossfade — CCW (0) = bypass, CW (1) = full BP only
-		float bpOutL = clamp(bpInL * (1.f - mix) + wetL * mix, -12.f, 12.f);
-		float bpOutR = clamp(bpInR * (1.f - mix) + wetR * mix, -12.f, 12.f);
+		// BP_MIX: crossfade — CCW (0) = LP1 bypass, CW (1) = full BP only
+		float bpOutL = clamp(bandL * (1.f - mix) + wetL * mix, -12.f, 12.f);
+		float bpOutR = clamp(bandR * (1.f - mix) + wetR * mix, -12.f, 12.f);
 
 		// ── Block HP: 2-pole SVF HP ───────────────────────────────────────────
 		float hpFreqCv = params[HP_FREQ_PARAM].getValue()
@@ -468,7 +467,8 @@ struct Pogo : Module {
 		outputs[MAIN_L_OUTPUT].setVoltage(clamp(outL,    -11.f, 11.f));
 		outputs[MAIN_R_OUTPUT].setVoltage(clamp(outR,    -11.f, 11.f));
 		outputs[BP3_L_OUTPUT ].setVoltage(clamp(bp3OutL, -11.f, 11.f));
-		outputs[BP3_R_OUTPUT ].setVoltage(clamp(bp3OutR, -11.f, 11.f));
+		outputs[BP3_R_OUTPUT ].setVoltage(clamp(
+		    outputs[BP3_R_OUTPUT].isConnected() ? bp3OutR : bp3OutL, -11.f, 11.f));
 		outputs[LFO1_OUTPUT  ].setVoltage(lfo1V);
 		outputs[LFO2_OUTPUT  ].setVoltage(lfo2V);
 
