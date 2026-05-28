@@ -2,9 +2,9 @@
 """build_panel.py — POGO panel build tool.
 
 Usage (run from repo root):
-    python3 tools/build_panel.py              # --resource + --design (default)
-    python3 tools/build_panel.py --resource   # writes plugin/res/Pogo-source.svg
-    python3 tools/build_panel.py --design     # writes design/panel-debug.html
+    python3 tools/build_panel.py              # --resource + --mfr + --design (default)
+    python3 tools/build_panel.py --resource   # writes plugin/res/Pogo-source.svg only
+    python3 tools/build_panel.py --design     # writes design/panel-debug.html only
     python3 tools/build_panel.py --mfr        # writes plugin/res/Pogo.svg via inkscape
     python3 tools/build_panel.py --cpp        # prints C++ stubs to stdout
     python3 tools/build_panel.py --check      # DRC only; exit 1 on violations
@@ -1329,7 +1329,7 @@ Query commands (no files written):
     )
     parser.add_argument("--resource",  action="store_true", help="Write plugin/res/Pogo-source.svg")
     parser.add_argument("--design",    action="store_true", help="Write design/panel-debug.html")
-    parser.add_argument("--mfr",       action="store_true", help="Write plugin/res/Pogo.svg via inkscape")
+    parser.add_argument("--mfr",       action="store_true", help="Write plugin/res/Pogo.svg via inkscape (included in default build)")
     parser.add_argument("--cpp",       action="store_true", help="Print C++ stubs to stdout")
     parser.add_argument("--check",     action="store_true", help="DRC only; exit 1 on violations")
     parser.add_argument("--list",      action="store_true", help="Print table of all resolved components")
@@ -1355,9 +1355,10 @@ Query commands (no files written):
                     getattr(args, "select", None),  getattr(args, "shift", None),
                     getattr(args, "shift_select", None)])
 
-    # Default: both --resource and --design
+    # Default: --resource + --mfr (Pogo.svg for VCV Rack) + --design
     if not any([args.resource, args.design, args.mfr, args.cpp, is_query]):
         args.resource = True
+        args.mfr      = True
         args.design   = True
 
     data  = load_data()
