@@ -483,13 +483,13 @@ zones:
       - id: BP1_FOCUS
         type: knob_large
         cx: 99.44
-        cy: 44.53
+        cy: 49.08
         label: "FOCUS"
         cpp_param: "BP1_FOCUS_PARAM"
       - id: BP1_TILT
         type: knob_large
         cx: 117.73
-        cy: 62.27
+        cy: 64.54
         rotate: 180
         label: "TILT"
         cpp_param: "BP1_TILT_PARAM"
