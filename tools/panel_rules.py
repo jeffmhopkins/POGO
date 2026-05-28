@@ -21,7 +21,7 @@ def _cy(ctype: str, fallback: tuple[float, float, float, float]) -> tuple[float,
 # Thonkiconn WQP-PJ398SM jack
 JACK_CY = _cy("jack_input", (-5.0, -7.90, 5.0, 6.50))    # (x1, y1, x2, y2)
 # Alpha RD901F 9mm pot (anchor = shaft centre)
-POT_CY  = _cy("knob_medium", (-8.65, -6.67, 5.1, 6.67))
+POT_CY  = _cy("knob", (-8.65, -6.67, 5.1, 6.67))
 # Bourns 3296W vertical trimpot (anchor = wiper/actuator)
 TRIMPOT_CY = _cy("trimpot", (-2.665, -3.385, 2.665, 3.385))
 # Potentiometer_Slider_45mm_Vertical (anchor = travel centre)
@@ -55,7 +55,7 @@ LED_TYPES         = {"led", "led_labeled"}
 MOUNTING_HOLE_CLEARANCE_MM = 3.5
 
 JACK_TYPES = {"jack_input", "jack_output"}
-POT_TYPES  = {"trimpot", "knob_medium", "knob_large", "knob_xl"}
+POT_TYPES  = {"trimpot", "knob"}
 
 
 def _rotate_rect(
@@ -188,6 +188,10 @@ class DesignRules:
     jack_nut_r: float = 5.0
     pot_nut_r: float = 5.5
 
+    # Knob cap default DIAMETER (mm), loaded from the `knobs:` block. A knob whose
+    # cap_mm is unset falls back to this; the radius drawn is cap_mm / 2.
+    knob_default_cap_mm: float = 14.0
+
     # Derived properties
     @property
     def att_cy(self) -> float:
@@ -226,6 +230,9 @@ class DesignRules:
         pot_fp  = fp.get("pot_alpha9mm", {})
         obj.jack_nut_r = float(jack_fp.get("nut_r_mm", cls.jack_nut_r))
         obj.pot_nut_r  = float(pot_fp.get("nut_r_mm",  cls.pot_nut_r))
+        # Knob cap default from the `knobs:` block
+        knobs = data.get("knobs", {})
+        obj.knob_default_cap_mm = float(knobs.get("default_cap_mm", cls.knob_default_cap_mm))
         return obj
 
     # ── DRC helpers ──────────────────────────────────────────────────────────

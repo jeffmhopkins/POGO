@@ -73,7 +73,7 @@
 
   const PALETTE_TYPES = [
     "jack_input", "jack_output", "trimpot",
-    "knob_medium", "knob_large", "knob_xl",
+    "knob",
     "toggle_dw3", "toggle_dw5",
     "led", "led_labeled", "slider_V45", "text",
   ];
@@ -416,9 +416,7 @@
       case "jack_input":  return rJack(c, "input");
       case "jack_output": return rJack(c, "output");
       case "trimpot":     return rTrimpot(c);
-      case "knob_medium": return rKnob(c, 4.5);
-      case "knob_large":  return rKnob(c, 7.0);
-      case "knob_xl":     return rKnob(c, 9.0);
+      case "knob":        return rKnob(c, (Number(c.cap_mm) || C.knob_default_cap_mm) / 2);
       case "led":         return rLed(c);
       case "led_labeled": return rLedLabeled(c);
       case "toggle_dw3":  return rToggle2(c, rawCx(c, zoneOf(c)));
@@ -1232,6 +1230,7 @@
     if (c.col != null) h += `<div class="hint">column-relative (col ${c.col} in ${esc(z.id)}); editing cx/cy converts to explicit cx.</div>`;
     const isText = c.type === "text";
     if (!isText) h += `<div class="field"><label>rotate</label><button id="i-rot">${Number(c.rotate || 0)}° — cycle</button></div>`;
+    if (c.type === "knob") h += `<div class="field"><label>cap_mm (knob ⌀)</label><input id="i-cap" type="number" step="0.5" min="1" value="${Number(c.cap_mm) || C.knob_default_cap_mm}"></div>`;
     h += `<div class="field"><label>${isText ? "text" : "label"}</label><input id="i-label" type="text" value="${esc(c.label || "")}"></div>`;
     h += `<div class="field"><label>font_size</label><input id="i-fs" type="number" step="0.1" value="${c.font_size != null ? c.font_size : (isText ? 2.0 : 1.8)}"></div>`;
     if (isText) {
@@ -1282,6 +1281,8 @@
     cyEl.addEventListener("change", applyXY);
     const rotEl = document.getElementById("i-rot");
     if (rotEl) rotEl.addEventListener("click", () => rotateComp(c.id));
+    const capEl = document.getElementById("i-cap");
+    if (capEl) capEl.addEventListener("change", (e) => { const v = Number(e.target.value); if (v > 0) c.cap_mm = v; else delete c.cap_mm; commit(); });
     document.getElementById("i-label").addEventListener("change", (e) => { if (e.target.value) c.label = e.target.value; else delete c.label; commit(); });
     document.getElementById("i-fs").addEventListener("change", (e) => { c.font_size = Number(e.target.value); commit(); });
     if (isText) {
@@ -1523,6 +1524,11 @@
       // rotate
       const oRot = Number(orig.rotate || 0), nRot = Number(cur.rotate || 0);
       if (oRot !== nRot) { if (nRot === 0) removeKey(id, "rotate"); else if (orig.rotate != null) patchKey(id, "rotate", String(nRot)); else insertKey(id, "rotate", String(nRot)); }
+      // cap_mm (knob cap diameter)
+      if (String(orig.cap_mm) !== String(cur.cap_mm)) {
+        if (cur.cap_mm != null) { if (orig.cap_mm != null) patchKey(id, "cap_mm", fmtVal(cur.cap_mm)); else insertKey(id, "cap_mm", fmtVal(cur.cap_mm)); }
+        else removeKey(id, "cap_mm");
+      }
       // label / font_size / cpp
       if ((orig.label || "") !== (cur.label || "")) { if (cur.label) patchKey(id, "label", quoteIfNeeded(cur.label)); else removeKey(id, "label"); }
       if (String(orig.font_size) !== String(cur.font_size) && cur.font_size != null) patchKey(id, "font_size", fmtVal(cur.font_size));
@@ -1625,7 +1631,7 @@
     function componentBlock(c, itemIndent) {     // → array of YAML lines for one component
       const fieldIndent = itemIndent + "  ";
       const blk = [`${itemIndent}- id: ${c.id}`];
-      const order = ["type", "cx", "cy", "rotate", "label", "font_size", "fill", "font_weight",
+      const order = ["type", "cx", "cy", "rotate", "cap_mm", "label", "font_size", "fill", "font_weight",
         "text_anchor", "label_border", "rect_w", "label_below_y", "label_above_y", "cy_body_top",
         "pos_y", "pos_xs", "pos_ys", "cpp_id", "cpp_param", "led_fill", "led_stroke"];
       for (const k of order) {

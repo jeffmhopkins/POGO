@@ -64,6 +64,14 @@ footprints:
   led_3mm:
     body_r_mm: 1.5
 
+# ── Knob cap sizing ──────────────────────────────────────────────────────────
+# Single `knob` component type; each knob sets `cap_mm` (cap DIAMETER in mm).
+# `default_cap_mm` is the base used when a knob omits cap_mm. The PCB footprint
+# (Alpha 9mm pot) is identical regardless of cap size — cap_mm is the visual cap
+# only. Reference diameters: small≈9, medium/large≈14, xl/huge≈18 mm.
+knobs:
+  default_cap_mm: 14.0
+
 # ── Mounting holes ────────────────────────────────────────────────────────────
 # 48 HP: left holes at x=7.5, right holes at x=243.84-7.5=236.34
 mounting_holes:
@@ -332,19 +340,22 @@ zones:
       # Evenly spaced between top label (y=9.0) and trimpot courtyard top (y=96.615):
       #   gap = (87.615 − 60.4) / 4 = 6.80mm at top, between each, and below last label
       - id: LP1_FREQ
-        type: knob_xl
+        type: knob
+        cap_mm: 18.0
         col: 1
         cy: 24.8
         label: "FREQ"
         cpp_param: "LP1_FREQ_PARAM"
       - id: LP1_TILT
-        type: knob_large
+        type: knob
+        cap_mm: 14.0
         col: 1
         cy: 52.4
         label: "TILT"
         cpp_param: "LP1_TILT_PARAM"
       - id: LP1_RES
-        type: knob_large
+        type: knob
+        cap_mm: 14.0
         col: 1
         cy: 78.0
         label: "RES"
@@ -396,25 +407,29 @@ zones:
     components:
       # ── Knobs: Offset (M) → Tilt (M) → Mix (M), evenly spaced to switch ────
       - id: BP_OFFSET
-        type: knob_medium
+        type: knob
+        cap_mm: 9.0
         cx: 80.01
         cy: 24.80
         label: "OFFSET"
         cpp_param: "BP_OFFSET_PARAM"
       - id: BP_TILT
-        type: knob_medium
+        type: knob
+        cap_mm: 9.0
         cx: 80.01
         cy: 43.20
         label: "TILT"
         cpp_param: "BP_TILT_PARAM"
       - id: BP_MIX
-        type: knob_medium
+        type: knob
+        cap_mm: 9.0
         cx: 80.01
         cy: 61.60
         label: "BYPASS"
         cpp_param: "BP_BYPASS_PARAM"
       - id: BP_WET
-        type: knob_medium
+        type: knob
+        cap_mm: 9.0
         cx: 80.01
         cy: 80.00
         label: "WET"
@@ -462,26 +477,30 @@ zones:
         label_below_y: 36.0
         cpp_param: "BP1_DIST_MODE_PARAM"
       - id: BP1_FREQ
-        type: knob_xl
+        type: knob
+        cap_mm: 18.0
         cx: 112.585
         cy: 24.80
         label: "FREQ"
         cpp_param: "BP1_FREQ_PARAM"
       - id: BP1_FOCUS
-        type: knob_large
+        type: knob
+        cap_mm: 14.0
         cx: 100.44
         cy: 47.69
         label: "FOCUS"
         cpp_param: "BP1_FOCUS_PARAM"
       - id: BP1_TILT
-        type: knob_large
+        type: knob
+        cap_mm: 14.0
         cx: 116.73
         cy: 63.85
         rotate: 180
         label: "TILT"
         cpp_param: "BP1_TILT_PARAM"
       - id: BP1_DIST
-        type: knob_large
+        type: knob
+        cap_mm: 14.0
         cx: 100.44
         cy: 80.00
         label: "DIST"
@@ -544,26 +563,30 @@ zones:
         label_below_y: 36.0
         cpp_param: "BP2_DIST_MODE_PARAM"
       - id: BP2_FREQ
-        type: knob_xl
+        type: knob
+        cap_mm: 18.0
         cx: 146.875
         cy: 24.80
         label: "FREQ"
         cpp_param: "BP2_FREQ_PARAM"
       - id: BP2_FOCUS
-        type: knob_large
+        type: knob
+        cap_mm: 14.0
         cx: 134.730
         cy: 47.69
         label: "FOCUS"
         cpp_param: "BP2_FOCUS_PARAM"
       - id: BP2_TILT
-        type: knob_large
+        type: knob
+        cap_mm: 14.0
         cx: 151.020
         cy: 63.85
         rotate: 180
         label: "TILT"
         cpp_param: "BP2_TILT_PARAM"
       - id: BP2_DIST
-        type: knob_large
+        type: knob
+        cap_mm: 14.0
         cx: 134.730
         cy: 80.00
         label: "DIST"
@@ -626,26 +649,30 @@ zones:
         label_below_y: 36.0
         cpp_param: "BP3_DIST_MODE_PARAM"
       - id: BP3_FREQ
-        type: knob_xl
+        type: knob
+        cap_mm: 18.0
         cx: 181.165
         cy: 24.80
         label: "FREQ"
         cpp_param: "BP3_FREQ_PARAM"
       - id: BP3_FOCUS
-        type: knob_large
+        type: knob
+        cap_mm: 14.0
         cx: 169.020
         cy: 47.69
         label: "FOCUS"
         cpp_param: "BP3_FOCUS_PARAM"
       - id: BP3_TILT
-        type: knob_large
+        type: knob
+        cap_mm: 14.0
         cx: 185.310
         cy: 63.85
         rotate: 180
         label: "TILT"
         cpp_param: "BP3_TILT_PARAM"
       - id: BP3_DIST
-        type: knob_large
+        type: knob
+        cap_mm: 14.0
         cx: 169.020
         cy: 80.00
         label: "DIST"

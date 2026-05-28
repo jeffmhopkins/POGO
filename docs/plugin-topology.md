@@ -455,9 +455,9 @@ scale the result (−1 to +1, bipolar). This is unchanged from the old architect
 
 | Panel type | VCV Rack widget class |
 |---|---|
-| `knob_xl` | `RoundHugeBlackKnob` |
-| `knob_large` | `RoundLargeBlackKnob` |
-| `knob_medium` | `RoundBlackKnob` |
+| `knob` (`cap_mm` ≥ 16) | `RoundHugeBlackKnob` |
+| `knob` (`cap_mm` 11–15) | `RoundLargeBlackKnob` |
+| `knob` (`cap_mm` < 11) | `RoundBlackKnob` |
 | `trimpot` | `PogoTrimPot` (custom, or `Trimpot`) |
 | `slider_V45` | `PogoSlider` (custom vertical 45mm fader) |
 | `toggle_dw3` | `PogoToggle2` (Dailywell DW3, 2-position) |
