@@ -303,6 +303,7 @@ zones:
         type: switch_V3
         col: 1
         cy: 112.0
+        rotate: 180
         label: "LFO1·LFO2·ENV"
         font_size: 1.4
         cpp_param: "MOD_SRC_PARAM"
