@@ -950,6 +950,31 @@
     c.cx = round3(resolvedCx - (DR.x_offset || 0));
     delete c.col;                       // off the column grid → explicit cx
     c.cy = round3(resolvedCy);
+    reassignZone(c);                    // keep tree membership = the zone it now sits in
+  }
+  // Raw (pre-x_offset) x-span [x0,x1) of a column-relative zone, else null.
+  function zoneSpanRaw(z) {
+    if (z.x_start == null) return null;
+    const pitch = z.col_pitch != null ? Number(z.col_pitch) : DR.jack_pitch;
+    const cols = z.cols != null ? Number(z.cols) : 0;
+    if (!cols) return null;
+    const x0 = Number(z.x_start);
+    return [x0, x0 + cols * pitch];
+  }
+  function zoneForRawCx(rawcx) {
+    for (const z of D.zones || []) { const s = zoneSpanRaw(z); if (s && rawcx >= s[0] - 0.001 && rawcx < s[1] + 0.001) return z; }
+    return null;
+  }
+  // After an individual move, move the component object into the zone whose x-span
+  // now contains it (so the component tree reflects its real location).
+  function reassignZone(c) {
+    const target = zoneForRawCx(Number(c.cx));
+    if (!target) return;
+    const cur = zoneOf(c);
+    if (!cur || cur === target) return;
+    const i = cur.components.indexOf(c);
+    if (i >= 0) cur.components.splice(i, 1);
+    (target.components = target.components || []).push(c);
   }
   function moveCompTo(id, resolvedCx, resolvedCy) {
     snapshot();
@@ -1502,21 +1527,31 @@
     }
 
     const origById = {};
-    for (const z of ORIG.zones || []) for (const c of z.components || []) origById[c.id] = c;
+    const compOrigZone = {};                   // component id → ORIGINAL owning zone id
+    for (const z of ORIG.zones || []) for (const c of z.components || []) { origById[c.id] = c; compOrigZone[c.id] = z.id; }
     const curById = {};
-    for (const z of D.zones || []) for (const c of z.components || []) curById[c.id] = c;
+    const curZoneOf = {};                      // component id → current D zone (object)
+    for (const z of D.zones || []) for (const c of z.components || []) { curById[c.id] = c; curZoneOf[c.id] = z; }
+    // A surviving component is RELOCATED if its current zone maps to a different
+    // original zone than where it started (incl. moving into a new zone).
+    const relocated = new Set();
+    for (const id of Object.keys(curById)) {
+      if (!origById[id]) continue;
+      if (compOrigZone[id] !== (curZoneOf[id]._orig_id || null)) relocated.add(id);
+    }
 
-    // 1 ── deletions
+    // 1 ── deletions (and remove the old block of each relocated component)
     for (const id of Object.keys(origById)) {
-      if (!curById[id]) {
+      if (!curById[id] || relocated.has(id)) {
         const idl = findIdLine(id);
         if (idl) { const end = blockEnd(idl.i, idl.indent); lines.splice(idl.i, end - idl.i); }
       }
     }
-    // 2 ── field patches for surviving components
+    // 2 ── field patches for surviving, NON-relocated components (relocated ones are
+    //      rewritten in full at their new location below)
     for (const id of Object.keys(curById)) {
       const cur = curById[id], orig = origById[id];
-      if (!orig) continue;                     // newly added → handled below
+      if (!orig || relocated.has(id)) continue;
       // cx
       const origCol = orig.col != null && orig.cx == null;
       if (cur.cx != null) {
@@ -1558,10 +1593,11 @@
     const liveOrigIds = new Set((D.zones || []).map((z) => z._orig_id).filter(Boolean));
     // 3a ── deleted zones: remove the whole block from the text
     for (const oz of ORIG.zones || []) if (!liveOrigIds.has(oz.id)) removeZoneBlock(oz.id);
-    // 3b ── component additions into EXISTING zones (located by original zone id)
+    // 3b ── inserts into EXISTING zones: new components AND relocated ones (whose old
+    //       block was removed above). Located by the zone's original id.
     for (const z of D.zones || []) {
       if (!z._orig_id) continue;                  // new zone → handled by insertZone
-      for (const c of z.components || []) if (!origById[c.id]) insertComponent(z._orig_id, c);
+      for (const c of z.components || []) if (!origById[c.id] || relocated.has(c.id)) insertComponent(z._orig_id, c);
     }
     // 3c ── new zones: append the whole zone block (with its components)
     for (const z of D.zones || []) if (!z._orig_id) insertZone(z);
