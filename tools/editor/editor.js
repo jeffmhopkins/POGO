@@ -26,11 +26,34 @@
 
   // Editor UI state
   const UI = {
-    selId: null,
+    tool: "select",          // "select" | "pan" | "anchor"
+    selId: null,             // selected component id
+    selZone: null,           // selected zone id (mutually exclusive with selId)
     snap: false,
-    snapMm: 0.5,
+    snapUnit: "mm",          // "mm" | "hp"
+    snapVal: 0.5,            // step in the chosen unit (e.g. 0.5 mm, 2.25 HP)
+    snapOriginId: null,      // component/divider id the snap grid counts from (null = panel 0,0)
+    anchor: null,            // active anchor/align pick: {axis:'x'|'y'|'both', offX, offY, unit}
+    armedAddType: null,      // palette type queued for click-to-place (unused: we add immediately)
     layers: { panel: true, keepout: false, nuts: false, pcb: false, kicad: false },
   };
+  const HP_MM = 5.08;
+  const undoStack = [];
+  const redoStack = [];
+  function snapshot() {
+    undoStack.push(JSON.stringify({ d: D, xo: DR.x_offset }));
+    if (undoStack.length > 100) undoStack.shift();
+    redoStack.length = 0;
+  }
+  function applySnapshot(s) {
+    const o = JSON.parse(s);
+    // mutate D in place so references in closures stay valid
+    for (const k of Object.keys(D)) delete D[k];
+    Object.assign(D, o.d);
+    DR.x_offset = o.xo;
+  }
+  function undo() { if (!undoStack.length) return; redoStack.push(JSON.stringify({ d: D, xo: DR.x_offset })); applySnapshot(undoStack.pop()); UI.selId = UI.selId && findComp(UI.selId) ? UI.selId : null; render(); }
+  function redo() { if (!redoStack.length) return; undoStack.push(JSON.stringify({ d: D, xo: DR.x_offset })); applySnapshot(redoStack.pop()); render(); }
 
   // ── Small helpers ────────────────────────────────────────────────────────────
   const f2 = (x) => Number(x).toFixed(2);
@@ -46,7 +69,7 @@
   const PALETTE_TYPES = [
     "jack_input", "jack_output", "trimpot",
     "knob_medium", "knob_large", "knob_xl",
-    "switch_H2", "switch_H3", "switch_V3",
+    "eg_2pos", "eg_3pos",
     "led", "led_labeled", "slider_V45",
   ];
 
@@ -101,6 +124,8 @@
     if (C.type_sets.switch_v3.includes(type)) return CY.SWITCH_V3_CY;
     if (type === "switch_H3") return CY.SWITCH_H3_CY;
     if (type === "switch_H2") return CY.SWITCH_CY;
+    if (C.type_sets.eg_2pos.includes(type)) return CY.EG1218_CY;
+    if (C.type_sets.eg_3pos.includes(type)) return CY.EG2301_V_CY;
     if (C.type_sets.led.includes(type)) return CY.LED_CY;
     return null;
   }
@@ -150,6 +175,15 @@
     // 1 ── nut keep-out
     for (const o of comps) {
       const { cx, cy, type, label } = o;
+      // EG slide switches: rectangular slot, check y-extent against ±half-height
+      if (C.type_sets.eg_2pos.includes(type) || C.type_sets.eg_3pos.includes(type)) {
+        const tag = C.type_sets.eg_2pos.includes(type) ? "EG2POS" : "EG3POS";
+        const ph = C.eg_panel_h[type];
+        const top = cy - ph, bot = cy + ph;
+        if (top < topKO) { V.push(`[NUT KEEPOUT] ${tag} '${label}' at cy=${f2(cy)}: slot top=${f2(top)} encroaches TOP keepout (${f2(topKO)})`); flag(o.c); }
+        if (bot > botKO) { V.push(`[NUT KEEPOUT] ${tag} '${label}' at cy=${f2(cy)}: slot bottom=${f2(bot)} exceeds BOT keepout (${f2(botKO)})`); flag(o.c); }
+        continue;
+      }
       let r = null, kind = null;
       if (C.type_sets.jack.includes(type)) { r = DR.jack_nut_r; kind = "JACK"; }
       else if (C.type_sets.pot.includes(type)) { r = DR.pot_nut_r; kind = "POT"; }
@@ -332,6 +366,42 @@
     s += `<text y="${(-slotH / 2 - 3.5).toFixed(1)}" fill="${COL.jack_text}" ${FONT} font-size="1.8" text-anchor="middle">${esc(c.label || "")}</text>`;
     return s;
   }
+  // E-Switch EG1218 — 2-pos horizontal slide (port of svg_eg_slide_h, anchor-relative).
+  function rEg2pos(c, rawcx) {
+    const bw = 11.6, bh = 4.0, pw = 3.5, ph = 4.8;
+    const cy = resolve(c, zoneOf(c)).cy;
+    let s = "";
+    if (c.label_above != null) {
+      const ay = c.label_above_y != null ? Number(c.label_above_y) - cy : -3.5;
+      s += `<text y="${ay}" fill="${COL.jack_text}" ${FONT} font-size="1.8" text-anchor="middle">${esc(c.label_above)}</text>`;
+    }
+    s += `<rect x="${(-bw / 2).toFixed(2)}" y="${(-bh / 2).toFixed(2)}" width="${bw}" height="${bh}" rx="0.8" fill="${COL.switch_body}" stroke="${COL.jack_outer}" stroke-width="0.5"/>`;
+    s += `<rect x="${(-bw / 2 + 0.8).toFixed(2)}" y="${(-ph / 2).toFixed(2)}" width="${pw}" height="${ph}" rx="0.6" fill="${COL.switch_slug}" stroke="${COL.switch_slug_s}" stroke-width="0.3"/>`;
+    const labels = c.pos_labels || [], xs = c.pos_xs || [];
+    const posY = c.pos_y != null ? Number(c.pos_y) - cy : 4;
+    labels.forEach((pl, i) => {
+      const px = xs[i] != null ? Number(xs[i]) - rawcx : 0;
+      s += `<text x="${px}" y="${posY}" fill="${COL.jack_text}" ${FONT} font-size="1.6" text-anchor="middle">${esc(pl)}</text>`;
+    });
+    return s;
+  }
+  // E-Switch EG2301 — 3-pos vertical slide (port of svg_eg_slide_v, anchor-relative).
+  function rEg3pos(c) {
+    const bw = 6.5, bh = 16.0, tw = 2.0, pw = 7.3, ph = 4.0;
+    const cy = resolve(c, zoneOf(c)).cy;
+    let s = `<rect x="${(-bw / 2).toFixed(2)}" y="${(-bh / 2).toFixed(2)}" width="${bw}" height="${bh}" rx="0.8" fill="${COL.switch_body}" stroke="${COL.jack_outer}" stroke-width="0.5"/>`;
+    s += `<rect x="${(-tw / 2).toFixed(2)}" y="${(-bh / 2).toFixed(2)}" width="${tw}" height="${bh}" rx="0.5" fill="${COL.panel_bg}" stroke="none"/>`;
+    s += `<rect x="${(-pw / 2).toFixed(2)}" y="${(-ph / 2).toFixed(2)}" width="${pw}" height="${ph}" rx="0.6" fill="${COL.switch_slug}" stroke="${COL.switch_slug_s}" stroke-width="0.3"/>`;
+    const lx = bw / 2 + 1.2;
+    const labels = c.pos_labels || [], ys = c.pos_ys || [];
+    labels.forEach((pl, i) => {
+      const py = ys[i] != null ? Number(ys[i]) - cy : (-bh / 2 + i * (bh / Math.max(1, labels.length - 1)));
+      s += `<text x="${lx.toFixed(2)}" y="${py}" fill="${COL.switch_label}" ${FONT} font-size="1.4" text-anchor="start">${esc(pl)}</text>`;
+    });
+    const lby = c.label_below_y != null ? Number(c.label_below_y) - cy : (bh / 2 + 3);
+    s += `<text y="${lby}" fill="${COL.control_text}" ${FONT} font-size="1.8" text-anchor="middle">${esc(c.label_below || c.label || "")}</text>`;
+    return s;
+  }
   // Visual SVG (anchor-relative) for a component.
   function visual(c) {
     switch (c.type) {
@@ -343,6 +413,8 @@
       case "knob_xl":     return rKnob(c, 9.0);
       case "led":         return rLed(c);
       case "led_labeled": return rLedLabeled(c);
+      case "eg_2pos":     return rEg2pos(c, rawCx(c, zoneOf(c)));
+      case "eg_3pos":     return rEg3pos(c);
       case "switch_H2":   return rSwitchH(c, 9, rawCx(c, zoneOf(c)));
       case "switch_H3":   return rSwitchH(c, 12, rawCx(c, zoneOf(c)));
       case "switch_V3":   return rSwitchV3(c);
@@ -436,7 +508,7 @@
     function cat(t) {
       if (C.type_sets.jack.includes(t)) return "jack";
       if (C.type_sets.pot.includes(t)) return "pot";
-      if (t.startsWith("switch")) return "switch";
+      if (t.startsWith("switch") || t.startsWith("eg_")) return "switch";
       if (C.type_sets.led.includes(t)) return "led";
       if (C.type_sets.slider.includes(t)) return "slider";
       return null;
@@ -502,54 +574,115 @@
   }
   const cssEsc = (s) => (window.CSS && CSS.escape) ? CSS.escape(s) : String(s).replace(/["\\]/g, "\\$&");
 
-  let drag = null;
+  let drag = null, pan = null;
+  let spaceDown = false;
+  function panActive() { return UI.tool === "pan" || spaceDown; }
   function wireCanvas() {
+    const wrap = document.getElementById("canvas-wrap");
+    svgEl.style.cursor = panActive() ? "grab" : (UI.tool === "anchor" ? "crosshair" : "default");
+
+    // Background: deselect (select tool) or start a pan (pan tool / space-hold).
+    svgEl.addEventListener("pointerdown", (e) => {
+      if (e.target.closest && e.target.closest(".comp")) return;  // component handles its own
+      if (panActive()) {
+        pan = { x: e.clientX, y: e.clientY, sl: wrap.scrollLeft, st: wrap.scrollTop };
+        svgEl.setPointerCapture(e.pointerId); svgEl.style.cursor = "grabbing"; e.preventDefault();
+      } else if (UI.tool === "anchor") {
+        UI.anchor = null; UI.tool = "select"; render();   // click empty space cancels pick
+      } else if (UI.selId || UI.selZone) {
+        deselect();
+      }
+    });
+    svgEl.addEventListener("pointermove", (e) => {
+      if (!pan) return;
+      wrap.scrollLeft = pan.sl - (e.clientX - pan.x);
+      wrap.scrollTop = pan.st - (e.clientY - pan.y);
+    });
+    const endPan = () => { if (pan) { pan = null; svgEl.style.cursor = panActive() ? "grab" : "default"; } };
+    svgEl.addEventListener("pointerup", endPan);
+    svgEl.addEventListener("pointercancel", endPan);
+
     svgEl.querySelectorAll(".comp").forEach((g) => {
       g.addEventListener("pointerdown", (e) => {
-        e.preventDefault();
         const id = g.dataset.cid;
-        selectComp(id);
+        if (panActive()) return;                 // let background pan handler run
+        e.preventDefault(); e.stopPropagation();
+        if (UI.tool === "anchor") { applyAnchor(id); return; }
+        UI.selId = id; UI.selZone = null; renderSelectionOnly();
         const m = clientToMm(e);
-        const found = findComp(id);
-        const { cx, cy } = resolve(found.c, found.z);
+        const f = findComp(id); const { cx, cy } = resolve(f.c, f.z);
         drag = { id, dx: m.x - cx, dy: m.y - cy, moved: false };
         g.setPointerCapture(e.pointerId);
       });
       g.addEventListener("pointermove", (e) => {
         if (!drag || drag.id !== g.dataset.cid) return;
         const m = clientToMm(e);
-        let nx = m.x - drag.dx, ny = m.y - drag.dy;
-        if (UI.snap) { nx = Math.round(nx / UI.snapMm) * UI.snapMm; ny = Math.round(ny / UI.snapMm) * UI.snapMm; }
-        drag.nx = nx; drag.ny = ny; drag.moved = true;
-        setCompTransform(drag.id, nx, ny);
+        const p = snapPos(m.x - drag.dx, m.y - drag.dy);
+        drag.nx = p.x; drag.ny = p.y; drag.moved = true;
+        setCompTransform(drag.id, p.x, p.y);
         const g2 = svgEl.querySelector(`.comp[data-cid="${cssEsc(drag.id)}"]`);
-        if (g2) g2.setAttribute("transform", `translate(${f3(nx)},${f3(ny)})`);
+        if (g2) g2.setAttribute("transform", `translate(${f3(p.x)},${f3(p.y)})`);
       });
       const end = () => {
         if (!drag || drag.id !== g.dataset.cid) return;
         if (drag.moved && drag.nx != null) moveCompTo(drag.id, drag.nx, drag.ny);
+        else { drag = null; renderRight(); }       // simple click = select (no move)
         drag = null;
       };
       g.addEventListener("pointerup", end);
       g.addEventListener("pointercancel", end);
     });
   }
+  // Lightweight selection highlight without a full re-render (used on pointerdown).
+  function renderSelectionOnly() {
+    svgEl.querySelectorAll(".comp.sel").forEach((g) => g.classList.remove("sel"));
+    const g = svgEl.querySelector(`.comp[data-cid="${cssEsc(UI.selId)}"]`);
+    if (g) g.classList.add("sel");
+    renderRight();
+    document.querySelectorAll(".tree-comp.sel").forEach((e) => e.classList.remove("sel"));
+    const t = document.querySelector(`.tree-comp[data-cid="${cssEsc(UI.selId)}"]`);
+    if (t) t.classList.add("sel");
+  }
+
+  // ── Snap helpers ─────────────────────────────────────────────────────────────
+  const round3 = (v) => Math.round(v * 1000) / 1000;
+  function snapStepMm() { return UI.snapUnit === "hp" ? UI.snapVal * HP_MM : UI.snapVal; }
+  function snapPos(nx, ny) {              // snap a resolved (on-screen) mm point
+    if (!UI.snap) return { x: nx, y: ny };
+    const step = snapStepMm();
+    if (!(step > 0)) return { x: nx, y: ny };
+    const o = UI.snapOrigin || { x: 0, y: 0 };
+    return { x: o.x + Math.round((nx - o.x) / step) * step, y: o.y + Math.round((ny - o.y) / step) * step };
+  }
 
   // ── Mutations ────────────────────────────────────────────────────────────────
-  function moveCompTo(id, resolvedCx, resolvedCy) {  // resolved (on-screen) coords
-    const { c } = findComp(id);
-    c.cx = Math.round((resolvedCx - (DR.x_offset || 0)) * 1000) / 1000;
+  function setCompResolved(c, resolvedCx, resolvedCy) {  // write model from on-screen coords
+    c.cx = round3(resolvedCx - (DR.x_offset || 0));
     delete c.col;                       // off the column grid → explicit cx
-    c.cy = Math.round(resolvedCy * 1000) / 1000;
+    c.cy = round3(resolvedCy);
+  }
+  function moveCompTo(id, resolvedCx, resolvedCy) {
+    snapshot();
+    setCompResolved(findComp(id).c, resolvedCx, resolvedCy);
+    render();
+  }
+  function moveCompBy(id, ddx, ddy) {     // arrow-nudge in mm
+    snapshot();
+    const { c, z } = findComp(id);
+    const r = resolve(c, z);
+    const p = snapPos(r.cx + ddx, r.cy + ddy);
+    setCompResolved(c, p.x, p.y);
     render();
   }
   function rotateComp(id) {
+    snapshot();
     const { c } = findComp(id);
     const next = { 0: 90, 90: 180, 180: 270, 270: 0 }[Number(c.rotate || 0)];
     if (next === 0) delete c.rotate; else c.rotate = next;
     render();
   }
   function deleteComp(id) {
+    snapshot();
     for (const z of D.zones || []) {
       const i = (z.components || []).findIndex((c) => c.id === id);
       if (i >= 0) { z.components.splice(i, 1); break; }
@@ -557,34 +690,103 @@
     if (UI.selId === id) UI.selId = null;
     render();
   }
+  // Revert a component to its as-built (ORIG) spec. No-op for added components.
+  function revertComp(id) {
+    const orig = (ORIG.zones || []).flatMap((z) => z.components || []).find((c) => c.id === id);
+    if (!orig) return;
+    snapshot();
+    const { c } = findComp(id);
+    for (const k of Object.keys(c)) delete c[k];
+    Object.assign(c, clone(orig));
+    render();
+  }
+  function targetZone() {                 // zone to add into, per current selection
+    if (UI.selZone) { const z = (D.zones || []).find((z) => z.id === UI.selZone); if (z) return z; }
+    if (UI.selId) { const r = findComp(UI.selId); if (r) return r.z; }
+    return (D.zones || [])[0];
+  }
   function addComp(type) {
-    const z = (D.zones || [])[0];
+    const z = targetZone();
     if (!z) { alert("No zone to add into."); return; }
+    snapshot();
     let n = 1, id;
     do { id = `${type.toUpperCase()}_${n++}`; } while (findComp(id));
     const W = Number(D.meta.width_mm);
     const isJack = type.startsWith("jack");
     const c = {
       id, type,
-      cx: Math.round((W / 2 - (DR.x_offset || 0)) * 1000) / 1000,
+      cx: round3(W / 2 - (DR.x_offset || 0)),
       cy: 60,
       label: type.replace(/_/g, " ").toUpperCase(),
     };
     if (isJack) c.cpp_id = id + "_INPUT"; else c.cpp_param = id + "_PARAM";
     if (!z.components) z.components = [];
     z.components.push(c);
-    UI.selId = id;
+    UI.selId = id; UI.selZone = null;
     render();
   }
   function selectComp(id) {
-    UI.selId = id;
-    svgEl.querySelectorAll(".comp.sel").forEach((g) => g.classList.remove("sel"));
-    const g = svgEl.querySelector(`.comp[data-cid="${cssEsc(id)}"]`);
-    if (g) g.classList.add("sel");
-    renderRight();
-    document.querySelectorAll(".tree-comp.sel").forEach((e) => e.classList.remove("sel"));
-    const t = document.querySelector(`.tree-comp[data-cid="${cssEsc(id)}"]`);
-    if (t) t.classList.add("sel");
+    UI.selId = id; UI.selZone = null;
+    if (UI.anchor) { applyAnchor(id); return; }
+    render();
+  }
+  function selectZone(zid) {
+    UI.selZone = zid; UI.selId = null; UI.anchor = null;
+    render();
+  }
+  function deselect() { UI.selId = null; UI.selZone = null; UI.anchor = null; if (UI.tool === "anchor") UI.tool = "select"; render(); }
+
+  // ── Zone (section) operations — mirror Python shift_zone ───────────────────────
+  function shiftZoneBy(zid, dx, dy) {
+    const z = (D.zones || []).find((z) => z.id === zid); if (!z) return;
+    snapshot();
+    if (dx) {
+      if (z.x_start != null) z.x_start = round3(Number(z.x_start) + dx);
+      for (const c of z.components || []) if (c.cx != null && c.col == null) c.cx = round3(Number(c.cx) + dx);
+    }
+    if (dy) for (const c of z.components || []) { const r = resolve(c, z); c.cy = round3(r.cy + dy); }
+    render();
+  }
+  function renameZone(oldId, field, value) {  // field: "id" | "label"
+    const z = (D.zones || []).find((z) => z.id === oldId); if (!z) return;
+    snapshot();
+    if (field === "id") { z.id = value; if (UI.selZone === oldId) UI.selZone = value; }
+    else z.label = value;
+    render();
+  }
+  function setZoneXStart(zid, val) {
+    const z = (D.zones || []).find((z) => z.id === zid); if (!z || z.x_start == null) return;
+    shiftZoneBy(zid, Number(val) - Number(z.x_start), 0);
+  }
+
+  // ── Anchor / align ─────────────────────────────────────────────────────────────
+  // UI.anchor = { mode:'align'|'place', axis:'x'|'y', origin:'pick'|'zero'|index, offX, offY, unit }
+  function armAlign(axis) { if (!UI.selId) return; UI.anchor = { mode: "align", axis }; UI.tool = "anchor"; render(); }
+  function dividerPoint(idx) {
+    const sp = (D.separators || [])[idx]; if (!sp) return null;
+    const ox = DR.x_offset || 0;
+    if (sp.type === "v") return { x: sp.x + ox, y: (sp.y1 + sp.y2) / 2 };
+    return { x: (sp.x1 + sp.x2) / 2 + ox, y: sp.y };
+  }
+  function applyAnchor(refId) {           // a component was clicked as the reference
+    const a = UI.anchor; if (!a || !UI.selId) { UI.anchor = null; return; }
+    const sel = findComp(UI.selId); const ref = findComp(refId);
+    if (!sel || !ref || refId === UI.selId) { UI.anchor = null; UI.tool = "select"; render(); return; }
+    const rp = resolve(ref.c, ref.z), sp = resolve(sel.c, sel.z);
+    if (a.mode === "align") {
+      if (a.axis === "x") setCompResolved(sel.c, rp.cx, sp.cy);
+      else setCompResolved(sel.c, sp.cx, rp.cy);
+    }
+    UI.anchor = null; UI.tool = "select";
+    snapshot(); render();
+  }
+  function placeRelative(originPt, offX, offY, unit) {  // explicit offset placement
+    if (!UI.selId) return;
+    const k = unit === "hp" ? HP_MM : 1;
+    const sel = findComp(UI.selId);
+    snapshot();
+    setCompResolved(sel.c, originPt.x + offX * k, originPt.y + offY * k);
+    render();
   }
 
   // ── Top bar ──────────────────────────────────────────────────────────────────
@@ -592,21 +794,34 @@
     const pass = lastDRC.violations.length === 0;
     const lyr = (key, name) =>
       `<label class="lyr"><input type="checkbox" data-layer="${key}" ${UI.layers[key] ? "checked" : ""}> ${name}</label>`;
+    const toolBtn = (t, name) => `<button data-tool="${t}" class="${UI.tool === t ? "primary" : ""}" title="${name}">${name}</button>`;
+    const originLabel = UI.snapOrigin ? (UI.snapOriginId || "ref") : "0,0";
     document.getElementById("topbar").innerHTML =
       `<h1>POGO PANEL EDITOR</h1>` +
+      `<div class="group">${toolBtn("select", "Select")}${toolBtn("pan", "Pan")}` +
+      `<button id="undo" title="Undo (Ctrl+Z)"${undoStack.length ? "" : " disabled"}>↶</button>` +
+      `<button id="redo" title="Redo (Ctrl+Shift+Z)"${redoStack.length ? "" : " disabled"}>↷</button></div>` +
+      `<div class="sep"></div>` +
       `<div class="group">HP <input type="number" id="hp" min="2" max="84" step="1" value="${D.meta.hp}"> ` +
-      `<button id="recenter" title="Recompute x_offset to centre content">Recenter</button></div>` +
+      `<button id="recenter" title="Recompute x_offset to centre content">Recenter</button>` +
+      `<button id="panel-settings">Panel…</button></div>` +
       `<div class="sep"></div>` +
       `<div class="group">` + lyr("panel", "Panel") + lyr("keepout", "Keep-Out") + lyr("nuts", "Nuts") + lyr("pcb", "Courtyards") + lyr("kicad", "KiCad") + `</div>` +
       `<div class="sep"></div>` +
       `<div class="group"><label class="lyr"><input type="checkbox" id="snap" ${UI.snap ? "checked" : ""}> Snap</label>` +
-      `<input type="number" id="snapMm" step="0.05" min="0.05" value="${UI.snapMm}" style="width:54px"> mm</div>` +
+      `<input type="number" id="snapVal" step="0.05" min="0.05" value="${UI.snapVal}" style="width:54px">` +
+      `<select id="snapUnit"><option value="mm" ${UI.snapUnit === "mm" ? "selected" : ""}>mm</option><option value="hp" ${UI.snapUnit === "hp" ? "selected" : ""}>HP</option></select>` +
+      `<button id="snapOrigin" title="Snap grid origin">grid: ${esc(originLabel)}</button></div>` +
       `<div class="sep"></div>` +
       `<div class="group"><button id="dividers">Dividers…</button>` +
       `<button id="export" class="primary">Export YAML</button></div>` +
       `<div class="sep"></div>` +
       `<span class="badge ${pass ? "pass" : "fail"}">${pass ? "DRC PASS" : "DRC " + lastDRC.violations.length + " ✗"}</span>`;
 
+    document.querySelectorAll("#topbar [data-tool]").forEach((b) =>
+      b.addEventListener("click", () => { UI.tool = b.dataset.tool; UI.anchor = null; render(); }));
+    document.getElementById("undo").addEventListener("click", undo);
+    document.getElementById("redo").addEventListener("click", redo);
     document.querySelectorAll("#topbar input[data-layer]").forEach((cb) =>
       cb.addEventListener("change", () => {
         UI.layers[cb.dataset.layer] = cb.checked;
@@ -614,14 +829,39 @@
         if (el) el.style.display = cb.checked ? "" : "none";
       }));
     document.getElementById("snap").addEventListener("change", (e) => { UI.snap = e.target.checked; });
-    document.getElementById("snapMm").addEventListener("change", (e) => { UI.snapMm = Number(e.target.value) || 0.5; });
+    document.getElementById("snapVal").addEventListener("change", (e) => { UI.snapVal = Number(e.target.value) || 0.5; });
+    document.getElementById("snapUnit").addEventListener("change", (e) => { UI.snapUnit = e.target.value; });
+    document.getElementById("snapOrigin").addEventListener("click", () => {
+      if (UI.snapOrigin) { UI.snapOrigin = null; UI.snapOriginId = null; }
+      else if (UI.selId) { const f = findComp(UI.selId); const r = resolve(f.c, f.z); UI.snapOrigin = { x: r.cx, y: r.cy }; UI.snapOriginId = UI.selId; }
+      else { alert("Select a component first to use it as the snap-grid origin."); return; }
+      renderTopbar();
+    });
     document.getElementById("hp").addEventListener("change", (e) => setHP(Number(e.target.value)));
     document.getElementById("recenter").addEventListener("click", recenter);
+    document.getElementById("panel-settings").addEventListener("click", openPanelSettings);
     document.getElementById("export").addEventListener("click", openExport);
     document.getElementById("dividers").addEventListener("click", openDividers);
   }
+  // ── Panel settings (rename board: title / brand) ───────────────────────────────
+  function openPanelSettings() {
+    const m = document.getElementById("export-modal");
+    m.classList.remove("hidden");
+    m.innerHTML = `<div class="box" style="height:auto"><h2>Panel settings</h2>` +
+      `<div class="field"><label>title (meta.title — shown on panel; split on · for the colored dot)</label><input id="ps-title" type="text" value="${esc(D.meta.title || "")}"></div>` +
+      `<div class="field"><label>brand (meta.brand — bottom strip)</label><input id="ps-brand" type="text" value="${esc(D.meta.brand || "")}"></div>` +
+      `<div class="bar"><button id="ps-apply" class="primary">Apply</button><button id="ps-close">Close</button></div></div>`;
+    document.getElementById("ps-close").addEventListener("click", () => m.classList.add("hidden"));
+    document.getElementById("ps-apply").addEventListener("click", () => {
+      snapshot();
+      D.meta.title = document.getElementById("ps-title").value;
+      D.meta.brand = document.getElementById("ps-brand").value;
+      m.classList.add("hidden"); render();
+    });
+  }
   function setHP(hp) {
     if (!hp || hp < 2) return;
+    snapshot();
     D.meta.hp = hp;
     const W = Math.round(hp * 5.08 * 100) / 100;
     D.meta.width_mm = W;
@@ -639,6 +879,7 @@
     }
     for (const { c, z } of allComps()) xs.push(rawCx(c, z));
     if (!xs.length) return;
+    snapshot();
     const span = Math.max(...xs) - Math.min(...xs);
     const off = Math.round(((Number(D.meta.width_mm) - span) / 2 - Math.min(...xs)) * 1000) / 1000;
     DR.x_offset = off;
@@ -652,7 +893,7 @@
     for (const t of PALETTE_TYPES) h += `<div class="pal-item" draggable="false" data-add="${t}">${t.replace(/_/g, "&#8203;_")}</div>`;
     h += `</div><div class="panel-h">Components</div>`;
     for (const z of D.zones || []) {
-      h += `<div class="tree-zone"><div class="zname">${esc(z.id)}</div>`;
+      h += `<div class="tree-zone"><div class="zname${z.id === UI.selZone ? " sel" : ""}" data-zid="${esc(z.id)}">${esc(z.id)}</div>`;
       for (const c of z.components || [])
         h += `<div class="tree-comp${c.id === UI.selId ? " sel" : ""}" data-cid="${esc(c.id)}">${esc(compLabel(c))} <span class="ttype">${esc(c.type)}</span></div>`;
       h += `</div>`;
@@ -661,6 +902,7 @@
     left.innerHTML = h;
     left.querySelectorAll("[data-add]").forEach((el) => el.addEventListener("click", () => addComp(el.dataset.add)));
     left.querySelectorAll(".tree-comp").forEach((el) => el.addEventListener("click", () => selectComp(el.dataset.cid)));
+    left.querySelectorAll(".zname").forEach((el) => el.addEventListener("click", () => selectZone(el.dataset.zid)));
   }
 
   // ── Right sidebar (inspector) ──────────────────────────────────────────────
@@ -669,7 +911,11 @@
   }
   function renderRight() {
     const right = document.getElementById("right");
-    if (!UI.selId) { right.innerHTML = `<div class="panel-h">Inspector</div><div class="hint">Select a component on the panel or in the list.</div>`; return; }
+    if (UI.selZone) { renderZoneInspector(right); return; }
+    if (!UI.selId) {
+      right.innerHTML = `<div class="panel-h">Inspector</div><div class="hint">Select a component (panel or list), or a zone (zone name in the list).<br><br>Arrows = nudge · Shift+Arrow = bigger · Del = delete · Ctrl+Z/⇧Z = undo/redo · Space = pan.</div>`;
+      return;
+    }
     const ref = findComp(UI.selId);
     if (!ref) { right.innerHTML = `<div class="panel-h">Inspector</div>`; return; }
     const { c, z } = ref;
@@ -687,7 +933,24 @@
     const cppKey = c.cpp_id != null ? "cpp_id" : (c.cpp_param != null ? "cpp_param" : (c.type.startsWith("jack") ? "cpp_id" : "cpp_param"));
     h += `<div class="field"><label>${cppKey}</label><input id="i-cpp" type="text" value="${esc(c[cppKey] || "")}"></div>`;
     h += `<div class="field"><label>KiCad footprint</label><div class="ro">${esc(fp)}</div></div>`;
-    h += `<div class="field"><button id="i-del" class="danger">Delete component</button></div>`;
+    // Align / anchor
+    const anchoring = UI.anchor && UI.anchor.mode === "align";
+    h += `<div class="panel-h" style="margin-top:10px">Align / place</div>`;
+    h += anchoring
+      ? `<div class="hint" style="color:#7fe7ff">Click a component to align ${UI.anchor.axis.toUpperCase()} to — Esc to cancel.</div>`
+      : `<div class="field row"><div><button id="i-alignx">Align X to…</button></div><div><button id="i-aligny">Align Y to…</button></div></div>`;
+    // Place relative to an origin (0,0 or a divider) by mm/HP offset
+    const seps = (D.separators || []).map((sp, i) =>
+      `<option value="sep${i}">divider ${i} (${sp.type}${sp.type === "v" ? " x=" + fmtVal(sp.x) : " y=" + fmtVal(sp.y)})</option>`).join("");
+    h += `<div class="field"><label>place relative — origin</label><select id="i-orig"><option value="zero">panel 0,0</option>${seps}</select></div>`;
+    h += `<div class="field row"><div><label>dx</label><input id="i-ox" type="number" step="0.01" value="0"></div>` +
+         `<div><label>dy</label><input id="i-oy" type="number" step="0.01" value="0"></div>` +
+         `<div><label>unit</label><select id="i-ou"><option value="mm">mm</option><option value="hp">HP</option></select></div></div>`;
+    h += `<div class="field"><button id="i-place">Place at offset</button></div>`;
+    // Revert / delete
+    const isAdded = !(ORIG.zones || []).some((zz) => (zz.components || []).some((cc) => cc.id === c.id));
+    h += `<div class="field row"><div><button id="i-revert"${isAdded ? " disabled title='no build spec (added in editor)'" : ""}>Revert to build spec</button></div>` +
+         `<div><button id="i-del" class="danger">Delete</button></div></div>`;
     right.innerHTML = h;
 
     const commit = () => { render(); };
@@ -706,7 +969,51 @@
     document.getElementById("i-label").addEventListener("change", (e) => { if (e.target.value) c.label = e.target.value; else delete c.label; commit(); });
     document.getElementById("i-fs").addEventListener("change", (e) => { c.font_size = Number(e.target.value); commit(); });
     document.getElementById("i-cpp").addEventListener("change", (e) => { c[cppKey] = e.target.value; commit(); });
+    if (!anchoring) {
+      document.getElementById("i-alignx").addEventListener("click", () => armAlign("x"));
+      document.getElementById("i-aligny").addEventListener("click", () => armAlign("y"));
+    }
+    document.getElementById("i-place").addEventListener("click", () => {
+      const o = document.getElementById("i-orig").value;
+      const origin = o === "zero" ? { x: 0, y: 0 } : dividerPoint(Number(o.slice(3)));
+      if (!origin) return;
+      placeRelative(origin, Number(document.getElementById("i-ox").value), Number(document.getElementById("i-oy").value), document.getElementById("i-ou").value);
+    });
+    const rev = document.getElementById("i-revert");
+    if (rev && !rev.disabled) rev.addEventListener("click", () => revertComp(c.id));
     document.getElementById("i-del").addEventListener("click", () => deleteComp(c.id));
+  }
+
+  // ── Zone inspector (section move + rename) ─────────────────────────────────────
+  function renderZoneInspector(right) {
+    const z = (D.zones || []).find((z) => z.id === UI.selZone);
+    if (!z) { right.innerHTML = `<div class="panel-h">Zone</div>`; return; }
+    const nx = z.x_start != null ? round3(Number(z.x_start) + (z.cols != null ? z.cols : 0) * (z.col_pitch != null ? Number(z.col_pitch) : DR.jack_pitch)) : null;
+    const xs = [];
+    for (const c of z.components || []) xs.push(resolve(c, z).cx);
+    const span = xs.length ? `${f2(Math.min(...xs))}–${f2(Math.max(...xs))}mm (${((Math.max(...xs) - Math.min(...xs)) / HP_MM).toFixed(2)} HP)` : "—";
+    let h = `<div class="panel-h">Zone: ${esc(z.id)}</div>`;
+    h += `<div class="field"><label>id</label><input id="z-id" type="text" value="${esc(z.id)}"></div>`;
+    h += `<div class="field"><label>label</label><input id="z-label" type="text" value="${esc(z.label || "")}"></div>`;
+    if (z.x_start != null)
+      h += `<div class="field"><label>x_start (mm)</label><input id="z-xstart" type="number" step="0.01" value="${fmtVal(z.x_start)}"></div>`;
+    h += `<div class="hint">components span: ${span}${nx != null ? ` · next x_start: ${f2(nx)}mm (${(nx / HP_MM).toFixed(2)} HP)` : ""}</div>`;
+    h += `<div class="hint">Arrows move the whole section (Shift = 1 HP). x_start shift moves column-relative parts; explicit-cx parts shift with it.</div>`;
+    h += `<div class="field row"><div><button data-zmove="-x">◀ −1mm</button></div><div><button data-zmove="+x">+1mm ▶</button></div></div>`;
+    h += `<div class="field row"><div><button data-zmove="-y">▲ −1mm</button></div><div><button data-zmove="+y">+1mm ▼</button></div></div>`;
+    right.innerHTML = h;
+    document.getElementById("z-id").addEventListener("change", (e) => {
+      const nv = e.target.value.trim();
+      if (nv && nv !== z.id && !(D.zones || []).some((q) => q.id === nv)) renameZone(z.id, "id", nv);
+      else e.target.value = z.id;
+    });
+    document.getElementById("z-label").addEventListener("change", (e) => renameZone(z.id, "label", e.target.value));
+    const xe = document.getElementById("z-xstart");
+    if (xe) xe.addEventListener("change", (e) => setZoneXStart(z.id, Number(e.target.value)));
+    right.querySelectorAll("[data-zmove]").forEach((b) => b.addEventListener("click", () => {
+      const d = b.dataset.zmove;
+      shiftZoneBy(z.id, d === "-x" ? -1 : d === "+x" ? 1 : 0, d === "-y" ? -1 : d === "+y" ? 1 : 0);
+    }));
   }
 
   // ── DRC panel ──────────────────────────────────────────────────────────────
@@ -744,7 +1051,7 @@
       `<div><label>y2 (v only)</label><input id="ns-y2" type="number" step="0.01" value="124"></div></div>` +
       `<div class="field"><label>label (h, optional)</label><input id="ns-label" type="text" value=""></div>` +
       `<div class="bar"><button id="ns-add">Add divider</button><button id="ns-close">Close</button></div></div>`;
-    m.querySelectorAll("[data-delsep]").forEach((b) => b.addEventListener("click", () => { D.separators.splice(Number(b.dataset.delsep), 1); render(); openDividers(); }));
+    m.querySelectorAll("[data-delsep]").forEach((b) => b.addEventListener("click", () => { snapshot(); D.separators.splice(Number(b.dataset.delsep), 1); render(); openDividers(); }));
     document.getElementById("ns-close").addEventListener("click", () => m.classList.add("hidden"));
     document.getElementById("ns-add").addEventListener("click", () => {
       const t = document.getElementById("ns-type").value;
@@ -756,6 +1063,7 @@
       const label = document.getElementById("ns-label").value.trim();
       const sp = t === "v" ? { type: "v", x: a, y1, y2, style } : { type: "h", x1: a, x2: b, y: y1, style };
       if (t === "h" && label) { sp.label = label; sp.label_x = (a + b) / 2; }
+      snapshot();
       (D.separators = D.separators || []).push(sp);
       render(); openDividers();
     });
@@ -855,21 +1163,36 @@
       if (String(orig.font_size) !== String(cur.font_size) && cur.font_size != null) patchKey(id, "font_size", fmtVal(cur.font_size));
       for (const k of ["cpp_id", "cpp_param"]) if (cur[k] != null && String(orig[k]) !== String(cur[k])) patchKey(id, k, quoteIfNeeded(cur[k]));
     }
-    // 3 ── additions (append to owning zone's components list)
-    for (const z of D.zones || []) {
+    // 3 ── additions. Locate the owning zone by its ORIGINAL id (zone renames are
+    //      applied LAST), so insertComponent always finds the zone still in the text.
+    const origZoneIdAt = (i) => (ORIG.zones && ORIG.zones[i]) ? ORIG.zones[i].id : null;
+    (D.zones || []).forEach((z, i) => {
       for (const c of z.components || []) {
         if (origById[c.id]) continue;
-        insertComponent(z.id, c);
+        insertComponent(origZoneIdAt(i) || z.id, c);
       }
-    }
-    // 4 ── meta + design_rules (only patch what changed → no-op export stays byte-identical)
+    });
+    // 4 ── zone x_start / label patches (gated on diff; located by ORIGINAL id)
+    (D.zones || []).forEach((z, i) => {
+      const o = (ORIG.zones || [])[i]; if (!o) return;
+      if (o.x_start != null && String(o.x_start) !== String(z.x_start)) patchZoneKey(o.id, "x_start", fmtVal(z.x_start));
+      if ((o.label || "") !== (z.label || "")) patchZoneKey(o.id, "label", quoteIfNeeded(z.label || ""));
+    });
+    // 5 ── zone id renames LAST (so steps 3–4 still match the original text)
+    (D.zones || []).forEach((z, i) => {
+      const o = (ORIG.zones || [])[i]; if (!o) return;
+      if (o.id !== z.id) patchZoneId(o.id, z.id);
+    });
+    // 6 ── meta + design_rules (only patch what changed → no-op export stays byte-identical)
     if (String(ORIG.meta.hp) !== String(D.meta.hp)) patchTop("hp", fmtVal(D.meta.hp), 2);
     if (String(ORIG.meta.width_mm) !== String(D.meta.width_mm)) patchTop("width_mm", fmtVal(D.meta.width_mm), 2);
     if (String(ORIG.meta.viewBox) !== String(D.meta.viewBox)) patchTop("viewBox", `"${D.meta.viewBox}"`, 2);
+    if ((ORIG.meta.title || "") !== (D.meta.title || "")) patchTop("title", quoteIfNeeded(D.meta.title || ""), 2);
+    if ((ORIG.meta.brand || "") !== (D.meta.brand || "")) patchTop("brand", quoteIfNeeded(D.meta.brand || ""), 2);
     if (String(ORIG.design_rules.x_offset) !== String(DR.x_offset)) patchTop("x_offset", fmtVal(DR.x_offset), 2);
     // mounting hole x (right edge) if changed
     syncMountingHoles();
-    // 5 ── separators: regenerate the block if changed (these have no ids to patch)
+    // 7 ── separators: regenerate the block if changed (these have no ids to patch)
     if (JSON.stringify(ORIG.separators) !== JSON.stringify(D.separators)) regenSeparators();
 
     return lines.join("\n");
@@ -882,6 +1205,32 @@
     function patchTop(key, newVal, indent) {
       const re = new RegExp("^(\\s{" + indent + "})" + key + ":\\s*(.*?)(\\s*(?:#.*)?)$");
       for (let i = 0; i < lines.length; i++) { const m = lines[i].match(re); if (m) { lines[i] = `${m[1]}${key}: ${newVal}${m[3]}`; return; } }
+    }
+    function reEsc(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+    // Zone `- id:` lines are at indent 2 with a mandatory `- ` prefix — target them
+    // specifically so we never collide with component `id:` lines (indent ≥ 6).
+    function findZoneIdLine(zoneId) {
+      const re = new RegExp("^(\\s{2})- id:\\s+" + reEsc(zoneId) + "\\s*$");
+      for (let i = 0; i < lines.length; i++) if (re.test(lines[i])) return i;
+      return -1;
+    }
+    function patchZoneId(oldId, newId) {
+      const i = findZoneIdLine(oldId); if (i < 0) return;
+      lines[i] = lines[i].replace(new RegExp("(- id:\\s+)" + reEsc(oldId) + "(\\s*)$"), `$1${newId}$2`);
+    }
+    function patchZoneKey(zoneId, key, newVal) {
+      const zi = findZoneIdLine(zoneId); if (zi < 0) return;
+      // scope: zone header region — stop at this zone's `components:`, the next zone, or a top-level key
+      let end = lines.length;
+      for (let j = zi + 1; j < lines.length; j++) {
+        const s = lines[j].trim();
+        if (/^components:\s*$/.test(s)) { end = j; break; }
+        if (indentOf(lines[j]) <= 2 && s.startsWith("-")) { end = j; break; }
+        if (indentOf(lines[j]) < 2 && s && !s.startsWith("#")) { end = j; break; }
+      }
+      const re = new RegExp("^(\\s{4})" + key + ":\\s*(.*?)(\\s*(?:#.*)?)$");
+      for (let j = zi + 1; j < end; j++) { const m = lines[j].match(re); if (m) { lines[j] = `${m[1]}${key}: ${newVal}${m[3]}`; return; } }
+      lines.splice(zi + 1, 0, `    ${key}: ${newVal}`);   // insert at zone-field indent
     }
     function insertComponent(zoneId, c) {
       const idl = findIdLine(zoneId); if (!idl) return;
@@ -963,6 +1312,54 @@
     });
   }
 
+  // ── Global keyboard (installed once; survives re-render) ────────────────────
+  function typingTarget() {
+    const a = document.activeElement;
+    if (!a) return false;
+    const t = (a.tagName || "").toUpperCase();
+    return t === "INPUT" || t === "TEXTAREA" || t === "SELECT" || a.isContentEditable;
+  }
+  function modalOpen() {
+    const m = document.getElementById("export-modal");
+    return m && !m.classList.contains("hidden");
+  }
+  function installGlobalKeys() {
+    document.addEventListener("keydown", (e) => {
+      // Space-hold → temporary pan (only when not typing)
+      if (e.code === "Space" && !typingTarget() && !modalOpen()) {
+        if (!spaceDown) { spaceDown = true; if (svgEl) svgEl.style.cursor = "grab"; }
+        e.preventDefault(); return;
+      }
+      const meta = e.ctrlKey || e.metaKey;
+      if (meta && (e.key === "z" || e.key === "Z")) { e.preventDefault(); if (e.shiftKey) redo(); else undo(); return; }
+      if (meta && (e.key === "y" || e.key === "Y")) { e.preventDefault(); redo(); return; }
+      if (typingTarget() || modalOpen()) return;
+
+      if (e.key === "Escape") {
+        if (UI.anchor || UI.tool === "anchor") { UI.anchor = null; UI.tool = "select"; render(); }
+        else if (UI.selId || UI.selZone) deselect();
+        e.preventDefault(); return;
+      }
+      if (e.key === "Delete" || e.key === "Backspace") {
+        if (UI.selId) { deleteComp(UI.selId); e.preventDefault(); }
+        return;
+      }
+      const arrows = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
+      if (arrows[e.key] && (UI.selId || UI.selZone)) {
+        e.preventDefault();
+        let step = UI.snap ? snapStepMm() : (UI.snapUnit === "hp" ? UI.snapVal * HP_MM : 0.25);
+        if (e.shiftKey) step = UI.snap ? step * 4 : HP_MM;   // big step = 1 HP when not snapping
+        const [sx, sy] = arrows[e.key];
+        if (UI.selId) moveCompBy(UI.selId, sx * step, sy * step);
+        else shiftZoneBy(UI.selZone, sx * step, sy * step);
+      }
+    });
+    document.addEventListener("keyup", (e) => {
+      if (e.code === "Space") { spaceDown = false; if (svgEl && !pan) svgEl.style.cursor = UI.tool === "pan" ? "grab" : (UI.tool === "anchor" ? "crosshair" : "default"); }
+    });
+  }
+
   // ── Boot ──────────────────────────────────────────────────────────────────
+  installGlobalKeys();
   render();
 })();
