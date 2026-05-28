@@ -1,6 +1,6 @@
-# POGO — Complex Stereo Eurorack Filter
+# POGO — Stereo Filter Bank
 
-**POGO** is a complex stereo Eurorack filter module (48HP) being developed by Space Coast
+**POGO** is a stereo filter bank module (48HP) being developed by Space Coast
 Synthesizers. The VCV Rack 2 plugin in this repository is the **working software prototype**
 and ground truth. Analog hardware design is reverse-engineered from it.
 
@@ -8,11 +8,11 @@ and ground truth. Analog hardware design is reverse-engineered from it.
 
 ## What It Does
 
-POGO routes stereo audio through a deeply modulated filter chain: a pre-gain stage, a
-voltage-controlled VCA, a stereo LP filter with tilt EQ (LP1), three independent 4-pole
-bandpass resonators (BP1/BP2/BP3) with per-group distortion, a HP filter, and a final LP
-filter (LP2). A dual triangle LFO feeds a central mod bus with 19 CV destinations — every
-key parameter is voltage-controllable.
+POGO routes stereo audio through a deeply modulated filter bank: a pre-gain stage, a
+voltage-controlled VCA, a stereo LP filter with tilt (LP1), three independent bandpass
+resonators (BP1/BP2/BP3) with per-group distortion, a HP filter, and a final LP filter (LP2).
+A dual triangle LFO feeds a central mod bus with 19 CV destinations — every key parameter
+is voltage-controllable.
 
 **Signal chain (48HP topology):**
 
@@ -24,10 +24,10 @@ Stereo In → Input Buffer → Pre-Gain (1×/5×)
                             LP Filter 1    ← FREQ, TILT (stereo spread), RES
                                   ↓
                ┌──────────────────────────────────────┐
-               │       Triple Bandpass SVF (2× OS)    │
-               │  BP1: 200Hz  BP2: 1.5kHz  BP3: 6kHz  │
+               │        Triple Bandpass Filter Bank    │
+               │  BP1 / BP2 / BP3 — 40 Hz – 4 kHz     │
                │  per-group: FREQ / FOCUS / DIST       │
-               │  global: OFFSET / TILT / POL / MIX   │
+               │  global: OFFSET / TILT / MIX          │
                │  BP3_L/R ──────────────────────────► BP3 out jacks
                └──────────────────────────────────────┘
                                   ↓

@@ -1,10 +1,10 @@
-# POGO — Complex Stereo Eurorack Filter Module
+# POGO — Stereo Filter Bank
 
 ## Project Purpose
 
-POGO is a complex stereo Eurorack filter module (48HP) with an extensive modulation
-architecture. The VCV Rack 2 plugin in this repository is a **working software prototype**
-that defines the module's behavior. Analog hardware design is reverse-engineered from it.
+POGO is a stereo filter bank module (48HP) with an extensive modulation architecture.
+The VCV Rack 2 plugin in this repository is a **working software prototype** that defines
+the module's behavior. Analog hardware design is reverse-engineered from it.
 
 ### Full Signal Chain (48HP topology)
 
@@ -16,9 +16,9 @@ Stereo Input (L + R)
   ├── [Block VCA] Pre-LP1 VCA        THAT 2180; VCA_AMT bipolar att; VCA_OFS floor; VCA_IN CV
   ├── [Block LP1] LP Filter 1        OTA-C SVF; LP1_FREQ, LP1_TILT (stereo spread), LP1_RES
   │                                  ← ALT path: ALT_BP_L/R → GAIN_BP3 (1×/5×) → BP direct
-  ├── [Block BP]  Triple Bandpass    3× 4-pole OTA-C SVF; 2× oversampled
-  │               BP_OFFSET (master), BP_MIX (dry/wet), BP_POL (±1), BP_DIST (soft/hard/fold)
-  │               Per-group: FREQ, FOCUS (Q), DIST (drive); BP_TILT CV (stereo spread)
+  ├── [Block BP]  Bandpass Bank      3× 2-pole OTA-C SVF bandpass resonators
+  │               BP_OFFSET (master), BP_MIX (dry/wet), BP_TILT (stereo spread), BP_DIST (soft/hard/fold)
+  │               Per-group: FREQ, FOCUS (Q), DIST (drive); 40 Hz–4 kHz range
   │               BP3_L/R_OUT tap (after distortion, before mix)
   ├── [Block HP]  HP Filter          OTA-C SVF; HP_FREQ (slider), HP_RES
   ├── [Block LP2] LP Filter 2        OTA-C SVF; LP2_FREQ (slider), LP2_RES

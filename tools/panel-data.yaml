@@ -10,7 +10,7 @@ meta:
   width_mm:   243.84        # 48 HP × 5.08 mm/HP
   height_mm:  128.5
   viewBox:    "0 0 243.84 128.5"
-  title:      "POGO  · STEREO TRIPLE BANDPASS FILTER"
+  title:      "POGO - Stereo Filter Bank"
   title_dot_color: "#ff8800"
   brand:      "SPACE COAST SYNTHESIZERS  ·  SCS"
 

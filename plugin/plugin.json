@@ -16,8 +16,8 @@
     {
       "slug": "Pogo",
       "name": "POGO",
-      "description": "Stereo Triple Comb Filter with modulation",
-      "tags": ["Filter", "Phaser", "Effect"]
+      "description": "Stereo Filter Bank with modulation",
+      "tags": ["Filter", "Effect"]
     }
   ]
 }
