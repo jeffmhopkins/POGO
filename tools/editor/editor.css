@@ -87,6 +87,18 @@
     #drc-panel summary { cursor: pointer; font-weight: bold; }
     #drc-panel ul { margin: 6px 0 0; padding-left: 18px; }
     #drc-panel li { margin: 2px 0; line-height: 1.35; }
+    #drc-panel li.drc-item { cursor: pointer; }
+    #drc-panel li.drc-item:hover { background: #222; border-radius: 3px; }
+
+    /* ── Clearance HUD (drag) ────────────────────────────────────────────── */
+    #hud {
+      display: none; position: fixed; right: 16px; bottom: 16px; z-index: 40;
+      background: #0d0d0d; border: 1px solid #00d4ff; border-radius: 5px;
+      padding: 7px 11px; font-size: 12px; color: #cde; pointer-events: none;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.6); line-height: 1.5;
+    }
+    #hud b { color: #7fe7ff; }
+    #hud .bad { color: #ff6666; font-weight: bold; }
 
     /* ── Modal ───────────────────────────────────────────────────────────── */
     .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.75);

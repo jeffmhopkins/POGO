@@ -94,6 +94,18 @@
     #drc-panel summary { cursor: pointer; font-weight: bold; }
     #drc-panel ul { margin: 6px 0 0; padding-left: 18px; }
     #drc-panel li { margin: 2px 0; line-height: 1.35; }
+    #drc-panel li.drc-item { cursor: pointer; }
+    #drc-panel li.drc-item:hover { background: #222; border-radius: 3px; }
+
+    /* ── Clearance HUD (drag) ────────────────────────────────────────────── */
+    #hud {
+      display: none; position: fixed; right: 16px; bottom: 16px; z-index: 40;
+      background: #0d0d0d; border: 1px solid #00d4ff; border-radius: 5px;
+      padding: 7px 11px; font-size: 12px; color: #cde; pointer-events: none;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.6); line-height: 1.5;
+    }
+    #hud b { color: #7fe7ff; }
+    #hud .bad { color: #ff6666; font-weight: bold; }
 
     /* ── Modal ───────────────────────────────────────────────────────────── */
     .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.75);
@@ -283,6 +295,36 @@
     if (C.type_sets.led.includes(type)) return P.led;
     return 0;
   }
+  // Signed min gap between two courtyard rects (mirrors panel_rules._rect_min_gap).
+  function rectMinGap(r1, r2) {
+    const sx = Math.max(0, Math.max(r1[0], r2[0]) - Math.min(r1[2], r2[2]));
+    const sy = Math.max(0, Math.max(r1[1], r2[1]) - Math.min(r1[3], r2[3]));
+    if (sx > 0 && sy > 0) return Math.hypot(sx, sy);
+    if (sx > 0 || sy > 0) return Math.max(sx, sy);
+    const ox = Math.min(r1[2], r2[2]) - Math.max(r1[0], r2[0]);
+    const oy = Math.min(r1[3], r2[3]) - Math.max(r1[1], r2[1]);
+    return -Math.min(ox, oy);
+  }
+  // Centre-to-centre, nut-edge clearance, and PCB courtyard gap (mirrors CLI --dist).
+  function pairGap(A, B) {           // A,B = {cx,cy,type,rot}
+    const dist = Math.hypot(B.cx - A.cx, B.cy - A.cy);
+    const rA = panelR(A.type), rB = panelR(B.type);
+    const nut = (rA > 0 && rB > 0) ? dist - (rA + rB) : null;
+    const ra = courtyard(A.cx, A.cy, A.type, A.rot || 0);
+    const rb = courtyard(B.cx, B.cy, B.type, B.rot || 0);
+    const ct = (ra && rb) ? rectMinGap(ra, rb) : null;
+    return { dist, nut, courtyard: ct };
+  }
+  function nearestComp(id, x, y) {   // nearest other component by centre distance
+    let best = null, bd = Infinity;
+    for (const { c, z } of allComps()) {
+      if (c.id === id) continue;
+      const r = resolve(c, z);
+      const d = Math.hypot(r.cx - x, r.cy - y);
+      if (d < bd) { bd = d; best = { c, cx: r.cx, cy: r.cy, type: c.type, rot: Number(c.rotate || 0) }; }
+    }
+    return best;
+  }
 
   // ── DRC (port of panel_rules.check_all) ────────────────────────────────────
   // Returns { violations:[str...], badIds:Set }.  Strings match the Python output
@@ -293,8 +335,17 @@
       return { c, cx, cy, type: c.type, rot: Number(c.rotate || 0), label: compLabel(c) };
     });
     const V = [];
+    const items = [];                  // structured: {tag, text, ids:[...]}
     const bad = new Set();
-    const flag = (c) => { if (c && c.id) bad.add(c.id); };
+    // Record one violation: append the (parity-identical) string AND a structured
+    // item carrying the offending component ids (used for jump-to-violation).
+    const rec = (text, ...cs) => {
+      V.push(text);
+      const tag = text.startsWith("[") ? text.slice(1, text.indexOf("]")) : "OTHER";
+      const ids = [...new Set(cs.filter((c) => c && c.id).map((c) => c.id))];
+      items.push({ tag, text, ids });
+      cs.forEach((c) => { if (c && c.id) bad.add(c.id); });
+    };
 
     const topKO = DR.top_keepout, botKO = DR.bot_keepout_start;
 
@@ -306,8 +357,8 @@
         const tag = C.type_sets.eg_2pos.includes(type) ? "EG2POS" : "EG3POS";
         const ph = C.eg_panel_h[type];
         const top = cy - ph, bot = cy + ph;
-        if (top < topKO) { V.push(`[NUT KEEPOUT] ${tag} '${label}' at cy=${f2(cy)}: slot top=${f2(top)} encroaches TOP keepout (${f2(topKO)})`); flag(o.c); }
-        if (bot > botKO) { V.push(`[NUT KEEPOUT] ${tag} '${label}' at cy=${f2(cy)}: slot bottom=${f2(bot)} exceeds BOT keepout (${f2(botKO)})`); flag(o.c); }
+        if (top < topKO) rec(`[NUT KEEPOUT] ${tag} '${label}' at cy=${f2(cy)}: slot top=${f2(top)} encroaches TOP keepout (${f2(topKO)})`, o.c);
+        if (bot > botKO) rec(`[NUT KEEPOUT] ${tag} '${label}' at cy=${f2(cy)}: slot bottom=${f2(bot)} exceeds BOT keepout (${f2(botKO)})`, o.c);
         continue;
       }
       let r = null, kind = null;
@@ -318,23 +369,11 @@
       if (r == null) continue;
       const top = cy - r, bot = cy + r;
       if (kind === "JACK" || kind === "POT") {
-        if (top < topKO) {
-          V.push(`[NUT KEEPOUT] ${kind} '${label}' @ cx=${f2(cx)},cy=${f2(cy)}: nut top=${f2(top)}mm breaches TOP keepout (${f2(topKO)}mm) — move down by ≥${f2(topKO - top)}mm`);
-          flag(o.c);
-        }
-        if (bot > botKO) {
-          V.push(`[NUT KEEPOUT] ${kind} '${label}' @ cx=${f2(cx)},cy=${f2(cy)}: nut bottom=${f2(bot)}mm breaches BOT keepout (${f2(botKO)}mm) — move up by ≥${f2(bot - botKO)}mm`);
-          flag(o.c);
-        }
+        if (top < topKO) rec(`[NUT KEEPOUT] ${kind} '${label}' @ cx=${f2(cx)},cy=${f2(cy)}: nut top=${f2(top)}mm breaches TOP keepout (${f2(topKO)}mm) — move down by ≥${f2(topKO - top)}mm`, o.c);
+        if (bot > botKO) rec(`[NUT KEEPOUT] ${kind} '${label}' @ cx=${f2(cx)},cy=${f2(cy)}: nut bottom=${f2(bot)}mm breaches BOT keepout (${f2(botKO)}mm) — move up by ≥${f2(bot - botKO)}mm`, o.c);
       } else { // SWITCH / LED use the "hole" wording
-        if (top < topKO) {
-          V.push(`[NUT KEEPOUT] ${kind} '${label}' at cy=${f2(cy)}: hole top=${f2(top)} encroaches TOP keepout (${f2(topKO)})`);
-          flag(o.c);
-        }
-        if (bot > botKO) {
-          V.push(`[NUT KEEPOUT] ${kind} '${label}' at cy=${f2(cy)}: hole bottom=${f2(bot)} exceeds BOT keepout start (${f2(botKO)})`);
-          flag(o.c);
-        }
+        if (top < topKO) rec(`[NUT KEEPOUT] ${kind} '${label}' at cy=${f2(cy)}: hole top=${f2(top)} encroaches TOP keepout (${f2(topKO)})`, o.c);
+        if (bot > botKO) rec(`[NUT KEEPOUT] ${kind} '${label}' at cy=${f2(cy)}: hole bottom=${f2(bot)} exceeds BOT keepout start (${f2(botKO)})`, o.c);
       }
     }
 
@@ -347,8 +386,7 @@
         const need = a.r + b.r;
         if (dist < need) {
           const ov = need - dist;
-          V.push(`[NUT CLEARANCE] '${a.label}' (${a.type} @ cx=${f2(a.cx)},cy=${f2(a.cy)}, r=${a.r}mm) ↔ '${b.label}' (${b.type} @ cx=${f2(b.cx)},cy=${f2(b.cy)}, r=${b.r}mm) — panel circles overlap ${f2(ov)}mm (centre-to-centre=${f2(dist)}mm, need≥${f2(need)}mm; increase separation by ≥${f2(ov)}mm)`);
-          flag(a.c); flag(b.c);
+          rec(`[NUT CLEARANCE] '${a.label}' (${a.type} @ cx=${f2(a.cx)},cy=${f2(a.cy)}, r=${a.r}mm) ↔ '${b.label}' (${b.type} @ cx=${f2(b.cx)},cy=${f2(b.cy)}, r=${b.r}mm) — panel circles overlap ${f2(ov)}mm (centre-to-centre=${f2(dist)}mm, need≥${f2(need)}mm; increase separation by ≥${f2(ov)}mm)`, a.c, b.c);
         }
       }
     }
@@ -362,8 +400,7 @@
         const dy = Math.min(a.rect[3], b.rect[3]) - Math.max(a.rect[1], b.rect[1]);
         if (dx > 0 && dy > 0) {
           const gap = -Math.min(dx, dy);
-          V.push(`[PCB OVERLAP] '${a.label}' (${a.type} @ cx=${f2(a.cx)},cy=${f2(a.cy)}) ↔ '${b.label}' (${b.type} @ cx=${f2(b.cx)},cy=${f2(b.cy)}) — courtyard overlap ${f2(dx)}×${f2(dy)}mm (gap=${f2(gap)}mm)`);
-          flag(a.c); flag(b.c);
+          rec(`[PCB OVERLAP] '${a.label}' (${a.type} @ cx=${f2(a.cx)},cy=${f2(a.cy)}) ↔ '${b.label}' (${b.type} @ cx=${f2(b.cx)},cy=${f2(b.cy)}) — courtyard overlap ${f2(dx)}×${f2(dy)}mm (gap=${f2(gap)}mm)`, a.c, b.c);
         }
       }
     }
@@ -377,10 +414,7 @@
         const nx = Math.max(x1, Math.min(hx, x2));
         const ny = Math.max(y1, Math.min(hy, y2));
         const dist = Math.hypot(hx - nx, hy - ny);
-        if (dist < mhr) {
-          V.push(`[MH CLEARANCE] '${o.label}' (${o.type} @ cx=${f2(o.cx)},cy=${f2(o.cy)}) PCB courtyard is ${f2(dist)}mm from mounting hole M3 @ (${fmtVal(hx)},${fmtVal(hy)}) — need ≥${mhr.toFixed(1)}mm; move component away by ≥${f2(mhr - dist)}mm`);
-          flag(o.c);
-        }
+        if (dist < mhr) rec(`[MH CLEARANCE] '${o.label}' (${o.type} @ cx=${f2(o.cx)},cy=${f2(o.cy)}) PCB courtyard is ${f2(dist)}mm from mounting hole M3 @ (${fmtVal(hx)},${fmtVal(hy)}) — need ≥${mhr.toFixed(1)}mm; move component away by ≥${f2(mhr - dist)}mm`, o.c);
       }
     }
 
@@ -388,16 +422,10 @@
     for (const o of fp) {
       const [, y1, , y2] = o.rect;
       const rotS = o.rot ? ` rotate=${o.rot}°` : "";
-      if (y1 < topKO) {
-        V.push(`[PCB KEEPOUT] '${o.label}' (${o.type} @ cx=${f2(o.cx)},cy=${f2(o.cy)}${rotS}) courtyard top=${f2(y1)}mm breaches TOP keepout (${f2(topKO)}mm) by ${f2(topKO - y1)}mm — move component down by ≥${f2(topKO - y1)}mm`);
-        flag(o.c);
-      }
-      if (y2 > botKO) {
-        V.push(`[PCB KEEPOUT] '${o.label}' (${o.type} @ cx=${f2(o.cx)},cy=${f2(o.cy)}${rotS}) courtyard bottom=${f2(y2)}mm breaches BOT keepout (${f2(botKO)}mm) by ${f2(y2 - botKO)}mm — move up by ≥${f2(y2 - botKO)}mm or add rotate:180`);
-        flag(o.c);
-      }
+      if (y1 < topKO) rec(`[PCB KEEPOUT] '${o.label}' (${o.type} @ cx=${f2(o.cx)},cy=${f2(o.cy)}${rotS}) courtyard top=${f2(y1)}mm breaches TOP keepout (${f2(topKO)}mm) by ${f2(topKO - y1)}mm — move component down by ≥${f2(topKO - y1)}mm`, o.c);
+      if (y2 > botKO) rec(`[PCB KEEPOUT] '${o.label}' (${o.type} @ cx=${f2(o.cx)},cy=${f2(o.cy)}${rotS}) courtyard bottom=${f2(y2)}mm breaches BOT keepout (${f2(botKO)}mm) by ${f2(y2 - botKO)}mm — move up by ≥${f2(y2 - botKO)}mm or add rotate:180`, o.c);
     }
-    return { violations: V, badIds: bad };
+    return { violations: V, badIds: bad, items };
   }
 
   // ── SVG component renderers (anchor-relative: origin = panel hole at 0,0) ───
@@ -700,6 +728,29 @@
   }
   const cssEsc = (s) => (window.CSS && CSS.escape) ? CSS.escape(s) : String(s).replace(/["\\]/g, "\\$&");
 
+  // ── Clearance HUD (shown while dragging) ───────────────────────────────────
+  let hudEl = null;
+  function hud() {
+    if (!hudEl) { hudEl = document.createElement("div"); hudEl.id = "hud"; document.body.appendChild(hudEl); }
+    return hudEl;
+  }
+  function showHUD(id, x, y) {
+    const el = hud(); el.style.display = "block";
+    const fmtG = (v, unit) => v == null ? "—" : `${v >= 0 ? "+" : ""}${f2(v)}${unit || "mm"}`;
+    const n = nearestComp(id, x, y);
+    let h = `<b>${esc(id)}</b>  cx=${f2(x)}  cy=${f2(y)}  (${(x / HP_MM).toFixed(2)} HP)`;
+    if (n) {
+      const g = pairGap({ cx: x, cy: y, type: findComp(id).c.type, rot: Number(findComp(id).c.rotate || 0) }, n);
+      const nutCls = g.nut != null && g.nut < 0 ? "bad" : "";
+      const ctCls = g.courtyard != null && g.courtyard < 0 ? "bad" : "";
+      h += `<br>↔ <b>${esc(n.c.id || "?")}</b>  c-c ${f2(g.dist)}mm` +
+        `  ·  nut <span class="${nutCls}">${fmtG(g.nut)}</span>` +
+        `  ·  courtyard <span class="${ctCls}">${fmtG(g.courtyard)}</span>`;
+    }
+    el.innerHTML = h;
+  }
+  function hideHUD() { if (hudEl) hudEl.style.display = "none"; }
+
   let drag = null, pan = null;
   let spaceDown = false;
   function panActive() { return UI.tool === "pan" || spaceDown; }
@@ -748,9 +799,11 @@
         setCompTransform(drag.id, p.x, p.y);
         const g2 = svgEl.querySelector(`.comp[data-cid="${cssEsc(drag.id)}"]`);
         if (g2) g2.setAttribute("transform", `translate(${f3(p.x)},${f3(p.y)})`);
+        showHUD(drag.id, p.x, p.y);
       });
       const end = () => {
         if (!drag || drag.id !== g.dataset.cid) return;
+        hideHUD();
         if (drag.moved && drag.nx != null) moveCompTo(drag.id, drag.nx, drag.ny);
         else { drag = null; renderRight(); }       // simple click = select (no move)
         drag = null;
@@ -1145,18 +1198,28 @@
   // ── DRC panel ──────────────────────────────────────────────────────────────
   function renderDRCPanel() {
     const el = document.getElementById("drc-panel");
-    const V = lastDRC.violations;
-    if (!V.length) { el.innerHTML = `<div style="color:#44ff44">No DRC violations.</div>`; return; }
+    const items = lastDRC.items || [];
+    if (!items.length) { el.innerHTML = `<div style="color:#44ff44">No DRC violations.</div>`; return; }
     const groups = {};
-    for (const v of V) { const tag = v.startsWith("[") ? v.slice(1, v.indexOf("]")) : "OTHER"; (groups[tag] = groups[tag] || []).push(v); }
+    items.forEach((it, i) => { (groups[it.tag] = groups[it.tag] || []).push({ it, i }); });
     const color = { "NUT KEEPOUT": "#ff6666", "NUT CLEARANCE": "#ff88aa", "PCB OVERLAP": "#ffaa44", "MH CLEARANCE": "#ffdd55", "PCB KEEPOUT": "#88aaff", "OTHER": "#cc99ff" };
     let h = "";
     for (const tag of Object.keys(groups).sort()) {
       const col = color[tag] || "#cc99ff";
       h += `<details open><summary style="color:${col}">${tag} (${groups[tag].length})</summary><ul>` +
-        groups[tag].map((v) => `<li style="color:${col}">${esc(v)}</li>`).join("") + `</ul></details>`;
+        groups[tag].map(({ it, i }) => `<li style="color:${col}" class="drc-item" data-vi="${i}" title="Click to select the component">${esc(it.text)}</li>`).join("") + `</ul></details>`;
     }
     el.innerHTML = h;
+    el.querySelectorAll(".drc-item").forEach((li) => li.addEventListener("click", () => {
+      const it = items[Number(li.dataset.vi)];
+      if (it && it.ids.length) jumpTo(it.ids[0]);
+    }));
+  }
+  function jumpTo(id) {
+    if (!findComp(id)) return;
+    selectComp(id);                       // selects + re-renders (highlights in panel + tree)
+    const g = svgEl && svgEl.querySelector(`.comp[data-cid="${cssEsc(id)}"]`);
+    if (g && g.scrollIntoView) g.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
   }
 
   // ══ Dividers modal ═════════════════════════════════════════════════════════
