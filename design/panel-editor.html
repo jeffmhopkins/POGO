@@ -652,7 +652,7 @@
     if (UI.selSep != null && (D.separators || [])[UI.selSep]) {
       const sp = D.separators[UI.selSep];
       const e = sepEndpointsResolved(sp);
-      s += `<line x1="${f3(e.a.x)}" y1="${f3(e.a.y)}" x2="${f3(e.b.x)}" y2="${f3(e.b.y)}" stroke="${COL.cyan}" stroke-width="0.6" opacity="0.9"/>`;
+      s += `<line class="sep-hl" x1="${f3(e.a.x)}" y1="${f3(e.a.y)}" x2="${f3(e.b.x)}" y2="${f3(e.b.y)}" stroke="${COL.cyan}" stroke-width="0.6" opacity="0.9"/>`;
       const handle = (p, end) => `<circle class="sep-handle" data-sep="${UI.selSep}" data-end="${end}" cx="${f3(p.x)}" cy="${f3(p.y)}" r="1.6"/>`;
       s += handle(e.a, "a") + handle(e.b, "b") + handle(e.mid, "mid");
     }
@@ -675,9 +675,11 @@
     const W = Number(D.meta.width_mm), H = Number(D.meta.height_mm);
     const comps = allComps();
 
-    // layer-panel: chrome + each component visual (+ transparent hit target)
+    // layer-panel: chrome + each component visual (+ transparent hit target).
+    // Render the selected component LAST so it paints on top of its neighbours.
     let panel = chromeSVG();
-    for (const { c, z } of comps) {
+    const ordered = comps.filter(({ c }) => c.id !== UI.selId).concat(comps.filter(({ c }) => c.id === UI.selId));
+    for (const { c, z } of ordered) {
       const { cx, cy } = resolve(c, z);
       const hitR = Math.max(panelR(c.type), 2.2);
       const selCls = c.id === UI.selId ? " sel" : "";
@@ -845,6 +847,8 @@
         e.preventDefault(); e.stopPropagation();
         if (UI.tool === "anchor") { applyAnchor(id); return; }
         UI.selId = id; UI.selZone = null; renderSelectionOnly();
+        const lp = svgEl.querySelector("#layer-panel");   // bring to top (paints last)
+        if (lp && g.parentNode === lp) lp.appendChild(g);
         const m = clientToMm(e);
         const f = findComp(id); const { cx, cy } = resolve(f.c, f.z);
         drag = { id, dx: m.x - cx, dy: m.y - cy, moved: false };
@@ -884,9 +888,21 @@
         if (!sepDrag.snapped) { snapshot(); sepDrag.snapped = true; }
         const mm = clientToMm(e); const m = snapPos(mm.x, mm.y);
         moveSepEndpoint(sepDrag.idx, sepDrag.end, m.x, m.y);
-        render();
+        // Update the live SVG directly (NO full render — re-rendering would destroy
+        // this handle and drop the pointer capture, breaking fast drags).
+        const e2 = sepEndpointsResolved(D.separators[sepDrag.idx]);
+        const hl = svgEl.querySelector(".sep-hl");
+        if (hl) { hl.setAttribute("x1", f3(e2.a.x)); hl.setAttribute("y1", f3(e2.a.y)); hl.setAttribute("x2", f3(e2.b.x)); hl.setAttribute("y2", f3(e2.b.y)); }
+        svgEl.querySelectorAll(".sep-handle").forEach((hh) => {
+          const p = e2[hh.dataset.end]; if (p) { hh.setAttribute("cx", f3(p.x)); hh.setAttribute("cy", f3(p.y)); }
+        });
+        sepDrag.moved = true;
       });
-      const sEnd = () => { if (sepDrag && sepDrag.idx === Number(h.dataset.sep)) sepDrag = null; };
+      const sEnd = () => {
+        if (!sepDrag || sepDrag.idx !== Number(h.dataset.sep)) return;
+        const moved = sepDrag.moved; sepDrag = null;
+        if (moved) render();            // rebuild cleanly (tree, inspector, DRC) on drop
+      };
       h.addEventListener("pointerup", sEnd);
       h.addEventListener("pointercancel", sEnd);
     });
