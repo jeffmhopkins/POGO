@@ -405,45 +405,40 @@ zones:
 
   # ── BP CONTROL: Bandpass Filter Controls ──────────────────────────────────────
   # 2 cols × 11.43mm = 22.86mm (4.5HP).  cx_c0=74.295  cx_c1=85.725  cx_ctr=80.01
-  # All 5 vertical gaps equal 6.20mm: top-label → xl → med-pair → H2 → H3 → ATT-top
   - id: zone_bp
     label: "Zone — BP CONTROL"
     x_start: 68.58
     col_pitch: 11.43
     cols: 2
     components:
-      # ── Polarity + Distortion switches — top of section ─────────────────────
-      # ── Switches: 3 equal VISUAL gaps of 7.23mm
-      # (zone_top→SW1_track_top, SW1_label_bot→SW2_track_top, SW2_label_bot→OFFSET_circle_top)
-      - id: BP_POL
-        type: switch_H2
+      # ── Knobs: Offset (L) → Tilt (M) → Mix (M) ─────────────────────────────
+      - id: BP_OFFSET
+        type: knob_large
         cx: 80.01
-        cy: 17.63
-        label_above: ""
-        pos_labels: ["POS", "NEG"]
-        pos_xs: [77.760, 82.260]   # raw cx±2.25; x_offset applied at render
-        cpp_param: "BP_POL_PARAM"
+        cy: 24.80
+        label: "OFFSET"
+        cpp_param: "BP_OFFSET_PARAM"
+      - id: BP_TILT
+        type: knob_medium
+        cx: 80.01
+        cy: 43.00
+        label: "TILT"
+        cpp_param: "BP_TILT_PARAM"
+      - id: BP_MIX
+        type: knob_medium
+        cx: 80.01
+        cy: 60.00
+        label: "MIX"
+        cpp_param: "BP_MIX_PARAM"
+      # ── Distortion type switch ───────────────────────────────────────────────
       - id: BP_DIST
         type: switch_H3
         cx: 80.01
-        cy: 30.57
+        cy: 78.00
         pos_labels: ["SOFT", "HARD", "FOLD"]
-        pos_xs: [75.51, 80.01, 84.51]  # raw cx±4.5 (body thirds +gap); x_offset applied at render
+        pos_xs: [75.51, 80.01, 84.51]
         label_below: ""
         cpp_param: "BP_DIST_PARAM"
-      # ── Knobs: aligned with LP1/BP1 rows 2 and 3 ────────────────────────────
-      - id: BP_OFFSET
-        type: knob_xl
-        cx: 80.01
-        cy: 52.40
-        label: "OFFSET"
-        cpp_param: "BP_OFFSET_PARAM"
-      - id: BP_MIX
-        type: knob_large
-        cx: 80.01
-        cy: 78.00
-        label: "MIX"
-        cpp_param: "BP_MIX_PARAM"
       # ── CV attenuverter trim pots ────────────────────────────────────────────
       - id: BP_FREQ_ATT
         type: trimpot
@@ -455,7 +450,7 @@ zones:
         col: 1
         cy: 100.0
         cpp_param: "BP_TILT_ATT_PARAM"
-      # ── CV input jacks (2.25HP grid continues: 74.295mm, 85.725mm) ───────────
+      # ── CV input jacks ───────────────────────────────────────────────────────
       - id: BP_FREQ_IN
         type: jack_input
         col: 0

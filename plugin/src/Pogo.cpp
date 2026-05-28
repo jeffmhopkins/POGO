@@ -140,10 +140,10 @@ struct Pogo : Module {
 		LP1_TILT_ATT_PARAM,
 		LP1_RES_ATT_PARAM,
 		// BP Control (global)
-		BP_POL_PARAM,           // switch 0/1: POS(+1) / NEG(−1)
+		BP_TILT_PARAM,          // medium knob ±1 V/oct stereo spread
 		BP_DIST_PARAM,          // switch 0/1/2: SOFT / HARD / FOLD
-		BP_OFFSET_PARAM,        // xl knob ±1.1 V/oct
-		BP_MIX_PARAM,           // large knob 0–1 dry/wet
+		BP_OFFSET_PARAM,        // large knob ±1.1 V/oct
+		BP_MIX_PARAM,           // medium knob 0–1 dry/wet
 		BP_FREQ_ATT_PARAM,
 		BP_TILT_ATT_PARAM,
 		// BP1
@@ -217,7 +217,7 @@ struct Pogo : Module {
 		configParam(LP1_RES_ATT_PARAM,  -1.f, 1.f, 0.f, "LP1 Res CV Depth");
 
 		// BP Control
-		configSwitch(BP_POL_PARAM,  0.f, 1.f, 0.f, "BP Polarity", {"Positive", "Negative"});
+		configParam(BP_TILT_PARAM,   -1.f, 1.f, 0.f, "BP Tilt", " V/oct");
 		configSwitch(BP_DIST_PARAM, 0.f, 2.f, 0.f, "BP Distortion Mode", {"Soft Clip", "Hard Clip", "Wavefold"});
 		configParam(BP_OFFSET_PARAM, -1.1f, 1.1f, 0.f, "BP Master Offset", " V/oct");
 		configParam(BP_MIX_PARAM,    0.f, 1.f, 0.5f, "BP Mix");
@@ -401,9 +401,9 @@ struct Pogo : Module {
 		// Pre-compute all BP CVs at base rate
 		float bpOffsetCv = params[BP_OFFSET_PARAM].getValue()
 		                   + modDest(BP_FREQ_INPUT, BP_FREQ_ATT_PARAM);
-		float bpTiltCv   = modDest(BP_TILT_INPUT, BP_TILT_ATT_PARAM); // stereo tilt: L+=, R-=
+		float bpTiltCv   = params[BP_TILT_PARAM].getValue()
+		                   + modDest(BP_TILT_INPUT, BP_TILT_ATT_PARAM); // stereo tilt: L+=, R-=
 
-		int polarityVal = (params[BP_POL_PARAM].getValue() >= 0.5f) ? -1 : 1;
 		int distMode    = (int)std::round(params[BP_DIST_PARAM].getValue());
 		float mix       = params[BP_MIX_PARAM].getValue();
 
@@ -438,11 +438,10 @@ struct Pogo : Module {
 			dSumL += distTapL[i];
 			dSumR += distTapR[i];
 		}
-		float pol     = (polarityVal == 1) ? 1.f : -1.f;
-		float wetL    = clamp(pol * dSumL, -10.5f, 10.5f);
-		float wetR    = clamp(pol * dSumR, -10.5f, 10.5f);
-		float bp3OutL = pol * distTapL[2];
-		float bp3OutR = pol * distTapR[2];
+		float wetL    = clamp(dSumL, -10.5f, 10.5f);
+		float wetR    = clamp(dSumR, -10.5f, 10.5f);
+		float bp3OutL = distTapL[2];
+		float bp3OutR = distTapR[2];
 
 		// BP_MIX: crossfade — CCW (0) = LP1 bypass, CW (1) = full BP only
 		float bpOutL = clamp(bandL * (1.f - mix) + wetL * mix, -12.f, 12.f);
@@ -528,14 +527,14 @@ struct PogoWidget : ModuleWidget {
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(64.77f, 112.00f)), module, Pogo::LP1_RES_INPUT));
 
 		// ── Zone — BP CONTROL ──────────────────────────────────────────
-		addParam(createParamCentered<PogoSwitchH2>(mm2px(Vec(81.92f, 17.63f)), module, Pogo::BP_POL_PARAM));
-		addParam(createParamCentered<PogoSwitchH3>(mm2px(Vec(81.92f, 30.57f)), module, Pogo::BP_DIST_PARAM));
-		addParam(createParamCentered<RoundHugeBlackKnob>(mm2px(Vec(81.92f, 52.40f)), module, Pogo::BP_OFFSET_PARAM));
-		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(81.92f, 78.00f)), module, Pogo::BP_MIX_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(76.20f, 100.00f)), module, Pogo::BP_FREQ_ATT_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(87.63f, 100.00f)), module, Pogo::BP_TILT_ATT_PARAM));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(76.20f, 112.00f)), module, Pogo::BP_FREQ_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(87.63f, 112.00f)), module, Pogo::BP_TILT_INPUT));
+		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(80.01f, 24.80f)), module, Pogo::BP_OFFSET_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(80.01f, 43.00f)), module, Pogo::BP_TILT_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(80.01f, 60.00f)), module, Pogo::BP_MIX_PARAM));
+		addParam(createParamCentered<PogoSwitchH3>(mm2px(Vec(80.01f, 78.00f)), module, Pogo::BP_DIST_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(74.295f, 100.00f)), module, Pogo::BP_FREQ_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(85.725f, 100.00f)), module, Pogo::BP_TILT_ATT_PARAM));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(74.295f, 112.00f)), module, Pogo::BP_FREQ_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(85.725f, 112.00f)), module, Pogo::BP_TILT_INPUT));
 
 		// ── Zone — BP 1 ────────────────────────────────────────────────
 		addParam(createParamCentered<RoundHugeBlackKnob>(mm2px(Vec(110.49f, 24.80f)), module, Pogo::BP1_FREQ_PARAM));
