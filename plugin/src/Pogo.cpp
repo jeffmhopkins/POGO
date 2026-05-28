@@ -148,13 +148,13 @@ struct Pogo : Module {
 		BP_TILT_ATT_PARAM,
 		// BP1
 		BP1_FREQ_PARAM, BP1_FOCUS_PARAM, BP1_DIST_PARAM,
-		BP1_FREQ_ATT_PARAM, BP1_FOCUS_ATT_PARAM, BP1_DIST_ATT_PARAM,
+		BP1_FREQ_ATT_PARAM, BP1_TILT_ATT_PARAM, BP1_DIST_ATT_PARAM,
 		// BP2
 		BP2_FREQ_PARAM, BP2_FOCUS_PARAM, BP2_DIST_PARAM,
-		BP2_FREQ_ATT_PARAM, BP2_FOCUS_ATT_PARAM, BP2_DIST_ATT_PARAM,
+		BP2_FREQ_ATT_PARAM, BP2_TILT_ATT_PARAM, BP2_DIST_ATT_PARAM,
 		// BP3
 		BP3_FREQ_PARAM, BP3_FOCUS_PARAM, BP3_DIST_PARAM,
-		BP3_FREQ_ATT_PARAM, BP3_FOCUS_ATT_PARAM, BP3_DIST_ATT_PARAM,
+		BP3_FREQ_ATT_PARAM, BP3_TILT_ATT_PARAM, BP3_DIST_ATT_PARAM,
 		// HP
 		HP_FREQ_PARAM, HP_RES_PARAM,
 		HP_FREQ_ATT_PARAM, HP_RES_ATT_PARAM,
@@ -170,9 +170,9 @@ struct Pogo : Module {
 		MOD_INPUT, VCA_INPUT,
 		LP1_FREQ_INPUT, LP1_TILT_INPUT, LP1_RES_INPUT,
 		BP_FREQ_INPUT, BP_TILT_INPUT,
-		BP1_FREQ_INPUT, BP1_FOCUS_INPUT, BP1_DIST_INPUT,
-		BP2_FREQ_INPUT, BP2_FOCUS_INPUT, BP2_DIST_INPUT,
-		BP3_FREQ_INPUT, BP3_FOCUS_INPUT, BP3_DIST_INPUT,
+		BP1_FREQ_INPUT, BP1_TILT_INPUT, BP1_DIST_INPUT,
+		BP2_FREQ_INPUT, BP2_TILT_INPUT, BP2_DIST_INPUT,
+		BP3_FREQ_INPUT, BP3_TILT_INPUT, BP3_DIST_INPUT,
 		HP_FREQ_INPUT, HP_RES_INPUT,
 		LP2_FREQ_INPUT, LP2_RES_INPUT,
 		NUM_INPUTS   // 24
@@ -230,7 +230,7 @@ struct Pogo : Module {
 		configParam(BP1_FOCUS_PARAM,  0.f, 1.f, 0.f,   "BP1 Focus");
 		configParam(BP1_DIST_PARAM,   0.f, 1.f, 0.20f, "BP1 Drive");
 		configParam(BP1_FREQ_ATT_PARAM,  -1.f, 1.f, 0.f, "BP1 Freq CV Depth");
-		configParam(BP1_FOCUS_ATT_PARAM, -1.f, 1.f, 0.f, "BP1 Focus CV Depth");
+		configParam(BP1_TILT_ATT_PARAM, -1.f, 1.f, 0.f, "BP1 Tilt CV Depth");
 		configParam(BP1_DIST_ATT_PARAM,  -1.f, 1.f, 0.f, "BP1 Drive CV Depth");
 
 		// BP2
@@ -238,7 +238,7 @@ struct Pogo : Module {
 		configParam(BP2_FOCUS_PARAM,  0.f, 1.f, 0.f,   "BP2 Focus");
 		configParam(BP2_DIST_PARAM,   0.f, 1.f, 0.20f, "BP2 Drive");
 		configParam(BP2_FREQ_ATT_PARAM,  -1.f, 1.f, 0.f, "BP2 Freq CV Depth");
-		configParam(BP2_FOCUS_ATT_PARAM, -1.f, 1.f, 0.f, "BP2 Focus CV Depth");
+		configParam(BP2_TILT_ATT_PARAM, -1.f, 1.f, 0.f, "BP2 Tilt CV Depth");
 		configParam(BP2_DIST_ATT_PARAM,  -1.f, 1.f, 0.f, "BP2 Drive CV Depth");
 
 		// BP3
@@ -246,7 +246,7 @@ struct Pogo : Module {
 		configParam(BP3_FOCUS_PARAM,  0.f, 1.f, 0.f,   "BP3 Focus");
 		configParam(BP3_DIST_PARAM,   0.f, 1.f, 0.20f, "BP3 Drive");
 		configParam(BP3_FREQ_ATT_PARAM,  -1.f, 1.f, 0.f, "BP3 Freq CV Depth");
-		configParam(BP3_FOCUS_ATT_PARAM, -1.f, 1.f, 0.f, "BP3 Focus CV Depth");
+		configParam(BP3_TILT_ATT_PARAM, -1.f, 1.f, 0.f, "BP3 Tilt CV Depth");
 		configParam(BP3_DIST_ATT_PARAM,  -1.f, 1.f, 0.f, "BP3 Drive CV Depth");
 
 		// HP
@@ -274,13 +274,13 @@ struct Pogo : Module {
 		configInput(BP_FREQ_INPUT,   "BP Offset CV");
 		configInput(BP_TILT_INPUT,   "BP Tilt CV");
 		configInput(BP1_FREQ_INPUT,  "BP1 Freq CV");
-		configInput(BP1_FOCUS_INPUT, "BP1 Focus CV");
+		configInput(BP1_TILT_INPUT,  "BP1 Tilt CV");
 		configInput(BP1_DIST_INPUT,  "BP1 Drive CV");
 		configInput(BP2_FREQ_INPUT,  "BP2 Freq CV");
-		configInput(BP2_FOCUS_INPUT, "BP2 Focus CV");
+		configInput(BP2_TILT_INPUT,  "BP2 Tilt CV");
 		configInput(BP2_DIST_INPUT,  "BP2 Drive CV");
 		configInput(BP3_FREQ_INPUT,  "BP3 Freq CV");
-		configInput(BP3_FOCUS_INPUT, "BP3 Focus CV");
+		configInput(BP3_TILT_INPUT,  "BP3 Tilt CV");
 		configInput(BP3_DIST_INPUT,  "BP3 Drive CV");
 		configInput(HP_FREQ_INPUT,   "HP Freq CV");
 		configInput(HP_RES_INPUT,    "HP Res CV");
@@ -413,9 +413,15 @@ struct Pogo : Module {
 			bpOffsetCv + params[BP3_FREQ_PARAM].getValue() + modDest(BP3_FREQ_INPUT, BP3_FREQ_ATT_PARAM),
 		};
 		float focusCv[3] = {
-			clamp(params[BP1_FOCUS_PARAM].getValue() + modDest(BP1_FOCUS_INPUT, BP1_FOCUS_ATT_PARAM), 0.f, 1.f),
-			clamp(params[BP2_FOCUS_PARAM].getValue() + modDest(BP2_FOCUS_INPUT, BP2_FOCUS_ATT_PARAM), 0.f, 1.f),
-			clamp(params[BP3_FOCUS_PARAM].getValue() + modDest(BP3_FOCUS_INPUT, BP3_FOCUS_ATT_PARAM), 0.f, 1.f),
+			clamp(params[BP1_FOCUS_PARAM].getValue(), 0.f, 1.f),
+			clamp(params[BP2_FOCUS_PARAM].getValue(), 0.f, 1.f),
+			clamp(params[BP3_FOCUS_PARAM].getValue(), 0.f, 1.f),
+		};
+		// Per-group tilt CV; added to global bpTiltCv so each band has independent stereo spread
+		float groupTiltV[3] = {
+			modDest(BP1_TILT_INPUT, BP1_TILT_ATT_PARAM),
+			modDest(BP2_TILT_INPUT, BP2_TILT_ATT_PARAM),
+			modDest(BP3_TILT_INPUT, BP3_TILT_ATT_PARAM),
 		};
 		float driveCv[3] = {
 			clamp(params[BP1_DIST_PARAM].getValue() + modDest(BP1_DIST_INPUT, BP1_DIST_ATT_PARAM), 0.f, 1.f),
@@ -427,9 +433,11 @@ struct Pogo : Module {
 		float bp3InL = altLConn ? VcaBlock::process(altL, vcaAmt, vcaCV) : bandL;
 		float bp3InR = (altLConn || altRConn) ? VcaBlock::process(altR, vcaAmt, vcaCV) : bandR;
 
-		// Stereo tilt: L gets +bpTiltCv, R gets −bpTiltCv (widthOffset in TripleBandpass API)
-		bandpassL.process(bandL, bp3InL, freqV, focusCv, +bpTiltCv, fs);
-		bandpassR.process(bandR, bp3InR, freqV, focusCv, -bpTiltCv, fs);
+		// Per-group tilt: global bpTiltCv + per-band groupTiltV; L gets +, R gets −
+		float tiltL[3] = { bpTiltCv + groupTiltV[0], bpTiltCv + groupTiltV[1], bpTiltCv + groupTiltV[2] };
+		float tiltR[3] = { -(bpTiltCv + groupTiltV[0]), -(bpTiltCv + groupTiltV[1]), -(bpTiltCv + groupTiltV[2]) };
+		bandpassL.process(bandL, bp3InL, freqV, focusCv, tiltL, fs);
+		bandpassR.process(bandR, bp3InR, freqV, focusCv, tiltR, fs);
 
 		float dSumL = 0.f, dSumR = 0.f;
 		for (int i = 0; i < 3; i++) {
@@ -541,10 +549,10 @@ struct PogoWidget : ModuleWidget {
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(110.49f, 52.40f)), module, Pogo::BP1_FOCUS_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(110.49f, 78.00f)), module, Pogo::BP1_DIST_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(99.06f, 100.00f)), module, Pogo::BP1_FREQ_ATT_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(110.49f, 100.00f)), module, Pogo::BP1_FOCUS_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(110.49f, 100.00f)), module, Pogo::BP1_TILT_ATT_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(121.92f, 100.00f)), module, Pogo::BP1_DIST_ATT_PARAM));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(99.06f, 112.00f)), module, Pogo::BP1_FREQ_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(110.49f, 112.00f)), module, Pogo::BP1_FOCUS_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(110.49f, 112.00f)), module, Pogo::BP1_TILT_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(121.92f, 112.00f)), module, Pogo::BP1_DIST_INPUT));
 
 		// ── Zone — BP 2 ────────────────────────────────────────────────
@@ -552,10 +560,10 @@ struct PogoWidget : ModuleWidget {
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(144.78f, 52.40f)), module, Pogo::BP2_FOCUS_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(144.78f, 78.00f)), module, Pogo::BP2_DIST_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(133.35f, 100.00f)), module, Pogo::BP2_FREQ_ATT_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(144.78f, 100.00f)), module, Pogo::BP2_FOCUS_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(144.78f, 100.00f)), module, Pogo::BP2_TILT_ATT_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(156.21f, 100.00f)), module, Pogo::BP2_DIST_ATT_PARAM));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(133.35f, 112.00f)), module, Pogo::BP2_FREQ_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(144.78f, 112.00f)), module, Pogo::BP2_FOCUS_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(144.78f, 112.00f)), module, Pogo::BP2_TILT_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(156.21f, 112.00f)), module, Pogo::BP2_DIST_INPUT));
 
 		// ── Zone — BP 3 ────────────────────────────────────────────────
@@ -563,10 +571,10 @@ struct PogoWidget : ModuleWidget {
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(179.07f, 52.40f)), module, Pogo::BP3_FOCUS_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(179.07f, 78.00f)), module, Pogo::BP3_DIST_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(167.64f, 100.00f)), module, Pogo::BP3_FREQ_ATT_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(179.07f, 100.00f)), module, Pogo::BP3_FOCUS_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(179.07f, 100.00f)), module, Pogo::BP3_TILT_ATT_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(190.50f, 100.00f)), module, Pogo::BP3_DIST_ATT_PARAM));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(167.64f, 112.00f)), module, Pogo::BP3_FREQ_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(179.07f, 112.00f)), module, Pogo::BP3_FOCUS_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(179.07f, 112.00f)), module, Pogo::BP3_TILT_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(190.50f, 112.00f)), module, Pogo::BP3_DIST_INPUT));
 
 		// ── Zone — BP3 OUT ─────────────────────────────────────────────

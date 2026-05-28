@@ -497,11 +497,11 @@ zones:
         col: 0
         cy: 100.0
         cpp_param: "BP1_FREQ_ATT_PARAM"
-      - id: BP1_FOCUS_ATT
+      - id: BP1_TILT_ATT
         type: trimpot
         col: 1
         cy: 100.0
-        cpp_param: "BP1_FOCUS_ATT_PARAM"
+        cpp_param: "BP1_TILT_ATT_PARAM"
       - id: BP1_DIST_ATT
         type: trimpot
         col: 2
@@ -513,12 +513,12 @@ zones:
         cy: 112.0
         label: "FREQ"
         cpp_id: "BP1_FREQ_INPUT"
-      - id: BP1_FOCUS_IN
+      - id: BP1_TILT_IN
         type: jack_input
         col: 1
         cy: 112.0
-        label: "FOCUS"
-        cpp_id: "BP1_FOCUS_INPUT"
+        label: "TILT"
+        cpp_id: "BP1_TILT_INPUT"
       - id: BP1_DIST_IN
         type: jack_input
         col: 2
@@ -557,11 +557,11 @@ zones:
         col: 0
         cy: 100.0
         cpp_param: "BP2_FREQ_ATT_PARAM"
-      - id: BP2_FOCUS_ATT
+      - id: BP2_TILT_ATT
         type: trimpot
         col: 1
         cy: 100.0
-        cpp_param: "BP2_FOCUS_ATT_PARAM"
+        cpp_param: "BP2_TILT_ATT_PARAM"
       - id: BP2_DIST_ATT
         type: trimpot
         col: 2
@@ -573,12 +573,12 @@ zones:
         cy: 112.0
         label: "FREQ"
         cpp_id: "BP2_FREQ_INPUT"
-      - id: BP2_FOCUS_IN
+      - id: BP2_TILT_IN
         type: jack_input
         col: 1
         cy: 112.0
-        label: "FOCUS"
-        cpp_id: "BP2_FOCUS_INPUT"
+        label: "TILT"
+        cpp_id: "BP2_TILT_INPUT"
       - id: BP2_DIST_IN
         type: jack_input
         col: 2
@@ -617,11 +617,11 @@ zones:
         col: 0
         cy: 100.0
         cpp_param: "BP3_FREQ_ATT_PARAM"
-      - id: BP3_FOCUS_ATT
+      - id: BP3_TILT_ATT
         type: trimpot
         col: 1
         cy: 100.0
-        cpp_param: "BP3_FOCUS_ATT_PARAM"
+        cpp_param: "BP3_TILT_ATT_PARAM"
       - id: BP3_DIST_ATT
         type: trimpot
         col: 2
@@ -633,12 +633,12 @@ zones:
         cy: 112.0
         label: "FREQ"
         cpp_id: "BP3_FREQ_INPUT"
-      - id: BP3_FOCUS_IN
+      - id: BP3_TILT_IN
         type: jack_input
         col: 1
         cy: 112.0
-        label: "FOCUS"
-        cpp_id: "BP3_FOCUS_INPUT"
+        label: "TILT"
+        cpp_id: "BP3_TILT_INPUT"
       - id: BP3_DIST_IN
         type: jack_input
         col: 2
