@@ -196,9 +196,13 @@
   // ── DRC (port of panel_rules.check_all) ────────────────────────────────────
   // Returns { violations:[str...], badIds:Set }.  Strings match the Python output
   // so the editor report mirrors `build_panel.py --check`.
-  function runDRC() {
+  // override (optional) = { id, cx, cy } resolved coords for an in-flight drag, so
+  // live DRC reflects the dragged position without mutating the model.
+  function runDRC(override) {
     const comps = allComps().map(({ c, z }) => {
-      const { cx, cy } = resolve(c, z);
+      let cx, cy;
+      if (override && c.id === override.id) { cx = override.cx; cy = override.cy; }
+      else { const r = resolve(c, z); cx = r.cx; cy = r.cy; }
       return { c, cx, cy, type: c.type, rot: Number(c.rotate || 0), label: compLabel(c) };
     });
     const V = [];
@@ -722,6 +726,9 @@
         setCompTransform(drag.id, p.x, p.y);
         const g2 = svgEl.querySelector(`.comp[data-cid="${cssEsc(drag.id)}"]`);
         if (g2) g2.setAttribute("transform", `translate(${f3(p.x)},${f3(p.y)})`);
+        // live DRC: recolour violators against the dragged position (no model mutation)
+        const bad = runDRC({ id: drag.id, cx: p.x, cy: p.y }).badIds;
+        svgEl.querySelectorAll(".comp").forEach((gg) => gg.classList.toggle("violation", bad.has(gg.dataset.cid)));
         showHUD(drag.id, p.x, p.y);
       });
       const end = () => {
@@ -841,6 +848,9 @@
     for (const z of D.zones || []) { const s = zoneSpanRaw(z); if (s && rawcx >= s[0] - 0.001 && rawcx < s[1] + 0.001) return z; }
     return null;
   }
+  // Representative raw-x of a separator (for associating it with a zone in the tree).
+  const sepRepX = (sp) => sp.type === "v" ? Number(sp.x) : (Number(sp.x1) + Number(sp.x2)) / 2;
+  const zoneOfSep = (sp) => zoneForRawCx(sepRepX(sp));
   // After an individual move, move the component object into the zone whose x-span
   // now contains it (so the component tree reflects its real location).
   function reassignZone(c) {
@@ -920,9 +930,15 @@
   function addDivider(orient) {
     snapshot();
     const ox = DR.x_offset || 0, W = Number(D.meta.width_mm), H = Number(D.meta.height_mm);
-    const sp = orient === "v"
-      ? { type: "v", x: round3(W / 2 - ox), y1: 9, y2: round3(H - 4.5), style: "zone_div" }
-      : { type: "h", x1: round3(W * 0.25 - ox), x2: round3(W * 0.75 - ox), y: round3(H / 2), style: "zone_div" };
+    let sp;
+    if (orient === "v") {
+      sp = { type: "v", x: round3(W / 2 - ox), y1: 9, y2: round3(H - 4.5), style: "zone_div" };
+    } else {
+      // Horizontal divider spans the selected zone (so it nests under that zone).
+      const s = zoneSpanRaw(targetZone() || {});
+      const x1 = s ? s[0] : W * 0.25 - ox, x2 = s ? s[1] : W * 0.75 - ox;
+      sp = { type: "h", x1: round3(x1), x2: round3(x2), y: round3(H / 2), style: "zone_div" };
+    }
     (D.separators = D.separators || []).push(sp);
     selectSep(D.separators.length - 1);
   }
@@ -934,8 +950,11 @@
     // Default: a 3-column section starting just past the current content's right edge.
     let xs = 0;
     for (const { c, z } of allComps()) xs = Math.max(xs, rawCx(c, z));
-    const z = { id, label: "New Zone", x_start: round3(Math.min(xs + 11.43, Number(D.meta.width_mm) - 34.29)), col_pitch: 11.43, cols: 3, components: [] };
+    const x0 = round3(Math.min(xs + 11.43, Number(D.meta.width_mm) - 34.29));
+    const z = { id, label: "New Zone", x_start: x0, col_pitch: 11.43, cols: 3, components: [] };
     (D.zones = D.zones || []).push(z);
+    // Zones own their vertical boundary divider — create one at the zone's left edge.
+    (D.separators = D.separators || []).push({ type: "v", x: x0, y1: 9, y2: round3(Number(D.meta.height_mm) - 4.5), style: "zone_div" });
     selectZone(id);
   }
   function deleteZone(zid) {
@@ -965,12 +984,16 @@
   function shiftZoneBy(zid, dx, dy) {
     const z = (D.zones || []).find((z) => z.id === zid); if (!z) return;
     snapshot();
+    const oldXs = z.x_start != null ? Number(z.x_start) : null;
     if (dx && z.x_start != null) z.x_start = round3(Number(z.x_start) + dx);
     for (const c of z.components || []) {
       if (dx && c.cx != null && c.col == null) c.cx = round3(Number(c.cx) + dx);
       if (dy) { const r = resolve(c, z); c.cy = round3(r.cy + dy); }
       shiftAux(c, dx, dy);              // keep switch labels / position marks aligned
     }
+    // Vertical dividers are tied to zones: move the boundary line at the old left edge.
+    if (dx && oldXs != null)
+      for (const sp of D.separators || []) if (sp.type === "v" && Math.abs(Number(sp.x) - oldXs) < 0.01) sp.x = round3(Number(sp.x) + dx);
     render();
   }
   function renameZone(oldId, field, value) {  // field: "id" | "label"
@@ -1112,34 +1135,37 @@
   }
 
   // ── Left sidebar (palette + tree) ──────────────────────────────────────────
+  function sepRow(sp, i) {
+    const desc = sp.type === "v" ? `▏ divider · x=${fmtVal(sp.x)}` : `— divider · y=${fmtVal(sp.y)}${sp.label ? ` · “${sp.label}”` : ""}`;
+    return `<div class="tree-comp${UI.selSep === i ? " sel" : ""}" data-sep="${i}">${esc(desc)} <span class="ttype">${esc(sp.style)}</span></div>`;
+  }
   function renderLeft() {
     let h = `<div class="panel-h">Add Component</div><div class="palette">`;
     for (const t of PALETTE_TYPES) h += `<div class="pal-item" draggable="false" data-add="${t}">${t.replace(/_/g, "&#8203;_")}</div>`;
     h += `</div><div class="field row" style="margin-bottom:12px">` +
-      `<div><button id="add-div-v">+ Divider ▏</button></div>` +
       `<div><button id="add-div-h">+ Divider —</button></div>` +
-      `<div><button id="add-zone">+ Zone</button></div></div>`;
+      `<div><button id="add-zone">+ Zone (+ ▏)</button></div></div>`;
+    // Group dividers by the zone whose x-span contains them; the rest go to "Other".
+    const sepByZone = {}; const otherSeps = [];
+    (D.separators || []).forEach((sp, i) => { const z = zoneOfSep(sp); (z ? (sepByZone[z.id] = sepByZone[z.id] || []) : otherSeps).push({ sp, i }); });
     h += `<div class="panel-h">Components</div>`;
     for (const z of D.zones || []) {
       h += `<div class="tree-zone"><div class="zname${z.id === UI.selZone ? " sel" : ""}" data-zid="${esc(z.id)}">${esc(z.id)}</div>`;
       for (const c of z.components || [])
         h += `<div class="tree-comp${c.id === UI.selId ? " sel" : ""}" data-cid="${esc(c.id)}">${esc(compLabel(c))} <span class="ttype">${esc(c.type)}</span></div>`;
+      for (const { sp, i } of (sepByZone[z.id] || [])) h += sepRow(sp, i);
       h += `</div>`;
     }
-    // Dividers behave like components in the tree (the modal is gone).
-    h += `<div class="panel-h">Dividers</div>`;
-    if (!(D.separators || []).length) h += `<div class="hint">none — use “+ Divider”.</div>`;
-    (D.separators || []).forEach((sp, i) => {
-      const desc = sp.type === "v" ? `vertical · x=${fmtVal(sp.x)}` : `horizontal · y=${fmtVal(sp.y)}${sp.label ? ` · “${sp.label}”` : ""}`;
-      h += `<div class="tree-comp${UI.selSep === i ? " sel" : ""}" data-sep="${i}">${esc(desc)} <span class="ttype">${esc(sp.style)}</span></div>`;
-    });
+    if (otherSeps.length) {
+      h += `<div class="panel-h">Other dividers</div>`;
+      for (const { sp, i } of otherSeps) h += sepRow(sp, i);
+    }
     const left = document.getElementById("left");
     left.innerHTML = h;
     left.querySelectorAll("[data-add]").forEach((el) => el.addEventListener("click", () => addComp(el.dataset.add)));
     left.querySelectorAll(".tree-comp[data-cid]").forEach((el) => el.addEventListener("click", () => selectComp(el.dataset.cid)));
     left.querySelectorAll(".tree-comp[data-sep]").forEach((el) => el.addEventListener("click", () => selectSep(Number(el.dataset.sep))));
     left.querySelectorAll(".zname").forEach((el) => el.addEventListener("click", () => selectZone(el.dataset.zid)));
-    document.getElementById("add-div-v").addEventListener("click", () => addDivider("v"));
     document.getElementById("add-div-h").addEventListener("click", () => addDivider("h"));
     document.getElementById("add-zone").addEventListener("click", addZone);
   }
