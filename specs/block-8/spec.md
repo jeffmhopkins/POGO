@@ -75,6 +75,9 @@ I_abc_q = 0.74 µA → Q = 0.70  (Butterworth, default)
 I_abc_q → 0       → Q → ∞    (self-oscillation)
 ```
 
+**Accepted Q_min deviation:** DSP Q_min = 0.5 at resParam = 0; hardware Q_min = 0.70 (Butterworth).
+See LP1 and `aux/aux-q-control.md` §Q_min deviation for full discussion.
+
 ### Cascaded response (LP1 + HP + LP2)
 
 When LP2 is stacked below LP1 (LP2_FREQ < LP1_FREQ), the combined response approaches 24 dB/oct.

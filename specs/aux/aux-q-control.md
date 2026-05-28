@@ -103,6 +103,12 @@ BP groups:
   Output normalized by 1/Q so peak amplitude ≈ 1/Q (constant loudness behavior)
 ```
 
+**Q_min deviation (accepted):** DSP Q_min = 0.5 at resParam/qParam = 0. Hardware Q_min = 0.70
+(Butterworth) because Iabc_q cannot go below ~0.74 µA without entering LM13700 low-current
+nonlinearity territory. Practical effect: hardware has no slightly-overdamped region (0.5 < Q < 0.707);
+the CCW-stop resonance position already yields maximally flat (Butterworth) response. This is the
+conventional analog filter design target and is audibly negligible.
+
 ### IRES_AMP Mapping
 
 ```
@@ -170,7 +176,7 @@ Bourns 3224W 100 kΩ SMD trimpot. Adjusts V_bias to set:
 | Ref (generic) | Part | Package | Value | Notes |
 |---|---|---|---|---|
 | U_Q_AB | LM13700M | SOIC-16 | — | Cell A = LP1 Q-cell; Cell B = LP2 Q-cell |
-| U_Q_C | LM13700M | SOIC-16 | — | Cell A = HP Q-cell; Cell B = spare |
+| U_Q_C | LM13700M | SOIC-16 | — | Cell A = HP Q-cell; Cell B = spare (IN+/IN− → AGND; Iabc via 100 kΩ to GND; OUT via 1 kΩ to GND) |
 | U_Q_BP1..3 | LM13700M | SOIC-16 | — | One per BP group; cell A = L channel, cell B = R channel |
 | U_IRES | TL072CDT | SOIC-8 | — | Half A = IRES_AMP per filter; can share TL072 with SUM_AMP |
 | R_Iabc | Resistor | 0603 | 1 MΩ | V_ires → Iabc conversion; 0.74V / 1MΩ = 0.74 µA at flat Q |

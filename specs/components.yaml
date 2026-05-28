@@ -73,6 +73,8 @@ components:
   - { ref: C14,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "47nF",   fn: "LP1 integrator C2 R (C0G/NP0)" }
   - { ref: R10,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "LP1 SUM_AMP R_in L" }
   - { ref: R11,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "LP1 SUM_AMP R_in R" }
+  - { ref: R_TILT_INV_IN, board: audio, block: block-5, part: ~,  pkg: "0603",   val: "100kΩ",  tol: "1%", fn: "LP1 tilt inverter input R (U13 half A; 1% for tilt center null depth)" }
+  - { ref: R_TILT_INV_FB, board: audio, block: block-5, part: ~,  pkg: "0603",   val: "100kΩ",  tol: "1%", fn: "LP1 tilt inverter feedback R (matched pair; G=−1 gives −V_tilt for R channel)" }
   - { ref: RV3,  board: audio,   block: block-5, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "LP1 f_ref trim rheostat; in series with R_IREF_A 1MΩ; ±25% range" }
   - { ref: RV4,  board: audio,   block: block-5, part: "Bourns 3224W", pkg: SMD,   val: "20kΩ",  fn: "LP1 1V/oct tracking trim; ±10% range" }
   - { ref: RV5,  board: audio,   block: block-5, part: ~,          pkg: SMD,      fn: "LP1 Q_max trim (IRES_AMP V_bias)" }
@@ -192,6 +194,10 @@ components:
   - { ref: RV16, board: audio,   block: block-7, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "HP f_ref trim rheostat; in series with R_IREF_A 1MΩ; ±25% range" }
   - { ref: RV17, board: audio,   block: block-7, part: "Bourns 3224W", pkg: SMD,   val: "20kΩ",  fn: "HP 1V/oct tracking trim; ±10% range" }
   - { ref: RV18, board: audio,   block: block-7, part: ~,          pkg: SMD,      fn: "HP Q_max trim" }
+  - { ref: R_QB_IABC_L, board: audio, block: block-7, part: ~,   pkg: "0603",   val: "100kΩ",  fn: "U51 cell B Iabc termination resistor to GND (prevents floating)" }
+  - { ref: R_QB_IABC_R, board: audio, block: block-7, part: ~,   pkg: "0603",   val: "100kΩ",  fn: "U52 cell B Iabc termination resistor to GND" }
+  - { ref: R_QB_OUT_L,  board: audio, block: block-7, part: ~,   pkg: "0603",   val: "1kΩ",    fn: "U51 cell B OTA output termination resistor to GND" }
+  - { ref: R_QB_OUT_R,  board: audio, block: block-7, part: ~,   pkg: "0603",   val: "1kΩ",    fn: "U52 cell B OTA output termination resistor to GND" }
 
   # block-8: LP Filter 2  (shares U9/U10 Q VCA with block-5; refs shifted from old U41–U45 to U56–U60)
   - { ref: U56,  board: audio,   block: block-8, part: LM13700M,   pkg: SOIC-16,  fn: "LP2 OTA integrators L" }
@@ -226,10 +232,10 @@ components:
   - { ref: C2,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "47nF",   fn: "C_INT2: LFO2 integrator timing cap (C0G mandatory)" }
   - { ref: C3,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "100nF",  qty: 2, fn: "C_BYPASS_LFO1: U1 +12V and −12V supply bypass (X7R)" }
   - { ref: C5,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "100nF",  qty: 2, fn: "C_BYPASS_LFO2: U2 +12V and −12V supply bypass (X7R)" }
-  - { ref: R1,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "270kΩ",  fn: "R_CW_END1: LFO1 CW end resistor; limits f_max ≈ 25 Hz" }
+  - { ref: R1,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "270kΩ",  fn: "R_CW_END1: LFO1 CW end resistor; limits f_max ≈ 43 Hz" }
   - { ref: R2,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "270kΩ",  fn: "R_CW_END2: LFO2 CW end resistor" }
-  - { ref: R3,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "10MΩ",   fn: "R_CCW_END1: LFO1 CCW end resistor; limits f_min ≈ 0.05 Hz" }
-  - { ref: R4,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "10MΩ",   fn: "R_CCW_END2: LFO2 CCW end resistor" }
+  - { ref: R3,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "100MΩ",  qty: 2, fn: "R_CCW_END1: LFO1 CCW end (2× in series = 200 MΩ); limits f_min ≈ 0.058 Hz" }
+  - { ref: R4,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "100MΩ",  qty: 2, fn: "R_CCW_END2: LFO2 CCW end (2× in series = 200 MΩ)" }
   - { ref: R5,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "R_FB_SQ1: LFO1 Schmitt feedback R (comparator output → (+) input)" }
   - { ref: R6,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "R_FB_SQ2: LFO2 Schmitt feedback R" }
   - { ref: R7,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "82kΩ",   fn: "R_HYS1: LFO1 Schmitt lower R ((+) input → GND); sets V_H = 5V" }

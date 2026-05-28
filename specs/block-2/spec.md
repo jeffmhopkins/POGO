@@ -50,15 +50,16 @@ flips at ±V_th (set by positive feedback resistor ratio). The integrator ramps 
 **Oscillation frequency:**
 
 ```
-f = V_th / (2 × R_int × C_int × V_sat)
+f = V_sat / (4 × V_H × R_int × C_int)
 ```
 
-where R_int and C_int are the integrator resistor and capacitor, and V_sat is the
-comparator's output saturation voltage (approximately V_rail − 1 V ≈ 11 V for a
-TL072 on ±12 V). Rearranging for the integrator time constant:
+where R_int and C_int are the integrator resistor and capacitor, V_sat is the
+comparator's output saturation voltage (≈ 11 V for TL072 on ±12 V), and V_H is the
+Schmitt trigger threshold (= 5 V). The factor of 4 arises from two half-periods each of
+duration 2×V_H×R_int×C_int/V_sat. Rearranging for the integrator resistor:
 
 ```
-R_int × C_int = V_th / (2 × f × V_sat)
+R_int = V_sat / (4 × V_H × f × C_int)
 ```
 
 **Rate control — preset trimpot:** The DSP uses `speedHz = 0.05 × 400^param`, which
@@ -160,18 +161,18 @@ X7R will cause LFO rate drift with temperature (audible as wandering sweep rate)
 V_sat ≈ 11 V, V_H = 5 V, C_INT = 47 nF
 
 At f_max = 20 Hz:   R_INT = 11 / (4 × 5 × 20 × 47n) = 293 kΩ
-At f_min = 0.05 Hz: R_INT = 11 / (4 × 5 × 0.05 × 47n) = 117 MΩ
+At f_min = 0.05 Hz: R_INT = 11 / (4 × 5 × 0.05 × 47n) = 234 MΩ
 ```
 
-Full range (293 kΩ to 117 MΩ) requires an effective resistance ratio of 400:1. Achieved
+Full range (293 kΩ to 234 MΩ) requires an effective resistance ratio of 800:1. Achieved
 with a 1 MΩ trimpot (Bourns 3296W; RV_LFO) plus two end resistors:
 - **R_CW_END = 270 kΩ** in parallel with the pot at the CW end — limits R_INT_min:
   R_INT_min ≈ 270k || 0 = 270kΩ → f_max ≈ 11/(4×5×270k×47n) = 43 Hz  
   (fast side is intentionally wider; the log pot's CW end compresses, trimmed by assembly)
-- **R_CCW_END = 10 MΩ** in series at the CCW end — limits R_INT_max ≈ 11 MΩ →  
-  f_min ≈ 11/(4×5×11M×47n) ≈ 0.053 Hz ≈ 0.05 Hz ✓
+- **R_CCW_END = 2 × 100 MΩ in series = 200 MΩ** (0603) at the CCW end — limits R_INT_max ≈ 201 MΩ →  
+  f_min ≈ 11/(4×5×201M×47n) ≈ 0.058 Hz ≈ 0.05 Hz ✓
 
-Actual achievable range with these end resistors: ~0.05 Hz to ~25 Hz. The extra headroom
+Actual achievable range with these end resistors: ~0.058 Hz to ~43 Hz. The extra headroom
 at the fast end is acceptable for a modulation source.
 
 **Schmitt trigger thresholds (±5 V):** Positive feedback divider from comparator output
@@ -251,8 +252,8 @@ output protection but are physically placed on the utility board near the LFO ou
 | C_INT2 | cap, C0G | 0603 | 47 nF | 1 | utility | block-2 | LFO2 integrator timing cap; C0G mandatory |
 | R_CW_END1 | resistor | 0603 | 270 kΩ | 1 | utility | block-2 | LFO1 CW end resistor; limits f_max ≈ 25 Hz |
 | R_CW_END2 | resistor | 0603 | 270 kΩ | 1 | utility | block-2 | LFO2 CW end resistor |
-| R_CCW_END1 | resistor | 0603 | 10 MΩ | 1 | utility | block-2 | LFO1 CCW end resistor; limits f_min ≈ 0.05 Hz |
-| R_CCW_END2 | resistor | 0603 | 10 MΩ | 1 | utility | block-2 | LFO2 CCW end resistor |
+| R_CCW_END1 | resistor | 0603 | 100 MΩ | 2 | utility | block-2 | LFO1 CCW end (2× in series = 200 MΩ); limits f_min ≈ 0.058 Hz |
+| R_CCW_END2 | resistor | 0603 | 100 MΩ | 2 | utility | block-2 | LFO2 CCW end (2× in series = 200 MΩ) |
 | R_FB_SQ1 | resistor | 0603 | 100 kΩ | 1 | utility | block-2 | LFO1 Schmitt feedback (output → (+) input) |
 | R_HYS1 | resistor | 0603 | 82 kΩ | 1 | utility | block-2 | LFO1 Schmitt hysteresis ((+) input → GND); sets V_H = 5V |
 | R_FB_SQ2 | resistor | 0603 | 100 kΩ | 1 | utility | block-2 | LFO2 Schmitt feedback |

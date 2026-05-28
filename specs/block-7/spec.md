@@ -72,6 +72,11 @@ Default CV: HP_FREQ_PARAM default = −3V → f₀ = 632 Hz × 2^(−3) = 79 Hz 
 DSP Q law:  `Q = 0.5 × 4000^resParam`  — same exponential law as LP1/LP2.
 Hardware Q range: 0.70 (Butterworth, I_abc_q = 0.74 µA) to ~50 (near self-oscillation).
 
+**Accepted Q_min deviation:** DSP Q_min = 0.5 at resParam = 0; hardware Q_min = 0.70
+(Butterworth). Hardware cannot produce Q < 0.70 without LM13700 low-Iabc nonlinearity.
+Practical effect: absent slightly-overdamped region below 0.707; CCW-stop position yields
+maximally flat response. Audibly negligible; accepted.
+
 ### Frequency derivation at default setting
 
 ```
@@ -144,6 +149,16 @@ IC_Q_C (LM13700, SOIC-16): cell A = HP Q cell. Cell B is spare (unused by HP; av
 utility functions or future use). The HP Q cell drives both L and R channel I_abc_q pins in
 parallel — one IRES_AMP output sets both channels' Q simultaneously.
 
+**Spare cell termination (CRITICAL — both U51 and U52):** Each LM13700 Q VCA IC has an
+unused cell B. Floating inputs create substrate noise that couples into cell A. Required
+termination for each spare cell:
+- IN+ (pin 9): connect to AGND
+- IN− (pin 10): connect to AGND
+- Iabc (pin 1): 100 kΩ to GND (sets ~0.1 µA quiescent bias; prevents rail floating)
+- OUT (pin 14): 1 kΩ to GND
+
+This applies to both U51 (HP Q VCA L) and U52 (HP Q VCA R) cell B.
+
 ### Calibration trim pots
 
 | Ref | Value | Purpose | Procedure |
@@ -188,7 +203,10 @@ HP_inv node.
 |---|---|---|---|---|---|---|---|
 | U_OTA_HP_L | LM13700M | SOIC-16 | — | 1 | audio | block-7 | HP L-channel integrators (cells A+B = OTA-A1+OTA-A2) |
 | U_OTA_HP_R | LM13700M | SOIC-16 | — | 1 | audio | block-7 | HP R-channel integrators (cells A+B = OTA-B1+OTA-B2) |
-| IC_Q_C | LM13700M | SOIC-16 | — | 1 | audio | block-7 | Q VCA: cell A = HP Q (L+R); cell B = spare |
+| U51 (IC_Q_C_L) | LM13700M | SOIC-16 | — | 1 | audio | block-7 | Q VCA L: cell A = HP Q; cell B spare (see termination note) |
+| U52 (IC_Q_C_R) | LM13700M | SOIC-16 | — | 1 | audio | block-7 | Q VCA R: cell A = HP Q; cell B spare (see termination note) |
+| R_QB_IABC_L, R_QB_IABC_R | resistor | 0603 | 100 kΩ | 2 | audio | block-7 | U51/U52 cell B Iabc termination (100 kΩ to GND each) |
+| R_QB_OUT_L, R_QB_OUT_R | resistor | 0603 | 1 kΩ | 2 | audio | block-7 | U51/U52 cell B output termination (1 kΩ to GND each) |
 | U_SUM_HP_L | OPA1612 | SOIC-8 | — | 1 | audio | block-7 | L-ch: half A = SUM_AMP, half B = HP inverting output buffer; 1.1 nV/√Hz |
 | U_SUM_HP_R | OPA1612 | SOIC-8 | — | 1 | audio | block-7 | R-ch: half A = SUM_AMP, half B = HP inverting output buffer; pin-compatible with TL072CDT |
 | U_IRES_HP | TL072CDT | SOIC-8 | — | 1 | audio | block-7 | Half A = IRES_AMP (Q control); half B = spare / utility |

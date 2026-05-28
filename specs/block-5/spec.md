@@ -79,9 +79,13 @@ I_abc_q = 0.26 µA → Q = 2.00
 I_abc_q → 0       → Q → ∞   (self-oscillation)
 ```
 
-Note: DSP Q reaches 2000; hardware Q is intentionally limited to ~50 maximum for stability.
-This is an accepted deviation — the musical behavior (sweep, resonance peak, self-oscillation
-onset) is preserved; the exact maximum Q is a hardware calibration point, not a tonal defect.
+**Accepted Q deviations:**
+- Q_min: DSP Q_min = 0.5 at resParam = 0; hardware Q_min = 0.70 (Butterworth) because
+  Iabc_q cannot fall below ~0.74 µA without LM13700 low-current nonlinearity. Hardware
+  has no slightly-overdamped region; CCW-stop position yields maximally flat response.
+- Q_max: DSP Q reaches 2000; hardware Q intentionally limited to ~50 for stability.
+Both are accepted deviations. Musical behavior (sweep, peak, self-oscillation) is
+preserved; exact Q floor and ceiling are calibration targets, not tonal defects.
 
 ### Stereo tilt
 
