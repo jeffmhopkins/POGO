@@ -142,7 +142,7 @@ struct Pogo : Module {
 		// BP Control (global)
 		BP_POL_PARAM,           // switch 0/1: POS(+1) / NEG(−1)
 		BP_DIST_PARAM,          // switch 0/1/2: SOFT / HARD / FOLD
-		BP_OFFSET_PARAM,        // xl knob −5–5 V/oct
+		BP_OFFSET_PARAM,        // xl knob ±1.1 V/oct
 		BP_MIX_PARAM,           // large knob 0–1 dry/wet
 		BP_FREQ_ATT_PARAM,
 		BP_TILT_ATT_PARAM,
@@ -219,7 +219,7 @@ struct Pogo : Module {
 		// BP Control
 		configSwitch(BP_POL_PARAM,  0.f, 1.f, 0.f, "BP Polarity", {"Positive", "Negative"});
 		configSwitch(BP_DIST_PARAM, 0.f, 2.f, 0.f, "BP Distortion Mode", {"Soft Clip", "Hard Clip", "Wavefold"});
-		configParam(BP_OFFSET_PARAM, -5.f, 5.f, 0.f, "BP Master Offset", " V/oct");
+		configParam(BP_OFFSET_PARAM, -1.1f, 1.1f, 0.f, "BP Master Offset", " V/oct");
 		configParam(BP_MIX_PARAM,    0.f, 1.f, 0.5f, "BP Mix");
 		configParam(BP_FREQ_ATT_PARAM, -1.f, 1.f, 0.f, "BP Offset CV Depth");
 		configParam(BP_TILT_ATT_PARAM, -1.f, 1.f, 0.f, "BP Tilt CV Depth");
