@@ -255,12 +255,10 @@ zones:
         cpp_param: "LFO2_RATE_PARAM"
 
   # ── Section 0c: MOD BUS ───────────────────────────────────────────────────
-  # All of SCALE, OFFSET, MOD_IN and both switches share col 1.
-  # LFO2_LED above at cy=65.9 (bottom=69.9) sets the upper bound.
-  # MOD_IN jack at cy=112 sets the lower bound (courtyard bottom=118.5 = keepout).
-  # Interleaved layout: SW1→SCALE→SW2→OFFSET→MOD_IN; min separations:
-  #   SW_V3↔trimpot=8.385mm, SW_V3↔SW_V3=10mm, trimpot↔jack=11.285mm
-  # Gaps approx 0.1–0.2mm at all boundaries (tight but DRC-clean).
+  # 3-column grid: col 0 = switches, col 1 = mod trimpots, col 2 = VCA trimpots.
+  # Row 1 (cy=83): SW1 | SCALE | VCA_AMT
+  # Row 2 (cy=96.34): SW2 | OFFSET | VCA_OFS
+  # Row 3 (cy=112): — | MOD_IN | VCA_IN   (jacks at 2.25HP pitch)
   - id: zone_mod
     label: "Zone 0c — MOD BUS"
     x_start: 0
@@ -270,13 +268,14 @@ zones:
       - id: MOD_SRC_SW
         type: switch_V3
         col: 0
-        cy: 79.0
+        cy: 83.0
+        rotate: 180
         label: "MOD SRC"
         cpp_param: "MOD_SRC_PARAM"
       - id: SCALE
         type: trimpot
         col: 1
-        cy: 83.6
+        cy: 83.0
         rotate: 180
         label: "SCALE"
         cpp_param: "MOD_SCALE_PARAM"
@@ -289,13 +288,14 @@ zones:
       - id: MOD_SRC_SW2
         type: switch_V3
         col: 0
-        cy: 92.1
+        cy: 96.34
+        rotate: 180
         label: "MOD SRC"
         cpp_param: "MOD_SRC2_PARAM"
       - id: OFFSET
         type: trimpot
         col: 1
-        cy: 100.6
+        cy: 96.34
         rotate: 180
         label: "OFFSET"
         cpp_param: "MOD_OFFSET_PARAM"
