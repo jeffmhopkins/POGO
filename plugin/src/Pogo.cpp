@@ -224,8 +224,9 @@ struct Pogo : Module {
 		configParam(BP_FREQ_ATT_PARAM, -1.f, 1.f, 0.f, "BP Offset CV Depth");
 		configParam(BP_TILT_ATT_PARAM, -1.f, 1.f, 0.f, "BP Tilt CV Depth");
 
-		// BP1
-		configParam<FormantFreqQuantity>(BP1_FREQ_PARAM,  -5.f, 5.f, 0.f, "BP1 Freq")->fref = 200.f;
+		// BP1/2/3 — all sweep 40 Hz–4 kHz (F_REF=400 Hz, ±log2(10) V/oct)
+		const float bpR = std::log2(10.f); // 3.322: 400×2^±bpR = [40 Hz, 4 kHz]
+		configParam<FormantFreqQuantity>(BP1_FREQ_PARAM,  -bpR, bpR, 0.f, "BP1 Freq")->fref = 400.f;
 		configParam(BP1_FOCUS_PARAM,  0.f, 1.f, 0.f,   "BP1 Focus");
 		configParam(BP1_DIST_PARAM,   0.f, 1.f, 0.20f, "BP1 Drive");
 		configParam(BP1_FREQ_ATT_PARAM,  -1.f, 1.f, 0.f, "BP1 Freq CV Depth");
@@ -233,7 +234,7 @@ struct Pogo : Module {
 		configParam(BP1_DIST_ATT_PARAM,  -1.f, 1.f, 0.f, "BP1 Drive CV Depth");
 
 		// BP2
-		configParam<FormantFreqQuantity>(BP2_FREQ_PARAM,  -5.f, 5.f, 0.f, "BP2 Freq")->fref = 1500.f;
+		configParam<FormantFreqQuantity>(BP2_FREQ_PARAM,  -bpR, bpR, 0.f, "BP2 Freq")->fref = 400.f;
 		configParam(BP2_FOCUS_PARAM,  0.f, 1.f, 0.f,   "BP2 Focus");
 		configParam(BP2_DIST_PARAM,   0.f, 1.f, 0.20f, "BP2 Drive");
 		configParam(BP2_FREQ_ATT_PARAM,  -1.f, 1.f, 0.f, "BP2 Freq CV Depth");
@@ -241,7 +242,7 @@ struct Pogo : Module {
 		configParam(BP2_DIST_ATT_PARAM,  -1.f, 1.f, 0.f, "BP2 Drive CV Depth");
 
 		// BP3
-		configParam<FormantFreqQuantity>(BP3_FREQ_PARAM,  -5.f, 5.f, 0.f, "BP3 Freq")->fref = 6000.f;
+		configParam<FormantFreqQuantity>(BP3_FREQ_PARAM,  -bpR, bpR, 0.f, "BP3 Freq")->fref = 400.f;
 		configParam(BP3_FOCUS_PARAM,  0.f, 1.f, 0.f,   "BP3 Focus");
 		configParam(BP3_DIST_PARAM,   0.f, 1.f, 0.20f, "BP3 Drive");
 		configParam(BP3_FREQ_ATT_PARAM,  -1.f, 1.f, 0.f, "BP3 Freq CV Depth");

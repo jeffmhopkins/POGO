@@ -36,7 +36,7 @@ struct TripleBandpass {
 	// polarity applied externally in Pogo.cpp
 	float process(float x, float bp3x, float freqV[3], float qParam[3],
 	              float widthOffset, float sampleRate) {
-		constexpr float F_REF[3] = {200.f, 1500.f, 6000.f};
+		constexpr float F_REF[3] = {400.f, 400.f, 400.f};
 		float sum = 0.f;
 		for (int i = 0; i < 3; i++) {
 			float f0 = F_REF[i] * std::pow(2.f, freqV[i] + widthOffset);
