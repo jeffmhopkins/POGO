@@ -173,12 +173,12 @@ zones:
         font_size: 1.8
         cpp_id: "R_IN_INPUT"
       - id: GAIN_MAIN
-        type: switch_H2
+        type: eg_2pos
         cx: 28.575
         cy: 17
         label_above: "MAIN"
         pos_labels: ["1×", "5×"]
-        pos_xs: [26.325, 30.825]   # raw cx±2.25 (slug centers); x_offset applied at render
+        pos_xs: [23.775, 33.375]   # cx ± 4.8mm (EG1218 body half-length 5.8 minus 1mm margin)
         cpp_param: "GAIN_PARAM"
       - id: BP3_L
         type: jack_input
@@ -197,12 +197,12 @@ zones:
         font_size: 1.6
         cpp_id: "ALT_BP_R_INPUT"
       - id: GAIN_BP3
-        type: switch_H2
+        type: eg_2pos
         cx: 28.575
         cy: 31.5
         label_above: "BP3"
         pos_labels: ["1×", "5×"]
-        pos_xs: [26.325, 30.825]   # raw cx±2.25 (slug centers); x_offset applied at render
+        pos_xs: [23.775, 33.375]   # cx ± 4.8mm
         cpp_param: "ALT_GAIN_PARAM"
 
   # ── Section 0b: LFO ───────────────────────────────────────────────────────
@@ -255,10 +255,13 @@ zones:
         cpp_param: "LFO2_RATE_PARAM"
 
   # ── Section 0c: MOD BUS ───────────────────────────────────────────────────
-  # 3-column grid: col 0 = switches, col 1 = mod trimpots, col 2 = VCA trimpots.
-  # Row 1 (cy=83): SW1 | SCALE | VCA_AMT
-  # Row 2 (cy=96.34): SW2 | OFFSET | VCA_OFS
-  # Row 3 (cy=112): — | MOD_IN | VCA_IN   (jacks at 2.25HP pitch)
+  # 3-column grid: col 0 = single eg_3pos switch, col 1 = mod trimpots, col 2 = VCA trimpots.
+  # Single EG2301 at cy=89.5 — top (81.25mm) aligns with SCALE top (83.75-2.5=81.25mm) ✓
+  #                           — bottom (97.75mm) aligns with OFFSET bottom (95.25+2.5=97.75mm) ✓
+  # Row A (cy=83.75): — | SCALE | VCA_AMT
+  # Row SW (cy=89.5):  SW | — | —
+  # Row B (cy=95.25): — | OFFSET | VCA_OFS
+  # Row C (cy=112):   — | MOD_IN | VCA_IN
   - id: zone_mod
     label: "Zone 0c — MOD BUS"
     x_start: 0
@@ -266,43 +269,34 @@ zones:
     cols: 3
     components:
       - id: MOD_SRC_SW
-        type: switch_V3
+        type: eg_3pos
         col: 0
-        cy: 83.0
-        rotate: 180
+        cy: 89.5
         label: "MOD SRC"
+        label_below_y: 100.5
         cpp_param: "MOD_SRC_PARAM"
       - id: SCALE
         type: trimpot
         col: 1
-        cy: 83.0
-        rotate: 180
+        cy: 83.75
         label: "SCALE"
         cpp_param: "MOD_SCALE_PARAM"
       - id: VCA_AMT
         type: trimpot
         col: 2
-        cy: 83.0
+        cy: 83.75
         label: "VCA AMT"
         cpp_param: "VCA_AMT_PARAM"
-      - id: MOD_SRC_SW2
-        type: switch_V3
-        col: 0
-        cy: 96.34
-        rotate: 180
-        label: "MOD SRC"
-        cpp_param: "MOD_SRC2_PARAM"
       - id: OFFSET
         type: trimpot
         col: 1
-        cy: 96.34
-        rotate: 180
+        cy: 95.25
         label: "OFFSET"
         cpp_param: "MOD_OFFSET_PARAM"
       - id: VCA_OFS
         type: trimpot
         col: 2
-        cy: 96.34
+        cy: 95.25
         label: "VCA OFS"
         cpp_param: "VCA_OFS_PARAM"
       - id: MOD_IN
@@ -459,13 +453,11 @@ zones:
     components:
       # col0 cx=97.155  col1 cx=108.585  col2 cx=120.015
       - id: BP1_DIST_SW
-        type: switch_V3
+        type: eg_3pos
         cx: 96.0
         cy: 24.80
-        cy_body_top: 18.80
-        body_height: 12
         label_below: "DIST"
-        label_below_y: 33.5
+        label_below_y: 36.0
         cpp_param: "BP1_DIST_MODE_PARAM"
       - id: BP1_FREQ
         type: knob_xl
@@ -543,13 +535,11 @@ zones:
     components:
       # col0 cx=131.445  col1 cx=142.875  col2 cx=154.305
       - id: BP2_DIST_SW
-        type: switch_V3
+        type: eg_3pos
         cx: 130.29
         cy: 24.80
-        cy_body_top: 18.80
-        body_height: 12
         label_below: "DIST"
-        label_below_y: 33.5
+        label_below_y: 36.0
         cpp_param: "BP2_DIST_MODE_PARAM"
       - id: BP2_FREQ
         type: knob_xl
@@ -627,13 +617,11 @@ zones:
     components:
       # col0 cx=165.735  col1 cx=177.165  col2 cx=188.595
       - id: BP3_DIST_SW
-        type: switch_V3
+        type: eg_3pos
         cx: 164.58
         cy: 24.80
-        cy_body_top: 18.80
-        body_height: 12
         label_below: "DIST"
-        label_below_y: 33.5
+        label_below_y: 36.0
         cpp_param: "BP3_DIST_MODE_PARAM"
       - id: BP3_FREQ
         type: knob_xl

@@ -895,6 +895,29 @@ def _component_svg(comp: dict, rules: DesignRules, colors: dict) -> str:
             colors=colors,
         )
 
+    elif ctype == "eg_2pos":
+        ox = rules.x_offset
+        pos_xs = [px + ox for px in comp.get("pos_xs", [])]
+        return svg.svg_eg_slide_h(
+            cx=cx, cy=cy,
+            label_above=comp.get("label_above", comp.get("label", "")),
+            label_above_y=float(comp.get("label_above_y", cy - 3.5)),
+            pos_labels=comp.get("pos_labels", []),
+            pos_xs=pos_xs,
+            pos_y=float(comp.get("pos_y", cy + 4.0)),
+            colors=colors,
+        )
+
+    elif ctype == "eg_3pos":
+        return svg.svg_eg_slide_v(
+            cx=cx, cy=cy,
+            pos_labels=comp.get("pos_labels", []),
+            pos_ys=comp.get("pos_ys", []),
+            label_below=comp.get("label_below", comp.get("label", "")),
+            label_below_y=float(comp.get("label_below_y", cy + 11.25)),
+            colors=colors,
+        )
+
     elif ctype == "led":
         return svg.svg_led(cx, cy, colors,
                            fill=comp.get("led_fill", ""),

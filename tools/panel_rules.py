@@ -38,6 +38,22 @@ SWITCH_V3_CY      = (-2.0, -6.4, 2.0, 6.4)
 # Wider than toggle switch_H2 — needs its own courtyard (not SWITCH_CY ±4.5mm)
 SWITCH_H3_CY = (-6.0, -3.5, 6.0, 7.5)
 
+# E-Switch EG1218 — 2-position horizontal slide (replaces switch_H2 in new build)
+# Body: 11.6 × 4.0mm; courtyard from DigiKey kicad_mod: 12.1 × 4.5mm (0.25mm margin)
+# Panel: rectangular slot ~3mm tall; half-height used for keepout check
+EG1218_CY      = (-6.05, -2.25, 6.05, 2.25)
+EG1218_PANEL_H = 1.5    # panel slot half-height
+
+# E-Switch EG2301 — 3-position vertical slide (replaces switch_V3 in new build)
+# Body: 16 × 6.5mm mounted vertically (long axis = y); courtyard: 16.5 × 7.0mm (0.25mm margin)
+# Panel: rectangular slot ~6.5mm wide; half-width and half-height used for keepout
+EG2301_V_CY      = (-3.5, -8.25, 3.5, 8.25)
+EG2301_V_PANEL_W = 3.25   # panel slot half-width (x-extent for keepout)
+EG2301_V_PANEL_H = 8.25   # panel slot half-height (y-extent for keepout)
+
+EG_2POS_TYPES = {"eg_2pos"}
+EG_3POS_TYPES = {"eg_3pos"}
+
 # 3mm LED THT
 # Panel hole: 3.2mm Ø → r=1.6mm
 # PCB courtyard: relative to LED body centre
@@ -60,10 +76,10 @@ SLIDER_V45_CY     = (-7.0, -28.5, 7.0, 28.5)
 SLIDER_V45_PANEL_W = 1.5   # panel slot half-width (for MH clearance overlay)
 SLIDER_TYPES = {"slider_V45"}
 
-H_SWITCH_TYPES = {"switch_H2", "switch_H3"}
+H_SWITCH_TYPES  = {"switch_H2", "switch_H3"}
 V3_SWITCH_TYPES = {"switch_V3"}
-SWITCH_TYPES = H_SWITCH_TYPES | V3_SWITCH_TYPES
-LED_TYPES    = {"led", "led_labeled"}
+SWITCH_TYPES    = H_SWITCH_TYPES | V3_SWITCH_TYPES | EG_2POS_TYPES | EG_3POS_TYPES
+LED_TYPES       = {"led", "led_labeled"}
 
 # Minimum clearance from PCB courtyard edge to mounting hole centre (M3, r≈3.5mm)
 MOUNTING_HOLE_CLEARANCE_MM = 3.5
@@ -127,6 +143,10 @@ def _get_courtyard(
         base = SWITCH_CY
     elif ctype in LED_TYPES:
         base = LED_CY
+    elif ctype in EG_2POS_TYPES:
+        base = EG1218_CY
+    elif ctype in EG_3POS_TYPES:
+        base = EG2301_V_CY
     if base is None:
         return None
     x1, y1, x2, y2 = _rotate_rect(base, rotate)
@@ -158,7 +178,12 @@ def _rect_min_gap(r1: tuple, r2: tuple) -> float:
 
 
 def get_panel_r(ctype: str, rules: Any) -> float:
-    """Return the panel-face nut / hole radius (mm) for a component type."""
+    """Return the panel-face nut / hole radius (mm) for a component type.
+
+    For slide switches (EG series) this returns 0 — they have rectangular slots,
+    not circular holes, so panel-face clearance is checked via PCB courtyard overlap
+    rather than circular nut clearance.
+    """
     if ctype in JACK_TYPES:
         return rules.jack_nut_r
     if ctype == "trimpot":
@@ -173,6 +198,7 @@ def get_panel_r(ctype: str, rules: Any) -> float:
         return SWITCH_PANEL_R
     if ctype in LED_TYPES:
         return LED_PANEL_R
+    # EG_2POS_TYPES and EG_3POS_TYPES: rectangular slot, no circular nut radius
     return 0.0
 
 
@@ -353,6 +379,34 @@ class DesignRules:
                     out.append(
                         f"[NUT KEEPOUT] LED '{label}' at cy={cy:.2f}: hole bottom={bot_edge:.2f}"
                         f" exceeds BOT keepout start ({self.bot_keepout_start:.2f})"
+                    )
+            elif ctype in EG_2POS_TYPES:
+                # Rectangular slot: check y-extent only (±EG1218_PANEL_H)
+                top_edge = cy - EG1218_PANEL_H
+                bot_edge = cy + EG1218_PANEL_H
+                if top_edge < self.top_keepout:
+                    out.append(
+                        f"[NUT KEEPOUT] EG2POS '{label}' at cy={cy:.2f}: slot top={top_edge:.2f}"
+                        f" encroaches TOP keepout ({self.top_keepout:.2f})"
+                    )
+                if bot_edge > self.bot_keepout_start:
+                    out.append(
+                        f"[NUT KEEPOUT] EG2POS '{label}' at cy={cy:.2f}: slot bottom={bot_edge:.2f}"
+                        f" exceeds BOT keepout ({self.bot_keepout_start:.2f})"
+                    )
+            elif ctype in EG_3POS_TYPES:
+                # Rectangular slot: check full y-extent of actuator travel (±EG2301_V_PANEL_H)
+                top_edge = cy - EG2301_V_PANEL_H
+                bot_edge = cy + EG2301_V_PANEL_H
+                if top_edge < self.top_keepout:
+                    out.append(
+                        f"[NUT KEEPOUT] EG3POS '{label}' at cy={cy:.2f}: slot top={top_edge:.2f}"
+                        f" encroaches TOP keepout ({self.top_keepout:.2f})"
+                    )
+                if bot_edge > self.bot_keepout_start:
+                    out.append(
+                        f"[NUT KEEPOUT] EG3POS '{label}' at cy={cy:.2f}: slot bottom={bot_edge:.2f}"
+                        f" exceeds BOT keepout ({self.bot_keepout_start:.2f})"
                     )
         return out
 

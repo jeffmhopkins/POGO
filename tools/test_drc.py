@@ -29,6 +29,8 @@ from panel_rules import (
     TRIMPOT_CY,
     SWITCH_CY,
     SWITCH_V3_CY,
+    EG1218_CY,
+    EG2301_V_CY,
     LED_CY,
     SLIDER_V45_CY,
     DesignRules,
@@ -680,6 +682,7 @@ class TestGetCourtyardUnknownType:
             "jack_input", "jack_output",
             "trimpot", "knob_medium", "knob_large", "knob_xl",
             "switch_H2", "switch_H3", "switch_V3",
+            "eg_2pos", "eg_3pos",
             "led", "led_labeled",
             "slider_V45",
         ]
@@ -748,4 +751,25 @@ class TestDiscrepancySummary:
         assert blind <= 0, (
             f"Expected blind <= 0 (no blind spot), got {blind:.4f}mm. "
             f"cy_sum={cy_sum:.3f}mm must exceed real_sum={real_sum:.3f}mm."
+        )
+
+    def test_eg1218_cy_extents(self):
+        """EG1218 courtyard from DigiKey kicad_mod: 12.1 × 4.5mm → ±6.05mm × ±2.25mm."""
+        assert EG1218_CY == (-6.05, -2.25, 6.05, 2.25), (
+            f"EG1218_CY changed: got {EG1218_CY}. Update if footprint source changes."
+        )
+
+    def test_eg2301_v_cy_extents(self):
+        """EG2301 vertical courtyard: body 16×6.5mm + 0.25mm margin → ±8.25mm × ±3.5mm."""
+        assert EG2301_V_CY == (-3.5, -8.25, 3.5, 8.25), (
+            f"EG2301_V_CY changed: got {EG2301_V_CY}. Update if body dimensions confirmed otherwise."
+        )
+
+    def test_eg2301_v_courtyard_exceeds_eg1218_in_y(self):
+        """EG2301 vertical must be taller than EG1218 horizontal (16mm > 4mm body)."""
+        assert EG2301_V_CY[3] > EG1218_CY[3], (
+            f"EG2301_V y-half ({EG2301_V_CY[3]}) should exceed EG1218 y-half ({EG1218_CY[3]})"
+        )
+        assert EG1218_CY[2] > EG2301_V_CY[2], (
+            f"EG1218 x-half ({EG1218_CY[2]}) should exceed EG2301_V x-half ({EG2301_V_CY[2]})"
         )
