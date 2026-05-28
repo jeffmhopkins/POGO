@@ -417,11 +417,11 @@ struct Pogo : Module {
 			clamp(params[BP2_FOCUS_PARAM].getValue(), 0.f, 1.f),
 			clamp(params[BP3_FOCUS_PARAM].getValue(), 0.f, 1.f),
 		};
-		// Per-group tilt CV; added to global bpTiltCv so each band has independent stereo spread
+		// Per-group tilt CV; scaled so ±5V at full att = ±1.1 oct; added to global bpTiltCv
 		float groupTiltV[3] = {
-			modDest(BP1_TILT_INPUT, BP1_TILT_ATT_PARAM),
-			modDest(BP2_TILT_INPUT, BP2_TILT_ATT_PARAM),
-			modDest(BP3_TILT_INPUT, BP3_TILT_ATT_PARAM),
+			modDest(BP1_TILT_INPUT, BP1_TILT_ATT_PARAM) * 0.22f,
+			modDest(BP2_TILT_INPUT, BP2_TILT_ATT_PARAM) * 0.22f,
+			modDest(BP3_TILT_INPUT, BP3_TILT_ATT_PARAM) * 0.22f,
 		};
 		float driveCv[3] = {
 			clamp(params[BP1_DIST_PARAM].getValue() + modDest(BP1_DIST_INPUT, BP1_DIST_ATT_PARAM), 0.f, 1.f),
