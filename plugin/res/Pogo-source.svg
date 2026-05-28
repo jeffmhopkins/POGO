@@ -229,12 +229,12 @@
   <circle cx="114.49" cy="24.8" r="9.0" fill="#1a1a1a" stroke="#555" stroke-width="0.7"/>
   <line x1="114.49" y1="24.8" x2="114.49" y2="15.8" stroke="#aaa" stroke-width="0.8"/>
   <text x="114.49" y="36.8" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
-  <circle cx="101.345" cy="49.08" r="7.0" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
-  <line x1="101.345" y1="49.08" x2="101.345" y2="42.08" stroke="#aaa" stroke-width="0.7"/>
-  <text x="101.345" y="59.1" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">FOCUS</text>
-  <circle cx="119.635" cy="64.54" r="7.0" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
-  <line x1="119.635" y1="64.54" x2="119.635" y2="57.540000000000006" stroke="#aaa" stroke-width="0.7"/>
-  <text x="119.635" y="74.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">TILT</text>
+  <circle cx="101.345" cy="47.69" r="7.0" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="101.345" y1="47.69" x2="101.345" y2="40.69" stroke="#aaa" stroke-width="0.7"/>
+  <text x="101.345" y="57.7" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">FOCUS</text>
+  <circle cx="119.635" cy="63.85" r="7.0" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="119.635" y1="63.85" x2="119.635" y2="56.85" stroke="#aaa" stroke-width="0.7"/>
+  <text x="119.635" y="73.8" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">TILT</text>
   <circle cx="101.345" cy="80.0" r="7.0" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
   <line x1="101.345" y1="80.0" x2="101.345" y2="73.0" stroke="#aaa" stroke-width="0.7"/>
   <text x="101.345" y="90.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">DIST</text>
