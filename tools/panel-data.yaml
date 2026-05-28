@@ -511,9 +511,10 @@ zones:
         label: "DIST"
         cpp_param: "BP1_DIST_PARAM"
       - id: BP1_CLIP_LED
-        type: led
+        type: led_labeled
         cx: 116.585
         cy: 80.00
+        label: "CLIP"
         led_fill: "#441111"
         led_stroke: "#cc2222"
         cpp_id: "BP1_CLIP_LIGHT"
