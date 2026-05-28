@@ -546,7 +546,7 @@ struct PogoWidget : ModuleWidget {
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(87.630f, 112.00f)), module, Pogo::BP_TILT_INPUT));
 
 		// ── Zone — BP 1 ────────────────────────────────────────────────
-		addParam(createParamCentered<RoundHugeBlackKnob>(mm2px(Vec(111.99f,  24.80f)), module, Pogo::BP1_FREQ_PARAM));
+		addParam(createParamCentered<RoundHugeBlackKnob>(mm2px(Vec(114.49f,  24.80f)), module, Pogo::BP1_FREQ_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(101.345f, 49.08f)), module, Pogo::BP1_FOCUS_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(119.635f, 64.54f)), module, Pogo::BP1_TILT_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(101.345f, 80.00f)), module, Pogo::BP1_DIST_PARAM));
