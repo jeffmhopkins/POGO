@@ -29,9 +29,14 @@ SWITCH_CY      = (-4.5, -3.5, 4.5, 7.5)
 
 # 3-position vertical slide switch (e.g. Nidec Copal CAS-120R3)
 # Panel slot: ~1.5mm × 8mm for actuator → panel_r = 1.0mm (half slot width)
-# PCB courtyard: body ~4mm wide × 10mm tall, symmetric about centre
+# PCB courtyard: CAS-120R3 body is 12.7mm tall (±6.35mm) + 0.05mm margin = ±6.4mm
+# Width: body 2.7mm wide but slug protrudes to ±2.0mm → use ±2.0mm
 SWITCH_V3_PANEL_R = 1.0
-SWITCH_V3_CY      = (-2.0, -5.0, 2.0, 5.0)
+SWITCH_V3_CY      = (-2.0, -6.4, 2.0, 6.4)
+
+# 3-position horizontal slide switch (body 12mm wide × 2.4mm tall)
+# Wider than toggle switch_H2 — needs its own courtyard (not SWITCH_CY ±4.5mm)
+SWITCH_H3_CY = (-6.0, -3.5, 6.0, 7.5)
 
 # 3mm LED THT
 # Panel hole: 3.2mm Ø → r=1.6mm
@@ -116,7 +121,9 @@ def _get_courtyard(
         base = SLIDER_V45_CY
     elif ctype in V3_SWITCH_TYPES:
         base = SWITCH_V3_CY
-    elif ctype in H_SWITCH_TYPES:
+    elif ctype == "switch_H3":
+        base = SWITCH_H3_CY
+    elif ctype == "switch_H2":
         base = SWITCH_CY
     elif ctype in LED_TYPES:
         base = LED_CY
@@ -318,7 +325,10 @@ class DesignRules:
                 v = self._pot_keepout_violation(cx, cy, label)
                 if v:
                     out.append(f"[NUT KEEPOUT] {v}")
-            elif ctype in SWITCH_TYPES:
+            elif ctype in V3_SWITCH_TYPES:
+                top_edge = cy - SWITCH_V3_PANEL_R
+                bot_edge = cy + SWITCH_V3_PANEL_R
+            elif ctype in H_SWITCH_TYPES:
                 top_edge = cy - SWITCH_PANEL_R
                 bot_edge = cy + SWITCH_PANEL_R
                 if top_edge < self.top_keepout:
