@@ -86,6 +86,8 @@
     .comp.sel .hit { stroke: #00d4ff; stroke-width: 0.4; fill: rgba(0,212,255,0.08); }
     .comp.violation .hit { stroke: #ff4444; stroke-width: 0.4; fill: rgba(255,68,68,0.12); }
     .hit { fill: transparent; }
+    #layer-kicad g[data-cid] { cursor: move; }
+    #layer-kicad g.violation * { stroke: #ff4444 !important; }
     .sep-handle { fill: #00d4ff; stroke: #0d0d0d; stroke-width: 0.3; cursor: pointer; }
     .sep-handle:hover { fill: #7fe7ff; }
 
@@ -180,7 +182,7 @@
     snapOriginId: null,      // component/divider id the snap grid counts from (null = panel 0,0)
     anchor: null,            // active anchor/align pick: {axis:'x'|'y'|'both', offX, offY, unit}
     armedAddType: null,      // palette type queued for click-to-place (unused: we add immediately)
-    layers: { panel: true, keepout: false, nuts: false, pcb: false, kicad: false },
+    layers: { panel: true, keepout: false, kicad: false },
   };
   const HP_MM = 5.08;
   const undoStack = [];
@@ -702,30 +704,15 @@
       `<line x1="0" y1="${kot}" x2="${W}" y2="${kot}" stroke="#ff4444" stroke-width="0.35" stroke-dasharray="1 0.7"/>` +
       `<line x1="0" y1="${kob}" x2="${W}" y2="${kob}" stroke="#ff4444" stroke-width="0.35" stroke-dasharray="1 0.7"/>`;
 
-    let nuts = "", pcb = "", kicad = "";
-    const nutColor = { jack: ["rgba(255,204,0,0.35)", "#ffcc00"], pot: ["rgba(100,180,255,0.35)", "#64b4ff"], switch: ["rgba(220,100,255,0.35)", "#dc64ff"], led: ["rgba(100,220,100,0.35)", "#64dc64"] };
-    const pcbColor = { jack: ["rgba(255,204,0,0.15)", "#ffcc00"], pot: ["rgba(100,180,255,0.15)", "#64b4ff"], switch: ["rgba(220,100,255,0.15)", "#dc64ff"], led: ["rgba(100,220,100,0.15)", "#64dc64"], slider: ["rgba(0,210,180,0.15)", "#00d4b4"] };
-    function cat(t) {
-      if (C.type_sets.jack.includes(t)) return "jack";
-      if (C.type_sets.pot.includes(t)) return "pot";
-      if (t.startsWith("switch") || t.startsWith("eg_")) return "switch";
-      if (C.type_sets.led.includes(t)) return "led";
-      if (C.type_sets.slider.includes(t)) return "slider";
-      return null;
-    }
+    let kicad = "";
     for (const { c, z } of comps) {
       const { cx, cy } = resolve(c, z);
       const rot = Number(c.rotate || 0);
-      const k = cat(c.type);
-      const r = panelR(c.type);
-      if (r > 0 && nutColor[k]) nuts += `<circle data-cid="${esc(c.id)}" cx="${f3(cx)}" cy="${f3(cy)}" r="${r}" fill="${nutColor[k][0]}" stroke="${nutColor[k][1]}" stroke-width="0.25"/>`;
-      else if (r > 0) nuts += `<circle data-cid="${esc(c.id)}" cx="${f3(cx)}" cy="${f3(cy)}" r="${r}" fill="rgba(180,180,180,0.3)" stroke="#aaa" stroke-width="0.25"/>`;
-      const rect = courtyard(cx, cy, c.type, rot);
-      if (rect && pcbColor[k]) pcb += `<rect data-cid="${esc(c.id)}" x="${f3(rect[0])}" y="${f3(rect[1])}" width="${f3(rect[2] - rect[0])}" height="${f3(rect[3] - rect[1])}" fill="${pcbColor[k][0]}" stroke="${pcbColor[k][1]}" stroke-width="0.2" stroke-dasharray="0.8 0.4"/>`;
       const tpl = KT[c.type];
       if (tpl) {
         const tr = rot ? `translate(${f3(cx)},${f3(cy)}) rotate(${rot})` : `translate(${f3(cx)},${f3(cy)})`;
-        kicad += `<g data-cid="${esc(c.id)}" data-rot="${rot}" transform="${tr}">${tpl}` +
+        const badCls = badIds && badIds.has(c.id) ? " violation" : "";
+        kicad += `<g class="${badCls}" data-cid="${esc(c.id)}" data-rot="${rot}" transform="${tr}">${tpl}` +
           `<line x1="-1.8" y1="0" x2="1.8" y2="0" stroke="#00ff88" stroke-width="0.18"/><line x1="0" y1="-1.8" x2="0" y2="1.8" stroke="#00ff88" stroke-width="0.18"/></g>`;
       }
     }
@@ -735,8 +722,6 @@
       `<svg xmlns="http://www.w3.org/2000/svg" width="${(W * SCALE).toFixed(0)}" height="${(H * SCALE).toFixed(0)}" viewBox="0 0 ${W} ${H}">` +
       `<g id="layer-panel"${dsp(UI.layers.panel)}>${panel}</g>` +
       `<g id="layer-keepout"${dsp(UI.layers.keepout)}>${keepout}</g>` +
-      `<g id="layer-nuts"${dsp(UI.layers.nuts)}>${nuts}</g>` +
-      `<g id="layer-pcb"${dsp(UI.layers.pcb)}>${pcb}</g>` +
       `<g id="layer-kicad"${dsp(UI.layers.kicad)}>${kicad}</g>` +
       `</svg>`;
     return svg;
@@ -765,9 +750,6 @@
   }
   function setCompTransform(id, cx, cy) {
     svgEl.querySelectorAll(`[data-cid="${cssEsc(id)}"]`).forEach((g) => {
-      if (g.tagName === "circle" && g.classList.contains("hit")) return;
-      if (g.tagName === "circle") { g.setAttribute("cx", f3(cx)); g.setAttribute("cy", f3(cy)); return; }
-      if (g.tagName === "rect") return; // courtyard rects: refreshed on full render at drop
       const rot = g.dataset.rot;
       g.setAttribute("transform", rot && rot !== "0" ? `translate(${f3(cx)},${f3(cy)}) rotate(${rot})` : `translate(${f3(cx)},${f3(cy)})`);
     });
@@ -791,7 +773,7 @@
       const ctCls = g.courtyard != null && g.courtyard < 0 ? "bad" : "";
       h += `<br>↔ <b>${esc(n.c.id || "?")}</b>  c-c ${f2(g.dist)}mm` +
         `  ·  nut <span class="${nutCls}">${fmtG(g.nut)}</span>` +
-        `  ·  courtyard <span class="${ctCls}">${fmtG(g.courtyard)}</span>`;
+        `  ·  footprint <span class="${ctCls}">${fmtG(g.courtyard)}</span>`;
     }
     el.innerHTML = h;
   }
@@ -871,6 +853,7 @@
         // live DRC: recolour violators against the dragged position (no model mutation)
         const bad = runDRC({ id: drag.id, cx: p.x, cy: p.y }).badIds;
         svgEl.querySelectorAll(".comp").forEach((gg) => gg.classList.toggle("violation", bad.has(gg.dataset.cid)));
+        svgEl.querySelectorAll("#layer-kicad g[data-cid]").forEach((gg) => gg.classList.toggle("violation", bad.has(gg.dataset.cid)));
         showHUD(drag.id, p.x, p.y);
       });
       const end = () => {
@@ -882,6 +865,41 @@
       };
       g.addEventListener("pointerup", end);
       g.addEventListener("pointercancel", end);
+    });
+
+    // KiCad footprint layer: draggable when visible (same drag state as .comp)
+    svgEl.querySelectorAll("#layer-kicad g[data-cid]").forEach((kg) => {
+      kg.addEventListener("pointerdown", (e) => {
+        const id = kg.dataset.cid;
+        if (panActive()) return;
+        e.preventDefault(); e.stopPropagation();
+        if (UI.tool === "anchor") { applyAnchor(id); return; }
+        UI.selId = id; UI.selZone = null; renderSelectionOnly();
+        const m = clientToMm(e);
+        const f = findComp(id); const { cx, cy } = resolve(f.c, f.z);
+        drag = { id, dx: m.x - cx, dy: m.y - cy, moved: false };
+        kg.setPointerCapture(e.pointerId);
+      });
+      kg.addEventListener("pointermove", (e) => {
+        if (!drag || drag.id !== kg.dataset.cid) return;
+        const m = clientToMm(e);
+        const p = snapPos(m.x - drag.dx, m.y - drag.dy);
+        drag.nx = p.x; drag.ny = p.y; drag.moved = true;
+        setCompTransform(drag.id, p.x, p.y);
+        const bad = runDRC({ id: drag.id, cx: p.x, cy: p.y }).badIds;
+        svgEl.querySelectorAll(".comp").forEach((gg) => gg.classList.toggle("violation", bad.has(gg.dataset.cid)));
+        svgEl.querySelectorAll("#layer-kicad g[data-cid]").forEach((gg) => gg.classList.toggle("violation", bad.has(gg.dataset.cid)));
+        showHUD(drag.id, p.x, p.y);
+      });
+      const kEnd = () => {
+        if (!drag || drag.id !== kg.dataset.cid) return;
+        hideHUD();
+        if (drag.moved && drag.nx != null) moveCompTo(drag.id, drag.nx, drag.ny);
+        else { drag = null; renderRight(); }
+        drag = null;
+      };
+      kg.addEventListener("pointerup", kEnd);
+      kg.addEventListener("pointercancel", kEnd);
     });
 
     // Separator endpoint handles
@@ -1244,7 +1262,7 @@
       `<button id="recenter" title="Recompute x_offset to centre content">Recenter</button>` +
       `<button id="panel-settings">Panel…</button></div>` +
       `<div class="sep"></div>` +
-      `<div class="group">` + lyr("panel", "Panel") + lyr("keepout", "Keep-Out") + lyr("nuts", "Nuts") + lyr("pcb", "Courtyards") + lyr("kicad", "KiCad") + `</div>` +
+      `<div class="group">` + lyr("panel", "Panel") + lyr("keepout", "Keep-Out") + lyr("kicad", "KiCad") + `</div>` +
       `<div class="sep"></div>` +
       `<div class="group"><label class="lyr"><input type="checkbox" id="snap" ${UI.snap ? "checked" : ""}> Snap</label>` +
       `<input type="number" id="snapVal" step="0.05" min="0.05" value="${UI.snapVal}" style="width:54px">` +
