@@ -882,15 +882,16 @@ def _component_svg(comp: dict, rules: DesignRules, colors: dict) -> str:
         )
 
     elif ctype == "switch_V3":
+        body_height = float(comp.get("body_height", 12))
         return svg.svg_switch_V3(
             cx=cx,
-            cy_body_top=float(comp.get("cy_body_top", cy)),
-            body_height=float(comp.get("body_height", 12)),
+            cy_body_top=float(comp.get("cy_body_top", cy - body_height / 2)),
+            body_height=body_height,
             slug_y_offset=float(comp.get("slug_y_offset", 4.25)),
             pos_labels=comp.get("pos_labels", []),
             pos_ys=comp.get("pos_ys", []),
-            label_below=comp.get("label_below", ""),
-            label_below_y=float(comp.get("label_below_y", cy + 15)),
+            label_below=comp.get("label_below", comp.get("label", "")),
+            label_below_y=float(comp.get("label_below_y", cy + body_height / 2 + 3)),
             colors=colors,
         )
 

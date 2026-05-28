@@ -148,9 +148,9 @@
   <circle cx="7.62" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="7.62" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
   <text x="7.62" y="119.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">MOD IN</text>
-  <rect x="17.85" y="112.0" width="2.4" height="12.0" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
-  <rect x="17.65" y="116.25" width="2.8" height="3.5" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
-  <text x="19.05" y="127.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <rect x="17.85" y="106.0" width="2.4" height="12.0" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
+  <rect x="17.65" y="110.25" width="2.8" height="3.5" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
+  <text x="19.05" y="121.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">LFO1·LFO2·ENV</text>
   <circle cx="30.48" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="30.48" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
   <text x="30.48" y="119.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">VCA IN</text>
