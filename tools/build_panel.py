@@ -812,7 +812,7 @@ def _component_svg(comp: dict, rules: DesignRules, colors: dict) -> str:
     if ctype == "jack_input":
         rect_w = comp.get("rect_w")
         return svg.svg_jack(cx, cy, label, "input", rules, colors, font_size=font_size,
-                            rect_w=rect_w)
+                            rect_w=rect_w, label_border=bool(comp.get("label_border", False)))
 
     elif ctype == "jack_output":
         rect_w = comp.get("rect_w")
@@ -834,7 +834,7 @@ def _component_svg(comp: dict, rules: DesignRules, colors: dict) -> str:
             ]
             return "\n".join(parts)
         return svg.svg_jack(cx, cy, label, "output", rules, colors, font_size=font_size,
-                            rect_w=rect_w)
+                            rect_w=rect_w, label_border=bool(comp.get("label_border", False)))
 
     elif ctype == "trimpot":
         tp_label       = comp.get("label", "")
@@ -933,7 +933,9 @@ def _component_svg(comp: dict, rules: DesignRules, colors: dict) -> str:
         return svg.svg_led_labeled(cx, cy, lbl, lbl_fill, rules, colors,
                                    fill=comp.get("led_fill", ""),
                                    stroke=comp.get("led_stroke", ""),
-                                   label_dy=lbl_dy)
+                                   label_dy=lbl_dy,
+                                   label_border=bool(comp.get("label_border", False)),
+                                   rect_w=comp.get("rect_w"))
 
     return ""
 

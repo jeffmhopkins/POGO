@@ -56,6 +56,9 @@
     .tree-zone { margin-bottom: 6px; }
     .tree-zone > .zname { color: #6fb8c8; cursor: pointer; padding: 2px 0; font-weight: bold; }
     .tree-zone > .zname:hover { color: #00d4ff; }
+    .tree-zone > .zname.sel { color: #7fe7ff; background: #06303a; border-radius: 3px; }
+    button:disabled { opacity: .4; cursor: not-allowed; }
+    button:disabled:hover { background: #1e1e1e; border-color: #3a3a3a; color: #ccc; }
     .tree-comp { padding: 2px 6px 2px 16px; cursor: pointer; border-radius: 3px;
                  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .tree-comp:hover { background: #1e1e1e; }
@@ -76,6 +79,8 @@
     .comp.sel .hit { stroke: #00d4ff; stroke-width: 0.4; fill: rgba(0,212,255,0.08); }
     .comp.violation .hit { stroke: #ff4444; stroke-width: 0.4; fill: rgba(255,68,68,0.12); }
     .hit { fill: transparent; }
+    .sep-handle { fill: #00d4ff; stroke: #0d0d0d; stroke-width: 0.3; cursor: pointer; }
+    .sep-handle:hover { fill: #7fe7ff; }
 
     /* ── DRC panel ───────────────────────────────────────────────────────── */
     #drc-panel { margin-top: 12px; max-width: 1000px; }
@@ -84,6 +89,18 @@
     #drc-panel summary { cursor: pointer; font-weight: bold; }
     #drc-panel ul { margin: 6px 0 0; padding-left: 18px; }
     #drc-panel li { margin: 2px 0; line-height: 1.35; }
+    #drc-panel li.drc-item { cursor: pointer; }
+    #drc-panel li.drc-item:hover { background: #222; border-radius: 3px; }
+
+    /* ── Clearance HUD (drag) ────────────────────────────────────────────── */
+    #hud {
+      display: none; position: fixed; right: 16px; bottom: 16px; z-index: 40;
+      background: #0d0d0d; border: 1px solid #00d4ff; border-radius: 5px;
+      padding: 7px 11px; font-size: 12px; color: #cde; pointer-events: none;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.6); line-height: 1.5;
+    }
+    #hud b { color: #7fe7ff; }
+    #hud .bad { color: #ff6666; font-weight: bold; }
 
     /* ── Modal ───────────────────────────────────────────────────────────── */
     .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.75);

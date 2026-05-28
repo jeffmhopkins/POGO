@@ -54,13 +54,28 @@ in-browser DRC and footprint overlays match `build_panel.py` exactly (no drift).
 - **Top bar** — panel **HP** field + **Recenter** (recomputes `x_offset`), **Dividers…** modal
   (add/remove separators), **Export YAML**, and a live DRC pass/fail badge.
 
+**Interactions**
+
+- **Tools** (top bar): Select (drag to move), Pan (drag canvas; or hold **Space** anytime).
+- **Arrow keys** nudge the selection (Shift = bigger / 1 HP); **Del** deletes; **Ctrl+Z / Ctrl+Shift+Z** undo/redo; **Esc** cancels a pick / deselects.
+- **Snap**: toggle + step in **mm or HP** (e.g. 2.25 HP = the jack pitch). The grid origin can be panel 0,0 or "grid: SEL" (counts from the selected component).
+- **Align / place** (component inspector): "Align X/Y to…" then click a reference component; or "Place at offset" from panel 0,0 or a divider, in mm/HP.
+- **Sections** (click a zone name in the list): rename `id`/`label`, edit `x_start`, and move the whole section with the dx/dy buttons or arrow keys (mirrors `--shift`: `x_start` moves column-relative parts, explicit-`cx` parts shift with it).
+- **Add** drops the new component into the selected component's (or selected zone's) zone.
+- **Revert to build spec** resets a component to its original `panel-data.yaml` values (disabled for components added in the editor).
+- **Panel…** renames `meta.title` / `meta.brand`. EG slide switches (`eg_2pos`/`eg_3pos`) render and DRC-check exactly as the build tool does.
+- **Separators**: click a divider (or "edit" it from the Dividers modal) to select it; drag its end handles to change length, or the middle handle to move it sideways. The inspector edits style/endpoints/label. Editing patches only that separator's line — surrounding derivation comments are preserved.
+- **Label border**: jacks and `led_labeled` have a "label border" checkbox (+ width) in the inspector that draws the rounded-rect outline (the one output jacks use). It's an explicit `label_border` field rendered identically by the editor and the Python build.
+- **DRC panel** rows are clickable (jump-to-component); dragging shows a live clearance HUD (centre-to-centre / nut / courtyard gaps).
+
 **Notes**
 
 - Dragging a component off its column converts it from `col:`-relative to an explicit `cx:` on
   export (the `col:` line is replaced). Vertical moves write a numeric `cy:` (replacing any
   `_cv_jack_cy_` / `_att_cy_` template).
 - **Export preserves comments**: it line-patches the original YAML (mirroring
-  `_apply_yaml_patches`), only inserting/removing lines for adds, deletes, and divider changes.
+  `_apply_yaml_patches`), only inserting/removing lines for adds, deletes, divider changes,
+  zone `x_start`/`label`/`id` renames, and `meta` edits. A no-op export is byte-identical.
 
 **Workflow**
 

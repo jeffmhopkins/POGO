@@ -26,8 +26,13 @@ def svg_jack(
     colors: dict,
     font_size: float = 1.8,
     rect_w: float | None = None,
+    label_border: bool = False,
 ) -> str:
-    """Thonkiconn jack symbol: outer ring + centre dot + optional output rect + label."""
+    """Thonkiconn jack symbol: outer ring + centre dot + optional label border + label.
+
+    The rounded-rect label border is drawn when ``label_border`` is set (an explicit
+    per-component field), independent of input/output direction.
+    """
     label_y = cy + rules.jack_label_dy
     parts = []
 
@@ -42,8 +47,8 @@ def svg_jack(
         f'fill="{colors["jack_inner"]}" stroke="{colors["jack_inner_s"]}" stroke-width="0.4"/>'
     )
 
-    # output border rect
-    if io == "output":
+    # label border rect (opt-in via label_border)
+    if label_border:
         rw = rect_w if rect_w is not None else 7.0
         rx_val = rules.output_rect_rx
         ry = rules.rect_y(label_y)
@@ -161,14 +166,24 @@ def svg_led_labeled(
     fill: str = "",
     stroke: str = "",
     label_dy: float | None = None,
+    label_border: bool = False,
+    rect_w: float | None = None,
 ) -> str:
     dy = label_dy if label_dy is not None else rules.jack_label_dy
     label_y = cy + dy
-    parts = [
-        svg_led(cx, cy, colors, fill=fill, stroke=stroke),
+    parts = [svg_led(cx, cy, colors, fill=fill, stroke=stroke)]
+    if label_border:
+        rw = rect_w if rect_w is not None else 7.0
+        ry = rules.rect_y(label_y)
+        parts.append(
+            f'<rect x="{cx - rw / 2:.2f}" y="{ry:.2f}" width="{rw}" '
+            f'height="{rules.output_rect_h}" rx="{rules.output_rect_rx}" '
+            f'fill="none" stroke="{colors["output_rect_s"]}" stroke-width="0.3"/>'
+        )
+    parts.append(
         f'<text x="{cx}" y="{label_y:.1f}" fill="{label_fill}" '
-        f'{_FONT} font-size="{font_size}" text-anchor="middle">{label}</text>',
-    ]
+        f'{_FONT} font-size="{font_size}" text-anchor="middle">{label}</text>'
+    )
     return "\n".join(parts)
 
 

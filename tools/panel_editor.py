@@ -44,6 +44,8 @@ def _export_rules_constants(rules: DesignRules) -> dict[str, Any]:
             "SWITCH_H3_CY":   list(rules_mod.SWITCH_H3_CY),
             "LED_CY":         list(rules_mod.LED_CY),
             "SLIDER_V45_CY":  list(rules_mod.SLIDER_V45_CY),
+            "EG1218_CY":      list(rules_mod.EG1218_CY),
+            "EG2301_V_CY":    list(rules_mod.EG2301_V_CY),
         },
         # Panel-face nut / hole radii
         "panel_r": {
@@ -54,6 +56,11 @@ def _export_rules_constants(rules: DesignRules) -> dict[str, Any]:
             "switch_v3":   rules_mod.SWITCH_V3_PANEL_R,
             "led":         rules_mod.LED_PANEL_R,
             "slider":      rules_mod.SLIDER_V45_PANEL_W,
+        },
+        # EG slide-switch panel-slot half-heights (used by the slot keep-out check)
+        "eg_panel_h": {
+            "eg_2pos": rules_mod.EG1218_PANEL_H,
+            "eg_3pos": rules_mod.EG2301_V_PANEL_H,
         },
         # Visual knob-cap radii (panel face)
         "knob_cap_r": {"knob_medium": 4.5, "knob_large": 7.0, "knob_xl": 9.0},
@@ -66,6 +73,8 @@ def _export_rules_constants(rules: DesignRules) -> dict[str, Any]:
             "switch_h":  sorted(rules_mod.H_SWITCH_TYPES),
             "switch_v3": sorted(rules_mod.V3_SWITCH_TYPES),
             "led":       sorted(rules_mod.LED_TYPES),
+            "eg_2pos":   sorted(rules_mod.EG_2POS_TYPES),
+            "eg_3pos":   sorted(rules_mod.EG_3POS_TYPES),
         },
         "mounting_hole_clearance_mm": rules_mod.MOUNTING_HOLE_CLEARANCE_MM,
         # Design-rule scalars needed for resolution + keepout in JS
