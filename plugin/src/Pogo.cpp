@@ -527,14 +527,14 @@ struct PogoWidget : ModuleWidget {
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(64.77f, 112.00f)), module, Pogo::LP1_RES_INPUT));
 
 		// ── Zone — BP CONTROL ──────────────────────────────────────────
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(80.01f, 24.80f)), module, Pogo::BP_OFFSET_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(80.01f, 43.20f)), module, Pogo::BP_TILT_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(80.01f, 61.60f)), module, Pogo::BP_MIX_PARAM));
-		addParam(createParamCentered<PogoSwitchH3>(mm2px(Vec(80.01f, 80.00f)), module, Pogo::BP_DIST_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(74.295f, 100.00f)), module, Pogo::BP_FREQ_ATT_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(85.725f, 100.00f)), module, Pogo::BP_TILT_ATT_PARAM));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(74.295f, 112.00f)), module, Pogo::BP_FREQ_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(85.725f, 112.00f)), module, Pogo::BP_TILT_INPUT));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(81.915f, 24.80f)), module, Pogo::BP_OFFSET_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(81.915f, 43.20f)), module, Pogo::BP_TILT_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(81.915f, 61.60f)), module, Pogo::BP_MIX_PARAM));
+		addParam(createParamCentered<PogoSwitchH3>(mm2px(Vec(81.915f, 80.00f)), module, Pogo::BP_DIST_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(76.200f, 100.00f)), module, Pogo::BP_FREQ_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(87.630f, 100.00f)), module, Pogo::BP_TILT_ATT_PARAM));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(76.200f, 112.00f)), module, Pogo::BP_FREQ_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(87.630f, 112.00f)), module, Pogo::BP_TILT_INPUT));
 
 		// ── Zone — BP 1 ────────────────────────────────────────────────
 		addParam(createParamCentered<RoundHugeBlackKnob>(mm2px(Vec(110.49f, 24.80f)), module, Pogo::BP1_FREQ_PARAM));
