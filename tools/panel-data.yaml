@@ -215,6 +215,7 @@ zones:
     components:
       - id: LFO1_OUT
         type: jack_output
+        label_border: true
         col: 0
         cy: 51.5
         label: "LFO 1"
@@ -235,6 +236,7 @@ zones:
         cpp_param: "LFO1_RATE_PARAM"
       - id: LFO2_OUT
         type: jack_output
+        label_border: true
         col: 0
         cy: 65.9
         label: "LFO 2"
@@ -705,6 +707,7 @@ zones:
     components:
       - id: BP3_L_OUT
         type: jack_output
+        label_border: true
         col: 0
         cy: 17.0
         rotate: 180
@@ -713,6 +716,7 @@ zones:
         cpp_id: "BP3_L_OUTPUT"
       - id: BP3_R_OUT
         type: jack_output
+        label_border: true
         col: 1
         cy: 17.0
         rotate: 180
@@ -785,6 +789,7 @@ zones:
     components:
       - id: MAIN_L_OUT
         type: jack_output
+        label_border: true
         col: 0
         cy: 17.0
         rotate: 180
@@ -793,6 +798,7 @@ zones:
         cpp_id: "MAIN_L_OUTPUT"
       - id: MAIN_R_OUT
         type: jack_output
+        label_border: true
         col: 1
         cy: 17.0
         rotate: 180

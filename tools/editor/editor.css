@@ -79,6 +79,8 @@
     .comp.sel .hit { stroke: #00d4ff; stroke-width: 0.4; fill: rgba(0,212,255,0.08); }
     .comp.violation .hit { stroke: #ff4444; stroke-width: 0.4; fill: rgba(255,68,68,0.12); }
     .hit { fill: transparent; }
+    .sep-handle { fill: #00d4ff; stroke: #0d0d0d; stroke-width: 0.3; cursor: pointer; }
+    .sep-handle:hover { fill: #7fe7ff; }
 
     /* ── DRC panel ───────────────────────────────────────────────────────── */
     #drc-panel { margin-top: 12px; max-width: 1000px; }

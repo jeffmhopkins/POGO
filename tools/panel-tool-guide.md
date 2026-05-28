@@ -64,6 +64,9 @@ in-browser DRC and footprint overlays match `build_panel.py` exactly (no drift).
 - **Add** drops the new component into the selected component's (or selected zone's) zone.
 - **Revert to build spec** resets a component to its original `panel-data.yaml` values (disabled for components added in the editor).
 - **Panel…** renames `meta.title` / `meta.brand`. EG slide switches (`eg_2pos`/`eg_3pos`) render and DRC-check exactly as the build tool does.
+- **Separators**: click a divider (or "edit" it from the Dividers modal) to select it; drag its end handles to change length, or the middle handle to move it sideways. The inspector edits style/endpoints/label. Editing patches only that separator's line — surrounding derivation comments are preserved.
+- **Label border**: jacks and `led_labeled` have a "label border" checkbox (+ width) in the inspector that draws the rounded-rect outline (the one output jacks use). It's an explicit `label_border` field rendered identically by the editor and the Python build.
+- **DRC panel** rows are clickable (jump-to-component); dragging shows a live clearance HUD (centre-to-centre / nut / courtyard gaps).
 
 **Notes**
 

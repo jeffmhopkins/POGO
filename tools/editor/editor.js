@@ -29,6 +29,7 @@
     tool: "select",          // "select" | "pan" | "anchor"
     selId: null,             // selected component id
     selZone: null,           // selected zone id (mutually exclusive with selId)
+    selSep: null,            // selected separator index (mutually exclusive with selId/selZone)
     snap: false,
     snapUnit: "mm",          // "mm" | "hp"
     snapVal: 0.5,            // step in the chosen unit (e.g. 0.5 mm, 2.25 HP)
@@ -52,7 +53,7 @@
     Object.assign(D, o.d);
     DR.x_offset = o.xo;
   }
-  function undo() { if (!undoStack.length) return; redoStack.push(JSON.stringify({ d: D, xo: DR.x_offset })); applySnapshot(undoStack.pop()); UI.selId = UI.selId && findComp(UI.selId) ? UI.selId : null; render(); }
+  function undo() { if (!undoStack.length) return; redoStack.push(JSON.stringify({ d: D, xo: DR.x_offset })); applySnapshot(undoStack.pop()); UI.selId = UI.selId && findComp(UI.selId) ? UI.selId : null; if (UI.selSep != null && (!D.separators || UI.selSep >= D.separators.length)) UI.selSep = null; render(); }
   function redo() { if (!redoStack.length) return; undoStack.push(JSON.stringify({ d: D, xo: DR.x_offset })); applySnapshot(redoStack.pop()); render(); }
 
   // ── Small helpers ────────────────────────────────────────────────────────────
@@ -293,16 +294,19 @@
   // ── SVG component renderers (anchor-relative: origin = panel hole at 0,0) ───
   const COL = D.colors;
   const FONT = 'font-family="monospace"';
+  // Rounded-rect label border (anchor-relative), shared by jacks and led_labeled.
+  // Drawn when c.label_border is set; geometry from design_rules.output_rect_*.
+  function labelBorderRect(c, labelDy) {
+    const rw = c.rect_w != null ? Number(c.rect_w) : 7.0;
+    const ry = labelDy + DR.output_rect_dy;
+    return `<rect x="${(-rw / 2).toFixed(2)}" y="${ry.toFixed(2)}" width="${rw}" height="${DR.output_rect_h}" rx="${DR.output_rect_rx}" fill="none" stroke="${COL.output_rect_s}" stroke-width="0.3"/>`;
+  }
   function rJack(c, io) {
     const fs = Number(c.font_size || 1.8);
     const ly = DR.jack_label_dy;
     let s = `<circle r="3.5" fill="none" stroke="${COL.jack_outer}" stroke-width="0.6"/>` +
             `<circle r="1.4" fill="${COL.jack_inner}" stroke="${COL.jack_inner_s}" stroke-width="0.4"/>`;
-    if (io === "output") {
-      const rw = c.rect_w != null ? Number(c.rect_w) : 7.0;
-      const ry = ly + DR.output_rect_dy;
-      s += `<rect x="${(-rw / 2).toFixed(2)}" y="${ry.toFixed(2)}" width="${rw}" height="${DR.output_rect_h}" rx="${DR.output_rect_rx}" fill="none" stroke="${COL.output_rect_s}" stroke-width="0.3"/>`;
-    }
+    if (c.label_border) s += labelBorderRect(c, ly);
     s += `<text y="${ly.toFixed(1)}" fill="${COL.jack_text}" ${FONT} font-size="${fs}" text-anchor="middle">${esc(c.label || "")}</text>`;
     return s;
   }
@@ -332,7 +336,8 @@
     const dy = c.label_dy != null ? Number(c.label_dy) : DR.jack_label_dy;
     const lf = c.label_fill || COL.jack_text;
     const fs = Number(c.font_size || 1.8);
-    return rLed(c) + `<text y="${dy.toFixed(1)}" fill="${lf}" ${FONT} font-size="${fs}" text-anchor="middle">${esc(c.label || "")}</text>`;
+    return rLed(c) + (c.label_border ? labelBorderRect(c, dy) : "") +
+      `<text y="${dy.toFixed(1)}" fill="${lf}" ${FONT} font-size="${fs}" text-anchor="middle">${esc(c.label || "")}</text>`;
   }
   function rSwitchH(c, width, rawcx) {
     const labels = c.pos_labels || [], xs = c.pos_xs || [];
@@ -490,7 +495,25 @@
       s += `<text x="${zl.x}" y="${zl.y}" fill="${COL.cyan}" ${FONT} font-size="2.4" text-anchor="middle" font-weight="bold">${esc(zl.text)}</text>`;
       if (zl.subtitle) s += `<text x="${zl.x}" y="${zl.y + 4.5}" fill="${COL.brand_text}" ${FONT} font-size="1.6" text-anchor="middle">${esc(zl.subtitle)}</text>`;
     }
+    // Endpoint handles for the selected separator (drawn on top of chrome)
+    if (UI.selSep != null && (D.separators || [])[UI.selSep]) {
+      const sp = D.separators[UI.selSep];
+      const e = sepEndpointsResolved(sp);
+      s += `<line x1="${f3(e.a.x)}" y1="${f3(e.a.y)}" x2="${f3(e.b.x)}" y2="${f3(e.b.y)}" stroke="${COL.cyan}" stroke-width="0.6" opacity="0.9"/>`;
+      const handle = (p, end) => `<circle class="sep-handle" data-sep="${UI.selSep}" data-end="${end}" cx="${f3(p.x)}" cy="${f3(p.y)}" r="1.6"/>`;
+      s += handle(e.a, "a") + handle(e.b, "b") + handle(e.mid, "mid");
+    }
     return s;
+  }
+  // Resolved (on-screen) endpoints of a separator (x-family gets +x_offset; y has none).
+  function sepEndpointsResolved(sp) {
+    const ox = DR.x_offset || 0;
+    if (sp.type === "v") {
+      const x = sp.x + ox;
+      return { a: { x, y: sp.y1 }, b: { x, y: sp.y2 }, mid: { x, y: (sp.y1 + sp.y2) / 2 } };
+    }
+    const x1 = sp.x1 + ox, x2 = sp.x2 + ox;
+    return { a: { x: x1, y: sp.y }, b: { x: x2, y: sp.y }, mid: { x: (x1 + x2) / 2, y: sp.y } };
   }
 
   // ── Full SVG assembly ──────────────────────────────────────────────────────
@@ -613,23 +636,44 @@
   }
   function hideHUD() { if (hudEl) hudEl.style.display = "none"; }
 
-  let drag = null, pan = null;
+  let drag = null, pan = null, sepDrag = null;
   let spaceDown = false;
   function panActive() { return UI.tool === "pan" || spaceDown; }
+  // Distance from point p to segment a-b (mm).
+  function distToSeg(p, a, b) {
+    const vx = b.x - a.x, vy = b.y - a.y;
+    const L2 = vx * vx + vy * vy;
+    let t = L2 ? ((p.x - a.x) * vx + (p.y - a.y) * vy) / L2 : 0;
+    t = Math.max(0, Math.min(1, t));
+    return Math.hypot(p.x - (a.x + t * vx), p.y - (a.y + t * vy));
+  }
+  function sepAtPoint(m) {                 // index of separator within ~1mm of point, or -1
+    const seps = D.separators || [];
+    let best = -1, bd = 1.0;
+    for (let i = 0; i < seps.length; i++) {
+      const e = sepEndpointsResolved(seps[i]);
+      const d = distToSeg(m, e.a, e.b);
+      if (d < bd) { bd = d; best = i; }
+    }
+    return best;
+  }
   function wireCanvas() {
     const wrap = document.getElementById("canvas-wrap");
     svgEl.style.cursor = panActive() ? "grab" : (UI.tool === "anchor" ? "crosshair" : "default");
 
-    // Background: deselect (select tool) or start a pan (pan tool / space-hold).
+    // Background: select a separator under the cursor, else deselect, else pan.
     svgEl.addEventListener("pointerdown", (e) => {
-      if (e.target.closest && e.target.closest(".comp")) return;  // component handles its own
+      if (e.target.closest && e.target.closest(".comp")) return;       // component handles its own
+      if (e.target.classList && e.target.classList.contains("sep-handle")) return;  // handle handles its own
       if (panActive()) {
         pan = { x: e.clientX, y: e.clientY, sl: wrap.scrollLeft, st: wrap.scrollTop };
         svgEl.setPointerCapture(e.pointerId); svgEl.style.cursor = "grabbing"; e.preventDefault();
       } else if (UI.tool === "anchor") {
         UI.anchor = null; UI.tool = "select"; render();   // click empty space cancels pick
-      } else if (UI.selId || UI.selZone) {
-        deselect();
+      } else {
+        const si = sepAtPoint(clientToMm(e));
+        if (si >= 0) { selectSep(si); }
+        else if (UI.selId || UI.selZone || UI.selSep != null) deselect();
       }
     });
     svgEl.addEventListener("pointermove", (e) => {
@@ -673,6 +717,45 @@
       g.addEventListener("pointerup", end);
       g.addEventListener("pointercancel", end);
     });
+
+    // Separator endpoint handles
+    svgEl.querySelectorAll(".sep-handle").forEach((h) => {
+      h.addEventListener("pointerdown", (e) => {
+        if (panActive()) return;
+        e.preventDefault(); e.stopPropagation();
+        sepDrag = { idx: Number(h.dataset.sep), end: h.dataset.end, snapped: false };
+        h.setPointerCapture(e.pointerId);
+      });
+      h.addEventListener("pointermove", (e) => {
+        if (!sepDrag || sepDrag.idx !== Number(h.dataset.sep) || sepDrag.end !== h.dataset.end) return;
+        if (!sepDrag.snapped) { snapshot(); sepDrag.snapped = true; }
+        const mm = clientToMm(e); const m = snapPos(mm.x, mm.y);
+        moveSepEndpoint(sepDrag.idx, sepDrag.end, m.x, m.y);
+        render();
+      });
+      const sEnd = () => { if (sepDrag && sepDrag.idx === Number(h.dataset.sep)) sepDrag = null; };
+      h.addEventListener("pointerup", sEnd);
+      h.addEventListener("pointercancel", sEnd);
+    });
+  }
+  // Apply a resolved (on-screen) endpoint position to a separator (convert x→raw).
+  function moveSepEndpoint(idx, end, rx, ry) {
+    const sp = (D.separators || [])[idx]; if (!sp) return;
+    const ox = DR.x_offset || 0;
+    const W = Number(D.meta.width_mm), H = Number(D.meta.height_mm);
+    const clampX = (v) => round3(Math.max(0, Math.min(W, v)) - ox);
+    const clampYr = (v) => round3(Math.max(0, Math.min(H, v)));
+    if (sp.type === "v") {
+      if (end === "mid") sp.x = clampX(rx);
+      else if (end === "a") sp.y1 = clampYr(ry);
+      else sp.y2 = clampYr(ry);
+    } else {
+      const labelCentered = sp.label != null && sp.label_x != null && Math.abs(sp.label_x - (sp.x1 + sp.x2) / 2) < 0.01;
+      if (end === "mid") sp.y = clampYr(ry);
+      else if (end === "a") sp.x1 = clampX(rx);
+      else sp.x2 = clampX(rx);
+      if (labelCentered) sp.label_x = round3((sp.x1 + sp.x2) / 2);
+    }
   }
   // Lightweight selection highlight without a full re-render (used on pointerdown).
   function renderSelectionOnly() {
@@ -767,15 +850,17 @@
     render();
   }
   function selectComp(id) {
-    UI.selId = id; UI.selZone = null;
+    UI.selId = id; UI.selZone = null; UI.selSep = null;
     if (UI.anchor) { applyAnchor(id); return; }
     render();
   }
   function selectZone(zid) {
-    UI.selZone = zid; UI.selId = null; UI.anchor = null;
+    UI.selZone = zid; UI.selId = null; UI.selSep = null; UI.anchor = null;
     render();
   }
-  function deselect() { UI.selId = null; UI.selZone = null; UI.anchor = null; if (UI.tool === "anchor") UI.tool = "select"; render(); }
+  function selectSep(i) { UI.selSep = i; UI.selId = null; UI.selZone = null; UI.anchor = null; render(); }
+  function deselect() { UI.selId = null; UI.selZone = null; UI.selSep = null; UI.anchor = null; if (UI.tool === "anchor") UI.tool = "select"; render(); }
+  const selSepObj = () => (UI.selSep != null ? (D.separators || [])[UI.selSep] : null);
 
   // ── Zone (section) operations — mirror Python shift_zone ───────────────────────
   function shiftZoneBy(zid, dx, dy) {
@@ -952,6 +1037,7 @@
   }
   function renderRight() {
     const right = document.getElementById("right");
+    if (UI.selSep != null) { renderSepInspector(right); return; }
     if (UI.selZone) { renderZoneInspector(right); return; }
     if (!UI.selId) {
       right.innerHTML = `<div class="panel-h">Inspector</div><div class="hint">Select a component (panel or list), or a zone (zone name in the list).<br><br>Arrows = nudge · Shift+Arrow = bigger · Del = delete · Ctrl+Z/⇧Z = undo/redo · Space = pan.</div>`;
@@ -973,6 +1059,11 @@
     h += `<div class="field"><label>font_size</label><input id="i-fs" type="number" step="0.1" value="${c.font_size != null ? c.font_size : 1.8}"></div>`;
     const cppKey = c.cpp_id != null ? "cpp_id" : (c.cpp_param != null ? "cpp_param" : (c.type.startsWith("jack") ? "cpp_id" : "cpp_param"));
     h += `<div class="field"><label>${cppKey}</label><input id="i-cpp" type="text" value="${esc(c[cppKey] || "")}"></div>`;
+    const borderEligible = c.type.startsWith("jack") || c.type === "led_labeled";
+    if (borderEligible) {
+      h += `<div class="field"><label><input type="checkbox" id="i-border" ${c.label_border ? "checked" : ""}> label border</label></div>`;
+      if (c.label_border) h += `<div class="field"><label>border width (rect_w mm)</label><input id="i-rectw" type="number" step="0.1" value="${c.rect_w != null ? c.rect_w : 7}"></div>`;
+    }
     h += `<div class="field"><label>KiCad footprint</label><div class="ro">${esc(fp)}</div></div>`;
     // Align / anchor
     const anchoring = UI.anchor && UI.anchor.mode === "align";
@@ -1010,6 +1101,13 @@
     document.getElementById("i-label").addEventListener("change", (e) => { if (e.target.value) c.label = e.target.value; else delete c.label; commit(); });
     document.getElementById("i-fs").addEventListener("change", (e) => { c.font_size = Number(e.target.value); commit(); });
     document.getElementById("i-cpp").addEventListener("change", (e) => { c[cppKey] = e.target.value; commit(); });
+    if (borderEligible) {
+      document.getElementById("i-border").addEventListener("change", (e) => {
+        snapshot(); if (e.target.checked) c.label_border = true; else { delete c.label_border; delete c.rect_w; } render();
+      });
+      const rw = document.getElementById("i-rectw");
+      if (rw) rw.addEventListener("change", (e) => { snapshot(); const v = Number(e.target.value); if (v && v !== 7) c.rect_w = v; else delete c.rect_w; render(); });
+    }
     if (!anchoring) {
       document.getElementById("i-alignx").addEventListener("click", () => armAlign("x"));
       document.getElementById("i-aligny").addEventListener("click", () => armAlign("y"));
@@ -1057,6 +1155,37 @@
     }));
   }
 
+  // ── Separator inspector (style, endpoints, delete) ─────────────────────────────
+  function renderSepInspector(right) {
+    const sp = selSepObj();
+    if (!sp) { right.innerHTML = `<div class="panel-h">Separator</div>`; return; }
+    const styles = ["zone_div", "main_cyan", "subdiv_gray"];
+    let h = `<div class="panel-h">Separator ${UI.selSep} (${sp.type})</div>`;
+    h += `<div class="hint">Drag the end handles on the panel to change length; the middle handle moves it sideways. Values below are raw (pre-x_offset).</div>`;
+    h += `<div class="field"><label>style</label><select id="s-style">${styles.map((s) => `<option ${s === sp.style ? "selected" : ""}>${s}</option>`).join("")}</select></div>`;
+    const numF = (key, lbl) => `<div><label>${lbl}</label><input class="s-num" data-key="${key}" type="number" step="0.01" value="${fmtVal(sp[key])}"></div>`;
+    if (sp.type === "v") h += `<div class="field"><label>x (lateral)</label><input class="s-num" data-key="x" type="number" step="0.01" value="${fmtVal(sp.x)}"></div>` +
+      `<div class="field row">${numF("y1", "y1 (top)")}${numF("y2", "y2 (bottom)")}</div>`;
+    else h += `<div class="field"><label>y (vertical)</label><input class="s-num" data-key="y" type="number" step="0.01" value="${fmtVal(sp.y)}"></div>` +
+      `<div class="field row">${numF("x1", "x1 (left)")}${numF("x2", "x2 (right)")}</div>`;
+    if (sp.type === "h") {
+      h += `<div class="field"><label>label (optional)</label><input id="s-label" type="text" value="${esc(sp.label || "")}"></div>`;
+      if (sp.label != null) h += `<div class="field"><label>label_x</label><input class="s-num" data-key="label_x" type="number" step="0.01" value="${fmtVal(sp.label_x != null ? sp.label_x : (sp.x1 + sp.x2) / 2)}"></div>`;
+    }
+    h += `<div class="field"><button id="s-del" class="danger">Delete separator</button></div>`;
+    right.innerHTML = h;
+    document.getElementById("s-style").addEventListener("change", (e) => { snapshot(); sp.style = e.target.value; render(); });
+    right.querySelectorAll(".s-num").forEach((el) => el.addEventListener("change", () => { snapshot(); sp[el.dataset.key] = round3(Number(el.value)); render(); }));
+    const lbl = document.getElementById("s-label");
+    if (lbl) lbl.addEventListener("change", (e) => {
+      snapshot();
+      if (e.target.value) { sp.label = e.target.value; if (sp.label_x == null) sp.label_x = round3((sp.x1 + sp.x2) / 2); }
+      else { delete sp.label; delete sp.label_x; }
+      render();
+    });
+    document.getElementById("s-del").addEventListener("click", () => { snapshot(); D.separators.splice(UI.selSep, 1); UI.selSep = null; render(); });
+  }
+
   // ── DRC panel ──────────────────────────────────────────────────────────────
   function renderDRCPanel() {
     const el = document.getElementById("drc-panel");
@@ -1090,7 +1219,7 @@
     m.classList.remove("hidden");
     let rows = (D.separators || []).map((sp, i) => {
       const desc = sp.type === "v" ? `v  x=${fmtVal(sp.x)}  [${sp.style}]` : `h  y=${fmtVal(sp.y)}  x=${fmtVal(sp.x1)}→${fmtVal(sp.x2)}  ${sp.label ? '"' + sp.label + '"' : ""} [${sp.style}]`;
-      return `<div class="row2"><span class="x">${esc(desc)}</span><button data-delsep="${i}" class="danger">✕</button></div>`;
+      return `<div class="row2"><span class="x">${esc(desc)}</span><button data-editsep="${i}">edit</button><button data-delsep="${i}" class="danger">✕</button></div>`;
     }).join("");
     m.innerHTML = `<div class="box"><h2>Dividers / Separators</h2>` +
       `<div class="sublist">${rows || '<div class="hint">none</div>'}</div>` +
@@ -1103,6 +1232,7 @@
       `<div class="field"><label>label (h, optional)</label><input id="ns-label" type="text" value=""></div>` +
       `<div class="bar"><button id="ns-add">Add divider</button><button id="ns-close">Close</button></div></div>`;
     m.querySelectorAll("[data-delsep]").forEach((b) => b.addEventListener("click", () => { snapshot(); D.separators.splice(Number(b.dataset.delsep), 1); render(); openDividers(); }));
+    m.querySelectorAll("[data-editsep]").forEach((b) => b.addEventListener("click", () => { m.classList.add("hidden"); selectSep(Number(b.dataset.editsep)); }));
     document.getElementById("ns-close").addEventListener("click", () => m.classList.add("hidden"));
     document.getElementById("ns-add").addEventListener("click", () => {
       const t = document.getElementById("ns-type").value;
@@ -1213,6 +1343,14 @@
       if ((orig.label || "") !== (cur.label || "")) { if (cur.label) patchKey(id, "label", quoteIfNeeded(cur.label)); else removeKey(id, "label"); }
       if (String(orig.font_size) !== String(cur.font_size) && cur.font_size != null) patchKey(id, "font_size", fmtVal(cur.font_size));
       for (const k of ["cpp_id", "cpp_param"]) if (cur[k] != null && String(orig[k]) !== String(cur[k])) patchKey(id, k, quoteIfNeeded(cur[k]));
+      // label_border (boolean) — emit literal true / remove when off
+      if (Boolean(orig.label_border) !== Boolean(cur.label_border)) {
+        if (cur.label_border) patchKey(id, "label_border", "true"); else removeKey(id, "label_border");
+      }
+      // rect_w (number)
+      if (String(orig.rect_w) !== String(cur.rect_w)) {
+        if (cur.rect_w != null) patchKey(id, "rect_w", fmtVal(cur.rect_w)); else removeKey(id, "rect_w");
+      }
     }
     // 3 ── additions. Locate the owning zone by its ORIGINAL id (zone renames are
     //      applied LAST), so insertComponent always finds the zone still in the text.
@@ -1243,8 +1381,9 @@
     if (String(ORIG.design_rules.x_offset) !== String(DR.x_offset)) patchTop("x_offset", fmtVal(DR.x_offset), 2);
     // mounting hole x (right edge) if changed
     syncMountingHoles();
-    // 7 ── separators: regenerate the block if changed (these have no ids to patch)
-    if (JSON.stringify(ORIG.separators) !== JSON.stringify(D.separators)) regenSeparators();
+    // 7 ── separators: patch changed lines in place (preserves comments); only
+    //      fall back to wholesale regen when the list grew/shrank.
+    if (JSON.stringify(ORIG.separators) !== JSON.stringify(D.separators)) patchSeparators();
 
     return lines.join("\n");
 
@@ -1299,7 +1438,7 @@
       const itemIndent = compsLine >= 0 ? " ".repeat(indentOf(lines[compsLine]) + 2) : " ".repeat(idl.indent + 4);
       const fieldIndent = itemIndent + "  ";
       const blk = [`${itemIndent}- id: ${c.id}`];
-      const order = ["type", "cx", "cy", "rotate", "label", "font_size", "cpp_id", "cpp_param", "led_fill", "led_stroke"];
+      const order = ["type", "cx", "cy", "rotate", "label", "font_size", "label_border", "rect_w", "cpp_id", "cpp_param", "led_fill", "led_stroke"];
       for (const k of order) {
         if (c[k] == null) continue;
         let v = (k === "label" || k === "cpp_id" || k === "cpp_param" || k === "led_fill" || k === "led_stroke") ? quoteIfNeeded(c[k]) : (typeof c[k] === "number" ? fmtVal(c[k]) : c[k]);
@@ -1317,19 +1456,35 @@
         if (m && curMH[idx]) { lines[i] = `${m[1]}${fmtVal(curMH[idx].cx)}${m[3]}${fmtVal(curMH[idx].cy)}${m[5]}`; idx++; }
       }
     }
-    function regenSeparators() {
-      // locate separators: block and replace its list items wholesale (comments above kept)
-      let start = -1, end = lines.length, indent = 0;
+    function sepBlock() {                  // {start, end, sepLineIdxs[]} for the separators: list
+      let start = -1, end = lines.length;
       for (let i = 0; i < lines.length; i++) {
-        if (/^separators:\s*$/.test(lines[i])) { start = i; indent = 0; }
-        else if (start >= 0) {
-          const s = lines[i].trim();
-          if (s && indentOf(lines[i]) <= indent && !s.startsWith("-") && !s.startsWith("#")) { end = i; break; }
-        }
+        if (/^separators:\s*$/.test(lines[i])) { start = i; }
+        else if (start >= 0 && indentOf(lines[i]) === 0 && lines[i].trim() && !lines[i].trim().startsWith("#")) { end = i; break; }
       }
-      if (start < 0) return;
-      const body = (D.separators || []).map((sp) => "  - " + flowMap(sp));
-      lines.splice(start + 1, end - (start + 1), ...body, "");
+      if (start < 0) return null;
+      const sepLineIdxs = [];
+      for (let i = start + 1; i < end; i++) if (/^\s*-\s*\{/.test(lines[i])) sepLineIdxs.push(i);
+      return { start, end, sepLineIdxs };
+    }
+    function patchSeparators() {
+      const blk = sepBlock();
+      if (!blk) return;
+      const aligned = blk.sepLineIdxs.length === (ORIG.separators || []).length &&
+        (D.separators || []).length === (ORIG.separators || []).length;
+      if (aligned) {
+        // In-place: rewrite only the lines whose separator object changed (comments kept).
+        for (let i = 0; i < D.separators.length; i++) {
+          if (JSON.stringify(D.separators[i]) === JSON.stringify(ORIG.separators[i])) continue;
+          const li = blk.sepLineIdxs[i];
+          const indent = lines[li].match(/^(\s*)-/)[1];
+          lines[li] = `${indent}- ${flowMap(D.separators[i])}`;
+        }
+      } else {
+        // Structural change (add/remove): rewrite the list body wholesale.
+        const body = (D.separators || []).map((sp) => "  - " + flowMap(sp));
+        lines.splice(blk.start + 1, blk.end - (blk.start + 1), ...body, "");
+      }
     }
     function flowMap(o) {
       const parts = [];
@@ -1393,6 +1548,7 @@
       }
       if (e.key === "Delete" || e.key === "Backspace") {
         if (UI.selId) { deleteComp(UI.selId); e.preventDefault(); }
+        else if (UI.selSep != null) { snapshot(); D.separators.splice(UI.selSep, 1); UI.selSep = null; render(); e.preventDefault(); }
         return;
       }
       const arrows = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
