@@ -202,13 +202,10 @@
   <text x="81.915" y="50.7" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">TILT</text>
   <circle cx="81.915" cy="61.6" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
   <line x1="81.915" y1="61.6" x2="81.915" y2="57.1" stroke="#aaa" stroke-width="0.6"/>
-  <text x="81.915" y="69.1" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">MIX</text>
-  <rect x="75.92" y="78.80" width="12" height="2.4" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
-  <rect x="80.17" y="78.60" width="3.5" height="2.8" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
-  <text x="77.415" y="85.3" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">SOFT</text>
-  <text x="81.915" y="85.3" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">HARD</text>
-  <text x="86.415" y="85.3" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">FOLD</text>
-  <text x="81.915" y="88.8" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <text x="81.915" y="69.1" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">BYPASS</text>
+  <circle cx="81.915" cy="80.0" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="81.915" y1="80.0" x2="81.915" y2="75.5" stroke="#aaa" stroke-width="0.6"/>
+  <text x="81.915" y="87.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">WET</text>
   <circle cx="76.2" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
   <line x1="76.2" y1="100.0" x2="76.2" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
   <text x="76.2" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>

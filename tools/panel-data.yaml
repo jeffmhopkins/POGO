@@ -428,17 +428,14 @@ zones:
         type: knob_medium
         cx: 80.01
         cy: 61.60
-        label: "MIX"
-        cpp_param: "BP_MIX_PARAM"
-      # ── Distortion type switch ───────────────────────────────────────────────
-      - id: BP_DIST
-        type: switch_H3
+        label: "BYPASS"
+        cpp_param: "BP_BYPASS_PARAM"
+      - id: BP_WET
+        type: knob_medium
         cx: 80.01
         cy: 80.00
-        pos_labels: ["SOFT", "HARD", "FOLD"]
-        pos_xs: [75.51, 80.01, 84.51]
-        label_below: ""
-        cpp_param: "BP_DIST_PARAM"
+        label: "WET"
+        cpp_param: "BP_WET_PARAM"
       # ── CV attenuverter trim pots ────────────────────────────────────────────
       - id: BP_FREQ_ATT
         type: trimpot

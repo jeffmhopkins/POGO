@@ -171,9 +171,9 @@ struct Pogo : Module {
 		LP1_RES_ATT_PARAM,
 		// BP Control (global)
 		BP_TILT_PARAM,          // medium knob ±1 V/oct stereo spread
-		BP_DIST_PARAM,          // switch 0/1/2: SOFT / HARD / FOLD
-		BP_OFFSET_PARAM,        // large knob ±1.1 V/oct
-		BP_MIX_PARAM,           // medium knob 0–1 dry/wet
+		BP_OFFSET_PARAM,        // medium knob ±1.1 V/oct
+		BP_BYPASS_PARAM,        // medium knob 0–1 bypass (dry) amount
+		BP_WET_PARAM,           // medium knob 0–1 wet amount
 		BP_FREQ_ATT_PARAM,
 		BP_TILT_ATT_PARAM,
 		// BP1
@@ -252,9 +252,9 @@ struct Pogo : Module {
 
 		// BP Control
 		configParam(BP_TILT_PARAM,   -1.f, 1.f, 0.f, "BP Tilt", " V/oct");
-		configSwitch(BP_DIST_PARAM, 0.f, 2.f, 0.f, "BP Distortion Mode", {"Soft Clip", "Hard Clip", "Wavefold"});
 		configParam(BP_OFFSET_PARAM, -1.1f, 1.1f, 0.f, "BP Master Offset", " V/oct");
-		configParam(BP_MIX_PARAM,    0.f, 1.f, 0.5f, "BP Mix");
+		configParam(BP_BYPASS_PARAM, 0.f, 1.f, 1.f, "BP Bypass");
+		configParam(BP_WET_PARAM,    0.f, 1.f, 1.f, "BP Wet");
 		configParam(BP_FREQ_ATT_PARAM, -1.f, 1.f, 0.f, "BP Offset CV Depth");
 		configParam(BP_TILT_ATT_PARAM, -1.f, 1.f, 0.f, "BP Tilt CV Depth");
 
@@ -449,7 +449,8 @@ struct Pogo : Module {
 			(int)std::round(params[BP2_DIST_MODE_PARAM].getValue()),
 			(int)std::round(params[BP3_DIST_MODE_PARAM].getValue()),
 		};
-		float mix       = params[BP_MIX_PARAM].getValue();
+		float bypass    = params[BP_BYPASS_PARAM].getValue();
+		float wet       = params[BP_WET_PARAM].getValue();
 
 		float freqV[3] = {
 			bpOffsetCv + params[BP1_FREQ_PARAM].getValue() + modDest(BP1_FREQ_INPUT, BP1_FREQ_ATT_PARAM),
@@ -501,9 +502,8 @@ struct Pogo : Module {
 		float bp3OutL = distTapL[2];
 		float bp3OutR = distTapR[2];
 
-		// BP_MIX: crossfade — CCW (0) = LP1 bypass, CW (1) = full BP only
-		float bpOutL = clamp(bandL * (1.f - mix) + wetL * mix, -12.f, 12.f);
-		float bpOutR = clamp(bandR * (1.f - mix) + wetR * mix, -12.f, 12.f);
+		float bpOutL = clamp(bandL * bypass + wetL * wet, -12.f, 12.f);
+		float bpOutR = clamp(bandR * bypass + wetR * wet, -12.f, 12.f);
 
 		// ── Block HP: 2-pole SVF HP ───────────────────────────────────────────
 		float hpFreqCv = params[HP_FREQ_PARAM].getValue()
@@ -587,8 +587,8 @@ struct PogoWidget : ModuleWidget {
 		// ── Zone — BP CONTROL ──────────────────────────────────────────
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(81.915f, 24.80f)), module, Pogo::BP_OFFSET_PARAM));
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(81.915f, 43.20f)), module, Pogo::BP_TILT_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(81.915f, 61.60f)), module, Pogo::BP_MIX_PARAM));
-		addParam(createParamCentered<PogoSwitchH3>(mm2px(Vec(81.915f, 80.00f)), module, Pogo::BP_DIST_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(81.915f, 61.60f)), module, Pogo::BP_BYPASS_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(81.915f, 80.00f)), module, Pogo::BP_WET_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(76.200f, 100.00f)), module, Pogo::BP_FREQ_ATT_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(87.630f, 100.00f)), module, Pogo::BP_TILT_ATT_PARAM));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(76.200f, 112.00f)), module, Pogo::BP_FREQ_INPUT));
