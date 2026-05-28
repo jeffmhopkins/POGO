@@ -152,8 +152,8 @@ struct FormantFreqQuantity : ParamQuantity {
 struct Pogo : Module {
 	enum ParamId {
 		// Zone 0a — INPUT / GAIN
-		GAIN_MAIN_PARAM,        // switch 0/1: 1× / 5×
-		GAIN_BP3_PARAM,         // switch 0/1: 1× / 5× (ALT path pre-gain)
+		GAIN_PARAM,             // switch 0/1: 1× / 5×
+		ALT_GAIN_PARAM,         // switch 0/1: 1× / 5× (ALT path pre-gain)
 		// Zone 0b — LFO
 		LFO1_RATE_PARAM,
 		LFO2_RATE_PARAM,
@@ -229,8 +229,8 @@ struct Pogo : Module {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 
 		// Zone 0a
-		configSwitch(GAIN_MAIN_PARAM, 0.f, 1.f, 0.f, "Main Gain", {"1\xc3\x97", "5\xc3\x97"});
-		configSwitch(GAIN_BP3_PARAM,  0.f, 1.f, 0.f, "Alt BP3 Gain", {"1\xc3\x97", "5\xc3\x97"});
+		configSwitch(GAIN_PARAM, 0.f, 1.f, 0.f, "Main Gain", {"1\xc3\x97", "5\xc3\x97"});
+		configSwitch(ALT_GAIN_PARAM,  0.f, 1.f, 0.f, "Alt BP3 Gain", {"1\xc3\x97", "5\xc3\x97"});
 
 		// Zone 0b
 		configParam(LFO1_RATE_PARAM, 0.f, 1.f, 0.3f, "LFO 1 Rate");
@@ -378,17 +378,17 @@ struct Pogo : Module {
 		                                 : inL); // normalise R to L if unpatched
 
 		// ── Block 1: pre-gain boost (main path) ──────────────────────────────
-		float pgL = PreGain::process(inL, params[GAIN_MAIN_PARAM].getValue());
-		float pgR = PreGain::process(inR, params[GAIN_MAIN_PARAM].getValue());
+		float pgL = PreGain::process(inL, params[GAIN_PARAM].getValue());
+		float pgR = PreGain::process(inR, params[GAIN_PARAM].getValue());
 
 		// ALT path: ALT_BP_L/R → GAIN_BP3 → bypasses VCA+LP1, feeds BP directly
 		bool altLConn = inputs[ALT_BP_L_INPUT].isConnected();
 		bool altRConn = inputs[ALT_BP_R_INPUT].isConnected();
 		float altL = altLConn
-		    ? PreGain::process(inputs[ALT_BP_L_INPUT].getVoltage(), params[GAIN_BP3_PARAM].getValue())
+		    ? PreGain::process(inputs[ALT_BP_L_INPUT].getVoltage(), params[ALT_GAIN_PARAM].getValue())
 		    : 0.f;
 		float altR = altRConn
-		    ? PreGain::process(inputs[ALT_BP_R_INPUT].getVoltage(), params[GAIN_BP3_PARAM].getValue())
+		    ? PreGain::process(inputs[ALT_BP_R_INPUT].getVoltage(), params[ALT_GAIN_PARAM].getValue())
 		    : (altLConn ? altL : 0.f); // normalise R to L alt if only L patched
 
 		// ── LFOs ─────────────────────────────────────────────────────────────
@@ -549,10 +549,10 @@ struct PogoWidget : ModuleWidget {
 		// ── Zone 0a — INPUT / GAIN ─────────────────────────────────────
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.62f, 17.00f)), module, Pogo::L_IN_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(19.05f, 17.00f)), module, Pogo::R_IN_INPUT));
-		addParam(createParamCentered<PogoSwitchH2>(mm2px(Vec(30.48f, 17.00f)), module, Pogo::GAIN_MAIN_PARAM));
+		addParam(createParamCentered<PogoSwitchH2>(mm2px(Vec(30.48f, 17.00f)), module, Pogo::GAIN_PARAM));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.62f, 31.50f)), module, Pogo::ALT_BP_L_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(19.05f, 31.50f)), module, Pogo::ALT_BP_R_INPUT));
-		addParam(createParamCentered<PogoSwitchH2>(mm2px(Vec(30.48f, 31.50f)), module, Pogo::GAIN_BP3_PARAM));
+		addParam(createParamCentered<PogoSwitchH2>(mm2px(Vec(30.48f, 31.50f)), module, Pogo::ALT_GAIN_PARAM));
 
 		// ── Zone 0b — LFO ──────────────────────────────────────────────
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(7.62f, 51.50f)), module, Pogo::LFO1_OUTPUT));

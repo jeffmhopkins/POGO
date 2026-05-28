@@ -1,5 +1,7 @@
 # aux: VCA Cell (THAT 2180 Exponential VCA)
 
+> ⚠️ **STALE** — Circuit library entry pending re-verification against current panel design (2026-05-28).
+
 Design status: [ ] draft → [ ] reviewed → [ ] validated on prototype
 
 ## Overview

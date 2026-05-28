@@ -26,6 +26,10 @@ bypasses VCA and LP1 entirely and enters BP directly.
 
 ## 2. Theoretical Design and Topology
 
+> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
+> It has not been verified against the current panel control set. Do not use for circuit
+> construction until re-verified. See `specs/STATUS.md` for current phase status.
+
 ### DSP-to-analog mapping
 
 The DSP model (LPFilter.hpp) implements Andrew Simper's trapezoidal-integrated 2-pole SVF. The
@@ -132,6 +136,10 @@ but its output is ignored in the signal chain until the ALT jacks are unpatched.
 
 ## 3. Physical Design
 
+> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
+> It has not been verified against the current panel control set. Do not use for circuit
+> construction until re-verified. See `specs/STATUS.md` for current phase status.
+
 ### Component derivations
 
 **Integrator capacitors C1, C2 (per channel, ×2 channels = 4 total):**
@@ -215,6 +223,10 @@ Block-8 power estimate excludes IC_Q_AB accordingly.
 ---
 
 ## 4. Component Requirements
+
+> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
+> It has not been verified against the current panel control set. Do not use for circuit
+> construction until re-verified. See `specs/STATUS.md` for current phase status.
 
 | Ref | Part | Package | Value | Qty | Board | Block | Function |
 |---|---|---|---|---|---|---|---|

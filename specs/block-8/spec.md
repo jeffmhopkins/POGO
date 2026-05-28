@@ -33,6 +33,10 @@ LP2's output feeds Block B (output buffers → MAIN_L/R jacks) directly.
 
 ## 2. Theoretical Design and Topology
 
+> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
+> It has not been verified against the current panel control set. Do not use for circuit
+> construction until re-verified. See `specs/STATUS.md` for current phase status.
+
 ### DSP-to-analog mapping
 
 LP2 uses the same LPFilter struct as LP1. From Pogo.cpp lines 486–491:
@@ -116,6 +120,10 @@ output — identical to HP, simpler than LP1.
 
 ## 3. Physical Design
 
+> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
+> It has not been verified against the current panel control set. Do not use for circuit
+> construction until re-verified. See `specs/STATUS.md` for current phase status.
+
 ### Component derivations
 
 **Integrator capacitors C1, C2 (per channel, ×2 channels = 4 total): 47 nF C0G/NP0 0603**
@@ -177,6 +185,10 @@ both cell A (LP1 Q) and cell B (LP2 Q) are of comparable length.
 ---
 
 ## 4. Component Requirements
+
+> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
+> It has not been verified against the current panel control set. Do not use for circuit
+> construction until re-verified. See `specs/STATUS.md` for current phase status.
 
 | Ref | Part | Package | Value | Qty | Board | Block | Function |
 |---|---|---|---|---|---|---|---|

@@ -1,5 +1,7 @@
 # Standard CV / Audio Input Protection Circuit
 
+> ⚠️ **STALE** — Circuit library entry pending re-verification against current panel design (2026-05-28).
+
 Applied to **every** jack input on POGO (audio in, CV in, override jacks, mod source jack).
 
 ## Schematic

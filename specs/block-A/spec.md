@@ -21,6 +21,10 @@ transparent mono-to-stereo normalling.
 
 ## 2. Theoretical Design and Topology
 
+> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
+> It has not been verified against the current panel control set. Do not use for circuit
+> construction until re-verified. See `specs/STATUS.md` for current phase status.
+
 ### DSP-to-analog mapping
 
 The DSP model is a single-line hard clamp:
@@ -92,6 +96,10 @@ intentional nonlinearity in this block.
 
 ## 3. Physical Design
 
+> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
+> It has not been verified against the current panel control set. Do not use for circuit
+> construction until re-verified. See `specs/STATUS.md` for current phase status.
+
 ### Component values and derivations
 
 **Series protection resistors (R1, R2): 100 Ω**
@@ -147,6 +155,10 @@ jacks are located to keep input traces short and shielded from digital noise.
 ---
 
 ## 4. Component Requirements
+
+> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
+> It has not been verified against the current panel control set. Do not use for circuit
+> construction until re-verified. See `specs/STATUS.md` for current phase status.
 
 | Ref | Part | Package | Value | Qty | Board | Block | Function |
 |---|---|---|---|---|---|---|---|

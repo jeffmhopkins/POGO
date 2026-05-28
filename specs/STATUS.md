@@ -1,6 +1,6 @@
 # POGO — Hardware Spec Status
 
-Last updated: 2026-05-27 | Topology: 48HP | Phase 3R: all blocks complete
+Last updated: 2026-05-28 | Topology: 48HP | Source of truth: `tools/panel-data.yaml`
 
 ## Phase Key
 
@@ -15,34 +15,40 @@ Last updated: 2026-05-27 | Topology: 48HP | Phase 3R: all blocks complete
 
 ## Block Specs (`specs/block-N/spec.md`)
 
-| Block | Name | Phase 1R | Phase 2R | Phase 3R | Notes |
-|---|---|---|---|---|---|
-| A | Input Buffer | ✅ | ✅ | ✅ | OPA1612 follower, BAT54S clamp |
-| 1 | Pre-Gain | ✅ | ✅ | ✅ | OPA1612, 1×/5× switch; ALT_BP path |
-| 2 | Dual LFO | ✅ | ✅ | ✅ | Integrator+Schmitt; 47nF C0G; formula corrected; R_CCW_END 2×100MΩ for f_min=0.058 Hz |
-| 3 | Mod Bus | ✅ | ✅ | ✅ | 19 destinations; 7× TL074CDT; 470kΩ SCALE pot |
-| 4 | VCA | ✅ | ✅ | ✅ | THAT 2180 dB-law; DSP updated to match |
-| 5 | LP Filter 1 | ✅ | ✅ | ✅ | OTA-C SVF; stereo tilt (symmetric ±V_tilt L/R) |
-| 6 | Triple BP + Dist | ✅ | ✅ | ✅ | SC/HC/WF + CD4053; BP_MIX polarity corrected (U48=wet restorer; SW_POL default via U27-B) |
-| 7 | HP Filter | ✅ | ✅ | ✅ | OTA-C SVF; G=−1 buffer corrects SUM_AMP inversion |
-| 8 | LP Filter 2 | ✅ | ✅ | ✅ | OTA-C SVF; independent from LP1; shares Q VCA LM13700 |
-| B | Output Buffer | ✅ | ✅ | ✅ | TL072; MAIN_L/R from LP2 + BP3_L/R tap |
+> **Design source of truth is now `tools/panel-data.yaml`** (as of 2026-05-28).
+> §1 Intent sections re-verified against panel. §2/§3/§4 marked STALE pending re-verification.
+> Do not use §2/§3/§4 for circuit construction until re-verified against the updated §1.
+
+| Block | Name | §1 Intent | §2/§3/§4 | Notes |
+|---|---|---|---|---|
+| A | Input Buffer | ✅ panel-verified | ⚠️ STALE | OPA1612 follower, BAT54S clamp |
+| 1 | Pre-Gain | ✅ panel-verified | ⚠️ STALE | OPA1612, 1×/5× switch; ALT_BP path |
+| 2 | Dual LFO | ✅ panel-verified | ⚠️ STALE | Integrator+Schmitt; formula corrected; R_CCW_END 2×100MΩ |
+| 3 | Mod Bus | ✅ panel-verified | ⚠️ STALE | 19 destinations; 7× TL074CDT |
+| 4 | VCA | ✅ panel-verified | ⚠️ STALE | THAT 2180 dB-law; DSP updated to match |
+| 5 | LP Filter 1 | ✅ panel-verified | ⚠️ STALE | OTA-C SVF; stereo tilt (symmetric ±V_tilt L/R) |
+| 6 | Triple BP + Dist | ✅ **rewritten 2026-05-28** | ⚠️ STALE | Panel redesigned: per-band DIST switch, FOCUS, TILT; BP_BYPASS+WET model |
+| 7 | HP Filter | ✅ panel-verified | ⚠️ STALE | OTA-C SVF; G=−1 buffer corrects SUM_AMP inversion |
+| 8 | LP Filter 2 | ✅ panel-verified | ⚠️ STALE | OTA-C SVF; independent from LP1 |
+| B | Output Buffer | ✅ panel-verified | ⚠️ STALE | TL072; MAIN_L/R from LP2 + BP3_L/R tap |
 
 ## aux/ Circuit Library (`specs/aux/aux-*.md`)
 
+> All aux files marked STALE (2026-05-28) — pending re-verification against updated §1 Intent.
+
 | File | Status | Notes |
 |---|---|---|
-| aux-ota-c-svf | ✅ | ASCII schematic + full derivations |
-| aux-expo-converter | ✅ | Component values + trim procedure |
-| aux-q-control | ✅ | IRES_AMP driver + IC sharing plan |
-| aux-vca-cell | ✅ | THAT 2180 dB-law; DSP matches |
-| aux-unity-buffer | ✅ | G=+1 and G=−1 variants |
-| aux-distortion | ✅ | SC/HC/WF + CD4053 mux wiring |
-| aux-attenuverter | ✅ | Bipolar pot + TL074 inverter |
-| aux-mod-bus-core | ✅ | MB_AMP + MB_INV; ±10V clamp |
-| aux-lfo-core | ✅ | Integrator + Schmitt; 0.05–20 Hz |
-| aux-cv-protection | ✅ | Moved from shared/; content unchanged |
-| aux-power-filter | ✅ | Moved from shared/; content unchanged |
+| aux-ota-c-svf | ⚠️ STALE | ASCII schematic + full derivations |
+| aux-expo-converter | ⚠️ STALE | Component values + trim procedure |
+| aux-q-control | ⚠️ STALE | IRES_AMP driver + IC sharing plan |
+| aux-vca-cell | ⚠️ STALE | THAT 2180 dB-law; DSP matches |
+| aux-unity-buffer | ⚠️ STALE | G=+1 and G=−1 variants |
+| aux-distortion | ⚠️ STALE | SC/HC/WF + CD4053 mux wiring |
+| aux-attenuverter | ⚠️ STALE | Bipolar pot + TL074 inverter |
+| aux-mod-bus-core | ⚠️ STALE | MB_AMP + MB_INV; ±10V clamp |
+| aux-lfo-core | ⚠️ STALE | Integrator + Schmitt; 0.05–20 Hz |
+| aux-cv-protection | ⚠️ STALE | Moved from shared/; content unchanged |
+| aux-power-filter | ⚠️ STALE | Moved from shared/; content unchanged |
 
 No SVG files — ASCII schematics within each `.md` are the source of truth.
 Circuit diagrams in spec text must be self-sufficient.
@@ -77,7 +83,9 @@ now resolved — the plugin is a faithful behavioral model of the hardware. Inte
 advantages retained: exact 1V/oct tracking, exact LFO rate law, LFO phase reset, extended Q
 range (creative tool).
 
-**Phase 4R (Panel) — DONE.** `tools/panel-data.yaml` DRC-clean.
+**Phase 4R (Panel) — DONE.** `tools/panel-data.yaml` DRC-clean. Panel is now the design source of truth.
+
+**Panel-as-truth spec update complete (2026-05-28).** `tools/panel-data.yaml` declared design source of truth. All §1 Intent sections re-verified against panel. GAIN_MAIN_PARAM→GAIN_PARAM and GAIN_BP3_PARAM→ALT_GAIN_PARAM renamed in plugin to match panel. Block-6 §1 Intent fully rewritten to reflect per-band DIST_MODE switch, FOCUS, TILT, CLIP LED, and BP_BYPASS/WET additive model. module-overview.md parameter table and modulation destination table updated. All §2/§3/§4 and aux/ marked STALE.
 
 **Analog design review complete** (`specs/analog-design-review.md` — 2026-05-27).
 All review findings resolved. See §7 Completed Action Items in that file for the full list.

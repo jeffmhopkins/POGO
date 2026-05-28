@@ -21,6 +21,10 @@ without touching the main signal path.
 
 ## 2. Theoretical Design and Topology
 
+> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
+> It has not been verified against the current panel control set. Do not use for circuit
+> construction until re-verified. See `specs/STATUS.md` for current phase status.
+
 ### DSP-to-analog mapping
 
 The DSP model is:
@@ -103,6 +107,10 @@ the DSP specifies ±10.5 V as nominal, consistent with OPA1612 datasheet typical
 
 ## 3. Physical Design
 
+> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
+> It has not been verified against the current panel control set. Do not use for circuit
+> construction until re-verified. See `specs/STATUS.md` for current phase status.
+
 ### Component values and derivations
 
 **Gain resistors (R3 = R_g, R4 = R_f): 4.7 kΩ, 18 kΩ (each ×2 channels)**
@@ -172,6 +180,10 @@ length carrying unshielded pre-gain signals.
 ---
 
 ## 4. Component Requirements
+
+> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
+> It has not been verified against the current panel control set. Do not use for circuit
+> construction until re-verified. See `specs/STATUS.md` for current phase status.
 
 | Ref | Part | Package | Value | Qty | Board | Block | Function |
 |---|---|---|---|---|---|---|---|

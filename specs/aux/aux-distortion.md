@@ -1,5 +1,7 @@
 # aux: Bandpass Distortion Circuit (SC / HC / WF)
 
+> ⚠️ **STALE** — Circuit library entry pending re-verification against current panel design (2026-05-28).
+
 Design status: [ ] draft → [ ] reviewed → [ ] validated on prototype
 
 ## Overview

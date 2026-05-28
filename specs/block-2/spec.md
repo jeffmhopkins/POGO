@@ -21,6 +21,10 @@ jack only, no automatic normalling.
 
 ## 2. Theoretical Design and Topology
 
+> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
+> It has not been verified against the current panel control set. Do not use for circuit
+> construction until re-verified. See `specs/STATUS.md` for current phase status.
+
 ### DSP-to-analog mapping
 
 The DSP model is a phase-accumulator triangle oscillator:
@@ -149,6 +153,10 @@ Items 1 and 3 below are intentional DSP advantages kept by design. Item 2 is now
 
 ## 3. Physical Design
 
+> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
+> It has not been verified against the current panel control set. Do not use for circuit
+> construction until re-verified. See `specs/STATUS.md` for current phase status.
+
 ### Component values and derivations
 
 **Target frequency range:** 0.05 Hz to 20 Hz.
@@ -241,6 +249,10 @@ output protection but are physically placed on the utility board near the LFO ou
 ---
 
 ## 4. Component Requirements
+
+> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
+> It has not been verified against the current panel control set. Do not use for circuit
+> construction until re-verified. See `specs/STATUS.md` for current phase status.
 
 | Ref | Part | Package | Value | Qty | Board | Block | Function |
 |---|---|---|---|---|---|---|---|

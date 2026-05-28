@@ -1,5 +1,7 @@
 # Standard Power Supply Filtering
 
+> ⚠️ **STALE** — Circuit library entry pending re-verification against current panel design (2026-05-28).
+
 Applied to every POGO PCB at the power connector and at each IC.
 
 ## Power Connector (16-pin IDC, Doepfer A-100 compatible)

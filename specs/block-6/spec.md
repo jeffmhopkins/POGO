@@ -1,26 +1,55 @@
 # Block 6: Triple Bandpass + Distortion
-Three independent 2-pole OTA-C SVF bandpass resonators (formant filters F1/F2/F3) with per-group drive and a global distortion mode switch.
+Three independent 2-pole OTA-C SVF bandpass resonators with per-band frequency, Q (FOCUS), stereo spread (TILT), drive, and distortion mode. A global BP master section controls overall offset, tilt, bypass level, and wet level.
 
-DSP source: `plugin/src/dsp/BandpassSVF.hpp`, `plugin/src/dsp/Distortion.hpp`, `plugin/src/Pogo.cpp` (lines 410–475)
+DSP source: `plugin/src/dsp/BandpassSVF.hpp`, `plugin/src/dsp/Distortion.hpp`, `plugin/src/Pogo.cpp` (lines 410–510)
 
 ---
 
 ## 1. Intent
 
-Three bandpass resonators tuned to low (F1 ~200 Hz), mid (F2 ~1500 Hz), and high (F3 ~6000 Hz) formant regions. Together they act as a talking/formant filter, vowel shape sculptor, or comb-like resonator bank.
+Three bandpass resonators — each freely tunable over ~50 Hz–3.2 kHz (F_REF = 400 Hz at param = 0). Together they act as a resonator bank, vowel sculptor, or harmonic comb filter. All three bands default to the same center frequency; the user positions them independently via the per-band FREQ knobs.
 
-**BP_OFFSET** shifts all three groups together (master frequency offset); each group also has an independent FREQ offset relative to its f_ref. **BP_TILT** spreads L and R independently — L gets +tiltV, R gets −tiltV, creating stereo width by separating the formant positions in each channel.
+### Global BP master controls
 
-**BP_MIX** dry/wet blend allows dialing from pure LP1 output (dry) to full formant stack (wet). At 50% (default) the formants add to the underlying LP1 texture.
+**BP_OFFSET** shifts all three bands simultaneously (master V/oct offset). **BP_TILT** creates global stereo spread — L channel gets +tiltV, R gets −tiltV — separating the band positions across the stereo field.
 
-**Distortion** runs post-SVF, pre-mix. One global `BP_DIST` switch selects Soft Clip / Hard Clip / Wavefold across all three groups simultaneously. Per-group `DRIVE` controls the distortion depth independently. The BP3 post-distortion tap (before mix) is available at `BP3_L/R_OUT` jacks.
+**BP_BYPASS** sets the level of the pre-BP signal (LP1 output or ALT input) that passes through to the BP output (0 = muted, 1 = full). **BP_WET** sets the level of the processed (post-distortion) BP sum at the output (0 = dry only, 1 = full wet). The output formula is:
 
-**ALT path**: `ALT_BP_L/R` jacks feed the BP input directly (bypassing VCA + LP1), with `GAIN_BP3` pre-gain (1× or 5×). When ALT jacks are patched, BP processes the ALT signal instead of the LP1 output.
+```
+bpOut = clamp(bandIn × bypass + wetSum × wet, −12, +12)
+```
+
+Both controls are independent scalers — not a crossfade. Setting both to 1.0 adds LP1 and full BP together; setting BYPASS to 0 gives pure BP; setting WET to 0 gives pure LP1 passthrough.
+
+CV inputs for the master section: FREQ jack (+ attenuverter trimpot) modulates BP_OFFSET; TILT jack modulates BP_TILT.
+
+### Per-band controls (BP1, BP2, BP3 — identical architecture)
+
+Each band has:
+- **DIST switch** (3-position vertical): Soft Clip (bottom) / Hard Clip (middle) / Wavefold (top) — selects distortion character independently per band
+- **FREQ knob** (xl): per-band frequency offset in V/oct; F_REF = 400 Hz → range ~50 Hz–3.2 kHz
+- **FOCUS knob** (large): resonance (Q); `Q = 0.5 × 400^focus` → Q range 0.5–200; does not self-oscillate
+- **TILT knob** (large): per-band stereo spread, additive with global BP_TILT
+- **DIST knob** (large): per-band drive depth (0–1), applied post-SVF before distortion cell
+- **CLIP LED**: illuminates when the per-band distortion output exceeds ±4 V
+- CV inputs per band: FREQ, TILT, DIST jacks (each with attenuverter trimpot)
+
+### ALT path
+
+`ALT_BP_L/R` jacks feed the BP input directly (bypassing VCA + LP1); the `ALT_GAIN` switch selects 1× or 5× pre-gain. When patched, BP processes the ALT signal instead of LP1 output.
+
+### BP3 output tap
+
+`BP3_L_OUT` and `BP3_R_OUT` jacks provide the BP3 per-band distortion output before the final mix — useful for parallel processing or sidechain routing.
 
 
 ---
 
 ## 2. Theoretical Design and Topology
+
+> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
+> It has not been verified against the current panel control set. Do not use for circuit
+> construction until re-verified. See `specs/STATUS.md` for current phase status.
 
 ### SVF Groups (3 independent resonators)
 
@@ -104,6 +133,10 @@ DSP and hardware are aligned on all BP signal-processing behaviors:
 ---
 
 ## 3. Physical Design
+
+> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
+> It has not been verified against the current panel control set. Do not use for circuit
+> construction until re-verified. See `specs/STATUS.md` for current phase status.
 
 ### OTA-C SVF instances
 
@@ -469,6 +502,10 @@ Icc figures use ±12V operating point (~2.6 mA/pkg), not the ±15V datasheet spe
 ---
 
 ## 4. Component Requirements
+
+> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
+> It has not been verified against the current panel control set. Do not use for circuit
+> construction until re-verified. See `specs/STATUS.md` for current phase status.
 
 | Ref | Part | Package | Value | Qty | Board | Block | Function |
 |---|---|---|---|---|---|---|---|

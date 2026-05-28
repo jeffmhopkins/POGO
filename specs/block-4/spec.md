@@ -33,6 +33,10 @@ to both, maintaining stereo balance.
 
 ## 2. Theoretical Design and Topology
 
+> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
+> It has not been verified against the current panel control set. Do not use for circuit
+> construction until re-verified. See `specs/STATUS.md` for current phase status.
+
 ### Gain Law (DSP and hardware)
 
 ```cpp
@@ -149,6 +153,10 @@ THAT 2180A14-U datasheet before PCB layout.
 
 ## 3. Physical Design
 
+> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
+> It has not been verified against the current panel control set. Do not use for circuit
+> construction until re-verified. See `specs/STATUS.md` for current phase status.
+
 **Board assignment:** Audio board (carries audio-frequency signal; THAT 2180 and CV
 conditioning are co-located with the signal path).
 
@@ -184,6 +192,10 @@ and RV_VCA_UNITY_R allow the two channels to be matched for DC offset and gain a
 ---
 
 ## 4. Component Requirements
+
+> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
+> It has not been verified against the current panel control set. Do not use for circuit
+> construction until re-verified. See `specs/STATUS.md` for current phase status.
 
 | Ref | Part | Package | Value | Qty | Board | Block | Function |
 |---|---|---|---|---|---|---|---|
