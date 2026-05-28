@@ -244,8 +244,8 @@
   <circle cx="102.345" cy="80.0" r="7.0" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
   <line x1="102.345" y1="80.0" x2="102.345" y2="73.0" stroke="#aaa" stroke-width="0.7"/>
   <text x="102.345" y="90.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">DIST</text>
-  <circle cx="118.49" cy="80.0" r="1.2" fill="#441111" stroke="#cc2222" stroke-width="0.4"/>
-  <text x="118.49" y="87.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">CLIP</text>
+  <circle cx="118.49" cy="83.0" r="1.2" fill="#441111" stroke="#cc2222" stroke-width="0.4"/>
+  <text x="118.49" y="90.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">CLIP</text>
   <circle cx="99.06" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
   <line x1="99.06" y1="100.0" x2="99.06" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
   <text x="99.06" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>

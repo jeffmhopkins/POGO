@@ -513,7 +513,7 @@ zones:
       - id: BP1_CLIP_LED
         type: led_labeled
         cx: 116.585
-        cy: 80.00
+        cy: 83.00
         label: "CLIP"
         led_fill: "#441111"
         led_stroke: "#cc2222"
