@@ -512,12 +512,14 @@
       s += `<text x="${zl.x}" y="${zl.y}" fill="${COL.cyan}" ${FONT} font-size="2.4" text-anchor="middle" font-weight="bold">${esc(zl.text)}</text>`;
       if (zl.subtitle) s += `<text x="${zl.x}" y="${zl.y + 4.5}" fill="${COL.brand_text}" ${FONT} font-size="1.6" text-anchor="middle">${esc(zl.subtitle)}</text>`;
     }
-    // Endpoint handles for the selected separator (drawn on top of chrome)
-    if (UI.selSep != null && (D.separators || [])[UI.selSep]) {
-      const sp = D.separators[UI.selSep];
+    // Endpoint handles for the active separator (an explicitly selected one, or the
+    // selected zone's boundary divider — so the zone inspector can drag it too).
+    const asi = activeSepIdx();
+    if (asi != null && (D.separators || [])[asi]) {
+      const sp = D.separators[asi];
       const e = sepEndpointsResolved(sp);
       s += `<line class="sep-hl" x1="${f3(e.a.x)}" y1="${f3(e.a.y)}" x2="${f3(e.b.x)}" y2="${f3(e.b.y)}" stroke="${COL.cyan}" stroke-width="0.6" opacity="0.9"/>`;
-      const handle = (p, end) => `<circle class="sep-handle" data-sep="${UI.selSep}" data-end="${end}" cx="${f3(p.x)}" cy="${f3(p.y)}" r="1.6"/>`;
+      const handle = (p, end) => `<circle class="sep-handle" data-sep="${asi}" data-end="${end}" cx="${f3(p.x)}" cy="${f3(p.y)}" r="1.6"/>`;
       s += handle(e.a, "a") + handle(e.b, "b") + handle(e.mid, "mid");
     }
     return s;
@@ -782,7 +784,11 @@
     const clampX = (v) => round3(Math.max(0, Math.min(W, v)) - ox);
     const clampYr = (v) => round3(Math.max(0, Math.min(H, v)));
     if (sp.type === "v") {
-      if (end === "mid") sp.x = clampX(rx);
+      if (end === "mid") {
+        const zb = zoneOfBoundaryDivider(idx);   // capture before changing sp.x
+        sp.x = clampX(rx);
+        if (zb && zb.x_start != null) zb.x_start = sp.x;  // keep the zone edge tied to its boundary
+      }
       else if (end === "a") sp.y1 = clampYr(ry);
       else sp.y2 = clampYr(ry);
     } else {
@@ -981,7 +987,13 @@
     UI.selZone = zid; UI.selId = null; UI.selSep = null; UI.anchor = null;
     render();
   }
-  function selectSep(i) { UI.selSep = i; UI.selId = null; UI.selZone = null; UI.anchor = null; render(); }
+  function selectSep(i) {
+    // A vertical divider sitting at a zone's left edge IS that zone's boundary —
+    // select the zone instead, so one combined inspector covers both.
+    const zb = zoneOfBoundaryDivider(i);
+    if (zb) { selectZone(zb.id); return; }
+    UI.selSep = i; UI.selId = null; UI.selZone = null; UI.anchor = null; render();
+  }
   function deselect() { UI.selId = null; UI.selZone = null; UI.selSep = null; UI.anchor = null; if (UI.tool === "anchor") UI.tool = "select"; render(); }
   const selSepObj = () => (UI.selSep != null ? (D.separators || [])[UI.selSep] : null);
 
@@ -991,6 +1003,19 @@
     if (z.x_start == null) return -1;
     const x0 = Number(z.x_start);
     return (D.separators || []).findIndex((sp) => sp.type === "v" && Math.abs(Number(sp.x) - x0) < 0.01);
+  }
+  // The zone a separator is the boundary of (vertical divider at the zone's x_start), else null.
+  function zoneOfBoundaryDivider(i) {
+    const sp = (D.separators || [])[i];
+    if (!sp || sp.type !== "v") return null;
+    return (D.zones || []).find((z) => z.x_start != null && Math.abs(Number(z.x_start) - Number(sp.x)) < 0.01) || null;
+  }
+  // The separator index whose drag-handles should render: an explicitly selected
+  // separator, or the boundary divider of the selected zone.
+  function activeSepIdx() {
+    if (UI.selSep != null) return UI.selSep;
+    if (UI.selZone) { const z = (D.zones || []).find((z) => z.id === UI.selZone); if (z) { const i = zoneBoundarySepIdx(z); if (i >= 0) return i; } }
+    return null;
   }
   // Per-zone toggle: enable/disable the zone's left-edge vertical divider.
   function setZoneDivider(zid, on) {
@@ -1170,8 +1195,12 @@
       `<div><button id="add-div-h">+ Divider —</button></div>` +
       `<div><button id="add-zone">+ Zone (+ ▏)</button></div></div>`;
     // Group dividers by the zone whose x-span contains them; the rest go to "Other".
+    // A zone's own boundary divider is omitted here — it's represented by the zone row.
     const sepByZone = {}; const otherSeps = [];
-    (D.separators || []).forEach((sp, i) => { const z = zoneOfSep(sp); (z ? (sepByZone[z.id] = sepByZone[z.id] || []) : otherSeps).push({ sp, i }); });
+    (D.separators || []).forEach((sp, i) => {
+      if (zoneOfBoundaryDivider(i)) return;
+      const z = zoneOfSep(sp); (z ? (sepByZone[z.id] = sepByZone[z.id] || []) : otherSeps).push({ sp, i });
+    });
     h += `<div class="panel-h">Components</div>`;
     for (const z of D.zones || []) {
       h += `<div class="tree-zone"><div class="zname${z.id === UI.selZone ? " sel" : ""}" data-zid="${esc(z.id)}">${esc(z.id)}</div>`;
@@ -1316,6 +1345,16 @@
       h += `<div class="field"><label>x_start (mm)</label><input id="z-xstart" type="number" step="0.01" value="${fmtVal(z.x_start)}"></div>`;
     if (z.x_start != null)
       h += `<div class="field"><label><input type="checkbox" id="z-div" ${zoneBoundarySepIdx(z) >= 0 ? "checked" : ""}> vertical divider (left edge)</label></div>`;
+    // Combined divider controls (the zone's boundary divider) — same window covers both.
+    const bIdx = zoneBoundarySepIdx(z);
+    if (bIdx >= 0) {
+      const bsp = D.separators[bIdx];
+      const styles = ["zone_div", "main_cyan", "subdiv_gray"];
+      h += `<div class="field"><label>divider style</label><select id="z-dstyle">${styles.map((s) => `<option ${s === bsp.style ? "selected" : ""}>${s}</option>`).join("")}</select></div>`;
+      h += `<div class="field row"><div><label>divider y1 (top)</label><input id="z-dy1" type="number" step="0.01" value="${fmtVal(bsp.y1)}"></div>` +
+           `<div><label>y2 (bottom)</label><input id="z-dy2" type="number" step="0.01" value="${fmtVal(bsp.y2)}"></div></div>`;
+      h += `<div class="hint">Drag the divider's end handles on the panel to change its length.</div>`;
+    }
     h += `<div class="hint">components span: ${span}${nx != null ? ` · next x_start: ${f2(nx)}mm (${(nx / HP_MM).toFixed(2)} HP)` : ""}</div>`;
     h += `<div class="hint">Arrows move the whole section (Shift = 1 HP). x_start shift moves column-relative parts; explicit-cx parts shift with it.</div>`;
     h += `<div class="field row"><div><button data-zmove="-x">◀ −1mm</button></div><div><button data-zmove="+x">+1mm ▶</button></div></div>`;
@@ -1333,6 +1372,11 @@
     if (xe) xe.addEventListener("change", (e) => setZoneXStart(z.id, Number(e.target.value)));
     const dv = document.getElementById("z-div");
     if (dv) dv.addEventListener("change", (e) => setZoneDivider(z.id, e.target.checked));
+    const dstyle = document.getElementById("z-dstyle");
+    if (dstyle) dstyle.addEventListener("change", (e) => { snapshot(); D.separators[zoneBoundarySepIdx(z)].style = e.target.value; render(); });
+    const dy1 = document.getElementById("z-dy1"), dy2 = document.getElementById("z-dy2");
+    if (dy1) dy1.addEventListener("change", (e) => { snapshot(); D.separators[zoneBoundarySepIdx(z)].y1 = round3(Number(e.target.value)); render(); });
+    if (dy2) dy2.addEventListener("change", (e) => { snapshot(); D.separators[zoneBoundarySepIdx(z)].y2 = round3(Number(e.target.value)); render(); });
     right.querySelectorAll("[data-zmove]").forEach((b) => b.addEventListener("click", () => {
       const d = b.dataset.zmove;
       shiftZoneBy(z.id, d === "-x" ? -1 : d === "+x" ? 1 : 0, d === "-y" ? -1 : d === "+y" ? 1 : 0);
