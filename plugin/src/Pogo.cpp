@@ -183,16 +183,18 @@ struct Pogo : Module {
 		// BP2
 		BP2_FREQ_PARAM, BP2_FOCUS_PARAM, BP2_TILT_PARAM, BP2_DIST_PARAM,
 		BP2_FREQ_ATT_PARAM, BP2_TILT_ATT_PARAM, BP2_DIST_ATT_PARAM,
+		BP2_DIST_MODE_PARAM,
 		// BP3
 		BP3_FREQ_PARAM, BP3_FOCUS_PARAM, BP3_TILT_PARAM, BP3_DIST_PARAM,
 		BP3_FREQ_ATT_PARAM, BP3_TILT_ATT_PARAM, BP3_DIST_ATT_PARAM,
+		BP3_DIST_MODE_PARAM,
 		// HP
 		HP_FREQ_PARAM, HP_RES_PARAM,
 		HP_FREQ_ATT_PARAM, HP_RES_ATT_PARAM,
 		// LP2
 		LP2_FREQ_PARAM, LP2_RES_PARAM,
 		LP2_FREQ_ATT_PARAM, LP2_RES_ATT_PARAM,
-		NUM_PARAMS   // 46
+		NUM_PARAMS   // 48
 	};
 
 	enum InputId {
@@ -219,8 +221,8 @@ struct Pogo : Module {
 	enum LightId {
 		LFO1_LIGHT, LFO2_LIGHT,
 		MOD_CLIP_LIGHT, MOD_POS_LIGHT, MOD_NEG_LIGHT,
-		BP1_CLIP_LIGHT,
-		NUM_LIGHTS   // 6
+		BP1_CLIP_LIGHT, BP2_CLIP_LIGHT, BP3_CLIP_LIGHT,
+		NUM_LIGHTS   // 8
 	};
 
 	Pogo() {
@@ -275,6 +277,7 @@ struct Pogo : Module {
 		configParam(BP2_FREQ_ATT_PARAM,  -1.f, 1.f, 0.f, "BP2 Freq CV Depth");
 		configParam(BP2_TILT_ATT_PARAM, -1.f, 1.f, 0.f, "BP2 Tilt CV Depth");
 		configParam(BP2_DIST_ATT_PARAM,  -1.f, 1.f, 0.f, "BP2 Drive CV Depth");
+		configSwitch(BP2_DIST_MODE_PARAM, 0.f, 2.f, 0.f, "BP2 Dist Mode", {"Soft Clip", "Hard Clip", "Wavefold"});
 
 		// BP3
 		configParam<FormantFreqQuantity>(BP3_FREQ_PARAM,  -bpR, bpR, 0.f, "BP3 Freq")->fref = 400.f;
@@ -284,6 +287,7 @@ struct Pogo : Module {
 		configParam(BP3_FREQ_ATT_PARAM,  -1.f, 1.f, 0.f, "BP3 Freq CV Depth");
 		configParam(BP3_TILT_ATT_PARAM, -1.f, 1.f, 0.f, "BP3 Tilt CV Depth");
 		configParam(BP3_DIST_ATT_PARAM,  -1.f, 1.f, 0.f, "BP3 Drive CV Depth");
+		configSwitch(BP3_DIST_MODE_PARAM, 0.f, 2.f, 0.f, "BP3 Dist Mode", {"Soft Clip", "Hard Clip", "Wavefold"});
 
 		// HP
 		configParam(HP_FREQ_PARAM, -5.f, 5.f, -3.f, "HP Freq", " V/oct");
@@ -440,11 +444,10 @@ struct Pogo : Module {
 		float bpTiltCv   = params[BP_TILT_PARAM].getValue()
 		                   + modDest(BP_TILT_INPUT, BP_TILT_ATT_PARAM); // stereo tilt: L+=, R-=
 
-		int globalDistMode = (int)std::round(params[BP_DIST_PARAM].getValue());
 		int distMode[3] = {
 			(int)std::round(params[BP1_DIST_MODE_PARAM].getValue()),
-			globalDistMode,
-			globalDistMode,
+			(int)std::round(params[BP2_DIST_MODE_PARAM].getValue()),
+			(int)std::round(params[BP3_DIST_MODE_PARAM].getValue()),
 		};
 		float mix       = params[BP_MIX_PARAM].getValue();
 
@@ -489,6 +492,10 @@ struct Pogo : Module {
 		}
 		lights[BP1_CLIP_LIGHT].setBrightness(
 			(std::max(std::abs(distTapL[0]), std::abs(distTapR[0])) > 4.0f) ? 1.f : 0.f);
+		lights[BP2_CLIP_LIGHT].setBrightness(
+			(std::max(std::abs(distTapL[1]), std::abs(distTapR[1])) > 4.0f) ? 1.f : 0.f);
+		lights[BP3_CLIP_LIGHT].setBrightness(
+			(std::max(std::abs(distTapL[2]), std::abs(distTapR[2])) > 4.0f) ? 1.f : 0.f);
 		float wetL    = clamp(dSumL, -10.5f, 10.5f);
 		float wetR    = clamp(dSumR, -10.5f, 10.5f);
 		float bp3OutL = distTapL[2];
@@ -602,10 +609,12 @@ struct PogoWidget : ModuleWidget {
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(121.92f, 112.00f)), module, Pogo::BP1_DIST_INPUT));
 
 		// ── Zone — BP 2 ────────────────────────────────────────────────
+		addParam(createParamCentered<PogoSwitchV3>(mm2px(Vec(132.195f, 24.80f)), module, Pogo::BP2_DIST_MODE_PARAM));
 		addParam(createParamCentered<RoundHugeBlackKnob>(mm2px(Vec(148.780f, 24.80f)), module, Pogo::BP2_FREQ_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(136.635f, 47.69f)), module, Pogo::BP2_FOCUS_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(152.925f, 63.85f)), module, Pogo::BP2_TILT_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(136.635f, 80.00f)), module, Pogo::BP2_DIST_PARAM));
+		addChild(createLightCentered<SmallLight<RedLight>>(mm2px(Vec(152.780f, 83.00f)), module, Pogo::BP2_CLIP_LIGHT));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(133.35f, 100.00f)), module, Pogo::BP2_FREQ_ATT_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(144.78f, 100.00f)), module, Pogo::BP2_TILT_ATT_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(156.21f, 100.00f)), module, Pogo::BP2_DIST_ATT_PARAM));
@@ -614,10 +623,12 @@ struct PogoWidget : ModuleWidget {
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(156.21f, 112.00f)), module, Pogo::BP2_DIST_INPUT));
 
 		// ── Zone — BP 3 ────────────────────────────────────────────────
+		addParam(createParamCentered<PogoSwitchV3>(mm2px(Vec(166.485f, 24.80f)), module, Pogo::BP3_DIST_MODE_PARAM));
 		addParam(createParamCentered<RoundHugeBlackKnob>(mm2px(Vec(183.070f, 24.80f)), module, Pogo::BP3_FREQ_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(170.925f, 47.69f)), module, Pogo::BP3_FOCUS_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(187.215f, 63.85f)), module, Pogo::BP3_TILT_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(170.925f, 80.00f)), module, Pogo::BP3_DIST_PARAM));
+		addChild(createLightCentered<SmallLight<RedLight>>(mm2px(Vec(187.070f, 83.00f)), module, Pogo::BP3_CLIP_LIGHT));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(167.64f, 100.00f)), module, Pogo::BP3_FREQ_ATT_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(179.07f, 100.00f)), module, Pogo::BP3_TILT_ATT_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(190.50f, 100.00f)), module, Pogo::BP3_DIST_ATT_PARAM));

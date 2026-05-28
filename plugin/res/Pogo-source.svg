@@ -266,6 +266,9 @@
   <!-- Zone — BP 2                                                              -->
   <!-- ════════════════════════════════════════════════════════════════════════ -->
 
+  <rect x="131.00" y="18.8" width="2.4" height="12.0" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
+  <rect x="130.79" y="23.05" width="2.8" height="3.5" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
+  <text x="132.195" y="33.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">DIST</text>
   <circle cx="148.78" cy="24.8" r="9.0" fill="#1a1a1a" stroke="#555" stroke-width="0.7"/>
   <line x1="148.78" y1="24.8" x2="148.78" y2="15.8" stroke="#aaa" stroke-width="0.8"/>
   <text x="148.78" y="36.8" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
@@ -278,6 +281,8 @@
   <circle cx="136.635" cy="80.0" r="7.0" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
   <line x1="136.635" y1="80.0" x2="136.635" y2="73.0" stroke="#aaa" stroke-width="0.7"/>
   <text x="136.635" y="90.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">DIST</text>
+  <circle cx="152.78" cy="83.0" r="1.2" fill="#441111" stroke="#cc2222" stroke-width="0.4"/>
+  <text x="152.78" y="90.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">CLIP</text>
   <circle cx="133.35" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
   <line x1="133.35" y1="100.0" x2="133.35" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
   <text x="133.35" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
@@ -301,6 +306,9 @@
   <!-- Zone — BP 3                                                              -->
   <!-- ════════════════════════════════════════════════════════════════════════ -->
 
+  <rect x="165.29" y="18.8" width="2.4" height="12.0" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
+  <rect x="165.09" y="23.05" width="2.8" height="3.5" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
+  <text x="166.485" y="33.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">DIST</text>
   <circle cx="183.07" cy="24.8" r="9.0" fill="#1a1a1a" stroke="#555" stroke-width="0.7"/>
   <line x1="183.07" y1="24.8" x2="183.07" y2="15.8" stroke="#aaa" stroke-width="0.8"/>
   <text x="183.07" y="36.8" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
@@ -313,6 +321,8 @@
   <circle cx="170.925" cy="80.0" r="7.0" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
   <line x1="170.925" y1="80.0" x2="170.925" y2="73.0" stroke="#aaa" stroke-width="0.7"/>
   <text x="170.925" y="90.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">DIST</text>
+  <circle cx="187.07" cy="83.0" r="1.2" fill="#441111" stroke="#cc2222" stroke-width="0.4"/>
+  <text x="187.07" y="90.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">CLIP</text>
   <circle cx="167.64000000000001" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
   <line x1="167.64000000000001" y1="100.0" x2="167.64000000000001" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
   <text x="167.64000000000001" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>

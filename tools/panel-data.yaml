@@ -558,6 +558,15 @@ zones:
     cols: 3
     components:
       # col0 cx=131.445  col1 cx=142.875  col2 cx=154.305
+      - id: BP2_DIST_SW
+        type: switch_V3
+        cx: 130.29
+        cy: 24.80
+        cy_body_top: 18.80
+        body_height: 12
+        label_below: "DIST"
+        label_below_y: 33.5
+        cpp_param: "BP2_DIST_MODE_PARAM"
       - id: BP2_FREQ
         type: knob_xl
         cx: 146.875
@@ -583,6 +592,14 @@ zones:
         cy: 80.00
         label: "DIST"
         cpp_param: "BP2_DIST_PARAM"
+      - id: BP2_CLIP_LED
+        type: led_labeled
+        cx: 150.875
+        cy: 83.00
+        label: "CLIP"
+        led_fill: "#441111"
+        led_stroke: "#cc2222"
+        cpp_id: "BP2_CLIP_LIGHT"
       - id: BP2_FREQ_ATT
         type: trimpot
         col: 0
@@ -625,6 +642,15 @@ zones:
     cols: 3
     components:
       # col0 cx=165.735  col1 cx=177.165  col2 cx=188.595
+      - id: BP3_DIST_SW
+        type: switch_V3
+        cx: 164.58
+        cy: 24.80
+        cy_body_top: 18.80
+        body_height: 12
+        label_below: "DIST"
+        label_below_y: 33.5
+        cpp_param: "BP3_DIST_MODE_PARAM"
       - id: BP3_FREQ
         type: knob_xl
         cx: 181.165
@@ -650,6 +676,14 @@ zones:
         cy: 80.00
         label: "DIST"
         cpp_param: "BP3_DIST_PARAM"
+      - id: BP3_CLIP_LED
+        type: led_labeled
+        cx: 185.165
+        cy: 83.00
+        label: "CLIP"
+        led_fill: "#441111"
+        led_stroke: "#cc2222"
+        cpp_id: "BP3_CLIP_LIGHT"
       - id: BP3_FREQ_ATT
         type: trimpot
         col: 0
