@@ -133,27 +133,27 @@
   <!-- Zone 0c — MOD BUS                                                        -->
   <!-- ════════════════════════════════════════════════════════════════════════ -->
 
-  <circle cx="7.62" cy="83.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="7.62" y1="83.0" x2="7.62" y2="80.5" stroke="#aaa" stroke-width="0.5"/>
-  <text x="7.62" y="88.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">SCALE</text>
+  <rect x="17.85" y="69.1" width="2.4" height="12.0" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
+  <rect x="17.65" y="73.35" width="2.8" height="3.5" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
+  <text x="19.05" y="84.1" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">MOD SRC</text>
+  <circle cx="19.05" cy="83.6" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="19.05" y1="83.6" x2="19.05" y2="81.1" stroke="#aaa" stroke-width="0.5"/>
+  <text x="19.05" y="89.1" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">SCALE</text>
   <circle cx="30.48" cy="83.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
   <line x1="30.48" y1="83.0" x2="30.48" y2="80.5" stroke="#aaa" stroke-width="0.5"/>
   <text x="30.48" y="88.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">VCA AMT</text>
-  <circle cx="7.62" cy="96.34" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="7.62" y1="96.34" x2="7.62" y2="93.84" stroke="#aaa" stroke-width="0.5"/>
-  <text x="7.62" y="101.8" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">OFFSET</text>
+  <rect x="17.85" y="86.1" width="2.4" height="12.0" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
+  <rect x="17.65" y="90.35" width="2.8" height="3.5" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
+  <text x="19.05" y="101.1" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">MOD SRC</text>
+  <circle cx="19.05" cy="100.6" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="19.05" y1="100.6" x2="19.05" y2="98.1" stroke="#aaa" stroke-width="0.5"/>
+  <text x="19.05" y="106.1" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">OFFSET</text>
   <circle cx="30.48" cy="96.34" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
   <line x1="30.48" y1="96.34" x2="30.48" y2="93.84" stroke="#aaa" stroke-width="0.5"/>
   <text x="30.48" y="101.8" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">VCA OFS</text>
-  <rect x="17.85" y="83.67" width="2.4" height="12.0" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
-  <rect x="17.65" y="87.92" width="2.8" height="3.5" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
-  <text x="19.05" y="98.67" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">MOD SRC</text>
-  <rect x="17.85" y="95.0" width="2.4" height="12.0" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
-  <rect x="17.65" y="99.25" width="2.8" height="3.5" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
-  <text x="19.05" y="110.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">MOD SRC</text>
-  <circle cx="7.62" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
-  <circle cx="7.62" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
-  <text x="7.62" y="119.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">MOD IN</text>
+  <circle cx="19.05" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
+  <circle cx="19.05" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
+  <text x="19.05" y="119.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">MOD IN</text>
   <circle cx="30.48" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="30.48" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
   <text x="30.48" y="119.0" fill="#888" font-family="monospace" font-size="1.6" text-anchor="middle">VCA IN</text>

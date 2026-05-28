@@ -255,21 +255,28 @@ zones:
         cpp_param: "LFO2_RATE_PARAM"
 
   # ── Section 0c: MOD BUS ───────────────────────────────────────────────────
-  # Row 1 knobs: SCALE col 0 (rotate=180 keeps CrtYd in panel), VCA AMT col 2
-  #   col 0 and col 2 have 5.56mm x-gap → same cy OK; cy=83
-  # Row 2 knobs: OFFSET col 0 (rotate=180), VCA OFS col 2; cy=96.34 (min pot→pot 13.34mm)
-  # Row 3 jacks: MOD IN col 0, LED col 1 (blue), VCA IN col 2; cy=112 (cv_jack_cy)
-  #   Pot→jack gap: 96.34+6.67=103.01 vs 112-7.9=104.1 → 1.09mm clearance ✓
+  # All of SCALE, OFFSET, MOD_IN and both switches share col 1.
+  # LFO2_LED above at cy=65.9 (bottom=69.9) sets the upper bound.
+  # MOD_IN jack at cy=112 sets the lower bound (courtyard bottom=118.5 = keepout).
+  # Interleaved layout: SW1→SCALE→SW2→OFFSET→MOD_IN; min separations:
+  #   SW_V3↔trimpot=8.385mm, SW_V3↔SW_V3=10mm, trimpot↔jack=11.285mm
+  # Gaps approx 0.1–0.2mm at all boundaries (tight but DRC-clean).
   - id: zone_mod
     label: "Zone 0c — MOD BUS"
     x_start: 0
     col_pitch: 11.43
     cols: 3
     components:
+      - id: MOD_SRC_SW
+        type: switch_V3
+        col: 1
+        cy: 75.1
+        label: "MOD SRC"
+        cpp_param: "MOD_SRC_PARAM"
       - id: SCALE
         type: trimpot
-        col: 0
-        cy: 83.0
+        col: 1
+        cy: 83.6
         rotate: 180
         label: "SCALE"
         cpp_param: "MOD_SCALE_PARAM"
@@ -279,10 +286,16 @@ zones:
         cy: 83.0
         label: "VCA AMT"
         cpp_param: "VCA_AMT_PARAM"
+      - id: MOD_SRC_SW2
+        type: switch_V3
+        col: 1
+        cy: 92.1
+        label: "MOD SRC"
+        cpp_param: "MOD_SRC2_PARAM"
       - id: OFFSET
         type: trimpot
-        col: 0
-        cy: 96.34
+        col: 1
+        cy: 100.6
         rotate: 180
         label: "OFFSET"
         cpp_param: "MOD_OFFSET_PARAM"
@@ -292,21 +305,9 @@ zones:
         cy: 96.34
         label: "VCA OFS"
         cpp_param: "VCA_OFS_PARAM"
-      - id: MOD_SRC_SW
-        type: switch_V3
-        col: 1
-        cy: 89.67
-        label: "MOD SRC"
-        cpp_param: "MOD_SRC_PARAM"
-      - id: MOD_SRC_SW2
-        type: switch_V3
-        col: 1
-        cy: 101.0
-        label: "MOD SRC"
-        cpp_param: "MOD_SRC2_PARAM"
       - id: MOD_IN
         type: jack_input
-        col: 0
+        col: 1
         cy: 112.0
         label: "MOD IN"
         font_size: 1.6
