@@ -1332,8 +1332,8 @@
     let h = `<div class="panel-h">Add Component</div><div class="palette">`;
     for (const t of PALETTE_TYPES) h += `<div class="pal-item" draggable="false" data-add="${t}">${t.replace(/_/g, "&#8203;_")}</div>`;
     h += `</div><div class="field row" style="margin-bottom:12px">` +
-      `<div><button id="add-div-h">+ Divider —</button></div>` +
-      `<div><button id="add-zone">+ Zone (+ ▏)</button></div></div>`;
+      `<div><button id="add-div-h">Add Divider</button></div>` +
+      `<div><button id="add-zone">Add Zone</button></div></div>`;
     // Group dividers by the zone whose x-span contains them; the rest go to "Other".
     // A zone's own boundary divider is omitted here — it's represented by the zone row.
     const sepByZone = {}; const otherSeps = [];
