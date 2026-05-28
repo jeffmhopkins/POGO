@@ -876,7 +876,7 @@ def _component_svg(comp: dict, rules: DesignRules, colors: dict) -> str:
             pos_labels=comp.get("pos_labels", []),
             pos_xs=pos_xs,
             pos_y=float(comp.get("pos_y", cy + 5.3)),
-            label_below=comp.get("label_below", ""),
+            label_below=comp.get("label_below", comp.get("label", "")),
             label_below_y=float(comp.get("label_below_y", cy + 8.8)),
             colors=colors,
         )
