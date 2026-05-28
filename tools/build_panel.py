@@ -29,6 +29,7 @@ REPO_ROOT   = Path(__file__).resolve().parent.parent
 SVG_SOURCE  = REPO_ROOT / "plugin" / "res" / "Pogo-source.svg"
 SVG_MFR     = REPO_ROOT / "plugin" / "res" / "Pogo.svg"
 HTML_DEBUG  = REPO_ROOT / "design" / "panel-debug.html"
+HTML_EDITOR = REPO_ROOT / "design" / "panel-editor.html"
 DATA_FILE   = REPO_ROOT / "tools" / "panel-data.yaml"
 
 # Add tools/ to path so sibling modules are importable
@@ -38,6 +39,7 @@ from panel_rules import DesignRules   # noqa: E402
 import panel_svg as svg               # noqa: E402
 from panel_cpp import generate_cpp_stubs  # noqa: E402
 from panel_kicad import build_kicad_layer  # noqa: E402
+from panel_editor import build_editor_html  # noqa: E402
 
 
 # ── YAML loader ───────────────────────────────────────────────────────────────
@@ -1330,6 +1332,7 @@ Query commands (no files written):
     )
     parser.add_argument("--resource",  action="store_true", help="Write plugin/res/Pogo-source.svg")
     parser.add_argument("--design",    action="store_true", help="Write design/panel-debug.html")
+    parser.add_argument("--editor",    action="store_true", help="Write design/panel-editor.html (interactive editor)")
     parser.add_argument("--mfr",       action="store_true", help="Write plugin/res/Pogo.svg via inkscape (included in default build)")
     parser.add_argument("--cpp",       action="store_true", help="Print C++ stubs to stdout")
     parser.add_argument("--check",     action="store_true", help="DRC only; exit 1 on violations")
@@ -1356,11 +1359,12 @@ Query commands (no files written):
                     getattr(args, "select", None),  getattr(args, "shift", None),
                     getattr(args, "shift_select", None)])
 
-    # Default: --resource + --mfr (Pogo.svg for VCV Rack) + --design
-    if not any([args.resource, args.design, args.mfr, args.cpp, is_query]):
+    # Default: --resource + --mfr (Pogo.svg for VCV Rack) + --design + --editor
+    if not any([args.resource, args.design, args.editor, args.mfr, args.cpp, is_query]):
         args.resource = True
         args.mfr      = True
         args.design   = True
+        args.editor   = True
 
     data  = load_data()
     rules = DesignRules.from_data(data)
@@ -1453,6 +1457,13 @@ Query commands (no files written):
         HTML_DEBUG.write_text(html_content, encoding="utf-8")
         vio_msg = f"  ({len(violations)} DRC violation(s))" if violations else "  (DRC PASS)"
         print(f"Wrote {HTML_DEBUG.relative_to(REPO_ROOT)}{vio_msg}")
+
+    if args.editor:
+        yaml_text     = DATA_FILE.read_text(encoding="utf-8")
+        editor_html   = build_editor_html(data, rules, yaml_text)
+        HTML_EDITOR.parent.mkdir(parents=True, exist_ok=True)
+        HTML_EDITOR.write_text(editor_html, encoding="utf-8")
+        print(f"Wrote {HTML_EDITOR.relative_to(REPO_ROOT)}")
 
     if args.mfr:
         if not args.resource:

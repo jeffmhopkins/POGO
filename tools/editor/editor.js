@@ -1,0 +1,968 @@
+/* POGO Panel Editor — interactive layout editor.
+ *
+ * Generated into design/panel-editor.html by tools/panel_editor.py. The page embeds:
+ *   #panel-payload  →  { data, yaml_text, constants, kicad_templates, footprint_names }
+ *
+ * All geometry constants (courtyards, nut radii, design rules) come from panel_rules.py
+ * via the payload, so the in-browser DRC matches `build_panel.py --check` exactly.
+ *
+ * Edit → drag/rotate/add/delete/HP/dividers → Export YAML → paste over
+ * tools/panel-data.yaml → `python3 tools/build_panel.py --check` → rebuild.
+ */
+(function () {
+  "use strict";
+
+  // ── Payload ────────────────────────────────────────────────────────────────
+  const PAYLOAD = JSON.parse(document.getElementById("panel-payload").textContent);
+  const C   = PAYLOAD.constants;
+  const DR  = C.design_rules;
+  const KT  = PAYLOAD.kicad_templates;
+  const FPN = PAYLOAD.footprint_names;
+  const SCALE = 4;                       // px per mm for on-screen display
+
+  const clone = (o) => JSON.parse(JSON.stringify(o));
+  const D    = clone(PAYLOAD.data);      // working model (mutated by edits)
+  const ORIG = clone(PAYLOAD.data);      // pristine copy for export diffing
+
+  // Editor UI state
+  const UI = {
+    selId: null,
+    snap: false,
+    snapMm: 0.5,
+    layers: { panel: true, keepout: false, nuts: false, pcb: false, kicad: false },
+  };
+
+  // ── Small helpers ────────────────────────────────────────────────────────────
+  const f2 = (x) => Number(x).toFixed(2);
+  const f3 = (x) => Number(x).toFixed(3);
+  function fmtVal(v) {                    // mirrors build_panel._fmt_val
+    if (v === Math.trunc(v)) return String(Math.trunc(v));
+    let s = Number(v).toFixed(3);
+    s = s.replace(/0+$/, "").replace(/\.$/, "");
+    return s;
+  }
+  const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+  const PALETTE_TYPES = [
+    "jack_input", "jack_output", "trimpot",
+    "knob_medium", "knob_large", "knob_xl",
+    "switch_H2", "switch_H3", "switch_V3",
+    "led", "led_labeled", "slider_V45",
+  ];
+
+  function compLabel(c) {
+    return c.id || c.label || c.cpp_id || c.cpp_param || "?";
+  }
+  function zoneOf(c) {
+    for (const z of D.zones || []) {
+      if ((z.components || []).indexOf(c) >= 0) return z;
+    }
+    return null;
+  }
+  function allComps() {                   // flat list with their owning zone
+    const out = [];
+    for (const z of D.zones || []) for (const c of z.components || []) out.push({ c, z });
+    return out;
+  }
+  function findComp(id) {
+    for (const z of D.zones || []) for (const c of z.components || []) if (c.id === id) return { c, z };
+    return null;
+  }
+
+  // ── Resolution (port of build_panel._resolve_comp) ─────────────────────────
+  function resolve(c, z) {
+    let cx;
+    if (c.col != null && z && z.x_start != null) {
+      const pitch = z.col_pitch != null ? Number(z.col_pitch) : DR.jack_pitch;
+      cx = Number(z.x_start) + (Number(c.col) + 0.5) * pitch;
+    } else {
+      cx = Number(c.cx);
+    }
+    if (DR.x_offset && cx != null && !Number.isNaN(cx)) cx += DR.x_offset;
+
+    let cy = c.cy;
+    const isJack = c.type === "jack_input" || c.type === "jack_output";
+    if (cy === "_cv_jack_cy_" || (cy == null && isJack)) cy = DR.cv_jack_cy;
+    else if (cy === "_att_cy_" || cy == null) cy = DR.att_cy;
+    else if (typeof cy === "string" && cy[0] === "_") cy = isJack ? DR.cv_jack_cy : DR.att_cy;
+    else cy = Number(cy);
+    return { cx, cy };
+  }
+  // Raw (pre-x_offset) cx of a component as currently modelled.
+  function rawCx(c, z) { return resolve(c, z).cx - (DR.x_offset || 0); }
+
+  // ── Courtyard geometry (port of panel_rules) ───────────────────────────────
+  const CY = C.courtyards;
+  function courtyardConst(type) {
+    if (C.type_sets.jack.includes(type)) return CY.JACK_CY;
+    if (type === "trimpot") return CY.TRIMPOT_CY;
+    if (C.type_sets.pot.includes(type)) return CY.POT_CY;
+    if (C.type_sets.slider.includes(type)) return CY.SLIDER_V45_CY;
+    if (C.type_sets.switch_v3.includes(type)) return CY.SWITCH_V3_CY;
+    if (type === "switch_H3") return CY.SWITCH_H3_CY;
+    if (type === "switch_H2") return CY.SWITCH_CY;
+    if (C.type_sets.led.includes(type)) return CY.LED_CY;
+    return null;
+  }
+  function rotateRect(rect, deg) {
+    if (!deg) return rect.slice();
+    const [x1, y1, x2, y2] = rect;
+    let pts = [[x1, y1], [x2, y1], [x1, y2], [x2, y2]];
+    if (deg === 90) pts = pts.map(([x, y]) => [y, -x]);
+    else if (deg === 180) pts = pts.map(([x, y]) => [-x, -y]);
+    else if (deg === 270) pts = pts.map(([x, y]) => [-y, x]);
+    else return rect.slice();
+    const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]);
+    return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)];
+  }
+  function courtyard(cx, cy, type, deg) {
+    const base = courtyardConst(type);
+    if (!base) return null;
+    const [x1, y1, x2, y2] = rotateRect(base, deg || 0);
+    return [cx + x1, cy + y1, cx + x2, cy + y2];
+  }
+  function panelR(type) {
+    const P = C.panel_r;
+    if (C.type_sets.jack.includes(type)) return P.jack;
+    if (type === "trimpot") return P.trimpot;
+    if (C.type_sets.pot.includes(type)) return P.pot;
+    if (C.type_sets.slider.includes(type)) return P.slider;
+    if (C.type_sets.switch_v3.includes(type)) return P.switch_v3;
+    if (type === "switch_H2" || type === "switch_H3") return P.switch_h;
+    if (C.type_sets.led.includes(type)) return P.led;
+    return 0;
+  }
+
+  // ── DRC (port of panel_rules.check_all) ────────────────────────────────────
+  // Returns { violations:[str...], badIds:Set }.  Strings match the Python output
+  // so the editor report mirrors `build_panel.py --check`.
+  function runDRC() {
+    const comps = allComps().map(({ c, z }) => {
+      const { cx, cy } = resolve(c, z);
+      return { c, cx, cy, type: c.type, rot: Number(c.rotate || 0), label: compLabel(c) };
+    });
+    const V = [];
+    const bad = new Set();
+    const flag = (c) => { if (c && c.id) bad.add(c.id); };
+
+    const topKO = DR.top_keepout, botKO = DR.bot_keepout_start;
+
+    // 1 ── nut keep-out
+    for (const o of comps) {
+      const { cx, cy, type, label } = o;
+      let r = null, kind = null;
+      if (C.type_sets.jack.includes(type)) { r = DR.jack_nut_r; kind = "JACK"; }
+      else if (C.type_sets.pot.includes(type)) { r = DR.pot_nut_r; kind = "POT"; }
+      else if (C.type_sets.switch_h.includes(type)) { r = C.panel_r.switch_h; kind = "SWITCH"; }
+      else if (C.type_sets.led.includes(type)) { r = C.panel_r.led; kind = "LED"; }
+      if (r == null) continue;
+      const top = cy - r, bot = cy + r;
+      if (kind === "JACK" || kind === "POT") {
+        if (top < topKO) {
+          V.push(`[NUT KEEPOUT] ${kind} '${label}' @ cx=${f2(cx)},cy=${f2(cy)}: nut top=${f2(top)}mm breaches TOP keepout (${f2(topKO)}mm) — move down by ≥${f2(topKO - top)}mm`);
+          flag(o.c);
+        }
+        if (bot > botKO) {
+          V.push(`[NUT KEEPOUT] ${kind} '${label}' @ cx=${f2(cx)},cy=${f2(cy)}: nut bottom=${f2(bot)}mm breaches BOT keepout (${f2(botKO)}mm) — move up by ≥${f2(bot - botKO)}mm`);
+          flag(o.c);
+        }
+      } else { // SWITCH / LED use the "hole" wording
+        if (top < topKO) {
+          V.push(`[NUT KEEPOUT] ${kind} '${label}' at cy=${f2(cy)}: hole top=${f2(top)} encroaches TOP keepout (${f2(topKO)})`);
+          flag(o.c);
+        }
+        if (bot > botKO) {
+          V.push(`[NUT KEEPOUT] ${kind} '${label}' at cy=${f2(cy)}: hole bottom=${f2(bot)} exceeds BOT keepout start (${f2(botKO)})`);
+          flag(o.c);
+        }
+      }
+    }
+
+    // 2 ── panel-face nut / hole clearance (circles overlap)
+    const circles = comps.map((o) => ({ ...o, r: panelR(o.type) })).filter((o) => o.r > 0);
+    for (let i = 0; i < circles.length; i++) {
+      for (let j = i + 1; j < circles.length; j++) {
+        const a = circles[i], b = circles[j];
+        const dist = Math.hypot(b.cx - a.cx, b.cy - a.cy);
+        const need = a.r + b.r;
+        if (dist < need) {
+          const ov = need - dist;
+          V.push(`[NUT CLEARANCE] '${a.label}' (${a.type} @ cx=${f2(a.cx)},cy=${f2(a.cy)}, r=${a.r}mm) ↔ '${b.label}' (${b.type} @ cx=${f2(b.cx)},cy=${f2(b.cy)}, r=${b.r}mm) — panel circles overlap ${f2(ov)}mm (centre-to-centre=${f2(dist)}mm, need≥${f2(need)}mm; increase separation by ≥${f2(ov)}mm)`);
+          flag(a.c); flag(b.c);
+        }
+      }
+    }
+
+    // 3 ── PCB courtyard overlaps
+    const fp = comps.map((o) => ({ ...o, rect: courtyard(o.cx, o.cy, o.type, o.rot) })).filter((o) => o.rect);
+    for (let i = 0; i < fp.length; i++) {
+      for (let j = i + 1; j < fp.length; j++) {
+        const a = fp[i], b = fp[j];
+        const dx = Math.min(a.rect[2], b.rect[2]) - Math.max(a.rect[0], b.rect[0]);
+        const dy = Math.min(a.rect[3], b.rect[3]) - Math.max(a.rect[1], b.rect[1]);
+        if (dx > 0 && dy > 0) {
+          const gap = -Math.min(dx, dy);
+          V.push(`[PCB OVERLAP] '${a.label}' (${a.type} @ cx=${f2(a.cx)},cy=${f2(a.cy)}) ↔ '${b.label}' (${b.type} @ cx=${f2(b.cx)},cy=${f2(b.cy)}) — courtyard overlap ${f2(dx)}×${f2(dy)}mm (gap=${f2(gap)}mm)`);
+          flag(a.c); flag(b.c);
+        }
+      }
+    }
+
+    // 4 ── mounting-hole clearance
+    const mhr = C.mounting_hole_clearance_mm;
+    for (const o of fp) {
+      const [x1, y1, x2, y2] = o.rect;
+      for (const mh of D.mounting_holes || []) {
+        const hx = Number(mh.cx), hy = Number(mh.cy);
+        const nx = Math.max(x1, Math.min(hx, x2));
+        const ny = Math.max(y1, Math.min(hy, y2));
+        const dist = Math.hypot(hx - nx, hy - ny);
+        if (dist < mhr) {
+          V.push(`[MH CLEARANCE] '${o.label}' (${o.type} @ cx=${f2(o.cx)},cy=${f2(o.cy)}) PCB courtyard is ${f2(dist)}mm from mounting hole M3 @ (${fmtVal(hx)},${fmtVal(hy)}) — need ≥${mhr.toFixed(1)}mm; move component away by ≥${f2(mhr - dist)}mm`);
+          flag(o.c);
+        }
+      }
+    }
+
+    // 5 ── PCB courtyard keep-out (rail intrusion)
+    for (const o of fp) {
+      const [, y1, , y2] = o.rect;
+      const rotS = o.rot ? ` rotate=${o.rot}°` : "";
+      if (y1 < topKO) {
+        V.push(`[PCB KEEPOUT] '${o.label}' (${o.type} @ cx=${f2(o.cx)},cy=${f2(o.cy)}${rotS}) courtyard top=${f2(y1)}mm breaches TOP keepout (${f2(topKO)}mm) by ${f2(topKO - y1)}mm — move component down by ≥${f2(topKO - y1)}mm`);
+        flag(o.c);
+      }
+      if (y2 > botKO) {
+        V.push(`[PCB KEEPOUT] '${o.label}' (${o.type} @ cx=${f2(o.cx)},cy=${f2(o.cy)}${rotS}) courtyard bottom=${f2(y2)}mm breaches BOT keepout (${f2(botKO)}mm) by ${f2(y2 - botKO)}mm — move up by ≥${f2(y2 - botKO)}mm or add rotate:180`);
+        flag(o.c);
+      }
+    }
+    return { violations: V, badIds: bad };
+  }
+
+  // ── SVG component renderers (anchor-relative: origin = panel hole at 0,0) ───
+  const COL = D.colors;
+  const FONT = 'font-family="monospace"';
+  function rJack(c, io) {
+    const fs = Number(c.font_size || 1.8);
+    const ly = DR.jack_label_dy;
+    let s = `<circle r="3.5" fill="none" stroke="${COL.jack_outer}" stroke-width="0.6"/>` +
+            `<circle r="1.4" fill="${COL.jack_inner}" stroke="${COL.jack_inner_s}" stroke-width="0.4"/>`;
+    if (io === "output") {
+      const rw = c.rect_w != null ? Number(c.rect_w) : 7.0;
+      const ry = ly + DR.output_rect_dy;
+      s += `<rect x="${(-rw / 2).toFixed(2)}" y="${ry.toFixed(2)}" width="${rw}" height="${DR.output_rect_h}" rx="${DR.output_rect_rx}" fill="none" stroke="${COL.output_rect_s}" stroke-width="0.3"/>`;
+    }
+    s += `<text y="${ly.toFixed(1)}" fill="${COL.jack_text}" ${FONT} font-size="${fs}" text-anchor="middle">${esc(c.label || "")}</text>`;
+    return s;
+  }
+  function rTrimpot(c) {
+    const fs = Number(c.label_font_size || 1.8);
+    return `<circle r="2.5" fill="${COL.knob_fill}" stroke="${COL.knob_stroke}" stroke-width="0.5"/>` +
+           `<line y2="${(-DR.indicator_length)}" stroke="${COL.indicator}" stroke-width="0.5"/>` +
+           `<text y="${(2.5 + 3.0).toFixed(1)}" fill="${COL.control_text}" ${FONT} font-size="${fs}" text-anchor="middle">${esc(c.label || "")}</text>`;
+  }
+  function rKnob(c, r) {
+    let sw = 0.5 + (r - 2.5) * 0.05, isw = 0.5 + (r - 2.5) * 0.06;
+    if (r >= 9) { sw = 0.7; isw = 0.8; } else if (r >= 7) { sw = 0.6; isw = 0.7; }
+    const lines = c.label_lines || [c.label || ""];
+    const fill = c.label_fill || COL.control_text;
+    let s = `<circle r="${r}" fill="${COL.knob_fill}" stroke="${COL.knob_stroke}" stroke-width="${sw.toFixed(1)}"/>` +
+            `<line y2="${(-r)}" stroke="${COL.indicator}" stroke-width="${isw.toFixed(1)}"/>`;
+    const base = r + 3.0;
+    lines.forEach((ln, i) => {
+      s += `<text y="${(base + i * 2.3).toFixed(1)}" fill="${fill}" ${FONT} font-size="1.8" text-anchor="middle">${esc(ln)}</text>`;
+    });
+    return s;
+  }
+  function rLed(c) {
+    return `<circle r="1.2" fill="${c.led_fill || COL.led_fill}" stroke="${c.led_stroke || COL.led_stroke}" stroke-width="0.4"/>`;
+  }
+  function rLedLabeled(c) {
+    const dy = c.label_dy != null ? Number(c.label_dy) : DR.jack_label_dy;
+    const lf = c.label_fill || COL.jack_text;
+    const fs = Number(c.font_size || 1.8);
+    return rLed(c) + `<text y="${dy.toFixed(1)}" fill="${lf}" ${FONT} font-size="${fs}" text-anchor="middle">${esc(c.label || "")}</text>`;
+  }
+  function rSwitchH(c, width, rawcx) {
+    const labels = c.pos_labels || [], xs = c.pos_xs || [];
+    const bx = -width / 2;
+    let s = "";
+    if (width === 9 && c.label_above != null) {
+      const ay = c.label_above_y != null ? Number(c.label_above_y) - resolve(c, zoneOf(c)).cy : -3.5;
+      s += `<text y="${ay}" fill="${COL.jack_text}" ${FONT} font-size="1.8" text-anchor="middle">${esc(c.label_above)}</text>`;
+    }
+    const slug = width === 9 ? bx + 0.5 : -1.75;
+    s += `<rect x="${bx.toFixed(2)}" y="-1.2" width="${width}" height="2.4" rx="1.2" fill="${COL.switch_body}" stroke="${COL.jack_outer}" stroke-width="0.5"/>`;
+    s += `<rect x="${slug.toFixed(2)}" y="-1.4" width="3.5" height="2.8" rx="0.8" fill="${COL.switch_slug}" stroke="${COL.switch_slug_s}" stroke-width="0.3"/>`;
+    const cy = resolve(c, zoneOf(c)).cy;
+    const posY = c.pos_y != null ? Number(c.pos_y) - cy : (width === 9 ? 4 : 5.3);
+    labels.forEach((pl, i) => {
+      const px = (xs[i] != null ? Number(xs[i]) - rawcx : 0);
+      s += `<text x="${px}" y="${posY}" fill="${COL.jack_text}" ${FONT} font-size="1.6" text-anchor="middle">${esc(pl)}</text>`;
+    });
+    if (width === 12) {
+      const lby = c.label_below_y != null ? Number(c.label_below_y) - cy : 8.8;
+      s += `<text y="${lby}" fill="${COL.control_text}" ${FONT} font-size="1.8" text-anchor="middle">${esc(c.label_below || c.label || "")}</text>`;
+    }
+    return s;
+  }
+  function rSwitchV3(c) {
+    const cy = resolve(c, zoneOf(c)).cy;
+    const bh = Number(c.body_height || 12);
+    const top = (c.cy_body_top != null ? Number(c.cy_body_top) - cy : -bh / 2);
+    const slugOff = Number(c.slug_y_offset != null ? c.slug_y_offset : 4.25);
+    let s = `<rect x="-1.2" y="${top.toFixed(2)}" width="2.4" height="${bh}" rx="1.2" fill="${COL.switch_body}" stroke="${COL.jack_outer}" stroke-width="0.5"/>`;
+    s += `<rect x="-1.4" y="${(top + slugOff).toFixed(2)}" width="2.8" height="3.5" rx="0.8" fill="${COL.switch_slug}" stroke="${COL.switch_slug_s}" stroke-width="0.3"/>`;
+    const labels = c.pos_labels || [], ys = c.pos_ys || [];
+    labels.forEach((pl, i) => {
+      const py = (ys[i] != null ? Number(ys[i]) - cy : (top + i * (bh / Math.max(1, labels.length - 1))));
+      s += `<text x="1.4" y="${py}" fill="${COL.switch_label}" ${FONT} font-size="1.4" text-anchor="start">${esc(pl)}</text>`;
+    });
+    const lby = c.label_below_y != null ? Number(c.label_below_y) - cy : (bh / 2 + 3);
+    s += `<text y="${lby}" fill="${COL.control_text}" ${FONT} font-size="1.8" text-anchor="middle">${esc(c.label_below || c.label || "")}</text>`;
+    return s;
+  }
+  function rSlider(c) {
+    const travel = 45.0, half = travel / 2, slotH = travel + 3.0, slotW = 2.5;
+    let s = `<rect x="${(-slotW / 2).toFixed(2)}" y="${(-slotH / 2).toFixed(2)}" width="${slotW}" height="${slotH.toFixed(1)}" rx="1.2" fill="${COL.knob_fill}" stroke="${COL.knob_stroke}" stroke-width="0.4"/>`;
+    s += `<line x1="-3.5" y1="${(-half).toFixed(2)}" x2="3.5" y2="${(-half).toFixed(2)}" stroke="${COL.knob_stroke}" stroke-width="0.5"/>`;
+    s += `<line x1="-3.5" y1="${half.toFixed(2)}" x2="3.5" y2="${half.toFixed(2)}" stroke="${COL.knob_stroke}" stroke-width="0.5"/>`;
+    s += `<line x1="-2" y1="0" x2="2" y2="0" stroke="${COL.indicator}" stroke-width="0.35"/>`;
+    s += `<text y="${(-slotH / 2 - 3.5).toFixed(1)}" fill="${COL.jack_text}" ${FONT} font-size="1.8" text-anchor="middle">${esc(c.label || "")}</text>`;
+    return s;
+  }
+  // Visual SVG (anchor-relative) for a component.
+  function visual(c) {
+    switch (c.type) {
+      case "jack_input":  return rJack(c, "input");
+      case "jack_output": return rJack(c, "output");
+      case "trimpot":     return rTrimpot(c);
+      case "knob_medium": return rKnob(c, 4.5);
+      case "knob_large":  return rKnob(c, 7.0);
+      case "knob_xl":     return rKnob(c, 9.0);
+      case "led":         return rLed(c);
+      case "led_labeled": return rLedLabeled(c);
+      case "switch_H2":   return rSwitchH(c, 9, rawCx(c, zoneOf(c)));
+      case "switch_H3":   return rSwitchH(c, 12, rawCx(c, zoneOf(c)));
+      case "switch_V3":   return rSwitchV3(c);
+      case "slider_V45":  return rSlider(c);
+      default:            return `<circle r="2" fill="none" stroke="#888"/>`;
+    }
+  }
+
+  // ── Page chrome (background, separators, labels) ───────────────────────────
+  function sepV(x, y1, y2, style) {
+    if (style === "main_cyan") return `<line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}" stroke="${COL.cyan}" stroke-width="0.5" opacity="0.55"/>`;
+    if (style === "subdiv_gray") return `<line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}" stroke="${COL.subdiv}" stroke-width="0.4"/>`;
+    return `<line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}" stroke="${COL.zone_div}" stroke-width="0.5"/>`;
+  }
+  function sepH(x1, x2, y, style) {
+    const cyan = style === "main_cyan";
+    return `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="${cyan ? COL.cyan : COL.zone_div}" stroke-width="0.5"${cyan ? ' opacity="0.55"' : ""}/>`;
+  }
+  function sepHLabeled(x1, x2, y, label, lx, style) {
+    const fs = 2.0, halfW = label.length * fs * 0.65 / 2, gap = 2.0;
+    const gl = lx - halfW - gap, gr = lx + halfW + gap;
+    const cyan = style === "main_cyan";
+    const stroke = cyan ? COL.cyan : COL.zone_div, extra = cyan ? ' opacity="0.55"' : "";
+    let s = "";
+    if (x1 < gl) s += `<line x1="${x1}" y1="${y}" x2="${gl.toFixed(2)}" y2="${y}" stroke="${stroke}" stroke-width="0.5"${extra}/>`;
+    if (gr < x2) s += `<line x1="${gr.toFixed(2)}" y1="${y}" x2="${x2}" y2="${y}" stroke="${stroke}" stroke-width="0.5"${extra}/>`;
+    s += `<text x="${lx}" y="${y}" fill="${COL.control_text}" ${FONT} font-size="${fs}" text-anchor="middle" dominant-baseline="middle">${esc(label)}</text>`;
+    return s;
+  }
+  function chromeSVG() {
+    const W = Number(D.meta.width_mm), H = Number(D.meta.height_mm), ox = DR.x_offset || 0;
+    let s = "";
+    s += `<rect x="0" y="0" width="${W}" height="${H}" fill="${COL.panel_bg}"/>`;
+    s += `<rect x="0" y="0" width="${W}" height="9" fill="${COL.panel_strip}"/>`;
+    s += `<rect x="0" y="${H - 4.5}" width="${W}" height="4.5" fill="${COL.panel_strip}"/>`;
+    for (const mh of D.mounting_holes || [])
+      s += `<circle cx="${mh.cx}" cy="${mh.cy}" r="1.6" fill="#0d0d0d" stroke="#2a2a2a" stroke-width="0.5"/>`;
+    // title
+    const tx = W / 2, title = D.meta.title || "";
+    if (title.includes("·")) {
+      const [a, b] = title.split(/·(.*)/s);
+      s += `<text x="${tx.toFixed(2)}" y="5.75" fill="${COL.cyan}" ${FONT} font-size="3.5" font-weight="bold" text-anchor="middle">${esc(a)}<tspan fill="${D.meta.title_dot_color}">·</tspan>${esc(b)}</text>`;
+    } else {
+      s += `<text x="${tx.toFixed(2)}" y="5.75" fill="${COL.cyan}" ${FONT} font-size="3.5" font-weight="bold" text-anchor="middle">${esc(title)}</text>`;
+    }
+    s += `<text x="${tx.toFixed(2)}" y="127.5" fill="${COL.brand_text}" ${FONT} font-size="2.4" text-anchor="middle" letter-spacing="0.15">${esc(D.meta.brand || "")}</text>`;
+    // separators
+    for (const sp of D.separators || []) {
+      if (sp.type === "v") s += sepV(sp.x + ox, sp.y1, sp.y2, sp.style);
+      else if (sp.type === "h") {
+        const x1 = sp.x1 + ox, x2 = sp.x2 + ox;
+        if (sp.label != null) s += sepHLabeled(x1, x2, sp.y, sp.label, (sp.label_x != null ? sp.label_x : (sp.x1 + sp.x2) / 2) + ox, sp.style);
+        else s += sepH(x1, x2, sp.y, sp.style);
+      }
+    }
+    for (const zl of D.zone_labels || []) {
+      s += `<text x="${zl.x}" y="${zl.y}" fill="${COL.cyan}" ${FONT} font-size="2.4" text-anchor="middle" font-weight="bold">${esc(zl.text)}</text>`;
+      if (zl.subtitle) s += `<text x="${zl.x}" y="${zl.y + 4.5}" fill="${COL.brand_text}" ${FONT} font-size="1.6" text-anchor="middle">${esc(zl.subtitle)}</text>`;
+    }
+    return s;
+  }
+
+  // ── Full SVG assembly ──────────────────────────────────────────────────────
+  let svgEl = null;
+  function buildSVG(badIds) {
+    const W = Number(D.meta.width_mm), H = Number(D.meta.height_mm);
+    const comps = allComps();
+
+    // layer-panel: chrome + each component visual (+ transparent hit target)
+    let panel = chromeSVG();
+    for (const { c, z } of comps) {
+      const { cx, cy } = resolve(c, z);
+      const hitR = Math.max(panelR(c.type), 2.2);
+      const selCls = c.id === UI.selId ? " sel" : "";
+      const badCls = badIds && badIds.has(c.id) ? " violation" : "";
+      panel += `<g class="comp${selCls}${badCls}" data-cid="${esc(c.id)}" transform="translate(${f3(cx)},${f3(cy)})">` +
+               visual(c) +
+               `<circle class="hit" r="${hitR.toFixed(2)}"/></g>`;
+    }
+
+    // overlay layers
+    const kot = DR.top_keepout, kob = DR.bot_keepout_start;
+    let keepout = `<rect x="0" y="0" width="${W}" height="${kot}" fill="rgba(255,0,0,0.18)"/>` +
+      `<rect x="0" y="${kob}" width="${W}" height="${H - kob}" fill="rgba(255,0,0,0.18)"/>` +
+      `<line x1="0" y1="${kot}" x2="${W}" y2="${kot}" stroke="#ff4444" stroke-width="0.35" stroke-dasharray="1 0.7"/>` +
+      `<line x1="0" y1="${kob}" x2="${W}" y2="${kob}" stroke="#ff4444" stroke-width="0.35" stroke-dasharray="1 0.7"/>`;
+
+    let nuts = "", pcb = "", kicad = "";
+    const nutColor = { jack: ["rgba(255,204,0,0.35)", "#ffcc00"], pot: ["rgba(100,180,255,0.35)", "#64b4ff"], switch: ["rgba(220,100,255,0.35)", "#dc64ff"], led: ["rgba(100,220,100,0.35)", "#64dc64"] };
+    const pcbColor = { jack: ["rgba(255,204,0,0.15)", "#ffcc00"], pot: ["rgba(100,180,255,0.15)", "#64b4ff"], switch: ["rgba(220,100,255,0.15)", "#dc64ff"], led: ["rgba(100,220,100,0.15)", "#64dc64"], slider: ["rgba(0,210,180,0.15)", "#00d4b4"] };
+    function cat(t) {
+      if (C.type_sets.jack.includes(t)) return "jack";
+      if (C.type_sets.pot.includes(t)) return "pot";
+      if (t.startsWith("switch")) return "switch";
+      if (C.type_sets.led.includes(t)) return "led";
+      if (C.type_sets.slider.includes(t)) return "slider";
+      return null;
+    }
+    for (const { c, z } of comps) {
+      const { cx, cy } = resolve(c, z);
+      const rot = Number(c.rotate || 0);
+      const k = cat(c.type);
+      const r = panelR(c.type);
+      if (r > 0 && nutColor[k]) nuts += `<circle data-cid="${esc(c.id)}" cx="${f3(cx)}" cy="${f3(cy)}" r="${r}" fill="${nutColor[k][0]}" stroke="${nutColor[k][1]}" stroke-width="0.25"/>`;
+      else if (r > 0) nuts += `<circle data-cid="${esc(c.id)}" cx="${f3(cx)}" cy="${f3(cy)}" r="${r}" fill="rgba(180,180,180,0.3)" stroke="#aaa" stroke-width="0.25"/>`;
+      const rect = courtyard(cx, cy, c.type, rot);
+      if (rect && pcbColor[k]) pcb += `<rect data-cid="${esc(c.id)}" x="${f3(rect[0])}" y="${f3(rect[1])}" width="${f3(rect[2] - rect[0])}" height="${f3(rect[3] - rect[1])}" fill="${pcbColor[k][0]}" stroke="${pcbColor[k][1]}" stroke-width="0.2" stroke-dasharray="0.8 0.4"/>`;
+      const tpl = KT[c.type];
+      if (tpl) {
+        const tr = rot ? `translate(${f3(cx)},${f3(cy)}) rotate(${rot})` : `translate(${f3(cx)},${f3(cy)})`;
+        kicad += `<g data-cid="${esc(c.id)}" data-rot="${rot}" transform="${tr}">${tpl}` +
+          `<line x1="-1.8" y1="0" x2="1.8" y2="0" stroke="#00ff88" stroke-width="0.18"/><line x1="0" y1="-1.8" x2="0" y2="1.8" stroke="#00ff88" stroke-width="0.18"/></g>`;
+      }
+    }
+
+    const dsp = (on) => on ? "" : ' style="display:none;"';
+    const svg =
+      `<svg xmlns="http://www.w3.org/2000/svg" width="${(W * SCALE).toFixed(0)}" height="${(H * SCALE).toFixed(0)}" viewBox="0 0 ${W} ${H}">` +
+      `<g id="layer-panel"${dsp(UI.layers.panel)}>${panel}</g>` +
+      `<g id="layer-keepout"${dsp(UI.layers.keepout)}>${keepout}</g>` +
+      `<g id="layer-nuts"${dsp(UI.layers.nuts)}>${nuts}</g>` +
+      `<g id="layer-pcb"${dsp(UI.layers.pcb)}>${pcb}</g>` +
+      `<g id="layer-kicad"${dsp(UI.layers.kicad)}>${kicad}</g>` +
+      `</svg>`;
+    return svg;
+  }
+
+  // ── Render (full) ──────────────────────────────────────────────────────────
+  let lastDRC = { violations: [], badIds: new Set() };
+  function render() {
+    lastDRC = runDRC();
+    document.getElementById("canvas").innerHTML = buildSVG(lastDRC.badIds);
+    svgEl = document.querySelector("#canvas svg");
+    wireCanvas();
+    renderTopbar();
+    renderLeft();
+    renderRight();
+    renderDRCPanel();
+  }
+
+  // ── Canvas interaction ───────────────────────────────────────────────────────
+  function clientToMm(e) {
+    const pt = svgEl.createSVGPoint();
+    pt.x = e.clientX; pt.y = e.clientY;
+    const m = svgEl.getScreenCTM().inverse();
+    const p = pt.matrixTransform(m);
+    return { x: p.x, y: p.y };
+  }
+  function setCompTransform(id, cx, cy) {
+    svgEl.querySelectorAll(`[data-cid="${cssEsc(id)}"]`).forEach((g) => {
+      if (g.tagName === "circle" && g.classList.contains("hit")) return;
+      if (g.tagName === "circle") { g.setAttribute("cx", f3(cx)); g.setAttribute("cy", f3(cy)); return; }
+      if (g.tagName === "rect") return; // courtyard rects: refreshed on full render at drop
+      const rot = g.dataset.rot;
+      g.setAttribute("transform", rot && rot !== "0" ? `translate(${f3(cx)},${f3(cy)}) rotate(${rot})` : `translate(${f3(cx)},${f3(cy)})`);
+    });
+  }
+  const cssEsc = (s) => (window.CSS && CSS.escape) ? CSS.escape(s) : String(s).replace(/["\\]/g, "\\$&");
+
+  let drag = null;
+  function wireCanvas() {
+    svgEl.querySelectorAll(".comp").forEach((g) => {
+      g.addEventListener("pointerdown", (e) => {
+        e.preventDefault();
+        const id = g.dataset.cid;
+        selectComp(id);
+        const m = clientToMm(e);
+        const found = findComp(id);
+        const { cx, cy } = resolve(found.c, found.z);
+        drag = { id, dx: m.x - cx, dy: m.y - cy, moved: false };
+        g.setPointerCapture(e.pointerId);
+      });
+      g.addEventListener("pointermove", (e) => {
+        if (!drag || drag.id !== g.dataset.cid) return;
+        const m = clientToMm(e);
+        let nx = m.x - drag.dx, ny = m.y - drag.dy;
+        if (UI.snap) { nx = Math.round(nx / UI.snapMm) * UI.snapMm; ny = Math.round(ny / UI.snapMm) * UI.snapMm; }
+        drag.nx = nx; drag.ny = ny; drag.moved = true;
+        setCompTransform(drag.id, nx, ny);
+        const g2 = svgEl.querySelector(`.comp[data-cid="${cssEsc(drag.id)}"]`);
+        if (g2) g2.setAttribute("transform", `translate(${f3(nx)},${f3(ny)})`);
+      });
+      const end = () => {
+        if (!drag || drag.id !== g.dataset.cid) return;
+        if (drag.moved && drag.nx != null) moveCompTo(drag.id, drag.nx, drag.ny);
+        drag = null;
+      };
+      g.addEventListener("pointerup", end);
+      g.addEventListener("pointercancel", end);
+    });
+  }
+
+  // ── Mutations ────────────────────────────────────────────────────────────────
+  function moveCompTo(id, resolvedCx, resolvedCy) {  // resolved (on-screen) coords
+    const { c } = findComp(id);
+    c.cx = Math.round((resolvedCx - (DR.x_offset || 0)) * 1000) / 1000;
+    delete c.col;                       // off the column grid → explicit cx
+    c.cy = Math.round(resolvedCy * 1000) / 1000;
+    render();
+  }
+  function rotateComp(id) {
+    const { c } = findComp(id);
+    const next = { 0: 90, 90: 180, 180: 270, 270: 0 }[Number(c.rotate || 0)];
+    if (next === 0) delete c.rotate; else c.rotate = next;
+    render();
+  }
+  function deleteComp(id) {
+    for (const z of D.zones || []) {
+      const i = (z.components || []).findIndex((c) => c.id === id);
+      if (i >= 0) { z.components.splice(i, 1); break; }
+    }
+    if (UI.selId === id) UI.selId = null;
+    render();
+  }
+  function addComp(type) {
+    const z = (D.zones || [])[0];
+    if (!z) { alert("No zone to add into."); return; }
+    let n = 1, id;
+    do { id = `${type.toUpperCase()}_${n++}`; } while (findComp(id));
+    const W = Number(D.meta.width_mm);
+    const isJack = type.startsWith("jack");
+    const c = {
+      id, type,
+      cx: Math.round((W / 2 - (DR.x_offset || 0)) * 1000) / 1000,
+      cy: 60,
+      label: type.replace(/_/g, " ").toUpperCase(),
+    };
+    if (isJack) c.cpp_id = id + "_INPUT"; else c.cpp_param = id + "_PARAM";
+    if (!z.components) z.components = [];
+    z.components.push(c);
+    UI.selId = id;
+    render();
+  }
+  function selectComp(id) {
+    UI.selId = id;
+    svgEl.querySelectorAll(".comp.sel").forEach((g) => g.classList.remove("sel"));
+    const g = svgEl.querySelector(`.comp[data-cid="${cssEsc(id)}"]`);
+    if (g) g.classList.add("sel");
+    renderRight();
+    document.querySelectorAll(".tree-comp.sel").forEach((e) => e.classList.remove("sel"));
+    const t = document.querySelector(`.tree-comp[data-cid="${cssEsc(id)}"]`);
+    if (t) t.classList.add("sel");
+  }
+
+  // ── Top bar ──────────────────────────────────────────────────────────────────
+  function renderTopbar() {
+    const pass = lastDRC.violations.length === 0;
+    const lyr = (key, name) =>
+      `<label class="lyr"><input type="checkbox" data-layer="${key}" ${UI.layers[key] ? "checked" : ""}> ${name}</label>`;
+    document.getElementById("topbar").innerHTML =
+      `<h1>POGO PANEL EDITOR</h1>` +
+      `<div class="group">HP <input type="number" id="hp" min="2" max="84" step="1" value="${D.meta.hp}"> ` +
+      `<button id="recenter" title="Recompute x_offset to centre content">Recenter</button></div>` +
+      `<div class="sep"></div>` +
+      `<div class="group">` + lyr("panel", "Panel") + lyr("keepout", "Keep-Out") + lyr("nuts", "Nuts") + lyr("pcb", "Courtyards") + lyr("kicad", "KiCad") + `</div>` +
+      `<div class="sep"></div>` +
+      `<div class="group"><label class="lyr"><input type="checkbox" id="snap" ${UI.snap ? "checked" : ""}> Snap</label>` +
+      `<input type="number" id="snapMm" step="0.05" min="0.05" value="${UI.snapMm}" style="width:54px"> mm</div>` +
+      `<div class="sep"></div>` +
+      `<div class="group"><button id="dividers">Dividers…</button>` +
+      `<button id="export" class="primary">Export YAML</button></div>` +
+      `<div class="sep"></div>` +
+      `<span class="badge ${pass ? "pass" : "fail"}">${pass ? "DRC PASS" : "DRC " + lastDRC.violations.length + " ✗"}</span>`;
+
+    document.querySelectorAll("#topbar input[data-layer]").forEach((cb) =>
+      cb.addEventListener("change", () => {
+        UI.layers[cb.dataset.layer] = cb.checked;
+        const el = svgEl.querySelector("#layer-" + cb.dataset.layer);
+        if (el) el.style.display = cb.checked ? "" : "none";
+      }));
+    document.getElementById("snap").addEventListener("change", (e) => { UI.snap = e.target.checked; });
+    document.getElementById("snapMm").addEventListener("change", (e) => { UI.snapMm = Number(e.target.value) || 0.5; });
+    document.getElementById("hp").addEventListener("change", (e) => setHP(Number(e.target.value)));
+    document.getElementById("recenter").addEventListener("click", recenter);
+    document.getElementById("export").addEventListener("click", openExport);
+    document.getElementById("dividers").addEventListener("click", openDividers);
+  }
+  function setHP(hp) {
+    if (!hp || hp < 2) return;
+    D.meta.hp = hp;
+    const W = Math.round(hp * 5.08 * 100) / 100;
+    D.meta.width_mm = W;
+    D.meta.viewBox = `0 0 ${W} ${D.meta.height_mm}`;
+    // right-edge mounting holes follow the new width
+    for (const mh of D.mounting_holes || []) if (Number(mh.cx) > Number(ORIG.meta.width_mm) / 2) mh.cx = Math.round((W - 7.5) * 100) / 100;
+    render();
+  }
+  function recenter() {
+    // x_offset that centres the content span within the panel width
+    const xs = [];
+    for (const sp of D.separators || []) {
+      if (sp.type === "v") xs.push(sp.x);
+      else { xs.push(sp.x1, sp.x2); }
+    }
+    for (const { c, z } of allComps()) xs.push(rawCx(c, z));
+    if (!xs.length) return;
+    const span = Math.max(...xs) - Math.min(...xs);
+    const off = Math.round(((Number(D.meta.width_mm) - span) / 2 - Math.min(...xs)) * 1000) / 1000;
+    DR.x_offset = off;
+    D.design_rules.x_offset = off;
+    render();
+  }
+
+  // ── Left sidebar (palette + tree) ──────────────────────────────────────────
+  function renderLeft() {
+    let h = `<div class="panel-h">Add Component</div><div class="palette">`;
+    for (const t of PALETTE_TYPES) h += `<div class="pal-item" draggable="false" data-add="${t}">${t.replace(/_/g, "&#8203;_")}</div>`;
+    h += `</div><div class="panel-h">Components</div>`;
+    for (const z of D.zones || []) {
+      h += `<div class="tree-zone"><div class="zname">${esc(z.id)}</div>`;
+      for (const c of z.components || [])
+        h += `<div class="tree-comp${c.id === UI.selId ? " sel" : ""}" data-cid="${esc(c.id)}">${esc(compLabel(c))} <span class="ttype">${esc(c.type)}</span></div>`;
+      h += `</div>`;
+    }
+    const left = document.getElementById("left");
+    left.innerHTML = h;
+    left.querySelectorAll("[data-add]").forEach((el) => el.addEventListener("click", () => addComp(el.dataset.add)));
+    left.querySelectorAll(".tree-comp").forEach((el) => el.addEventListener("click", () => selectComp(el.dataset.cid)));
+  }
+
+  // ── Right sidebar (inspector) ──────────────────────────────────────────────
+  function fieldNum(label, val, onCommit, step) {
+    return { label, val, onCommit, step: step || "0.01", kind: "num" };
+  }
+  function renderRight() {
+    const right = document.getElementById("right");
+    if (!UI.selId) { right.innerHTML = `<div class="panel-h">Inspector</div><div class="hint">Select a component on the panel or in the list.</div>`; return; }
+    const ref = findComp(UI.selId);
+    if (!ref) { right.innerHTML = `<div class="panel-h">Inspector</div>`; return; }
+    const { c, z } = ref;
+    const { cx, cy } = resolve(c, z);
+    const fp = FPN[c.type] || "—";
+    let h = `<div class="panel-h">Inspector</div>`;
+    h += `<div class="field"><label>id</label><input id="i-id" type="text" value="${esc(c.id)}"></div>`;
+    h += `<div class="field"><label>type</label><select id="i-type">${PALETTE_TYPES.map((t) => `<option ${t === c.type ? "selected" : ""}>${t}</option>`).join("")}</select></div>`;
+    h += `<div class="field row"><div><label>cx (mm, resolved)</label><input id="i-cx" type="number" step="0.01" value="${f3(cx)}"></div>` +
+         `<div><label>cy (mm)</label><input id="i-cy" type="number" step="0.01" value="${f3(cy)}"></div></div>`;
+    if (c.col != null) h += `<div class="hint">column-relative (col ${c.col} in ${esc(z.id)}); editing cx/cy converts to explicit cx.</div>`;
+    h += `<div class="field"><label>rotate</label><button id="i-rot">${Number(c.rotate || 0)}° — cycle</button></div>`;
+    h += `<div class="field"><label>label</label><input id="i-label" type="text" value="${esc(c.label || "")}"></div>`;
+    h += `<div class="field"><label>font_size</label><input id="i-fs" type="number" step="0.1" value="${c.font_size != null ? c.font_size : 1.8}"></div>`;
+    const cppKey = c.cpp_id != null ? "cpp_id" : (c.cpp_param != null ? "cpp_param" : (c.type.startsWith("jack") ? "cpp_id" : "cpp_param"));
+    h += `<div class="field"><label>${cppKey}</label><input id="i-cpp" type="text" value="${esc(c[cppKey] || "")}"></div>`;
+    h += `<div class="field"><label>KiCad footprint</label><div class="ro">${esc(fp)}</div></div>`;
+    h += `<div class="field"><button id="i-del" class="danger">Delete component</button></div>`;
+    right.innerHTML = h;
+
+    const commit = () => { render(); };
+    const idEl = document.getElementById("i-id");
+    idEl.addEventListener("change", () => {
+      const nv = idEl.value.trim();
+      if (nv && !(findComp(nv) && nv !== c.id)) { const old = c.id; c.id = nv; if (UI.selId === old) UI.selId = nv; commit(); }
+      else { idEl.value = c.id; }
+    });
+    document.getElementById("i-type").addEventListener("change", (e) => { c.type = e.target.value; commit(); });
+    const cxEl = document.getElementById("i-cx"), cyEl = document.getElementById("i-cy");
+    const applyXY = () => moveCompTo(c.id, Number(cxEl.value), Number(cyEl.value));
+    cxEl.addEventListener("change", applyXY);
+    cyEl.addEventListener("change", applyXY);
+    document.getElementById("i-rot").addEventListener("click", () => rotateComp(c.id));
+    document.getElementById("i-label").addEventListener("change", (e) => { if (e.target.value) c.label = e.target.value; else delete c.label; commit(); });
+    document.getElementById("i-fs").addEventListener("change", (e) => { c.font_size = Number(e.target.value); commit(); });
+    document.getElementById("i-cpp").addEventListener("change", (e) => { c[cppKey] = e.target.value; commit(); });
+    document.getElementById("i-del").addEventListener("click", () => deleteComp(c.id));
+  }
+
+  // ── DRC panel ──────────────────────────────────────────────────────────────
+  function renderDRCPanel() {
+    const el = document.getElementById("drc-panel");
+    const V = lastDRC.violations;
+    if (!V.length) { el.innerHTML = `<div style="color:#44ff44">No DRC violations.</div>`; return; }
+    const groups = {};
+    for (const v of V) { const tag = v.startsWith("[") ? v.slice(1, v.indexOf("]")) : "OTHER"; (groups[tag] = groups[tag] || []).push(v); }
+    const color = { "NUT KEEPOUT": "#ff6666", "NUT CLEARANCE": "#ff88aa", "PCB OVERLAP": "#ffaa44", "MH CLEARANCE": "#ffdd55", "PCB KEEPOUT": "#88aaff", "OTHER": "#cc99ff" };
+    let h = "";
+    for (const tag of Object.keys(groups).sort()) {
+      const col = color[tag] || "#cc99ff";
+      h += `<details open><summary style="color:${col}">${tag} (${groups[tag].length})</summary><ul>` +
+        groups[tag].map((v) => `<li style="color:${col}">${esc(v)}</li>`).join("") + `</ul></details>`;
+    }
+    el.innerHTML = h;
+  }
+
+  // ══ Dividers modal ═════════════════════════════════════════════════════════
+  function openDividers() {
+    const m = document.getElementById("export-modal");
+    m.classList.remove("hidden");
+    let rows = (D.separators || []).map((sp, i) => {
+      const desc = sp.type === "v" ? `v  x=${fmtVal(sp.x)}  [${sp.style}]` : `h  y=${fmtVal(sp.y)}  x=${fmtVal(sp.x1)}→${fmtVal(sp.x2)}  ${sp.label ? '"' + sp.label + '"' : ""} [${sp.style}]`;
+      return `<div class="row2"><span class="x">${esc(desc)}</span><button data-delsep="${i}" class="danger">✕</button></div>`;
+    }).join("");
+    m.innerHTML = `<div class="box"><h2>Dividers / Separators</h2>` +
+      `<div class="sublist">${rows || '<div class="hint">none</div>'}</div>` +
+      `<div class="field row"><div><label>type</label><select id="ns-type"><option value="v">v</option><option value="h">h</option></select></div>` +
+      `<div><label>style</label><select id="ns-style"><option>zone_div</option><option>main_cyan</option><option>subdiv_gray</option></select></div></div>` +
+      `<div class="field row"><div><label>x or x1</label><input id="ns-a" type="number" step="0.01" value="0"></div>` +
+      `<div><label>x2 (h only)</label><input id="ns-b" type="number" step="0.01" value="0"></div></div>` +
+      `<div class="field row"><div><label>y or y1</label><input id="ns-y1" type="number" step="0.01" value="9"></div>` +
+      `<div><label>y2 (v only)</label><input id="ns-y2" type="number" step="0.01" value="124"></div></div>` +
+      `<div class="field"><label>label (h, optional)</label><input id="ns-label" type="text" value=""></div>` +
+      `<div class="bar"><button id="ns-add">Add divider</button><button id="ns-close">Close</button></div></div>`;
+    m.querySelectorAll("[data-delsep]").forEach((b) => b.addEventListener("click", () => { D.separators.splice(Number(b.dataset.delsep), 1); render(); openDividers(); }));
+    document.getElementById("ns-close").addEventListener("click", () => m.classList.add("hidden"));
+    document.getElementById("ns-add").addEventListener("click", () => {
+      const t = document.getElementById("ns-type").value;
+      const style = document.getElementById("ns-style").value;
+      const a = Number(document.getElementById("ns-a").value);
+      const b = Number(document.getElementById("ns-b").value);
+      const y1 = Number(document.getElementById("ns-y1").value);
+      const y2 = Number(document.getElementById("ns-y2").value);
+      const label = document.getElementById("ns-label").value.trim();
+      const sp = t === "v" ? { type: "v", x: a, y1, y2, style } : { type: "h", x1: a, x2: b, y: y1, style };
+      if (t === "h" && label) { sp.label = label; sp.label_x = (a + b) / 2; }
+      (D.separators = D.separators || []).push(sp);
+      render(); openDividers();
+    });
+  }
+
+  // ══ YAML export (comment-preserving line patching) ═════════════════════════
+  // Mirrors build_panel._apply_yaml_patches and extends it with insert/remove,
+  // col→cx conversion, adds, deletes, meta + separator edits.
+  function exportYAML() {
+    let lines = PAYLOAD.yaml_text.split("\n");
+
+    // helpers ------------------------------------------------------------------
+    const indentOf = (s) => s.length - s.replace(/^\s+/, "").length;
+    function findIdLine(id) {
+      const re = new RegExp("^(\\s*)(?:- )?id:\\s+" + id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*$");
+      for (let i = 0; i < lines.length; i++) { const m = lines[i].match(re); if (m) return { i, indent: m[1].length }; }
+      return null;
+    }
+    function blockEnd(idLine, idIndent) {
+      for (let j = idLine + 1; j < lines.length; j++) {
+        const s = lines[j].trim();
+        if (!s) continue;
+        if (indentOf(lines[j]) <= idIndent && s.startsWith("-")) return j;
+        if (indentOf(lines[j]) < idIndent) return j;
+      }
+      return lines.length;
+    }
+    function findKey(idLine, end, key) {
+      const re = new RegExp("^(\\s+)" + key + ":\\s*(.*?)(\\s*(?:#.*)?)$");
+      for (let j = idLine + 1; j < end; j++) {
+        const s = lines[j].trim();
+        if (s.startsWith("-") && indentOf(lines[j]) <= indentOf(lines[idLine])) break;
+        const m = lines[j].match(re);
+        if (m) return { j, indent: m[1], comment: m[3] };
+      }
+      return null;
+    }
+    function patchKey(id, key, newVal) {
+      const idl = findIdLine(id); if (!idl) return;
+      const end = blockEnd(idl.i, idl.indent);
+      const k = findKey(idl.i, end, key);
+      if (k) lines[k.j] = `${k.indent}${key}: ${newVal}${k.comment}`;
+      else insertKey(id, key, newVal);
+    }
+    function insertKey(id, key, newVal) {
+      const idl = findIdLine(id); if (!idl) return;
+      // field indent = id-field indent; match an existing sibling field's indent if present
+      const end = blockEnd(idl.i, idl.indent);
+      let fieldIndent = " ".repeat(idl.indent + 2);
+      for (let j = idl.i + 1; j < end; j++) { const s = lines[j].trim(); if (s && !s.startsWith("-")) { fieldIndent = " ".repeat(indentOf(lines[j])); break; } }
+      lines.splice(idl.i + 1, 0, `${fieldIndent}${key}: ${newVal}`);
+    }
+    function removeKey(id, key) {
+      const idl = findIdLine(id); if (!idl) return;
+      const end = blockEnd(idl.i, idl.indent);
+      const k = findKey(idl.i, end, key);
+      if (k) lines.splice(k.j, 1);
+    }
+    function renameColToCx(id, cxVal) {        // replace `col: N` line with `cx: <val>`
+      const idl = findIdLine(id); if (!idl) return;
+      const end = blockEnd(idl.i, idl.indent);
+      const k = findKey(idl.i, end, "col");
+      if (k) lines[k.j] = `${k.indent}cx: ${cxVal}`;
+      else patchKey(id, "cx", cxVal);
+    }
+
+    const origById = {};
+    for (const z of ORIG.zones || []) for (const c of z.components || []) origById[c.id] = c;
+    const curById = {};
+    for (const z of D.zones || []) for (const c of z.components || []) curById[c.id] = c;
+
+    // 1 ── deletions
+    for (const id of Object.keys(origById)) {
+      if (!curById[id]) {
+        const idl = findIdLine(id);
+        if (idl) { const end = blockEnd(idl.i, idl.indent); lines.splice(idl.i, end - idl.i); }
+      }
+    }
+    // 2 ── field patches for surviving components
+    for (const id of Object.keys(curById)) {
+      const cur = curById[id], orig = origById[id];
+      if (!orig) continue;                     // newly added → handled below
+      // cx
+      const origCol = orig.col != null && orig.cx == null;
+      if (cur.cx != null) {
+        if (origCol) renameColToCx(id, fmtVal(cur.cx));
+        else if (String(orig.cx) !== String(cur.cx)) patchKey(id, "cx", fmtVal(cur.cx));
+      }
+      // cy
+      if (String(orig.cy) !== String(cur.cy) && cur.cy != null)
+        patchKey(id, "cy", typeof cur.cy === "string" ? cur.cy : fmtVal(cur.cy));
+      // rotate
+      const oRot = Number(orig.rotate || 0), nRot = Number(cur.rotate || 0);
+      if (oRot !== nRot) { if (nRot === 0) removeKey(id, "rotate"); else if (orig.rotate != null) patchKey(id, "rotate", String(nRot)); else insertKey(id, "rotate", String(nRot)); }
+      // label / font_size / cpp
+      if ((orig.label || "") !== (cur.label || "")) { if (cur.label) patchKey(id, "label", quoteIfNeeded(cur.label)); else removeKey(id, "label"); }
+      if (String(orig.font_size) !== String(cur.font_size) && cur.font_size != null) patchKey(id, "font_size", fmtVal(cur.font_size));
+      for (const k of ["cpp_id", "cpp_param"]) if (cur[k] != null && String(orig[k]) !== String(cur[k])) patchKey(id, k, quoteIfNeeded(cur[k]));
+    }
+    // 3 ── additions (append to owning zone's components list)
+    for (const z of D.zones || []) {
+      for (const c of z.components || []) {
+        if (origById[c.id]) continue;
+        insertComponent(z.id, c);
+      }
+    }
+    // 4 ── meta + design_rules (only patch what changed → no-op export stays byte-identical)
+    if (String(ORIG.meta.hp) !== String(D.meta.hp)) patchTop("hp", fmtVal(D.meta.hp), 2);
+    if (String(ORIG.meta.width_mm) !== String(D.meta.width_mm)) patchTop("width_mm", fmtVal(D.meta.width_mm), 2);
+    if (String(ORIG.meta.viewBox) !== String(D.meta.viewBox)) patchTop("viewBox", `"${D.meta.viewBox}"`, 2);
+    if (String(ORIG.design_rules.x_offset) !== String(DR.x_offset)) patchTop("x_offset", fmtVal(DR.x_offset), 2);
+    // mounting hole x (right edge) if changed
+    syncMountingHoles();
+    // 5 ── separators: regenerate the block if changed (these have no ids to patch)
+    if (JSON.stringify(ORIG.separators) !== JSON.stringify(D.separators)) regenSeparators();
+
+    return lines.join("\n");
+
+    // local mutators -----------------------------------------------------------
+    function quoteIfNeeded(v) {
+      const s = String(v);
+      return /^[\w.+×\-/]+$/.test(s) && !/^\d/.test(s) ? s : `"${s.replace(/"/g, '\\"')}"`;
+    }
+    function patchTop(key, newVal, indent) {
+      const re = new RegExp("^(\\s{" + indent + "})" + key + ":\\s*(.*?)(\\s*(?:#.*)?)$");
+      for (let i = 0; i < lines.length; i++) { const m = lines[i].match(re); if (m) { lines[i] = `${m[1]}${key}: ${newVal}${m[3]}`; return; } }
+    }
+    function insertComponent(zoneId, c) {
+      const idl = findIdLine(zoneId); if (!idl) return;
+      // find this zone's `components:` and the end of the zone block
+      let compsLine = -1, zoneEnd = lines.length;
+      for (let j = idl.i + 1; j < lines.length; j++) {
+        const s = lines[j].trim();
+        if (indentOf(lines[j]) <= idl.indent && s.startsWith("-")) { zoneEnd = j; break; }
+        if (indentOf(lines[j]) <= idl.indent && s && !s.startsWith("#")) { /* next top-level key */ if (indentOf(lines[j]) < idl.indent) { zoneEnd = j; break; } }
+        if (/^\s+components:\s*$/.test(lines[j])) compsLine = j;
+      }
+      // find insertion point = last non-blank line before zoneEnd
+      let ins = zoneEnd;
+      while (ins - 1 > (compsLine >= 0 ? compsLine : idl.i) && !lines[ins - 1].trim()) ins--;
+      const itemIndent = compsLine >= 0 ? " ".repeat(indentOf(lines[compsLine]) + 2) : " ".repeat(idl.indent + 4);
+      const fieldIndent = itemIndent + "  ";
+      const blk = [`${itemIndent}- id: ${c.id}`];
+      const order = ["type", "cx", "cy", "rotate", "label", "font_size", "cpp_id", "cpp_param", "led_fill", "led_stroke"];
+      for (const k of order) {
+        if (c[k] == null) continue;
+        let v = (k === "label" || k === "cpp_id" || k === "cpp_param" || k === "led_fill" || k === "led_stroke") ? quoteIfNeeded(c[k]) : (typeof c[k] === "number" ? fmtVal(c[k]) : c[k]);
+        blk.push(`${fieldIndent}${k}: ${v}`);
+      }
+      lines.splice(ins, 0, ...blk);
+    }
+    function syncMountingHoles() {
+      // patch the right-edge mounting-hole cx values to match the model
+      const origMH = ORIG.mounting_holes || [], curMH = D.mounting_holes || [];
+      if (JSON.stringify(origMH) === JSON.stringify(curMH)) return;
+      let idx = 0;
+      for (let i = 0; i < lines.length; i++) {
+        const m = lines[i].match(/^(\s*- \{cx:\s*)([-\d.]+)(,\s*cy:\s*)([-\d.]+)(\s*\})\s*$/);
+        if (m && curMH[idx]) { lines[i] = `${m[1]}${fmtVal(curMH[idx].cx)}${m[3]}${fmtVal(curMH[idx].cy)}${m[5]}`; idx++; }
+      }
+    }
+    function regenSeparators() {
+      // locate separators: block and replace its list items wholesale (comments above kept)
+      let start = -1, end = lines.length, indent = 0;
+      for (let i = 0; i < lines.length; i++) {
+        if (/^separators:\s*$/.test(lines[i])) { start = i; indent = 0; }
+        else if (start >= 0) {
+          const s = lines[i].trim();
+          if (s && indentOf(lines[i]) <= indent && !s.startsWith("-") && !s.startsWith("#")) { end = i; break; }
+        }
+      }
+      if (start < 0) return;
+      const body = (D.separators || []).map((sp) => "  - " + flowMap(sp));
+      lines.splice(start + 1, end - (start + 1), ...body, "");
+    }
+    function flowMap(o) {
+      const parts = [];
+      for (const k of Object.keys(o)) {
+        const v = o[k];
+        parts.push(`${k}: ${typeof v === "number" ? fmtVal(v) : (k === "label" ? `"${v}"` : v)}`);
+      }
+      return "{" + parts.join(", ") + "}";
+    }
+  }
+
+  function openExport() {
+    const m = document.getElementById("export-modal");
+    let text;
+    try { text = exportYAML(); }
+    catch (e) { text = "# export error: " + e.message + "\n" + (e.stack || ""); }
+    m.classList.remove("hidden");
+    m.innerHTML = `<div class="box"><h2>panel-data.yaml — copy over tools/panel-data.yaml</h2>` +
+      `<textarea id="yaml-out" spellcheck="false">${esc(text)}</textarea>` +
+      `<div class="bar"><span class="hint" style="flex:1">Then run <code>python3 tools/build_panel.py --check</code> to validate.</span>` +
+      `<button id="yaml-copy" class="primary">Copy</button><button id="yaml-dl">Download</button><button id="yaml-close">Close</button></div></div>`;
+    document.getElementById("yaml-close").addEventListener("click", () => m.classList.add("hidden"));
+    document.getElementById("yaml-copy").addEventListener("click", () => {
+      const ta = document.getElementById("yaml-out"); ta.select();
+      navigator.clipboard ? navigator.clipboard.writeText(ta.value) : document.execCommand("copy");
+      const b = document.getElementById("yaml-copy"); b.textContent = "Copied!"; setTimeout(() => (b.textContent = "Copy"), 1200);
+    });
+    document.getElementById("yaml-dl").addEventListener("click", () => {
+      const blob = new Blob([document.getElementById("yaml-out").value], { type: "text/yaml" });
+      const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "panel-data.yaml"; a.click();
+    });
+  }
+
+  // ── Boot ──────────────────────────────────────────────────────────────────
+  render();
+})();

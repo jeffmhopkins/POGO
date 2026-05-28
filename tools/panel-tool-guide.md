@@ -13,9 +13,10 @@ All commands run from the repo root.
 ## CLI Quick Reference
 
 ```
-python3 tools/build_panel.py                             # rebuild SVG + HTML (default)
+python3 tools/build_panel.py                             # rebuild SVG + debug HTML + editor (default)
 python3 tools/build_panel.py --resource                  # SVG only
 python3 tools/build_panel.py --design                    # HTML debug viewer only
+python3 tools/build_panel.py --editor                    # interactive editor HTML only
 python3 tools/build_panel.py --check                     # DRC only; exit 1 on violations
 python3 tools/build_panel.py --list                      # table of all resolved positions
 python3 tools/build_panel.py --next ZONE_ID              # x_start for the section after ZONE_ID
@@ -27,6 +28,50 @@ python3 tools/build_panel.py --shift ZONE_ID DX DY       # preview bulk zone shi
 python3 tools/build_panel.py --shift ZONE_ID DX DY --apply   # write zone shift to YAML
 python3 tools/build_panel.py --shift-select X1 Y1 X2 Y2 DX DY         # preview bbox shift
 python3 tools/build_panel.py --shift-select X1 Y1 X2 Y2 DX DY --apply # write bbox shift
+```
+
+## Interactive Editor (`design/panel-editor.html`)
+
+`--editor` (included in the default build) generates `design/panel-editor.html` — a
+**single static HTML+JS file** for visually editing the panel. It needs no server: open it
+directly in a browser. It is built *from* `panel-data.yaml`; you edit visually, then copy the
+exported YAML back over `panel-data.yaml`.
+
+The editor embeds the parsed YAML, the original YAML text (for export), the real DRC constants
+from `panel_rules.py`, and the real KiCad footprint geometry from `panel_kicad.py` — so its
+in-browser DRC and footprint overlays match `build_panel.py` exactly (no drift).
+
+**Layout**
+
+- **Left** — palette of addable component types (click to add) + a zone/component tree (click to
+  select).
+- **Centre** — the live panel SVG. Drag components to move them; the selected one is highlighted;
+  DRC violators are outlined red. Layer-visibility checkboxes (Panel / Keep-Out / Nuts /
+  Courtyards / KiCad) and an optional grid snap live in the top bar.
+- **Right** — inspector for the selected component: `id`, `type`, resolved `cx`/`cy` (numeric
+  entry), `rotate` (cycle button), `label`, `font_size`, `cpp_id`/`cpp_param`, and the read-only
+  KiCad footprint name. Includes a delete button.
+- **Top bar** — panel **HP** field + **Recenter** (recomputes `x_offset`), **Dividers…** modal
+  (add/remove separators), **Export YAML**, and a live DRC pass/fail badge.
+
+**Notes**
+
+- Dragging a component off its column converts it from `col:`-relative to an explicit `cx:` on
+  export (the `col:` line is replaced). Vertical moves write a numeric `cy:` (replacing any
+  `_cv_jack_cy_` / `_att_cy_` template).
+- **Export preserves comments**: it line-patches the original YAML (mirroring
+  `_apply_yaml_patches`), only inserting/removing lines for adds, deletes, and divider changes.
+
+**Workflow**
+
+```
+1. python3 tools/build_panel.py --editor   # (or default build)
+2. open design/panel-editor.html in a browser
+3. drag / rotate / add / delete / change HP / add dividers
+4. Export YAML → Copy
+5. paste over tools/panel-data.yaml
+6. python3 tools/build_panel.py --check    # authoritative DRC
+7. python3 tools/build_panel.py            # rebuild SVG + HTML when clean
 ```
 
 ### --dist
