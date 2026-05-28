@@ -480,8 +480,6 @@ zones:
         cy: 24.80
         cy_body_top: 18.80
         body_height: 12
-        pos_labels: ["WF", "HC", "SC"]
-        pos_ys: [20.5, 25.0, 29.5]
         label_below: "DIST"
         label_below_y: 33.5
         cpp_param: "BP1_DIST_MODE_PARAM"
