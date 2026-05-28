@@ -1,0 +1,101 @@
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; }
+    body {
+      background: #111; color: #ccc;
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 12px;
+    }
+    #app { display: flex; flex-direction: column; height: 100vh; }
+
+    /* ── Top bar ─────────────────────────────────────────────────────────── */
+    #topbar {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px;
+      padding: 8px 12px; background: #161616; border-bottom: 1px solid #2a2a2a;
+    }
+    #topbar h1 { color: #00d4ff; font-size: 14px; margin: 0 12px 0 0; letter-spacing: .08em; }
+    #topbar .group { display: flex; align-items: center; gap: 6px; }
+    #topbar .sep { width: 1px; align-self: stretch; background: #2a2a2a; margin: 0 2px; }
+    label.lyr { cursor: pointer; white-space: nowrap; user-select: none; }
+    .badge { padding: 2px 8px; border-radius: 4px; font-weight: bold; }
+    .badge.pass { background: #0c2a0c; color: #44ff44; border: 1px solid #1c5c1c; }
+    .badge.fail { background: #2a0c0c; color: #ff6666; border: 1px solid #5c1c1c; }
+    input[type=number], input[type=text], select {
+      background: #0d0d0d; color: #ddd; border: 1px solid #333; border-radius: 3px;
+      padding: 3px 5px; font-family: inherit; font-size: 12px;
+    }
+    input[type=number] { width: 62px; }
+    button {
+      background: #1e1e1e; color: #ccc; border: 1px solid #3a3a3a; border-radius: 3px;
+      padding: 4px 9px; cursor: pointer; font-family: inherit; font-size: 12px;
+    }
+    button:hover { background: #2a2a2a; border-color: #00d4ff; color: #fff; }
+    button.primary { background: #06303a; border-color: #00d4ff; color: #7fe7ff; }
+    button.danger:hover { border-color: #ff6666; color: #ff8888; }
+
+    /* ── Main 3-column layout ────────────────────────────────────────────── */
+    #main { flex: 1; display: flex; min-height: 0; }
+    #left, #right {
+      width: 250px; flex: 0 0 250px; overflow-y: auto;
+      background: #141414; border-right: 1px solid #2a2a2a; padding: 10px;
+    }
+    #right { border-right: none; border-left: 1px solid #2a2a2a; }
+    #canvas-wrap { flex: 1; overflow: auto; padding: 16px; display: flex; flex-direction: column; }
+    #canvas { display: inline-block; }
+    #canvas svg { background: #0d0d0d; border: 1px solid #333; display: block; }
+
+    .panel-h { color: #00d4ff; font-size: 12px; margin: 4px 0 8px; letter-spacing: .06em;
+               text-transform: uppercase; border-bottom: 1px solid #222; padding-bottom: 4px; }
+
+    /* ── Palette ─────────────────────────────────────────────────────────── */
+    .palette { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 14px; }
+    .pal-item { padding: 5px 4px; text-align: center; border: 1px solid #2e2e2e; border-radius: 3px;
+                cursor: grab; background: #181818; font-size: 11px; }
+    .pal-item:hover { border-color: #00d4ff; color: #fff; }
+
+    /* ── Tree ────────────────────────────────────────────────────────────── */
+    .tree-zone { margin-bottom: 6px; }
+    .tree-zone > .zname { color: #6fb8c8; cursor: pointer; padding: 2px 0; font-weight: bold; }
+    .tree-zone > .zname:hover { color: #00d4ff; }
+    .tree-comp { padding: 2px 6px 2px 16px; cursor: pointer; border-radius: 3px;
+                 white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tree-comp:hover { background: #1e1e1e; }
+    .tree-comp.sel { background: #06303a; color: #7fe7ff; }
+    .tree-comp .ttype { color: #666; }
+
+    /* ── Inspector ───────────────────────────────────────────────────────── */
+    .field { margin-bottom: 8px; }
+    .field label { display: block; color: #888; margin-bottom: 2px; font-size: 11px; }
+    .field input, .field select { width: 100%; }
+    .field.row { display: flex; gap: 6px; }
+    .field.row > div { flex: 1; }
+    .ro { color: #6a9; }
+    .hint { color: #666; font-size: 11px; margin: 6px 0; line-height: 1.4; }
+
+    /* ── SVG interaction ─────────────────────────────────────────────────── */
+    .comp { cursor: move; }
+    .comp.sel .hit { stroke: #00d4ff; stroke-width: 0.4; fill: rgba(0,212,255,0.08); }
+    .comp.violation .hit { stroke: #ff4444; stroke-width: 0.4; fill: rgba(255,68,68,0.12); }
+    .hit { fill: transparent; }
+
+    /* ── DRC panel ───────────────────────────────────────────────────────── */
+    #drc-panel { margin-top: 12px; max-width: 1000px; }
+    #drc-panel details { background: #161616; border: 1px solid #2a2a2a; border-radius: 4px;
+                         padding: 6px 10px; margin-bottom: 6px; }
+    #drc-panel summary { cursor: pointer; font-weight: bold; }
+    #drc-panel ul { margin: 6px 0 0; padding-left: 18px; }
+    #drc-panel li { margin: 2px 0; line-height: 1.35; }
+
+    /* ── Modal ───────────────────────────────────────────────────────────── */
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+             display: flex; align-items: center; justify-content: center; z-index: 50; }
+    .modal.hidden { display: none; }
+    .modal .box { background: #161616; border: 1px solid #00d4ff; border-radius: 6px;
+                  width: min(900px, 92vw); height: min(80vh, 800px); display: flex; flex-direction: column;
+                  padding: 14px; }
+    .modal h2 { color: #00d4ff; margin: 0 0 8px; font-size: 14px; }
+    .modal textarea { flex: 1; width: 100%; background: #0d0d0d; color: #cde; border: 1px solid #333;
+                      border-radius: 4px; font-family: inherit; font-size: 11px; resize: none; padding: 8px; }
+    .modal .bar { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; }
+    .sublist { margin: 0 0 12px; }
+    .sublist .row2 { display: flex; align-items: center; gap: 6px; padding: 2px 0; }
+    .sublist .row2 .x { color: #888; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
