@@ -482,13 +482,19 @@ zones:
         cpp_param: "BP1_FREQ_PARAM"
       - id: BP1_FOCUS
         type: knob_large
-        col: 1
+        cx: 102.87
         cy: 52.40
         label: "FOCUS"
         cpp_param: "BP1_FOCUS_PARAM"
+      - id: BP1_TILT
+        type: knob_large
+        cx: 114.30
+        cy: 65.20
+        label: "TILT"
+        cpp_param: "BP1_TILT_PARAM"
       - id: BP1_DIST
         type: knob_large
-        col: 1
+        cx: 102.87
         cy: 78.00
         label: "DIST"
         cpp_param: "BP1_DIST_PARAM"
