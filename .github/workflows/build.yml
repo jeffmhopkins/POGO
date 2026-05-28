@@ -35,14 +35,12 @@ jobs:
 
       - name: Generate panel SVG from YAML
         run: |
-          apt-get update -qq && apt-get install -y python3-yaml -qq
+          apt-get update -qq && apt-get install -y python3-yaml inkscape -qq
           # DRC must pass before we compile — catches keepout/overlap violations early
           python3 tools/build_panel.py --check
-          # Regenerate plugin/res/Pogo-source.svg from panel-data.yaml (source of truth)
-          python3 tools/build_panel.py --resource
-          # plugin/res/Pogo.svg (Inkscape-converted paths, no <text>) is committed to the
-          # repo and must not be overwritten here. It is kept in sync locally via the
-          # default 'python3 tools/build_panel.py' which runs --mfr (Inkscape).
+          # Regenerate plugin/res/Pogo-source.svg (source) AND plugin/res/Pogo.svg
+          # (Inkscape text-to-path, loaded by VCV Rack) from panel-data.yaml.
+          python3 tools/build_panel.py --resource --mfr
 
       - name: Build plugin
         run: |
@@ -78,10 +76,10 @@ jobs:
 
       - name: Generate panel SVG from YAML
         run: |
-          apt-get update -qq && apt-get install -y python3-yaml -qq
+          apt-get update -qq && apt-get install -y python3-yaml inkscape -qq
           python3 tools/build_panel.py --check
-          python3 tools/build_panel.py --resource
-          # plugin/res/Pogo.svg is committed (Inkscape-converted); do not overwrite.
+          # Regenerate Pogo-source.svg + Pogo.svg (Inkscape text-to-path) from the YAML.
+          python3 tools/build_panel.py --resource --mfr
 
       - name: Build plugin
         run: |
@@ -135,9 +133,11 @@ jobs:
       - name: Generate panel SVG from YAML
         run: |
           python3 -m pip install --break-system-packages pyyaml --quiet
+          brew install --cask inkscape
+          export PATH="/Applications/Inkscape.app/Contents/MacOS:$PATH"
           python3 tools/build_panel.py --check
-          python3 tools/build_panel.py --resource
-          # plugin/res/Pogo.svg is committed (Inkscape-converted); do not overwrite.
+          # Regenerate Pogo-source.svg + Pogo.svg (Inkscape text-to-path) from the YAML.
+          python3 tools/build_panel.py --resource --mfr
 
       - name: Build plugin
         run: |

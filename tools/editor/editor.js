@@ -196,9 +196,13 @@
   // ── DRC (port of panel_rules.check_all) ────────────────────────────────────
   // Returns { violations:[str...], badIds:Set }.  Strings match the Python output
   // so the editor report mirrors `build_panel.py --check`.
-  function runDRC() {
+  // override (optional) = { id, cx, cy } resolved coords for an in-flight drag, so
+  // live DRC reflects the dragged position without mutating the model.
+  function runDRC(override) {
     const comps = allComps().map(({ c, z }) => {
-      const { cx, cy } = resolve(c, z);
+      let cx, cy;
+      if (override && c.id === override.id) { cx = override.cx; cy = override.cy; }
+      else { const r = resolve(c, z); cx = r.cx; cy = r.cy; }
       return { c, cx, cy, type: c.type, rot: Number(c.rotate || 0), label: compLabel(c) };
     });
     const V = [];
@@ -483,7 +487,7 @@
     let s = "";
     s += `<rect x="0" y="0" width="${W}" height="${H}" fill="${COL.panel_bg}"/>`;
     s += `<rect x="0" y="0" width="${W}" height="9" fill="${COL.panel_strip}"/>`;
-    s += `<rect x="0" y="${H - 4.5}" width="${W}" height="4.5" fill="${COL.panel_strip}"/>`;
+    s += `<rect x="0" y="${H - 9}" width="${W}" height="9" fill="${COL.panel_strip}"/>`;   // symmetric with top strip
     for (const mh of D.mounting_holes || [])
       s += `<circle cx="${mh.cx}" cy="${mh.cy}" r="1.6" fill="#0d0d0d" stroke="#2a2a2a" stroke-width="0.5"/>`;
     // title
@@ -512,7 +516,7 @@
     if (UI.selSep != null && (D.separators || [])[UI.selSep]) {
       const sp = D.separators[UI.selSep];
       const e = sepEndpointsResolved(sp);
-      s += `<line x1="${f3(e.a.x)}" y1="${f3(e.a.y)}" x2="${f3(e.b.x)}" y2="${f3(e.b.y)}" stroke="${COL.cyan}" stroke-width="0.6" opacity="0.9"/>`;
+      s += `<line class="sep-hl" x1="${f3(e.a.x)}" y1="${f3(e.a.y)}" x2="${f3(e.b.x)}" y2="${f3(e.b.y)}" stroke="${COL.cyan}" stroke-width="0.6" opacity="0.9"/>`;
       const handle = (p, end) => `<circle class="sep-handle" data-sep="${UI.selSep}" data-end="${end}" cx="${f3(p.x)}" cy="${f3(p.y)}" r="1.6"/>`;
       s += handle(e.a, "a") + handle(e.b, "b") + handle(e.mid, "mid");
     }
@@ -535,9 +539,11 @@
     const W = Number(D.meta.width_mm), H = Number(D.meta.height_mm);
     const comps = allComps();
 
-    // layer-panel: chrome + each component visual (+ transparent hit target)
+    // layer-panel: chrome + each component visual (+ transparent hit target).
+    // Render the selected component LAST so it paints on top of its neighbours.
     let panel = chromeSVG();
-    for (const { c, z } of comps) {
+    const ordered = comps.filter(({ c }) => c.id !== UI.selId).concat(comps.filter(({ c }) => c.id === UI.selId));
+    for (const { c, z } of ordered) {
       const { cx, cy } = resolve(c, z);
       const hitR = Math.max(panelR(c.type), 2.2);
       const selCls = c.id === UI.selId ? " sel" : "";
@@ -705,6 +711,8 @@
         e.preventDefault(); e.stopPropagation();
         if (UI.tool === "anchor") { applyAnchor(id); return; }
         UI.selId = id; UI.selZone = null; renderSelectionOnly();
+        const lp = svgEl.querySelector("#layer-panel");   // bring to top (paints last)
+        if (lp && g.parentNode === lp) lp.appendChild(g);
         const m = clientToMm(e);
         const f = findComp(id); const { cx, cy } = resolve(f.c, f.z);
         drag = { id, dx: m.x - cx, dy: m.y - cy, moved: false };
@@ -718,6 +726,9 @@
         setCompTransform(drag.id, p.x, p.y);
         const g2 = svgEl.querySelector(`.comp[data-cid="${cssEsc(drag.id)}"]`);
         if (g2) g2.setAttribute("transform", `translate(${f3(p.x)},${f3(p.y)})`);
+        // live DRC: recolour violators against the dragged position (no model mutation)
+        const bad = runDRC({ id: drag.id, cx: p.x, cy: p.y }).badIds;
+        svgEl.querySelectorAll(".comp").forEach((gg) => gg.classList.toggle("violation", bad.has(gg.dataset.cid)));
         showHUD(drag.id, p.x, p.y);
       });
       const end = () => {
@@ -744,9 +755,21 @@
         if (!sepDrag.snapped) { snapshot(); sepDrag.snapped = true; }
         const mm = clientToMm(e); const m = snapPos(mm.x, mm.y);
         moveSepEndpoint(sepDrag.idx, sepDrag.end, m.x, m.y);
-        render();
+        // Update the live SVG directly (NO full render — re-rendering would destroy
+        // this handle and drop the pointer capture, breaking fast drags).
+        const e2 = sepEndpointsResolved(D.separators[sepDrag.idx]);
+        const hl = svgEl.querySelector(".sep-hl");
+        if (hl) { hl.setAttribute("x1", f3(e2.a.x)); hl.setAttribute("y1", f3(e2.a.y)); hl.setAttribute("x2", f3(e2.b.x)); hl.setAttribute("y2", f3(e2.b.y)); }
+        svgEl.querySelectorAll(".sep-handle").forEach((hh) => {
+          const p = e2[hh.dataset.end]; if (p) { hh.setAttribute("cx", f3(p.x)); hh.setAttribute("cy", f3(p.y)); }
+        });
+        sepDrag.moved = true;
       });
-      const sEnd = () => { if (sepDrag && sepDrag.idx === Number(h.dataset.sep)) sepDrag = null; };
+      const sEnd = () => {
+        if (!sepDrag || sepDrag.idx !== Number(h.dataset.sep)) return;
+        const moved = sepDrag.moved; sepDrag = null;
+        if (moved) render();            // rebuild cleanly (tree, inspector, DRC) on drop
+      };
       h.addEventListener("pointerup", sEnd);
       h.addEventListener("pointercancel", sEnd);
     });
@@ -810,7 +833,8 @@
     c.cx = round3(resolvedCx - (DR.x_offset || 0));
     delete c.col;                       // off the column grid → explicit cx
     c.cy = round3(resolvedCy);
-    reassignZone(c);                    // keep tree membership = the zone it now sits in
+    // Zone membership is NOT auto-changed on move — it's chosen explicitly via the
+    // inspector's zone dropdown (moveCompToZone).
   }
   // Raw (pre-x_offset) x-span [x0,x1) of a column-relative zone, else null.
   function zoneSpanRaw(z) {
@@ -825,16 +849,23 @@
     for (const z of D.zones || []) { const s = zoneSpanRaw(z); if (s && rawcx >= s[0] - 0.001 && rawcx < s[1] + 0.001) return z; }
     return null;
   }
-  // After an individual move, move the component object into the zone whose x-span
-  // now contains it (so the component tree reflects its real location).
-  function reassignZone(c) {
-    const target = zoneForRawCx(Number(c.cx));
-    if (!target) return;
-    const cur = zoneOf(c);
-    if (!cur || cur === target) return;
-    const i = cur.components.indexOf(c);
-    if (i >= 0) cur.components.splice(i, 1);
+  // Representative raw-x of a separator (for associating it with a zone in the tree).
+  const sepRepX = (sp) => sp.type === "v" ? Number(sp.x) : (Number(sp.x1) + Number(sp.x2)) / 2;
+  const zoneOfSep = (sp) => zoneForRawCx(sepRepX(sp));
+  // Explicit zone reassignment (inspector dropdown). Keeps the component's on-panel
+  // position fixed — a column-relative part is converted to explicit cx first so it
+  // doesn't jump to the new zone's grid; only its tree/YAML grouping changes.
+  function moveCompToZone(id, zid) {
+    const ref = findComp(id); if (!ref) return;
+    const target = (D.zones || []).find((z) => z.id === zid);
+    if (!target || target === ref.z) return;
+    snapshot();
+    const c = ref.c;
+    if (c.col != null) { const r = resolve(c, ref.z); c.cx = round3(r.cx - (DR.x_offset || 0)); delete c.col; }
+    const i = ref.z.components.indexOf(c);
+    if (i >= 0) ref.z.components.splice(i, 1);
     (target.components = target.components || []).push(c);
+    render();
   }
   function moveCompTo(id, resolvedCx, resolvedCy) {
     snapshot();
@@ -904,9 +935,15 @@
   function addDivider(orient) {
     snapshot();
     const ox = DR.x_offset || 0, W = Number(D.meta.width_mm), H = Number(D.meta.height_mm);
-    const sp = orient === "v"
-      ? { type: "v", x: round3(W / 2 - ox), y1: 9, y2: round3(H - 4.5), style: "zone_div" }
-      : { type: "h", x1: round3(W * 0.25 - ox), x2: round3(W * 0.75 - ox), y: round3(H / 2), style: "zone_div" };
+    let sp;
+    if (orient === "v") {
+      sp = { type: "v", x: round3(W / 2 - ox), y1: 9, y2: round3(H - 4.5), style: "zone_div" };
+    } else {
+      // Horizontal divider spans the selected zone (so it nests under that zone).
+      const s = zoneSpanRaw(targetZone() || {});
+      const x1 = s ? s[0] : W * 0.25 - ox, x2 = s ? s[1] : W * 0.75 - ox;
+      sp = { type: "h", x1: round3(x1), x2: round3(x2), y: round3(H / 2), style: "zone_div" };
+    }
     (D.separators = D.separators || []).push(sp);
     selectSep(D.separators.length - 1);
   }
@@ -918,8 +955,11 @@
     // Default: a 3-column section starting just past the current content's right edge.
     let xs = 0;
     for (const { c, z } of allComps()) xs = Math.max(xs, rawCx(c, z));
-    const z = { id, label: "New Zone", x_start: round3(Math.min(xs + 11.43, Number(D.meta.width_mm) - 34.29)), col_pitch: 11.43, cols: 3, components: [] };
+    const x0 = round3(Math.min(xs + 11.43, Number(D.meta.width_mm) - 34.29));
+    const z = { id, label: "New Zone", x_start: x0, col_pitch: 11.43, cols: 3, components: [] };
     (D.zones = D.zones || []).push(z);
+    // Zones own their vertical boundary divider — create one at the zone's left edge.
+    (D.separators = D.separators || []).push({ type: "v", x: x0, y1: 9, y2: round3(Number(D.meta.height_mm) - 4.5), style: "zone_div" });
     selectZone(id);
   }
   function deleteZone(zid) {
@@ -946,15 +986,38 @@
   const selSepObj = () => (UI.selSep != null ? (D.separators || [])[UI.selSep] : null);
 
   // ── Zone (section) operations — mirror Python shift_zone ───────────────────────
+  // Index of the vertical divider sitting at a zone's left edge (its boundary), else -1.
+  function zoneBoundarySepIdx(z) {
+    if (z.x_start == null) return -1;
+    const x0 = Number(z.x_start);
+    return (D.separators || []).findIndex((sp) => sp.type === "v" && Math.abs(Number(sp.x) - x0) < 0.01);
+  }
+  // Per-zone toggle: enable/disable the zone's left-edge vertical divider.
+  function setZoneDivider(zid, on) {
+    const z = (D.zones || []).find((z) => z.id === zid); if (!z || z.x_start == null) return;
+    const idx = zoneBoundarySepIdx(z);
+    snapshot();
+    if (on && idx < 0) {
+      (D.separators = D.separators || []).push({ type: "v", x: round3(Number(z.x_start)), y1: 9, y2: round3(Number(D.meta.height_mm) - 4.5), style: "zone_div" });
+    } else if (!on && idx >= 0) {
+      D.separators.splice(idx, 1);
+      if (UI.selSep === idx) UI.selSep = null; else if (UI.selSep != null && UI.selSep > idx) UI.selSep--;
+    }
+    render();
+  }
   function shiftZoneBy(zid, dx, dy) {
     const z = (D.zones || []).find((z) => z.id === zid); if (!z) return;
     snapshot();
+    const oldXs = z.x_start != null ? Number(z.x_start) : null;
     if (dx && z.x_start != null) z.x_start = round3(Number(z.x_start) + dx);
     for (const c of z.components || []) {
       if (dx && c.cx != null && c.col == null) c.cx = round3(Number(c.cx) + dx);
       if (dy) { const r = resolve(c, z); c.cy = round3(r.cy + dy); }
       shiftAux(c, dx, dy);              // keep switch labels / position marks aligned
     }
+    // Vertical dividers are tied to zones: move the boundary line at the old left edge.
+    if (dx && oldXs != null)
+      for (const sp of D.separators || []) if (sp.type === "v" && Math.abs(Number(sp.x) - oldXs) < 0.01) sp.x = round3(Number(sp.x) + dx);
     render();
   }
   function renameZone(oldId, field, value) {  // field: "id" | "label"
@@ -1096,34 +1159,37 @@
   }
 
   // ── Left sidebar (palette + tree) ──────────────────────────────────────────
+  function sepRow(sp, i) {
+    const desc = sp.type === "v" ? `▏ divider · x=${fmtVal(sp.x)}` : `— divider · y=${fmtVal(sp.y)}${sp.label ? ` · “${sp.label}”` : ""}`;
+    return `<div class="tree-comp${UI.selSep === i ? " sel" : ""}" data-sep="${i}">${esc(desc)} <span class="ttype">${esc(sp.style)}</span></div>`;
+  }
   function renderLeft() {
     let h = `<div class="panel-h">Add Component</div><div class="palette">`;
     for (const t of PALETTE_TYPES) h += `<div class="pal-item" draggable="false" data-add="${t}">${t.replace(/_/g, "&#8203;_")}</div>`;
     h += `</div><div class="field row" style="margin-bottom:12px">` +
-      `<div><button id="add-div-v">+ Divider ▏</button></div>` +
       `<div><button id="add-div-h">+ Divider —</button></div>` +
-      `<div><button id="add-zone">+ Zone</button></div></div>`;
+      `<div><button id="add-zone">+ Zone (+ ▏)</button></div></div>`;
+    // Group dividers by the zone whose x-span contains them; the rest go to "Other".
+    const sepByZone = {}; const otherSeps = [];
+    (D.separators || []).forEach((sp, i) => { const z = zoneOfSep(sp); (z ? (sepByZone[z.id] = sepByZone[z.id] || []) : otherSeps).push({ sp, i }); });
     h += `<div class="panel-h">Components</div>`;
     for (const z of D.zones || []) {
       h += `<div class="tree-zone"><div class="zname${z.id === UI.selZone ? " sel" : ""}" data-zid="${esc(z.id)}">${esc(z.id)}</div>`;
       for (const c of z.components || [])
         h += `<div class="tree-comp${c.id === UI.selId ? " sel" : ""}" data-cid="${esc(c.id)}">${esc(compLabel(c))} <span class="ttype">${esc(c.type)}</span></div>`;
+      for (const { sp, i } of (sepByZone[z.id] || [])) h += sepRow(sp, i);
       h += `</div>`;
     }
-    // Dividers behave like components in the tree (the modal is gone).
-    h += `<div class="panel-h">Dividers</div>`;
-    if (!(D.separators || []).length) h += `<div class="hint">none — use “+ Divider”.</div>`;
-    (D.separators || []).forEach((sp, i) => {
-      const desc = sp.type === "v" ? `vertical · x=${fmtVal(sp.x)}` : `horizontal · y=${fmtVal(sp.y)}${sp.label ? ` · “${sp.label}”` : ""}`;
-      h += `<div class="tree-comp${UI.selSep === i ? " sel" : ""}" data-sep="${i}">${esc(desc)} <span class="ttype">${esc(sp.style)}</span></div>`;
-    });
+    if (otherSeps.length) {
+      h += `<div class="panel-h">Other dividers</div>`;
+      for (const { sp, i } of otherSeps) h += sepRow(sp, i);
+    }
     const left = document.getElementById("left");
     left.innerHTML = h;
     left.querySelectorAll("[data-add]").forEach((el) => el.addEventListener("click", () => addComp(el.dataset.add)));
     left.querySelectorAll(".tree-comp[data-cid]").forEach((el) => el.addEventListener("click", () => selectComp(el.dataset.cid)));
     left.querySelectorAll(".tree-comp[data-sep]").forEach((el) => el.addEventListener("click", () => selectSep(Number(el.dataset.sep))));
     left.querySelectorAll(".zname").forEach((el) => el.addEventListener("click", () => selectZone(el.dataset.zid)));
-    document.getElementById("add-div-v").addEventListener("click", () => addDivider("v"));
     document.getElementById("add-div-h").addEventListener("click", () => addDivider("h"));
     document.getElementById("add-zone").addEventListener("click", addZone);
   }
@@ -1148,6 +1214,7 @@
     let h = `<div class="panel-h">Inspector</div>`;
     h += `<div class="field"><label>id</label><input id="i-id" type="text" value="${esc(c.id)}"></div>`;
     h += `<div class="field"><label>type</label><select id="i-type">${PALETTE_TYPES.map((t) => `<option ${t === c.type ? "selected" : ""}>${t}</option>`).join("")}</select></div>`;
+    h += `<div class="field"><label>zone</label><select id="i-zone">${(D.zones || []).map((zz) => `<option ${zz.id === z.id ? "selected" : ""}>${esc(zz.id)}</option>`).join("")}</select></div>`;
     h += `<div class="field row"><div><label>cx (mm, resolved)</label><input id="i-cx" type="number" step="0.01" value="${f3(cx)}"></div>` +
          `<div><label>cy (mm)</label><input id="i-cy" type="number" step="0.01" value="${f3(cy)}"></div></div>`;
     if (c.col != null) h += `<div class="hint">column-relative (col ${c.col} in ${esc(z.id)}); editing cx/cy converts to explicit cx.</div>`;
@@ -1196,6 +1263,7 @@
       else { idEl.value = c.id; }
     });
     document.getElementById("i-type").addEventListener("change", (e) => { c.type = e.target.value; commit(); });
+    document.getElementById("i-zone").addEventListener("change", (e) => moveCompToZone(c.id, e.target.value));
     const cxEl = document.getElementById("i-cx"), cyEl = document.getElementById("i-cy");
     const applyXY = () => moveCompTo(c.id, Number(cxEl.value), Number(cyEl.value));
     cxEl.addEventListener("change", applyXY);
@@ -1246,6 +1314,8 @@
     h += `<div class="field"><label>label</label><input id="z-label" type="text" value="${esc(z.label || "")}"></div>`;
     if (z.x_start != null)
       h += `<div class="field"><label>x_start (mm)</label><input id="z-xstart" type="number" step="0.01" value="${fmtVal(z.x_start)}"></div>`;
+    if (z.x_start != null)
+      h += `<div class="field"><label><input type="checkbox" id="z-div" ${zoneBoundarySepIdx(z) >= 0 ? "checked" : ""}> vertical divider (left edge)</label></div>`;
     h += `<div class="hint">components span: ${span}${nx != null ? ` · next x_start: ${f2(nx)}mm (${(nx / HP_MM).toFixed(2)} HP)` : ""}</div>`;
     h += `<div class="hint">Arrows move the whole section (Shift = 1 HP). x_start shift moves column-relative parts; explicit-cx parts shift with it.</div>`;
     h += `<div class="field row"><div><button data-zmove="-x">◀ −1mm</button></div><div><button data-zmove="+x">+1mm ▶</button></div></div>`;
@@ -1261,6 +1331,8 @@
     document.getElementById("z-label").addEventListener("change", (e) => renameZone(z.id, "label", e.target.value));
     const xe = document.getElementById("z-xstart");
     if (xe) xe.addEventListener("change", (e) => setZoneXStart(z.id, Number(e.target.value)));
+    const dv = document.getElementById("z-div");
+    if (dv) dv.addEventListener("change", (e) => setZoneDivider(z.id, e.target.checked));
     right.querySelectorAll("[data-zmove]").forEach((b) => b.addEventListener("click", () => {
       const d = b.dataset.zmove;
       shiftZoneBy(z.id, d === "-x" ? -1 : d === "+x" ? 1 : 0, d === "-y" ? -1 : d === "+y" ? 1 : 0);

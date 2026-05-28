@@ -4,7 +4,7 @@
   <!-- ── PANEL BACKGROUND ─────────────────────────────────────────────────── -->
   <rect x="0" y="0" width="243.84" height="128.5" fill="#0d0d0d"/>
   <rect x="0" y="0" width="243.84" height="9.0" fill="#141414"/>
-  <rect x="0" y="124.0" width="243.84" height="4.5" fill="#141414"/>
+  <rect x="0" y="119.5" width="243.84" height="9.0" fill="#141414"/>
 
   <!--
     PANEL: 243.84 mm wide × 128.50 mm tall
