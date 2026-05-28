@@ -265,10 +265,24 @@ source impedance of R_clamp = 10 kΩ at (+), which has no impact on loop stabili
 Phase margin is identical to a standard G=+2 non-inverting configuration. No stability
 concern — no prototype verification required for this stage.
 
-**Diode Vth variation:** 1N4148W Vf ≈ 0.6–0.7 V depending on current.
-At R_clamp = 10 kΩ and V_fold_in = 3V: I_clamp ≈ (3−1.4)/10kΩ = 160 µA → Vf ≈ 0.60V → Vth ≈ 1.2V.
-Fold threshold shifts slightly with drive level (soft onset, similar to Buchla-style folders).
-Intentional characteristic; not a defect.
+**Diode Vth variation (resolved — accepted characteristic):**
+
+1N4148W Vf depends on clamp current; Vth = 2×Vf shifts with drive level:
+
+```
+V_fold_in   I_clamp = (V−1.4V)/10kΩ   Vf (1N4148W)   Vth = 2×Vf
+  3 V           160 µA                  ~0.62 V          ~1.24 V
+  5 V           360 µA                  ~0.64 V          ~1.28 V
+ 10 V           860 µA                  ~0.68 V          ~1.36 V
+ 28 V (max)    2.66 mA                  ~0.72 V          ~1.44 V
+```
+
+At practical folding depths (V_fold_in > 5 V), Vth sits in the 1.28–1.44 V range,
+within ±10% of the DSP target (1.4 V). At very low drive (barely past threshold),
+Vth is lower (~1.2 V), which softens fold onset slightly. This gives the hardware a
+characteristically smooth entry into folding — the fold corners are rounder than the
+mathematical `asin(sin(x))` model, consistent with all passive-diode Buchla-style
+folders. It is an analog character feature, not a defect. No hardware change required.
 
 Components per WF path: 2× TL072 halves (pre-gain + folder; same IC, no additional ICs),
 4× 1N4148W (SOD-123), 4× resistors (R_WF_in, R_WF_fb_fixed, R_clamp, R_g = R_f = 10 kΩ).

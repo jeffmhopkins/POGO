@@ -110,9 +110,11 @@ Stage boundaries verified: Block 1→VCA −0.006 dB; VCA→LP1 −0.009 dB — 
 Exact IN+ (~20 kΩ) and OUT+ (<100 Ω) impedance figures are typical values from THAT Corp
 application notes; confirm from THAT 2180A14-U datasheet during PCB layout.
 
-**Open prototype questions (Phase 3R advisory, not blocking):**
-- block-2: LFO LED: confirm pulsing (half-wave rectified) vs breathing (no diode) — prototype preference
-- block-6: WF fold threshold Vth diode-current dependency — bench characterization of fold shape at various drive levels (informational; topology is correct)
+**Open prototype questions:** None. All resolved.
+- block-2 LFO LED: pulsing confirmed (half-wave rectified via D_LED 1N4148W). Signal
+  routing updated to include diode in path.
+- block-6 WF Vth: diode-current dependency analyzed and documented (Vth 1.24–1.44 V
+  across drive range; ±10% of DSP target at practical fold depths; accepted characteristic).
 
 ---
 

@@ -205,12 +205,12 @@ R_LED = (5 − 2.0 − 0.7) / 0.002 = 1.15 kΩ  → use 1.2 kΩ standard
 ```
 RV_LFO1 (rate pot) → R_min → integrator input
 Schmitt output → integrator input (sign reversal via comparator polarity)
-Integrator output (triangle) → U_LFO1-A output → R_LED1 → LED_LFO1
+Integrator output (triangle) → D_LED1 (1N4148W) → R_LED1 (1.2 kΩ) → LED_LFO1
                              → R_LFO1 (1 kΩ) → J_LFO1 output jack
                              → (normalling ring of J_MOD_IN) ← tip-switch controlled
 
 RV_LFO2 (rate pot) → R_min → integrator input (U_LFO2-A)
-Integrator output → R_LED2 → LED_LFO2
+Integrator output → D_LED2 (1N4148W) → R_LED2 (1.2 kΩ) → LED_LFO2
                  → R_LFO2 (1 kΩ) → J_LFO2 output jack
 ```
 
