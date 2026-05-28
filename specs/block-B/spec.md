@@ -73,7 +73,7 @@ J_LFO2. This is a valid approach because:
 The DSP model has no output impedance — it writes a voltage directly to the rack
 simulation node. In hardware, the 1 kΩ series resistor creates a voltage divider
 with the input impedance of the downstream module (typically 100 kΩ), resulting in
-a −0.01 dB attenuation, negligible in practice. The DSP clamp at ±11 V maps cleanly
+a −0.087 dB attenuation (100k/(100k+1k) = 0.990×), negligible in practice. The DSP clamp at ±11 V maps cleanly
 to the TL072 output swing.
 
 → References `aux/unity-buffer.md`

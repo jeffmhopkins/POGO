@@ -19,11 +19,11 @@ Last updated: 2026-05-27 | Topology: 48HP | Phase 3R: all blocks complete
 |---|---|---|---|---|---|
 | A | Input Buffer | ✅ | ✅ | ✅ | OPA1612 follower, BAT54S clamp |
 | 1 | Pre-Gain | ✅ | ✅ | ✅ | OPA1612, 1×/5× switch; ALT_BP path |
-| 2 | Dual LFO | ✅ | ✅ | ✅ | Integrator+Schmitt; 47nF C0G; 1MΩ log pot + end R |
+| 2 | Dual LFO | ✅ | ✅ | ✅ | Integrator+Schmitt; 47nF C0G; formula corrected; R_CCW_END 2×100MΩ for f_min=0.058 Hz |
 | 3 | Mod Bus | ✅ | ✅ | ✅ | 19 destinations; 7× TL074CDT; 470kΩ SCALE pot |
 | 4 | VCA | ✅ | ✅ | ✅ | THAT 2180 dB-law; DSP updated to match |
 | 5 | LP Filter 1 | ✅ | ✅ | ✅ | OTA-C SVF; stereo tilt (symmetric ±V_tilt L/R) |
-| 6 | Triple BP + Dist | ✅ | ✅ | ✅ | SC/HC/WF sub-circuits + CD4053; BP_MIX+POL; DSP aligned |
+| 6 | Triple BP + Dist | ✅ | ✅ | ✅ | SC/HC/WF + CD4053; BP_MIX polarity corrected (U48=wet restorer; SW_POL default via U27-B) |
 | 7 | HP Filter | ✅ | ✅ | ✅ | OTA-C SVF; G=−1 buffer corrects SUM_AMP inversion |
 | 8 | LP Filter 2 | ✅ | ✅ | ✅ | OTA-C SVF; independent from LP1; shares Q VCA LM13700 |
 | B | Output Buffer | ✅ | ✅ | ✅ | TL072; MAIN_L/R from LP2 + BP3_L/R tap |
@@ -94,9 +94,18 @@ block-6 WF topology replaced with true symmetric precision folder (no prototype 
 - Distortion: SC diode chain ±1.4V; HC ±5.8V; WF Vth=±1.4V (~18 folds)
 - LFO: one-pole peak rounding at 10× rate (integrator slew model)
 
+**Pre-layout verification complete (2026-05-28).** Adversarial Phase 1 (DSP↔spec cross-check),
+Phase 2 (IC allocation), Phase 3 (signal-path trace), and Phase 4 (BOM completeness) all passed.
+Corrections applied: LFO formula + R_CCW_END; Q_min deviation documented; HP Q spare cell
+termination specified; R_TILT_INV tolerance flags added; block-1 signal-routing stale values
+corrected; block-B output Z attenuation corrected; BP_MIX wet polarity circuit corrected.
+
 **Remaining work before PCB layout:**
-1. **Write 48HP KiCad generator** — replaces 40HP-era stale generators; inputs from components.yaml + panel-data.yaml
-2. **Phase 6R** — VCV Rack signal-path smoke tests (CI integration)
+1. **THAT 2180 audio I/O impedances** — verify from datasheet that audio IN+ Z and OUT Z are
+   compatible with source/load in the VCA signal path (block-4 → block-5 boundary); confirm
+   differential-to-SE output topology. Flag from Phase 3 signal-path trace.
+2. **Write 48HP KiCad generator** — replaces 40HP-era stale generators; inputs from components.yaml + panel-data.yaml
+3. **Phase 6R** — VCV Rack signal-path smoke tests (CI integration)
 
 **Open prototype questions (Phase 3R advisory, not blocking):**
 - block-2: LFO LED: confirm pulsing (half-wave rectified) vs breathing (no diode) — prototype preference

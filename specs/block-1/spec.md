@@ -130,9 +130,9 @@ note below. Both give gain within 5% of 5×.
 
 Main path:
 ```
-Block-A outL → R3_L (12 kΩ) → U2A (−) input
+Block-A outL → R3_L (4.7 kΩ) → U2A (−) input
                                U2A (+) = Block-A outL (non-inv.)
-                               U2A output → R4_L (47 kΩ) → U2A (−) [feedback]
+                               U2A output → R4_L (18 kΩ) → U2A (−) [feedback]
 SW1 position A: U2A output → pgL
 SW1 position B: Block-A outL → pgL (bypass)
 
@@ -142,8 +142,8 @@ pgL/pgR → Block VCA
 
 ALT path:
 ```
-J_ALT_L → R_ALT_g (12 kΩ) → U3A non-inverting amp → SW2 → altL
-J_ALT_R → R_ALT_g (12 kΩ) → U3B non-inverting amp → SW2 → altR
+J_ALT_L → R_ALT_g (4.7 kΩ) → U3A non-inverting amp → SW2 → altL
+J_ALT_R → R_ALT_g (4.7 kΩ) → U3B non-inverting amp → SW2 → altR
 altL/altR → Block BP (direct input, bypassing VCA and LP1)
 ```
 

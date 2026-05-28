@@ -356,13 +356,26 @@ V_wet_inv ──[R_wet_pot = RV_BP_MIX wiper × 100k]─┘
 ```
 
 RV_BP_MIX (linear-taper 100 kΩ): controls R_wet from 0 (full CCW, no wet) to 100 kΩ (full CW).
-V_mix_inv = −(V_dry + V_wet_inv × R_mix_f/R_wet)
+V_mix_inv = −(V_dry × R_f/R_dry + V_wet_inv × R_f/R_wet)
 
-At MIX=0 (R_wet = ∞): V_mix_inv = −V_dry (dry only)
-At MIX=max (R_wet = 100k): V_mix_inv = −V_dry − V_wet_inv = −V_dry + V_wet (polarity corrected)
+At MIX=0 (R_wet = ∞): V_mix_inv = −V_dry (dry inverted)
+At MIX=max (R_wet = 100k, R_f = R_dry = 100k):
+  V_mix_inv = −V_dry − V_wet_inv = −V_dry − (−V_wet) = −V_dry + V_wet
 
-A unity-gain inverting buffer (TL072 half B) after the mix amp restores final polarity:
-V_bp_out_pre_pol = +V_dry when MIX=0, → dry + wet at MIX=max.
+**Wet polarity restore (U48):** An inverting unity-gain buffer on the V_wet_inv signal
+restores wet polarity to +V_wet before the MIX amp, so V_wet_pos = −V_wet_inv = +V_wet.
+
+With V_wet_pos (corrected) feeding the MIX amp instead of V_wet_inv:
+  V_mix_inv = −(V_dry + V_wet_pos × R_f/R_wet)
+At MIX=0: V_mix_inv = −V_dry
+At MIX=max: V_mix_inv = −V_dry − V_wet
+
+V_mix_inv then passes directly to the SW_POL stage (no separate output buffer needed).
+
+**DESIGN NOTE — U48 reassigned:** U48 (previously "output polarity buffer") is used as
+the wet polarity restorer. This inserts one inversion in the wet path to correct the
+polarity before the MIX amp. Without this correction, the wet signal would be subtracted
+rather than added at the BP output (V_dry − V_wet instead of V_dry + V_wet).
 
 **Note:** DSP matches hardware: dry is always present at unity, wet is added on top. At MIX=max: output = dry + wet (up to 6 dB louder than a crossfade at equal level). DSP clamps at ±12V; hardware limited by op-amp rails.
 
@@ -370,24 +383,35 @@ V_bp_out_pre_pol = +V_dry when MIX=0, → dry + wet at MIX=max.
 
 The DSP applies BP_POL ∈ {+1, −1} to the BP output before summing into the signal chain.
 
-Hardware: SW_POL (2-position slide) selects between the direct path and an inverting buffer.
+Hardware: SW_POL (2-position slide) selects between an inverting buffer (default, produces
+positive polarity) and the direct MIX amp output (negative polarity). The MIX amp output
+V_mix_inv is inherently negative-polarity (−V_dry − V_wet); the G=−1 stage inverts it
+to the expected positive-polarity output (+V_dry + V_wet).
 
 ```
-V_bp_out_pre_pol ──────────────────────────────────────────┐
-                                                           SW_POL
-V_bp_out_pre_pol ──[R_pol_in = 100 kΩ]──►(−) TL072 ──►──┘    ──► V_bp_out
-                                              │
-                                         [R_pol_fb = 100 kΩ] (G = −1)
-                                         (+) = GND
+                               R_pol_in (100 kΩ)    R_pol_fb (100 kΩ)
+V_mix_inv ──[R_pol_in = 100 kΩ]──►(−) U27-B ──[R_pol_fb]──► V_bp_out_pos (+V_dry+V_wet)
+                                        │
+                                   (+) = GND
+
+V_mix_inv ─────────────────────────────────────────────────► V_bp_out_neg (−V_dry−V_wet)
+
+SW_POL:  position 1 (default, "+") → V_bp_out_pos → V_bp_out
+         position 2 (negative, "−") → V_bp_out_neg → V_bp_out
 ```
 
-The spare half of BP_TILT_INV TL072CDT (half B) is used as the G=−1 polarity inverter:
-- Half A of BP_TILT_INV: generates −V_tilt (already assigned)
-- Half B of BP_TILT_INV: polarity inverter (G=−1) for BP_POL
+U27 half B (G=−1, in BP_TILT_INV TL072CDT) is in the DEFAULT signal path:
+- Half A of U27: generates −V_tilt for R-channel expo converter (unchanged)
+- Half B of U27: G=−1 polarity inverter; corrects V_mix_inv polarity in default path
 
-SW_POL (PogoSwitchH2) selects between V_bp_out_pre_pol (positive polarity, default) and
-the output of the G=−1 stage (negative polarity). The switch is a standard 1P2T (SPDT)
-slide/toggle on the panel.
+SW_POL selects:
+- Default ("+"): V_mix_inv → U27 half B → V_bp_out = +V_dry + V_wet ✓
+- Negative ("−"): V_mix_inv direct → V_bp_out = −V_dry − V_wet ✓
+
+**Note:** The G=−1 stage is in the default path (not the alternate path). This is required
+because V_mix_inv exits the MIX amp with negative polarity. The G=−1 converts to positive
+output as expected. No additional ICs are needed vs. the BP_POL design; only the routing
+of SW_POL positions changes from what was previously described.
 
 **Board assignment:** BP_MIX summing amp and BP_POL inverter on audio board. SW_POL panel
 wiring routes to control board via ribbon connector.

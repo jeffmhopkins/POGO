@@ -120,7 +120,7 @@ components:
   # block-6: BP_MIX and BP_POL circuit ICs
   - { ref: U46,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "BP wet summer half A = L (BP1+BP2+BP3 inv sum); half B = MIX crossfade L" }
   - { ref: U47,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "BP wet summer half A = R; half B = MIX crossfade R" }
-  - { ref: U48,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "BP_MIX output polarity buffer half A = L; half B = R" }
+  - { ref: U48,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "BP wet polarity restore: half A = V_wet_inv→V_wet_pos (L); half B = V_wet_inv→V_wet_pos (R)" }
 
   # block-6: Calibration trim pots
   - { ref: RV7,  board: audio,   block: block-6, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "BP1 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 200 Hz at 0V; ±25% range" }
