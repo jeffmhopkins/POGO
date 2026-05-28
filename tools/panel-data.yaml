@@ -226,7 +226,7 @@ zones:
         cy: 51.5
         led_fill:   "#112244"
         led_stroke: "#2255cc"
-        cpp_id: "LFO1_LED"
+        cpp_id: "LFO1_LIGHT"
       - id: LFO1_RATE
         type: trimpot
         col: 2
@@ -246,7 +246,7 @@ zones:
         cy: 65.9
         led_fill:   "#112244"
         led_stroke: "#2255cc"
-        cpp_id: "LFO2_LED"
+        cpp_id: "LFO2_LIGHT"
       - id: LFO2_RATE
         type: trimpot
         col: 2
@@ -287,7 +287,7 @@ zones:
         label_dy: 5.5
         led_fill:   "#441111"
         led_stroke: "#cc2222"
-        cpp_id: "MOD_LED_R1"
+        cpp_id: "MOD_CLIP_LIGHT"
       - id: OFFSET
         type: trimpot
         col: 0
@@ -309,7 +309,7 @@ zones:
         label_dy: 5.5
         led_fill:   "#112244"
         led_stroke: "#2255cc"
-        cpp_id: "MOD_LED_R2"
+        cpp_id: "MOD_POS_LIGHT"
       - id: MOD_IN
         type: jack_input
         col: 0
@@ -324,7 +324,7 @@ zones:
         label: "NEG"
         led_fill:   "#441111"
         led_stroke: "#cc2222"
-        cpp_id: "MOD_LED_R3"
+        cpp_id: "MOD_NEG_LIGHT"
       - id: VCA_IN
         type: jack_input
         col: 2
