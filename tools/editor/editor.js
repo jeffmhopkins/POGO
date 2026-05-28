@@ -780,7 +780,20 @@
   }
 
   // ── Mutations ────────────────────────────────────────────────────────────────
+  // Shift a component's ABSOLUTE auxiliary position fields so labels/position-marks
+  // track the body when it moves. These store absolute panel coords (y) / raw x and
+  // would otherwise drift relative to the moved cx/cy.
+  function shiftAux(c, ddx, ddy) {
+    if (ddy) {
+      for (const k of ["label_below_y", "label_above_y", "cy_body_top", "pos_y"])
+        if (c[k] != null) c[k] = round3(Number(c[k]) + ddy);
+      if (Array.isArray(c.pos_ys)) c.pos_ys = c.pos_ys.map((v) => round3(Number(v) + ddy));
+    }
+    if (ddx && Array.isArray(c.pos_xs)) c.pos_xs = c.pos_xs.map((v) => round3(Number(v) + ddx));
+  }
   function setCompResolved(c, resolvedCx, resolvedCy) {  // write model from on-screen coords
+    const old = resolve(c, zoneOf(c));
+    shiftAux(c, resolvedCx - old.cx, resolvedCy - old.cy);
     c.cx = round3(resolvedCx - (DR.x_offset || 0));
     delete c.col;                       // off the column grid → explicit cx
     c.cy = round3(resolvedCy);
@@ -866,11 +879,12 @@
   function shiftZoneBy(zid, dx, dy) {
     const z = (D.zones || []).find((z) => z.id === zid); if (!z) return;
     snapshot();
-    if (dx) {
-      if (z.x_start != null) z.x_start = round3(Number(z.x_start) + dx);
-      for (const c of z.components || []) if (c.cx != null && c.col == null) c.cx = round3(Number(c.cx) + dx);
+    if (dx && z.x_start != null) z.x_start = round3(Number(z.x_start) + dx);
+    for (const c of z.components || []) {
+      if (dx && c.cx != null && c.col == null) c.cx = round3(Number(c.cx) + dx);
+      if (dy) { const r = resolve(c, z); c.cy = round3(r.cy + dy); }
+      shiftAux(c, dx, dy);              // keep switch labels / position marks aligned
     }
-    if (dy) for (const c of z.components || []) { const r = resolve(c, z); c.cy = round3(r.cy + dy); }
     render();
   }
   function renameZone(oldId, field, value) {  // field: "id" | "label"
@@ -1351,6 +1365,13 @@
       if (String(orig.rect_w) !== String(cur.rect_w)) {
         if (cur.rect_w != null) patchKey(id, "rect_w", fmtVal(cur.rect_w)); else removeKey(id, "rect_w");
       }
+      // absolute auxiliary position fields (shifted by shiftAux on move) — persist so
+      // the built panel matches the editor. Scalars:
+      for (const k of ["label_below_y", "label_above_y", "cy_body_top", "pos_y"])
+        if (String(orig[k]) !== String(cur[k])) { if (cur[k] != null) patchKey(id, k, fmtVal(cur[k])); else removeKey(id, k); }
+      // Arrays (flow sequences):
+      for (const k of ["pos_xs", "pos_ys"])
+        if (JSON.stringify(orig[k]) !== JSON.stringify(cur[k])) { if (cur[k] != null) patchKey(id, k, flowSeq(cur[k])); else removeKey(id, k); }
     }
     // 3 ── additions. Locate the owning zone by its ORIGINAL id (zone renames are
     //      applied LAST), so insertComponent always finds the zone still in the text.
@@ -1391,6 +1412,9 @@
     function quoteIfNeeded(v) {
       const s = String(v);
       return /^[\w.+×\-/]+$/.test(s) && !/^\d/.test(s) ? s : `"${s.replace(/"/g, '\\"')}"`;
+    }
+    function flowSeq(a) {   // YAML flow sequence: numbers via fmtVal, strings quoted
+      return "[" + a.map((v) => typeof v === "number" ? fmtVal(v) : quoteIfNeeded(v)).join(", ") + "]";
     }
     function patchTop(key, newVal, indent) {
       const re = new RegExp("^(\\s{" + indent + "})" + key + ":\\s*(.*?)(\\s*(?:#.*)?)$");
