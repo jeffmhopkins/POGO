@@ -547,9 +547,9 @@ struct PogoWidget : ModuleWidget {
 
 		// ── Zone — BP 1 ────────────────────────────────────────────────
 		addParam(createParamCentered<RoundHugeBlackKnob>(mm2px(Vec(114.49f,  24.80f)), module, Pogo::BP1_FREQ_PARAM));
-		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(101.345f, 47.69f)), module, Pogo::BP1_FOCUS_PARAM));
-		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(119.635f, 63.85f)), module, Pogo::BP1_TILT_PARAM));
-		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(101.345f, 80.00f)), module, Pogo::BP1_DIST_PARAM));
+		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(102.345f, 47.69f)), module, Pogo::BP1_FOCUS_PARAM));
+		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(118.635f, 63.85f)), module, Pogo::BP1_TILT_PARAM));
+		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(102.345f, 80.00f)), module, Pogo::BP1_DIST_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(99.06f, 100.00f)), module, Pogo::BP1_FREQ_ATT_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(110.49f, 100.00f)), module, Pogo::BP1_TILT_ATT_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(121.92f, 100.00f)), module, Pogo::BP1_DIST_ATT_PARAM));
