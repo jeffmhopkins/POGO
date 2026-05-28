@@ -8,72 +8,50 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-# ── PCB courtyard dimensions (mm, relative to component origin) ───────────────
-# WQP-PJ398SM: origin = barrel centre = panel hole axis (footprint coord 0,6.48)
-#   Footprint CrtYd: (-5,-1.42) to (5,12.98) relative to sleeve (footprint origin).
-#   Shift by -6.48 in y → relative to barrel centre (panel hole):
-JACK_CY = (-5.0, -7.90, 5.0, 6.50)    # (x1, y1, x2, y2)
+from panel_kicad import footprint_courtyard as _fp_crtyd  # single source of truth
 
-# Alpha RD901F 9mm: origin = shaft centre (derived from footprint pin 1 origin)
-#   Source: Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles.kicad_mod
-#   Footprint origin = pin1; shaft centre = (7.5, 2.5) in footprint coords
-#   Courtyard footprint coords: x∈[-1.15, 12.6], y∈[-4.17, 9.17]
-#   → relative to shaft: x∈[-8.65, 5.1], y∈[-6.67, 6.67]
-POT_CY  = (-8.65, -6.67, 5.1, 6.67)
+# ── PCB courtyard dimensions (mm, relative to the component's panel anchor) ───
+# These are DERIVED from each component's KiCad footprint F.CrtYd layer via
+# panel_kicad.footprint_courtyard() — the .kicad_mod files are the single source
+# of truth.  The literal fallbacks document the expected values and guard against
+# a missing footprint file (parity with the footprints is enforced by test_drc).
+def _cy(ctype: str, fallback: tuple[float, float, float, float]) -> tuple[float, float, float, float]:
+    return _fp_crtyd(ctype) or fallback
 
-# Sub-mini toggle switch (SPDT THT, e.g. C&K M-series)
-# Panel hole: 6.3mm Ø → r=3.15mm
-# PCB courtyard: relative to switch body centre
-SWITCH_PANEL_R = 3.15
-SWITCH_CY      = (-4.5, -3.5, 4.5, 7.5)
+# Thonkiconn WQP-PJ398SM jack
+JACK_CY = _cy("jack_input", (-5.0, -7.90, 5.0, 6.50))    # (x1, y1, x2, y2)
+# Alpha RD901F 9mm pot (anchor = shaft centre)
+POT_CY  = _cy("knob_medium", (-8.65, -6.67, 5.1, 6.67))
+# Bourns 3296W vertical trimpot (anchor = wiper/actuator)
+TRIMPOT_CY = _cy("trimpot", (-2.665, -3.385, 2.665, 3.385))
+# Potentiometer_Slider_45mm_Vertical (anchor = travel centre)
+SLIDER_V45_CY = _cy("slider_V45", (-7.0, -28.5, 7.0, 28.5))
+# 3mm LED THT
+LED_CY = _cy("led", (-2.0, -1.5, 2.0, 4.0))
+# Sub-mini toggle switch (SPDT THT) — switch_H2
+SWITCH_CY = _cy("switch_H2", (-4.5, -3.5, 4.5, 7.5))
+# E-Switch EG1218 — 2-position horizontal slide (eg_2pos)
+EG1218_CY = _cy("eg_2pos", (-6.05, -2.25, 6.05, 2.25))
+# E-Switch EG2301 — 3-position vertical slide (eg_3pos)
+EG2301_V_CY = _cy("eg_3pos", (-3.5, -8.25, 3.5, 8.25))
 
-# 3-position vertical slide switch (e.g. Nidec Copal CAS-120R3)
-# Panel slot: ~1.5mm × 8mm for actuator → panel_r = 1.0mm (half slot width)
-# PCB courtyard: CAS-120R3 body is 12.7mm tall (±6.35mm) + 0.05mm margin = ±6.4mm
-# Width: body 2.7mm wide but slug protrudes to ±2.0mm → use ±2.0mm
-SWITCH_V3_PANEL_R = 1.0
-SWITCH_V3_CY      = (-2.0, -6.4, 2.0, 6.4)
+# ── Panel-face hole/slot dimensions (NOT courtyards; used by nut/keepout checks) ──
+SWITCH_PANEL_R = 3.15      # sub-mini toggle 6.3mm Ø hole
+SWITCH_V3_PANEL_R = 1.0    # legacy 3-pos vertical slide actuator slot half-width
+LED_PANEL_R = 1.6          # 3mm LED 3.2mm Ø hole
+TRIMPOT_PANEL_R = 2.5      # trimpot actuator hole
+SLIDER_V45_PANEL_W = 1.5   # 45mm slider slot half-width
+EG1218_PANEL_H = 1.5       # EG1218 panel slot half-height
+EG2301_V_PANEL_W = 3.25    # EG2301 panel slot half-width
+EG2301_V_PANEL_H = 8.25    # EG2301 panel slot half-height
 
-# 3-position horizontal slide switch (body 12mm wide × 2.4mm tall)
-# Wider than toggle switch_H2 — needs its own courtyard (not SWITCH_CY ±4.5mm)
-SWITCH_H3_CY = (-6.0, -3.5, 6.0, 7.5)
-
-# E-Switch EG1218 — 2-position horizontal slide (replaces switch_H2 in new build)
-# Body: 11.6 × 4.0mm; courtyard from DigiKey kicad_mod: 12.1 × 4.5mm (0.25mm margin)
-# Panel: rectangular slot ~3mm tall; half-height used for keepout check
-EG1218_CY      = (-6.05, -2.25, 6.05, 2.25)
-EG1218_PANEL_H = 1.5    # panel slot half-height
-
-# E-Switch EG2301 — 3-position vertical slide (replaces switch_V3 in new build)
-# Body: 16 × 6.5mm mounted vertically (long axis = y); courtyard: 16.5 × 7.0mm (0.25mm margin)
-# Panel: rectangular slot ~6.5mm wide; half-width and half-height used for keepout
-EG2301_V_CY      = (-3.5, -8.25, 3.5, 8.25)
-EG2301_V_PANEL_W = 3.25   # panel slot half-width (x-extent for keepout)
-EG2301_V_PANEL_H = 8.25   # panel slot half-height (y-extent for keepout)
+# Legacy slide switches with no dedicated footprint (unused in the current panel;
+# SW_SPDT placeholder courtyard would mis-size them) — kept hand-defined.
+SWITCH_V3_CY = (-2.0, -6.4, 2.0, 6.4)    # Nidec Copal CAS-120R3 body ±6.35mm + margin
+SWITCH_H3_CY = (-6.0, -3.5, 6.0, 7.5)    # 12mm-wide 3-pos horizontal slide
 
 EG_2POS_TYPES = {"eg_2pos"}
 EG_3POS_TYPES = {"eg_3pos"}
-
-# 3mm LED THT
-# Panel hole: 3.2mm Ø → r=1.6mm
-# PCB courtyard: relative to LED body centre
-LED_PANEL_R = 1.6
-LED_CY      = (-2.0, -1.5, 2.0, 4.0)
-
-# Bourns 3296W Vertical trimpot (used for attenuverters and VCA trim controls)
-# Panel hole: ~5mm Ø slotted hex actuator → r=2.5mm
-# PCB courtyard derived from kicad/footprints/Potentiometer_THT.pretty/
-#   Potentiometer_Bourns_3296W_Vertical.kicad_mod
-#   F.CrtYd (footprint coords, pin1 at origin): x∈[-2.665,2.665] y∈[-0.885,5.885]
-#   Panel anchor = pin2 (wiper/actuator) at footprint (0, 2.5)
-#   → relative to anchor: x∈[-2.665,2.665]  y∈[-3.385,3.385]
-TRIMPOT_PANEL_R = 2.5
-TRIMPOT_CY      = (-2.665, -3.385, 2.665, 3.385)
-
-# Potentiometer_Slider_45mm_Vertical.kicad_mod — anchor at travel centre (0,0)
-# F.CrtYd: x∈[-7.0,7.0] y∈[-28.5,28.5] (body ±6.5mm, ±28mm; 0.5mm margin)
-SLIDER_V45_CY     = (-7.0, -28.5, 7.0, 28.5)
-SLIDER_V45_PANEL_W = 1.5   # panel slot half-width (for MH clearance overlay)
 SLIDER_TYPES = {"slider_V45"}
 
 H_SWITCH_TYPES  = {"switch_H2", "switch_H3"}

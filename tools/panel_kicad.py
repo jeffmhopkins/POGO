@@ -90,6 +90,14 @@ _FOOTPRINT_MAP: dict[str, tuple[str, float, float]] = {
         "Button_Switch_THT.pretty/SW_SPDT_PanelMount.kicad_mod",
         0.0, 0.0,
     ),
+    "eg_2pos": (
+        "Button_Switch_THT.pretty/SW_EG1218.kicad_mod",
+        0.0, 0.0,   # origin = actuator/slot centre = panel hole centre
+    ),
+    "eg_3pos": (
+        "Button_Switch_THT.pretty/SW_EG2301.kicad_mod",
+        0.0, 0.0,
+    ),
 }
 
 # Visual style per KiCad layer.
@@ -167,6 +175,32 @@ def _load_footprint(rel_path: str) -> list[dict]:
         else:
             _fp_cache[rel_path] = _parse_footprint(fp_path.read_text(encoding="utf-8"))
     return _fp_cache[rel_path]
+
+
+def footprint_courtyard(ctype: str) -> tuple[float, float, float, float] | None:
+    """PCB courtyard (x1,y1,x2,y2) for a component type, RELATIVE TO ITS PANEL ANCHOR.
+
+    Derived from the component's KiCad footprint F.CrtYd layer (the single source of
+    truth), translated from footprint origin to the panel anchor via the (ox,oy)
+    offset in _FOOTPRINT_MAP.  Returns None if the type has no footprint or no
+    courtyard layer.  This replaces the hand-maintained *_CY constants — the DRC
+    (panel_rules) and the web editor both consume this so they cannot drift.
+    """
+    entry = _FOOTPRINT_MAP.get(ctype)
+    if entry is None:
+        return None
+    rel_path, ox, oy = entry
+    prims = _load_footprint(rel_path)
+    xs: list[float] = []
+    ys: list[float] = []
+    for p in prims:
+        if p.get("t") == "line" and "CrtYd" in p.get("layer", ""):
+            xs += [p["x1"], p["x2"]]
+            ys += [p["y1"], p["y2"]]
+    if not xs:
+        return None
+    return (round(min(xs) - ox, 4), round(min(ys) - oy, 4),
+            round(max(xs) - ox, 4), round(max(ys) - oy, 4))
 
 
 # ── SVG emitter ────────────────────────────────────────────────────────────────

@@ -809,6 +809,13 @@ def _component_svg(comp: dict, rules: DesignRules, colors: dict) -> str:
     label_lines = comp.get("label_lines")
     label_fill  = comp.get("label_fill")
 
+    if ctype == "text":
+        return svg.svg_text(cx, cy, comp.get("label", ""), colors,
+                            font_size=float(comp.get("font_size", 2.0)),
+                            fill=comp.get("fill"),
+                            weight=comp.get("font_weight", "normal"),
+                            anchor=comp.get("text_anchor", "middle"))
+
     if ctype == "jack_input":
         rect_w = comp.get("rect_w")
         return svg.svg_jack(cx, cy, label, "input", rules, colors, font_size=font_size,

@@ -68,6 +68,27 @@ def svg_jack(
     return "\n".join(parts)
 
 
+# ── Free text annotation ───────────────────────────────────────────────────────
+
+def svg_text(
+    cx: float,
+    cy: float,
+    text: str,
+    colors: dict,
+    font_size: float = 2.0,
+    fill: str | None = None,
+    weight: str = "normal",
+    anchor: str = "middle",
+) -> str:
+    """Free-floating text label (panel annotation; no hole/courtyard)."""
+    f = fill or colors["control_text"]
+    w = ' font-weight="bold"' if weight == "bold" else ""
+    return (
+        f'<text x="{cx}" y="{cy}" fill="{f}" {_FONT} font-size="{font_size}" '
+        f'text-anchor="{anchor}"{w}>{text}</text>'
+    )
+
+
 # ── Trimpots ──────────────────────────────────────────────────────────────────
 
 def svg_trimpot(
