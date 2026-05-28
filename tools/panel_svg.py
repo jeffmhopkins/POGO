@@ -98,15 +98,25 @@ def svg_trimpot(
     rules: Any,
     colors: dict,
     label_font_size: float = 1.8,
+    rotate: int = 0,
 ) -> str:
-    """Small trim-pot symbol: circle + indicator line + label below."""
+    """Small trim-pot symbol: circle + indicator line + label below.
+
+    The body circle is rotation-invariant; `rotate` spins the wiper-indicator
+    pointer to match the rotated footprint (a pot mounted rotated sits with its
+    pointer rotated). The label stays upright.
+    """
     r = 2.5
     label_y = cy + r + 3.0  # consistent spacing below the circle
-    ind_y2 = cy - rules.indicator_length
+    if rotate:
+        ind_dx, ind_dy = _rotate_vec(0.0, -rules.indicator_length, rotate)
+        ind_x2, ind_y2 = f"{cx + ind_dx:.3f}", f"{cy + ind_dy:.3f}"
+    else:
+        ind_x2, ind_y2 = f"{cx}", f"{cy - rules.indicator_length}"
     parts = [
         f'<circle cx="{cx}" cy="{cy}" r="{r}" '
         f'fill="{colors["knob_fill"]}" stroke="{colors["knob_stroke"]}" stroke-width="0.5"/>',
-        f'<line x1="{cx}" y1="{cy}" x2="{cx}" y2="{ind_y2}" '
+        f'<line x1="{cx}" y1="{cy}" x2="{ind_x2}" y2="{ind_y2}" '
         f'stroke="{colors["indicator"]}" stroke-width="0.5"/>',
         f'<text x="{cx}" y="{label_y:.1f}" fill="{colors["control_text"]}" '
         f'{_FONT} font-size="{label_font_size}" text-anchor="middle">{label}</text>',
@@ -130,6 +140,12 @@ def svg_knob(
 
     If label_lines is given it overrides label (for multi-line labels).
     First label line is at cy + r + 3.0; subsequent lines at +2.3 spacing.
+
+    Note: knobs intentionally do NOT honour `rotate`. The pointer is a value
+    indicator on a removable cap, set independently of how the pot body is mounted;
+    a rotated pot (e.g. rotate:180 for PCB-courtyard fit) still takes a cap pointing
+    up. Only the PCB courtyard rotates (shown in the KiCad layer). Toggles, sliders
+    and trimpots — whose actuator is fixed to the body — do honour rotation.
     """
     if label_lines is None:
         label_lines = [label]
@@ -212,9 +228,22 @@ def svg_led_labeled(
 
 # Dailywell 2M sub-miniature toggles are rendered top-view: a round bushing/nut
 # with a short toggle lever. The lever rests toward the default position so the
-# panel mock-up reads as a toggle, not a slide.
+# panel mock-up reads as a toggle, not a slide. The bushing is a circle (rotation-
+# invariant); a `rotate` value spins the lever vector by the same SVG rotate(deg)
+# convention used for the KiCad footprint overlay, so the front-panel symbol stays
+# in agreement with the rotated footprint. Silkscreen labels are not rotated.
 _TOGGLE_NUT_R = 2.475   # panel hole Ø4.95mm
 _TOGGLE_LEVER = 2.2     # lever length from bushing centre
+
+
+def _rotate_vec(dx: float, dy: float, deg: float) -> tuple[float, float]:
+    """Rotate (dx, dy) by deg using the SVG rotate() convention (CW, y-down)."""
+    if not deg:
+        return dx, dy
+    import math
+    r = math.radians(deg)
+    c, s = math.cos(r), math.sin(r)
+    return dx * c - dy * s, dx * s + dy * c
 
 
 def _toggle_bushing(cx: float, cy: float, colors: dict) -> str:
@@ -243,14 +272,16 @@ def svg_toggle_2pos(
     pos_xs: list[float],
     pos_y: float,
     colors: dict,
+    rotate: int = 0,
 ) -> str:
-    """Dailywell DW3 2-position (ON-ON) sub-mini toggle, top-view, lever horizontal."""
+    """Dailywell DW3 2-position (ON-ON) sub-mini toggle, top-view. Lever rests toward
+    position 0 (left at rotate=0), rotated by `rotate` to match the footprint."""
+    dx, dy = _rotate_vec(-_TOGGLE_LEVER, 0.0, rotate)
     parts = [
         f'<text x="{cx}" y="{label_above_y}" fill="{colors["jack_text"]}" '
         f'{_FONT} font-size="1.8" text-anchor="middle">{label_above}</text>',
         _toggle_bushing(cx, cy, colors),
-        # Lever rests toward position 0 (left).
-        _toggle_lever(cx, cy, -_TOGGLE_LEVER, 0.0, colors),
+        _toggle_lever(cx, cy, dx, dy, colors),
     ]
     for lx, pl in zip(pos_xs, pos_labels):
         parts.append(
@@ -268,12 +299,14 @@ def svg_toggle_3pos(
     label_below: str,
     label_below_y: float,
     colors: dict,
+    rotate: int = 0,
 ) -> str:
-    """Dailywell DW5 3-position (ON-ON-ON) sub-mini toggle, top-view, lever vertical."""
+    """Dailywell DW5 3-position (ON-ON-ON) sub-mini toggle, top-view. Lever rests
+    toward the top position (rotate=0), rotated by `rotate` to match the footprint."""
+    dx, dy = _rotate_vec(0.0, -_TOGGLE_LEVER, rotate)
     parts = [
         _toggle_bushing(cx, cy, colors),
-        # Lever rests toward the top position.
-        _toggle_lever(cx, cy, 0.0, -_TOGGLE_LEVER, colors),
+        _toggle_lever(cx, cy, dx, dy, colors),
     ]
     lx = cx + _TOGGLE_NUT_R + 1.2    # position labels to the right
     for ply, pl in zip(pos_ys, pos_labels):
@@ -303,11 +336,14 @@ def svg_slider_V45(
     label: str,
     colors: dict,
     travel: float = 45.0,
+    rotate: int = 0,
 ) -> str:
     """45mm travel vertical slide potentiometer panel symbol.
 
     cx, cy = centre of travel (panel anchor).  The slot spans ±(travel/2+1.5)mm
-    vertically; the label appears above the slot.
+    vertically; the label appears above the slot. `rotate` spins the directional
+    track/ticks (about the anchor, matching the rotated footprint) while the label
+    stays upright.
     """
     half_travel = travel / 2.0          # 22.5 mm
     slot_h = travel + 3.0               # 48 mm — 1.5 mm margin each end
@@ -315,15 +351,11 @@ def svg_slider_V45(
     slot_x = cx - slot_w / 2
     slot_y = cy - slot_h / 2
 
-    handle_w, handle_h = 9.0, 4.5
-    hx = cx - handle_w / 2
-    hy = cy - handle_h / 2              # handle rests at centre (neutral)
-
     top_y = cy - half_travel
     bot_y = cy + half_travel
     label_y = slot_y - 3.5
 
-    parts = [
+    body = [
         # Slot body
         f'<rect x="{slot_x:.2f}" y="{slot_y:.2f}" width="{slot_w}" height="{slot_h:.1f}"'
         f' rx="1.2" fill="{colors["knob_fill"]}" stroke="{colors["knob_stroke"]}"'
@@ -336,7 +368,13 @@ def svg_slider_V45(
         # Centre (neutral) tick — subtle reference mark only; handle drawn by VCV Rack widget
         f'<line x1="{cx-2:.2f}" y1="{cy:.2f}" x2="{cx+2:.2f}" y2="{cy:.2f}"'
         f' stroke="{colors["indicator"]}" stroke-width="0.35"/>',
-        # Label above slot
+    ]
+    # The track/ticks are body-fixed and rotate with the part; the label stays upright.
+    if rotate:
+        body = [f'<g transform="rotate({rotate} {cx} {cy})">' + "".join(body) + "</g>"]
+
+    parts = body + [
+        # Label above slot (stays upright regardless of rotation)
         f'<text x="{cx}" y="{label_y:.1f}" fill="{colors["jack_text"]}"'
         f' {_FONT} font-size="1.8" text-anchor="middle">{label}</text>',
     ]

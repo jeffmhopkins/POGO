@@ -846,7 +846,8 @@ def _component_svg(comp: dict, rules: DesignRules, colors: dict) -> str:
     elif ctype == "trimpot":
         tp_label       = comp.get("label", "")
         lfs            = float(comp.get("label_font_size", 1.8))
-        return svg.svg_trimpot(cx, cy, tp_label, rules, colors, label_font_size=lfs)
+        return svg.svg_trimpot(cx, cy, tp_label, rules, colors, label_font_size=lfs,
+                               rotate=int(comp.get("rotate", 0)))
 
     elif ctype in ("knob_medium", "knob_large", "knob_xl"):
         r_map = {"knob_medium": 4.5, "knob_large": 7.0, "knob_xl": 9.0}
@@ -856,7 +857,8 @@ def _component_svg(comp: dict, rules: DesignRules, colors: dict) -> str:
                             label_lines=label_lines, label_fill=label_fill)
 
     elif ctype == "slider_V45":
-        return svg.svg_slider_V45(cx, cy, comp.get("label", ""), colors)
+        return svg.svg_slider_V45(cx, cy, comp.get("label", ""), colors,
+                                  rotate=int(comp.get("rotate", 0)))
 
     elif ctype == "slider":
         # Legacy: slider widget drawn by VCV Rack only (no SVG body)
@@ -876,6 +878,7 @@ def _component_svg(comp: dict, rules: DesignRules, colors: dict) -> str:
             pos_xs=pos_xs,
             pos_y=float(comp.get("pos_y", cy + 4.0)),
             colors=colors,
+            rotate=int(comp.get("rotate", 0)),
         )
 
     elif ctype == "toggle_dw5":
@@ -886,6 +889,7 @@ def _component_svg(comp: dict, rules: DesignRules, colors: dict) -> str:
             label_below=comp.get("label_below", comp.get("label", "")),
             label_below_y=float(comp.get("label_below_y", cy + 7.0)),
             colors=colors,
+            rotate=int(comp.get("rotate", 0)),
         )
 
     elif ctype == "led":
