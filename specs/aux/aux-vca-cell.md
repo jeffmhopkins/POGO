@@ -19,16 +19,16 @@ Chosen because:
 ## Schematic
 
 
-ASCII fallback (one channel shown):
+ASCII fallback (one channel shown; single-ended operation):
 
 ```
                         THAT 2180 (U_VCA, SOIC-8)
                    ┌────────────────────────────────┐
- AUDIO_IN+ ────────┤ IN+                  OUT+ ├──── AUDIO_OUT
- AUDIO_IN− ────────┤ IN−                  OUT− ├──── (differential; convert to SE with op-amp)
+ AUDIO_IN ─────────┤ IN+                  OUT+ ├──── AUDIO_OUT (→ LP1 R_in 100kΩ)
+ AGND ─────────────┤ IN−                  OUT− ├──[R_OUT_N 10kΩ]── AGND
                    │                            │
- V_gain ──[R_gain]─┤ GAIN                VCC  ├──── +15V (or +12V)
-                   │ GND                  VEE  ├──── −15V (or −12V)
+ V_gain ──[R_gain]─┤ GAIN                VCC  ├──── +12V
+                   │ GND                  VEE  ├──── −12V
                    └────────────────────────────┘
 
  V_gain control chain:
@@ -154,7 +154,7 @@ is confirmed in the datasheet, with slightly reduced headroom. Audio headroom wi
 | R_cv_in | Resistor | 0603 | 100 Ω | CV input protection series resistor |
 | D_cv_in | BAT54S | SOT-23 | — | Dual Schottky clamp at CV input |
 | C_VCC, C_VEE | Ceramic bypass | 0603 | 100 nF | Per THAT 2180 supply pin |
-| R_out | Resistor | 0603 | — | Differential-to-SE conversion if needed (see notes) |
+| R_OUT_N | Resistor | 0603 | 10 kΩ | OUT− termination to AGND (per channel; prevents floating) |
 
 ### Power Budget
 
@@ -174,6 +174,8 @@ is confirmed in the datasheet, with slightly reduced headroom. Audio headroom wi
 | Audio bandwidth | >100 kHz | THAT 2180 specification |
 | THD+N | <0.01% | Unity gain, 1 kHz, ±5V input |
 | Dynamic range | >100 dB | THAT 2180 specification |
+| Audio input impedance (IN+) | ~20 kΩ | Small-signal; THAT 2180A14-U translinear cell |
+| Audio output impedance (OUT+) | <100 Ω | Low-Z transimpedance output stage |
 | Input range | ±11V | Clamped at input buffer |
 | Output range | ±11V | ±12V supply |
 | CV input range | 0–10V | Clamped by BAT54S |
@@ -185,9 +187,10 @@ is confirmed in the datasheet, with slightly reduced headroom. Audio headroom wi
   and away from audio-frequency signals on the board
 - RV_VCA_UNITY calibration: apply 0V to VCA_IN, set AMT pot to center detent (0V out
   of attenuverter), trim RV_VCA_UNITY until audio output = audio input amplitude
-- THAT 2180 differential output requires conversion to single-ended before the next
-  block; use one TL072 half in a differential-to-SE (instrumentation amp) configuration
-  or simply use the non-inverting output if the inverting output is not needed
+- THAT 2180 is operated single-ended in POGO: IN− → AGND (direct); OUT+ is the signal
+  output; OUT− is terminated to AGND via R_OUT_N (10 kΩ). No differential-to-SE op-amp
+  stage is needed. This is valid because POGO's signal chain is entirely single-ended and
+  no balanced line drive is required
 - At maximum attenuation, the THAT 2180 produces residual feedthrough (~−80 dB);
   this is normal and typically inaudible
 - BAT54S anode must connect to GND (not to signal ground return) — use analog GND star

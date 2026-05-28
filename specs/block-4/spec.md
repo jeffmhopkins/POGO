@@ -115,6 +115,36 @@ route the wiper through a 47 Ω series resistor directly to R_GAIN. Alternativel
 add a TL072 unity-gain follower between the wiper and R_GAIN, but this requires a
 third IC half; lowering the pot value is simpler.
 
+### Audio Signal Path and I/O Impedances
+
+POGO's signal chain is single-ended throughout. The THAT 2180 is operated single-ended:
+
+- **IN+**: Audio signal input (from Block 1 OPA1612 output; closed-loop Z ≈ 10–20 Ω).
+- **IN−**: Connected directly to AGND. No matching resistor required; differential
+  common-mode rejection is not needed within a single-ended module.
+- **OUT+**: Audio signal output to LP1 input resistor R_in (100 kΩ).
+- **OUT−**: Terminated to AGND via R_OUT_N (10 kΩ per channel). Prevents the pin from
+  floating, which would produce noise current through the internal translinear cell.
+  The OUT− node is not used as a signal.
+
+**Stage boundary compatibility:**
+
+```
+Block 1 → VCA IN+:
+  Source Z = OPA1612 output, closed-loop ≈ 10–20 Ω
+  Load Z   = THAT 2180 IN+ ≈ 20 kΩ (small-signal; translinear cell base-emitter network)
+  Divider  = 20k / (20k + 15) = 0.9993 → −0.006 dB   negligible ✓
+
+VCA OUT+ → LP1:
+  Source Z = THAT 2180 OUT+ < 100 Ω (low-impedance transimpedance output stage)
+  Load Z   = LP1 R_in = 100 kΩ
+  Divider  = 100k / (100k + 100) = 0.999  → −0.009 dB   negligible ✓
+```
+
+Impedance values (IN+ ~20 kΩ, OUT+ <100 Ω) are consistent with THAT Corporation
+application notes for the THAT 2180 series; verify exact figures against the
+THAT 2180A14-U datasheet before PCB layout.
+
 ---
 
 ## 3. Physical Design
@@ -175,3 +205,5 @@ and RV_VCA_UNITY_R allow the two channels to be matched for DC offset and gain a
 | C_VCA_R | Capacitor | 0603 | 100 nF | 2 | audio | 4 | THAT 2180 R supply decoupling (V+ and V–) |
 | C_U_VCA | Capacitor | 0603 | 100 nF | 2 | audio | 4 | TL072 supply decoupling (V+ and V–) |
 | J_VCA_IN | PJ301M-12 | panel | — | 1 | panel | 4 | VCA_INPUT jack (normalles to mod bus) |
+| R_OUT_N_L | resistor | 0603 | 10 kΩ | 1 | audio | 4 | L-channel THAT 2180 OUT− termination to AGND (single-ended operation) |
+| R_OUT_N_R | resistor | 0603 | 10 kΩ | 1 | audio | 4 | R-channel THAT 2180 OUT− termination to AGND |

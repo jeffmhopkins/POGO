@@ -101,11 +101,14 @@ termination specified; R_TILT_INV tolerance flags added; block-1 signal-routing 
 corrected; block-B output Z attenuation corrected; BP_MIX wet polarity circuit corrected.
 
 **Remaining work before PCB layout:**
-1. **THAT 2180 audio I/O impedances** — verify from datasheet that audio IN+ Z and OUT Z are
-   compatible with source/load in the VCA signal path (block-4 → block-5 boundary); confirm
-   differential-to-SE output topology. Flag from Phase 3 signal-path trace.
-2. **Write 48HP KiCad generator** — replaces 40HP-era stale generators; inputs from components.yaml + panel-data.yaml
-3. **Phase 6R** — VCV Rack signal-path smoke tests (CI integration)
+1. **Write 48HP KiCad generator** — replaces 40HP-era stale generators; inputs from components.yaml + panel-data.yaml
+2. **Phase 6R** — VCV Rack signal-path smoke tests (CI integration)
+
+**THAT 2180 audio I/O resolved (2026-05-28):** Single-ended operation confirmed throughout
+(IN+ = signal, IN− → AGND direct; OUT+ = signal out, OUT− → 10 kΩ → AGND via R_OUT_N_L/R).
+Stage boundaries verified: Block 1→VCA −0.006 dB; VCA→LP1 −0.009 dB — both negligible.
+Exact IN+ (~20 kΩ) and OUT+ (<100 Ω) impedance figures are typical values from THAT Corp
+application notes; confirm from THAT 2180A14-U datasheet during PCB layout.
 
 **Open prototype questions (Phase 3R advisory, not blocking):**
 - block-2: LFO LED: confirm pulsing (half-wave rectified) vs breathing (no diode) — prototype preference

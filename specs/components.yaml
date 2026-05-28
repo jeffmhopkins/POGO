@@ -57,6 +57,8 @@ components:
   - { ref: C8,   board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U4 -12V decoupling" }
   - { ref: C9,   board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U5 +12V decoupling" }
   - { ref: C10,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U5 -12V decoupling" }
+  - { ref: R_OUT_N_L, board: audio, block: block-4, part: ~, pkg: "0603", val: "10kΩ", fn: "U4 OUT− termination to AGND (single-ended operation; L channel)" }
+  - { ref: R_OUT_N_R, board: audio, block: block-4, part: ~, pkg: "0603", val: "10kΩ", fn: "U5 OUT− termination to AGND (single-ended operation; R channel)" }
 
   # block-5: LP Filter 1
   - { ref: U7,   board: audio,   block: block-5, part: LM13700M,   pkg: SOIC-16,  fn: "LP1 OTA integrators L" }
