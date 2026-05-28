@@ -30,6 +30,7 @@ SVG_SOURCE  = REPO_ROOT / "plugin" / "res" / "Pogo-source.svg"
 SVG_MFR     = REPO_ROOT / "plugin" / "res" / "Pogo.svg"
 HTML_DEBUG  = REPO_ROOT / "design" / "panel-debug.html"
 HTML_EDITOR = REPO_ROOT / "design" / "panel-editor.html"
+DOCS_EDITOR = REPO_ROOT / "docs" / "panel-editor.html"   # GitHub Pages deploy copy
 DATA_FILE   = REPO_ROOT / "tools" / "panel-data.yaml"
 
 # Add tools/ to path so sibling modules are importable
@@ -1464,6 +1465,10 @@ Query commands (no files written):
         HTML_EDITOR.parent.mkdir(parents=True, exist_ok=True)
         HTML_EDITOR.write_text(editor_html, encoding="utf-8")
         print(f"Wrote {HTML_EDITOR.relative_to(REPO_ROOT)}")
+        # Keep the GitHub Pages deploy copy in sync (self-contained single file).
+        DOCS_EDITOR.parent.mkdir(parents=True, exist_ok=True)
+        DOCS_EDITOR.write_text(editor_html, encoding="utf-8")
+        print(f"Wrote {DOCS_EDITOR.relative_to(REPO_ROOT)}")
 
     if args.mfr:
         if not args.resource:
