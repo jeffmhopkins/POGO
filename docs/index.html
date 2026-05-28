@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POGO — Stereo Filter Bank</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; background: #0d0d0d; color: #ccc;
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      display: flex; align-items: center; justify-content: center; padding: 24px;
+    }
+    .wrap { width: min(720px, 100%); }
+    h1 { color: #00d4ff; letter-spacing: .08em; margin: 0 0 4px; font-size: 22px; }
+    h1 .dot { color: #ff8800; }
+    .sub { color: #4a6070; margin: 0 0 28px; letter-spacing: .12em; font-size: 13px; }
+    .cards { display: grid; gap: 14px; }
+    a.card {
+      display: block; text-decoration: none; color: #ccc;
+      background: #141414; border: 1px solid #2a2a2a; border-radius: 6px;
+      padding: 16px 18px; transition: border-color .15s, background .15s;
+    }
+    a.card:hover { border-color: #00d4ff; background: #181818; }
+    a.card .t { color: #7fe7ff; font-size: 15px; font-weight: bold; }
+    a.card .d { color: #888; font-size: 12px; margin-top: 5px; line-height: 1.45; }
+    footer { color: #3a3a3a; font-size: 11px; margin-top: 26px; text-align: center; }
+    footer a { color: #4a6070; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>POGO <span class="dot">·</span> STEREO FILTER BANK</h1>
+    <p class="sub">SPACE COAST SYNTHESIZERS</p>
+    <div class="cards">
+      <a class="card" href="panel-editor.html">
+        <div class="t">Interactive Panel Editor &rarr;</div>
+        <div class="d">Drag, rotate, add and delete panel components; toggle layers; live DRC;
+          export a comment-preserving panel-data.yaml. Built from the source layout.</div>
+      </a>
+      <a class="card" href="plugin-topology.md">
+        <div class="t">Plugin Topology &rarr;</div>
+        <div class="d">Authoritative 48HP plugin spec — parameters, I/O, and DSP signal chain.</div>
+      </a>
+    </div>
+    <footer><a href="https://github.com/jeffmhopkins/POGO">github.com/jeffmhopkins/POGO</a></footer>
+  </div>
+</body>
+</html>
