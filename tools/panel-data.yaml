@@ -269,8 +269,8 @@ zones:
     components:
       - id: MOD_SRC_SW
         type: switch_V3
-        col: 1
-        cy: 75.1
+        col: 0
+        cy: 79.0
         label: "MOD SRC"
         cpp_param: "MOD_SRC_PARAM"
       - id: SCALE
@@ -288,7 +288,7 @@ zones:
         cpp_param: "VCA_AMT_PARAM"
       - id: MOD_SRC_SW2
         type: switch_V3
-        col: 1
+        col: 0
         cy: 92.1
         label: "MOD SRC"
         cpp_param: "MOD_SRC2_PARAM"
