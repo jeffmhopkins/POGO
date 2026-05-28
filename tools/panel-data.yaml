@@ -293,7 +293,7 @@ zones:
         label: "VCA OFS"
         cpp_param: "VCA_OFS_PARAM"
       - id: MOD_SRC_SW
-        type: switch_H3
+        type: switch_V3
         col: 1
         cy: 89.67
         label: "MOD SRC"
