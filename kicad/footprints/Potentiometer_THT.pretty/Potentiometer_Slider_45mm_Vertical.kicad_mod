@@ -1,0 +1,50 @@
+(module Potentiometer_Slider_45mm_Vertical (layer F.Cu) (tedit 20250527)
+  (descr "Generic 45mm travel vertical slide potentiometer (e.g. Alpha RSN45, Alps RSANN), 3-terminal, panel-mount. Anchor = centre of travel (panel slot centre).")
+  (tags "slide pot potentiometer slider 45mm vertical Eurorack")
+
+  (fp_text reference "RV**" (at 0 -32) (layer F.SilkS)
+    (effects (font (size 1 1) (thickness 0.15))))
+  (fp_text value "SLIDER_45mm" (at 0 32) (layer F.Fab)
+    (effects (font (size 1 1) (thickness 0.15))))
+
+  ; ── Coordinate system ────────────────────────────────────────────────────────
+  ; Origin (0,0) = centre of travel = centre of panel slot.
+  ; +Y = toward CCW end (lower on panel in standard mounting).
+  ; Travel: Y = -22.5 (CW/top) … +22.5 (CCW/bottom).
+  ; Body extends 5.5 mm past each travel endpoint → ±28 mm.
+  ; Body width: ±6.5 mm.
+
+  ; ── F.Fab — component body outline ──────────────────────────────────────────
+  (fp_line (start -6.5 -28) (end  6.5 -28) (layer F.Fab) (width 0.10))
+  (fp_line (start  6.5 -28) (end  6.5  28) (layer F.Fab) (width 0.10))
+  (fp_line (start  6.5  28) (end -6.5  28) (layer F.Fab) (width 0.10))
+  (fp_line (start -6.5  28) (end -6.5 -28) (layer F.Fab) (width 0.10))
+
+  ; Travel extents (dotted lines) and centre mark
+  (fp_line (start -4 -22.5) (end  4 -22.5) (layer F.Fab) (width 0.08))
+  (fp_line (start -4  22.5) (end  4  22.5) (layer F.Fab) (width 0.08))
+  (fp_line (start -2  0)    (end  2  0)    (layer F.Fab) (width 0.08))
+
+  ; ── F.SilkS — body outline ───────────────────────────────────────────────────
+  (fp_line (start -6.5 -28) (end  6.5 -28) (layer F.SilkS) (width 0.12))
+  (fp_line (start  6.5 -28) (end  6.5  28) (layer F.SilkS) (width 0.12))
+  (fp_line (start  6.5  28) (end -6.5  28) (layer F.SilkS) (width 0.12))
+  (fp_line (start -6.5  28) (end -6.5 -28) (layer F.SilkS) (width 0.12))
+
+  ; ── F.CrtYd — courtyard (0.5 mm margin around body) ─────────────────────────
+  (fp_line (start -7.0 -28.5) (end  7.0 -28.5) (layer F.CrtYd) (width 0.05))
+  (fp_line (start  7.0 -28.5) (end  7.0  28.5) (layer F.CrtYd) (width 0.05))
+  (fp_line (start  7.0  28.5) (end -7.0  28.5) (layer F.CrtYd) (width 0.05))
+  (fp_line (start -7.0  28.5) (end -7.0 -28.5) (layer F.CrtYd) (width 0.05))
+
+  ; ── Pads ─────────────────────────────────────────────────────────────────────
+  ; Pin 1 (CCW / bottom end), back row
+  (pad 1 thru_hole rect (at -1.75  25.5) (size 2.5 2.5) (drill 1.5)
+    (layers *.Cu *.Mask))
+  ; Pin 2 (wiper), front row, same Y as pin 1
+  (pad 2 thru_hole oval (at  0.25  25.5) (size 2.5 2.5) (drill 1.5)
+    (layers *.Cu *.Mask))
+  ; Pin 3 (CW / top end), back row
+  (pad 3 thru_hole oval (at -1.75 -25.5) (size 2.5 2.5) (drill 1.5)
+    (layers *.Cu *.Mask))
+)

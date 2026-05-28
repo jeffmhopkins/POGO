@@ -1,0 +1,48 @@
+(module Potentiometer_Bourns_3296W_Vertical (layer F.Cu) (tedit 20250527)
+  (descr "Bourns 3296W series vertical multi-turn trimpot, 3-pin, 2.5mm pitch")
+  (tags "trimpot trimmer potentiometer Bourns 3296W")
+  (fp_text reference REF** (at 0 -3.5) (layer F.SilkS)
+    (effects (font (size 1 1) (thickness 0.15)))
+  )
+  (fp_text value Potentiometer_Bourns_3296W_Vertical (at 0 8) (layer F.Fab)
+    (effects (font (size 1 1) (thickness 0.15)))
+  )
+
+  ; ── Pads ───────────────────────────────────────────────────────────────────
+  ; Pin 1 (CW end), Pin 2 (Wiper), Pin 3 (CCW end) — in-line, 2.5mm pitch
+  ; Hole Ø 0.8mm, pad Ø 1.5mm (Bourns datasheet pin Ø 0.64mm + margin)
+  (pad 1 thru_hole circle (at 0 0) (size 1.5 1.5) (drill 0.8)
+    (layers *.Cu *.Mask)
+  )
+  (pad 2 thru_hole circle (at 0 2.5) (size 1.5 1.5) (drill 0.8)
+    (layers *.Cu *.Mask)
+  )
+  (pad 3 thru_hole circle (at 0 5.0) (size 1.5 1.5) (drill 0.8)
+    (layers *.Cu *.Mask)
+  )
+
+  ; ── F.Fab — component body outline (from Bourns 3296W datasheet) ───────────
+  ; Body: 4.83mm wide × 4.83mm deep; total pin-to-pin span = 5.0mm
+  ; Fab body centred on pin array (y: -0.635 to 5.635) × (x: -2.415 to 2.415)
+  (fp_line (start -2.415 -0.635) (end  2.415 -0.635) (layer F.Fab) (width 0.10))
+  (fp_line (start  2.415 -0.635) (end  2.415  5.635) (layer F.Fab) (width 0.10))
+  (fp_line (start  2.415  5.635) (end -2.415  5.635) (layer F.Fab) (width 0.10))
+  (fp_line (start -2.415  5.635) (end -2.415 -0.635) (layer F.Fab) (width 0.10))
+  ; Actuator circle at pin-2 (wiper) centre — Ø 3.0mm hex (1.5mm r)
+  (fp_circle (center 0 2.5) (end 1.5 2.5) (layer F.Fab) (width 0.10))
+  ; Pin-1 chamfer indicator (small notch top-left)
+  (fp_line (start -2.415 -0.635) (end -1.415 -0.635) (layer F.SilkS) (width 0.12))
+  (fp_line (start -2.415 -0.635) (end -2.415  0.365) (layer F.SilkS) (width 0.12))
+
+  ; ── F.SilkS — body outline (offset 0.3mm from F.Fab) ─────────────────────
+  (fp_line (start -2.715 -0.935) (end  2.715 -0.935) (layer F.SilkS) (width 0.12))
+  (fp_line (start  2.715 -0.935) (end  2.715  5.935) (layer F.SilkS) (width 0.12))
+  (fp_line (start  2.715  5.935) (end -2.715  5.935) (layer F.SilkS) (width 0.12))
+  (fp_line (start -2.715  5.935) (end -2.715 -0.935) (layer F.SilkS) (width 0.12))
+
+  ; ── F.CrtYd — courtyard (0.25mm margin from F.Fab) ───────────────────────
+  (fp_line (start -2.665 -0.885) (end  2.665 -0.885) (layer F.CrtYd) (width 0.05))
+  (fp_line (start  2.665 -0.885) (end  2.665  5.885) (layer F.CrtYd) (width 0.05))
+  (fp_line (start  2.665  5.885) (end -2.665  5.885) (layer F.CrtYd) (width 0.05))
+  (fp_line (start -2.665  5.885) (end -2.665 -0.885) (layer F.CrtYd) (width 0.05))
+)

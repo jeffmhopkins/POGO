@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POGO — Block 7: HP Filter</title>
+<style>
+  body { font-family: monospace; background: #0d0d0d; color: #c8c8c8; margin: 0; padding: 2rem; }
+  h1 { color: #e8e8e8; border-bottom: 2px solid #444; padding-bottom: .5rem; }
+  h2 { color: #aaa; border-bottom: 1px solid #333; padding-bottom: .3rem; margin-top: 2rem; }
+  h3 { color: #888; margin-top: 1.5rem; }
+  a { color: #7aacdc; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  pre { background: #1a1a1a; border: 1px solid #333; padding: 1rem; overflow-x: auto; line-height: 1.5; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th { background: #222; color: #aaa; text-align: left; padding: .5rem .8rem; border: 1px solid #444; }
+  td { padding: .4rem .8rem; border: 1px solid #333; }
+  tr:nth-child(even) { background: #141414; }
+  .nav { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 2rem; }
+  .nav a { background: #1e1e1e; border: 1px solid #444; padding: .3rem .7rem; border-radius: 3px; font-size: .85rem; }
+  .nav a.current { background: #2a3a4a; border-color: #7aacdc; color: #7aacdc; }
+  .note { background: #1a1400; border-left: 3px solid #665500; padding: .5rem 1rem; margin: 1rem 0; }
+  .status { display: inline-block; background: #0d2a0d; border: 1px solid #2a5a2a; color: #6abf6a; padding: .2rem .6rem; border-radius: 3px; font-size: .85rem; }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <a href="index.html">Overview</a>
+  <a href="block-A-input-buffer.html">Block A</a>
+  <a href="block-1-pregain.html">Block 1</a>
+  <a href="block-2-envelope-follower.html">Block 2</a>
+  <a href="block-3-apcf.html">Block 3</a>
+  <a href="block-4-distortion.html">Block 4</a>
+  <a href="block-VCA.html">Block VCA</a>
+  <a href="block-5-lp1.html">Block 5</a>
+  <a href="block-6-lp2.html">Block 6</a>
+  <a href="block-7-hp.html" class="current">Block 7</a>
+  <a href="block-B-output-buffer.html">Block B</a>
+  <a href="mod-architecture.html">Mod Arch</a>
+</div>
+
+<h1>Block 7: HP Filter (OTA-C State-Variable Filter, HP output tapped)</h1>
+<span class="status">Phase 1 ✅ &nbsp; Phase 2 ✅ &nbsp; Phase 3 ✅ &nbsp; Phase 4 [ ]</span>
+
+<h2>1. Block Diagram</h2>
+<pre>
+LP Filter 2 output (±5 V from Block 6)
+  │
+  ▼ (L channel — R channel is identical)
+
+V_in ──[R_in 100kΩ]──(−in) SUM_AMP (TL072 half) ──(out)── V_HP ──► HP OUT → Block B
+                         (+in)=GND                     │
+                                                        ▼
+                                            [OTA1: LM13700 cell]
+                                              I_abc from EXPO (THAT340)
+                                              ω₀ = g_m / C_int
+                                                        │
+                                                   C_int (33 nF, C0G)
+                                                        │
+                                                    V_BP (bandpass)
+                                                    (optional aux output jack)
+                                                        │
+                                            [OTA2: LM13700 cell]
+                                              same I_abc as OTA1
+                                                        │
+                                                   C_int (33 nF, C0G)
+                                                        │
+                                                    V_LP (lowpass)
+                                                    (optional aux output jack)
+
+Feedback (resonance control):
+  V_LP ──────────────────────────────────────────────► (−in) SUM_AMP
+  V_BP ──[linearizing diodes]──► HP_Q_OTA IN+ (LM13700 cell A of IC_Q_C)
+                                  Iabc ← IRES_AMP inverting driver (more RESONANCE → less Iabc)
+                                  I_out ─────────────────────────────► (−in) SUM_AMP (resonance feedback current)
+
+  V_HP = V_in − V_LP − (1/Q) × V_BP  [SUM_AMP computes this]
+
+HP tapped from SUM_AMP output = V_HP (correct — HP is the direct SVF summing result)
+
+Expo Converter (HP_EXPO, THAT340, shared L+R):
+  V_ctrl = CUTOFF HP knob + CUTOFF HP CV (attenuverter)
+  I_abc = I_ref × e^(V_ctrl / V_T)
+  1V/oct: +1V → I_abc ×2 → ω₀ ×2 → f ×2
+
+Range: 20 Hz – 5 kHz (≈8 octaves; f_ref ≈ 300 Hz at V_ctrl = 0V)
+Integrator caps: C_int = 33 nF (C0G/NP0, 0603)
+
+Signal levels:
+  In:  ±5 V (from LP2; may be ±8 V at high LP2 resonance)
+  HP out: ±5 V (resonance peak may add several dB above 0 dBFS reference)
+</pre>
+
+<h2>2. Schematic</h2>
+<pre>
+HP_SUM_L (TL072CDT, SOIC-8):
+  Half A = summing amp for L channel SVF
+  Half B = HP output buffer for L channel
+
+V_in_L ──[R_in 100kΩ]──(−in, pin 2) HP_SUM_LA ──(out, pin 1)── V_HP_L
+V_LP_L ──[R_lp 100kΩ]──(−in, pin 2)
+V_BP_fb ─[R_fb]────────(−in, pin 2)
+                         (+in, pin 3)=GND
+
+HP_OTA_L (LM13700M, SOIC-16):
+  OTA cell 1:
+    (IN+): V_HP_L
+    (IN−): GND via linearizing resistors (1kΩ)
+    (Iabc): from HP_EXPO expo converter
+    (OUT): current → C_int_1 = 33 nF → GND  → V_BP_L
+  OTA cell 2:
+    (IN+): V_BP_L
+    (Iabc): same expo current as cell 1
+    (OUT): current → C_int_2 = 33 nF → GND  → V_LP_L
+
+Resonance Q feedback (HP_Q_OTA, IC_Q_C):
+  V_BP_L ──[linearizing diodes]──► HP_Q_OTA IN+ (LM13700 cell A of IC_Q_C_L)
+                                    IN− → GND
+                                    Iabc ← IRES_AMP inverting driver (V_Iabc = V_bias − V_RES_scaled; R_Iabc = 1 MΩ)
+                                    I_out → HP_SUM_LA (−in) virtual-ground node
+  IC_Q_C_L (combined audio board, L-channel): cell A = HP L Q; cell B = spare
+  IC_Q_C_R (combined audio board, R-channel): cell A = HP R Q; cell B = spare
+
+HP_EXPO (THAT340, SOIC-8):
+  Shared L+R expo converter
+  RV_HP_REF: sets f_ref at V_ctrl = 0V (target: ~300 Hz)
+  RV_HP_1VOCT: temperature-compensated 1V/oct calibration
+
+Output buffers:
+  V_HP_L → (pin 5+6+7) HP_SUM_LB unity-gain buffer → HP OUT L (to Block B)
+  V_BP_L → optional BP OUT L jack
+  V_LP_L → optional LP OUT L jack
+
+(R channel: HP_OTA_R, HP_SUM_R — identical structure)
+</pre>
+
+<h2>3. Parts List</h2>
+<table>
+  <thead>
+    <tr><th>Reference</th><th>Part Number</th><th>Package</th><th>Qty</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>HP_OTA_L</td><td>LM13700M</td><td>SOIC-16</td><td>1</td><td>Dual OTA; 2 integrators for L channel</td></tr>
+    <tr><td>HP_OTA_R</td><td>LM13700M</td><td>SOIC-16</td><td>1</td><td>Dual OTA; 2 integrators for R channel</td></tr>
+    <tr><td>HP_SUM_L</td><td>TL072CDT</td><td>SOIC-8</td><td>1</td><td>SVF summing amp (half A) + HP buffer (half B), L channel</td></tr>
+    <tr><td>HP_SUM_R</td><td>TL072CDT</td><td>SOIC-8</td><td>1</td><td>SVF summing amp + buffer, R channel</td></tr>
+    <tr><td>IC_Q_C_L</td><td>LM13700M</td><td>SOIC-16</td><td>1</td><td>Combined audio board L-channel; cell A = HP L Q VCA; cell B = spare</td></tr>
+    <tr><td>IC_Q_C_R</td><td>LM13700M</td><td>SOIC-16</td><td>1</td><td>Combined audio board R-channel; cell A = HP R Q VCA; cell B = spare</td></tr>
+    <tr><td>HP_EXPO</td><td>THAT340</td><td>SOIC-8</td><td>1</td><td>Matched NPN pair; shared L+R expo converter</td></tr>
+    <tr><td>C_int_1L, C_int_2L</td><td>C0G/NP0 cap</td><td>0603</td><td>2</td><td>33 nF integrator caps, L channel</td></tr>
+    <tr><td>C_int_1R, C_int_2R</td><td>C0G/NP0 cap</td><td>0603</td><td>2</td><td>33 nF integrator caps, R channel</td></tr>
+    <tr><td>R_in_L, R_in_R</td><td>—</td><td>0603</td><td>2</td><td>100 kΩ summing amp input resistors</td></tr>
+    <tr><td>RV_CUTOFF_HP</td><td>Log-taper pot</td><td>9mm</td><td>1</td><td>CUTOFF HP knob; 20 Hz–5 kHz range</td></tr>
+    <tr><td>RV_RES_HP</td><td>Lin pot</td><td>9mm</td><td>1</td><td>RESONANCE HP knob; 0 to self-oscillation</td></tr>
+    <tr><td>RV_HP_REF</td><td>Bourns 3296W</td><td>TH multiturn</td><td>1</td><td>HP cutoff reference frequency; target ~300 Hz at 0V CV</td></tr>
+    <tr><td>RV_HP_1VOCT</td><td>Bourns 3296W</td><td>TH multiturn</td><td>1</td><td>Expo 1V/oct tracking calibration</td></tr>
+    <tr><td>RV_HP_QMAX</td><td>Bourns 3296W</td><td>TH multiturn</td><td>1</td><td>Maximum Q / self-oscillation onset</td></tr>
+    <tr><td>C_VCC, C_VEE</td><td>—</td><td>0603</td><td>8</td><td>100 nF decoupling; 2 per IC × 4 ICs</td></tr>
+  </tbody>
+</table>
+
+<h2>4. Design Notes</h2>
+
+<h3>Phase 1 — Sonic Intent</h3>
+<p>
+  A 2-pole voltage-controlled highpass filter as the final filter stage. Applied after both LP stages, it sculpts
+  low-frequency content: removing sub-bass rumble, adding tightness to the low end, or — at high resonance —
+  creating a resonant emphasis at the HP cutoff that produces an aggressive, formant-like peak at the bottom
+  of the frequency spectrum.
+</p>
+<ul>
+  <li><strong>Low resonance</strong>: clean, transparent high-pass tilt.</li>
+  <li><strong>High resonance</strong>: pronounced resonant peak; sweeping the cutoff with CV creates a "bubble" or "quack" effect.</li>
+  <li><strong>Maximum resonance</strong>: self-oscillation at the HP cutoff frequency.</li>
+  <li>Range: 20 Hz to ~5 kHz (HP is primarily for low-end sculpting).</li>
+</ul>
+
+<h3>Phase 2 — Transfer Function</h3>
+<pre>
+H_HP(s) = s² / (s² + (ω₀/Q) × s + ω₀²)
+
+SVF simultaneously provides:
+  H_LP(s) = ω₀² / (s² + ω₀/Q × s + ω₀²)   ← aux jack
+  H_BP(s) = (ω₀/Q)×s / (s² + ω₀/Q × s + ω₀²) ← aux jack
+  H_HP(s) = s² / (s² + ω₀/Q × s + ω₀²)     ← main output
+
+  At s → 0 (DC): H_HP → 0 (blocks low frequencies)
+  At s → ∞: H_HP → 1 (passes high frequencies)
+  At resonance: |H_HP(jω₀)| = Q (peak height)
+
+Integrator cap values:
+  Target f₀ nominal = 1 kHz; I_abc_nominal = 10 µA
+  g_m = 10µA / (2 × 26mV) = 192 µS
+  C = g_m / ω₀ = 192µS / (2π × 1000) = 30.6 nF → use 33 nF (C0G)
+
+Range: 20 Hz – 5 kHz (≈8 octaves; controlled by expo converter)
+</pre>
+
+<h3>Phase 3 — Circuit Notes</h3>
+<ul>
+  <li><strong>SVF summing amp polarity (RESOLVED)</strong>: the SUM_AMP inverts. HP_SUM_L/R (TL072) half B = HP output buffer — configure as G = −1 inverting unity-gain (R_in = R_f, (+) = GND). This corrects the phase inversion at no extra IC cost. Annotate in schematic: "HP buffer configured as G = −1 to compensate SUM_AMP inversion."</li>
+  <li><strong>OTA linearizing resistors</strong>: LM13700 has built-in linearizing diodes. Connect linearizing diode inputs to the OTA differential inputs via 1 kΩ series resistors for low distortion at high signal levels.</li>
+  <li><strong>LM13700 Q Iabc sizing and direction</strong>: HP Q uses IC_Q_C cell A. Q = 52 mV / (Iabc × R_in) = 52 mV / (Iabc × 100 kΩ). More Iabc → more damping → lower Q. Self-oscillation at Iabc → 0. RESONANCE HP must decrease Iabc via IRES_AMP inverting driver (same circuit as LP1/LP2): V_Iabc = V_bias − V_RES_scaled, R_Iabc = 1 MΩ. RV_HP_QMAX trims V_bias.</li>
+  <li><strong>Self-oscillation amplitude</strong>: at Q → ∞, oscillation amplitude limited by op-amp/OTA clipping. Output will be a slightly distorted sine. Acceptable behavior.</li>
+  <li><strong>HP above LP1/LP2 cutoff</strong>: if HP cutoff is set above LP1/LP2 cutoff, audio is attenuated by both LP and HP; effective bandpass. Output level may be very low. Valid (if unusual) patch.</li>
+</ul>
+
+<h3>Trim Pots</h3>
+<table>
+  <thead><tr><th>Reference</th><th>Range</th><th>Purpose</th><th>Adjustment Procedure</th></tr></thead>
+  <tbody>
+    <tr><td>RV_HP_REF</td><td>±20%</td><td>HP cutoff 1V/oct reference frequency</td><td>Adjust until HP cutoff at 0V CV = target frequency (~300 Hz nominal)</td></tr>
+    <tr><td>RV_HP_1VOCT</td><td>±5%</td><td>HP expo converter 1V/oct tracking</td><td>One-octave step test: +1V CV should double cutoff frequency</td></tr>
+    <tr><td>RV_HP_QMAX</td><td>Q 10–50</td><td>Maximum Q / self-oscillation onset</td><td>Turn RESONANCE HP to max; verify clean, stable sine output</td></tr>
+  </tbody>
+</table>
+
+<h3>Power</h3>
+<p>+12 V: ~10 mA &nbsp;|&nbsp; −12 V: ~10 mA &nbsp;(2× LM13700 integrators + 2× IC_Q_C LM13700 + 2× TL072)</p>
+
+</body>
+</html>

@@ -1,0 +1,858 @@
+# POGO panel data — edit this file to change the panel layout.
+# Generated SVG and C++ stubs are produced by tools/build_panel.py.
+#
+# Workflow: add one zone at a time, run `python3 tools/build_panel.py --check`
+# after each addition. Confirm clean before moving to the next zone.
+
+# ── Meta ─────────────────────────────────────────────────────────────────────
+meta:
+  hp:         48
+  width_mm:   243.84        # 48 HP × 5.08 mm/HP
+  height_mm:  128.5
+  viewBox:    "0 0 243.84 128.5"
+  title:      "POGO - Stereo Filter Bank"
+  title_dot_color: "#ff8800"
+  brand:      "SPACE COAST SYNTHESIZERS  ·  SCS"
+
+# ── Colors ───────────────────────────────────────────────────────────────────
+colors:
+  panel_bg:       "#0d0d0d"
+  panel_strip:    "#141414"
+  cyan:           "#00d4ff"
+  brand_text:     "#4a6070"
+  control_text:   "#999"
+  jack_text:      "#888"
+  jack_outer:     "#555"
+  jack_inner:     "#333"
+  jack_inner_s:   "#666"
+  knob_fill:      "#1a1a1a"
+  knob_stroke:    "#555"
+  indicator:      "#aaa"
+  switch_body:    "#222"
+  switch_slug:    "#666"
+  switch_slug_s:  "#888"
+  switch_label:   "#3d5260"
+  subdiv:         "#2a2a2a"
+  zone_div:       "#3a3a3a"
+  output_rect_s:  "#888"
+  led_fill:       "#441111"
+  led_stroke:     "#cc2222"
+
+# ── Design rules ─────────────────────────────────────────────────────────────
+design_rules:
+  top_keepout:       10.0
+  bot_keepout_start: 118.5
+  cv_jack_cy:        112.0   # PCB courtyard bottom = 118.50 mm — at rail keepout floor
+  att_offset:        -15.0   # att_cy = cv_jack_cy + att_offset = 97.0
+  jack_label_dy:      7.0    # label_y = cy + 7.0
+  output_rect_dy:    -1.76
+  output_rect_h:      2.26
+  output_rect_rx:     0.6
+  jack_pitch:        15.24   # 1 jack per 3 HP
+  indicator_length:   2.5
+  # Panel centering: content spans 0–240.03mm; 48HP = 243.84mm → offset = (243.84-240.03)/2
+  x_offset:           1.905  # shifts all zone/separator x coords right to centre in 48HP
+
+# ── Hardware footprints (for DRC overlay) ────────────────────────────────────
+footprints:
+  jack_thonkiconn:
+    body_r_mm: 4.0
+    nut_r_mm:  5.0      # Thonkiconn hex nut radius
+  pot_alpha9mm:
+    body_r_mm: 4.5
+    nut_r_mm:  5.5      # Alpha 9mm bushing nut radius
+  led_3mm:
+    body_r_mm: 1.5
+
+# ── Mounting holes ────────────────────────────────────────────────────────────
+# 48 HP: left holes at x=7.5, right holes at x=243.84-7.5=236.34
+mounting_holes:
+  - {cx:   7.50, cy:   5.1}
+  - {cx: 236.34, cy:   5.1}
+  - {cx:   7.50, cy: 123.4}
+  - {cx: 236.34, cy: 123.4}
+
+# ── Separator lines ───────────────────────────────────────────────────────────
+# Jack grid: uniform 2.25 HP (11.43 mm) pitch across all bottom-row jacks.
+# Cyan dividers land at the midpoint between adjacent jacks across zone boundaries:
+#   midpoint(col_last, col_first_next) = x_start_next  (since pitch is uniform)
+# Section 0: 3 cols at 2.25 HP → right edge = 3 × 11.43 = 34.29 mm
+#   col 0 cx = 5.715mm, col 1 cx = 17.145mm, col 2 cx = 28.575mm
+# LP1: x_start = 34.29mm, 3 cols → right edge = 34.29 + 34.29 = 68.58 mm
+#   col 0 cx = 40.005mm, col 1 cx = 51.435mm, col 2 cx = 62.865mm
+separators:
+  # ── Section 0 / LP1 boundary ──────────────────────────────────────────────────
+  # x = midpoint(VCA_IN=28.575, LP1_FREQ=40.005) = 34.29mm
+  - {type: v, x: 34.29, y1: 9.0, y2: 124.0, style: zone_div}
+  # Top of INPUT zone — label breaks the line
+  # Perfect midpoint: strip bottom = 4.5mm, L_IN visual top = 13.5mm → mid = 9.0
+  - {type: h, x1: 1.0, x2: 34.29, y: 9.0, style: zone_div, label: "INPUT", label_x: 17.145}
+  # INPUT / GAIN → LFO boundary — label breaks the line
+  - {type: h, x1: 1.0, x2: 34.29, y: 43.0, style: zone_div, label: "LFOs", label_x: 17.145}
+  # LFO → MOD BUS boundary — label breaks the line
+  # Perfect midpoint: LFO2 Rate 2 label baseline = 73.4mm, SCALE top = 80.5mm → mid = 76.95
+  - {type: h, x1: 1.0, x2: 34.29, y: 77.0, style: zone_div, label: "MOD BUS", label_x: 17.145}
+
+  # ── LP1 right boundary / LP2 boundary ────────────────────────────────────────
+  # x = midpoint(LP1_RES=62.865, next-zone col0=74.295) = 68.58mm
+  - {type: v, x: 68.58, y1: 9.0, y2: 124.0, style: zone_div}
+  - {type: h, x1: 34.29, x2: 68.58, y: 9.0, style: zone_div, label: "LP1", label_x: 51.435}
+
+  # ── BP CONTROL right boundary ─────────────────────────────────────────────────
+  # 2-col section (2 × 11.43mm = 22.86mm); jacks continue 2.25HP grid
+  # x = midpoint(BP_TILT_IN=85.725, next col0=97.155) = 91.44mm
+  - {type: v, x: 91.44, y1: 9.0, y2: 124.0, style: zone_div}
+  - {type: h, x1: 68.58, x2: 91.44, y: 9.0, style: zone_div, label: "BP", label_x: 80.01}
+
+  # ── BP 1 right boundary ────────────────────────────────────────────────────────
+  # 3-col section (3 × 11.43mm = 34.29mm); x_start=91.44, col1 cx=108.585
+  # x = midpoint(BP1 col2 jack=120.015, next col0=131.445) = 125.73mm
+  - {type: v, x: 125.73, y1: 9.0, y2: 124.0, style: zone_div}
+  - {type: h, x1: 91.44, x2: 125.73, y: 9.0, style: zone_div, label: "BP 1", label_x: 108.585}
+
+  # ── BP 2 right boundary ────────────────────────────────────────────────────────
+  # x_start=125.73, col1 cx=142.875
+  # x = midpoint(BP2 col2 jack=154.305, next col0=165.735) = 160.02mm
+  - {type: v, x: 160.02, y1: 9.0, y2: 124.0, style: zone_div}
+  - {type: h, x1: 125.73, x2: 160.02, y: 9.0, style: zone_div, label: "BP 2", label_x: 142.875}
+
+  # ── BP 3 right boundary ────────────────────────────────────────────────────────
+  # x_start=160.02, col1 cx=177.165
+  # x = midpoint(BP3 col2 jack=188.595, next col0=200.025) = 194.31mm
+  - {type: v, x: 194.31, y1: 9.0, y2: 124.0, style: zone_div}
+  - {type: h, x1: 160.02, x2: 194.31, y: 9.0, style: zone_div, label: "BP 3", label_x: 177.165}
+
+  # ── BP3 OUT + HP right boundary ───────────────────────────────────────────────
+  # Both zones share x_start=194.31, col_pitch=11.43mm, cols=2 (4.5HP total)
+  # col0 cx=200.025, col1 cx=211.455
+  # Slider (cx=205.74) and RES knob (cx=205.74) share same centre line
+  # Right boundary = 194.31 + 2×11.43 = 217.17mm
+  - {type: v, x: 217.17, y1: 9.0, y2: 124.0, style: zone_div}
+  - {type: h, x1: 194.31, x2: 217.17, y: 9.0, style: zone_div, label: "BP3 Out", label_x: 205.74}
+  # Grey divider between BP3 OUT jacks (cy=17) and HP slider (cy=54)
+  - {type: h, x1: 194.31, x2: 217.17, y: 26.0, style: zone_div, label: "HP", label_x: 205.74}
+
+  # ── MAIN OUT + LP2 right boundary ─────────────────────────────────────────────
+  # Both zones share x_start=217.17, col_pitch=11.43mm, cols=2 (4.5HP total)
+  # col0 cx=222.885, col1 cx=234.315
+  # Slider (cx=228.60) and RES knob (cx=228.60) share same centre line
+  # Right boundary = 217.17 + 2×11.43 = 240.03mm
+  - {type: h, x1: 217.17, x2: 240.03, y: 9.0, style: zone_div, label: "Main Out", label_x: 228.60}
+  # Grey divider between MAIN OUT jacks (cy=17) and LP2 slider (cy=54)
+  - {type: h, x1: 217.17, x2: 240.03, y: 26.0, style: zone_div, label: "LP2", label_x: 228.60}
+
+# ── Zone labels ───────────────────────────────────────────────────────────────
+# x=17.145 is the geometric centre of the 3-column section (col 1 cx)
+zone_labels: []
+
+# ── Zones ─────────────────────────────────────────────────────────────────────
+zones:
+
+  # ── Section 0a: INPUT / GAIN ──────────────────────────────────────────────
+  # col 0 → cx = 5.715mm, col 1 → cx = 17.145mm, col 2 → cx = 28.575mm (switches)
+  - id: zone_input
+    label: "Zone 0a — INPUT / GAIN"
+    x_start: 0
+    col_pitch: 11.43
+    cols: 3
+    components:
+      - id: L_IN
+        type: jack_input
+        col: 0
+        cy: 17
+        rotate: 180
+        label: "L IN"
+        font_size: 1.8
+        cpp_id: "L_IN_INPUT"
+      - id: R_IN
+        type: jack_input
+        col: 1
+        cy: 17
+        rotate: 180
+        label: "R IN"
+        font_size: 1.8
+        cpp_id: "R_IN_INPUT"
+      - id: GAIN_MAIN
+        type: eg_2pos
+        cx: 28.575
+        cy: 17
+        label_above: "MAIN"
+        pos_labels: ["1×", "5×"]
+        pos_xs: [23.775, 33.375]   # cx ± 4.8mm (EG1218 body half-length 5.8 minus 1mm margin)
+        cpp_param: "GAIN_PARAM"
+      - id: BP3_L
+        type: jack_input
+        col: 0
+        cy: 31.5
+        rotate: 180
+        label: "BP3 L"
+        font_size: 1.6
+        cpp_id: "ALT_BP_L_INPUT"
+      - id: BP3_R
+        type: jack_input
+        col: 1
+        cy: 31.5
+        rotate: 180
+        label: "BP3 R"
+        font_size: 1.6
+        cpp_id: "ALT_BP_R_INPUT"
+      - id: GAIN_BP3
+        type: eg_2pos
+        cx: 28.575
+        cy: 31.5
+        label_above: "BP3"
+        pos_labels: ["1×", "5×"]
+        pos_xs: [23.775, 33.375]   # cx ± 4.8mm
+        cpp_param: "ALT_GAIN_PARAM"
+
+  # ── Section 0b: LFO ───────────────────────────────────────────────────────
+  # col 0 jack | col 1 LED | col 2 knob
+  - id: zone_lfo
+    label: "Zone 0b — LFO"
+    x_start: 0
+    col_pitch: 11.43
+    cols: 3
+    components:
+      - id: LFO1_OUT
+        type: jack_output
+        label_border: true
+        col: 0
+        cy: 51.5
+        label: "LFO 1"
+        font_size: 1.6
+        cpp_id: "LFO1_OUTPUT"
+      - id: LFO1_LED
+        type: led
+        col: 1
+        cy: 51.5
+        led_fill:   "#112244"
+        led_stroke: "#2255cc"
+        cpp_id: "LFO1_LIGHT"
+      - id: LFO1_RATE
+        type: trimpot
+        col: 2
+        cy: 51.5
+        label: "Rate 1"
+        cpp_param: "LFO1_RATE_PARAM"
+      - id: LFO2_OUT
+        type: jack_output
+        label_border: true
+        col: 0
+        cy: 65.9
+        label: "LFO 2"
+        font_size: 1.6
+        cpp_id: "LFO2_OUTPUT"
+      - id: LFO2_LED
+        type: led
+        col: 1
+        cy: 65.9
+        led_fill:   "#112244"
+        led_stroke: "#2255cc"
+        cpp_id: "LFO2_LIGHT"
+      - id: LFO2_RATE
+        type: trimpot
+        col: 2
+        cy: 65.9
+        label: "Rate 2"
+        cpp_param: "LFO2_RATE_PARAM"
+
+  # ── Section 0c: MOD BUS ───────────────────────────────────────────────────
+  # 3-column grid: col 0 = single eg_3pos switch, col 1 = mod trimpots, col 2 = VCA trimpots.
+  # Single EG2301 at cy=89.5 — top (81.25mm) aligns with SCALE top (83.75-2.5=81.25mm) ✓
+  #                           — bottom (97.75mm) aligns with OFFSET bottom (95.25+2.5=97.75mm) ✓
+  # Row A (cy=83.75): — | SCALE | VCA_AMT
+  # Row SW (cy=89.5):  SW | — | —
+  # Row B (cy=95.25): — | OFFSET | VCA_OFS
+  # Row C (cy=112):   — | MOD_IN | VCA_IN
+  - id: zone_mod
+    label: "Zone 0c — MOD BUS"
+    x_start: 0
+    col_pitch: 11.43
+    cols: 3
+    components:
+      - id: MOD_SRC_SW
+        type: eg_3pos
+        col: 0
+        cy: 89.5
+        label: "MOD SRC"
+        label_below_y: 100.5
+        cpp_param: "MOD_SRC_PARAM"
+      - id: SCALE
+        type: trimpot
+        col: 1
+        cy: 83.75
+        label: "SCALE"
+        cpp_param: "MOD_SCALE_PARAM"
+      - id: VCA_AMT
+        type: trimpot
+        col: 2
+        cy: 83.75
+        label: "VCA AMT"
+        cpp_param: "VCA_AMT_PARAM"
+      - id: OFFSET
+        type: trimpot
+        col: 1
+        cy: 95.25
+        label: "OFFSET"
+        cpp_param: "MOD_OFFSET_PARAM"
+      - id: VCA_OFS
+        type: trimpot
+        col: 2
+        cy: 95.25
+        label: "VCA OFS"
+        cpp_param: "VCA_OFS_PARAM"
+      - id: MOD_IN
+        type: jack_input
+        col: 1
+        cy: 112.0
+        label: "MOD IN"
+        font_size: 1.6
+        cpp_id: "MOD_INPUT"
+      - id: VCA_IN
+        type: jack_input
+        col: 2
+        cy: 112.0
+        label: "VCA IN"
+        font_size: 1.6
+        cpp_id: "VCA_INPUT"
+
+  # ── LP1: Low-Pass Filter 1 ────────────────────────────────────────────────────
+  # 9 HP   x_start=35.56   col_pitch=15.24 (3 HP/col)
+  # col 0 cx=43.18  col 1 cx=58.42  col 2 cx=73.66
+  # All main knobs centred at col 1 (cx=58.42mm).
+  # Attenuverters spread across cols 0/1/2 at cy=97.0 (ATT-to-jack gap 0.43mm ✓).
+  # Adjacent ATT pots: 1.49mm x-gap (no PCB overlap). Bottom jacks cy=112.0 (matching sec 0).
+  - id: zone_lp1
+    label: "Zone — LP1 Low-Pass Filter"
+    x_start: 34.29             # = 3 × 11.43mm; aligns LP1 col0 jack at 40.005mm = 28.575 + 11.43
+    col_pitch: 11.43           # 2.25 HP/col — uniform grid with section-0
+    cols: 3
+    components:
+      # ── Main knobs (all col 1 = section centre cx=51.435mm) ──────────────────
+      # Evenly spaced between top label (y=9.0) and trimpot courtyard top (y=96.615):
+      #   gap = (87.615 − 60.4) / 4 = 6.80mm at top, between each, and below last label
+      - id: LP1_FREQ
+        type: knob_xl
+        col: 1
+        cy: 24.8
+        label: "FREQ"
+        cpp_param: "LP1_FREQ_PARAM"
+      - id: LP1_TILT
+        type: knob_large
+        col: 1
+        cy: 52.4
+        label: "TILT"
+        cpp_param: "LP1_TILT_PARAM"
+      - id: LP1_RES
+        type: knob_large
+        col: 1
+        cy: 78.0
+        label: "RES"
+        cpp_param: "LP1_RES_PARAM"
+      # ── Attenuverters — compact pot (Bourns PTV09A style), no label ──────────
+      # ATT_CY = ±5mm symmetric; fits 11.43mm pitch with 1.43mm x-gap each side
+      - id: LP1_FREQ_ATT
+        type: trimpot
+        col: 0
+        cy: 100.0
+        cpp_param: "LP1_FREQ_ATT_PARAM"
+      - id: LP1_TILT_ATT
+        type: trimpot
+        col: 1
+        cy: 100.0
+        cpp_param: "LP1_TILT_ATT_PARAM"
+      - id: LP1_RES_ATT
+        type: trimpot
+        col: 2
+        cy: 100.0
+        cpp_param: "LP1_RES_ATT_PARAM"
+      # ── CV input jacks (cy=112.0 matches section-0 bottom row) ───────────────
+      - id: LP1_FREQ_IN
+        type: jack_input
+        col: 0
+        cy: 112.0
+        label: "FREQ"
+        cpp_id: "LP1_FREQ_INPUT"
+      - id: LP1_TILT_IN
+        type: jack_input
+        col: 1
+        cy: 112.0
+        label: "TILT"
+        cpp_id: "LP1_TILT_INPUT"
+      - id: LP1_RES_IN
+        type: jack_input
+        col: 2
+        cy: 112.0
+        label: "RES"
+        cpp_id: "LP1_RES_INPUT"
+
+  # ── BP CONTROL: Bandpass Filter Controls ──────────────────────────────────────
+  # 2 cols × 11.43mm = 22.86mm (4.5HP).  cx_c0=74.295  cx_c1=85.725  cx_ctr=80.01
+  - id: zone_bp
+    label: "Zone — BP CONTROL"
+    x_start: 68.58
+    col_pitch: 11.43
+    cols: 2
+    components:
+      # ── Knobs: Offset (M) → Tilt (M) → Mix (M), evenly spaced to switch ────
+      - id: BP_OFFSET
+        type: knob_medium
+        cx: 80.01
+        cy: 24.80
+        label: "OFFSET"
+        cpp_param: "BP_OFFSET_PARAM"
+      - id: BP_TILT
+        type: knob_medium
+        cx: 80.01
+        cy: 43.20
+        label: "TILT"
+        cpp_param: "BP_TILT_PARAM"
+      - id: BP_MIX
+        type: knob_medium
+        cx: 80.01
+        cy: 61.60
+        label: "BYPASS"
+        cpp_param: "BP_BYPASS_PARAM"
+      - id: BP_WET
+        type: knob_medium
+        cx: 80.01
+        cy: 80.00
+        label: "WET"
+        cpp_param: "BP_WET_PARAM"
+      # ── CV attenuverter trim pots ────────────────────────────────────────────
+      - id: BP_FREQ_ATT
+        type: trimpot
+        col: 0
+        cy: 100.0
+        cpp_param: "BP_FREQ_ATT_PARAM"
+      - id: BP_TILT_ATT
+        type: trimpot
+        col: 1
+        cy: 100.0
+        cpp_param: "BP_TILT_ATT_PARAM"
+      # ── CV input jacks ───────────────────────────────────────────────────────
+      - id: BP_FREQ_IN
+        type: jack_input
+        col: 0
+        cy: 112.0
+        label: "FREQ"
+        cpp_id: "BP_FREQ_INPUT"
+      - id: BP_TILT_IN
+        type: jack_input
+        col: 1
+        cy: 112.0
+        label: "TILT"
+        cpp_id: "BP_TILT_INPUT"
+
+  # ── Zone: BP 1 ───────────────────────────────────────────────────────────────
+  # Mirror of LP1: xl + 2× large knobs on col1, 3 trimpots + 3 jacks across cols 0/1/2
+  # cy values match LP1 for visual alignment across rows
+  - id: zone_bp1
+    label: "Zone — BP 1"
+    x_start: 91.44
+    col_pitch: 11.43
+    cols: 3
+    components:
+      # col0 cx=97.155  col1 cx=108.585  col2 cx=120.015
+      - id: BP1_DIST_SW
+        type: eg_3pos
+        cx: 96.0
+        cy: 24.80
+        label_below: "DIST"
+        label_below_y: 36.0
+        cpp_param: "BP1_DIST_MODE_PARAM"
+      - id: BP1_FREQ
+        type: knob_xl
+        cx: 112.585
+        cy: 24.80
+        label: "FREQ"
+        cpp_param: "BP1_FREQ_PARAM"
+      - id: BP1_FOCUS
+        type: knob_large
+        cx: 100.44
+        cy: 47.69
+        label: "FOCUS"
+        cpp_param: "BP1_FOCUS_PARAM"
+      - id: BP1_TILT
+        type: knob_large
+        cx: 116.73
+        cy: 63.85
+        rotate: 180
+        label: "TILT"
+        cpp_param: "BP1_TILT_PARAM"
+      - id: BP1_DIST
+        type: knob_large
+        cx: 100.44
+        cy: 80.00
+        label: "DIST"
+        cpp_param: "BP1_DIST_PARAM"
+      - id: BP1_CLIP_LED
+        type: led_labeled
+        cx: 116.585
+        cy: 83.00
+        label: "CLIP"
+        led_fill: "#441111"
+        led_stroke: "#cc2222"
+        cpp_id: "BP1_CLIP_LIGHT"
+      - id: BP1_FREQ_ATT
+        type: trimpot
+        col: 0
+        cy: 100.0
+        cpp_param: "BP1_FREQ_ATT_PARAM"
+      - id: BP1_TILT_ATT
+        type: trimpot
+        col: 1
+        cy: 100.0
+        cpp_param: "BP1_TILT_ATT_PARAM"
+      - id: BP1_DIST_ATT
+        type: trimpot
+        col: 2
+        cy: 100.0
+        cpp_param: "BP1_DIST_ATT_PARAM"
+      - id: BP1_FREQ_IN
+        type: jack_input
+        col: 0
+        cy: 112.0
+        label: "FREQ"
+        cpp_id: "BP1_FREQ_INPUT"
+      - id: BP1_TILT_IN
+        type: jack_input
+        col: 1
+        cy: 112.0
+        label: "TILT"
+        cpp_id: "BP1_TILT_INPUT"
+      - id: BP1_DIST_IN
+        type: jack_input
+        col: 2
+        cy: 112.0
+        label: "DIST"
+        cpp_id: "BP1_DIST_INPUT"
+
+  # ── Zone: BP 2 ───────────────────────────────────────────────────────────────
+  - id: zone_bp2
+    label: "Zone — BP 2"
+    x_start: 125.73
+    col_pitch: 11.43
+    cols: 3
+    components:
+      # col0 cx=131.445  col1 cx=142.875  col2 cx=154.305
+      - id: BP2_DIST_SW
+        type: eg_3pos
+        cx: 130.29
+        cy: 24.80
+        label_below: "DIST"
+        label_below_y: 36.0
+        cpp_param: "BP2_DIST_MODE_PARAM"
+      - id: BP2_FREQ
+        type: knob_xl
+        cx: 146.875
+        cy: 24.80
+        label: "FREQ"
+        cpp_param: "BP2_FREQ_PARAM"
+      - id: BP2_FOCUS
+        type: knob_large
+        cx: 134.730
+        cy: 47.69
+        label: "FOCUS"
+        cpp_param: "BP2_FOCUS_PARAM"
+      - id: BP2_TILT
+        type: knob_large
+        cx: 151.020
+        cy: 63.85
+        rotate: 180
+        label: "TILT"
+        cpp_param: "BP2_TILT_PARAM"
+      - id: BP2_DIST
+        type: knob_large
+        cx: 134.730
+        cy: 80.00
+        label: "DIST"
+        cpp_param: "BP2_DIST_PARAM"
+      - id: BP2_CLIP_LED
+        type: led_labeled
+        cx: 150.875
+        cy: 83.00
+        label: "CLIP"
+        led_fill: "#441111"
+        led_stroke: "#cc2222"
+        cpp_id: "BP2_CLIP_LIGHT"
+      - id: BP2_FREQ_ATT
+        type: trimpot
+        col: 0
+        cy: 100.0
+        cpp_param: "BP2_FREQ_ATT_PARAM"
+      - id: BP2_TILT_ATT
+        type: trimpot
+        col: 1
+        cy: 100.0
+        cpp_param: "BP2_TILT_ATT_PARAM"
+      - id: BP2_DIST_ATT
+        type: trimpot
+        col: 2
+        cy: 100.0
+        cpp_param: "BP2_DIST_ATT_PARAM"
+      - id: BP2_FREQ_IN
+        type: jack_input
+        col: 0
+        cy: 112.0
+        label: "FREQ"
+        cpp_id: "BP2_FREQ_INPUT"
+      - id: BP2_TILT_IN
+        type: jack_input
+        col: 1
+        cy: 112.0
+        label: "TILT"
+        cpp_id: "BP2_TILT_INPUT"
+      - id: BP2_DIST_IN
+        type: jack_input
+        col: 2
+        cy: 112.0
+        label: "DIST"
+        cpp_id: "BP2_DIST_INPUT"
+
+  # ── Zone: BP 3 ───────────────────────────────────────────────────────────────
+  - id: zone_bp3
+    label: "Zone — BP 3"
+    x_start: 160.02
+    col_pitch: 11.43
+    cols: 3
+    components:
+      # col0 cx=165.735  col1 cx=177.165  col2 cx=188.595
+      - id: BP3_DIST_SW
+        type: eg_3pos
+        cx: 164.58
+        cy: 24.80
+        label_below: "DIST"
+        label_below_y: 36.0
+        cpp_param: "BP3_DIST_MODE_PARAM"
+      - id: BP3_FREQ
+        type: knob_xl
+        cx: 181.165
+        cy: 24.80
+        label: "FREQ"
+        cpp_param: "BP3_FREQ_PARAM"
+      - id: BP3_FOCUS
+        type: knob_large
+        cx: 169.020
+        cy: 47.69
+        label: "FOCUS"
+        cpp_param: "BP3_FOCUS_PARAM"
+      - id: BP3_TILT
+        type: knob_large
+        cx: 185.310
+        cy: 63.85
+        rotate: 180
+        label: "TILT"
+        cpp_param: "BP3_TILT_PARAM"
+      - id: BP3_DIST
+        type: knob_large
+        cx: 169.020
+        cy: 80.00
+        label: "DIST"
+        cpp_param: "BP3_DIST_PARAM"
+      - id: BP3_CLIP_LED
+        type: led_labeled
+        cx: 185.165
+        cy: 83.00
+        label: "CLIP"
+        led_fill: "#441111"
+        led_stroke: "#cc2222"
+        cpp_id: "BP3_CLIP_LIGHT"
+      - id: BP3_FREQ_ATT
+        type: trimpot
+        col: 0
+        cy: 100.0
+        cpp_param: "BP3_FREQ_ATT_PARAM"
+      - id: BP3_TILT_ATT
+        type: trimpot
+        col: 1
+        cy: 100.0
+        cpp_param: "BP3_TILT_ATT_PARAM"
+      - id: BP3_DIST_ATT
+        type: trimpot
+        col: 2
+        cy: 100.0
+        cpp_param: "BP3_DIST_ATT_PARAM"
+      - id: BP3_FREQ_IN
+        type: jack_input
+        col: 0
+        cy: 112.0
+        label: "FREQ"
+        cpp_id: "BP3_FREQ_INPUT"
+      - id: BP3_TILT_IN
+        type: jack_input
+        col: 1
+        cy: 112.0
+        label: "TILT"
+        cpp_id: "BP3_TILT_INPUT"
+      - id: BP3_DIST_IN
+        type: jack_input
+        col: 2
+        cy: 112.0
+        label: "DIST"
+        cpp_id: "BP3_DIST_INPUT"
+
+  # ── Zone: BP3 OUT ────────────────────────────────────────────────────────────
+  # 2 stereo output jacks for BP3; continues 2.25HP jack grid
+  # ── Zone: BP3 OUT ────────────────────────────────────────────────────────────
+  # Stereo output jacks at top of column — stacked above HP zone (same x_start).
+  # col_pitch=16.0mm so cols align with HP below; rotate=180 keeps PCB within keepout.
+  # col0 cx=200.025 (BP3 L), col1 cx=211.455 (BP3 R)
+  # Jack PCB bottom = 17+7.9 = 24.9mm; HP slider PCB top = 55-28.5 = 26.5mm → gap=1.6mm ✓
+  - id: zone_bp3_out
+    label: "Zone — BP3 OUT"
+    x_start: 194.31
+    col_pitch: 11.43
+    cols: 2
+    components:
+      - id: BP3_L_OUT
+        type: jack_output
+        label_border: true
+        col: 0
+        cy: 17.0
+        rotate: 180
+        label: "BP3 L"
+        font_size: 1.6
+        cpp_id: "BP3_L_OUTPUT"
+      - id: BP3_R_OUT
+        type: jack_output
+        label_border: true
+        col: 1
+        cy: 17.0
+        rotate: 180
+        label: "BP3 R"
+        font_size: 1.6
+        cpp_id: "BP3_R_OUTPUT"
+
+  # ── Zone: HP ─────────────────────────────────────────────────────────────────
+  # 45mm slider (FREQ) + med knob (RES, same centre line) + 2 trimpots + 2 jacks.
+  # Same x_start + col_pitch as BP3 OUT above — components stack vertically.
+  # col0 cx=200.025 (FREQ att/jack), col1 cx=211.455 (RES att/jack)
+  # Slider and RES knob both at cx=205.74 (zone centre, between col0 and col1)
+  #
+  # PCB gap chain (all positive → DRC PASS):
+  #   BP3 OUT jack bottom(24.9) → slider top(25.5): gap=0.600mm ✓
+  #   Slider bottom(82.5) → RES knob top(82.83): gap=0.330mm ✓
+  #   RES knob bottom(96.17) → trimpot top(96.62): gap=0.445mm ✓
+  #   Trimpot bottom(103.39) → jack PCB top(104.1): gap=0.715mm ✓
+  #   Jack nut bottom(117mm) < keepout(118.5mm) ✓
+  - id: zone_hp
+    label: "Zone — HP"
+    x_start: 194.31
+    col_pitch: 11.43
+    cols: 2
+    components:
+      # Slider and RES both at cx=205.74 — same vertical centre line
+      - id: HP_FREQ
+        type: slider_V45
+        cx: 205.74
+        cy: 54.0
+        label: ""
+        cpp_param: "HP_FREQ_PARAM"
+      - id: HP_RES
+        type: trimpot
+        cx: 205.74
+        cy: 87.0
+        label: "RES"
+        cpp_param: "HP_RES_PARAM"
+      - id: HP_FREQ_ATT
+        type: trimpot
+        col: 0
+        cy: 100.0
+        cpp_param: "HP_FREQ_ATT_PARAM"
+      - id: HP_RES_ATT
+        type: trimpot
+        col: 1
+        cy: 100.0
+        cpp_param: "HP_RES_ATT_PARAM"
+      - id: HP_FREQ_IN
+        type: jack_input
+        col: 0
+        cy: 112.0
+        label: "FREQ"
+        cpp_id: "HP_FREQ_INPUT"
+      - id: HP_RES_IN
+        type: jack_input
+        col: 1
+        cy: 112.0
+        label: "RES"
+        cpp_id: "HP_RES_INPUT"
+
+  # ── Zone: MAIN OUT (stereo main outputs) ──────────────────────────────────────
+  # col0 cx=222.885 (MAIN L), col1 cx=234.315 (MAIN R)
+  # Jack PCB bottom = 17+7.9 = 24.9mm; LP2 slider PCB top = 54-28.5 = 25.5mm → gap=0.6mm ✓
+  - id: zone_main_out
+    label: "Zone — MAIN OUT"
+    x_start: 217.17
+    col_pitch: 11.43
+    cols: 2
+    components:
+      - id: MAIN_L_OUT
+        type: jack_output
+        label_border: true
+        col: 0
+        cy: 17.0
+        rotate: 180
+        label: "MAIN L"
+        font_size: 1.6
+        cpp_id: "MAIN_L_OUTPUT"
+      - id: MAIN_R_OUT
+        type: jack_output
+        label_border: true
+        col: 1
+        cy: 17.0
+        rotate: 180
+        label: "MAIN R"
+        font_size: 1.6
+        cpp_id: "MAIN_R_OUTPUT"
+
+  # ── Zone: LP2 ─────────────────────────────────────────────────────────────────
+  # 45mm slider (FREQ) + med knob (RES, same centre line) + 2 trimpots + 2 jacks.
+  # Mirrors HP zone exactly; cx=228.60 is the shared centre line.
+  #
+  # PCB gap chain (mirrors HP; all positive → DRC PASS):
+  #   MAIN OUT jack bottom(24.9) → slider top(25.5): gap=0.600mm ✓
+  #   Slider bottom(82.5) → RES knob top(82.83): gap=0.330mm ✓
+  #   RES knob bottom(96.17) → trimpot top(96.62): gap=0.445mm ✓
+  #   Trimpot bottom(103.39) → jack PCB top(104.1): gap=0.715mm ✓
+  #   Jack nut bottom(117mm) < keepout(118.5mm) ✓
+  - id: zone_lp2
+    label: "Zone — LP2"
+    x_start: 217.17
+    col_pitch: 11.43
+    cols: 2
+    components:
+      - id: LP2_FREQ
+        type: slider_V45
+        cx: 228.60
+        cy: 54.0
+        label: ""
+        cpp_param: "LP2_FREQ_PARAM"
+      - id: LP2_RES
+        type: trimpot
+        cx: 228.60
+        cy: 87.0
+        label: "RES"
+        cpp_param: "LP2_RES_PARAM"
+      - id: LP2_FREQ_ATT
+        type: trimpot
+        col: 0
+        cy: 100.0
+        cpp_param: "LP2_FREQ_ATT_PARAM"
+      - id: LP2_RES_ATT
+        type: trimpot
+        col: 1
+        cy: 100.0
+        cpp_param: "LP2_RES_ATT_PARAM"
+      - id: LP2_FREQ_IN
+        type: jack_input
+        col: 0
+        cy: 112.0
+        label: "FREQ"
+        cpp_id: "LP2_FREQ_INPUT"
+      - id: LP2_RES_IN
+        type: jack_input
+        col: 1
+        cy: 112.0
+        label: "RES"
+        cpp_id: "LP2_RES_INPUT"

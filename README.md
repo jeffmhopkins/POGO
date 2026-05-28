@@ -1,84 +1,68 @@
-# POGO — Stereo Triple Comb Filter
+# POGO — Stereo Filter Bank
 
-**POGO** is a complex stereo Eurorack filter module being developed by Space Coast Synthesizers.
-This repository contains the complete hardware design specification (Phases 1–5) and the
-VCV Rack 2 software prototype (Phase 6, in progress) used to validate the design before
-hardware construction begins.
+**POGO** is a stereo filter bank module (48HP) being developed by Space Coast
+Synthesizers. The VCV Rack 2 plugin in this repository is the **working software prototype**
+and ground truth. Analog hardware design is reverse-engineered from it.
 
 ---
 
 ## What It Does
 
-POGO routes stereo audio through three independent 6-stage all-pass comb filter chains,
-each with its own frequency, feedback depth, and distortion drive control. The output
-feeds a resonant LP filter stack (LP1 + LP2), then an HP filter — the full signal chain
-is voltage-controlled and deeply modulatable.
+POGO routes stereo audio through a deeply modulated filter bank: a pre-gain stage, a
+voltage-controlled VCA, a stereo LP filter with tilt (LP1), three independent bandpass
+resonators (BP1/BP2/BP3) with per-group distortion, a HP filter, and a final LP filter (LP2).
+A dual triangle LFO feeds a central mod bus with 19 CV destinations — every key parameter
+is voltage-controllable.
 
-**Signal chain:**
+**Signal chain (48HP topology):**
 
 ```
-Stereo In → Input Buffer → Pre-Gain → Envelope Follower
-                                              ↓
-                          ┌───────────────────────────────┐
-                          │   Triple 6-Stage APF Comb     │
-                          │   (3 independent groups,       │
-                          │    each: Freq / FB / Drive)    │
-                          └───────────────────────────────┘
-                                              ↓
-                                        Distortion
-                          (Soft Clip / Hard Clip / Wavefold)
-                                              ↓
-                                       Pre-LP1 VCA
-                                              ↓
-                                    LP Filter 1 (resonant)
-                                       BAND OUT ──────────► LP1 L/R jacks
-                                              ↓
-                                    LP Filter 2 (resonant)
-                                              ↓
-                                       HP Filter
-                                              ↓
-                                     Output Buffer
-                                              ↓
-                                       Stereo Out
+Stereo In → Input Buffer → Pre-Gain (1×/5×)
+                                  ↓
+                             Pre-LP1 VCA   ← mod bus, VCA_OFS floor
+                                  ↓
+                            LP Filter 1    ← FREQ, TILT (stereo spread), RES
+                                  ↓
+               ┌──────────────────────────────────────┐
+               │        Triple Bandpass Filter Bank    │
+               │  BP1 / BP2 / BP3 — 40 Hz – 4 kHz     │
+               │  per-group: FREQ / FOCUS / DIST       │
+               │  global: OFFSET / TILT / MIX          │
+               │  BP3_L/R ──────────────────────────► BP3 out jacks
+               └──────────────────────────────────────┘
+                                  ↓
+                             HP Filter     ← FREQ, RES
+                                  ↓
+                            LP Filter 2   ← FREQ, RES
+                                  ↓
+                           Output Buffer
+                                  ↓
+                             Stereo Out
+
+LFO1 / LFO2  →  ±5V triangle, 0.05–20Hz
+Mod Bus      →  19 CV destinations (each: override jack + attenuverter)
 ```
 
-**Modulation system:** The envelope follower drives a central mod bus with independent
-attenuverters and override jacks for 19 CV destinations — every key parameter is
-voltage-controllable.
-
-**Hardware target:** 40 HP, 4-board split (control + utility + left audio + right audio),
-±12 V Eurorack power, ~167 mA per rail.
+**Hardware target:** 48HP, ±12V Eurorack. Power budget ~190 mA per rail (estimate; under
+revision as block-level estimates are refined).
 
 ---
 
 ## Project State
 
-All hardware design phases are complete. The VCV Rack software prototype is now being
-implemented block by block.
+The plugin and panel are complete and CI-passing. Circuit design (Phase 3R) is complete
+for all blocks; board layout (Phase 5R) is in progress.
 
 | Phase | Description | Status |
 |---|---|---|
-| Phase 1 | Audio / functional specification (all blocks) | ✅ Complete |
-| Phase 2 | Analog behavior model (all blocks) | ✅ Complete |
-| Phase 3 | Circuit design (all blocks) | ✅ Complete |
-| Phase 4 | Panel design — 40 HP layout, all controls placed | ✅ Complete |
-| Phase 5 | Board layout — 4-board split, connector pinouts | ✅ Complete |
-| Phase 6 | VCV Rack 2 plugin — **Stage 0 scaffold done; DSP next** | 🔄 In Progress |
+| Phase 1R | Extract functional spec from plugin code (all blocks) | ✅ Complete |
+| Phase 2R | Analog behavior model (bilinear transform inverse) | ✅ Complete |
+| Phase 3R | Circuit design — all 10 blocks + components.yaml finalized | ✅ Complete |
+| Phase 4R | Panel — 48HP, DRC-clean, CI-verified | ✅ Complete |
+| Phase 5R | Board layout — 48HP, architecture under review | 🔄 In Progress |
+| Phase 6R | Code validation — CI green, signal-path smoke tests | ✅ Complete |
 
-### Phase 6 Development Stages
-
-| Stage | Description | Status |
-|---|---|---|
-| Stage 0 | Scaffold: plugin.json, Makefile, all params/IOs registered, blank panel | ✅ Done |
-| Stage 1 | Block A + B: input/output buffers, clean pass-through test | ⬜ Next |
-| Stage 2 | Block 1: Pre-gain (switched 1× / 5×) | ⬜ |
-| Stage 3 | Block 2: Envelope follower (0–10 V CV) | ⬜ |
-| Stage 4 | Blocks 5/6/7: LP1, LP2, HP filters (OTA-C SVF, bilinear transform) | ⬜ |
-| Stage 5 | Block VCA: Pre-LP1 VCA (THAT 2180 gain law) | ⬜ |
-| Stage 6 | Block 3: Triple APF comb filter (6-stage per-group all-pass chain) | ⬜ |
-| Stage 7 | Block 4: Distortion (soft clip / hard clip / wavefold, 2× oversampled) | ⬜ |
-| Stage 8 | Mod architecture: mod bus processor + 19 attenuverter destinations | ⬜ |
-| Stage 9 | Full integration and signal-chain verification | ⬜ |
+See `specs/STATUS.md` for per-block detail.
 
 ---
 
@@ -86,215 +70,139 @@ implemented block by block.
 
 ```
 POGO/
-├── specs/                    ← Hardware design documentation (Phases 1–5)
-│   ├── STATUS.md             ← Master phase-completion checklist
-│   ├── module-overview.md    ← Full signal chain and power budget
-│   ├── mod-architecture.md   ← Modulation system spec
-│   ├── panel-design/         ← Phase 4: 40 HP panel layout
-│   │   └── panel.svg         ← Authoritative panel layout SVG
-│   ├── board-layout/         ← Phase 5: 4-board split, connector pinouts
-│   │   └── layout-notes.md   ← Full CN_CTRL_1/2/3 and CN_UTIL_L/R pinouts
-│   ├── block-*/spec.md       ← Per-block specifications (Phases 1–3)
-│   └── shared/               ← Reusable circuit standards (CV protection, power)
-├── kicad/                    ← KiCad 7 schematic generation (board design system)
-│   ├── kicad_common.py       ← Shared generator infrastructure (all 4 boards)
-│   ├── generate_control_board.py  ← Control board generator script
-│   ├── validate_schematic.py ← Structural validator (kiutils-based)
-│   ├── pogo-control-board.kicad_sch  ← Generated control board schematic
-│   ├── pogo.kicad_pro        ← KiCad 7 project file
-│   └── kicad-process.md      ← (see specs/kicad-process.md) generation workflow
-├── design/                   ← HTML design documents (one per block)
-├── src/                      ← VCV Rack plugin source (Phase 6)
-│   ├── plugin.hpp / plugin.cpp
-│   ├── Pogo.cpp              ← Module definition, all params/IOs, widget
-│   └── dsp/                  ← DSP classes (one per block, added per stage)
-├── res/
-│   └── Pogo.svg              ← Panel SVG for VCV Rack
-├── .github/workflows/
-│   └── build.yml             ← GitHub Actions CI build
-├── plugin.json
-└── Makefile
+├── plugin/                        ← VCV Rack 2 plugin
+│   ├── Makefile / plugin.json
+│   ├── src/
+│   │   ├── Pogo.cpp               ← Module: params, process(), widget
+│   │   └── dsp/                   ← DSP classes (all blocks)
+│   └── res/
+│       └── Pogo.svg               ← Panel SVG (generated — do not hand-edit)
+│
+├── tools/                         ← Panel build system
+│   ├── panel-data.yaml            ← SOURCE OF TRUTH for all panel positions
+│   ├── build_panel.py             ← CLI: --check --resource --design --cpp --list
+│   ├── panel_svg.py / panel_rules.py / panel_cpp.py
+│   └── panel-tool-guide.md
+│
+├── docs/
+│   └── plugin-topology.md         ← Authoritative 48HP plugin spec
+│
+├── specs/                         ← Hardware design documentation
+│   ├── STATUS.md                  ← Phase completion checklist
+│   ├── module-overview.md         ← Signal chain, power budget
+│   ├── components.yaml            ← Global component registry (265 entries)
+│   ├── analog-design-review.md    ← Trim pots, parts availability, noise analysis
+│   │
+│   ├── aux/                       ← Circuit design library (shared building blocks)
+│   │   ├── aux-ota-c-svf.md       ← OTA-C SVF (LM13700M + OPA1612 SUM_AMP)
+│   │   ├── aux-expo-converter.md  ← THAT340S14-U V/oct expo converter
+│   │   ├── aux-q-control.md       ← LM13700 resonance control
+│   │   ├── aux-vca-cell.md        ← THAT 2180 VCA cell
+│   │   ├── aux-unity-buffer.md    ← Unity-gain buffer
+│   │   ├── aux-distortion.md      ← SC/HC/WF cells + CD4053 mux
+│   │   ├── aux-attenuverter.md    ← Bipolar pot + inverter (mod bus destinations)
+│   │   ├── aux-mod-bus-core.md    ← Inverting summer + distribution buffer
+│   │   ├── aux-lfo-core.md        ← Triangle oscillator core
+│   │   ├── aux-cv-protection.md   ← 100Ω + BAT54S clamp
+│   │   └── aux-power-filter.md    ← Board power filtering
+│   │
+│   ├── block-A/spec.md            ← Input Buffers (LM4562)
+│   ├── block-1/spec.md            ← Pre-Gain (NE5532D, 1×/5× switch)
+│   ├── block-2/spec.md            ← Dual LFO (triangle, 0.05–20 Hz)
+│   ├── block-3/spec.md            ← Mod Bus (19 destinations, attenuverters)
+│   ├── block-4/spec.md            ← VCA (THAT 2180, AMT + OFS)
+│   ├── block-5/spec.md            ← LP Filter 1 (OTA-C SVF, stereo tilt)
+│   ├── block-6/spec.md            ← Triple BP + Distortion (3× SVF + SC/HC/WF)
+│   ├── block-7/spec.md            ← HP Filter (OTA-C SVF)
+│   ├── block-8/spec.md            ← LP Filter 2 (OTA-C SVF, independent)
+│   ├── block-B/spec.md            ← Output Buffers
+│   │
+│   ├── panel-design/panel-notes.md
+│   ├── board-layout/layout-notes.md
+│   └── archive/40hp-era-2026-05/  ← Superseded 40HP specs
+│
+├── kicad/                         ← KiCad schematics — STALE (40HP era)
+│   ├── README-STALE.md            ← Do not regenerate until Phase 5R complete
+│   ├── generate_control_board.py  ← 40HP era — not current topology
+│   ├── generate_utility_board.py  ← 40HP era — not current topology
+│   └── validate_*.py              ← 40HP era — KiCad CI step is disabled
+│
+├── design/
+│   └── panel-debug.html           ← Interactive panel layer viewer (keepouts, DRC)
+│
+└── .github/workflows/build.yml    ← CI: Linux/Win/macOS builds + panel DRC check
+```
+
+---
+
+## Panel Build System
+
+The panel is data-driven. **Never hand-edit SVG files.**
+
+```bash
+# Edit panel layout
+edit tools/panel-data.yaml
+
+# Rebuild SVG + debug HTML
+python3 tools/build_panel.py
+
+# DRC check (CI gate — must pass before commit)
+python3 tools/build_panel.py --check
+
+# Get C++ widget positions for Pogo.cpp
+python3 tools/build_panel.py --cpp
+
+# Interactive layer viewer (keepouts, footprints, DRC overlays)
+open design/panel-debug.html
 ```
 
 ---
 
 ## KiCad Schematic Generation
 
-All EDA files are generated from the specs — no hand-drawn schematics. Each board has a
-Python generator script in `kicad/` that emits a valid KiCad 7 `.kicad_sch` file; the script
-is the authoritative source and the `.kicad_sch` is the artifact.
+The KiCad generators (`kicad/generate_*.py`) are **40HP-era and stale** — they reference
+the old block topology and are not compatible with the current 48HP design. The KiCad
+validation step in CI is currently disabled. New schematics will be generated in Phase 5R
+once board architecture is finalized.
 
-### Board order
-
-| Board | Generator | Status | Notes |
-|---|---|---|---|
-| Control board | `generate_control_board.py` | ✅ Complete | Jacks, pots, switches, IDC connectors |
-| Utility board | `generate_utility_board.py` | ⬜ Next | Mod bus, attenuverters, THAT340 expo converters |
-| Left audio board | `generate_audio_left.py` | ⬜ | All analog ICs (LM13700, THAT2180, etc.) |
-| Right audio board | `generate_audio_right.py` | ⬜ | Mirror of left |
-
-### Running the control board generator
-
-```bash
-cd kicad
-python3 generate_control_board.py
-# → writes pogo-control-board.kicad_sch
-# → automatically runs validate_schematic.py and prints a pass/fail report
-```
-
-The generated schematic contains **78 components** — 28 jacks, 43 pots/sliders, 4 switches,
-and 3 IDC connectors (CN1 34-pin, CN2 40-pin, CN3 24-pin) — connected entirely via global
-net labels (no drawn wires). Three nets are intentionally single-occurrence:
-`SPARE_CN2_28`, `SPARE_CN2_40`, `SPARE_CN3_24`.
-
-### Validating a schematic
-
-`validate_schematic.py` parses the generated `.kicad_sch` using
-[kiutils](https://github.com/mvnmgrx/kiutils) and runs nine checks, verifying 326 individual
-pin assignments:
-
-| Check | What it catches |
-|---|---|
-| Component counts | Wrong number of J / RV / SW / CN components |
-| Duplicate refs | Two symbols claiming the same reference designator |
-| Floating nets | Single-occurrence global labels (unexpected unconnected nets) |
-| Required nets | Missing signal, wiper, CV, switch, or power nets by name |
-| MODBUS_NORM count | Must appear exactly 20× (19 SW lugs + 1 CN2 pin) |
-| Jack pin assignments | Tip / sleeve / SW-lug net per J1–J28 |
-| Pot pin assignments | CCW / wiper / CW net per RV1–RV43 |
-| Switch pin assignments | All throws and common per SW1–SW4 |
-| Connector pinouts (CN1/2/3) | All 34+40+24 = 98 connector pins vs. layout-notes.md §5 |
-
-```bash
-# Run standalone (requires: pip3 install kiutils)
-cd kicad
-python3 validate_schematic.py
-# or against any schematic:
-python3 validate_schematic.py path/to/other.kicad_sch
-```
-
-The validator exits 0 on pass, 1 on any error — suitable for CI. The generator calls it
-automatically, so a broken generator change fails immediately.
-
-**What this does not cover:** ERC pin-type conflicts, short circuits between power rails, and
-missing power pin connections on ICs. For those, open the schematic in KiCad 7 and run
-`Tools → Electrical Rules Checker`. Expected ERC output: three "pin unconnected" warnings
-for the intentional spare pins — nothing else.
-
-### Shared infrastructure (`kicad_common.py`)
-
-`kicad_common.py` is imported by every board generator. It provides:
-
-- **`begin_schematic()` / `end_schematic()` / `write_schematic()`** — file skeleton and output
-- **`sym_power()` / `sym_idc()` / `sym_rpot()` / `sym_r()` / `sym_c()`** — passive lib symbols
-- **`sym_tl072()` / `sym_lm4562()` / `sym_ne5532()` / `sym_tl074()`** — op-amp lib symbols
-- **`sym_lm13700()` / `sym_that340()` / `sym_that2180()` / `sym_cd4053()`** — IC lib symbols
-- **`*_pins(ox, oy)`** — pin coordinate helpers for every component type
-- **`place_symbol()` / `connect_pin()` / `power_sym()` / `global_label()`** — emitters
-- **`place_idc34/40/24/16()`** — IDC connector placement with net map
-
-### Connector architecture
-
-```
-Control board ──CN1 (34-pin)──► Utility board   power rails + audio I/O + 19 CV jack tips
-              ──CN2 (40-pin)──►                  attenuverter wipers + switch outputs
-              ──CN3 (24-pin)──►                  main parameter wipers (FREQ/FB/DRIVE/filter Qs)
-```
-
-Key design decisions captured in the schematic:
-
-- **`NET_MODBUS_NORM`**: All 19 CV override jack switch lugs are wired together on the
-  control board PCB to a single net. The utility board drives this net (post-AMOUNT/OFFSET
-  mod bus output) via CN2 pin 39 — one connector pin instead of 19.
-- **`NET_ENV_NORM`**: MOD IN jack SW lug is driven by the utility board's selected ENV output
-  (CN2 pin 38) so the mod source normalizes to the envelope when no cable is plugged.
-- **Switch commons**: SP3T and SPDT switch commons tie directly to +12V power symbols on the
-  control board (no connector pin). Only position outputs and the GAIN common go to CN2.
-
-### Importing into Flux.ai
-
-1. In Flux.ai: **File → Import → KiCad 7 Schematic**
-2. Select `kicad/pogo-control-board.kicad_sch`
-3. Standard parts (R_POT, AudioJack, SW_SPDT, SW_SP3T) auto-match; IDC connectors may need
-   manual assignment from Nexar/Octopart search within Flux
-4. Net names are preserved exactly as generated
-
-See `specs/kicad-process.md` for the full generation methodology, ERC validation steps,
-and the template for the remaining three board generators.
+See `kicad/README-STALE.md` for details.
 
 ---
 
-## Building
+## Building the Plugin
 
-### Via GitHub Actions (no local setup required)
+### Via GitHub Actions (recommended — no local setup)
 
-Every push to `main` or any `claude/**` branch triggers an automatic build. The workflow
-downloads the Rack 2.6 SDK from `vcvrack.com` and compiles the plugin on an Ubuntu runner —
-no local SDK installation or Docker setup is needed.
-
-**To get a build artifact:**
-
-1. Go to the **Actions** tab in this repository
-2. Click the latest **Build VCV Rack Plugin** run
-3. Scroll to **Artifacts** at the bottom
-4. Download `POGO-linux-x64-<run_number>`
-
-**To install the downloaded plugin:**
-
-```bash
-# Unzip the artifact into your Rack plugins folder
-unzip POGO-linux-x64-*.zip -d ~/.rack2/plugins/
-# Launch VCV Rack — POGO will appear in the module browser
-```
-
-**To trigger a build manually** (without pushing code):
+Every push to `main` or `dev` triggers Linux x64 + Windows x64 + macOS builds.
 
 1. Go to **Actions → Build VCV Rack Plugin**
-2. Click **Run workflow** → **Run workflow**
+2. Click the latest run → scroll to **Artifacts**
+3. Download `POGO-linux-x64-<run_number>`
+
+```bash
+# Install artifact
+unzip POGO-linux-x64-*.zip -d ~/.rack2/plugins/
+# Launch VCV Rack — POGO appears in the module browser
+```
 
 ### Locally (requires Rack SDK)
 
 ```bash
-# 1. Download the Rack SDK from https://vcvrack.com/downloads
-#    and extract it (e.g. to ~/Rack-SDK)
-
-# 2. Build the plugin
 export RACK_DIR=~/Rack-SDK
-make -j$(nproc) dist
-
-# 3. Install for development testing
-ln -s $(pwd) ~/.rack2/plugins/POGO
-
-# 4. Launch Rack in dev mode (loads plugins from the plugins folder)
-Rack -d
+cd plugin
+make dep
+make dist
 ```
 
 ---
 
 ## Design Documentation
 
-Full hardware specifications live in `specs/`. Each block has a `spec.md` covering:
-- **Phase 1**: Sonic intent, parameter ranges, CV targets, signal levels
-- **Phase 2**: Transfer functions, analog behavior model, bilinear transform notes
-- **Phase 3**: Circuit topology, component values, IC selection, trim pots
+Hardware specs live in `specs/`. Paradigm: **code-first reverse engineering** — the working
+plugin is the ground truth; specs are extracted from it.
 
-HTML design documents in `design/` synthesize each block's three phases into a single
-readable page with block diagrams, schematics, parts lists, and design notes.
+- **Phase 1R**: Functional spec extracted from plugin code (params, signal flow, DSP math)
+- **Phase 2R**: Analog behavior model (bilinear transform inverse, component values)
+- **Phase 3R**: Circuit design (topology, IC selection, component values, BOM)
 
-Key design decisions documented:
-- OTA-C state-variable filter (LM13700) with correct Q = 2V_T / (Iabc × R_in) formula
-  and inverted Iabc driver (more RESONANCE → less Iabc → higher Q → self-oscillation)
-- All-pass comb filter capacitor values: 33 nF / 6.8 nF / 1.5 nF (Groups 1/2/3)
-- Modulation bus: 19 destinations, each with override jack and bipolar attenuverter
-- 4-board hardware split: control + utility + left audio + right audio
-
----
-
-## Hardware Notes
-
-POGO is designed for hardware construction after the VCV Rack prototype validates the DSP.
-Circuit specs:
-- **ICs**: LM13700 OTA (15 per audio board), THAT 2180 VCA, THAT340 expo converters, LM4562 (Block A), NE5532 (Block 1), TL072/TL074 op-amps
-- **Power**: ±12 V Eurorack, ~167 mA per rail
-- **Format**: 40 HP, 3U, 4-PCB split
-- **CV protection**: 100 Ω series + BAT54S clamp on every input jack (see `specs/shared/cv-input-protection.md`)
+See `CLAUDE.md` for the full development paradigm and workflow.

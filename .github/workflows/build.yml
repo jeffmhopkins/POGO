@@ -12,6 +12,7 @@ on:
 
 env:
   rack-plugin-toolchain-dir: /home/build/rack-plugin-toolchain
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 defaults:
   run:
@@ -30,18 +31,168 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+
+      - name: Generate panel SVG from YAML
+        run: |
+          apt-get update -qq && apt-get install -y python3-yaml inkscape -qq
+          # DRC must pass before we compile — catches keepout/overlap violations early
+          python3 tools/build_panel.py --check
+          # Regenerate plugin/res/Pogo-source.svg (source) AND plugin/res/Pogo.svg
+          # (Inkscape text-to-path, loaded by VCV Rack) from panel-data.yaml.
+          python3 tools/build_panel.py --resource --mfr
 
       - name: Build plugin
         run: |
-          export PLUGIN_DIR=$GITHUB_WORKSPACE
+          export PLUGIN_DIR=$GITHUB_WORKSPACE/plugin
           pushd ${{ env.rack-plugin-toolchain-dir }}
           make plugin-build-lin-x64
 
+      - name: Stage artifact
+        run: |
+          mkdir -p /tmp/artifact
+          find ${{ env.rack-plugin-toolchain-dir }}/plugin-build -name "*.vcvplugin" | \
+            while read f; do zstd -d "$f" -c | tar -x -C /tmp/artifact/; done
+
       - name: Upload Linux artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: POGO-linux-x64-${{ github.run_number }}
-          path: ${{ env.rack-plugin-toolchain-dir }}/plugin-build
+          path: /tmp/artifact
           if-no-files-found: warn
           retention-days: 30
+
+  # ─── Windows x64 (cross-compiled from Linux via MinGW) ───────────────────
+  build-win:
+    name: Build · Windows x64
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/qno/rack-plugin-toolchain-win-linux
+      options: --user root
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Generate panel SVG from YAML
+        run: |
+          apt-get update -qq && apt-get install -y python3-yaml inkscape -qq
+          python3 tools/build_panel.py --check
+          # Regenerate Pogo-source.svg + Pogo.svg (Inkscape text-to-path) from the YAML.
+          python3 tools/build_panel.py --resource --mfr
+
+      - name: Build plugin
+        run: |
+          export PLUGIN_DIR=$GITHUB_WORKSPACE/plugin
+          pushd ${{ env.rack-plugin-toolchain-dir }}
+          make plugin-build-win-x64
+
+      - name: Stage artifact
+        run: |
+          mkdir -p /tmp/artifact
+          find ${{ env.rack-plugin-toolchain-dir }}/plugin-build -name "*.vcvplugin" | \
+            while read f; do zstd -d "$f" -c | tar -x -C /tmp/artifact/; done
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: POGO-win-x64-${{ github.run_number }}
+          path: /tmp/artifact
+          if-no-files-found: warn
+          retention-days: 30
+
+  # ─── macOS (native runner; Apple SDK can't be cross-compiled) ─────────────
+  build-mac:
+    name: Build · macOS
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Get Rack SDK
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pushd $HOME
+          VERSIONS=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
+            "https://api.github.com/repos/VCVRack/Rack/tags?per_page=20" | \
+            jq -r '.[].name | ltrimstr("v")' | grep '^2\.')
+          for VERSION in $VERSIONS; do
+            URL="https://vcvrack.com/downloads/Rack-SDK-${VERSION}-mac-x64+arm64.zip"
+            echo "Trying Rack SDK v${VERSION}..."
+            if wget -q -O Rack-SDK.zip "$URL"; then
+              echo "Using Rack SDK v${VERSION}"
+              unzip Rack-SDK.zip
+              break
+            fi
+            rm -f Rack-SDK.zip
+          done
+          [ -d Rack-SDK ] || { echo "ERROR: No Rack SDK found for any recent version" >&2; exit 1; }
+
+      - name: Generate panel SVG from YAML
+        run: |
+          python3 -m pip install --break-system-packages pyyaml --quiet
+          brew install --cask inkscape
+          export PATH="/Applications/Inkscape.app/Contents/MacOS:$PATH"
+          python3 tools/build_panel.py --check
+          # Regenerate Pogo-source.svg + Pogo.svg (Inkscape text-to-path) from the YAML.
+          python3 tools/build_panel.py --resource --mfr
+
+      - name: Build plugin
+        run: |
+          export RACK_DIR=$HOME/Rack-SDK
+          cd $GITHUB_WORKSPACE/plugin
+          make dep
+          make dist
+
+      - name: Stage artifact
+        run: |
+          mkdir -p artifact
+          find $GITHUB_WORKSPACE/plugin/dist -name "*.vcvplugin" | \
+            while read f; do zstd -d "$f" -c | tar -x -C artifact/; done
+
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: POGO-mac-${{ github.run_number }}
+          path: artifact
+          if-no-files-found: warn
+          retention-days: 30
+
+  # ─── KiCad schematic generation + validation ──────────────────────────────
+  # DISABLED: generators are 40HP-era (see kicad/README-STALE.md).
+  # Will be re-enabled when 48HP KiCad generators are written (after Phase 3R complete).
+  #
+  # kicad-build:
+  #   name: KiCad · Generate & Validate
+  #   runs-on: ubuntu-latest
+  #
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v6
+  #
+  #     - name: Install kiutils
+  #       run: pip install kiutils
+  #
+  #     - name: Generate control board schematic
+  #       run: python3 kicad/generate_control_board.py
+  #
+  #     - name: Validate control board (9 checks, 326 pin assignments)
+  #       run: python3 kicad/validate_schematic.py kicad/pogo-control-board.kicad_sch
+  #
+  #     - name: Generate utility board schematic
+  #       run: python3 kicad/generate_utility_board.py
+  #
+  #     - name: Validate utility board (7 checks, 477 coordinate-verified pin assignments)
+  #       run: python3 kicad/validate_utility_board.py kicad/pogo-utility-board.kicad_sch
+  #
+  #     - name: Upload schematic artifact
+  #       uses: actions/upload-artifact@v7
+  #       with:
+  #         name: POGO-kicad-${{ github.run_number }}
+  #         path: |
+  #           kicad/*.kicad_sch
+  #           kicad/*.kicad_pro
+  #         if-no-files-found: error
+  #         retention-days: 30
