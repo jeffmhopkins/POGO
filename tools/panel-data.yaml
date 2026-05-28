@@ -543,20 +543,27 @@ zones:
       # col0 cx=131.445  col1 cx=142.875  col2 cx=154.305
       - id: BP2_FREQ
         type: knob_xl
-        col: 1
+        cx: 146.875
         cy: 24.80
         label: "FREQ"
         cpp_param: "BP2_FREQ_PARAM"
       - id: BP2_FOCUS
         type: knob_large
-        col: 1
-        cy: 52.40
+        cx: 134.730
+        cy: 47.69
         label: "FOCUS"
         cpp_param: "BP2_FOCUS_PARAM"
+      - id: BP2_TILT
+        type: knob_large
+        cx: 151.020
+        cy: 63.85
+        rotate: 180
+        label: "TILT"
+        cpp_param: "BP2_TILT_PARAM"
       - id: BP2_DIST
         type: knob_large
-        col: 1
-        cy: 78.00
+        cx: 134.730
+        cy: 80.00
         label: "DIST"
         cpp_param: "BP2_DIST_PARAM"
       - id: BP2_FREQ_ATT
@@ -603,20 +610,27 @@ zones:
       # col0 cx=165.735  col1 cx=177.165  col2 cx=188.595
       - id: BP3_FREQ
         type: knob_xl
-        col: 1
+        cx: 181.165
         cy: 24.80
         label: "FREQ"
         cpp_param: "BP3_FREQ_PARAM"
       - id: BP3_FOCUS
         type: knob_large
-        col: 1
-        cy: 52.40
+        cx: 169.020
+        cy: 47.69
         label: "FOCUS"
         cpp_param: "BP3_FOCUS_PARAM"
+      - id: BP3_TILT
+        type: knob_large
+        cx: 185.310
+        cy: 63.85
+        rotate: 180
+        label: "TILT"
+        cpp_param: "BP3_TILT_PARAM"
       - id: BP3_DIST
         type: knob_large
-        col: 1
-        cy: 78.00
+        cx: 169.020
+        cy: 80.00
         label: "DIST"
         cpp_param: "BP3_DIST_PARAM"
       - id: BP3_FREQ_ATT

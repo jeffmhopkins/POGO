@@ -261,15 +261,18 @@
   <!-- Zone — BP 2                                                              -->
   <!-- ════════════════════════════════════════════════════════════════════════ -->
 
-  <circle cx="144.78" cy="24.8" r="9.0" fill="#1a1a1a" stroke="#555" stroke-width="0.7"/>
-  <line x1="144.78" y1="24.8" x2="144.78" y2="15.8" stroke="#aaa" stroke-width="0.8"/>
-  <text x="144.78" y="36.8" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
-  <circle cx="144.78" cy="52.4" r="7.0" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
-  <line x1="144.78" y1="52.4" x2="144.78" y2="45.4" stroke="#aaa" stroke-width="0.7"/>
-  <text x="144.78" y="62.4" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">FOCUS</text>
-  <circle cx="144.78" cy="78.0" r="7.0" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
-  <line x1="144.78" y1="78.0" x2="144.78" y2="71.0" stroke="#aaa" stroke-width="0.7"/>
-  <text x="144.78" y="88.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">DIST</text>
+  <circle cx="148.78" cy="24.8" r="9.0" fill="#1a1a1a" stroke="#555" stroke-width="0.7"/>
+  <line x1="148.78" y1="24.8" x2="148.78" y2="15.8" stroke="#aaa" stroke-width="0.8"/>
+  <text x="148.78" y="36.8" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
+  <circle cx="136.635" cy="47.69" r="7.0" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="136.635" y1="47.69" x2="136.635" y2="40.69" stroke="#aaa" stroke-width="0.7"/>
+  <text x="136.635" y="57.7" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">FOCUS</text>
+  <circle cx="152.925" cy="63.85" r="7.0" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="152.925" y1="63.85" x2="152.925" y2="56.85" stroke="#aaa" stroke-width="0.7"/>
+  <text x="152.925" y="73.8" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">TILT</text>
+  <circle cx="136.635" cy="80.0" r="7.0" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="136.635" y1="80.0" x2="136.635" y2="73.0" stroke="#aaa" stroke-width="0.7"/>
+  <text x="136.635" y="90.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">DIST</text>
   <circle cx="133.35" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
   <line x1="133.35" y1="100.0" x2="133.35" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
   <text x="133.35" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
@@ -293,15 +296,18 @@
   <!-- Zone — BP 3                                                              -->
   <!-- ════════════════════════════════════════════════════════════════════════ -->
 
-  <circle cx="179.07000000000002" cy="24.8" r="9.0" fill="#1a1a1a" stroke="#555" stroke-width="0.7"/>
-  <line x1="179.07000000000002" y1="24.8" x2="179.07000000000002" y2="15.8" stroke="#aaa" stroke-width="0.8"/>
-  <text x="179.07000000000002" y="36.8" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
-  <circle cx="179.07000000000002" cy="52.4" r="7.0" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
-  <line x1="179.07000000000002" y1="52.4" x2="179.07000000000002" y2="45.4" stroke="#aaa" stroke-width="0.7"/>
-  <text x="179.07000000000002" y="62.4" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">FOCUS</text>
-  <circle cx="179.07000000000002" cy="78.0" r="7.0" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
-  <line x1="179.07000000000002" y1="78.0" x2="179.07000000000002" y2="71.0" stroke="#aaa" stroke-width="0.7"/>
-  <text x="179.07000000000002" y="88.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">DIST</text>
+  <circle cx="183.07" cy="24.8" r="9.0" fill="#1a1a1a" stroke="#555" stroke-width="0.7"/>
+  <line x1="183.07" y1="24.8" x2="183.07" y2="15.8" stroke="#aaa" stroke-width="0.8"/>
+  <text x="183.07" y="36.8" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
+  <circle cx="170.925" cy="47.69" r="7.0" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="170.925" y1="47.69" x2="170.925" y2="40.69" stroke="#aaa" stroke-width="0.7"/>
+  <text x="170.925" y="57.7" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">FOCUS</text>
+  <circle cx="187.215" cy="63.85" r="7.0" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="187.215" y1="63.85" x2="187.215" y2="56.85" stroke="#aaa" stroke-width="0.7"/>
+  <text x="187.215" y="73.8" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">TILT</text>
+  <circle cx="170.925" cy="80.0" r="7.0" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
+  <line x1="170.925" y1="80.0" x2="170.925" y2="73.0" stroke="#aaa" stroke-width="0.7"/>
+  <text x="170.925" y="90.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">DIST</text>
   <circle cx="167.64000000000001" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
   <line x1="167.64000000000001" y1="100.0" x2="167.64000000000001" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
   <text x="167.64000000000001" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
