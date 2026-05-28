@@ -40,8 +40,9 @@ jobs:
           python3 tools/build_panel.py --check
           # Regenerate plugin/res/Pogo-source.svg from panel-data.yaml (source of truth)
           python3 tools/build_panel.py --resource
-          # plugin/res/Pogo.svg is what VCV Rack loads; copy source when Inkscape unavailable
-          cp plugin/res/Pogo-source.svg plugin/res/Pogo.svg
+          # plugin/res/Pogo.svg (Inkscape-converted paths, no <text>) is committed to the
+          # repo and must not be overwritten here. It is kept in sync locally via the
+          # default 'python3 tools/build_panel.py' which runs --mfr (Inkscape).
 
       - name: Build plugin
         run: |
@@ -80,7 +81,7 @@ jobs:
           apt-get update -qq && apt-get install -y python3-yaml -qq
           python3 tools/build_panel.py --check
           python3 tools/build_panel.py --resource
-          cp plugin/res/Pogo-source.svg plugin/res/Pogo.svg
+          # plugin/res/Pogo.svg is committed (Inkscape-converted); do not overwrite.
 
       - name: Build plugin
         run: |
@@ -136,7 +137,7 @@ jobs:
           python3 -m pip install --break-system-packages pyyaml --quiet
           python3 tools/build_panel.py --check
           python3 tools/build_panel.py --resource
-          cp plugin/res/Pogo-source.svg plugin/res/Pogo.svg
+          # plugin/res/Pogo.svg is committed (Inkscape-converted); do not overwrite.
 
       - name: Build plugin
         run: |
