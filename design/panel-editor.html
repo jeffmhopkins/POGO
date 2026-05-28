@@ -1126,6 +1126,25 @@
   const selSepObj = () => (UI.selSep != null ? (D.separators || [])[UI.selSep] : null);
 
   // ── Zone (section) operations — mirror Python shift_zone ───────────────────────
+  // Index of the vertical divider sitting at a zone's left edge (its boundary), else -1.
+  function zoneBoundarySepIdx(z) {
+    if (z.x_start == null) return -1;
+    const x0 = Number(z.x_start);
+    return (D.separators || []).findIndex((sp) => sp.type === "v" && Math.abs(Number(sp.x) - x0) < 0.01);
+  }
+  // Per-zone toggle: enable/disable the zone's left-edge vertical divider.
+  function setZoneDivider(zid, on) {
+    const z = (D.zones || []).find((z) => z.id === zid); if (!z || z.x_start == null) return;
+    const idx = zoneBoundarySepIdx(z);
+    snapshot();
+    if (on && idx < 0) {
+      (D.separators = D.separators || []).push({ type: "v", x: round3(Number(z.x_start)), y1: 9, y2: round3(Number(D.meta.height_mm) - 4.5), style: "zone_div" });
+    } else if (!on && idx >= 0) {
+      D.separators.splice(idx, 1);
+      if (UI.selSep === idx) UI.selSep = null; else if (UI.selSep != null && UI.selSep > idx) UI.selSep--;
+    }
+    render();
+  }
   function shiftZoneBy(zid, dx, dy) {
     const z = (D.zones || []).find((z) => z.id === zid); if (!z) return;
     snapshot();
@@ -1435,6 +1454,8 @@
     h += `<div class="field"><label>label</label><input id="z-label" type="text" value="${esc(z.label || "")}"></div>`;
     if (z.x_start != null)
       h += `<div class="field"><label>x_start (mm)</label><input id="z-xstart" type="number" step="0.01" value="${fmtVal(z.x_start)}"></div>`;
+    if (z.x_start != null)
+      h += `<div class="field"><label><input type="checkbox" id="z-div" ${zoneBoundarySepIdx(z) >= 0 ? "checked" : ""}> vertical divider (left edge)</label></div>`;
     h += `<div class="hint">components span: ${span}${nx != null ? ` · next x_start: ${f2(nx)}mm (${(nx / HP_MM).toFixed(2)} HP)` : ""}</div>`;
     h += `<div class="hint">Arrows move the whole section (Shift = 1 HP). x_start shift moves column-relative parts; explicit-cx parts shift with it.</div>`;
     h += `<div class="field row"><div><button data-zmove="-x">◀ −1mm</button></div><div><button data-zmove="+x">+1mm ▶</button></div></div>`;
@@ -1450,6 +1471,8 @@
     document.getElementById("z-label").addEventListener("change", (e) => renameZone(z.id, "label", e.target.value));
     const xe = document.getElementById("z-xstart");
     if (xe) xe.addEventListener("change", (e) => setZoneXStart(z.id, Number(e.target.value)));
+    const dv = document.getElementById("z-div");
+    if (dv) dv.addEventListener("change", (e) => setZoneDivider(z.id, e.target.checked));
     right.querySelectorAll("[data-zmove]").forEach((b) => b.addEventListener("click", () => {
       const d = b.dataset.zmove;
       shiftZoneBy(z.id, d === "-x" ? -1 : d === "+x" ? 1 : 0, d === "-y" ? -1 : d === "+y" ? 1 : 0);
