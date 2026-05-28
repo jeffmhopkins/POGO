@@ -1407,6 +1407,7 @@ Query commands (no files written):
             SVG_SOURCE.write_text(svg_content, encoding="utf-8")
         inkscape_cmd = [
             "inkscape",
+            "--export-text-to-path",
             "--export-plain-svg",
             f"--export-filename={SVG_MFR}",
             str(SVG_SOURCE),

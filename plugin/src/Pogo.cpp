@@ -422,9 +422,11 @@ struct Pogo : Module {
 			clamp(params[BP3_DIST_PARAM].getValue() + modDest(BP3_DIST_INPUT, BP3_DIST_ATT_PARAM), 0.f, 1.f),
 		};
 
-		// BP input: ALT when patched, else LP1 output
-		float bpInL = altLConn ? altL : bandL;
-		float bpInR = (altLConn || altRConn) ? altR : bandR;
+		// BP input: ALT (VCA-controlled) when patched, else LP1 output (already VCA-processed)
+		float altLVca = altLConn ? VcaBlock::process(altL, vcaAmt, vcaCV) : 0.f;
+		float altRVca = (altLConn || altRConn) ? VcaBlock::process(altR, vcaAmt, vcaCV) : 0.f;
+		float bpInL = altLConn ? altLVca : bandL;
+		float bpInR = (altLConn || altRConn) ? altRVca : bandR;
 
 		// Stereo tilt: L gets +bpTiltCv, R gets −bpTiltCv (widthOffset in TripleBandpass API)
 		bandpassL.process(bpInL, freqV, focusCv, polarityVal, +bpTiltCv, fs);
@@ -442,9 +444,9 @@ struct Pogo : Module {
 		float bp3OutL = distTapL[2];
 		float bp3OutR = distTapR[2];
 
-		// BP_MIX: dry at unity + wet added on top (hardware inverting summer behavior)
-		float bpOutL = clamp(bandL + wetL * mix, -12.f, 12.f);
-		float bpOutR = clamp(bandR + wetR * mix, -12.f, 12.f);
+		// BP_MIX: crossfade — CCW (0) = bypass, CW (1) = full BP only
+		float bpOutL = clamp(bpInL * (1.f - mix) + wetL * mix, -12.f, 12.f);
+		float bpOutR = clamp(bpInR * (1.f - mix) + wetR * mix, -12.f, 12.f);
 
 		// ── Block HP: 2-pole SVF HP ───────────────────────────────────────────
 		float hpFreqCv = params[HP_FREQ_PARAM].getValue()
@@ -573,7 +575,7 @@ struct PogoWidget : ModuleWidget {
 
 		// ── Zone — HP ──────────────────────────────────────────────────
 		addParam(createParamCentered<PogoSlider>(mm2px(Vec(207.65f, 54.00f)), module, Pogo::HP_FREQ_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(205.74f, 87.00f)), module, Pogo::HP_RES_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(207.645f, 87.00f)), module, Pogo::HP_RES_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(201.93f, 100.00f)), module, Pogo::HP_FREQ_ATT_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(213.36f, 100.00f)), module, Pogo::HP_RES_ATT_PARAM));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(201.93f, 112.00f)), module, Pogo::HP_FREQ_INPUT));
@@ -585,7 +587,7 @@ struct PogoWidget : ModuleWidget {
 
 		// ── Zone — LP2 ─────────────────────────────────────────────────
 		addParam(createParamCentered<PogoSlider>(mm2px(Vec(230.50f, 54.00f)), module, Pogo::LP2_FREQ_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(228.60f, 87.00f)), module, Pogo::LP2_RES_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(230.505f, 87.00f)), module, Pogo::LP2_RES_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(224.79f, 100.00f)), module, Pogo::LP2_FREQ_ATT_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(236.22f, 100.00f)), module, Pogo::LP2_RES_ATT_PARAM));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(224.79f, 112.00f)), module, Pogo::LP2_FREQ_INPUT));

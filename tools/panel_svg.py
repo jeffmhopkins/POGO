@@ -321,16 +321,9 @@ def svg_slider_V45(
         f' stroke="{colors["knob_stroke"]}" stroke-width="0.5"/>',
         f'<line x1="{cx-3.5:.2f}" y1="{bot_y:.2f}" x2="{cx+3.5:.2f}" y2="{bot_y:.2f}"'
         f' stroke="{colors["knob_stroke"]}" stroke-width="0.5"/>',
-        # Centre (neutral) tick
+        # Centre (neutral) tick — subtle reference mark only; handle drawn by VCV Rack widget
         f'<line x1="{cx-2:.2f}" y1="{cy:.2f}" x2="{cx+2:.2f}" y2="{cy:.2f}"'
         f' stroke="{colors["indicator"]}" stroke-width="0.35"/>',
-        # Slider handle (cap)
-        f'<rect x="{hx:.2f}" y="{hy:.2f}" width="{handle_w}" height="{handle_h}"'
-        f' rx="1.8" fill="{colors["switch_slug"]}" stroke="{colors["switch_slug_s"]}"'
-        f' stroke-width="0.35"/>',
-        # Handle centre line
-        f'<line x1="{cx-3.5:.2f}" y1="{cy:.2f}" x2="{cx+3.5:.2f}" y2="{cy:.2f}"'
-        f' stroke="{colors["indicator"]}" stroke-width="0.6"/>',
         # Label above slot
         f'<text x="{cx}" y="{label_y:.1f}" fill="{colors["jack_text"]}"'
         f' {_FONT} font-size="1.8" text-anchor="middle">{label}</text>',
