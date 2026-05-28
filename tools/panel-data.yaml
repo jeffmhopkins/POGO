@@ -298,6 +298,12 @@ zones:
         cy: 89.67
         label: "MOD SRC"
         cpp_param: "MOD_SRC_PARAM"
+      - id: MOD_SRC_SW2
+        type: switch_V3
+        col: 1
+        cy: 101.0
+        label: "MOD SRC"
+        cpp_param: "MOD_SRC2_PARAM"
       - id: MOD_IN
         type: jack_input
         col: 0
