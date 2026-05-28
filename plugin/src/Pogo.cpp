@@ -146,7 +146,6 @@ struct Pogo : Module {
 		BP_MIX_PARAM,           // medium knob 0–1 dry/wet
 		BP_FREQ_ATT_PARAM,
 		BP_TILT_ATT_PARAM,
-		BP_RECIRC_PARAM,        // medium knob 0–0.95: recirculation feedback (Q_eff = Q/(1−g))
 		// BP1
 		BP1_FREQ_PARAM, BP1_FOCUS_PARAM, BP1_DIST_PARAM,
 		BP1_FREQ_ATT_PARAM, BP1_FOCUS_ATT_PARAM, BP1_DIST_ATT_PARAM,
@@ -224,7 +223,6 @@ struct Pogo : Module {
 		configParam(BP_MIX_PARAM,    0.f, 1.f, 0.5f, "BP Mix");
 		configParam(BP_FREQ_ATT_PARAM, -1.f, 1.f, 0.f, "BP Offset CV Depth");
 		configParam(BP_TILT_ATT_PARAM, -1.f, 1.f, 0.f, "BP Tilt CV Depth");
-		configParam(BP_RECIRC_PARAM,   0.f, 0.95f, 0.f, "BP Recirculation");
 
 		// BP1/2/3 — all sweep 40 Hz–4 kHz (F_REF=400 Hz, ±log2(10) V/oct)
 		const float bpR = std::log2(10.f); // 3.322: 400×2^±bpR = [40 Hz, 4 kHz]
@@ -429,11 +427,9 @@ struct Pogo : Module {
 		float bp3InL = altLConn ? VcaBlock::process(altL, vcaAmt, vcaCV) : bandL;
 		float bp3InR = (altLConn || altRConn) ? VcaBlock::process(altR, vcaAmt, vcaCV) : bandR;
 
-		float recirc = params[BP_RECIRC_PARAM].getValue();
-
 		// Stereo tilt: L gets +bpTiltCv, R gets −bpTiltCv (widthOffset in TripleBandpass API)
-		bandpassL.process(bandL, bp3InL, freqV, focusCv, +bpTiltCv, recirc, fs);
-		bandpassR.process(bandR, bp3InR, freqV, focusCv, -bpTiltCv, recirc, fs);
+		bandpassL.process(bandL, bp3InL, freqV, focusCv, +bpTiltCv, fs);
+		bandpassR.process(bandR, bp3InR, freqV, focusCv, -bpTiltCv, fs);
 
 		float dSumL = 0.f, dSumR = 0.f;
 		for (int i = 0; i < 3; i++) {
@@ -535,7 +531,6 @@ struct PogoWidget : ModuleWidget {
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(80.01f, 43.20f)), module, Pogo::BP_TILT_PARAM));
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(80.01f, 61.60f)), module, Pogo::BP_MIX_PARAM));
 		addParam(createParamCentered<PogoSwitchH3>(mm2px(Vec(80.01f, 80.00f)), module, Pogo::BP_DIST_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(80.01f, 90.00f)), module, Pogo::BP_RECIRC_PARAM)); // RECIRC (unlabeled — test only)
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(74.295f, 100.00f)), module, Pogo::BP_FREQ_ATT_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(85.725f, 100.00f)), module, Pogo::BP_TILT_ATT_PARAM));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(74.295f, 112.00f)), module, Pogo::BP_FREQ_INPUT));
