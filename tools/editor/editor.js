@@ -23,6 +23,10 @@
   const clone = (o) => JSON.parse(JSON.stringify(o));
   const D    = clone(PAYLOAD.data);      // working model (mutated by edits)
   const ORIG = clone(PAYLOAD.data);      // pristine copy for export diffing
+  // Tag each existing zone with its original id (UI-only, never exported) so the
+  // exporter can locate it in the source text even after a rename, and tell new
+  // zones (no _orig_id) from existing ones.
+  (D.zones || []).forEach((z) => { z._orig_id = z.id; });
 
   // Editor UI state
   const UI = {
@@ -71,7 +75,7 @@
     "jack_input", "jack_output", "trimpot",
     "knob_medium", "knob_large", "knob_xl",
     "eg_2pos", "eg_3pos",
-    "led", "led_labeled", "slider_V45",
+    "led", "led_labeled", "slider_V45", "text",
   ];
 
   function compLabel(c) {
@@ -423,9 +427,18 @@
     s += `<text y="${lby}" fill="${COL.control_text}" ${FONT} font-size="1.8" text-anchor="middle">${esc(c.label_below || c.label || "")}</text>`;
     return s;
   }
+  // Free-text annotation (anchor-relative: baseline at the component anchor).
+  function rText(c) {
+    const fs = Number(c.font_size || 2.0);
+    const fill = c.fill || COL.control_text;
+    const w = c.font_weight === "bold" ? ' font-weight="bold"' : "";
+    const anc = c.text_anchor || "middle";
+    return `<text y="0" fill="${fill}" ${FONT} font-size="${fs}" text-anchor="${anc}"${w}>${esc(c.label || "")}</text>`;
+  }
   // Visual SVG (anchor-relative) for a component.
   function visual(c) {
     switch (c.type) {
+      case "text":        return rText(c);
       case "jack_input":  return rJack(c, "input");
       case "jack_output": return rJack(c, "output");
       case "trimpot":     return rTrimpot(c);
@@ -854,12 +867,44 @@
       id, type,
       cx: round3(W / 2 - (DR.x_offset || 0)),
       cy: 60,
-      label: type.replace(/_/g, " ").toUpperCase(),
+      label: type === "text" ? "TEXT" : type.replace(/_/g, " ").toUpperCase(),
     };
-    if (isJack) c.cpp_id = id + "_INPUT"; else c.cpp_param = id + "_PARAM";
+    if (type === "text") c.font_size = 2.0;
+    else if (isJack) c.cpp_id = id + "_INPUT"; else c.cpp_param = id + "_PARAM";
     if (!z.components) z.components = [];
     z.components.push(c);
-    UI.selId = id; UI.selZone = null;
+    UI.selId = id; UI.selZone = null; UI.selSep = null;
+    render();
+  }
+  function addDivider(orient) {
+    snapshot();
+    const ox = DR.x_offset || 0, W = Number(D.meta.width_mm), H = Number(D.meta.height_mm);
+    const sp = orient === "v"
+      ? { type: "v", x: round3(W / 2 - ox), y1: 9, y2: round3(H - 4.5), style: "zone_div" }
+      : { type: "h", x1: round3(W * 0.25 - ox), x2: round3(W * 0.75 - ox), y: round3(H / 2), style: "zone_div" };
+    (D.separators = D.separators || []).push(sp);
+    selectSep(D.separators.length - 1);
+  }
+  function addZone() {
+    snapshot();
+    let n = 1, id;
+    const has = (zid) => (D.zones || []).some((z) => z.id === zid);
+    do { id = `zone_new_${n++}`; } while (has(id));
+    // Default: a 3-column section starting just past the current content's right edge.
+    let xs = 0;
+    for (const { c, z } of allComps()) xs = Math.max(xs, rawCx(c, z));
+    const z = { id, label: "New Zone", x_start: round3(Math.min(xs + 11.43, Number(D.meta.width_mm) - 34.29)), col_pitch: 11.43, cols: 3, components: [] };
+    (D.zones = D.zones || []).push(z);
+    selectZone(id);
+  }
+  function deleteZone(zid) {
+    const i = (D.zones || []).findIndex((z) => z.id === zid);
+    if (i < 0) return;
+    const z = D.zones[i];
+    if ((z.components || []).length && !confirm(`Delete zone "${zid}" and its ${z.components.length} component(s)?`)) return;
+    snapshot();
+    D.zones.splice(i, 1);
+    if (UI.selZone === zid) UI.selZone = null;
     render();
   }
   function selectComp(id) {
@@ -953,8 +998,7 @@
       `<select id="snapUnit"><option value="mm" ${UI.snapUnit === "mm" ? "selected" : ""}>mm</option><option value="hp" ${UI.snapUnit === "hp" ? "selected" : ""}>HP</option></select>` +
       `<button id="snapOrigin" title="Snap grid origin">grid: ${esc(originLabel)}</button></div>` +
       `<div class="sep"></div>` +
-      `<div class="group"><button id="dividers">Dividers…</button>` +
-      `<button id="export" class="primary">Export YAML</button></div>` +
+      `<div class="group"><button id="export" class="primary">Export YAML</button></div>` +
       `<div class="sep"></div>` +
       `<span class="badge ${pass ? "pass" : "fail"}">${pass ? "DRC PASS" : "DRC " + lastDRC.violations.length + " ✗"}</span>`;
 
@@ -981,7 +1025,6 @@
     document.getElementById("recenter").addEventListener("click", recenter);
     document.getElementById("panel-settings").addEventListener("click", openPanelSettings);
     document.getElementById("export").addEventListener("click", openExport);
-    document.getElementById("dividers").addEventListener("click", openDividers);
   }
   // ── Panel settings (rename board: title / brand) ───────────────────────────────
   function openPanelSettings() {
@@ -1031,18 +1074,33 @@
   function renderLeft() {
     let h = `<div class="panel-h">Add Component</div><div class="palette">`;
     for (const t of PALETTE_TYPES) h += `<div class="pal-item" draggable="false" data-add="${t}">${t.replace(/_/g, "&#8203;_")}</div>`;
-    h += `</div><div class="panel-h">Components</div>`;
+    h += `</div><div class="field row" style="margin-bottom:12px">` +
+      `<div><button id="add-div-v">+ Divider ▏</button></div>` +
+      `<div><button id="add-div-h">+ Divider —</button></div>` +
+      `<div><button id="add-zone">+ Zone</button></div></div>`;
+    h += `<div class="panel-h">Components</div>`;
     for (const z of D.zones || []) {
       h += `<div class="tree-zone"><div class="zname${z.id === UI.selZone ? " sel" : ""}" data-zid="${esc(z.id)}">${esc(z.id)}</div>`;
       for (const c of z.components || [])
         h += `<div class="tree-comp${c.id === UI.selId ? " sel" : ""}" data-cid="${esc(c.id)}">${esc(compLabel(c))} <span class="ttype">${esc(c.type)}</span></div>`;
       h += `</div>`;
     }
+    // Dividers behave like components in the tree (the modal is gone).
+    h += `<div class="panel-h">Dividers</div>`;
+    if (!(D.separators || []).length) h += `<div class="hint">none — use “+ Divider”.</div>`;
+    (D.separators || []).forEach((sp, i) => {
+      const desc = sp.type === "v" ? `vertical · x=${fmtVal(sp.x)}` : `horizontal · y=${fmtVal(sp.y)}${sp.label ? ` · “${sp.label}”` : ""}`;
+      h += `<div class="tree-comp${UI.selSep === i ? " sel" : ""}" data-sep="${i}">${esc(desc)} <span class="ttype">${esc(sp.style)}</span></div>`;
+    });
     const left = document.getElementById("left");
     left.innerHTML = h;
     left.querySelectorAll("[data-add]").forEach((el) => el.addEventListener("click", () => addComp(el.dataset.add)));
-    left.querySelectorAll(".tree-comp").forEach((el) => el.addEventListener("click", () => selectComp(el.dataset.cid)));
+    left.querySelectorAll(".tree-comp[data-cid]").forEach((el) => el.addEventListener("click", () => selectComp(el.dataset.cid)));
+    left.querySelectorAll(".tree-comp[data-sep]").forEach((el) => el.addEventListener("click", () => selectSep(Number(el.dataset.sep))));
     left.querySelectorAll(".zname").forEach((el) => el.addEventListener("click", () => selectZone(el.dataset.zid)));
+    document.getElementById("add-div-v").addEventListener("click", () => addDivider("v"));
+    document.getElementById("add-div-h").addEventListener("click", () => addDivider("h"));
+    document.getElementById("add-zone").addEventListener("click", addZone);
   }
 
   // ── Right sidebar (inspector) ──────────────────────────────────────────────
@@ -1068,11 +1126,17 @@
     h += `<div class="field row"><div><label>cx (mm, resolved)</label><input id="i-cx" type="number" step="0.01" value="${f3(cx)}"></div>` +
          `<div><label>cy (mm)</label><input id="i-cy" type="number" step="0.01" value="${f3(cy)}"></div></div>`;
     if (c.col != null) h += `<div class="hint">column-relative (col ${c.col} in ${esc(z.id)}); editing cx/cy converts to explicit cx.</div>`;
-    h += `<div class="field"><label>rotate</label><button id="i-rot">${Number(c.rotate || 0)}° — cycle</button></div>`;
-    h += `<div class="field"><label>label</label><input id="i-label" type="text" value="${esc(c.label || "")}"></div>`;
-    h += `<div class="field"><label>font_size</label><input id="i-fs" type="number" step="0.1" value="${c.font_size != null ? c.font_size : 1.8}"></div>`;
+    const isText = c.type === "text";
+    if (!isText) h += `<div class="field"><label>rotate</label><button id="i-rot">${Number(c.rotate || 0)}° — cycle</button></div>`;
+    h += `<div class="field"><label>${isText ? "text" : "label"}</label><input id="i-label" type="text" value="${esc(c.label || "")}"></div>`;
+    h += `<div class="field"><label>font_size</label><input id="i-fs" type="number" step="0.1" value="${c.font_size != null ? c.font_size : (isText ? 2.0 : 1.8)}"></div>`;
+    if (isText) {
+      h += `<div class="field"><label>fill (color)</label><input id="i-fill" type="text" value="${esc(c.fill || COL.control_text)}"></div>`;
+      h += `<div class="field row"><div><label>weight</label><select id="i-weight"><option value="normal" ${c.font_weight !== "bold" ? "selected" : ""}>normal</option><option value="bold" ${c.font_weight === "bold" ? "selected" : ""}>bold</option></select></div>` +
+           `<div><label>anchor</label><select id="i-anchor">${["start", "middle", "end"].map((a) => `<option ${(c.text_anchor || "middle") === a ? "selected" : ""}>${a}</option>`).join("")}</select></div></div>`;
+    }
     const cppKey = c.cpp_id != null ? "cpp_id" : (c.cpp_param != null ? "cpp_param" : (c.type.startsWith("jack") ? "cpp_id" : "cpp_param"));
-    h += `<div class="field"><label>${cppKey}</label><input id="i-cpp" type="text" value="${esc(c[cppKey] || "")}"></div>`;
+    if (!isText) h += `<div class="field"><label>${cppKey}</label><input id="i-cpp" type="text" value="${esc(c[cppKey] || "")}"></div>`;
     const borderEligible = c.type.startsWith("jack") || c.type === "led_labeled";
     if (borderEligible) {
       h += `<div class="field"><label><input type="checkbox" id="i-border" ${c.label_border ? "checked" : ""}> label border</label></div>`;
@@ -1111,10 +1175,17 @@
     const applyXY = () => moveCompTo(c.id, Number(cxEl.value), Number(cyEl.value));
     cxEl.addEventListener("change", applyXY);
     cyEl.addEventListener("change", applyXY);
-    document.getElementById("i-rot").addEventListener("click", () => rotateComp(c.id));
+    const rotEl = document.getElementById("i-rot");
+    if (rotEl) rotEl.addEventListener("click", () => rotateComp(c.id));
     document.getElementById("i-label").addEventListener("change", (e) => { if (e.target.value) c.label = e.target.value; else delete c.label; commit(); });
     document.getElementById("i-fs").addEventListener("change", (e) => { c.font_size = Number(e.target.value); commit(); });
-    document.getElementById("i-cpp").addEventListener("change", (e) => { c[cppKey] = e.target.value; commit(); });
+    if (isText) {
+      document.getElementById("i-fill").addEventListener("change", (e) => { const v = e.target.value.trim(); if (v && v !== COL.control_text) c.fill = v; else delete c.fill; commit(); });
+      document.getElementById("i-weight").addEventListener("change", (e) => { if (e.target.value === "bold") c.font_weight = "bold"; else delete c.font_weight; commit(); });
+      document.getElementById("i-anchor").addEventListener("change", (e) => { if (e.target.value !== "middle") c.text_anchor = e.target.value; else delete c.text_anchor; commit(); });
+    }
+    const cppEl = document.getElementById("i-cpp");
+    if (cppEl) cppEl.addEventListener("change", (e) => { c[cppKey] = e.target.value; commit(); });
     if (borderEligible) {
       document.getElementById("i-border").addEventListener("change", (e) => {
         snapshot(); if (e.target.checked) c.label_border = true; else { delete c.label_border; delete c.rect_w; } render();
@@ -1154,7 +1225,9 @@
     h += `<div class="hint">Arrows move the whole section (Shift = 1 HP). x_start shift moves column-relative parts; explicit-cx parts shift with it.</div>`;
     h += `<div class="field row"><div><button data-zmove="-x">◀ −1mm</button></div><div><button data-zmove="+x">+1mm ▶</button></div></div>`;
     h += `<div class="field row"><div><button data-zmove="-y">▲ −1mm</button></div><div><button data-zmove="+y">+1mm ▼</button></div></div>`;
+    h += `<div class="field"><button id="z-del" class="danger">Delete zone</button></div>`;
     right.innerHTML = h;
+    document.getElementById("z-del").addEventListener("click", () => deleteZone(z.id));
     document.getElementById("z-id").addEventListener("change", (e) => {
       const nv = e.target.value.trim();
       if (nv && nv !== z.id && !(D.zones || []).some((q) => q.id === nv)) renameZone(z.id, "id", nv);
@@ -1225,43 +1298,6 @@
     selectComp(id);                       // selects + re-renders (highlights in panel + tree)
     const g = svgEl && svgEl.querySelector(`.comp[data-cid="${cssEsc(id)}"]`);
     if (g && g.scrollIntoView) g.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
-  }
-
-  // ══ Dividers modal ═════════════════════════════════════════════════════════
-  function openDividers() {
-    const m = document.getElementById("export-modal");
-    m.classList.remove("hidden");
-    let rows = (D.separators || []).map((sp, i) => {
-      const desc = sp.type === "v" ? `v  x=${fmtVal(sp.x)}  [${sp.style}]` : `h  y=${fmtVal(sp.y)}  x=${fmtVal(sp.x1)}→${fmtVal(sp.x2)}  ${sp.label ? '"' + sp.label + '"' : ""} [${sp.style}]`;
-      return `<div class="row2"><span class="x">${esc(desc)}</span><button data-editsep="${i}">edit</button><button data-delsep="${i}" class="danger">✕</button></div>`;
-    }).join("");
-    m.innerHTML = `<div class="box"><h2>Dividers / Separators</h2>` +
-      `<div class="sublist">${rows || '<div class="hint">none</div>'}</div>` +
-      `<div class="field row"><div><label>type</label><select id="ns-type"><option value="v">v</option><option value="h">h</option></select></div>` +
-      `<div><label>style</label><select id="ns-style"><option>zone_div</option><option>main_cyan</option><option>subdiv_gray</option></select></div></div>` +
-      `<div class="field row"><div><label>x or x1</label><input id="ns-a" type="number" step="0.01" value="0"></div>` +
-      `<div><label>x2 (h only)</label><input id="ns-b" type="number" step="0.01" value="0"></div></div>` +
-      `<div class="field row"><div><label>y or y1</label><input id="ns-y1" type="number" step="0.01" value="9"></div>` +
-      `<div><label>y2 (v only)</label><input id="ns-y2" type="number" step="0.01" value="124"></div></div>` +
-      `<div class="field"><label>label (h, optional)</label><input id="ns-label" type="text" value=""></div>` +
-      `<div class="bar"><button id="ns-add">Add divider</button><button id="ns-close">Close</button></div></div>`;
-    m.querySelectorAll("[data-delsep]").forEach((b) => b.addEventListener("click", () => { snapshot(); D.separators.splice(Number(b.dataset.delsep), 1); render(); openDividers(); }));
-    m.querySelectorAll("[data-editsep]").forEach((b) => b.addEventListener("click", () => { m.classList.add("hidden"); selectSep(Number(b.dataset.editsep)); }));
-    document.getElementById("ns-close").addEventListener("click", () => m.classList.add("hidden"));
-    document.getElementById("ns-add").addEventListener("click", () => {
-      const t = document.getElementById("ns-type").value;
-      const style = document.getElementById("ns-style").value;
-      const a = Number(document.getElementById("ns-a").value);
-      const b = Number(document.getElementById("ns-b").value);
-      const y1 = Number(document.getElementById("ns-y1").value);
-      const y2 = Number(document.getElementById("ns-y2").value);
-      const label = document.getElementById("ns-label").value.trim();
-      const sp = t === "v" ? { type: "v", x: a, y1, y2, style } : { type: "h", x1: a, x2: b, y: y1, style };
-      if (t === "h" && label) { sp.label = label; sp.label_x = (a + b) / 2; }
-      snapshot();
-      (D.separators = D.separators || []).push(sp);
-      render(); openDividers();
-    });
   }
 
   // ══ YAML export (comment-preserving line patching) ═════════════════════════
@@ -1372,27 +1408,31 @@
       // Arrays (flow sequences):
       for (const k of ["pos_xs", "pos_ys"])
         if (JSON.stringify(orig[k]) !== JSON.stringify(cur[k])) { if (cur[k] != null) patchKey(id, k, flowSeq(cur[k])); else removeKey(id, k); }
+      // Text-component font fields (strings):
+      for (const k of ["fill", "font_weight", "text_anchor"])
+        if ((orig[k] || "") !== (cur[k] || "")) { if (cur[k]) patchKey(id, k, quoteIfNeeded(cur[k])); else removeKey(id, k); }
     }
-    // 3 ── additions. Locate the owning zone by its ORIGINAL id (zone renames are
-    //      applied LAST), so insertComponent always finds the zone still in the text.
-    const origZoneIdAt = (i) => (ORIG.zones && ORIG.zones[i]) ? ORIG.zones[i].id : null;
-    (D.zones || []).forEach((z, i) => {
-      for (const c of z.components || []) {
-        if (origById[c.id]) continue;
-        insertComponent(origZoneIdAt(i) || z.id, c);
-      }
-    });
-    // 4 ── zone x_start / label patches (gated on diff; located by ORIGINAL id)
-    (D.zones || []).forEach((z, i) => {
-      const o = (ORIG.zones || [])[i]; if (!o) return;
-      if (o.x_start != null && String(o.x_start) !== String(z.x_start)) patchZoneKey(o.id, "x_start", fmtVal(z.x_start));
-      if ((o.label || "") !== (z.label || "")) patchZoneKey(o.id, "label", quoteIfNeeded(z.label || ""));
-    });
+    // Zones keyed by their ORIGINAL id (z._orig_id); new zones have none.
+    const origZoneById = {};
+    for (const oz of ORIG.zones || []) origZoneById[oz.id] = oz;
+    const liveOrigIds = new Set((D.zones || []).map((z) => z._orig_id).filter(Boolean));
+    // 3a ── deleted zones: remove the whole block from the text
+    for (const oz of ORIG.zones || []) if (!liveOrigIds.has(oz.id)) removeZoneBlock(oz.id);
+    // 3b ── component additions into EXISTING zones (located by original zone id)
+    for (const z of D.zones || []) {
+      if (!z._orig_id) continue;                  // new zone → handled by insertZone
+      for (const c of z.components || []) if (!origById[c.id]) insertComponent(z._orig_id, c);
+    }
+    // 3c ── new zones: append the whole zone block (with its components)
+    for (const z of D.zones || []) if (!z._orig_id) insertZone(z);
+    // 4 ── zone x_start / label patches for existing zones (gated; located by orig id)
+    for (const z of D.zones || []) {
+      const o = z._orig_id ? origZoneById[z._orig_id] : null; if (!o) continue;
+      if (o.x_start != null && String(o.x_start) !== String(z.x_start)) patchZoneKey(z._orig_id, "x_start", fmtVal(z.x_start));
+      if ((o.label || "") !== (z.label || "")) patchZoneKey(z._orig_id, "label", quoteIfNeeded(z.label || ""));
+    }
     // 5 ── zone id renames LAST (so steps 3–4 still match the original text)
-    (D.zones || []).forEach((z, i) => {
-      const o = (ORIG.zones || [])[i]; if (!o) return;
-      if (o.id !== z.id) patchZoneId(o.id, z.id);
-    });
+    for (const z of D.zones || []) if (z._orig_id && z._orig_id !== z.id) patchZoneId(z._orig_id, z.id);
     // 6 ── meta + design_rules (only patch what changed → no-op export stays byte-identical)
     if (String(ORIG.meta.hp) !== String(D.meta.hp)) patchTop("hp", fmtVal(D.meta.hp), 2);
     if (String(ORIG.meta.width_mm) !== String(D.meta.width_mm)) patchTop("width_mm", fmtVal(D.meta.width_mm), 2);
@@ -1446,6 +1486,22 @@
       for (let j = zi + 1; j < end; j++) { const m = lines[j].match(re); if (m) { lines[j] = `${m[1]}${key}: ${newVal}${m[3]}`; return; } }
       lines.splice(zi + 1, 0, `    ${key}: ${newVal}`);   // insert at zone-field indent
     }
+    function isQuoteKey(k) { return ["label", "cpp_id", "cpp_param", "led_fill", "led_stroke", "fill"].includes(k); }
+    function componentBlock(c, itemIndent) {     // → array of YAML lines for one component
+      const fieldIndent = itemIndent + "  ";
+      const blk = [`${itemIndent}- id: ${c.id}`];
+      const order = ["type", "cx", "cy", "rotate", "label", "font_size", "fill", "font_weight",
+        "text_anchor", "label_border", "rect_w", "label_below_y", "label_above_y", "cy_body_top",
+        "pos_y", "pos_xs", "pos_ys", "cpp_id", "cpp_param", "led_fill", "led_stroke"];
+      for (const k of order) {
+        if (c[k] == null) continue;
+        const v = Array.isArray(c[k]) ? flowSeq(c[k])
+          : isQuoteKey(k) ? quoteIfNeeded(c[k])
+          : (typeof c[k] === "number" ? fmtVal(c[k]) : c[k]);
+        blk.push(`${fieldIndent}${k}: ${v}`);
+      }
+      return blk;
+    }
     function insertComponent(zoneId, c) {
       const idl = findIdLine(zoneId); if (!idl) return;
       // find this zone's `components:` and the end of the zone block
@@ -1460,15 +1516,39 @@
       let ins = zoneEnd;
       while (ins - 1 > (compsLine >= 0 ? compsLine : idl.i) && !lines[ins - 1].trim()) ins--;
       const itemIndent = compsLine >= 0 ? " ".repeat(indentOf(lines[compsLine]) + 2) : " ".repeat(idl.indent + 4);
-      const fieldIndent = itemIndent + "  ";
-      const blk = [`${itemIndent}- id: ${c.id}`];
-      const order = ["type", "cx", "cy", "rotate", "label", "font_size", "label_border", "rect_w", "cpp_id", "cpp_param", "led_fill", "led_stroke"];
-      for (const k of order) {
-        if (c[k] == null) continue;
-        let v = (k === "label" || k === "cpp_id" || k === "cpp_param" || k === "led_fill" || k === "led_stroke") ? quoteIfNeeded(c[k]) : (typeof c[k] === "number" ? fmtVal(c[k]) : c[k]);
-        blk.push(`${fieldIndent}${k}: ${v}`);
+      lines.splice(ins, 0, ...componentBlock(c, itemIndent));
+    }
+    function insertZone(z) {
+      // append a new zone block at the end of the `zones:` list
+      let zi = -1;
+      for (let i = 0; i < lines.length; i++) if (/^zones:\s*$/.test(lines[i])) { zi = i; break; }
+      if (zi < 0) return;
+      let end = lines.length;
+      for (let j = zi + 1; j < lines.length; j++) {
+        const s = lines[j].trim();
+        if (indentOf(lines[j]) === 0 && s && !s.startsWith("#")) { end = j; break; }
+      }
+      let ins = end; while (ins - 1 > zi && !lines[ins - 1].trim()) ins--;
+      const blk = ["", `  - id: ${z.id}`];
+      for (const k of ["label", "x_start", "col_pitch", "cols"])
+        if (z[k] != null) blk.push(`    ${k}: ${k === "label" ? quoteIfNeeded(z[k]) : fmtVal(z[k])}`);
+      if ((z.components || []).length) {
+        blk.push(`    components:`);
+        for (const c of z.components) blk.push(...componentBlock(c, "      "));
+      } else {
+        blk.push(`    components: []`);
       }
       lines.splice(ins, 0, ...blk);
+    }
+    function removeZoneBlock(zoneId) {
+      const i = findZoneIdLine(zoneId); if (i < 0) return;
+      let end = lines.length;
+      for (let j = i + 1; j < lines.length; j++) {
+        const s = lines[j].trim();
+        if (indentOf(lines[j]) <= 2 && s.startsWith("-")) { end = j; break; }
+        if (indentOf(lines[j]) === 0 && s && !s.startsWith("#")) { end = j; break; }
+      }
+      lines.splice(i, end - i);
     }
     function syncMountingHoles() {
       // patch the right-edge mounting-hole cx values to match the model
@@ -1494,20 +1574,30 @@
     function patchSeparators() {
       const blk = sepBlock();
       if (!blk) return;
-      const aligned = blk.sepLineIdxs.length === (ORIG.separators || []).length &&
-        (D.separators || []).length === (ORIG.separators || []).length;
-      if (aligned) {
-        // In-place: rewrite only the lines whose separator object changed (comments kept).
-        for (let i = 0; i < D.separators.length; i++) {
-          if (JSON.stringify(D.separators[i]) === JSON.stringify(ORIG.separators[i])) continue;
-          const li = blk.sepLineIdxs[i];
-          const indent = lines[li].match(/^(\s*)-/)[1];
-          lines[li] = `${indent}- ${flowMap(D.separators[i])}`;
-        }
-      } else {
-        // Structural change (add/remove): rewrite the list body wholesale.
-        const body = (D.separators || []).map((sp) => "  - " + flowMap(sp));
+      const L = blk.sepLineIdxs, m = L.length;
+      const D2 = D.separators || [], O = ORIG.separators || [];
+      if (m !== O.length) {
+        // Source line count doesn't match the baseline — rebuild wholesale (rare).
+        const body = D2.map((sp) => "  - " + flowMap(sp));
         lines.splice(blk.start + 1, blk.end - (blk.start + 1), ...body, "");
+        return;
+      }
+      // Index-aligned: patch changed lines, append new, delete trailing — never
+      // touches the interspersed comment lines, so derivation notes are preserved.
+      const overlap = Math.min(m, D2.length);
+      for (let i = 0; i < overlap; i++) {
+        if (JSON.stringify(D2[i]) === JSON.stringify(O[i])) continue;
+        const indent = lines[L[i]].match(/^(\s*)-/)[1];
+        lines[L[i]] = `${indent}- ${flowMap(D2[i])}`;
+      }
+      if (D2.length > m) {                    // appended dividers
+        const indent = m ? lines[L[m - 1]].match(/^(\s*)-/)[1] : "  ";
+        const insAt = m ? L[m - 1] + 1 : blk.start + 1;
+        const add = [];
+        for (let i = m; i < D2.length; i++) add.push(`${indent}- ${flowMap(D2[i])}`);
+        lines.splice(insAt, 0, ...add);
+      } else if (D2.length < m) {             // removed (delete extra source lines, bottom-up)
+        for (let i = m - 1; i >= D2.length; i--) lines.splice(L[i], 1);
       }
     }
     function flowMap(o) {
