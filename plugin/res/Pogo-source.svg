@@ -226,9 +226,9 @@
   <!-- Zone — BP 1                                                              -->
   <!-- ════════════════════════════════════════════════════════════════════════ -->
 
-  <circle cx="110.49" cy="24.8" r="9.0" fill="#1a1a1a" stroke="#555" stroke-width="0.7"/>
-  <line x1="110.49" y1="24.8" x2="110.49" y2="15.8" stroke="#aaa" stroke-width="0.8"/>
-  <text x="110.49" y="36.8" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
+  <circle cx="111.99" cy="24.8" r="9.0" fill="#1a1a1a" stroke="#555" stroke-width="0.7"/>
+  <line x1="111.99" y1="24.8" x2="111.99" y2="15.8" stroke="#aaa" stroke-width="0.8"/>
+  <text x="111.99" y="36.8" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
   <circle cx="101.345" cy="49.08" r="7.0" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
   <line x1="101.345" y1="49.08" x2="101.345" y2="42.08" stroke="#aaa" stroke-width="0.7"/>
   <text x="101.345" y="59.1" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">FOCUS</text>

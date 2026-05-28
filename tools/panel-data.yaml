@@ -476,7 +476,7 @@ zones:
       # col0 cx=97.155  col1 cx=108.585  col2 cx=120.015
       - id: BP1_FREQ
         type: knob_xl
-        col: 1
+        cx: 110.085
         cy: 24.80
         label: "FREQ"
         cpp_param: "BP1_FREQ_PARAM"
