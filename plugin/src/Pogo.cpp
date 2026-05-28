@@ -40,6 +40,36 @@ struct PogoSwitchH2 : app::Switch {
 };
 
 // ── Horizontal 3-position slide switch ────────────────────────────────────
+struct PogoSwitchV3 : app::Switch {
+	PogoSwitchV3() { box.size = mm2px(Vec(5.f, 12.f)); }
+
+	void draw(const DrawArgs& args) override {
+		float w = box.size.x, h = box.size.y;
+		float cx = w * 0.5f;
+		float bodyW = mm2px(2.4f), slugW = mm2px(2.8f), slugH = mm2px(3.5f);
+
+		nvgBeginPath(args.vg);
+		nvgRoundedRect(args.vg, cx - bodyW * 0.5f, 0, bodyW, h, mm2px(1.2f));
+		nvgFillColor(args.vg, nvgRGB(0x22, 0x22, 0x22));
+		nvgFill(args.vg);
+		nvgStrokeColor(args.vg, nvgRGB(0x55, 0x55, 0x55));
+		nvgStrokeWidth(args.vg, 0.5f);
+		nvgStroke(args.vg);
+
+		auto* pq = getParamQuantity();
+		// t=0 → slug at bottom (soft), t=1 → slug at top (fold)
+		float t = pq ? (pq->getValue() - pq->getMinValue()) / (pq->getMaxValue() - pq->getMinValue()) : 0.f;
+		float slugY = (1.f - t) * (h - slugH);
+		nvgBeginPath(args.vg);
+		nvgRoundedRect(args.vg, cx - slugW * 0.5f, slugY, slugW, slugH, mm2px(0.8f));
+		nvgFillColor(args.vg, nvgRGB(0x66, 0x66, 0x66));
+		nvgFill(args.vg);
+		nvgStrokeColor(args.vg, nvgRGB(0x88, 0x88, 0x88));
+		nvgStrokeWidth(args.vg, 0.3f);
+		nvgStroke(args.vg);
+	}
+};
+
 struct PogoSwitchH3 : app::Switch {
 	PogoSwitchH3() { box.size = mm2px(Vec(12.f, 5.f)); }
 
@@ -149,6 +179,7 @@ struct Pogo : Module {
 		// BP1
 		BP1_FREQ_PARAM, BP1_FOCUS_PARAM, BP1_TILT_PARAM, BP1_DIST_PARAM,
 		BP1_FREQ_ATT_PARAM, BP1_TILT_ATT_PARAM, BP1_DIST_ATT_PARAM,
+		BP1_DIST_MODE_PARAM,
 		// BP2
 		BP2_FREQ_PARAM, BP2_FOCUS_PARAM, BP2_TILT_PARAM, BP2_DIST_PARAM,
 		BP2_FREQ_ATT_PARAM, BP2_TILT_ATT_PARAM, BP2_DIST_ATT_PARAM,
@@ -188,7 +219,8 @@ struct Pogo : Module {
 	enum LightId {
 		LFO1_LIGHT, LFO2_LIGHT,
 		MOD_CLIP_LIGHT, MOD_POS_LIGHT, MOD_NEG_LIGHT,
-		NUM_LIGHTS   // 5
+		BP1_CLIP_LIGHT,
+		NUM_LIGHTS   // 6
 	};
 
 	Pogo() {
@@ -233,6 +265,7 @@ struct Pogo : Module {
 		configParam(BP1_FREQ_ATT_PARAM,  -1.f, 1.f, 0.f, "BP1 Freq CV Depth");
 		configParam(BP1_TILT_ATT_PARAM, -1.f, 1.f, 0.f, "BP1 Tilt CV Depth");
 		configParam(BP1_DIST_ATT_PARAM,  -1.f, 1.f, 0.f, "BP1 Drive CV Depth");
+		configSwitch(BP1_DIST_MODE_PARAM, 0.f, 2.f, 0.f, "BP1 Dist Mode", {"Soft Clip", "Hard Clip", "Wavefold"});
 
 		// BP2
 		configParam<FormantFreqQuantity>(BP2_FREQ_PARAM,  -bpR, bpR, 0.f, "BP2 Freq")->fref = 400.f;
@@ -407,7 +440,12 @@ struct Pogo : Module {
 		float bpTiltCv   = params[BP_TILT_PARAM].getValue()
 		                   + modDest(BP_TILT_INPUT, BP_TILT_ATT_PARAM); // stereo tilt: L+=, R-=
 
-		int distMode    = (int)std::round(params[BP_DIST_PARAM].getValue());
+		int globalDistMode = (int)std::round(params[BP_DIST_PARAM].getValue());
+		int distMode[3] = {
+			(int)std::round(params[BP1_DIST_MODE_PARAM].getValue()),
+			globalDistMode,
+			globalDistMode,
+		};
 		float mix       = params[BP_MIX_PARAM].getValue();
 
 		float freqV[3] = {
@@ -444,11 +482,13 @@ struct Pogo : Module {
 
 		float dSumL = 0.f, dSumR = 0.f;
 		for (int i = 0; i < 3; i++) {
-			distTapL[i] = Distortion::process(bandpassL.prevOut[i], driveCv[i], distMode);
-			distTapR[i] = Distortion::process(bandpassR.prevOut[i], driveCv[i], distMode);
+			distTapL[i] = Distortion::process(bandpassL.prevOut[i], driveCv[i], distMode[i]);
+			distTapR[i] = Distortion::process(bandpassR.prevOut[i], driveCv[i], distMode[i]);
 			dSumL += distTapL[i];
 			dSumR += distTapR[i];
 		}
+		lights[BP1_CLIP_LIGHT].setBrightness(
+			(std::max(std::abs(distTapL[0]), std::abs(distTapR[0])) > 4.0f) ? 1.f : 0.f);
 		float wetL    = clamp(dSumL, -10.5f, 10.5f);
 		float wetR    = clamp(dSumR, -10.5f, 10.5f);
 		float bp3OutL = distTapL[2];
@@ -548,10 +588,12 @@ struct PogoWidget : ModuleWidget {
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(87.630f, 112.00f)), module, Pogo::BP_TILT_INPUT));
 
 		// ── Zone — BP 1 ────────────────────────────────────────────────
+		addParam(createParamCentered<PogoSwitchV3>(mm2px(Vec(97.905f, 24.80f)), module, Pogo::BP1_DIST_MODE_PARAM));
 		addParam(createParamCentered<RoundHugeBlackKnob>(mm2px(Vec(114.49f,  24.80f)), module, Pogo::BP1_FREQ_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(102.345f, 47.69f)), module, Pogo::BP1_FOCUS_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(118.635f, 63.85f)), module, Pogo::BP1_TILT_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(102.345f, 80.00f)), module, Pogo::BP1_DIST_PARAM));
+		addChild(createLightCentered<SmallLight<RedLight>>(mm2px(Vec(110.905f, 80.00f)), module, Pogo::BP1_CLIP_LIGHT));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(99.06f, 100.00f)), module, Pogo::BP1_FREQ_ATT_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(110.49f, 100.00f)), module, Pogo::BP1_TILT_ATT_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(121.92f, 100.00f)), module, Pogo::BP1_DIST_ATT_PARAM));

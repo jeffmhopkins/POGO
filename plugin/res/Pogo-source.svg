@@ -226,6 +226,12 @@
   <!-- Zone — BP 1                                                              -->
   <!-- ════════════════════════════════════════════════════════════════════════ -->
 
+  <rect x="96.70" y="18.8" width="2.4" height="12.0" rx="1.2" fill="#222" stroke="#555" stroke-width="0.5"/>
+  <rect x="96.50" y="23.05" width="2.8" height="3.5" rx="0.8" fill="#666" stroke="#888" stroke-width="0.3"/>
+  <text x="99.305" y="20.5" fill="#3d5260" font-family="monospace" font-size="1.4" text-anchor="start">WF</text>
+  <text x="99.305" y="25.0" fill="#3d5260" font-family="monospace" font-size="1.4" text-anchor="start">HC</text>
+  <text x="99.305" y="29.5" fill="#3d5260" font-family="monospace" font-size="1.4" text-anchor="start">SC</text>
+  <text x="97.905" y="33.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">DIST</text>
   <circle cx="114.49" cy="24.8" r="9.0" fill="#1a1a1a" stroke="#555" stroke-width="0.7"/>
   <line x1="114.49" y1="24.8" x2="114.49" y2="15.8" stroke="#aaa" stroke-width="0.8"/>
   <text x="114.49" y="36.8" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
@@ -238,6 +244,7 @@
   <circle cx="102.345" cy="80.0" r="7.0" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
   <line x1="102.345" y1="80.0" x2="102.345" y2="73.0" stroke="#aaa" stroke-width="0.7"/>
   <text x="102.345" y="90.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">DIST</text>
+  <circle cx="110.905" cy="80.0" r="1.2" fill="#441111" stroke="#cc2222" stroke-width="0.4"/>
   <circle cx="99.06" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
   <line x1="99.06" y1="100.0" x2="99.06" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
   <text x="99.06" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>

@@ -474,6 +474,17 @@ zones:
     cols: 3
     components:
       # col0 cx=97.155  col1 cx=108.585  col2 cx=120.015
+      - id: BP1_DIST_SW
+        type: switch_V3
+        cx: 96.0
+        cy: 24.80
+        cy_body_top: 18.80
+        body_height: 12
+        pos_labels: ["WF", "HC", "SC"]
+        pos_ys: [20.5, 25.0, 29.5]
+        label_below: "DIST"
+        label_below_y: 33.5
+        cpp_param: "BP1_DIST_MODE_PARAM"
       - id: BP1_FREQ
         type: knob_xl
         cx: 112.585
@@ -499,6 +510,13 @@ zones:
         cy: 80.00
         label: "DIST"
         cpp_param: "BP1_DIST_PARAM"
+      - id: BP1_CLIP_LED
+        type: led
+        cx: 109.0
+        cy: 80.00
+        led_fill: "#441111"
+        led_stroke: "#cc2222"
+        cpp_id: "BP1_CLIP_LIGHT"
       - id: BP1_FREQ_ATT
         type: trimpot
         col: 0
