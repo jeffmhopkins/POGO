@@ -476,7 +476,7 @@ zones:
       # col0 cx=97.155  col1 cx=108.585  col2 cx=120.015
       - id: BP1_FREQ
         type: knob_xl
-        col: 1
+        cx: 97.94
         cy: 24.80
         label: "FREQ"
         cpp_param: "BP1_FREQ_PARAM"
@@ -488,14 +488,14 @@ zones:
         cpp_param: "BP1_FOCUS_PARAM"
       - id: BP1_TILT
         type: knob_large
-        cx: 114.30
+        cx: 119.23
         cy: 65.20
         rotate: 180
         label: "TILT"
         cpp_param: "BP1_TILT_PARAM"
       - id: BP1_DIST
         type: knob_large
-        cx: 102.87
+        cx: 97.94
         cy: 78.00
         label: "DIST"
         cpp_param: "BP1_DIST_PARAM"
