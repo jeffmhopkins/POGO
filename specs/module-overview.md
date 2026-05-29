@@ -60,8 +60,8 @@ MODULATION (parallel)
 
 | Param | Block | Type | Range | Default |
 |---|---|---|---|---|
-| GAIN_PARAM | 1 | switch | 0/1 | 0 (1×) |
-| ALT_GAIN_PARAM | 1 | switch | 0/1 | 0 (1×) |
+| GAIN_PARAM | 1 | toggle_dw3 | 0/1 | 0 (1×) |
+| ALT_GAIN_PARAM | 1 | toggle_dw3 | 0/1 | 0 (1×) |
 | LFO1_RATE_PARAM | 2 | trimpot | 0–1 | 0.3 |
 | LFO2_RATE_PARAM | 2 | trimpot | 0–1 | 0.3 |
 | MOD_SCALE_PARAM | 3 | trimpot | 0–1 | 0.5 (≈1×) |
@@ -80,7 +80,7 @@ MODULATION (parallel)
 | BP_WET_PARAM | 6 | medium knob | 0–1 | 1.0 |
 | BP_FREQ_ATT_PARAM | 6 | trimpot | −1–1 | 0 |
 | BP_TILT_ATT_PARAM | 6 | trimpot | −1–1 | 0 |
-| BP1_DIST_MODE_PARAM | 6 | switch_V3 | 0/1/2 | 0 (SC) |
+| BP1_DIST_MODE_PARAM | 6 | toggle_dw5 | 0/1/2 | 0 (SC) |
 | BP1_FREQ_PARAM | 6 | xl knob | ±3.32 V/oct | 0 (→400Hz) |
 | BP1_FOCUS_PARAM | 6 | large knob | 0–1 | 0 |
 | BP1_TILT_PARAM | 6 | large knob | −1–1 | 0 |
@@ -88,7 +88,7 @@ MODULATION (parallel)
 | BP1_FREQ_ATT_PARAM | 6 | trimpot | −1–1 | 0 |
 | BP1_TILT_ATT_PARAM | 6 | trimpot | −1–1 | 0 |
 | BP1_DIST_ATT_PARAM | 6 | trimpot | −1–1 | 0 |
-| BP2_DIST_MODE_PARAM | 6 | switch_V3 | 0/1/2 | 0 (SC) |
+| BP2_DIST_MODE_PARAM | 6 | toggle_dw5 | 0/1/2 | 0 (SC) |
 | BP2_FREQ_PARAM | 6 | xl knob | ±3.32 V/oct | 0 (→400Hz) |
 | BP2_FOCUS_PARAM | 6 | large knob | 0–1 | 0 |
 | BP2_TILT_PARAM | 6 | large knob | −1–1 | 0 |
@@ -96,7 +96,7 @@ MODULATION (parallel)
 | BP2_FREQ_ATT_PARAM | 6 | trimpot | −1–1 | 0 |
 | BP2_TILT_ATT_PARAM | 6 | trimpot | −1–1 | 0 |
 | BP2_DIST_ATT_PARAM | 6 | trimpot | −1–1 | 0 |
-| BP3_DIST_MODE_PARAM | 6 | switch_V3 | 0/1/2 | 0 (SC) |
+| BP3_DIST_MODE_PARAM | 6 | toggle_dw5 | 0/1/2 | 0 (SC) |
 | BP3_FREQ_PARAM | 6 | xl knob | ±3.32 V/oct | 0 (→400Hz) |
 | BP3_FOCUS_PARAM | 6 | large knob | 0–1 | 0 |
 | BP3_TILT_PARAM | 6 | large knob | −1–1 | 0 |

@@ -1,0 +1,17 @@
+# that2180 — POGO sourced component (hand-maintained)
+slug: that2180
+mpn: THAT2180LD
+manufacturer: THAT Corporation
+supplier: '~'
+package: SOIC-8
+matches:
+- THAT2180
+footprint:
+  lib: Package_SO
+  name: SOIC-8_3.9x4.9mm_P1.27mm
+datasheet:
+  url: https://www.thatcorp.com/datashts/THAT_2180-Series_Datasheet.pdf
+  version: Doc 600029 Rev 02
+  sha256: 79f4e7cea383fe0e6378ab0d386c720dfdc4e0c98bfdbc68f25f2914d7ff24f3
+  bytes: 327952
+notes: Blackmer VCA; pre-LP1 VCA cell.

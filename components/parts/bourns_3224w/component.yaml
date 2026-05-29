@@ -1,0 +1,17 @@
+# bourns_3224w — POGO sourced component (hand-maintained)
+slug: bourns_3224w
+mpn: 3224W-1-xxx
+manufacturer: Bourns
+supplier: '~'
+package: SMD
+matches:
+- Bourns 3224W
+footprint:
+  lib: Potentiometer_SMD
+  name: Potentiometer_Bourns_3224W
+datasheet:
+  url: https://www.bourns.com/docs/Product-Datasheets/3224.pdf
+  version: rev 2024
+  sha256: 6913966a4c1b5a7e8a9d2517ac2720943b07dd919b1e21d57f6335015636a233
+  bytes: 167852
+notes: SMD multiturn trimmer; audio-board bias trims.

@@ -1,0 +1,17 @@
+# opa1612 — POGO sourced component (hand-maintained)
+slug: opa1612
+mpn: OPA1612AID
+manufacturer: Texas Instruments
+supplier: '~'
+package: SOIC-8
+matches:
+- OPA1612
+footprint:
+  lib: Package_SO
+  name: SOIC-8_3.9x4.9mm_P1.27mm
+datasheet:
+  url: https://www.ti.com/lit/ds/symlink/opa1612.pdf
+  version: SBOS450C (2014-08)
+  sha256: d1df82fa9ca489528d4d676c86e9770e4154fbc7d984093e1ba0a9ae33512de6
+  bytes: 1540184
+notes: Low-noise dual op-amp; input buffers, pre-gain, filters.

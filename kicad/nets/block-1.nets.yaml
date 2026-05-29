@@ -1,0 +1,93 @@
+# POGO Block 1 — Pre-Gain (1x/5x main + 1x/5x ALT path) — schematic netlist
+#
+# Source of truth, transcribed from:
+#   specs/components.yaml  (block-1 rows; BOM authoritative)
+#   specs/block-1/spec.md §1 (panel-verified intent) + §3 (path-select topology)
+#   specs/aux/aux-unity-buffer.md, specs/aux/aux-cv-protection.md
+#   plugin/src/dsp/PreGain.hpp, Pogo.cpp (1x = bypass; 5x = clamp(5*Vin))
+#
+# Topology: non-inverting amp, G = 1 + R_f/R_g = 1 + 18k/4.7k = 4.83x (~5x).
+# Gain select is a DPDT path-select (matches DSP true-bypass at 1x): the toggle
+# common picks either the 5x amp output or the raw input. One pole per channel
+# (L,R switch together). SW1 = main (GAIN_MAIN), SW2 = ALT (GAIN_BP3).
+#
+# Refdes convention (project decision 2026-05-29): components.yaml keeps grouped
+# refs with qty>1 for stereo pairs; per-instance schematic refdes are derived by
+# L/R suffix. Here R3->R3L/R3R, R4->R4L/R4R, R5->R5L/R5R, R6->R6L/R6R.
+#
+# Reconciliations applied to components.yaml (BOM truth) alongside this netlist:
+#  - R3-R6 given qty:2 (were unqty'd despite "x2 ch" fn + §4 Qty=2).
+#  - ALT inputs J3/J4 now get block-A-style protection (R38/R39 100Ω + D8/D9
+#    BAT54S), per aux-cv-protection "every jack input". (User-approved.)
+
+block: block-1
+board: audio
+title: POGO Block 1 - Pre-Gain (main + ALT)
+
+parts:
+  U2:  { sym: opamp2, part: OPA1612, value: OPA1612 }   # main gain: A=L, B=R
+  U3:  { sym: opamp2, part: OPA1612, value: OPA1612 }   # ALT gain:  A=L, B=R
+  # main gain network (R_g to GND, R_f feedback)
+  R3L: { sym: r, value: 4k7 }
+  R3R: { sym: r, value: 4k7 }
+  R4L: { sym: r, value: 18k }
+  R4R: { sym: r, value: 18k }
+  # ALT gain network
+  R5L: { sym: r, value: 4k7 }
+  R5R: { sym: r, value: 4k7 }
+  R6L: { sym: r, value: 18k }
+  R6R: { sym: r, value: 18k }
+  # ALT input protection (mirrors block-A)
+  R38: { sym: r,      value: 100R }
+  R39: { sym: r,      value: 100R }
+  D8:  { sym: bat54s, part: BAT54S, value: BAT54S }
+  D9:  { sym: bat54s, part: BAT54S, value: BAT54S }
+  # decoupling
+  C3:  { sym: c, value: 100nF }
+  C4:  { sym: c, value: 100nF }
+  C5:  { sym: c, value: 100nF }
+  C6:  { sym: c, value: 100nF }
+  # gain toggles + ALT jacks
+  SW1: { sym: dw3,  part: "Dailywell DW3 (2M DPDT ON-ON)", value: GAIN_MAIN }
+  SW2: { sym: dw3,  part: "Dailywell DW3 (2M DPDT ON-ON)", value: GAIN_BP3 }
+  J3:  { sym: jack, part: PJ301M-12, value: ALT_BP_L }
+  J4:  { sym: jack, part: PJ301M-12, value: ALT_BP_R }
+
+nets:
+  "+12V":   [U2.8, U3.8, D8.3, D9.3, C3.1, C5.1]
+  "-12V":   [U2.4, U3.4, D8.1, D9.1, C4.1, C6.1]
+  GND:      [R3L.2, R3R.2, R5L.2, R5R.2, J3.2, J4.2, C3.2, C4.2, C5.2, C6.2]
+
+  # ---- main path (U2 / SW1) ----
+  L_OUT:    [U2.3, SW1.3]                 # <- block-A out L (boundary); also 1x bypass throw
+  R_OUT:    [U2.5, SW1.6]                 # <- block-A out R (boundary); also 1x bypass throw
+  U2A_INV:  [U2.2, R3L.1, R4L.1]          # U2A (-) summing node
+  U2B_INV:  [U2.6, R3R.1, R4R.1]          # U2B (-) summing node
+  PG5X_L:   [U2.1, R4L.2, SW1.1]          # U2A out (5x) -> R_f feedback + toggle throw
+  PG5X_R:   [U2.7, R4R.2, SW1.4]
+  PG_OUT_L: [SW1.2]                        # toggle common -> VCA (boundary)
+  PG_OUT_R: [SW1.5]
+
+  # ---- ALT path (U3 / SW2, protected inputs) ----
+  ALT_L_TIP: [J3.1, R38.1]                # J3 tip -> 100Ω series
+  ALT_R_TIP: [J4.1, R39.1]                # J4 tip -> 100Ω series
+  ALT_L_IN:  [R38.2, D8.2, U3.3, SW2.3, J4.3]  # protected L node: U3A(+), 1x throw, J4 normalling lug
+  ALT_R_IN:  [R39.2, D9.2, U3.5, SW2.6]   # protected R node: U3B(+), 1x throw
+  U3A_INV:   [U3.2, R5L.1, R6L.1]
+  U3B_INV:   [U3.6, R5R.1, R6R.1]
+  ALT5X_L:   [U3.1, R6L.2, SW2.1]
+  ALT5X_R:   [U3.7, R6R.2, SW2.4]
+  ALT_OUT_L: [SW2.2]                       # -> BP block (boundary)
+  ALT_OUT_R: [SW2.5]
+
+# J3 is the primary ALT input (no normalling source); its switch lug is unused.
+no_connect:
+  - J3.3
+
+boundary:
+  - L_OUT      # from block-A
+  - R_OUT      # from block-A
+  - PG_OUT_L   # to block-VCA (main pre-gain out)
+  - PG_OUT_R   # to block-VCA
+  - ALT_OUT_L  # to block-6 (ALT direct into BP)
+  - ALT_OUT_R  # to block-6

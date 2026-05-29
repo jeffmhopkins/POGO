@@ -14,3 +14,7 @@ plugin.so
 .vscode/
 *.swp
 *~
+
+
+# Claude Code agent worktrees (isolated; never commit)
+.claude/worktrees/

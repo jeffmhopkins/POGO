@@ -1,0 +1,17 @@
+# bat54s — POGO sourced component (hand-maintained)
+slug: bat54s
+mpn: BAT54S
+manufacturer: Diodes Inc.
+supplier: '~'
+package: SOT-23
+matches:
+- BAT54S
+footprint:
+  lib: Package_TO_SOT_SMD
+  name: SOT-23
+datasheet:
+  url: https://www.diodes.com/assets/Datasheets/ds11005.pdf
+  version: DS11005
+  sha256: 50b04e4e17bcf5db62164f6e5422e91546d0cace0ab2efed61660c3044b4fef0
+  bytes: 502635
+notes: Dual series Schottky; input/CV clamps.

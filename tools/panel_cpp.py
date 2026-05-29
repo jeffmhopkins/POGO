@@ -12,16 +12,20 @@ from typing import Any
 
 _KNOB_TYPE = {
     "trimpot":    "Trimpot",
-    "knob_medium": "RoundBlackKnob",
-    "knob_large":  "RoundLargeBlackKnob",
-    "knob_xl":     "RoundHugeBlackKnob",
     "slider":      "PogoSlider",
 }
 
+# Single `knob` type sized by cap_mm (diameter); pick the nearest stock VCV knob.
+def _knob_widget(cap_mm: float) -> str:
+    if cap_mm < 11.0:
+        return "RoundBlackKnob"       # ~9mm
+    if cap_mm < 16.0:
+        return "RoundLargeBlackKnob"  # ~14mm
+    return "RoundHugeBlackKnob"       # ~18mm
+
 _SWITCH_TYPE = {
-    "switch_H2": "PogoSwitchH2",
-    "switch_H3": "PogoSwitchH3",
-    "switch_V3": "CKSSThree",
+    "toggle_dw3": "PogoToggle2",
+    "toggle_dw5": "PogoToggle3",
 }
 
 _JACK_TYPE = "PJ301MPort"
@@ -146,9 +150,9 @@ def generate_cpp_stubs(zones: list[dict], rules: Any) -> str:
                 if param_id:
                     out.append(_param_line("Trimpot", param_id, cx, cy))
 
-            elif ctype in ("knob_medium", "knob_large", "knob_xl"):
+            elif ctype == "knob":
                 param_id  = comp.get("cpp_param", "")
-                vcv_type  = _KNOB_TYPE[ctype]
+                vcv_type  = _knob_widget(float(comp.get("cap_mm", 14.0)))
                 if param_id:
                     out.append(_param_line(vcv_type, param_id, cx, cy))
 

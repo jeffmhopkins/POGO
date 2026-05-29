@@ -1,0 +1,18 @@
+# slide_pot_45mm — POGO sourced component (hand-maintained)
+slug: slide_pot_45mm
+mpn: '~'
+manufacturer: Alpha/Alps
+supplier: Thonk
+package: 45mm slide
+matches:
+- PogoSlider
+footprint:
+  lib: Potentiometer_THT
+  name: Potentiometer_Slider_45mm_Vertical
+datasheet:
+  url: https://www.thonk.co.uk/shop/alpha-sliders/
+  version: supplier page
+panel_types:
+- slider_V45
+notes: '45mm travel slide pot (HP_FREQ, LP2_FREQ). Exact MPN TBD. NOTE: Thonk stocks 20mm-travel sliders,
+  not 45mm — verify travel/source before BOM.'

@@ -1,0 +1,17 @@
+# tl074 — POGO sourced component (hand-maintained)
+slug: tl074
+mpn: TL074CDT
+manufacturer: Texas Instruments
+supplier: '~'
+package: SOIC-14
+matches:
+- TL074CDT
+footprint:
+  lib: Package_SO
+  name: SOIC-14_3.9x8.7mm_P1.27mm
+datasheet:
+  url: https://www.ti.com/lit/ds/symlink/tl074.pdf
+  version: SLOS080W (2025-07)
+  sha256: f7b9691b73808f0e041ea0d9bde14ddda5b7bbb3d7b269be6f5e088235670204
+  bytes: 6080715
+notes: JFET quad op-amp; utility board.

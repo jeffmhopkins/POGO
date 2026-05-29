@@ -97,14 +97,14 @@ def _resolve_band_components(zone: dict, rules: DesignRules) -> list[dict]:
     cv_cy   = rules.cv_jack_cy
 
     comps = []
-    for ctrl, ctype, cy_key in [
-        ("freq",  "knob_xl",    "cy"),
-        ("focus", "knob_large", "cy"),
-        ("drive", "knob_large", "cy"),
+    for ctrl, cap_mm, cy_key in [
+        ("freq",  18.0, "cy"),
+        ("focus", 14.0, "cy"),
+        ("drive", 14.0, "cy"),
     ]:
         ctrl_data = zone.get(ctrl, {})
         cy_val    = float(ctrl_data.get("cy", 34 if ctrl == "freq" else (63 if ctrl == "focus" else 89)))
-        comps.append({"type": ctype, "cx": cx_c, "cy": cy_val, "id": f"{ctrl}_{n}"})
+        comps.append({"type": "knob", "cap_mm": cap_mm, "cx": cx_c, "cy": cy_val, "id": f"{ctrl}_{n}"})
 
     cv_jacks = zone.get("cv_jacks", {})
     cv_labels = zone.get("cv_labels", ["FREQ", "FOCUS", "DRIVE"])
@@ -816,10 +816,16 @@ def _component_svg(comp: dict, rules: DesignRules, colors: dict) -> str:
                             weight=comp.get("font_weight", "normal"),
                             anchor=comp.get("text_anchor", "middle"))
 
+    # Per-instance label nudges (0 = component-standard default position)
+    ldx = float(comp.get("label_dx", 0.0))
+    ldy = float(comp.get("label_dy", 0.0))
+    rot = int(comp.get("rotate", 0))
+
     if ctype == "jack_input":
         rect_w = comp.get("rect_w")
         return svg.svg_jack(cx, cy, label, "input", rules, colors, font_size=font_size,
-                            rect_w=rect_w, label_border=bool(comp.get("label_border", False)))
+                            rect_w=rect_w, label_border=bool(comp.get("label_border", False)),
+                            label_dx=ldx, label_dy=ldy)
 
     elif ctype == "jack_output":
         rect_w = comp.get("rect_w")
@@ -827,6 +833,7 @@ def _component_svg(comp: dict, rules: DesignRules, colors: dict) -> str:
         explicit_rect = comp.get("rect")
         if explicit_rect:
             # Use the explicitly stored rect coordinates (e.g. LFO outputs)
+            lx, ly = svg.label_xy(cx, cy, 0.0, rules.jack_label_dy, ldx, ldy)
             parts = [
                 f'<circle cx="{cx}" cy="{cy}" r="3.5" fill="none" '
                 f'stroke="{colors["jack_outer"]}" stroke-width="0.6"/>',
@@ -836,27 +843,32 @@ def _component_svg(comp: dict, rules: DesignRules, colors: dict) -> str:
                 f'width="{explicit_rect["w"]}" height="{explicit_rect["h"]}" '
                 f'rx="{rules.output_rect_rx}" fill="none" '
                 f'stroke="{colors["output_rect_s"]}" stroke-width="0.3"/>',
-                f'<text x="{cx}" y="{cy + rules.jack_label_dy:.1f}" fill="{colors["jack_text"]}" '
+                f'<text x="{lx}" y="{ly:.1f}" fill="{colors["jack_text"]}" '
                 f'font-family="monospace" font-size="{font_size}" text-anchor="middle">{label}</text>',
             ]
             return "\n".join(parts)
         return svg.svg_jack(cx, cy, label, "output", rules, colors, font_size=font_size,
-                            rect_w=rect_w, label_border=bool(comp.get("label_border", False)))
+                            rect_w=rect_w, label_border=bool(comp.get("label_border", False)),
+                            label_dx=ldx, label_dy=ldy)
 
     elif ctype == "trimpot":
         tp_label       = comp.get("label", "")
         lfs            = float(comp.get("label_font_size", 1.8))
-        return svg.svg_trimpot(cx, cy, tp_label, rules, colors, label_font_size=lfs)
+        return svg.svg_trimpot(cx, cy, tp_label, rules, colors, label_font_size=lfs,
+                               rotate=rot, label_dx=ldx, label_dy=ldy)
 
-    elif ctype in ("knob_medium", "knob_large", "knob_xl"):
-        r_map = {"knob_medium": 4.5, "knob_large": 7.0, "knob_xl": 9.0}
-        r     = r_map[ctype]
-        lbl   = label if not label_lines else ""
+    elif ctype == "knob":
+        # cap_mm = cap DIAMETER; the drawn circle radius is cap_mm / 2.
+        cap_mm = float(comp.get("cap_mm", rules.knob_default_cap_mm))
+        r      = cap_mm / 2.0
+        lbl    = label if not label_lines else ""
         return svg.svg_knob(cx, cy, r, lbl, rules, colors,
-                            label_lines=label_lines, label_fill=label_fill)
+                            label_lines=label_lines, label_fill=label_fill,
+                            label_dx=ldx, label_dy=ldy)
 
     elif ctype == "slider_V45":
-        return svg.svg_slider_V45(cx, cy, comp.get("label", ""), colors)
+        return svg.svg_slider_V45(cx, cy, comp.get("label", ""), colors,
+                                  rotate=rot, label_dx=ldx, label_dy=ldy)
 
     elif ctype == "slider":
         # Legacy: slider widget drawn by VCV Rack only (no SVG body)
@@ -865,67 +877,24 @@ def _component_svg(comp: dict, rules: DesignRules, colors: dict) -> str:
     elif ctype == "slider_label":
         return svg.svg_slider_label(float(comp.get("cx", cx)), float(comp.get("y", 38)), colors)
 
-    elif ctype == "switch_H2":
-        ox = rules.x_offset
-        pos_xs = [px + ox for px in comp.get("pos_xs", [])]
-        return svg.svg_switch_H2(
-            cx=cx, cy=cy,
-            label_above=comp.get("label_above", ""),
-            label_above_y=float(comp.get("label_above_y", cy - 3.5)),
+    elif ctype == "toggle_dw3":
+        return svg.svg_toggle_2pos(
+            cx, cy, comp.get("label", ""), colors,
             pos_labels=comp.get("pos_labels", []),
-            pos_xs=pos_xs,
-            pos_y=float(comp.get("pos_y", cy + 4)),
-            colors=colors,
+            label_dx=ldx, label_dy=ldy,
+            pos_dx=float(comp.get("pos_dx", 0.0)), pos_dy=float(comp.get("pos_dy", 0.0)),
+            pos_spread=float(comp.get("pos_spread", svg.POS_SPREAD_DEFAULT)),
+            rotate=rot,
         )
 
-    elif ctype == "switch_H3":
-        ox = rules.x_offset
-        pos_xs = [px + ox for px in comp.get("pos_xs", [])]
-        return svg.svg_switch_H3(
-            cx=cx, cy=cy,
+    elif ctype == "toggle_dw5":
+        return svg.svg_toggle_3pos(
+            cx, cy, comp.get("label", ""), colors,
             pos_labels=comp.get("pos_labels", []),
-            pos_xs=pos_xs,
-            pos_y=float(comp.get("pos_y", cy + 5.3)),
-            label_below=comp.get("label_below", comp.get("label", "")),
-            label_below_y=float(comp.get("label_below_y", cy + 8.8)),
-            colors=colors,
-        )
-
-    elif ctype == "switch_V3":
-        body_height = float(comp.get("body_height", 12))
-        return svg.svg_switch_V3(
-            cx=cx,
-            cy_body_top=float(comp.get("cy_body_top", cy - body_height / 2)),
-            body_height=body_height,
-            slug_y_offset=float(comp.get("slug_y_offset", 4.25)),
-            pos_labels=comp.get("pos_labels", []),
-            pos_ys=comp.get("pos_ys", []),
-            label_below=comp.get("label_below", comp.get("label", "")),
-            label_below_y=float(comp.get("label_below_y", cy + body_height / 2 + 3)),
-            colors=colors,
-        )
-
-    elif ctype == "eg_2pos":
-        ox = rules.x_offset
-        pos_xs = [px + ox for px in comp.get("pos_xs", [])]
-        return svg.svg_eg_slide_h(
-            cx=cx, cy=cy,
-            label_above=comp.get("label_above", comp.get("label", "")),
-            label_above_y=float(comp.get("label_above_y", cy - 3.5)),
-            pos_labels=comp.get("pos_labels", []),
-            pos_xs=pos_xs,
-            pos_y=float(comp.get("pos_y", cy + 4.0)),
-            colors=colors,
-        )
-
-    elif ctype == "eg_3pos":
-        return svg.svg_eg_slide_v(
-            cx=cx, cy=cy,
-            pos_labels=comp.get("pos_labels", []),
-            pos_ys=comp.get("pos_ys", []),
-            label_below=comp.get("label_below", comp.get("label", "")),
-            label_below_y=float(comp.get("label_below_y", cy + 11.25)),
-            colors=colors,
+            label_dx=ldx, label_dy=ldy,
+            pos_dx=float(comp.get("pos_dx", 0.0)), pos_dy=float(comp.get("pos_dy", 0.0)),
+            pos_spread=float(comp.get("pos_spread", svg.POS_SPREAD_DEFAULT)),
+            rotate=rot,
         )
 
     elif ctype == "led":
@@ -936,11 +905,10 @@ def _component_svg(comp: dict, rules: DesignRules, colors: dict) -> str:
     elif ctype == "led_labeled":
         lbl_fill = comp.get("label_fill", colors["jack_text"])
         lbl      = comp.get("label", "")
-        lbl_dy   = comp.get("label_dy", None)
         return svg.svg_led_labeled(cx, cy, lbl, lbl_fill, rules, colors,
                                    fill=comp.get("led_fill", ""),
                                    stroke=comp.get("led_stroke", ""),
-                                   label_dy=lbl_dy,
+                                   label_dx=ldx, label_dy=ldy,
                                    label_border=bool(comp.get("label_border", False)),
                                    rect_w=comp.get("rect_w"))
 
@@ -1014,8 +982,6 @@ def _collect_overlay_positions(data: dict, rules: DesignRules) -> dict:
     leds:     list[tuple] = []  # (cx, cy, rotate)
     sliders:  list[tuple] = []  # (cx, cy, rotate)
 
-    r_cap_map = {"knob_medium": 4.5, "knob_large": 7.0, "knob_xl": 9.0}
-
     from panel_rules import SWITCH_TYPES, LED_TYPES, JACK_TYPES, POT_TYPES, SLIDER_TYPES  # noqa: E402
 
     for comp in resolve_components(data, rules):
@@ -1028,8 +994,9 @@ def _collect_overlay_positions(data: dict, rules: DesignRules) -> dict:
             jacks.append((cx, cy, rotate))
         elif ctype in POT_TYPES:
             pots.append((cx, cy, rotate))
-            if ctype in r_cap_map:
-                knobs.append((cx, cy, r_cap_map[ctype]))
+            if ctype == "knob":
+                cap_r = float(comp.get("cap_mm", rules.knob_default_cap_mm)) / 2.0
+                knobs.append((cx, cy, cap_r))
         elif ctype in SWITCH_TYPES:
             switches.append((cx, cy, rotate))
         elif ctype in LED_TYPES:
@@ -1235,7 +1202,7 @@ def build_html(svg_content: str, rules: DesignRules, violations: list[str], data
         ("#ffcc00", "●", "Jack nut  r=5.0mm"),
         ("#64b4ff", "●", "Pot / trimpot nut  r=5.5mm"),
         ("#ff8c00", "●", "Knob cap  (visual)"),
-        ("#dc64ff", "●", "Switch hole  r=3.15mm"),
+        ("#dc64ff", "●", "Toggle washer  r=3.8mm"),
         ("#64dc64", "●", "LED hole  r=1.6mm"),
         ("#ffcc00", "⬚", "PCB courtyard  (simplified bbox; dashed)"),
         ("#f5a623", "⬚", "KiCad fab outline  F.Fab"),
@@ -1355,7 +1322,7 @@ Query commands (no files written):
   --dist ID1 ID2                 Center-to-center, nut-edge, and PCB courtyard distances
   --snap-to ID DIR TYPE GAP      cx/cy for TYPE with GAP mm nut-edge clearance from ID
                                  DIR: right | left | above | below
-                                 TYPE: jack_input | trimpot | knob_medium | switch_H2 | led | …
+                                 TYPE: jack_input | trimpot | knob | toggle_dw3 | led | …
   --zone-bbox ZONE_ID            Component bounding box for a zone
   --select X1 Y1 X2 Y2           List components whose centres fall within the bbox
   --shift ZONE_ID DX DY          Preview bulk shift of all components in a zone

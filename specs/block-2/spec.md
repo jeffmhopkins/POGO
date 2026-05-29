@@ -21,9 +21,9 @@ jack only, no automatic normalling.
 
 ## 2. Theoretical Design and Topology
 
-> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
-> It has not been verified against the current panel control set. Do not use for circuit
-> construction until re-verified. See `specs/STATUS.md` for current phase status.
+> ✅ **FINALIZED 2026-05-29** — Rate network reworked to the drive-attenuator topology
+> (fixed R_INT + trimpot attenuator on the Schmitt output) and verified against the
+> plugin rate law and the components.yaml BOM. Transcribed in `kicad/nets/block-2.nets.yaml`.
 
 ### DSP-to-analog mapping
 
@@ -66,27 +66,46 @@ duration 2×V_H×R_int×C_int/V_sat. Rearranging for the integrator resistor:
 R_int = V_sat / (4 × V_H × f × C_int)
 ```
 
-**Rate control — preset trimpot:** The DSP uses `speedHz = 0.05 × 400^param`, which
-spans 0.05 to 20 Hz over the [0, 1] range. The hardware rate control is a Bourns 3296W
-screwdriver trimpot (preset, not a performance knob). The trimpot wiper sets R_int,
-varying the integrator charge current and thus the oscillation rate. Because the trimpot
-is a fixed preset rather than a swept control, linear taper is acceptable — the user
-simply turns to the desired position during setup. The full 0.05–20 Hz range is
-accessible over the trimpot travel with the R_CW_END and R_CCW_END resistors (see below).
+**Rate control — drive-attenuator (FINALIZED 2026-05-29):** The DSP uses
+`speedHz = 0.05 × 400^param`, spanning 0.05–20 Hz (a 400:1 range). Since
+f ∝ 1/(R_int·C_int), covering 400:1 by varying R_int would need a 400:1 resistance
+swing (≈590 kΩ → 234 MΩ) — impossible from a single 1 MΩ linear trimpot used as a
+rheostat (series R is only additive). The 3296W is a cermet preset (linear taper only;
+no log option), so the earlier "R_CW_END/R_CCW_END" rheostat scheme could not deliver
+the range and is **superseded**.
+
+Instead, R_int is **fixed** and the rate is set by **attenuating the Schmitt
+square-wave drive into the integrator**. The trimpot is wired as a voltage divider on
+V_sq; its wiper feeds R_int. The integrator charge current is V_drive/R_int = k·V_sq/R_int
+with k ∈ [k_min, 1] the wiper fraction, so f scales linearly with k:
+
+```
+f = k · V_sat / (4 · V_H · R_int · C_int)
+```
+
+This covers the full 400:1 range from one linear trimpot. Because the trimpot is a
+set-once preset, the (now linear-in-rotation) rate law is irrelevant — the user simply
+turns to the desired rate during setup. A small floor resistor (R_FLOOR) at the divider
+bottom bounds k_min so the LFO cannot stall at DC.
 
 ### Topology: integrator + Schmitt trigger
 
 ```
 Triangle oscillator — two op-amp halves per LFO (one TL072CDT):
 
+Rate attenuator (sets charge current):
+  V_sq ──[RV_RATE top]──┐
+                        ├── wiper = V_drive = k·V_sq  ──[R_INT]──►(−) TL072-A
+  GND ──[R_FLOOR]──[RV_RATE bottom]┘   (k ∈ [k_min,1] set by trimpot position)
+
 Half A — Integrator:
-  V_sq (comparator output) ──[R_INT]──►(−) TL072-A
-                                              │
-                                            C_INT  (to GND; op-amp (−) is virtual ground)
-                                              │
-                                         V_tri (op-amp output)
+  V_drive (attenuated square) ──[R_INT fixed]──►(−) TL072-A
+                                                     │
+                                                   C_INT  (feedback; (−) is virtual ground)
+                                                     │
+                                                V_tri (op-amp output)
   (+) input tied to AGND (signal ground)
-  Capacitor integrates: V_tri = −∫(V_sq / R_INT·C_INT) dt → linear ramp
+  Capacitor integrates: V_tri = −∫(V_drive / R_INT·C_INT) dt → linear ramp; rate ∝ k
 
 Half B — Schmitt trigger (non-inverting comparator with hysteresis):
   V_tri ──────────────────────────────────►(−) TL072-B  ← inverting input follows triangle
@@ -153,9 +172,9 @@ Items 1 and 3 below are intentional DSP advantages kept by design. Item 2 is now
 
 ## 3. Physical Design
 
-> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
-> It has not been verified against the current panel control set. Do not use for circuit
-> construction until re-verified. See `specs/STATUS.md` for current phase status.
+> ✅ **FINALIZED 2026-05-29** — Rate network reworked to the drive-attenuator topology
+> (fixed R_INT + trimpot attenuator on the Schmitt output) and verified against the
+> plugin rate law and the components.yaml BOM. Transcribed in `kicad/nets/block-2.nets.yaml`.
 
 ### Component values and derivations
 
@@ -164,24 +183,24 @@ Items 1 and 3 below are intentional DSP advantages kept by design. Item 2 is now
 **Integrator capacitor:** C_INT = 47 nF C0G ceramic (0603). C0G mandatory —
 X7R will cause LFO rate drift with temperature (audible as wandering sweep rate).
 
-**Required R_INT range** (from frequency equation f = V_sat / (4 × V_H × R_INT × C_INT)):
+**Fixed integrator resistor R_INT** (sets f_max at full drive, k=1):
 ```
 V_sat ≈ 11 V, V_H = 5 V, C_INT = 47 nF
-
-At f_max = 20 Hz:   R_INT = 11 / (4 × 5 × 20 × 47n) = 293 kΩ
-At f_min = 0.05 Hz: R_INT = 11 / (4 × 5 × 0.05 × 47n) = 234 MΩ
+R_INT = V_sat / (4 × V_H × f_max × C_INT) = 11 / (4 × 5 × 20 × 47n) = 585 kΩ
+→ R_INT = 590 kΩ (E96, 1%)  → f_max ≈ 19.8 Hz at k = 1
 ```
 
-Full range (293 kΩ to 234 MΩ) requires an effective resistance ratio of 800:1. Achieved
-with a 1 MΩ trimpot (Bourns 3296W; RV_LFO) plus two end resistors:
-- **R_CW_END = 270 kΩ** in parallel with the pot at the CW end — limits R_INT_min:
-  R_INT_min ≈ 270k || 0 = 270kΩ → f_max ≈ 11/(4×5×270k×47n) = 43 Hz  
-  (fast side is intentionally wider; the log pot's CW end compresses, trimmed by assembly)
-- **R_CCW_END = 2 × 100 MΩ in series = 200 MΩ** (0603) at the CCW end — limits R_INT_max ≈ 201 MΩ →  
-  f_min ≈ 11/(4×5×201M×47n) ≈ 0.058 Hz ≈ 0.05 Hz ✓
-
-Actual achievable range with these end resistors: ~0.058 Hz to ~43 Hz. The extra headroom
-at the fast end is acceptable for a modulation source.
+**Rate attenuator (RV_RATE = 1 MΩ linear trimpot + R_FLOOR):** the trimpot is a divider
+on V_sq — top (pin 3) to V_sq, bottom (pin 1) to GND via R_FLOOR, wiper (pin 2) to R_INT.
+The wiper fraction k sets the charge current and thus f = k · f_max:
+```
+k_max ≈ 1                         → f_max ≈ 19.8 Hz   (wiper at top)
+k_min = R_FLOOR / (RV + R_FLOOR)  → f_min ≈ k_min · f_max
+R_FLOOR = 2.4 kΩ → k_min = 2.4k / (1M + 2.4k) ≈ 0.0024 → f_min ≈ 0.047 Hz ✓
+```
+R_INT (590 kΩ) loads the wiper in parallel with R_FLOOR (≈2.39 kΩ effective); the small
+shift is absorbed when the preset is dialled in at assembly. Achievable range ≈0.05–20 Hz
+from a single linear trimpot. C_INT must be C0G (timing stability).
 
 **Schmitt trigger thresholds (±5 V):** Positive feedback divider from comparator output
 to (+) input, with a lower resistor to GND:
@@ -211,31 +230,28 @@ R_LED = (5 − 2.0 − 0.7) / 0.002 = 1.15 kΩ  → use 1.2 kΩ standard
 ### Signal routing
 
 ```
-RV_LFO1 (rate pot) → R_min → integrator input
-Schmitt output → integrator input (sign reversal via comparator polarity)
-Integrator output (triangle) → D_LED1 (1N4148W) → R_LED1 (1.2 kΩ) → LED_LFO1
-                             → R_LFO1 (1 kΩ) → J_LFO1 output jack
-                             → (normalling ring of J_MOD_IN) ← tip-switch controlled
+LFO1 (U1 = TL072): integrator (A) + Schmitt (B)
+  Schmitt out V_sq → RV1 top; RV1 bottom → R3 (R_FLOOR) → GND; RV1 wiper → R1 (R_INT) → U1A(−)
+  U1A: (+) = GND, (−) = R1/C1 summing node, out = V_tri; C1 (C_INT) feedback (−)↔out
+  Schmitt U1B: (−) = V_tri, (+) = R5(R_FB_SQ to V_sq)/R7(R_HYS to GND) node, out = V_sq
+  V_tri → D1 (1N4148W) → R9 (R_LED 1.2 kΩ) → LED1 → GND   (half-wave pulsing indicator)
+  V_tri → R11 (R_OUT 1 kΩ) → J5 (LFO1 jack)  and  → MOD_IN normalling ring (block-3)
 
-RV_LFO2 (rate pot) → R_min → integrator input (U_LFO2-A)
-Integrator output → D_LED2 (1N4148W) → R_LED2 (1.2 kΩ) → LED_LFO2
-                 → R_LFO2 (1 kΩ) → J_LFO2 output jack
+LFO2 (U2): identical, standalone — V_tri → R12 → J6 (LFO2 jack); no normalling.
 ```
 
 ### Calibration points
 
-No rate calibration trimmer is specified in the current design. The log-taper pot
-produces an approximate exponential law adequate for a modulation rate control. If
-tighter frequency accuracy is required in Phase 3R, a trimmer in series with R_min
-can adjust the maximum frequency endpoint.
+The rate trimpot (RV1/RV2) IS the calibration: dial each LFO to the desired rate at
+assembly. R_INT (590 kΩ) sets the fast endpoint; R_FLOOR (2.4 kΩ) sets the slow floor.
+C_INT tolerance shifts absolute frequency but the preset absorbs it. No additional rate
+trimmer is needed.
 
 ### Trim pots
 
-None required. The 1 MΩ log-taper pot with end resistors provides adequate
-rate-law approximation (±1 half-octave accuracy is sufficient for a modulation
-source). If tighter maximum-rate calibration is needed during assembly, a 10 kΩ–
-50 kΩ trimmer can be added in series with R_CW_END; this is not required for
-functionality and is omitted from the bill of materials.
+RV1/RV2 (1 MΩ linear, Bourns 3296W) are the rate presets, wired as drive attenuators on
+the Schmitt output (not as rheostats). Linear taper is correct — the rate law across
+rotation is irrelevant for a set-once preset.
 
 ### Board assignment
 
@@ -250,9 +266,9 @@ output protection but are physically placed on the utility board near the LFO ou
 
 ## 4. Component Requirements
 
-> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
-> It has not been verified against the current panel control set. Do not use for circuit
-> construction until re-verified. See `specs/STATUS.md` for current phase status.
+> ✅ **FINALIZED 2026-05-29** — Rate network reworked to the drive-attenuator topology
+> (fixed R_INT + trimpot attenuator on the Schmitt output) and verified against the
+> plugin rate law and the components.yaml BOM. Transcribed in `kicad/nets/block-2.nets.yaml`.
 
 | Ref | Part | Package | Value | Qty | Board | Block | Function |
 |---|---|---|---|---|---|---|---|
@@ -262,10 +278,10 @@ output protection but are physically placed on the utility board near the LFO ou
 | RV_LFO2 | Bourns 3296W trimpot | through-hole | 1 MΩ | 1 | control | block-2 | LFO2 rate preset (0.05–20 Hz) |
 | C_INT1 | cap, C0G | 0603 | 47 nF | 1 | utility | block-2 | LFO1 integrator timing cap; C0G mandatory |
 | C_INT2 | cap, C0G | 0603 | 47 nF | 1 | utility | block-2 | LFO2 integrator timing cap; C0G mandatory |
-| R_CW_END1 | resistor | 0603 | 270 kΩ | 1 | utility | block-2 | LFO1 CW end resistor; limits f_max ≈ 25 Hz |
-| R_CW_END2 | resistor | 0603 | 270 kΩ | 1 | utility | block-2 | LFO2 CW end resistor |
-| R_CCW_END1 | resistor | 0603 | 100 MΩ | 2 | utility | block-2 | LFO1 CCW end (2× in series = 200 MΩ); limits f_min ≈ 0.058 Hz |
-| R_CCW_END2 | resistor | 0603 | 100 MΩ | 2 | utility | block-2 | LFO2 CCW end (2× in series = 200 MΩ) |
+| R_INT1 (R1) | resistor 1% | 0603 | 590 kΩ | 1 | utility | block-2 | LFO1 integrator input R (fixed); f_max ≈ 20 Hz at full drive |
+| R_INT2 (R2) | resistor 1% | 0603 | 590 kΩ | 1 | utility | block-2 | LFO2 integrator input R (fixed) |
+| R_FLOOR1 (R3) | resistor | 0603 | 2.4 kΩ | 1 | utility | block-2 | LFO1 rate-attenuator floor; sets f_min ≈ 0.05 Hz |
+| R_FLOOR2 (R4) | resistor | 0603 | 2.4 kΩ | 1 | utility | block-2 | LFO2 rate-attenuator floor |
 | R_FB_SQ1 | resistor | 0603 | 100 kΩ | 1 | utility | block-2 | LFO1 Schmitt feedback (output → (+) input) |
 | R_HYS1 | resistor | 0603 | 82 kΩ | 1 | utility | block-2 | LFO1 Schmitt hysteresis ((+) input → GND); sets V_H = 5V |
 | R_FB_SQ2 | resistor | 0603 | 100 kΩ | 1 | utility | block-2 | LFO2 Schmitt feedback |

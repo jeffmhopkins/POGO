@@ -1,0 +1,17 @@
+# that340 — POGO sourced component (hand-maintained)
+slug: that340
+mpn: THAT340S14-U
+manufacturer: THAT Corporation
+supplier: '~'
+package: SOIC-14
+matches:
+- THAT340S14-U
+footprint:
+  lib: Package_SO
+  name: SOIC-14_3.9x8.7mm_P1.27mm
+datasheet:
+  url: https://thatcorp.com/datashts/THAT_300-Series_Datasheet.pdf
+  version: Doc 600041 Rev 04
+  sha256: 721a07f1fccfca770224174f1c91e5b76f19fa6306dcf413d7960ec3733f4f5c
+  bytes: 107680
+notes: Matched transistor array; V/oct expo converter.

@@ -73,8 +73,8 @@
 
   const PALETTE_TYPES = [
     "jack_input", "jack_output", "trimpot",
-    "knob_medium", "knob_large", "knob_xl",
-    "eg_2pos", "eg_3pos",
+    "knob",
+    "toggle_dw3", "toggle_dw5",
     "led", "led_labeled", "slider_V45", "text",
   ];
 
@@ -126,11 +126,7 @@
     if (type === "trimpot") return CY.TRIMPOT_CY;
     if (C.type_sets.pot.includes(type)) return CY.POT_CY;
     if (C.type_sets.slider.includes(type)) return CY.SLIDER_V45_CY;
-    if (C.type_sets.switch_v3.includes(type)) return CY.SWITCH_V3_CY;
-    if (type === "switch_H3") return CY.SWITCH_H3_CY;
-    if (type === "switch_H2") return CY.SWITCH_CY;
-    if (C.type_sets.eg_2pos.includes(type)) return CY.EG1218_CY;
-    if (C.type_sets.eg_3pos.includes(type)) return CY.EG2301_V_CY;
+    if (C.type_sets.toggle_dw3.includes(type) || C.type_sets.toggle_dw5.includes(type)) return CY.TOGGLE_CY;
     if (C.type_sets.led.includes(type)) return CY.LED_CY;
     return null;
   }
@@ -157,8 +153,7 @@
     if (type === "trimpot") return P.trimpot;
     if (C.type_sets.pot.includes(type)) return P.pot;
     if (C.type_sets.slider.includes(type)) return P.slider;
-    if (C.type_sets.switch_v3.includes(type)) return P.switch_v3;
-    if (type === "switch_H2" || type === "switch_H3") return P.switch_h;
+    if (C.type_sets.toggle_dw3.includes(type) || C.type_sets.toggle_dw5.includes(type)) return P.toggle;
     if (C.type_sets.led.includes(type)) return P.led;
     return 0;
   }
@@ -223,19 +218,10 @@
     // 1 ── nut keep-out
     for (const o of comps) {
       const { cx, cy, type, label } = o;
-      // EG slide switches: rectangular slot, check y-extent against ±half-height
-      if (C.type_sets.eg_2pos.includes(type) || C.type_sets.eg_3pos.includes(type)) {
-        const tag = C.type_sets.eg_2pos.includes(type) ? "EG2POS" : "EG3POS";
-        const ph = C.eg_panel_h[type];
-        const top = cy - ph, bot = cy + ph;
-        if (top < topKO) rec(`[NUT KEEPOUT] ${tag} '${label}' at cy=${f2(cy)}: slot top=${f2(top)} encroaches TOP keepout (${f2(topKO)})`, o.c);
-        if (bot > botKO) rec(`[NUT KEEPOUT] ${tag} '${label}' at cy=${f2(cy)}: slot bottom=${f2(bot)} exceeds BOT keepout (${f2(botKO)})`, o.c);
-        continue;
-      }
       let r = null, kind = null;
       if (C.type_sets.jack.includes(type)) { r = DR.jack_nut_r; kind = "JACK"; }
       else if (C.type_sets.pot.includes(type)) { r = DR.pot_nut_r; kind = "POT"; }
-      else if (C.type_sets.switch_h.includes(type)) { r = C.panel_r.switch_h; kind = "SWITCH"; }
+      else if (C.type_sets.toggle_dw3.includes(type) || C.type_sets.toggle_dw5.includes(type)) { r = C.panel_r.toggle; kind = "SWITCH"; }
       else if (C.type_sets.led.includes(type)) { r = C.panel_r.led; kind = "LED"; }
       if (r == null) continue;
       const top = cy - r, bot = cy + r;
@@ -304,36 +290,71 @@
   const FONT = 'font-family="monospace"';
   // Rounded-rect label border (anchor-relative), shared by jacks and led_labeled.
   // Drawn when c.label_border is set; geometry from design_rules.output_rect_*.
-  function labelBorderRect(c, labelDy) {
+  function labelBorderRect(c, labelDy, labelDx) {
     const rw = c.rect_w != null ? Number(c.rect_w) : 7.0;
     const ry = labelDy + DR.output_rect_dy;
-    return `<rect x="${(-rw / 2).toFixed(2)}" y="${ry.toFixed(2)}" width="${rw}" height="${DR.output_rect_h}" rx="${DR.output_rect_rx}" fill="none" stroke="${COL.output_rect_s}" stroke-width="0.3"/>`;
+    const rx0 = (labelDx || 0) - rw / 2;
+    return `<rect x="${rx0.toFixed(2)}" y="${ry.toFixed(2)}" width="${rw}" height="${DR.output_rect_h}" rx="${DR.output_rect_rx}" fill="none" stroke="${COL.output_rect_s}" stroke-width="0.3"/>`;
+  }
+  // ── Label geometry (anchor-relative; mirrors panel_svg.label_xy / pos_label_xys) ──
+  const POS_SPREAD_DEFAULT = 4.8, POS_DY_DEFAULT = 4.0;
+  const LABEL_FOLLOWS_ROTATION = new Set(["toggle_dw3", "toggle_dw5", "slider_V45"]);
+  // Compact mm coordinate (mirror panel_svg._fmt): 3 dp, strip trailing zeros.
+  const nf = (v) => (Math.round(v * 1000) / 1000).toString();
+  function rotateVec(dx, dy, deg) {
+    if (!deg) return [dx, dy];
+    const r = deg * Math.PI / 180, c = Math.cos(r), s = Math.sin(r);
+    return [dx * c - dy * s, dx * s + dy * c];
+  }
+  // Resolve a label offset (relative to the component anchor): default + (rotated if the
+  // type follows rotation) + screen-axis nudge (label_dx/label_dy).
+  function labelXY(c, ddx, ddy) {
+    const rot = Number(c.rotate || 0);
+    if (LABEL_FOLLOWS_ROTATION.has(c.type) && rot) [ddx, ddy] = rotateVec(ddx, ddy, rot);
+    return [ddx + Number(c.label_dx || 0), ddy + Number(c.label_dy || 0)];
+  }
+  // Default-flank N position labels around a switch (rotates with the switch) + nudge.
+  function posLabelXYs(c, n, spread) {
+    const rot = Number(c.rotate || 0), pdx = Number(c.pos_dx || 0), pdy = Number(c.pos_dy || 0);
+    const out = [];
+    for (let i = 0; i < n; i++) {
+      const dx = n <= 1 ? 0 : (i - (n - 1) / 2) * (2 * spread / (n - 1));
+      const [rx, ry] = rotateVec(dx, POS_DY_DEFAULT, rot);
+      out.push([rx + pdx, ry + pdy]);
+    }
+    return out;
   }
   function rJack(c, io) {
     const fs = Number(c.font_size || 1.8);
-    const ly = DR.jack_label_dy;
+    const [lx, ly] = labelXY(c, 0, DR.jack_label_dy);
     let s = `<circle r="3.5" fill="none" stroke="${COL.jack_outer}" stroke-width="0.6"/>` +
             `<circle r="1.4" fill="${COL.jack_inner}" stroke="${COL.jack_inner_s}" stroke-width="0.4"/>`;
-    if (c.label_border) s += labelBorderRect(c, ly);
-    s += `<text y="${ly.toFixed(1)}" fill="${COL.jack_text}" ${FONT} font-size="${fs}" text-anchor="middle">${esc(c.label || "")}</text>`;
+    if (c.label_border) s += labelBorderRect(c, ly, lx);
+    s += `<text x="${nf(lx)}" y="${nf(ly)}" fill="${COL.jack_text}" ${FONT} font-size="${fs}" text-anchor="middle">${esc(c.label || "")}</text>`;
     return s;
   }
   function rTrimpot(c) {
     const fs = Number(c.label_font_size || 1.8);
+    const rot = Number(c.rotate || 0);
+    const [ix, iy] = rotateVec(0, -DR.indicator_length, rot);
+    const ind = rot ? `x2="${ix.toFixed(3)}" y2="${iy.toFixed(3)}"` : `y2="${(-DR.indicator_length)}"`;
+    const [lx, ly] = labelXY(c, 0, 2.5 + 3.0);
     return `<circle r="2.5" fill="${COL.knob_fill}" stroke="${COL.knob_stroke}" stroke-width="0.5"/>` +
-           `<line y2="${(-DR.indicator_length)}" stroke="${COL.indicator}" stroke-width="0.5"/>` +
-           `<text y="${(2.5 + 3.0).toFixed(1)}" fill="${COL.control_text}" ${FONT} font-size="${fs}" text-anchor="middle">${esc(c.label || "")}</text>`;
+           `<line ${ind} stroke="${COL.indicator}" stroke-width="0.5"/>` +
+           `<text x="${nf(lx)}" y="${nf(ly)}" fill="${COL.control_text}" ${FONT} font-size="${fs}" text-anchor="middle">${esc(c.label || "")}</text>`;
   }
   function rKnob(c, r) {
     let sw = 0.5 + (r - 2.5) * 0.05, isw = 0.5 + (r - 2.5) * 0.06;
     if (r >= 9) { sw = 0.7; isw = 0.8; } else if (r >= 7) { sw = 0.6; isw = 0.7; }
     const lines = c.label_lines || [c.label || ""];
     const fill = c.label_fill || COL.control_text;
+    // Knobs intentionally ignore rotate for their pointer/label (cap is independent
+    // of body mounting); only the PCB courtyard rotates. See svg_knob() in panel_svg.py.
     let s = `<circle r="${r}" fill="${COL.knob_fill}" stroke="${COL.knob_stroke}" stroke-width="${sw.toFixed(1)}"/>` +
             `<line y2="${(-r)}" stroke="${COL.indicator}" stroke-width="${isw.toFixed(1)}"/>`;
-    const base = r + 3.0;
+    const [lx, base] = labelXY(c, 0, r + 3.0);
     lines.forEach((ln, i) => {
-      s += `<text y="${(base + i * 2.3).toFixed(1)}" fill="${fill}" ${FONT} font-size="1.8" text-anchor="middle">${esc(ln)}</text>`;
+      s += `<text x="${nf(lx)}" y="${nf(base + i * 2.3)}" fill="${fill}" ${FONT} font-size="1.8" text-anchor="middle">${esc(ln)}</text>`;
     });
     return s;
   }
@@ -341,94 +362,60 @@
     return `<circle r="1.2" fill="${c.led_fill || COL.led_fill}" stroke="${c.led_stroke || COL.led_stroke}" stroke-width="0.4"/>`;
   }
   function rLedLabeled(c) {
-    const dy = c.label_dy != null ? Number(c.label_dy) : DR.jack_label_dy;
     const lf = c.label_fill || COL.jack_text;
     const fs = Number(c.font_size || 1.8);
-    return rLed(c) + (c.label_border ? labelBorderRect(c, dy) : "") +
-      `<text y="${dy.toFixed(1)}" fill="${lf}" ${FONT} font-size="${fs}" text-anchor="middle">${esc(c.label || "")}</text>`;
-  }
-  function rSwitchH(c, width, rawcx) {
-    const labels = c.pos_labels || [], xs = c.pos_xs || [];
-    const bx = -width / 2;
-    let s = "";
-    if (width === 9 && c.label_above != null) {
-      const ay = c.label_above_y != null ? Number(c.label_above_y) - resolve(c, zoneOf(c)).cy : -3.5;
-      s += `<text y="${ay}" fill="${COL.jack_text}" ${FONT} font-size="1.8" text-anchor="middle">${esc(c.label_above)}</text>`;
-    }
-    const slug = width === 9 ? bx + 0.5 : -1.75;
-    s += `<rect x="${bx.toFixed(2)}" y="-1.2" width="${width}" height="2.4" rx="1.2" fill="${COL.switch_body}" stroke="${COL.jack_outer}" stroke-width="0.5"/>`;
-    s += `<rect x="${slug.toFixed(2)}" y="-1.4" width="3.5" height="2.8" rx="0.8" fill="${COL.switch_slug}" stroke="${COL.switch_slug_s}" stroke-width="0.3"/>`;
-    const cy = resolve(c, zoneOf(c)).cy;
-    const posY = c.pos_y != null ? Number(c.pos_y) - cy : (width === 9 ? 4 : 5.3);
-    labels.forEach((pl, i) => {
-      const px = (xs[i] != null ? Number(xs[i]) - rawcx : 0);
-      s += `<text x="${px}" y="${posY}" fill="${COL.jack_text}" ${FONT} font-size="1.6" text-anchor="middle">${esc(pl)}</text>`;
-    });
-    if (width === 12) {
-      const lby = c.label_below_y != null ? Number(c.label_below_y) - cy : 8.8;
-      s += `<text y="${lby}" fill="${COL.control_text}" ${FONT} font-size="1.8" text-anchor="middle">${esc(c.label_below || c.label || "")}</text>`;
-    }
-    return s;
-  }
-  function rSwitchV3(c) {
-    const cy = resolve(c, zoneOf(c)).cy;
-    const bh = Number(c.body_height || 12);
-    const top = (c.cy_body_top != null ? Number(c.cy_body_top) - cy : -bh / 2);
-    const slugOff = Number(c.slug_y_offset != null ? c.slug_y_offset : 4.25);
-    let s = `<rect x="-1.2" y="${top.toFixed(2)}" width="2.4" height="${bh}" rx="1.2" fill="${COL.switch_body}" stroke="${COL.jack_outer}" stroke-width="0.5"/>`;
-    s += `<rect x="-1.4" y="${(top + slugOff).toFixed(2)}" width="2.8" height="3.5" rx="0.8" fill="${COL.switch_slug}" stroke="${COL.switch_slug_s}" stroke-width="0.3"/>`;
-    const labels = c.pos_labels || [], ys = c.pos_ys || [];
-    labels.forEach((pl, i) => {
-      const py = (ys[i] != null ? Number(ys[i]) - cy : (top + i * (bh / Math.max(1, labels.length - 1))));
-      s += `<text x="1.4" y="${py}" fill="${COL.switch_label}" ${FONT} font-size="1.4" text-anchor="start">${esc(pl)}</text>`;
-    });
-    const lby = c.label_below_y != null ? Number(c.label_below_y) - cy : (bh / 2 + 3);
-    s += `<text y="${lby}" fill="${COL.control_text}" ${FONT} font-size="1.8" text-anchor="middle">${esc(c.label_below || c.label || "")}</text>`;
-    return s;
+    const [lx, ly] = labelXY(c, 0, DR.jack_label_dy);
+    return rLed(c) + (c.label_border ? labelBorderRect(c, ly, lx) : "") +
+      `<text x="${nf(lx)}" y="${nf(ly)}" fill="${lf}" ${FONT} font-size="${fs}" text-anchor="middle">${esc(c.label || "")}</text>`;
   }
   function rSlider(c) {
     const travel = 45.0, half = travel / 2, slotH = travel + 3.0, slotW = 2.5;
-    let s = `<rect x="${(-slotW / 2).toFixed(2)}" y="${(-slotH / 2).toFixed(2)}" width="${slotW}" height="${slotH.toFixed(1)}" rx="1.2" fill="${COL.knob_fill}" stroke="${COL.knob_stroke}" stroke-width="0.4"/>`;
-    s += `<line x1="-3.5" y1="${(-half).toFixed(2)}" x2="3.5" y2="${(-half).toFixed(2)}" stroke="${COL.knob_stroke}" stroke-width="0.5"/>`;
-    s += `<line x1="-3.5" y1="${half.toFixed(2)}" x2="3.5" y2="${half.toFixed(2)}" stroke="${COL.knob_stroke}" stroke-width="0.5"/>`;
-    s += `<line x1="-2" y1="0" x2="2" y2="0" stroke="${COL.indicator}" stroke-width="0.35"/>`;
-    s += `<text y="${(-slotH / 2 - 3.5).toFixed(1)}" fill="${COL.jack_text}" ${FONT} font-size="1.8" text-anchor="middle">${esc(c.label || "")}</text>`;
+    const rot = Number(c.rotate || 0);
+    let body = `<rect x="${(-slotW / 2).toFixed(2)}" y="${(-slotH / 2).toFixed(2)}" width="${slotW}" height="${slotH.toFixed(1)}" rx="1.2" fill="${COL.knob_fill}" stroke="${COL.knob_stroke}" stroke-width="0.4"/>`;
+    body += `<line x1="-3.5" y1="${(-half).toFixed(2)}" x2="3.5" y2="${(-half).toFixed(2)}" stroke="${COL.knob_stroke}" stroke-width="0.5"/>`;
+    body += `<line x1="-3.5" y1="${half.toFixed(2)}" x2="3.5" y2="${half.toFixed(2)}" stroke="${COL.knob_stroke}" stroke-width="0.5"/>`;
+    body += `<line x1="-2" y1="0" x2="2" y2="0" stroke="${COL.indicator}" stroke-width="0.35"/>`;
+    let s = rot ? `<g transform="rotate(${rot})">${body}</g>` : body;
+    const [lx, ly] = labelXY(c, 0, -(slotH / 2 + 3.5));
+    s += `<text x="${nf(lx)}" y="${nf(ly)}" fill="${COL.jack_text}" ${FONT} font-size="1.8" text-anchor="middle">${esc(c.label || "")}</text>`;
     return s;
   }
-  // E-Switch EG1218 — 2-pos horizontal slide (port of svg_eg_slide_h, anchor-relative).
-  function rEg2pos(c, rawcx) {
-    const bw = 11.6, bh = 4.0, pw = 3.5, ph = 4.8;
-    const cy = resolve(c, zoneOf(c)).cy;
-    let s = "";
-    if (c.label_above != null) {
-      const ay = c.label_above_y != null ? Number(c.label_above_y) - cy : -3.5;
-      s += `<text y="${ay}" fill="${COL.jack_text}" ${FONT} font-size="1.8" text-anchor="middle">${esc(c.label_above)}</text>`;
-    }
-    s += `<rect x="${(-bw / 2).toFixed(2)}" y="${(-bh / 2).toFixed(2)}" width="${bw}" height="${bh}" rx="0.8" fill="${COL.switch_body}" stroke="${COL.jack_outer}" stroke-width="0.5"/>`;
-    s += `<rect x="${(-bw / 2 + 0.8).toFixed(2)}" y="${(-ph / 2).toFixed(2)}" width="${pw}" height="${ph}" rx="0.6" fill="${COL.switch_slug}" stroke="${COL.switch_slug_s}" stroke-width="0.3"/>`;
-    const labels = c.pos_labels || [], xs = c.pos_xs || [];
-    const posY = c.pos_y != null ? Number(c.pos_y) - cy : 4;
-    labels.forEach((pl, i) => {
-      const px = xs[i] != null ? Number(xs[i]) - rawcx : 0;
-      s += `<text x="${px}" y="${posY}" fill="${COL.jack_text}" ${FONT} font-size="1.6" text-anchor="middle">${esc(pl)}</text>`;
-    });
+  // Dailywell toggle helpers (mirror panel_svg._toggle_bushing / _toggle_lever).
+  const TOGGLE_NUT_R = 2.475, TOGGLE_LEVER = 2.2;
+  function toggleBushing() {
+    return `<circle cx="0" cy="0" r="${TOGGLE_NUT_R}" fill="${COL.switch_body}" stroke="${COL.jack_outer}" stroke-width="0.4"/>`;
+  }
+  function toggleLever(dx, dy) {
+    return `<line x1="0" y1="0" x2="${dx.toFixed(3)}" y2="${dy.toFixed(3)}" stroke="${COL.switch_slug_s}" stroke-width="1.0" stroke-linecap="round"/>`
+      + `<circle cx="${dx.toFixed(3)}" cy="${dy.toFixed(3)}" r="0.9" fill="${COL.switch_slug}" stroke="${COL.switch_slug_s}" stroke-width="0.3"/>`;
+  }
+  function togglePosLabels(c) {
+    const labels = c.pos_labels || [];
+    if (!labels.length) return "";
+    const spread = c.pos_spread != null ? Number(c.pos_spread) : POS_SPREAD_DEFAULT;
+    const xys = posLabelXYs(c, labels.length, spread);
+    return labels.map((pl, i) =>
+      `<text x="${nf(xys[i][0])}" y="${nf(xys[i][1])}" fill="${COL.jack_text}" ${FONT} font-size="1.6" text-anchor="middle">${esc(pl)}</text>`
+    ).join("");
+  }
+  // Dailywell DW3 — 2-pos toggle (port of svg_toggle_2pos, anchor-relative).
+  function rToggle2(c) {
+    const [ldx, ldy] = labelXY(c, 0, -3.5);
+    let s = `<text x="${nf(ldx)}" y="${nf(ldy)}" fill="${COL.jack_text}" ${FONT} font-size="1.8" text-anchor="middle">${esc(c.label || "")}</text>`;
+    s += toggleBushing();
+    const [lx2, ly2] = rotateVec(-TOGGLE_LEVER, 0, Number(c.rotate || 0));
+    s += toggleLever(lx2, ly2);
+    s += togglePosLabels(c);
     return s;
   }
-  // E-Switch EG2301 — 3-pos vertical slide (port of svg_eg_slide_v, anchor-relative).
-  function rEg3pos(c) {
-    const bw = 6.5, bh = 16.0, tw = 2.0, pw = 7.3, ph = 4.0;
-    const cy = resolve(c, zoneOf(c)).cy;
-    let s = `<rect x="${(-bw / 2).toFixed(2)}" y="${(-bh / 2).toFixed(2)}" width="${bw}" height="${bh}" rx="0.8" fill="${COL.switch_body}" stroke="${COL.jack_outer}" stroke-width="0.5"/>`;
-    s += `<rect x="${(-tw / 2).toFixed(2)}" y="${(-bh / 2).toFixed(2)}" width="${tw}" height="${bh}" rx="0.5" fill="${COL.panel_bg}" stroke="none"/>`;
-    s += `<rect x="${(-pw / 2).toFixed(2)}" y="${(-ph / 2).toFixed(2)}" width="${pw}" height="${ph}" rx="0.6" fill="${COL.switch_slug}" stroke="${COL.switch_slug_s}" stroke-width="0.3"/>`;
-    const lx = bw / 2 + 1.2;
-    const labels = c.pos_labels || [], ys = c.pos_ys || [];
-    labels.forEach((pl, i) => {
-      const py = ys[i] != null ? Number(ys[i]) - cy : (-bh / 2 + i * (bh / Math.max(1, labels.length - 1)));
-      s += `<text x="${lx.toFixed(2)}" y="${py}" fill="${COL.switch_label}" ${FONT} font-size="1.4" text-anchor="start">${esc(pl)}</text>`;
-    });
-    const lby = c.label_below_y != null ? Number(c.label_below_y) - cy : (bh / 2 + 3);
-    s += `<text y="${lby}" fill="${COL.control_text}" ${FONT} font-size="1.8" text-anchor="middle">${esc(c.label_below || c.label || "")}</text>`;
+  // Dailywell DW5 — 3-pos toggle (port of svg_toggle_3pos, anchor-relative).
+  function rToggle3(c) {
+    let s = toggleBushing();
+    const [lx3, ly3] = rotateVec(0, -TOGGLE_LEVER, Number(c.rotate || 0));
+    s += toggleLever(lx3, ly3);
+    s += togglePosLabels(c);
+    const [ldx, ldy] = labelXY(c, 0, 7.0);
+    s += `<text x="${nf(ldx)}" y="${nf(ldy)}" fill="${COL.control_text}" ${FONT} font-size="1.8" text-anchor="middle">${esc(c.label || "")}</text>`;
     return s;
   }
   // Free-text annotation (anchor-relative: baseline at the component anchor).
@@ -446,16 +433,11 @@
       case "jack_input":  return rJack(c, "input");
       case "jack_output": return rJack(c, "output");
       case "trimpot":     return rTrimpot(c);
-      case "knob_medium": return rKnob(c, 4.5);
-      case "knob_large":  return rKnob(c, 7.0);
-      case "knob_xl":     return rKnob(c, 9.0);
+      case "knob":        return rKnob(c, (Number(c.cap_mm) || C.knob_default_cap_mm) / 2);
       case "led":         return rLed(c);
       case "led_labeled": return rLedLabeled(c);
-      case "eg_2pos":     return rEg2pos(c, rawCx(c, zoneOf(c)));
-      case "eg_3pos":     return rEg3pos(c);
-      case "switch_H2":   return rSwitchH(c, 9, rawCx(c, zoneOf(c)));
-      case "switch_H3":   return rSwitchH(c, 12, rawCx(c, zoneOf(c)));
-      case "switch_V3":   return rSwitchV3(c);
+      case "toggle_dw3":  return rToggle2(c);
+      case "toggle_dw5":  return rToggle3(c);
       case "slider_V45":  return rSlider(c);
       default:            return `<circle r="2" fill="none" stroke="#888"/>`;
     }
@@ -838,17 +820,10 @@
   }
 
   // ── Mutations ────────────────────────────────────────────────────────────────
-  // Shift a component's ABSOLUTE auxiliary position fields so labels/position-marks
-  // track the body when it moves. These store absolute panel coords (y) / raw x and
-  // would otherwise drift relative to the moved cx/cy.
-  function shiftAux(c, ddx, ddy) {
-    if (ddy) {
-      for (const k of ["label_below_y", "label_above_y", "cy_body_top", "pos_y"])
-        if (c[k] != null) c[k] = round3(Number(c[k]) + ddy);
-      if (Array.isArray(c.pos_ys)) c.pos_ys = c.pos_ys.map((v) => round3(Number(v) + ddy));
-    }
-    if (ddx && Array.isArray(c.pos_xs)) c.pos_xs = c.pos_xs.map((v) => round3(Number(v) + ddx));
-  }
+  // Labels now use a component-relative offset model (label_dx/dy, pos_dx/dy nudges
+  // on top of per-type defaults), so nothing needs shifting when a component moves —
+  // the offsets are already relative to the anchor. Kept as a no-op for call sites.
+  function shiftAux(_c, _ddx, _ddy) { /* offsets are anchor-relative; no shift needed */ }
   function setCompResolved(c, resolvedCx, resolvedCy) {  // write model from on-screen coords
     const old = resolve(c, zoneOf(c));
     shiftAux(c, resolvedCx - old.cx, resolvedCy - old.cy);
@@ -1265,8 +1240,24 @@
     if (c.col != null) h += `<div class="hint">column-relative (col ${c.col} in ${esc(z.id)}); editing cx/cy converts to explicit cx.</div>`;
     const isText = c.type === "text";
     if (!isText) h += `<div class="field"><label>rotate</label><button id="i-rot">${Number(c.rotate || 0)}° — cycle</button></div>`;
+    if (c.type === "knob") h += `<div class="field"><label>cap_mm (knob ⌀)</label><input id="i-cap" type="number" step="0.5" min="1" value="${Number(c.cap_mm) || C.knob_default_cap_mm}"></div>`;
     h += `<div class="field"><label>${isText ? "text" : "label"}</label><input id="i-label" type="text" value="${esc(c.label || "")}"></div>`;
     h += `<div class="field"><label>font_size</label><input id="i-fs" type="number" step="0.1" value="${c.font_size != null ? c.font_size : (isText ? 2.0 : 1.8)}"></div>`;
+    if (!isText) {
+      const hasOff = c.label_dx != null || c.label_dy != null;
+      h += `<div class="field row"><div><label>label dx (mm)</label><input id="i-ldx" type="number" step="0.5" value="${Number(c.label_dx || 0)}"></div>` +
+           `<div><label>label dy (mm)</label><input id="i-ldy" type="number" step="0.5" value="${Number(c.label_dy || 0)}"></div></div>`;
+      h += `<div class="field"><button id="i-lreset"${hasOff ? "" : " disabled"}>Reset label offset</button></div>`;
+    }
+    const isToggle = c.type === "toggle_dw3" || c.type === "toggle_dw5";
+    if (isToggle) {
+      const hasPos = c.pos_dx != null || c.pos_dy != null || c.pos_spread != null;
+      h += `<div class="field"><label>position labels (comma-sep)</label><input id="i-poslabels" type="text" value="${esc((c.pos_labels || []).join(", "))}"></div>`;
+      h += `<div class="field row"><div><label>pos dx (mm)</label><input id="i-pdx" type="number" step="0.5" value="${Number(c.pos_dx || 0)}"></div>` +
+           `<div><label>pos dy (mm)</label><input id="i-pdy" type="number" step="0.5" value="${Number(c.pos_dy || 0)}"></div></div>`;
+      h += `<div class="field"><label>pos spread (mm)</label><input id="i-pspread" type="number" step="0.5" value="${Number(c.pos_spread != null ? c.pos_spread : POS_SPREAD_DEFAULT)}"></div>`;
+      h += `<div class="field"><button id="i-preset"${hasPos ? "" : " disabled"}>Reset position-label offset</button></div>`;
+    }
     if (isText) {
       h += `<div class="field"><label>fill (color)</label><input id="i-fill" type="text" value="${esc(c.fill || COL.control_text)}"></div>`;
       h += `<div class="field row"><div><label>weight</label><select id="i-weight"><option value="normal" ${c.font_weight !== "bold" ? "selected" : ""}>normal</option><option value="bold" ${c.font_weight === "bold" ? "selected" : ""}>bold</option></select></div>` +
@@ -1315,8 +1306,23 @@
     cyEl.addEventListener("change", applyXY);
     const rotEl = document.getElementById("i-rot");
     if (rotEl) rotEl.addEventListener("click", () => rotateComp(c.id));
+    const capEl = document.getElementById("i-cap");
+    if (capEl) capEl.addEventListener("change", (e) => { const v = Number(e.target.value); if (v > 0) c.cap_mm = v; else delete c.cap_mm; commit(); });
     document.getElementById("i-label").addEventListener("change", (e) => { if (e.target.value) c.label = e.target.value; else delete c.label; commit(); });
     document.getElementById("i-fs").addEventListener("change", (e) => { c.font_size = Number(e.target.value); commit(); });
+    const ldxEl = document.getElementById("i-ldx"), ldyEl = document.getElementById("i-ldy");
+    if (ldxEl) ldxEl.addEventListener("change", (e) => { const v = Number(e.target.value); if (v) c.label_dx = v; else delete c.label_dx; commit(); });
+    if (ldyEl) ldyEl.addEventListener("change", (e) => { const v = Number(e.target.value); if (v) c.label_dy = v; else delete c.label_dy; commit(); });
+    const lreset = document.getElementById("i-lreset");
+    if (lreset) lreset.addEventListener("click", () => { snapshot(); delete c.label_dx; delete c.label_dy; render(); });
+    const plEl = document.getElementById("i-poslabels");
+    if (plEl) plEl.addEventListener("change", (e) => { const arr = e.target.value.split(",").map((s) => s.trim()).filter((s) => s.length); if (arr.length) c.pos_labels = arr; else delete c.pos_labels; commit(); });
+    const pdxEl = document.getElementById("i-pdx"), pdyEl = document.getElementById("i-pdy"), psEl = document.getElementById("i-pspread");
+    if (pdxEl) pdxEl.addEventListener("change", (e) => { const v = Number(e.target.value); if (v) c.pos_dx = v; else delete c.pos_dx; commit(); });
+    if (pdyEl) pdyEl.addEventListener("change", (e) => { const v = Number(e.target.value); if (v) c.pos_dy = v; else delete c.pos_dy; commit(); });
+    if (psEl) psEl.addEventListener("change", (e) => { const v = Number(e.target.value); if (v && v !== POS_SPREAD_DEFAULT) c.pos_spread = v; else delete c.pos_spread; commit(); });
+    const preset = document.getElementById("i-preset");
+    if (preset) preset.addEventListener("click", () => { snapshot(); delete c.pos_dx; delete c.pos_dy; delete c.pos_spread; render(); });
     if (isText) {
       document.getElementById("i-fill").addEventListener("change", (e) => { const v = e.target.value.trim(); if (v && v !== COL.control_text) c.fill = v; else delete c.fill; commit(); });
       document.getElementById("i-weight").addEventListener("change", (e) => { if (e.target.value === "bold") c.font_weight = "bold"; else delete c.font_weight; commit(); });
@@ -1556,6 +1562,11 @@
       // rotate
       const oRot = Number(orig.rotate || 0), nRot = Number(cur.rotate || 0);
       if (oRot !== nRot) { if (nRot === 0) removeKey(id, "rotate"); else if (orig.rotate != null) patchKey(id, "rotate", String(nRot)); else insertKey(id, "rotate", String(nRot)); }
+      // cap_mm (knob cap diameter)
+      if (String(orig.cap_mm) !== String(cur.cap_mm)) {
+        if (cur.cap_mm != null) { if (orig.cap_mm != null) patchKey(id, "cap_mm", fmtVal(cur.cap_mm)); else insertKey(id, "cap_mm", fmtVal(cur.cap_mm)); }
+        else removeKey(id, "cap_mm");
+      }
       // label / font_size / cpp
       if ((orig.label || "") !== (cur.label || "")) { if (cur.label) patchKey(id, "label", quoteIfNeeded(cur.label)); else removeKey(id, "label"); }
       if (String(orig.font_size) !== String(cur.font_size) && cur.font_size != null) patchKey(id, "font_size", fmtVal(cur.font_size));
@@ -1568,13 +1579,17 @@
       if (String(orig.rect_w) !== String(cur.rect_w)) {
         if (cur.rect_w != null) patchKey(id, "rect_w", fmtVal(cur.rect_w)); else removeKey(id, "rect_w");
       }
-      // absolute auxiliary position fields (shifted by shiftAux on move) — persist so
-      // the built panel matches the editor. Scalars:
-      for (const k of ["label_below_y", "label_above_y", "cy_body_top", "pos_y"])
-        if (String(orig[k]) !== String(cur[k])) { if (cur[k] != null) patchKey(id, k, fmtVal(cur[k])); else removeKey(id, k); }
-      // Arrays (flow sequences):
-      for (const k of ["pos_xs", "pos_ys"])
-        if (JSON.stringify(orig[k]) !== JSON.stringify(cur[k])) { if (cur[k] != null) patchKey(id, k, flowSeq(cur[k])); else removeKey(id, k); }
+      // Label / position-label offset nudges (component-relative; 0 = default):
+      for (const k of ["label_dx", "label_dy", "pos_dx", "pos_dy", "pos_spread"])
+        if (String(orig[k]) !== String(cur[k])) {
+          if (cur[k] != null) { if (orig[k] != null) patchKey(id, k, fmtVal(cur[k])); else insertKey(id, k, fmtVal(cur[k])); }
+          else removeKey(id, k);
+        }
+      // Position-label text (flow sequence of quoted strings):
+      if (JSON.stringify(orig.pos_labels) !== JSON.stringify(cur.pos_labels)) {
+        if (cur.pos_labels != null) { if (orig.pos_labels != null) patchKey(id, "pos_labels", flowSeq(cur.pos_labels)); else insertKey(id, "pos_labels", flowSeq(cur.pos_labels)); }
+        else removeKey(id, "pos_labels");
+      }
       // Text-component font fields (strings):
       for (const k of ["fill", "font_weight", "text_anchor"])
         if ((orig[k] || "") !== (cur[k] || "")) { if (cur[k]) patchKey(id, k, quoteIfNeeded(cur[k])); else removeKey(id, k); }
@@ -1658,9 +1673,9 @@
     function componentBlock(c, itemIndent) {     // → array of YAML lines for one component
       const fieldIndent = itemIndent + "  ";
       const blk = [`${itemIndent}- id: ${c.id}`];
-      const order = ["type", "cx", "cy", "rotate", "label", "font_size", "fill", "font_weight",
-        "text_anchor", "label_border", "rect_w", "label_below_y", "label_above_y", "cy_body_top",
-        "pos_y", "pos_xs", "pos_ys", "cpp_id", "cpp_param", "led_fill", "led_stroke"];
+      const order = ["type", "cx", "cy", "rotate", "cap_mm", "label", "font_size", "fill", "font_weight",
+        "text_anchor", "label_dx", "label_dy", "pos_labels", "pos_dx", "pos_dy", "pos_spread",
+        "label_border", "rect_w", "cpp_id", "cpp_param", "led_fill", "led_stroke"];
       for (const k of order) {
         if (c[k] == null) continue;
         const v = Array.isArray(c[k]) ? flowSeq(c[k])

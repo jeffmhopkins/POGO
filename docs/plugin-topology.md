@@ -22,8 +22,8 @@ R_IN ──┤  [A: Input Buffer]  clamp ±11 V; R normalises to L when unpatche
 ALT_BP_L/R → GAIN_BP3 → ────────────┐
                                      ↓
                           [BP]
-                            global: BP_OFFSET (V/oct), BP_TILT (stereo CV), BP_POL, BP_DIST mode
-                            per group (×3): FREQ + FOCUS (Q) + DIST (drive)
+                            global: BP_OFFSET (V/oct), BP_TILT (stereo CV)
+                            per group (×3): FREQ + FOCUS (Q) + DIST (drive) + DIST mode (Soft/Hard/Fold)
                             formant ref: BP1=200 Hz, BP2=1500 Hz, BP3=6000 Hz
                             BP3_L/R_OUT ← tap here (after BP3 distortion)
                             summed (1× each, no weighting) → BP_MIX wet path
@@ -76,8 +76,9 @@ enum ParamId {
     LP1_RES_ATT_PARAM,
 
     // ── BP Control (global) ────────────────────────────────────
-    BP_POL_PARAM,           // switch 0/1 → POS (+1) / NEG (−1)
-    BP_DIST_PARAM,          // switch 0/1/2 → SOFT / HARD / FOLD
+    BP1_DIST_MODE_PARAM,    // per-band switch 0/1/2 → SOFT / HARD / FOLD
+    BP2_DIST_MODE_PARAM,    //   (BP_DIST mode is per-band, not global)
+    BP3_DIST_MODE_PARAM,
     BP_OFFSET_PARAM,        // −5–5 V/oct xl knob (added to all 3 formant freqs)
     BP_MIX_PARAM,           // 0–1 dry/wet (large knob; 0=LP1 out, 1=BP summed)
     BP_FREQ_ATT_PARAM,      // −1–1 trimpot (attenuverter for BP_OFFSET CV)
@@ -290,8 +291,7 @@ LP1 filter parameters (unchanged from `LPFilter.hpp`):
 // Global BP CV
 bpOffsetCv = BP_OFFSET_PARAM + att(BP_FREQ_ATT, BP_FREQ_INPUT)  // V/oct
 bpTiltCv   =                    att(BP_TILT_ATT, BP_TILT_INPUT)  // V/oct (no knob)
-polarity   = BP_POL_PARAM < 0.5 ? +1.0 : −1.0   // 0=POS→+1, 1=NEG→−1
-distMode   = (int)roundf(BP_DIST_PARAM)           // 0=SOFT, 1=HARD, 2=FOLD
+distMode[n]= (int)roundf(BP{n}_DIST_MODE_PARAM)   // per band; 0=SOFT, 1=HARD, 2=FOLD
 mix        = BP_MIX_PARAM
 
 // Per-group CV (same for L and R base; tilt applied inside loop)
@@ -309,8 +309,8 @@ bpInR = ALT_BP_R connected ? altR : lp1R
 ```
 // Stereo tilt: L gets +tilt, R gets −tilt
 for n in {1, 2, 3}:
-    bpL[n] = SVFGroup[n].process(bpInL, freqCv[n] + bpTiltCv, focusCv[n], polarity, fs)
-    bpR[n] = SVFGroup[n].process(bpInR, freqCv[n] − bpTiltCv, focusCv[n], polarity, fs)
+    bpL[n] = SVFGroup[n].process(bpInL, freqCv[n] + bpTiltCv, focusCv[n], fs)
+    bpR[n] = SVFGroup[n].process(bpInR, freqCv[n] − bpTiltCv, focusCv[n], fs)
 
     // Distortion (mode shared; drive per group)
     distL[n] = Distortion::processNorm(bpL[n] / 5, driveCv[n], distMode) × 5
@@ -414,7 +414,7 @@ scale the result (−1 to +1, bipolar). This is unchanged from the old architect
 - `process()` rewrite following §6 signal chain exactly
 - `PogoWidget` constructor: replace all `mm2px()` positions from `build_panel.py --cpp` output
 - Remove: `WIDTH_PARAM`, `COMB_BYPASS_PARAM` (replaced by `LP1_TILT_PARAM` and `BP_MIX_PARAM`)
-- Remove: old `POLARITY_PARAM` 3-way logic; replace with 2-way `BP_POL_PARAM`
+- Remove: `BP_POL_PARAM` / polarity entirely (cut — hardware uses a fixed output-polarity inverter; no user polarity control). DIST mode is per-band (`BP{1,2,3}_DIST_MODE_PARAM`), not a global `BP_DIST_PARAM`.
 - Remove: `BAND_L_OUTPUT`, `BAND_R_OUTPUT` → replaced by `BP3_L_OUTPUT`, `BP3_R_OUTPUT`
 - Remove: old `MOD_AMOUNT_PARAM` (knob) → replaced by `MOD_SCALE_PARAM` (trimpot, same math)
 - Add: `GAIN_BP3_PARAM`, `VCA_OFS_PARAM`, `LP1_TILT_PARAM`, `BP_MIX_PARAM`, `BP_TILT_ATT_PARAM`
@@ -436,8 +436,7 @@ scale the result (−1 to +1, bipolar). This is unchanged from the old architect
 | LP1_FREQ_PARAM | 0.0 | 632 Hz (f_ref) |
 | LP1_TILT_PARAM | 0.0 | No stereo tilt |
 | LP1_RES_PARAM | 0.0 | Minimal resonance |
-| BP_POL_PARAM | 0 (POS) | Positive polarity |
-| BP_DIST_PARAM | 0 (SOFT) | Soft clip |
+| BP1/2/3_DIST_MODE_PARAM | 0 (SOFT) | Soft clip (per band) |
 | BP_OFFSET_PARAM | 0.0 | No master offset |
 | BP_MIX_PARAM | 0.5 | Equal dry/wet |
 | BP{N}_FREQ_PARAM | 0.0 | f_ref per group |
@@ -455,13 +454,13 @@ scale the result (−1 to +1, bipolar). This is unchanged from the old architect
 
 | Panel type | VCV Rack widget class |
 |---|---|
-| `knob_xl` | `RoundHugeBlackKnob` |
-| `knob_large` | `RoundLargeBlackKnob` |
-| `knob_medium` | `RoundBlackKnob` |
+| `knob` (`cap_mm` ≥ 16) | `RoundHugeBlackKnob` |
+| `knob` (`cap_mm` 11–15) | `RoundLargeBlackKnob` |
+| `knob` (`cap_mm` < 11) | `RoundBlackKnob` |
 | `trimpot` | `PogoTrimPot` (custom, or `Trimpot`) |
 | `slider_V45` | `PogoSlider` (custom vertical 45mm fader) |
-| `switch_H2` | `PogoSwitchH2` (2-position horizontal) |
-| `switch_H3` | `PogoSwitchH3` (3-position horizontal) |
+| `toggle_dw3` | `PogoToggle2` (Dailywell DW3, 2-position) |
+| `toggle_dw5` | `PogoToggle3` (Dailywell DW5, 3-position) |
 | `jack_input` | `PJ301MPort` |
 | `jack_output` | `PJ301MPort` |
 | `led` | `MediumLight<GreenLight>` |

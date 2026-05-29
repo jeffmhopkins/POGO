@@ -39,42 +39,30 @@ def _export_rules_constants(rules: DesignRules) -> dict[str, Any]:
             "JACK_CY":        list(rules_mod.JACK_CY),
             "POT_CY":         list(rules_mod.POT_CY),
             "TRIMPOT_CY":     list(rules_mod.TRIMPOT_CY),
-            "SWITCH_CY":      list(rules_mod.SWITCH_CY),
-            "SWITCH_V3_CY":   list(rules_mod.SWITCH_V3_CY),
-            "SWITCH_H3_CY":   list(rules_mod.SWITCH_H3_CY),
+            "TOGGLE_CY":      list(rules_mod.TOGGLE_CY),
             "LED_CY":         list(rules_mod.LED_CY),
             "SLIDER_V45_CY":  list(rules_mod.SLIDER_V45_CY),
-            "EG1218_CY":      list(rules_mod.EG1218_CY),
-            "EG2301_V_CY":    list(rules_mod.EG2301_V_CY),
         },
         # Panel-face nut / hole radii
         "panel_r": {
             "jack":        rules.jack_nut_r,
             "trimpot":     rules_mod.TRIMPOT_PANEL_R,
             "pot":         rules.pot_nut_r,
-            "switch_h":    rules_mod.SWITCH_PANEL_R,
-            "switch_v3":   rules_mod.SWITCH_V3_PANEL_R,
+            "toggle":      rules_mod.TOGGLE_PANEL_R,
             "led":         rules_mod.LED_PANEL_R,
             "slider":      rules_mod.SLIDER_V45_PANEL_W,
         },
-        # EG slide-switch panel-slot half-heights (used by the slot keep-out check)
-        "eg_panel_h": {
-            "eg_2pos": rules_mod.EG1218_PANEL_H,
-            "eg_3pos": rules_mod.EG2301_V_PANEL_H,
-        },
-        # Visual knob-cap radii (panel face)
-        "knob_cap_r": {"knob_medium": 4.5, "knob_large": 7.0, "knob_xl": 9.0},
+        # Knob cap default DIAMETER (mm); a knob's radius = (cap_mm or default)/2.
+        "knob_default_cap_mm": rules.knob_default_cap_mm,
         # Type-set membership
         "type_sets": {
-            "jack":      sorted(rules_mod.JACK_TYPES),
-            "pot":       sorted(rules_mod.POT_TYPES),
-            "trimpot":   ["trimpot"],
-            "slider":    sorted(rules_mod.SLIDER_TYPES),
-            "switch_h":  sorted(rules_mod.H_SWITCH_TYPES),
-            "switch_v3": sorted(rules_mod.V3_SWITCH_TYPES),
-            "led":       sorted(rules_mod.LED_TYPES),
-            "eg_2pos":   sorted(rules_mod.EG_2POS_TYPES),
-            "eg_3pos":   sorted(rules_mod.EG_3POS_TYPES),
+            "jack":       sorted(rules_mod.JACK_TYPES),
+            "pot":        sorted(rules_mod.POT_TYPES),
+            "trimpot":    ["trimpot"],
+            "slider":     sorted(rules_mod.SLIDER_TYPES),
+            "toggle_dw3": sorted(rules_mod.TOGGLE_2POS_TYPES),
+            "toggle_dw5": sorted(rules_mod.TOGGLE_3POS_TYPES),
+            "led":        sorted(rules_mod.LED_TYPES),
         },
         "mounting_hole_clearance_mm": rules_mod.MOUNTING_HOLE_CLEARANCE_MM,
         # Design-rule scalars needed for resolution + keepout in JS

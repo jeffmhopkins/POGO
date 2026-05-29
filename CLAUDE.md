@@ -317,22 +317,75 @@ python3 tools/build_panel.py
 
 ---
 
-## Git Workflow
+## Git Workflow & Change Process
 
-**All development happens on the `dev` branch. Never commit to any other branch without explicit permission.**
+**Every change lives on its own `change/<slug>` branch off `dev` and merges back to `dev`
+by PR. Never commit directly to `dev` or `main`.** CI (`.github/workflows/build.yml`)
+cross-compiles the `.vcvplugin` for Linux/Windows/macOS and runs the `--check` gate stack;
+there is no Rack runtime in CI, so a plugin is verified by the **user in VCV Rack** (download
+the `.vcvplugin` from the GitHub Actions run for the branch).
 
-Develop on `dev`. Push to trigger CI (Linux/Windows/macOS plugin builds + panel DRC check).
-The KiCad validation step is currently disabled (generators are 40HP-era; see `kicad/README-STALE.md`).
+> **For AI assistants:** before committing, verify `git branch --show-current` starts with
+> `change/`. If on `dev` or `main`, create a `change/<slug>` branch first. (Legacy `claude/**`
+> branches still build, but new work uses `change/<slug>`.)
+
+Every non-trivial change is tracked by a persistent file `changes/NNNN-<slug>.md` (from
+`changes/_TEMPLATE.md`), **committed and never deleted** — it is the per-change record of
+intent, gate approvals, and decisions. `NNNN` = highest existing on `dev` + 1 at branch time.
+
+### Pick a lane first
+
+| Lane | When | Path |
+|---|---|---|
+| **A — Behavioral** | changes audible DSP or panel-control behavior | full **Step 0–8**, gates **G1–G6** |
+| **B — Hardware-only** | plugin already LOCKED for the block; only spec §2–4 / nets / components / schematic change | enter at **Step 5**, gates **G4–G6** + `--check` (this is where per-block schematic transcription lives — see `kicad/SCHEMATIC-GEN-PLAN.md`) |
+| **C — Trivial** | docs / comments / tests / typos; touches no DSP math, no `panel-data.yaml` geometry, no `components.yaml`, no nets connectivity | no change file; a `change/<slug>` PR that passes CI |
+
+Rule: **if unsure whether behavior changes, use Lane A.** A "refactor" that alters audio
+output is a Lane A change. If Lane-B/transcription work *discovers the plugin is wrong*, that
+spawns a **separate Lane A change** — the plugin leads; the schematic never silently leads it.
+
+> These per-change Steps 0–8 are distinct from the whole-project maturity milestones
+> **Phase 1R–6R** (see `specs/STATUS.md`). They are orthogonal: one change runs Steps 0–8;
+> its output advances a block toward its 1R–6R status.
+
+### Steps & gates (Lane A; owner in brackets)
+
+0. **Open** [assistant] — `change/<slug>` branch + `changes/NNNN-<slug>.md` (lane, intent stub, scope/blocks, gate checklist, decisions log, component table, artifact links).
+1. **Intent** [you state → assistant restates]. **G1**: you confirm the restatement.
+2. **Plugin + Panel** [assistant] — update DSP (`plugin/src/**`) + `tools/panel-data.yaml` (`build_panel.py --cpp` syncs widget positions into `Pogo.cpp`), `build_panel.py --check` clean, push. **G2 = panel layout only** (review in the editor → Export YAML → assistant pastes over `panel-data.yaml` + re-DRC; loop). DSP correctness is verified at G3, not G2.
+3. **Build + Verify** — CI builds the `.vcvplugin`; you load it in VCV Rack. Iterate Steps 2/3. **G3**: you confirm behavior matches intent.
+4. **Lock** [assistant, auto on G3] — record `Plugin LOCKED @ <blob-hashes>` (the locked `plugin/src/**` DSP files + `panel-data.yaml`) in the change file. These are frozen for the change; any further plugin/panel edit re-opens G2/G3. (Blob hashes, not commit SHA, so the record survives squash-merge.)
+5. **Spec** [assistant] — update affected block spec(s): §1 Intent + the functional spec to the locked behavior; assistant asserts parity vs the locked plugin. **G4**: you approve.
+6. **Topology + components** [assistant proposes] — topology prose only (spec §2, referencing `aux/*`); list any new component with rationale + candidate part/footprint. **G5**: you approve the topology. **G6a**: you approve each new component → it is added to `specs/components.yaml` (ref-uniqueness + `qty` rules) + the `components/` registry (`matches[]`) + datasheet entry. **G6b**: its footprint exists — resolves to a real library footprint, or a vendored `.kicad_mod` committed under `kicad/footprints/` with a datasheet land-pattern citation. **G6 must close before any netlist references the part.**
+7. **Schematic + artifacts** [assistant] — update `kicad/nets/*.nets.yaml` (+ datasheet-verified symbols in `kicad_common.py`), regenerate, **commit the generated `.kicad_sch` beside its `.nets.yaml`**; for every changed `boundary:` net, update *both* sheets and re-check. Build/refresh artifacts: schematic, `kicad/pogo-bom.csv`, panel (`plugin/res/Pogo*.svg` + `design/panel-debug.html`). Link them in the change file (paths/links, not copies; the `.vcvplugin` lives only in the Actions run).
+8. **Close** [assistant] — for a Lane A behavioral change, bump `plugin/plugin.json` `version` (semver) and tag the squash-merge; update `specs/STATUS.md` (reuse the `✅ ⚠️ 🔲 🚧` vocabulary; bump `Last updated`) and `kicad/SCHEMATIC-GEN-PLAN.md` if a block's schematic moved; PR `change/<slug>` → `dev`; squash-merge on green CI. **Abandoned change** → set the change file `Status: ABANDONED` + reason, close-out PR with *only* the change file (discard the code commits).
+
+**Gates are hard stops** (assistant waits for your explicit OK): G1 intent · G2 panel · G3 behavior · G4 spec · G5 topology · G6a/b component+footprint. On rejection: log the reason in the decisions log, revert dependent work to the last gate-approved state, and re-enter at the failed step.
+
+### Invariants
+
+- One change per branch/PR; the change file is committed and never deleted (abandoned → `ABANDONED`).
+- **Plugin = ground truth.** Spec and schematic follow the locked plugin; they never lead it.
+- **All five CI `--check` gates pass**: `components.py`, `fetch_datasheets.py` (enforces "symbols datasheet-verified"), `build_components.py`, `generate_schematic.py` (pin coverage + structural + byte-drift), `build_panel.py` (DRC).
+- Generated `.kicad_sch` is committed beside its `.nets.yaml`.
+- No component is used in a netlist before G6 closes (in `components.yaml` + registry + footprint + datasheet).
+- Locked files stay unchanged after lock unless G2/G3 are re-opened.
+
+> **Enforcement note (honor-system, 2026-05):** these invariants are currently enforced by
+> assistant discipline + the five artifact-level `--check` gates, which verify *artifact
+> self-consistency* (yaml↔sch, DRC, registry), **not** cross-layer plugin↔panel↔netlist drift
+> or lock state. Tracked follow-ups (a future change): `tools/check_locked.py` (locked blob
+> hashes unchanged), `tools/check_drift.py` (plugin enum surface ↔ panel control count ↔
+> nets/components), and a boundary-net cross-sheet consistency check.
 
 ```bash
-git checkout dev
-# ... make changes ...
+git checkout -b change/<slug> dev
+# ... make changes per the lane ...
 git add -A && git commit -m "description"
-git push -u origin dev
+git push -u origin change/<slug>
+# open a PR to dev; squash-merge on green CI
 ```
-
-> **For AI assistants:** Always verify you are on `dev` before committing:
-> `git branch --show-current` must return `dev`. If on any other branch, switch to `dev` first.
 
 ---
 

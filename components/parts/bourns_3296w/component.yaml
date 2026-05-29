@@ -1,0 +1,19 @@
+# bourns_3296w — POGO sourced component (hand-maintained)
+slug: bourns_3296w
+mpn: 3296W-1-xxx
+manufacturer: Bourns
+supplier: '~'
+package: through-hole
+matches:
+- Bourns 3296W
+footprint:
+  lib: Potentiometer_THT
+  name: Potentiometer_Bourns_3296W_Vertical
+datasheet:
+  url: https://www.bourns.com/docs/Product-Datasheets/3296.pdf
+  version: rev 2019-08-07
+  sha256: 8492a5d67ee2785d4716ec3131b8fa6f9aaef9fa9e9eff65999b1d1a50d9baef
+  bytes: 577872
+panel_types:
+- trimpot
+notes: 25-turn trimmer; calibration/attenuverters.

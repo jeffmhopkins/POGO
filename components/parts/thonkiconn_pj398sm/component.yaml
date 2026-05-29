@@ -1,0 +1,19 @@
+# thonkiconn_pj398sm — POGO sourced component (hand-maintained)
+slug: thonkiconn_pj398sm
+mpn: WQP-PJ398SM
+alt_mpn: PJ301M-12
+manufacturer: Qingpu (Thonkiconn)
+supplier: Thonk
+package: 3.5mm panel jack
+matches:
+- PJ301M-12
+footprint:
+  lib: Connector_Audio
+  name: Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles
+datasheet:
+  url: https://www.thonk.co.uk/shop/thonkiconn/
+  version: supplier page
+panel_types:
+- jack_input
+- jack_output
+notes: Eurorack 3.5mm jack. MPN WQP-PJ398SM; PJ301M-12 is the common clone.

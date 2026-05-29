@@ -1,0 +1,18 @@
+# led_3mm — POGO sourced component (hand-maintained)
+slug: led_3mm
+mpn: '~'
+manufacturer: generic
+supplier: '~'
+package: 3mm THT LED
+matches:
+- LED 3mm
+footprint:
+  lib: LED_THT
+  name: LED_D3.0mm
+datasheet:
+  url: https://www.thonk.co.uk/product-category/electronic-component/led/
+  version: supplier page
+panel_types:
+- led
+- led_labeled
+notes: 3mm panel indicator LED.

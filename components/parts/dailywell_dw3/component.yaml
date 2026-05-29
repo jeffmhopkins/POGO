@@ -1,0 +1,17 @@
+# dailywell_dw3 — POGO sourced component (hand-maintained)
+slug: dailywell_dw3
+mpn: DW3 (2M DPDT ON-ON)
+manufacturer: Dailywell
+supplier: Thonk
+package: sub-mini toggle 2M
+matches:
+- Dailywell DW3 (2M DPDT ON-ON)
+footprint:
+  lib: Button_Switch_THT
+  name: SW_Dailywell_DW3_DPDT
+datasheet:
+  url: https://www.thonk.co.uk/shop/sub-mini-toggle-switches/
+  version: supplier page (DW3 datasheet linked)
+panel_types:
+- toggle_dw3
+notes: DPDT ON-ON sub-mini toggle (GAIN_MAIN, GAIN_BP3).

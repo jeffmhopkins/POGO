@@ -111,18 +111,21 @@ f_R = 632 Hz × 2^(V_freq − V_tilt)
 
 At V_tilt = +1V: f_L is one octave above f_R. At V_tilt = +5V: five-octave spread.
 
-### Hardware tilt implementation
+### Hardware tilt implementation (FINALIZED 2026-05-29: per-channel expo)
 
-The tilt CV arrives at a shared summing node. An inverting buffer (TL072, G = −1) generates
-−V_tilt from +V_tilt. The L expo converter input receives V_freq + V_tilt; the R expo converter
-input receives V_freq + (−V_tilt) = V_freq − V_tilt. A trim pot (RV_LP1_TILT_NULL) nulls the
-center-detent error to < 5 mV so both channels are matched when the tilt knob is at center.
+Stereo tilt requires independent L/R cutoff, which a single expo core cannot produce (one
+THAT340 = one Iabc = one frequency). So LP1 uses **two expo converters — one per channel**
+(U14 = L, U64 = R). The tilt CV arrives at a summing node; an inverting buffer (TL072 U13-A,
+G = −1) generates −V_tilt from +V_tilt. The **L** expo base receives V_freq + V_tilt; the **R**
+expo base receives V_freq − V_tilt → `f_L`/`f_R` diverge by ±V_tilt octaves (exact, octave-
+accurate). `RV6` (RV_LP1_TILT_NULL) nulls the center-detent L/R mismatch. The earlier
+"single shared THAT340 with per-channel V_ctrl summers" description was electrically
+impossible (one transistor base cannot hold two control voltages) and is superseded;
+`aux/aux-expo-converter.md` flagged this as the Phase-3R decision, now resolved.
 
-Both L and R expo converters are separate THAT340 instances? No — one THAT340 (EXPO_LP1) drives
-both channels from a single expo output node. The tilt offset is summed into the V_ctrl voltage
-before the THAT340 input, as a per-channel summer: the L channel V_ctrl summer adds +V_tilt; the
-R channel V_ctrl summer adds −V_tilt. The THAT340 itself is shared (single expo core per block
-per `aux/aux-expo-converter.md`).
+Note: the LM13700 integrator Darlington output buffers (used as the v1/v2 state-variable
+outputs) require emitter pulldown resistors to V− (R68–R71, 10 kΩ) — added 2026-05-29; the
+prior spec/BOM omitted them, which would have left the buffers unable to sink current.
 
 See `aux/aux-ota-c-svf.md`, `aux/aux-expo-converter.md`, `aux/aux-q-control.md`.
 

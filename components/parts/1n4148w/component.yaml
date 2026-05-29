@@ -1,0 +1,17 @@
+# 1n4148w — POGO sourced component (hand-maintained)
+slug: 1n4148w
+mpn: 1N4148W
+manufacturer: Diodes Inc.
+supplier: '~'
+package: SOD-123
+matches:
+- 1N4148W
+footprint:
+  lib: Diode_SMD
+  name: D_SOD-123
+datasheet:
+  url: https://www.diodes.com/assets/Datasheets/ds30086.pdf
+  version: DS30086
+  sha256: 39c16a6888bdab22418e93e17182174aad763a66957a4632e70c944194e3fc08
+  bytes: 319838
+notes: Switching diode.
