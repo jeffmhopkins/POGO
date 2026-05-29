@@ -2,7 +2,7 @@
 
 > ✅ **CORRECTED 2026-05-29** — Topology fixed to the real THAT2180 current-in/current-out
 > device (was wrongly modelled as a differential voltage VCA with no output op-amp).
-> Pinout from datasheet Doc 600029 Rev 02 Table 1. Verified in `kicad/nets/block-4.nets.yaml`.
+> Pinout from datasheet Doc 600029 Rev 02 Table 1. Verified in `specs/block-4/block-4.nets.yaml`.
 
 Design status: [ ] draft → [ ] reviewed → [ ] validated on prototype
 

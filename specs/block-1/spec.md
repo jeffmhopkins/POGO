@@ -186,24 +186,6 @@ length carrying unshielded pre-gain signals.
 
 ## 4. Component Requirements
 
-> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
-> It has not been verified against the current panel control set. Do not use for circuit
-> construction until re-verified. See `specs/STATUS.md` for current phase status.
-
-| Ref | Part | Package | Value | Qty | Board | Block | Function |
-|---|---|---|---|---|---|---|---|
-| U2 | OPA1612 | SOIC-8 | — | 1 | audio | block-1 | Main gain amp, L+R channels; 1.1 nV/√Hz |
-| U3 | OPA1612 | SOIC-8 | — | 1 | audio | block-1 | ALT BP gain amp, L+R channels; 1.1 nV/√Hz |
-| R3 | resistor 1% | 0603 | 4.7 kΩ | 2 | audio | block-1 | R_g main gain stage (×2 ch); 1% for L/R match + low i_n×R noise |
-| R4 | resistor 1% | 0603 | 18 kΩ | 2 | audio | block-1 | R_f main gain stage (×2 ch); G = 4.83× ≈ 5× |
-| R5 | resistor 1% | 0603 | 4.7 kΩ | 2 | audio | block-1 | R_g ALT gain stage (×2 ch) |
-| R6 | resistor 1% | 0603 | 18 kΩ | 2 | audio | block-1 | R_f ALT gain stage (×2 ch) |
-| SW1 | Dailywell DW3 | sub-mini toggle 2M | DPDT ON-ON | 1 | panel | block-1 | GAIN_MAIN 1×/5× |
-| SW2 | Dailywell DW3 | sub-mini toggle 2M | DPDT ON-ON | 1 | panel | block-1 | GAIN_BP3 1×/5× (ALT path) |
-| R38 | resistor | 0603 | 100 Ω | 1 | audio | block-1 | ALT_BP_L series input protection |
-| R39 | resistor | 0603 | 100 Ω | 1 | audio | block-1 | ALT_BP_R series input protection |
-| D8 | BAT54S | SOT-23 | — | 1 | audio | block-1 | ALT_BP_L input clamp ±12 V |
-| D9 | BAT54S | SOT-23 | — | 1 | audio | block-1 | ALT_BP_R input clamp ±12 V |
-| C2 | cap, X7R | 0603 | 100 nF | 4 | audio | block-1 | OPA1612 supply decoupling (2 ICs × 2 pins) |
-| J3 | PJ301M-12 | panel | — | 1 | panel | block-1 | ALT_BP_L input jack |
-| J4 | PJ301M-12 | panel | — | 1 | panel | block-1 | ALT_BP_R input jack (normalled to ALT_BP_L) |
+Component set: see the generated BOM `kicad/pogo-bom.csv` (rows with `Block = block-1`),
+sourced from `specs/components.yaml` (the per-ref design manifest) and enriched by the
+`components/` registry (MPN, footprint, datasheet). Verification status: `specs/STATUS.md`.

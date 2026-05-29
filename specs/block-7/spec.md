@@ -207,49 +207,6 @@ HP_inv node.
 
 ## 4. Component Requirements
 
-> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
-> It has not been verified against the current panel control set. Do not use for circuit
-> construction until re-verified. See `specs/STATUS.md` for current phase status.
-
-| Ref | Part | Package | Value | Qty | Board | Block | Function |
-|---|---|---|---|---|---|---|---|
-| U_OTA_HP_L | LM13700M | SOIC-16 | — | 1 | audio | block-7 | HP L-channel integrators (cells A+B = OTA-A1+OTA-A2) |
-| U_OTA_HP_R | LM13700M | SOIC-16 | — | 1 | audio | block-7 | HP R-channel integrators (cells A+B = OTA-B1+OTA-B2) |
-| U51 (IC_Q_C_L) | LM13700M | SOIC-16 | — | 1 | audio | block-7 | Q VCA L: cell A = HP Q; cell B spare (see termination note) |
-| U52 (IC_Q_C_R) | LM13700M | SOIC-16 | — | 1 | audio | block-7 | Q VCA R: cell A = HP Q; cell B spare (see termination note) |
-| R_QB_IABC_L, R_QB_IABC_R | resistor | 0603 | 100 kΩ | 2 | audio | block-7 | U51/U52 cell B Iabc termination (100 kΩ to GND each) |
-| R_QB_OUT_L, R_QB_OUT_R | resistor | 0603 | 1 kΩ | 2 | audio | block-7 | U51/U52 cell B output termination (1 kΩ to GND each) |
-| U_SUM_HP_L | OPA1612 | SOIC-8 | — | 1 | audio | block-7 | L-ch: half A = SUM_AMP, half B = HP inverting output buffer; 1.1 nV/√Hz |
-| U_SUM_HP_R | OPA1612 | SOIC-8 | — | 1 | audio | block-7 | R-ch: half A = SUM_AMP, half B = HP inverting output buffer; pin-compatible with TL072CDT |
-| U_IRES_HP | TL072CDT | SOIC-8 | — | 1 | audio | block-7 | Half A = IRES_AMP (Q control); half B = spare / utility |
-| EXPO_HP | THAT340S14-U | SOIC-14 | — | 1 | audio | block-7 | Expo V/oct converter; f_ref = 632 Hz; drives HP L+R Iabc |
-| C1_L, C2_L | C0G cap | 0603 | 47 nF | 2 | audio | block-7 | HP L integrator caps (C0G/NP0 mandatory) |
-| C1_R, C2_R | C0G cap | 0603 | 47 nF | 2 | audio | block-7 | HP R integrator caps (C0G/NP0 mandatory) |
-| R_IN_L, R_IN_R | resistor | 0603 | 100 kΩ | 2 | audio | block-7 | SUM_AMP input resistors |
-| R_FB_L, R_FB_R | resistor | 0603 | 100 kΩ | 2 | audio | block-7 | SUM_AMP feedback / Q feedback input resistors |
-| R_LIN_A_L, R_LIN_B_L | resistor | 0603 | 1 kΩ | 2 | audio | block-7 | L-ch OTA linearizing resistors |
-| R_LIN_A_R, R_LIN_B_R | resistor | 0603 | 1 kΩ | 2 | audio | block-7 | R-ch OTA linearizing resistors |
-| R_f_L, R_f_R | resistor | 0603 | 100 kΩ | 2 | audio | block-7 | SUM_AMP feedback resistors |
-| R_HP_IN_L, R_HP_IN_R | resistor | 0603 | 100 kΩ | 2 | audio | block-7 | HP output inverting buffer R_in (R_in = R_f = 100kΩ) |
-| R_HP_FB_L, R_HP_FB_R | resistor | 0603 | 100 kΩ | 2 | audio | block-7 | HP output inverting buffer R_f |
-| R_Iabc_L | resistor | 0603 | 1 MΩ | 1 | audio | block-7 | Q VCA V→I: L-ch V_ires to IC_Q_C cell-A Iabc |
-| R_Iabc_R | resistor | 0603 | 1 MΩ | 1 | audio | block-7 | Q VCA V→I: R-ch V_ires to IC_Q_C cell-A Iabc |
-| R_QBIAS | resistor | 0603 | 100 kΩ | 1 | audio | block-7 | IRES_AMP bias input (sets Butterworth Iabc) |
-| R_QINV | resistor | 0603 | 100 kΩ | 1 | audio | block-7 | IRES_AMP resonance CV input resistor |
-| R_f_q | resistor | 0603 | 100 kΩ | 1 | audio | block-7 | IRES_AMP feedback resistor |
-| R_IREF_A | resistor | 0603 | 1 MΩ | 1 | audio | block-7 | EXPO_HP fixed I_ref network R; in series with RV_REF; R_total at midpoint = 1250 kΩ → 9.6 µA |
-| R_VOCT | resistor | 0603 | 47 kΩ | 1 | audio | block-7 | EXPO_HP V/oct scaling R (1% tolerance); with R_E=1kΩ and RV_1VOCT≈7.5kΩ → 18.0 mV/V 1V/oct ratio |
-| R_E | resistor | 0603 | 1 kΩ | 1 | audio | block-7 | EXPO_HP emitter degeneration |
-| RV_REF | Bourns 3224W | SMD | 500 kΩ | 1 | audio | block-7 | EXPO_HP f_ref trim rheostat; in series with R_IREF_A; range ±25% |
-| RV_1VOCT | Bourns 3224W | SMD | 20 kΩ | 1 | audio | block-7 | EXPO_HP 1V/oct tracking trim; ±10% range |
-| RV_QMAX | Bourns 3224W | SMD | 100 kΩ | 1 | audio | block-7 | HP Q max / self-oscillation onset trim |
-| D_IRES | BAT54 | SOT-23 | — | 1 | audio | block-7 | Clamp V_ires ≥ 0 (prevents reverse Iabc into IC_Q_C) |
-| C_IREF | C0G cap | 0603 | 100 nF | 1 | audio | block-7 | EXPO_HP I_ref node bypass |
-| C_IABC_L, C_IABC_R | C0G cap | 0402 | 10 nF | 2 | audio | block-7 | Integrator OTA Iabc pin bypass (HF noise filter) |
-| C_IABC_Q | C0G cap | 0402 | 10 nF | 1 | audio | block-7 | IC_Q_C cell-A Iabc pin bypass |
-| C_VCC_OTA_L, C_VEE_OTA_L | cap, X7R | 0603 | 100 nF | 2 | audio | block-7 | U_OTA_HP_L supply decoupling |
-| C_VCC_OTA_R, C_VEE_OTA_R | cap, X7R | 0603 | 100 nF | 2 | audio | block-7 | U_OTA_HP_R supply decoupling |
-| C_VCC_SUM_L, C_VEE_SUM_L | cap, X7R | 0603 | 100 nF | 2 | audio | block-7 | U_SUM_HP_L supply decoupling |
-| C_VCC_SUM_R, C_VEE_SUM_R | cap, X7R | 0603 | 100 nF | 2 | audio | block-7 | U_SUM_HP_R supply decoupling |
-| C_VCC_IRES, C_VEE_IRES | cap, X7R | 0603 | 100 nF | 2 | audio | block-7 | U_IRES_HP supply decoupling |
-| C_VCC_EXPO, C_VEE_EXPO | cap, X7R | 0603 | 100 nF | 2 | audio | block-7 | EXPO_HP THAT340 supply decoupling |
+Component set: see the generated BOM `kicad/pogo-bom.csv` (rows with `Block = block-7`),
+sourced from `specs/components.yaml` (the per-ref design manifest) and enriched by the
+`components/` registry (MPN, footprint, datasheet). Verification status: `specs/STATUS.md`.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate kicad/nets/block-6.nets.yaml — Triple BP + Distortion (the last block).
+"""Generate specs/block-6/block-6.nets.yaml — Triple BP + Distortion (the last block).
 
 3-group repetition (like block-3 was generated). This is a netlist-only,
 decision-locked transcription per SCHEMATIC-GEN-PLAN.md "block-6 readiness":
@@ -25,11 +25,11 @@ Three controls are under-specified in the STALE specs and flagged Phase-3R; the
 signal path is wired faithfully and the control is treated as boundary CV applied
 via a Phase-3R element (see the FLAG notes printed into the YAML header).
 
-Run:  python3 kicad/gen_block6.py     # writes kicad/nets/block-6.nets.yaml
+Run:  python3 kicad/gen_block6.py     # writes specs/block-6/block-6.nets.yaml
 """
 from pathlib import Path
 
-OUT = Path(__file__).resolve().parent / "nets" / "block-6.nets.yaml"
+OUT = Path(__file__).resolve().parent.parent / "specs" / "block-6" / "block-6.nets.yaml"
 
 parts: list[tuple[str, str, str]] = []     # (ref, "{ sym: ... }", comment)
 nets:  list[tuple[str, list[str], str]] = []  # (name, [REF.PIN], comment)

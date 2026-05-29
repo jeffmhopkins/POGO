@@ -26,7 +26,7 @@ _REPO = Path(__file__).resolve().parent.parent
 _COMPONENTS = _REPO / "components"
 _FOOTPRINTS_YAML = _COMPONENTS / "footprints.yaml"
 _PARTS_DIR = _COMPONENTS / "parts"
-_FP_ROOT = _REPO / "kicad" / "footprints"
+_FP_ROOT = _REPO / "components" / "footprints"
 
 # Required fields for every part record.
 _PART_REQUIRED = ("slug", "mpn", "package")
@@ -41,7 +41,7 @@ def _footprints_raw() -> list[dict[str, Any]]:
 def footprint_map() -> dict[str, tuple[str, float, float]]:
     """Ordered {panel_type: (rel_path, ox, oy)} — drop-in for the legacy _FOOTPRINT_MAP.
 
-    rel_path is "<lib>.pretty/<name>.kicad_mod" relative to kicad/footprints/.
+    rel_path is "<lib>.pretty/<name>.kicad_mod" relative to components/footprints/.
     Order follows components/footprints.yaml (significant: feeds the editor payload).
     """
     out: dict[str, tuple[str, float, float]] = {}

@@ -7,7 +7,7 @@
   )
   (schematic
     (meta
-      (filename "pogo-control-board.kicad_sch")
+      (filename "pogo-block-A.kicad_sch")  ; placeholder root until Phase-5R board assembly
     )
   )
   (pcb

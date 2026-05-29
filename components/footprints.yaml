@@ -2,7 +2,7 @@
 #
 # Maps each SEMANTIC panel component type to its KiCad footprint + the panel-anchor
 # offset (ox, oy) = footprint origin relative to the panel hole/anchor centre.
-#   rel path consumed by tools = "<lib>.pretty/<name>.kicad_mod"  (under kicad/footprints/)
+#   rel path consumed by tools = "<lib>.pretty/<name>.kicad_mod"  (under components/footprints/)
 #
 # ORDER IS SIGNIFICANT: tools/panel_kicad.py builds _FOOTPRINT_MAP from this list and
 # panel_editor.py serialises it into the git-tracked design/*.html editor payload, so a

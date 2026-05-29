@@ -27,7 +27,7 @@ from typing import Any
 # ── Repo-relative paths ────────────────────────────────────────────────────────
 
 _REPO = Path(__file__).resolve().parent.parent
-_FP_ROOT = _REPO / "kicad" / "footprints"
+_FP_ROOT = _REPO / "components" / "footprints"
 
 # Map component type → (relative footprint path, origin_offset_x, origin_offset_y)
 # origin_offset is the footprint's origin relative to the component's "panel anchor".

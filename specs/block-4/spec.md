@@ -36,7 +36,7 @@ to both, maintaining stereo balance.
 > ✅ **CORRECTED 2026-05-29** — THAT2180 reworked to its real current-in/current-out
 > topology (datasheet pinout) with R_in + I/V op-amp per channel and Ec+ control; the
 > prior differential-voltage model (IN+/IN−/OUT+/OUT−, R_OUT_N) was wrong and is removed.
-> Verified in `kicad/nets/block-4.nets.yaml`. CV-conditioning scaling is Phase-3R bring-up.
+> Verified in `specs/block-4/block-4.nets.yaml`. CV-conditioning scaling is Phase-3R bring-up.
 
 ### Gain Law (DSP and hardware)
 
@@ -132,7 +132,7 @@ VCA I/V output (op-amp, <100 Ω) drives LP1's input resistor — negligible loss
 > ✅ **CORRECTED 2026-05-29** — THAT2180 reworked to its real current-in/current-out
 > topology (datasheet pinout) with R_in + I/V op-amp per channel and Ec+ control; the
 > prior differential-voltage model (IN+/IN−/OUT+/OUT−, R_OUT_N) was wrong and is removed.
-> Verified in `kicad/nets/block-4.nets.yaml`. CV-conditioning scaling is Phase-3R bring-up.
+> Verified in `specs/block-4/block-4.nets.yaml`. CV-conditioning scaling is Phase-3R bring-up.
 
 **Board assignment:** Audio board (carries audio-frequency signal; THAT 2180 and CV
 conditioning are co-located with the signal path).
@@ -170,29 +170,6 @@ Unity-gain trimmers RV1/RV2 match the two channels for gain accuracy.
 
 ## 4. Component Requirements
 
-> ✅ **CORRECTED 2026-05-29** — THAT2180 reworked to its real current-in/current-out
-> topology (datasheet pinout) with R_in + I/V op-amp per channel and Ec+ control; the
-> prior differential-voltage model (IN+/IN−/OUT+/OUT−, R_OUT_N) was wrong and is removed.
-> Verified in `kicad/nets/block-4.nets.yaml`. CV-conditioning scaling is Phase-3R bring-up.
-
-Mirrors `specs/components.yaml` block-4 (authoritative). Refs as in components.yaml.
-
-| Ref | Part | Package | Value | Qty | Board | Block | Function |
-|---|---|---|---|---|---|---|---|
-| U4 | THAT2180 | SOIC-8 | — | 1 | audio | 4 | L-channel dB-law VCA (current-in/out) |
-| U5 | THAT2180 | SOIC-8 | — | 1 | audio | 4 | R-channel dB-law VCA (current-in/out) |
-| U6 | TL072CDT | SOIC-8 | — | 1 | audio | 4 | I/V transimpedance converters (L=A, R=B) |
-| U63 | TL072CDT | SOIC-8 | — | 1 | audio | 4 | CV conditioning: AMT inverter (A) + CV/OFS summer (B) |
-| R7, R8 | Resistor 1% | 0603 | 20 kΩ | 2 | audio | 4 | R_in L/R: audio V→I into Input (pin 1) |
-| R40, R41 | Resistor 1% | 0603 | 20 kΩ | 2 | audio | 4 | R_f L/R: I/V feedback (unity @0 dB; inverting) |
-| R42, R43 | Resistor | 0603 | 10 kΩ | 2 | audio | 4 | AMT attenuverter inverter in/fb |
-| R44, R45 | Resistor | 0603 | 100 kΩ | 2 | audio | 4 | CV summer inputs (AMT-scaled CV, OFS) |
-| R46 | Resistor | 0603 | 2.4 kΩ | 1 | audio | 4 | CV summer feedback (Ec scaling; Phase-3R trim) |
-| R9 | Resistor | 0603 | 100 Ω | 1 | audio | 4 | VCA_INPUT series protection |
-| D3 | BAT54S | SOT-23 | — | 1 | audio | 4 | VCA CV input clamp ±12 V |
-| RV1, RV2 | Bourns 3224W | SMD | 500 Ω | 2 | audio | 4 | L/R unity-gain trim (Ec+ offset) |
-| RV24 | Bipolar pot, 9 mm | panel | 1 kΩ | 1 | control | 4 | VCA_AMT attenuverter −1×…+1× |
-| RV25 | Linear pot, 9 mm | panel | — | 1 | control | 4 | VCA_OFS CV floor |
-| C7–C10 | Capacitor | 0603 | 100 nF | 4 | audio | 4 | THAT2180 L/R supply decoupling (V+ and V−) |
-| C41–C44 | Capacitor | 0603 | 100 nF | 4 | audio | 4 | U6, U63 supply decoupling |
-| J26 | PJ301M-12 | panel | — | 1 | panel | 4 | VCA_INPUT jack (normalles to mod bus) |
+Component set: see the generated BOM `kicad/pogo-bom.csv` (rows with `Block = block-4`),
+sourced from `specs/components.yaml` (the per-ref design manifest) and enriched by the
+`components/` registry (MPN, footprint, datasheet). Verification status: `specs/STATUS.md`.

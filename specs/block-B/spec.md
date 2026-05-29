@@ -151,24 +151,6 @@ near the LFO output stage, but are logically Block B's responsibility.
 
 ## 4. Component Requirements
 
-> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
-> It has not been verified against the current panel control set. Do not use for circuit
-> construction until re-verified. See `specs/STATUS.md` for current phase status.
-
-| Ref | Part | Package | Value | Qty | Board | Block | Function |
-|---|---|---|---|---|---|---|---|
-| U_MAIN | TL072CDT | SOIC-8 | — | 1 | audio | block-B | MAIN_L + MAIN_R output buffers |
-| U_BP3 | TL072CDT | SOIC-8 | — | 1 | audio | block-B | BP3_L + BP3_R output buffers |
-| R_MAIN_L | resistor | 0603 | 1 kΩ | 1 | audio | block-B | MAIN_L output series protection |
-| R_MAIN_R | resistor | 0603 | 1 kΩ | 1 | audio | block-B | MAIN_R output series protection |
-| R_BP3_L | resistor | 0603 | 1 kΩ | 1 | audio | block-B | BP3_L output series protection |
-| R_BP3_R | resistor | 0603 | 1 kΩ | 1 | audio | block-B | BP3_R output series protection |
-| R_LFO1 | resistor | 0603 | 1 kΩ | 1 | utility | block-B | LFO1 output series protection |
-| R_LFO2 | resistor | 0603 | 1 kΩ | 1 | utility | block-B | LFO2 output series protection |
-| C_B | cap, X7R | 0603 | 100 nF | 4 | audio | block-B | TL072 supply decoupling (2 ICs × 2 pins) |
-| J_MAIN_L | PJ301M-12 | panel | — | 1 | panel | block-B | MAIN_L output jack |
-| J_MAIN_R | PJ301M-12 | panel | — | 1 | panel | block-B | MAIN_R output jack |
-| J_BP3_L | PJ301M-12 | panel | — | 1 | panel | block-B | BP3_L output jack (pre-mix formant tap) |
-| J_BP3_R | PJ301M-12 | panel | — | 1 | panel | block-B | BP3_R output jack (pre-mix formant tap) |
-| J_LFO1 | PJ301M-12 | panel | — | 1 | panel | block-B | LFO1 output jack |
-| J_LFO2 | PJ301M-12 | panel | — | 1 | panel | block-B | LFO2 output jack |
+Component set: see the generated BOM `kicad/pogo-bom.csv` (rows with `Block = block-B`),
+sourced from `specs/components.yaml` (the per-ref design manifest) and enriched by the
+`components/` registry (MPN, footprint, datasheet). Verification status: `specs/STATUS.md`.

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """POGO 48HP schematic generator — data-driven, per-block vertical slice.
 
-Reads a block netlist (kicad/nets/<block>.nets.yaml) and emits a KiCad 7
+Reads a block netlist (specs/<block>/<block>.nets.yaml) and emits a KiCad 7
 schematic (kicad/pogo-<block>.kicad_sch). Connectivity is name-based: every
 REF.PIN listed under a net gets a global label, so pins sharing a net name are
 joined. Symbols, pin geometry, and emitters are reused from kicad_common.py;
@@ -19,7 +19,7 @@ Design properties
 Usage:
   python3 kicad/generate_schematic.py            # regenerate all block schematics
   python3 kicad/generate_schematic.py --check     # CI gate: validate + drift check
-  python3 kicad/generate_schematic.py --block block-A
+  python3 kicad/generate_schematic.py --block block-A   # nets live in specs/block-*/
 """
 
 from __future__ import annotations
@@ -34,7 +34,7 @@ import yaml
 
 _HERE = Path(__file__).resolve().parent           # kicad/
 _REPO = _HERE.parent
-_NETS_DIR = _HERE / "nets"
+_NETS_DIR = _REPO / "specs"      # per-block nets live with each block spec (specs/block-*/)
 sys.path.insert(0, str(_HERE))
 sys.path.insert(0, str(_REPO / "tools"))
 
@@ -370,7 +370,7 @@ def out_path_for(block: dict) -> Path:
 
 
 def _block_files() -> list[Path]:
-    return sorted(_NETS_DIR.glob("*.nets.yaml"))
+    return sorted(_NETS_DIR.glob("block-*/*.nets.yaml"))
 
 
 def _main(argv: list[str]) -> int:

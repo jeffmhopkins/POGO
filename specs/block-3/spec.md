@@ -204,41 +204,6 @@ is logically a mod bus destination and is normalled to V_modbus.
 
 ## 4. Component Requirements
 
-> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
-> It has not been verified against the current panel control set. Do not use for circuit
-> construction until re-verified. See `specs/STATUS.md` for current phase status.
-
-| Ref | Part | Package | Value | Qty | Board | Block | Function |
-|---|---|---|---|---|---|---|---|
-| MB_PROC_A | TL074CDT | SOIC-14 | — | 1 | utility | 3 | Mod bus summer (1 section) + polarity inverter (1 section) + distribution buffer (1 section, paralleled with half-D for drive); 0 sections spare |
-| MB_PROC_B | TL074CDT | SOIC-14 | — | 1 | utility | 3 | LED drivers: MOD_POS (1) + MOD_NEG (1) + MOD_CLIP (1); 1 section spare |
-| MB_INV_1 | TL074CDT | SOIC-14 | — | 1 | utility | 3 | −V_src inverters for destinations 1–4 |
-| MB_INV_2 | TL074CDT | SOIC-14 | — | 1 | utility | 3 | –V_src inverters for destinations 5–8 |
-| MB_INV_3 | TL074CDT | SOIC-14 | — | 1 | utility | 3 | –V_src inverters for destinations 9–12 |
-| MB_INV_4 | TL074CDT | SOIC-14 | — | 1 | utility | 3 | –V_src inverters for destinations 13–16 |
-| MB_INV_5 | TL074CDT | SOIC-14 | — | 1 | utility | 3 | –V_src inverters for destinations 17–19 (1 spare section) |
-| RV_MB_SCALE | Log-taper pot, 9 mm | panel | 470 kΩ | 1 | control | 3 | MOD_SCALE: sets V_src gain 0.20×–4.55× (≈0.2×–5×) |
-| RV_MB_OFFSET | Linear pot, 9 mm | panel | 50 kΩ | 1 | control | 3 | MOD_OFFSET: adds ±5 V DC to bus |
-| RV_ATT_1–19 | Bipolar pot, 9 mm, centre detent | panel | 10 kΩ | 19 | control | 3 | Destination attenuverters –1× to +1× |
-| R_MB_F | Resistor | 0603 | 100 kΩ | 1 | utility | 3 | Feedback resistor, MB summer stage |
-| R_MB_SRC | Resistor | 0603 | 22 kΩ | 1 | utility | 3 | Floor input resistor for V_src (pot at zero → G_max = 100/22 = 4.55×) |
-| R_MB_OFF | Resistor | 0603 | 100 kΩ | 1 | utility | 3 | Input resistor for offset pot |
-| R_MB_INV | Resistor | 0603 | 100 kΩ | 2 | utility | 3 | Equal-value R in/fb for polarity inverter stage |
-| R_SRC_NORM | Resistor | 0603 | 100 kΩ | 19 | utility | 3 | Bus normalling resistor per destination jack |
-| R_CLAMP | Resistor | 0603 | 100 Ω | 19 | utility | 3 | Series CV protection per destination |
-| D_CLAMP | BAT54S | SOT-23 | — | 19 | utility | 3 | Dual Schottky clamp per destination CV input |
-| R_LED_POS | Resistor | 0603 | 1 kΩ | 1 | utility | 3 | Current limit, MOD_POS LED |
-| R_LED_NEG | Resistor | 0603 | 1 kΩ | 1 | utility | 3 | Current limit, MOD_NEG LED |
-| R_LED_CLIP | Resistor | 0603 | 1 kΩ | 1 | utility | 3 | Current limit, MOD_CLIP LED |
-| R_CLIP_DIV_H | Resistor | 0603 | 9.9 kΩ | 1 | utility | 3 | Upper leg of 9.9 V clip threshold divider |
-| R_CLIP_DIV_L | Resistor | 0603 | 100 Ω | 1 | utility | 3 | Lower leg of 9.9 V clip threshold divider |
-| LED_POS | Green LED, 3 mm | panel | — | 1 | panel | 3 | MOD_POS indicator |
-| LED_NEG | Red LED, 3 mm | panel | — | 1 | panel | 3 | MOD_NEG indicator |
-| LED_CLIP | White LED, 3 mm | panel | — | 1 | panel | 3 | MOD_CLIP indicator |
-| J_MOD_IN | PJ301M-12 | panel | — | 1 | panel | 3 | MOD_INPUT jack (LFO1 normalled) |
-| J_DEST_1–19 | PJ301M-12 | panel | — | 19 | panel | 3 | Destination override jacks |
-| D_MB_CLAMP_P | BZX84C10 | SOT-23 | 10 V | 1 | utility | 3 | +10 V zener; back-to-back with D_MB_CLAMP_N in MB_INV feedback (±10 V output clamp) |
-| D_MB_CLAMP_N | BZX84C10 | SOT-23 | 10 V | 1 | utility | 3 | −10 V zener; back-to-back with D_MB_CLAMP_P in MB_INV feedback |
-| RV_MB_ZERO | Bourns 3224W | SMD | 10 kΩ | 1 | utility | 3 | Offset null trim: zero V_modbus when SCALE = 0 and OFFSET = center (< 10 mV residual) |
-| RV_MB_AMOUNT_MAX | Bourns 3224W | SMD | 10 kΩ | 1 | utility | 3 | 5× gain calibration: adjust until V_modbus = 5 × V_src at SCALE = max |
-| C_BYPASS | Capacitor | 0603 | 100 nF | 14 | utility | 3 | Supply bypass, one per op-amp supply pin (7 ICs × 2) |
+Component set: see the generated BOM `kicad/pogo-bom.csv` (rows with `Block = block-3`),
+sourced from `specs/components.yaml` (the per-ref design manifest) and enriched by the
+`components/` registry (MPN, footprint, datasheet). Verification status: `specs/STATUS.md`.

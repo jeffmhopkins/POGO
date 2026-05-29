@@ -4,14 +4,14 @@ Status as of 2026-05-29. The data-driven schematic generator
 (`kicad/generate_schematic.py`) is built and proven on **block-A**. This document
 is the plan for transcribing the remaining blocks. It is the gate doc for that work.
 
-See `kicad/README-STALE.md` for the generator's design; this file is the *rollout
+This file is the *rollout
 order, symbol gaps, and per-block transcription checklist*.
 
 ---
 
 ## How a block gets added (the repeatable unit of work)
 
-1. Write `kicad/nets/<block>.nets.yaml`:
+1. Write `specs/<block>/<block>.nets.yaml`:
    - `parts:` — each `REF: { sym, part?, value }`. `sym` selects the lib symbol +
      pin map from `SYM_TABLE`; `part` (optional) binds to the `components/`
      registry by a `matches[]` string for footprint/MPN; passives use `value` only.
@@ -118,7 +118,7 @@ validator works. Current state:
 The stale `sym_spdt`/`sym_sp3t` + `spdt_pins`/`sp3t_pins` are 40HP single-pole
 parts and must **not** be reused — the 48HP toggles are the Dailywell DPDT DW3/DW5
 (see the switch-standardization work). Footprints already exist in
-`kicad/footprints/Button_Switch_THT.pretty/` and resolve via the registry.
+`components/footprints/Button_Switch_THT.pretty/` and resolve via the registry.
 
 ---
 
@@ -185,7 +185,7 @@ clean, then commit → **10/10 blocks**.
 ## Shared / cross-block parts → a dedicated shared sheet (decision 2026-05-29, revised)
 
 Parts that span two blocks are NOT owned by either block — they live in their own
-`kicad/nets/shared-*.nets.yaml` sheet, and the using blocks connect via boundary nets.
+`specs/block-Q/shared-*.nets.yaml` sheet, and the using blocks connect via boundary nets.
 First instance: `shared-q.nets.yaml` owns the LP1/LP2 Q-VCAs **U9** (L) and **U10** (R)
 (each LM13700: cell A = LP1 Q, cell B = LP2 Q), plus their decoupling and Iabc-bypass
 caps. components.yaml groups these under `block: block-Q`.
