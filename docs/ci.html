@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POGO — What Happens on Commit</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; background: #0d0d0d; color: #ccc;
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; padding: 24px; line-height: 1.55;
+    }
+    .wrap { width: min(820px, 100%); margin: 0 auto; }
+    a { color: #7fe7ff; text-decoration: none; } a:hover { text-decoration: underline; }
+    h1 { color: #00d4ff; letter-spacing: .08em; margin: 0 0 2px; font-size: 20px; }
+    h1 .dot { color: #ff8800; }
+    .sub { color: #4a6070; margin: 0 0 22px; letter-spacing: .1em; font-size: 12px; }
+    h2 { color: #7fe7ff; font-size: 14px; margin: 24px 0 8px; letter-spacing: .04em; }
+    p, li { font-size: 13px; color: #bbb; }
+    ul { padding-left: 18px; }
+    b { color: #bcd; }
+    code { color: #9ab; background: #1d1d1d; padding: 0 4px; border-radius: 3px; }
+    ol.flow { list-style: none; padding: 0; }
+    ol.flow li { background: #141414; border: 1px solid #2a2a2a; border-radius: 6px; padding: 10px 14px; margin: 8px 0; }
+    ol.flow .s { color: #7fe7ff; font-weight: bold; }
+    footer { color: #3a3a3a; font-size: 11px; margin-top: 26px; }
+    footer a { color: #4a6070; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>POGO <span class="dot">·</span> WHAT HAPPENS ON COMMIT</h1>
+    <p class="sub"><a href="index.html">&larr; docs</a> &nbsp;·&nbsp; the CI pipeline behind every push</p>
+
+    <p>Push a <code>change/&lt;slug&gt;</code> branch and CI (<code>.github/workflows/build.yml</code>) runs on every push and PR:</p>
+
+    <ol class="flow">
+      <li><span class="s">1 · Five <code>--check</code> gates</span> &mdash; <code>components.py</code>,
+        <code>fetch_datasheets.py</code>, <code>build_components.py</code> (BOM + footprint SVGs + the
+        docs viewer data), <code>generate_schematic.py</code> (pin coverage + structural + byte-drift),
+        and <code>build_panel.py</code> (panel DRC). A stale generated artifact fails the build.</li>
+      <li><span class="s">2 · Plugin builds</span> &mdash; the <code>.vcvplugin</code> is cross-compiled for
+        Linux, Windows and macOS. There is no Rack runtime in CI, so the plugin itself is verified by
+        <b>you</b> in VCV Rack (download the artifact from the run).</li>
+      <li><span class="s">3 · Artifacts</span> &mdash; each run publishes the <code>.vcvplugin</code> per OS
+        plus a <code>POGO-hardware</code> bundle: per-block schematics, the BOM (<code>pogo-bom.csv</code>),
+        the panel SVG, and the panel debug HTML.</li>
+    </ol>
+
+    <h2>Merge flow</h2>
+    <ul>
+      <li>PR <code>change/&lt;slug&gt;</code> → <code>dev</code>, squash-merged once CI is green.</li>
+      <li><code>dev</code> → <code>main</code> promotes a release.</li>
+      <li>Never commit directly to <code>dev</code> or <code>main</code>.</li>
+    </ul>
+
+    <p>For the full workflow — lanes, gates, and change records — see
+      <a href="change-process.html">Change Process</a>.</p>
+
+    <footer><a href="https://github.com/jeffmhopkins/POGO" target="_blank" rel="noopener">github.com/jeffmhopkins/POGO</a></footer>
+  </div>
+</body>
+</html>
