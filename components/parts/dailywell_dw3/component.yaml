@@ -4,6 +4,8 @@ mpn: DW3 (2M DPDT ON-ON)
 manufacturer: Dailywell
 supplier: Thonk
 package: sub-mini toggle 2M
+matches:
+- Dailywell DW3 (2M DPDT ON-ON)
 footprint:
   lib: Button_Switch_THT
   name: SW_Dailywell_DW3_DPDT

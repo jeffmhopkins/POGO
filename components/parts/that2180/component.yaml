@@ -4,6 +4,8 @@ mpn: THAT2180LD
 manufacturer: THAT Corporation
 supplier: '~'
 package: SOIC-8
+matches:
+- THAT2180
 footprint:
   lib: Package_SO
   name: SOIC-8_3.9x4.9mm_P1.27mm

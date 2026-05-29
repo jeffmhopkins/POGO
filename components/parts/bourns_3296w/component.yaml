@@ -4,6 +4,8 @@ mpn: 3296W-1-xxx
 manufacturer: Bourns
 supplier: '~'
 package: through-hole
+matches:
+- Bourns 3296W
 footprint:
   lib: Potentiometer_THT
   name: Potentiometer_Bourns_3296W_Vertical

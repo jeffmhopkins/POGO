@@ -81,6 +81,31 @@ def part(slug: str) -> dict[str, Any] | None:
     return None
 
 
+@lru_cache(maxsize=1)
+def _match_index() -> dict[str, dict[str, Any]]:
+    """components.yaml `part:` string -> registry part (via each part's matches[])."""
+    idx: dict[str, dict[str, Any]] = {}
+    for p in parts():
+        for m in (p.get("matches") or []):
+            idx[m] = p
+    return idx
+
+
+def part_for(part_str: str) -> dict[str, Any] | None:
+    """Resolve a components.yaml `part:` value to its registry part, or None."""
+    return _match_index().get(part_str)
+
+
+_SPEC_COMPONENTS = _REPO / "specs" / "components.yaml"
+
+
+@lru_cache(maxsize=1)
+def bom_components() -> list[dict[str, Any]]:
+    """The hand-maintained BOM rows from specs/components.yaml (in file order)."""
+    data = yaml.safe_load(_SPEC_COMPONENTS.read_text())
+    return list(data.get("components", []))
+
+
 # ── Validation ──────────────────────────────────────────────────────────────
 
 def validate() -> list[str]:

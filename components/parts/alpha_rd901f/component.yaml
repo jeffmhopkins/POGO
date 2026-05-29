@@ -4,6 +4,13 @@ mpn: RD901F-40-00D
 manufacturer: Alpha (Taiwan)
 supplier: Thonk
 package: 9mm
+matches:
+- lin pot
+- log pot
+- bipolar pot
+- knob
+- large knob
+- xl knob
 footprint:
   lib: Potentiometer_THT
   name: Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles
