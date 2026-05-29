@@ -215,6 +215,10 @@ audio,C109,6,,100nF,0603,,,,,block-6,C_IREF: expo I_ref node bypass; 1 per expo 
 audio,RV24,3,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6,BP R-channel expo f_ref trim; 1 per group
 audio,RV25,3,3224W-1-xxx,20kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6,BP R-channel expo 1V/oct trim; 1 per group
 audio,C110,84,,100nF,0603,,,,,block-6,"C_BYP: per-IC supply decoupling; 2 per IC × 42 block-6 ICs (U15-U48, U67-U74)"
+audio,R124,3,,1MΩ,0603,,,,,block-6,R_IREF_A_L: L-channel expo I_ref fixed R (U28-30); 1 per group
+audio,R125,3,,47kΩ,0603,,,,,block-6,R_VOCT_L: L-channel expo V/oct scaling (U28-30); 1 per group
+audio,R126,3,,1kΩ,0603,,,,,block-6,R_E_L: L-channel expo emitter degeneration (U28-30); 1 per group
+audio,R127,6,,100kΩ,0603,,,,,block-6,R_TILT_SUM: ±V_tilt summing R into each expo base (+L / −R); 1 per expo (6)
 audio,U49,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-7,HP OTA integrators L
 audio,U50,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-7,HP OTA integrators R
 audio,U51,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-7,HP Q VCA L (cell A; cell B spare)

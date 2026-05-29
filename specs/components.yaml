@@ -286,6 +286,10 @@ components:
   - { ref: RV24, board: audio,   block: block-6, part: "Bourns 3224W", pkg: SMD, val: "500kΩ", qty: 3, fn: "BP R-channel expo f_ref trim; 1 per group" }
   - { ref: RV25, board: audio,   block: block-6, part: "Bourns 3224W", pkg: SMD, val: "20kΩ",  qty: 3, fn: "BP R-channel expo 1V/oct trim; 1 per group" }
   - { ref: C110, board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "100nF",  qty: 84, fn: "C_BYP: per-IC supply decoupling; 2 per IC × 42 block-6 ICs (U15-U48, U67-U74)" }
+  - { ref: R124, board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "1MΩ",    qty: 3,  fn: "R_IREF_A_L: L-channel expo I_ref fixed R (U28-30); 1 per group" }
+  - { ref: R125, board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "47kΩ",   qty: 3, tol: "1%", fn: "R_VOCT_L: L-channel expo V/oct scaling (U28-30); 1 per group" }
+  - { ref: R126, board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "1kΩ",    qty: 3,  fn: "R_E_L: L-channel expo emitter degeneration (U28-30); 1 per group" }
+  - { ref: R127, board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 6,  fn: "R_TILT_SUM: ±V_tilt summing R into each expo base (+L / −R); 1 per expo (6)" }
 
   # block-7: HP Filter (refs shifted from old U34–U40 to U49–U55)
   - { ref: U49,  board: audio,   block: block-7, part: LM13700M,   pkg: SOIC-16,  fn: "HP OTA integrators L" }
