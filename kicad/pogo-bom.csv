@@ -52,7 +52,7 @@ audio,U10,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas In
 audio,U11,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/opa1612.pdf,block-5,LP1 SUM_AMP + output buffer L
 audio,U12,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/opa1612.pdf,block-5,LP1 SUM_AMP + output buffer R
 audio,U13,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-5,LP1 tilt inverter (−V_tilt for R)
-audio,U14,1,THAT340S14-U,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,THAT Corporation,,https://thatcorp.com/datashts/THAT_300-Series_Datasheet.pdf,block-5,LP1 expo converter matched NPN (L+R shared)
+audio,U14,1,THAT340S14-U,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,THAT Corporation,,https://thatcorp.com/datashts/THAT_300-Series_Datasheet.pdf,block-5,LP1 expo converter L (matched NPN Q1/Q2); per-channel for true stereo tilt
 audio,C11,1,,47nF,0603,,,,,block-5,LP1 integrator C1 L (C0G/NP0)
 audio,C12,1,,47nF,0603,,,,,block-5,LP1 integrator C2 L (C0G/NP0)
 audio,C13,1,,47nF,0603,,,,,block-5,LP1 integrator C1 R (C0G/NP0)
@@ -61,8 +61,8 @@ audio,R10,1,,100kΩ,0603,,,,,block-5,LP1 SUM_AMP R_in L
 audio,R11,1,,100kΩ,0603,,,,,block-5,LP1 SUM_AMP R_in R
 audio,R_TILT_INV_IN,1,,100kΩ,0603,,,,,block-5,LP1 tilt inverter input R (U13 half A; 1% for tilt center null depth)
 audio,R_TILT_INV_FB,1,,100kΩ,0603,,,,,block-5,LP1 tilt inverter feedback R (matched pair; G=−1 gives −V_tilt for R channel)
-audio,RV3,1,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-5,LP1 f_ref trim rheostat; in series with R_IREF_A 1MΩ; ±25% range
-audio,RV4,1,3224W-1-xxx,20kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-5,LP1 1V/oct tracking trim; ±10% range
+audio,RV3,1,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-5,LP1 f_ref trim rheostat L; in series with R_IREF_A 1MΩ; ±25% range
+audio,RV4,1,3224W-1-xxx,20kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-5,LP1 1V/oct tracking trim L; ±10% range
 audio,RV5,1,,,SMD,,,,,block-5,LP1 Q_max trim (IRES_AMP V_bias)
 audio,RV6,1,,,SMD,,,,,block-5,LP1 tilt null trim
 audio,R47,1,,100kΩ,0603,,,,,block-5,LP1 SUM_AMP v2 feedback input R L (R_FB_L)
@@ -105,6 +105,19 @@ audio,C62,1,,100nF,0603,,,,,block-5,U13 V+ decoupling
 audio,C63,1,,100nF,0603,,,,,block-5,U13 V- decoupling
 audio,C64,1,,100nF,0603,,,,,block-5,U14 V+ decoupling
 audio,C65,1,,100nF,0603,,,,,block-5,U14 V- decoupling
+audio,U64,1,THAT340S14-U,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,THAT Corporation,,https://thatcorp.com/datashts/THAT_300-Series_Datasheet.pdf,block-5,LP1 expo converter R (matched NPN Q1/Q2)
+audio,R65,1,,1MΩ,0603,,,,,block-5,LP1 expo R I_ref fixed R; series with RV22 (R_IREF_A_R)
+audio,R66,1,,47kΩ,0603,,,,,block-5,LP1 expo R V/oct scaling R (R_VOCT_R)
+audio,R67,1,,1kΩ,0603,,,,,block-5,LP1 expo R emitter degeneration (R_E_R)
+audio,RV22,1,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-5,LP1 f_ref trim rheostat R
+audio,RV23,1,3224W-1-xxx,20kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-5,LP1 1V/oct tracking trim R
+audio,C66,1,,100nF,0603,,,,,block-5,LP1 expo R I_ref node bypass (C0G)
+audio,C67,1,,100nF,0603,,,,,block-5,U64 V+ decoupling
+audio,C68,1,,100nF,0603,,,,,block-5,U64 V- decoupling
+audio,R68,1,,10kΩ,0603,,,,,block-5,LP1 L OTA1 buffer (v1) emitter pulldown to V-
+audio,R69,1,,10kΩ,0603,,,,,block-5,LP1 L OTA2 buffer (v2) emitter pulldown to V-
+audio,R70,1,,10kΩ,0603,,,,,block-5,LP1 R OTA1 buffer (v1) emitter pulldown to V-
+audio,R71,1,,10kΩ,0603,,,,,block-5,LP1 R OTA2 buffer (v2) emitter pulldown to V-
 audio,U15,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-6,BP1 OTA integrators + Q L
 audio,U16,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-6,BP1 OTA integrators + Q R
 audio,U17,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-6,BP2 OTA integrators + Q L

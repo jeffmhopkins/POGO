@@ -54,7 +54,8 @@ Ordered by rising symbol/wiring risk so each step de-risks the next. ✅ = done.
 | 3 | **1** Pre-gain | audio | 2× OPA1612, 2× DW3 | DW3 toggle sym + pins (✅ added; DW5 too) | ✅ DONE. DPDT path-select 1×/5×; ALT path protected (R38/R39+D8/D9). |
 | 4 | **2** Dual LFO | utility | 2× TL072 | diode/led syms + trimpot (✅ added) | ✅ DONE. Rate network FINALIZED (drive-attenuator); SOD-123 footprint vendored; LFO LEDs added to BOM. |
 | 5 | **4** VCA | audio | 2× THAT2180, 2× TL072, BAT54S | that2180_pins (✅) | ✅ DONE. THAT2180 pinout/topology CORRECTED from datasheet (current-in/I-V-out); 3224W SMD footprint vendored. |
-| 6 | **5** LP1 | audio | 4× LM13700, 2× OPA1612, TL072, THAT340 | **lm13700_pins**, **that340 all-pins use** | First OTA-C SVF; re-verify `aux-ota-c-svf`, `aux-expo-converter`, `aux-q-control` (all STALE). |
+| 6 | **5** LP1 | audio | LM13700, OPA1612, TL072, 2× THAT340 | lm13700/that340 (✅) | ✅ DONE (dual-derivation). Per-channel expo (true tilt); shared-q sheet (U9/U10); buffer pulldowns added. |
+| — | **shared-q** | audio | 2× LM13700 (U9/U10) | — | ✅ DONE. Shared LP1/LP2 Q-VCAs; cell A→block-5, cell B→block-8 (boundary). |
 | 7 | **8** LP2 | audio | 2× LM13700, 2× OPA1612, THAT340 | — (reuse #6) | Same SVF core as LP1, independent. |
 | 8 | **7** HP | audio | 4× LM13700, 2× OPA1612, THAT340 | — (reuse #6) | G=−1 buffer corrects SUM_AMP inversion. |
 | 9 | **3** Mod bus | utility | 7× TL074, DW5 | **tl074 all-pins (+power 4/11)**, **DW5 toggle** | 19 attenuverters (repetitive), 19 override jacks. |
@@ -164,6 +165,8 @@ Fix any missing `qty` on grouped rows as you go (block-1 fixed R3–R6).
 - [x] block-1 transcribed + verified (DW3/DW5 symbols; refdes-suffix convention)
 - [x] block-2 transcribed + verified (LFO rate net FINALIZED; diode/led/trimpot syms; SOD-123 fp)
 - [x] block-4 transcribed + verified (THAT2180 pinout/topology CORRECTED; vca sym; 3224W SMD fp)
-- [ ] blocks 5, 6, 7, 8, 3 transcribed + verified
+- [x] block-5 + shared-q transcribed + verified (dual-derivation; LM13700/THAT340 datasheet-corrected;
+      per-channel expo; OTA buffer pulldowns added; SOD-123 already present)
+- [ ] blocks 6, 7, 8, 3 transcribed + verified
 - [ ] (optional) board-level sheets combining per-block schematics by board
 - [ ] (gated separately) enable a KiCad CI job (kiutils) — currently disabled

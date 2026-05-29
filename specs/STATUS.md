@@ -26,7 +26,7 @@ Last updated: 2026-05-28 | Topology: 48HP | Source of truth: `tools/panel-data.y
 | 2 | Dual LFO | ✅ panel-verified | ✅ rate net FINALIZED 2026-05-29 | Integrator+Schmitt; drive-attenuator rate control (fixed R_INT + trimpot attenuator) |
 | 3 | Mod Bus | ✅ panel-verified | ⚠️ STALE | 19 destinations; 7× TL074CDT |
 | 4 | VCA | ✅ panel-verified | ✅ CORRECTED 2026-05-29 | THAT 2180 current-in/I-V-out (datasheet pinout); Ec+ control; I/V op-amps added |
-| 5 | LP Filter 1 | ✅ panel-verified | ⚠️ STALE | OTA-C SVF; stereo tilt (symmetric ±V_tilt L/R) |
+| 5 | LP Filter 1 | ✅ panel-verified | ✅ transcribed 2026-05-29 | OTA-C SVF; per-channel expo (true tilt); shared-q Q-VCAs; buffer pulldowns added |
 | 6 | Triple BP + Dist | ✅ **rewritten 2026-05-28** | ⚠️ STALE | Panel redesigned: per-band DIST switch, FOCUS, TILT; BP_BYPASS+WET model |
 | 7 | HP Filter | ✅ panel-verified | ⚠️ STALE | OTA-C SVF; G=−1 buffer corrects SUM_AMP inversion |
 | 8 | LP Filter 2 | ✅ panel-verified | ⚠️ STALE | OTA-C SVF; independent from LP1 |
@@ -70,8 +70,8 @@ Circuit diagrams in spec text must be self-sufficient.
 
 | File | Status |
 |---|---|
-| `kicad/generate_schematic.py` | 🚧 48HP data-driven generator — framework done, **blocks A, B, 1, 2, 4 complete** (5/10 blocks). Rollout plan: `kicad/SCHEMATIC-GEN-PLAN.md` |
-| `kicad/nets/*.nets.yaml` | 🚧 per-block netlists — `block-A`, `block-B`, `block-1`, `block-2`, `block-4` done |
+| `kicad/generate_schematic.py` | 🚧 48HP data-driven generator — framework done, **blocks A, B, 1, 2, 4, 5 + shared-q complete** (6/10 blocks). Rollout plan: `kicad/SCHEMATIC-GEN-PLAN.md` |
+| `kicad/nets/*.nets.yaml` | 🚧 per-block netlists — `block-A/B/1/2/4/5` + `shared-q` done |
 | `kicad/generate_control_board.py`, `generate_utility_board.py` | ⚠️ 40HP-era STALE (see kicad/README-STALE.md) |
 | `kicad/validate_*.py` | ⚠️ 40HP-era STALE |
 | `.github/workflows/build.yml` schematic gate | ✅ `generate_schematic.py --check` (validate + structural verify + drift) in all jobs |
@@ -117,7 +117,7 @@ corrected; block-B output Z attenuation corrected; BP_MIX wet polarity circuit c
    40HP-era stale generators. Per-block netlists in `kicad/nets/*.nets.yaml`,
    footprints resolved from the `components/` registry, byte-stable output, pin-
    coverage + structural verification gated in CI. Remaining: transcribe blocks
-   5, 6, 7, 8, 3. **Order, symbol gaps, and per-block checklist:
+   6, 7, 8, 3. **Order, symbol gaps, and per-block checklist:
    `kicad/SCHEMATIC-GEN-PLAN.md`.**
 2. **Phase 6R** — VCV Rack signal-path smoke tests (CI integration)
 

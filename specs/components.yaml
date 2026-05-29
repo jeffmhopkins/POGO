@@ -84,7 +84,7 @@ components:
   - { ref: U11,  board: audio,   block: block-5, part: OPA1612,   pkg: SOIC-8,   fn: "LP1 SUM_AMP + output buffer L" }
   - { ref: U12,  board: audio,   block: block-5, part: OPA1612,   pkg: SOIC-8,   fn: "LP1 SUM_AMP + output buffer R" }
   - { ref: U13,  board: audio,   block: block-5, part: TL072CDT,   pkg: SOIC-8,   fn: "LP1 tilt inverter (−V_tilt for R)" }
-  - { ref: U14,  board: audio,   block: block-5, part: THAT340S14-U, pkg: SOIC-14,   fn: "LP1 expo converter matched NPN (L+R shared)" }
+  - { ref: U14,  board: audio,   block: block-5, part: THAT340S14-U, pkg: SOIC-14,   fn: "LP1 expo converter L (matched NPN Q1/Q2); per-channel for true stereo tilt" }
   - { ref: C11,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "47nF",   fn: "LP1 integrator C1 L (C0G/NP0)" }
   - { ref: C12,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "47nF",   fn: "LP1 integrator C2 L (C0G/NP0)" }
   - { ref: C13,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "47nF",   fn: "LP1 integrator C1 R (C0G/NP0)" }
@@ -93,8 +93,8 @@ components:
   - { ref: R11,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "LP1 SUM_AMP R_in R" }
   - { ref: R_TILT_INV_IN, board: audio, block: block-5, part: ~,  pkg: "0603",   val: "100kΩ",  tol: "1%", fn: "LP1 tilt inverter input R (U13 half A; 1% for tilt center null depth)" }
   - { ref: R_TILT_INV_FB, board: audio, block: block-5, part: ~,  pkg: "0603",   val: "100kΩ",  tol: "1%", fn: "LP1 tilt inverter feedback R (matched pair; G=−1 gives −V_tilt for R channel)" }
-  - { ref: RV3,  board: audio,   block: block-5, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "LP1 f_ref trim rheostat; in series with R_IREF_A 1MΩ; ±25% range" }
-  - { ref: RV4,  board: audio,   block: block-5, part: "Bourns 3224W", pkg: SMD,   val: "20kΩ",  fn: "LP1 1V/oct tracking trim; ±10% range" }
+  - { ref: RV3,  board: audio,   block: block-5, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "LP1 f_ref trim rheostat L; in series with R_IREF_A 1MΩ; ±25% range" }
+  - { ref: RV4,  board: audio,   block: block-5, part: "Bourns 3224W", pkg: SMD,   val: "20kΩ",  fn: "LP1 1V/oct tracking trim L; ±10% range" }
   - { ref: RV5,  board: audio,   block: block-5, part: ~,          pkg: SMD,      fn: "LP1 Q_max trim (IRES_AMP V_bias)" }
   - { ref: RV6,  board: audio,   block: block-5, part: ~,          pkg: SMD,      fn: "LP1 tilt null trim" }
   # block-5 full circuit (expanded from spec §4, 2026-05-29): SUM_AMP fb, OTA R_LIN,
@@ -139,6 +139,25 @@ components:
   - { ref: C63,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "100nF",  fn: "U13 V- decoupling" }
   - { ref: C64,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "100nF",  fn: "U14 V+ decoupling" }
   - { ref: C65,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "100nF",  fn: "U14 V- decoupling" }
+  # block-5 per-channel expo R (2026-05-29 decision: true stereo tilt needs one expo
+  # converter per channel — U14=L, U64=R; each fed V_freq ± V_tilt).
+  - { ref: U64,  board: audio,   block: block-5, part: THAT340S14-U, pkg: SOIC-14,   fn: "LP1 expo converter R (matched NPN Q1/Q2)" }
+  - { ref: R65,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "1MΩ",    fn: "LP1 expo R I_ref fixed R; series with RV22 (R_IREF_A_R)" }
+  - { ref: R66,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "47kΩ",   tol: "1%", fn: "LP1 expo R V/oct scaling R (R_VOCT_R)" }
+  - { ref: R67,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "LP1 expo R emitter degeneration (R_E_R)" }
+  - { ref: RV22, board: audio,   block: block-5, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "LP1 f_ref trim rheostat R" }
+  - { ref: RV23, board: audio,   block: block-5, part: "Bourns 3224W", pkg: SMD,   val: "20kΩ",  fn: "LP1 1V/oct tracking trim R" }
+  - { ref: C66,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "100nF",  fn: "LP1 expo R I_ref node bypass (C0G)" }
+  - { ref: C67,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "100nF",  fn: "U64 V+ decoupling" }
+  - { ref: C68,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "100nF",  fn: "U64 V- decoupling" }
+  # block-5 LM13700 integrator Darlington-buffer emitter pulldowns to V- (review
+  # finding 2026-05-29: buffers are used as the v1/v2 state-variable outputs but the
+  # spec/BOM omitted the mandatory emitter-follower pulldown; without it the buffer
+  # cannot sink current).
+  - { ref: R68,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "LP1 L OTA1 buffer (v1) emitter pulldown to V-" }
+  - { ref: R69,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "LP1 L OTA2 buffer (v2) emitter pulldown to V-" }
+  - { ref: R70,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "LP1 R OTA1 buffer (v1) emitter pulldown to V-" }
+  - { ref: R71,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "LP1 R OTA2 buffer (v2) emitter pulldown to V-" }
 
   # block-6: Triple BP + Distortion — SVF ICs
   - { ref: U15,  board: audio,   block: block-6, part: LM13700M,   pkg: SOIC-16,  fn: "BP1 OTA integrators + Q L" }

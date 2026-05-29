@@ -128,7 +128,10 @@ This means:
 - Phase 3R must decide: shared expo (simplest, mono tracking) vs separate expo
   per channel (enables tilt CV hardware implementation)
 
-Current spec: shared expo per block, document as Phase 3R open item for tilt.
+RESOLVED 2026-05-29: tilt-bearing blocks (LP1 block-5, BP block-6) use **one expo
+converter per channel** (two THAT340 per block, each fed V_freq ± V_tilt) for true
+octave-accurate L/R spread. Non-tilt blocks (HP block-7, LP2 block-8) keep a single
+shared expo (mono L/R tracking).
 
 ### Trim Pots
 
