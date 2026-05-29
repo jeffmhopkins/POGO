@@ -4,6 +4,8 @@ mpn: '~'
 manufacturer: Alpha/Alps
 supplier: Thonk
 package: 45mm slide
+matches:
+- PogoSlider
 footprint:
   lib: Potentiometer_THT
   name: Potentiometer_Slider_45mm_Vertical

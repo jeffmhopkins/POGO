@@ -39,6 +39,7 @@ jobs:
           # Component registry must validate, then DRC must pass before we compile
           python3 tools/components.py --check
           python3 tools/fetch_datasheets.py --check
+          python3 tools/build_components.py --check
           python3 tools/build_panel.py --check
           # Regenerate plugin/res/Pogo-source.svg (source) AND plugin/res/Pogo.svg
           # (Inkscape text-to-path, loaded by VCV Rack) from panel-data.yaml.
@@ -81,6 +82,7 @@ jobs:
           apt-get update -qq && apt-get install -y python3-yaml inkscape -qq
           python3 tools/components.py --check
           python3 tools/fetch_datasheets.py --check
+          python3 tools/build_components.py --check
           python3 tools/build_panel.py --check
           # Regenerate Pogo-source.svg + Pogo.svg (Inkscape text-to-path) from the YAML.
           python3 tools/build_panel.py --resource --mfr
@@ -141,6 +143,7 @@ jobs:
           export PATH="/Applications/Inkscape.app/Contents/MacOS:$PATH"
           python3 tools/components.py --check
           python3 tools/fetch_datasheets.py --check
+          python3 tools/build_components.py --check
           python3 tools/build_panel.py --check
           # Regenerate Pogo-source.svg + Pogo.svg (Inkscape text-to-path) from the YAML.
           python3 tools/build_panel.py --resource --mfr

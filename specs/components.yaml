@@ -138,7 +138,7 @@ components:
   # block-6: Discrete semiconductors
   - { ref: D4,   board: audio,   block: block-6, part: 1N4148W,    pkg: SOD-123,  qty: 24, fn: "SC soft-clip diodes; 4 per path (2 antiparallel pairs) × 6 paths" }
   - { ref: D5,   board: audio,   block: block-6, part: BZX84C5V1,  pkg: SOT-23,   qty: 12, fn: "HC back-to-back zener clamps (±5.8V clip); 2 per path × 6 paths" }
-  - { ref: D6,   board: audio,   block: block-6, part: 1N4148W,    pkg: SOD-123,  qty: 48, fn: "WF passive clamp diodes; 4 per path (2 per polarity, Vth=±1.4V) × 6 paths; true symmetric fold" }
+  - { ref: D6,   board: audio,   block: block-6, part: 1N4148W,    pkg: SOD-123,  qty: 24, fn: "WF passive clamp diodes; 4 per path (2 per polarity, Vth=±1.4V) × 6 paths; true symmetric fold" }
   - { ref: D7,   board: audio,   block: block-6, part: BZX84C5V1,  pkg: SOT-23,   fn: "CD4053 logic supply 5.1V zener shunt (from +12V with R_5V_logic)" }
 
   # block-6: Passives — SVF integrator caps

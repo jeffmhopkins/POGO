@@ -4,6 +4,8 @@ mpn: TL074CDT
 manufacturer: Texas Instruments
 supplier: '~'
 package: SOIC-14
+matches:
+- TL074CDT
 footprint:
   lib: Package_SO
   name: SOIC-14_3.9x8.7mm_P1.27mm

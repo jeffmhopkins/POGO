@@ -4,6 +4,8 @@ mpn: BZX84C5V1
 manufacturer: Nexperia
 supplier: '~'
 package: SOT-23
+matches:
+- BZX84C5V1
 footprint: null
 footprint_needed: SOT-23
 datasheet:

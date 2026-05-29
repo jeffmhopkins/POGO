@@ -4,6 +4,8 @@ mpn: 3224W-1-xxx
 manufacturer: Bourns
 supplier: '~'
 package: SMD
+matches:
+- Bourns 3224W
 footprint: null
 footprint_needed: SMD trimmer 3224W
 datasheet:

@@ -5,6 +5,8 @@ alt_mpn: PJ301M-12
 manufacturer: Qingpu (Thonkiconn)
 supplier: Thonk
 package: 3.5mm panel jack
+matches:
+- PJ301M-12
 footprint:
   lib: Connector_Audio
   name: Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles

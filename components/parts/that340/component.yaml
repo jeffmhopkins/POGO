@@ -4,6 +4,8 @@ mpn: THAT340S14-U
 manufacturer: THAT Corporation
 supplier: '~'
 package: SOIC-14
+matches:
+- THAT340S14-U
 footprint:
   lib: Package_SO
   name: SOIC-14_3.9x8.7mm_P1.27mm

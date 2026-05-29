@@ -4,6 +4,7 @@ mpn: '~'
 manufacturer: generic
 supplier: '~'
 package: 3mm THT LED
+matches: []
 footprint:
   lib: LED_THT
   name: LED_D3.0mm

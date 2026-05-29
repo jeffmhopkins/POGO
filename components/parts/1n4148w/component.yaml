@@ -4,6 +4,8 @@ mpn: 1N4148W
 manufacturer: Diodes Inc.
 supplier: '~'
 package: SOD-123
+matches:
+- 1N4148W
 footprint: null
 footprint_needed: SOD-123
 datasheet:
