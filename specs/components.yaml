@@ -242,10 +242,10 @@ components:
   - { ref: C2,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "47nF",   fn: "C_INT2: LFO2 integrator timing cap (C0G mandatory)" }
   - { ref: C3,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "100nF",  qty: 2, fn: "C_BYPASS_LFO1: U1 +12V and −12V supply bypass (X7R)" }
   - { ref: C5,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "100nF",  qty: 2, fn: "C_BYPASS_LFO2: U2 +12V and −12V supply bypass (X7R)" }
-  - { ref: R1,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "270kΩ",  fn: "R_CW_END1: LFO1 CW end resistor; limits f_max ≈ 43 Hz" }
-  - { ref: R2,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "270kΩ",  fn: "R_CW_END2: LFO2 CW end resistor" }
-  - { ref: R3,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "100MΩ",  qty: 2, fn: "R_CCW_END1: LFO1 CCW end (2× in series = 200 MΩ); limits f_min ≈ 0.058 Hz" }
-  - { ref: R4,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "100MΩ",  qty: 2, fn: "R_CCW_END2: LFO2 CCW end (2× in series = 200 MΩ)" }
+  - { ref: R1,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "590kΩ",  tol: "1%", fn: "R_INT1: LFO1 integrator input R (fixed); sets f_max ≈ 20 Hz at full drive" }
+  - { ref: R2,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "590kΩ",  tol: "1%", fn: "R_INT2: LFO2 integrator input R (fixed)" }
+  - { ref: R3,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "2.4kΩ",  fn: "R_FLOOR1: LFO1 rate-attenuator floor (pot bottom → GND); sets f_min ≈ 0.05 Hz" }
+  - { ref: R4,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "2.4kΩ",  fn: "R_FLOOR2: LFO2 rate-attenuator floor (pot bottom → GND)" }
   - { ref: R5,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "R_FB_SQ1: LFO1 Schmitt feedback R (comparator output → (+) input)" }
   - { ref: R6,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "R_FB_SQ2: LFO2 Schmitt feedback R" }
   - { ref: R7,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "82kΩ",   fn: "R_HYS1: LFO1 Schmitt lower R ((+) input → GND); sets V_H = 5V" }
@@ -256,6 +256,8 @@ components:
   - { ref: R12,  board: utility, block: block-2, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "R_OUT2: LFO2 output series protection to jack" }
   - { ref: D1,   board: utility, block: block-2, part: 1N4148W,    pkg: SOD-123,  fn: "D_LED1: LFO1 LED half-wave rectifier (positive half-cycle pulsing)" }
   - { ref: D2,   board: utility, block: block-2, part: 1N4148W,    pkg: SOD-123,  fn: "D_LED2: LFO2 LED half-wave rectifier" }
+  - { ref: LED1, board: panel,   block: block-2, part: "LED 3mm",  pkg: "3mm",    fn: "LFO1 rate/phase indicator" }
+  - { ref: LED2, board: panel,   block: block-2, part: "LED 3mm",  pkg: "3mm",    fn: "LFO2 rate/phase indicator" }
 
   # block-3: Mod Bus Processor ICs (7× TL074CDT total)
   - { ref: U3,   board: utility, block: block-3, part: TL074CDT,   pkg: SOIC-14,  fn: "MB_PROC_A: MB summer (half A) + MB inverter (half B); 2 sections spare" }
@@ -294,8 +296,8 @@ components:
   - { ref: SW2,  board: control, block: block-1, part: "Dailywell DW3 (2M DPDT ON-ON)", pkg: "sub-mini toggle 2M",  fn: "GAIN_BP3 1×/5×" }
 
   # block-2 panel controls
-  - { ref: RV1,  board: control, block: block-2, part: "Bourns 3296W", pkg: "through-hole", val: "1MΩ", fn: "LFO1_RATE trimpot (preset; 0.05–20 Hz range)" }
-  - { ref: RV2,  board: control, block: block-2, part: "Bourns 3296W", pkg: "through-hole", val: "1MΩ", fn: "LFO2_RATE trimpot (preset; 0.05–20 Hz range)" }
+  - { ref: RV1,  board: control, block: block-2, part: "Bourns 3296W", pkg: "through-hole", val: "1MΩ", fn: "LFO1_RATE trimpot (preset; rate attenuator on Schmitt output, 0.05–20 Hz)" }
+  - { ref: RV2,  board: control, block: block-2, part: "Bourns 3296W", pkg: "through-hole", val: "1MΩ", fn: "LFO2_RATE trimpot (preset; rate attenuator on Schmitt output, 0.05–20 Hz)" }
 
   # block-3 panel controls
   - { ref: RV3,  board: control, block: block-3, part: "log pot",    pkg: "9mm",  val: "470kΩ",  fn: "MOD_SCALE (0.2×–5×; log taper; in series with 22kΩ R_MB_SRC on utility board)" }

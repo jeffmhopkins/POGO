@@ -52,7 +52,7 @@ Ordered by rising symbol/wiring risk so each step de-risks the next. ✅ = done.
 | 1 | **A** Input buffers | audio | OPA1612, BAT54S | — (✅ all added) | ✅ DONE |
 | 2 | **B** Output buffers | audio | 2× TL072 | — (jack/opamp exist) | ✅ DONE. MAIN (U61) + BP3 tap (U62); BP3/LFO jacks live in other blocks (boundary nets). |
 | 3 | **1** Pre-gain | audio | 2× OPA1612, 2× DW3 | DW3 toggle sym + pins (✅ added; DW5 too) | ✅ DONE. DPDT path-select 1×/5×; ALT path protected (R38/R39+D8/D9). |
-| 4 | **2** Dual LFO | utility | 2× TL072 | — (trimpots = rpot) | Re-verify `aux-lfo-core` (STALE). |
+| 4 | **2** Dual LFO | utility | 2× TL072 | diode/led syms + trimpot (✅ added) | ✅ DONE. Rate network FINALIZED (drive-attenuator); SOD-123 footprint vendored; LFO LEDs added to BOM. |
 | 5 | **4** VCA | audio | 2× THAT2180, TL072, BAT54S | **that2180_pins** all-pins | First THAT2180; AMT/OFS trims. |
 | 6 | **5** LP1 | audio | 4× LM13700, 2× OPA1612, TL072, THAT340 | **lm13700_pins**, **that340 all-pins use** | First OTA-C SVF; re-verify `aux-ota-c-svf`, `aux-expo-converter`, `aux-q-control` (all STALE). |
 | 7 | **8** LP2 | audio | 2× LM13700, 2× OPA1612, THAT340 | — (reuse #6) | Same SVF core as LP1, independent. |
@@ -84,6 +84,9 @@ validator works. Current state:
 | **TL074** | ✅ sym | partial (`opamp_quad_pins`, no power) | add `opamp_quad_all_pins` (units 1–4 + V+ 4, V− 11) |
 | DW3 toggle (DPDT ON-ON) | ✅ `sym_dw3` | ✅ `dpdt6_pins` | done (sym `dw3` in SYM_TABLE) |
 | DW5 toggle (DPDT ON-ON-ON) | ✅ `sym_dw5` | ✅ `dpdt6_pins` (shared) | done (sym `dw5`); same 6-pin body as DW3 |
+| Diode (1N4148W) | ✅ `sym_diode` | ✅ `diode2_pins` | done (sym `diode`); pins A/K; SOD-123 footprint vendored |
+| LED (3 mm) | ✅ `sym_led` | ✅ `diode2_pins` (shared) | done (sym `led`); pins A/K match LED_D3.0mm |
+| Trimpot / pot (3-pin) | ✅ `sym_rpot` | ✅ `rpot_pins` | done (sym `trimpot` in SYM_TABLE) |
 
 The stale `sym_spdt`/`sym_sp3t` + `spdt_pins`/`sp3t_pins` are 40HP single-pole
 parts and must **not** be reused — the 48HP toggles are the Dailywell DPDT DW3/DW5
@@ -105,6 +108,7 @@ must use one canonical name on both sides. Registry (extend as blocks are added)
 | `LP2_OUT_L`, `LP2_OUT_R` | block-8 → block-B | final LP2 stereo to MAIN buffers |
 | `BP3_TAP_L`, `BP3_TAP_R` | block-6 → block-B | BP3 group tap to BP3 buffers |
 | `BP3_L_OUT`, `BP3_R_OUT` | block-B → block-6 | buffered BP3 to panel jacks J27/J28 |
+| `LFO1_OUT` | block-2 → block-3 | LFO1 normals into MOD_IN tip-switch ring |
 
 When transcribing the consuming block, use these exact names on the matching pins.
 
@@ -141,6 +145,7 @@ Fix any missing `qty` on grouped rows as you go (block-1 fixed R3–R6).
 - [x] BAT54S SOT-23 footprint vendored; structural verifier
 - [x] block-B transcribed + verified
 - [x] block-1 transcribed + verified (DW3/DW5 symbols; refdes-suffix convention)
-- [ ] blocks 2, 4, 5, 6, 7, 8, 3 transcribed + verified
+- [x] block-2 transcribed + verified (LFO rate net FINALIZED; diode/led/trimpot syms; SOD-123 fp)
+- [ ] blocks 4, 5, 6, 7, 8, 3 transcribed + verified
 - [ ] (optional) board-level sheets combining per-block schematics by board
 - [ ] (gated separately) enable a KiCad CI job (kiutils) — currently disabled

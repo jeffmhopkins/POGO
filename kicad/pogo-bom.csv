@@ -98,9 +98,9 @@ audio,RV12,1,,,SMD,,,,,block-6,BP2 Q_max trim
 audio,RV13,1,3224W-1-xxx,500kΩ,SMD,,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6,BP3 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 6000 Hz at 0V; ±25% range
 audio,RV14,1,3224W-1-xxx,20kΩ,SMD,,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6,BP3 1V/oct tracking trim; ±10% range
 audio,RV15,1,,,SMD,,,,,block-6,BP3 Q_max trim
-audio,D4,24,1N4148W,,SOD-123,,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6,SC soft-clip diodes; 4 per path (2 antiparallel pairs) × 6 paths
+audio,D4,24,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6,SC soft-clip diodes; 4 per path (2 antiparallel pairs) × 6 paths
 audio,D5,12,BZX84C5V1,,SOT-23,,Nexperia,,https://assets.nexperia.com/documents/data-sheet/BZX84_SER.pdf,block-6,HC back-to-back zener clamps (±5.8V clip); 2 per path × 6 paths
-audio,D6,24,1N4148W,,SOD-123,,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6,"WF passive clamp diodes; 4 per path (2 per polarity, Vth=±1.4V) × 6 paths; true symmetric fold"
+audio,D6,24,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6,"WF passive clamp diodes; 4 per path (2 per polarity, Vth=±1.4V) × 6 paths; true symmetric fold"
 audio,D7,1,BZX84C5V1,,SOT-23,,Nexperia,,https://assets.nexperia.com/documents/data-sheet/BZX84_SER.pdf,block-6,CD4053 logic supply 5.1V zener shunt (from +12V with R_5V_logic)
 audio,C15,4,,150nF,0805,,,,,block-6,BP1 integrator caps (C0G; 2 per channel × L+R)
 audio,C19,4,,22nF,0603,,,,,block-6,BP2 integrator caps (C0G; 2 per channel × L+R)
@@ -171,10 +171,10 @@ utility,C1,1,,47nF,0603,,,,,block-2,C_INT1: LFO1 integrator timing cap (C0G mand
 utility,C2,1,,47nF,0603,,,,,block-2,C_INT2: LFO2 integrator timing cap (C0G mandatory)
 utility,C3,2,,100nF,0603,,,,,block-2,C_BYPASS_LFO1: U1 +12V and −12V supply bypass (X7R)
 utility,C5,2,,100nF,0603,,,,,block-2,C_BYPASS_LFO2: U2 +12V and −12V supply bypass (X7R)
-utility,R1,1,,270kΩ,0603,,,,,block-2,R_CW_END1: LFO1 CW end resistor; limits f_max ≈ 43 Hz
-utility,R2,1,,270kΩ,0603,,,,,block-2,R_CW_END2: LFO2 CW end resistor
-utility,R3,2,,100MΩ,0603,,,,,block-2,R_CCW_END1: LFO1 CCW end (2× in series = 200 MΩ); limits f_min ≈ 0.058 Hz
-utility,R4,2,,100MΩ,0603,,,,,block-2,R_CCW_END2: LFO2 CCW end (2× in series = 200 MΩ)
+utility,R1,1,,590kΩ,0603,,,,,block-2,R_INT1: LFO1 integrator input R (fixed); sets f_max ≈ 20 Hz at full drive
+utility,R2,1,,590kΩ,0603,,,,,block-2,R_INT2: LFO2 integrator input R (fixed)
+utility,R3,1,,2.4kΩ,0603,,,,,block-2,R_FLOOR1: LFO1 rate-attenuator floor (pot bottom → GND); sets f_min ≈ 0.05 Hz
+utility,R4,1,,2.4kΩ,0603,,,,,block-2,R_FLOOR2: LFO2 rate-attenuator floor (pot bottom → GND)
 utility,R5,1,,100kΩ,0603,,,,,block-2,R_FB_SQ1: LFO1 Schmitt feedback R (comparator output → (+) input)
 utility,R6,1,,100kΩ,0603,,,,,block-2,R_FB_SQ2: LFO2 Schmitt feedback R
 utility,R7,1,,82kΩ,0603,,,,,block-2,R_HYS1: LFO1 Schmitt lower R ((+) input → GND); sets V_H = 5V
@@ -183,8 +183,10 @@ utility,R9,1,,1.2kΩ,0603,,,,,block-2,R_LED1: LFO1 LED current limit (≈2 mA at
 utility,R10,1,,1.2kΩ,0603,,,,,block-2,R_LED2: LFO2 LED current limit
 utility,R11,1,,1kΩ,0603,,,,,block-2,R_OUT1: LFO1 output series protection to jack
 utility,R12,1,,1kΩ,0603,,,,,block-2,R_OUT2: LFO2 output series protection to jack
-utility,D1,1,1N4148W,,SOD-123,,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-2,D_LED1: LFO1 LED half-wave rectifier (positive half-cycle pulsing)
-utility,D2,1,1N4148W,,SOD-123,,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-2,D_LED2: LFO2 LED half-wave rectifier
+utility,D1,1,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-2,D_LED1: LFO1 LED half-wave rectifier (positive half-cycle pulsing)
+utility,D2,1,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-2,D_LED2: LFO2 LED half-wave rectifier
+panel,LED1,1,,,3mm,POGO_LED_THT:LED_D3.0mm,generic,,https://www.thonk.co.uk/product-category/electronic-component/led/,block-2,LFO1 rate/phase indicator
+panel,LED2,1,,,3mm,POGO_LED_THT:LED_D3.0mm,generic,,https://www.thonk.co.uk/product-category/electronic-component/led/,block-2,LFO2 rate/phase indicator
 utility,U3,1,TL074CDT,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl074.pdf,block-3,MB_PROC_A: MB summer (half A) + MB inverter (half B); 2 sections spare
 utility,U4,1,TL074CDT,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl074.pdf,block-3,MB_PROC_B: MOD_POS LED driver (half A) + MOD_NEG LED driver (half B) + MOD_CLIP (half C); 1 section spare
 utility,U5,1,TL074CDT,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl074.pdf,block-3,MB_INV_1: −V_src inverters for destinations 1–4
@@ -207,8 +209,8 @@ utility,R60,1,,100Ω,0603,,,,,block-3,R_CLIP_DIV_L: lower leg of MOD_CLIP thresh
 utility,C7,14,,100nF,0603,,,,,block-3,C_BYPASS_MB: supply bypass; one per op-amp supply pin (7 ICs × 2 rails)
 control,SW1,1,DW3 (2M DPDT ON-ON),,sub-mini toggle 2M,POGO_Button_Switch_THT:SW_Dailywell_DW3_DPDT,Dailywell,Thonk,https://www.thonk.co.uk/shop/sub-mini-toggle-switches/,block-1,GAIN_MAIN 1×/5×
 control,SW2,1,DW3 (2M DPDT ON-ON),,sub-mini toggle 2M,POGO_Button_Switch_THT:SW_Dailywell_DW3_DPDT,Dailywell,Thonk,https://www.thonk.co.uk/shop/sub-mini-toggle-switches/,block-1,GAIN_BP3 1×/5×
-control,RV1,1,3296W-1-xxx,1MΩ,through-hole,POGO_Potentiometer_THT:Potentiometer_Bourns_3296W_Vertical,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3296.pdf,block-2,LFO1_RATE trimpot (preset; 0.05–20 Hz range)
-control,RV2,1,3296W-1-xxx,1MΩ,through-hole,POGO_Potentiometer_THT:Potentiometer_Bourns_3296W_Vertical,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3296.pdf,block-2,LFO2_RATE trimpot (preset; 0.05–20 Hz range)
+control,RV1,1,3296W-1-xxx,1MΩ,through-hole,POGO_Potentiometer_THT:Potentiometer_Bourns_3296W_Vertical,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3296.pdf,block-2,"LFO1_RATE trimpot (preset; rate attenuator on Schmitt output, 0.05–20 Hz)"
+control,RV2,1,3296W-1-xxx,1MΩ,through-hole,POGO_Potentiometer_THT:Potentiometer_Bourns_3296W_Vertical,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3296.pdf,block-2,"LFO2_RATE trimpot (preset; rate attenuator on Schmitt output, 0.05–20 Hz)"
 control,RV3,1,RD901F-40-00D,470kΩ,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-3,MOD_SCALE (0.2×–5×; log taper; in series with 22kΩ R_MB_SRC on utility board)
 control,RV4,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-3,MOD_OFFSET (±5V)
 control,RV5,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-3,VCA_AMT dest attenuverter

@@ -23,7 +23,7 @@ Last updated: 2026-05-28 | Topology: 48HP | Source of truth: `tools/panel-data.y
 |---|---|---|---|---|
 | A | Input Buffer | ✅ panel-verified | ⚠️ STALE | OPA1612 follower, BAT54S clamp |
 | 1 | Pre-Gain | ✅ panel-verified | ⚠️ STALE | OPA1612, 1×/5× switch; ALT_BP path |
-| 2 | Dual LFO | ✅ panel-verified | ⚠️ STALE | Integrator+Schmitt; formula corrected; R_CCW_END 2×100MΩ |
+| 2 | Dual LFO | ✅ panel-verified | ✅ rate net FINALIZED 2026-05-29 | Integrator+Schmitt; drive-attenuator rate control (fixed R_INT + trimpot attenuator) |
 | 3 | Mod Bus | ✅ panel-verified | ⚠️ STALE | 19 destinations; 7× TL074CDT |
 | 4 | VCA | ✅ panel-verified | ⚠️ STALE | THAT 2180 dB-law; DSP updated to match |
 | 5 | LP Filter 1 | ✅ panel-verified | ⚠️ STALE | OTA-C SVF; stereo tilt (symmetric ±V_tilt L/R) |
@@ -70,8 +70,8 @@ Circuit diagrams in spec text must be self-sufficient.
 
 | File | Status |
 |---|---|
-| `kicad/generate_schematic.py` | 🚧 48HP data-driven generator — framework done, **blocks A, B, 1 complete** (3/10 blocks). Rollout plan: `kicad/SCHEMATIC-GEN-PLAN.md` |
-| `kicad/nets/*.nets.yaml` | 🚧 per-block netlists — `block-A`, `block-B`, `block-1` done |
+| `kicad/generate_schematic.py` | 🚧 48HP data-driven generator — framework done, **blocks A, B, 1, 2 complete** (4/10 blocks). Rollout plan: `kicad/SCHEMATIC-GEN-PLAN.md` |
+| `kicad/nets/*.nets.yaml` | 🚧 per-block netlists — `block-A`, `block-B`, `block-1`, `block-2` done |
 | `kicad/generate_control_board.py`, `generate_utility_board.py` | ⚠️ 40HP-era STALE (see kicad/README-STALE.md) |
 | `kicad/validate_*.py` | ⚠️ 40HP-era STALE |
 | `.github/workflows/build.yml` schematic gate | ✅ `generate_schematic.py --check` (validate + structural verify + drift) in all jobs |
@@ -117,7 +117,7 @@ corrected; block-B output Z attenuation corrected; BP_MIX wet polarity circuit c
    40HP-era stale generators. Per-block netlists in `kicad/nets/*.nets.yaml`,
    footprints resolved from the `components/` registry, byte-stable output, pin-
    coverage + structural verification gated in CI. Remaining: transcribe blocks
-   2, 4, 5, 6, 7, 8, 3. **Order, symbol gaps, and per-block checklist:
+   4, 5, 6, 7, 8, 3. **Order, symbol gaps, and per-block checklist:
    `kicad/SCHEMATIC-GEN-PLAN.md`.**
 2. **Phase 6R** — VCV Rack signal-path smoke tests (CI integration)
 

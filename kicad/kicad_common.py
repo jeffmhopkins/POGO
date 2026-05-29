@@ -407,6 +407,54 @@ def sym_jack():
   )'''
 
 
+def sym_diode():
+    """Generic diode (Device:D), e.g. 1N4148W. Pins A (anode, top), K (cathode, bottom).
+    Pad names A/K match the SOD-123 footprint."""
+    return '''  (symbol "Device:D"
+    (pin_names (offset 0) hide)
+    (pin_numbers hide)
+    (property "Reference" "D" (at 2.032 0 90) (effects (font (size 1.27 1.27))))
+    (property "Value" "D" (at -2.032 0 90) (effects (font (size 1.27 1.27))))
+    (symbol "D_0_1"
+      (polyline (pts (xy -1.27 1.27) (xy 1.27 1.27) (xy 0 -1.016) (xy -1.27 1.27)) (stroke (width 0.254) (type default)) (fill (type none)))
+      (polyline (pts (xy -1.27 -1.016) (xy 1.27 -1.016)) (stroke (width 0.254) (type default)) (fill (type none)))
+    )
+    (symbol "D_1_1"
+      (pin passive line (at 0 3.81 270) (length 2.794) (name "A" (effects (font (size 1.27 1.27)))) (number "A" (effects (font (size 1.27 1.27)))))
+      (pin passive line (at 0 -3.81 90) (length 2.794) (name "K" (effects (font (size 1.27 1.27)))) (number "K" (effects (font (size 1.27 1.27)))))
+    )
+  )'''
+
+
+def sym_led():
+    """LED (Device:LED). Pins A (anode, top), K (cathode, bottom). Pad names A/K
+    match LED_THT/LED_D3.0mm."""
+    return '''  (symbol "Device:LED"
+    (pin_names (offset 1.016) hide)
+    (pin_numbers hide)
+    (property "Reference" "LED" (at 2.54 0 90) (effects (font (size 1.27 1.27))))
+    (property "Value" "LED" (at -2.54 0 90) (effects (font (size 1.27 1.27))))
+    (symbol "LED_0_1"
+      (polyline (pts (xy -1.27 1.27) (xy 1.27 1.27) (xy 0 -1.016) (xy -1.27 1.27)) (stroke (width 0.254) (type default)) (fill (type none)))
+      (polyline (pts (xy -1.27 -1.016) (xy 1.27 -1.016)) (stroke (width 0.254) (type default)) (fill (type none)))
+      (polyline (pts (xy 1.27 1.778) (xy 2.286 2.794)) (stroke (width 0.254) (type default)) (fill (type none)))
+      (polyline (pts (xy 0.254 2.032) (xy 1.27 3.048)) (stroke (width 0.254) (type default)) (fill (type none)))
+    )
+    (symbol "LED_1_1"
+      (pin passive line (at 0 3.81 270) (length 2.794) (name "A" (effects (font (size 1.27 1.27)))) (number "A" (effects (font (size 1.27 1.27)))))
+      (pin passive line (at 0 -3.81 90) (length 2.794) (name "K" (effects (font (size 1.27 1.27)))) (number "K" (effects (font (size 1.27 1.27)))))
+    )
+  )'''
+
+
+def diode2_pins(ox, oy, angle=0):
+    """2-pin diode/LED: A (anode, top), K (cathode, bottom). Matches sym_diode/sym_led."""
+    return {
+        "A": _rot(ox, oy, angle, 0,  3.81),
+        "K": _rot(ox, oy, angle, 0, -3.81),
+    }
+
+
 def _sym_dpdt(lib_id, value):
     """Shared DPDT 6-pin toggle lib_symbol (Dailywell DW3/DW5 2M body).
     Pole A: 1=A1, 2=A_COM, 3=A2.  Pole B: 4=B1, 5=B_COM, 6=B2.

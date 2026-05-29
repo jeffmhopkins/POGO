@@ -67,6 +67,9 @@ SYM_TABLE = {
     "opamp2": ("Amplifier_Operational:OPA1612",     kc.sym_opa1612, kc.opamp_dual_all_pins),
     "dw3":    ("Switch:SW_Dailywell_DW3",           kc.sym_dw3,     kc.dpdt6_pins),
     "dw5":    ("Switch:SW_Dailywell_DW5",           kc.sym_dw5,     kc.dpdt6_pins),
+    "diode":  ("Device:D",                          kc.sym_diode,   kc.diode2_pins),
+    "led":    ("Device:LED",                        kc.sym_led,     kc.diode2_pins),
+    "trimpot":("Device:R_POT",                      kc.sym_rpot,    kc.rpot_pins),
 }
 
 # Layout grid (mm). Symbols only need to not overlap — nets connect by name.
