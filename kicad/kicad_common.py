@@ -818,6 +818,23 @@ def opamp_quad_pins(ox, oy, unit, angle=0):
     return {p: _rot(ox, oy, angle, dx, dy) for p, (dx, dy) in unit_map[unit].items()}
 
 
+def opamp_quad_unit_pins(ox, oy, unit, angle=0):
+    """Per-unit pins of a quad op-amp (TL074), relative to that unit's placement origin.
+    units 1-4 = gates; unit 5 = power {4=V+, 11=V-}. For the multi-unit placer."""
+    if unit == 5:
+        return {"4": _rot(ox, oy, angle, 0, 3.81), "11": _rot(ox, oy, angle, 0, -3.81)}
+    return opamp_quad_pins(ox, oy, unit, angle)
+
+
+def opamp_quad_all_pins(ox, oy, angle=0):
+    """All 14 TL074 pins (units 1-4 signal + power 4/11) — name set for coverage."""
+    pins: dict = {}
+    for u in (1, 2, 3, 4):
+        pins.update(opamp_quad_pins(ox, oy, u, angle))
+    pins.update(opamp_quad_unit_pins(ox, oy, 5, angle))
+    return pins
+
+
 # ---------------------------------------------------------------------------
 # Generic schematic emitters
 # ---------------------------------------------------------------------------

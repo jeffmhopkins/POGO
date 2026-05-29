@@ -73,6 +73,7 @@ SYM_TABLE = {
     "vca":    ("POGO:THAT2180",                     kc.sym_that2180, kc.that2180_pins),
     "ota":    ("Amplifier_Operational:LM13700",     kc.sym_lm13700, kc.lm13700_pins),
     "expo":   ("POGO:THAT340",                      kc.sym_that340, kc.that340_pins),
+    "opamp4": ("Amplifier_Operational:TL074",       kc.sym_tl074,   kc.opamp_quad_all_pins),
 }
 
 # Layout grid (mm). Symbols only need to not overlap — nets connect by name.
@@ -83,6 +84,8 @@ _COL_DX, _ROW_DY, _NCOLS, _X0, _Y0 = 60.0, 55.0, 3, 40.0, 40.0
 #   sym -> (per_unit_pins_fn, [(unit_no, dx, dy), ...])
 MULTI_UNIT = {
     "opamp2": (kc.opamp_unit_pins, [(1, 0.0, 0.0), (2, 0.0, 22.0), (3, 24.0, 11.0)]),
+    "opamp4": (kc.opamp_quad_unit_pins,
+               [(1, 0.0, 0.0), (2, 18.0, 0.0), (3, 36.0, 0.0), (4, 0.0, 22.0), (5, 18.0, 22.0)]),
 }
 
 
