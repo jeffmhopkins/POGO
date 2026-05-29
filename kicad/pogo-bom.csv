@@ -157,6 +157,10 @@ audio,R34,1,,1kΩ,0603,,,,,block-B,MAIN_L output protection
 audio,R35,1,,1kΩ,0603,,,,,block-B,MAIN_R output protection
 audio,R36,1,,1kΩ,0603,,,,,block-B,BP3_L output protection
 audio,R37,1,,1kΩ,0603,,,,,block-B,BP3_R output protection
+audio,C37,1,,100nF,0603,,,,,block-B,U61 +12V decoupling
+audio,C38,1,,100nF,0603,,,,,block-B,U61 -12V decoupling
+audio,C39,1,,100nF,0603,,,,,block-B,U62 +12V decoupling
+audio,C40,1,,100nF,0603,,,,,block-B,U62 -12V decoupling
 utility,U1,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-2,LFO1 integrator (half A) + Schmitt trigger (half B)
 utility,U2,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-2,LFO2 integrator (half A) + Schmitt trigger (half B)
 utility,C1,1,,47nF,0603,,,,,block-2,C_INT1: LFO1 integrator timing cap (C0G mandatory)

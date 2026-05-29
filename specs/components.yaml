@@ -222,6 +222,10 @@ components:
   - { ref: R35,  board: audio,   block: block-B, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "MAIN_R output protection" }
   - { ref: R36,  board: audio,   block: block-B, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "BP3_L output protection" }
   - { ref: R37,  board: audio,   block: block-B, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "BP3_R output protection" }
+  - { ref: C37,  board: audio,   block: block-B, part: ~,          pkg: "0603",   val: "100nF",  fn: "U61 +12V decoupling" }
+  - { ref: C38,  board: audio,   block: block-B, part: ~,          pkg: "0603",   val: "100nF",  fn: "U61 -12V decoupling" }
+  - { ref: C39,  board: audio,   block: block-B, part: ~,          pkg: "0603",   val: "100nF",  fn: "U62 +12V decoupling" }
+  - { ref: C40,  board: audio,   block: block-B, part: ~,          pkg: "0603",   val: "100nF",  fn: "U62 -12V decoupling" }
 
   # ── UTILITY BOARD ────────────────────────────────────────────────────────────
 

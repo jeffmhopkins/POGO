@@ -14,10 +14,8 @@
 # R_MAIN_L, ...) and its 6-jack listing predate this ref scheme — components.yaml
 # is authoritative.
 #
-# DRIFT FLAGGED: components.yaml lists no decoupling caps for U61/U62, whereas
-# block-A allocates 2x 100nF per dual op-amp. Not invented here (would create
-# refs absent from the BOM). Recommend adding 4x 100nF decoupling rows to
-# components.yaml; until then this netlist ties V+/V- straight to the rails.
+# Decoupling: C37-C40 (4x 100nF) added to components.yaml for U61/U62, matching
+# block-A's 2x-100nF-per-dual-op-amp pattern.
 
 block: block-B
 board: audio
@@ -32,11 +30,15 @@ parts:
   R37: { sym: r, value: 1k }                            # BP3_R  series protection
   J29: { sym: jack, part: PJ301M-12, value: MAIN_L }
   J30: { sym: jack, part: PJ301M-12, value: MAIN_R }
+  C37: { sym: c, value: 100nF }            # U61 +12V decoupling
+  C38: { sym: c, value: 100nF }            # U61 -12V decoupling
+  C39: { sym: c, value: 100nF }            # U62 +12V decoupling
+  C40: { sym: c, value: 100nF }            # U62 -12V decoupling
 
 nets:
-  "+12V":     [U61.8, U62.8]               # op-amp V+
-  "-12V":     [U61.4, U62.4]               # op-amp V-
-  GND:        [J29.2, J30.2]               # MAIN jack sleeves
+  "+12V":     [U61.8, U62.8, C37.1, C39.1]  # op-amp V+ + decoupling
+  "-12V":     [U61.4, U62.4, C38.1, C40.1]  # op-amp V- + decoupling
+  GND:        [J29.2, J30.2, C37.2, C38.2, C39.2, C40.2]  # jack sleeves + decoup returns
 
   # MAIN path: LP2 -> U61 follower (G=+1) -> 1kΩ -> jack
   LP2_OUT_L:  [U61.3]                       # <- block-8 LP2 out L (boundary)
