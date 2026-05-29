@@ -116,6 +116,47 @@ must use one canonical name on both sides. Registry (extend as blocks are added)
 
 When transcribing the consuming block, use these exact names on the matching pins.
 
+## block-6 readiness (next session — netlist only; all decisions locked, BOM complete)
+
+block-6 is the last block. Its **BOM is 100% complete** (119 rows, committed) and every
+design decision is resolved — the netlist is now a pure transcription. Brief for the
+fresh pass:
+
+**Locked decisions (with rationale in commit history):**
+- **BP resonator = Option B (DSP-faithful):** the plugin BP (`BandpassSVF.hpp`) is the
+  same 2-integrator Simper SVF as LP1/HP/LP2 (Q = damping term). So mirror block-5/8 but
+  tap **v1 (BP)** instead of v2, with **separate Q-VCA OTAs U67–U69** (one per group,
+  cell A = L, cell B = R) injecting damping at the SUM_AMP virtual ground (like shared-q).
+- **Per-channel expo (true BP_TILT):** U28–U30 = L expo, U70–U72 = R expo; each fed
+  `BP{g}_VCTRL ± V_tilt` (U27-A inverter makes −V_tilt; R127 tilt summers). Mirror block-5.
+- **Distortion mux = +3 CD4053 (stereo 1-of-3):** per group, 2 CD4053 (U31/U75, U32/U76,
+  U33/U77): muxA selects SC-vs-MID for L(X_A)/R(X_B); muxB selects HC-vs-WF. DW5 (SW4-6)
+  is the **mode encoder** → 2 control bits via R128 pull-ups to the 5V logic rail
+  (D7 zener + R29 + C27/C28). INH→GND, X_C unused.
+- **Q control:** per group, IRES_AMP (U73-A=BP1, U73-B=BP2, U74-A=BP3; U74-B spare) with
+  R117/R118/R119, RV9/12/15 V_bias, D13 V_ires clamp, R116 → Q-cell Iabc.
+
+**Distortion cells (per aux-distortion + block-6 spec §2; 6 paths):** SC = gain amp
+(U34–39 half A) + 1N4148 chain D4 across feedback; HC = gain amp (half B) + BZX84C5V1
+back-to-back zeners D5 (±5.8V); WF = pre-gain (U40–45 half A) + passive 1N4148 clamp
+(D6/R24) + folder (half B, R25/R_f_wf): `V_out = 2·V_clamp − V_in`.
+
+**Wet/mix:** U46/U47 half A = per-channel wet sum (R26); half B = MIX (R27 dry from
+`LP1_OUT`, R28 fb); U48 = polarity restore (A=L, B=R) → `BP_OUT_{L,R}`. BP3 distorted tap
+→ `BP3_TAP_{L,R}` (to block-B); J27/J28 ← `BP3_L_OUT`/`BP3_R_OUT` (from block-B).
+
+**Boundary nets:** in `LP1_OUT_{L,R}` (BP1/BP2 input + dry), `BP3IN_{L,R}` (BP3 input;
+ALT/LP1), `BP{g}_VCTRL`, `BP_TILT_CV`, `BP{g}_FOCUS_CV`, `BP{g}_DIST_CV`, `BP_MIX_CV`;
+out `BP_OUT_{L,R}`, `BP3_TAP_{L,R}`; `BP3_L_OUT`/`BP3_R_OUT` in.
+
+**Flag at prototype (under-specified in the STALE specs — interpret + document):** the
+DRIVE→variable-gain mechanism (one knob → stereo gain), the DW5 ON-ON-ON→2-bit make
+pattern, and the BP_MIX blend control element. Wire the signal path faithfully; treat
+these controls as boundary CV applied via a Phase-3R control element.
+
+Build with a generation script (3-group repetition, like block-3), iterate to `--check`
+clean, then commit → **10/10 blocks**.
+
 ## Shared / cross-block parts → a dedicated shared sheet (decision 2026-05-29, revised)
 
 Parts that span two blocks are NOT owned by either block — they live in their own
