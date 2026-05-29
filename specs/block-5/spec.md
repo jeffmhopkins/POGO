@@ -231,5 +231,6 @@ Component set: see the generated BOM `kicad/pogo-bom.csv` (rows with `Block = bl
 sourced from `specs/components.yaml` (the per-ref design manifest) and enriched by the
 `components/` registry (MPN, footprint, datasheet). Verification status: `specs/STATUS.md`.
 
-**Shared dependency:** LP1's resonance Q-VCAs (`U9` L / `U10` R, cell A) are the shared
-LP1/LP2 cells owned by `specs/block-Q/` (BOM rows with `Block = block-Q`), not listed above.
+**Shared resource:** this block **hosts** the LP1/LP2 resonance Q-VCAs `U9` (L) / `U10` (R) —
+co-owned by block-8 (`components.yaml`: `block: [block-5, block-8]`, `shared: true`). Cell A = LP1 Q
+(internal here); cell B = LP2 Q, reached by block-8 via boundary nets `LP2_V1/SUMINV/QIABC_*`.

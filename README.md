@@ -52,14 +52,14 @@ revision as block-level estimates are refined).
 
 The plugin and panel are complete and CI-passing. Circuit design (Phase 3R) is complete
 for all blocks, and **per-block KiCad schematics are transcribed and CI-gated for all 10
-blocks + the shared-Q sheet** (data-driven generator, see below). Board layout (Phase 5R)
+blocks** (data-driven generator, see below). Board layout (Phase 5R)
 is in progress.
 
 | Phase | Description | Status |
 |---|---|---|
 | Phase 1R | Extract functional spec from plugin code (all blocks) | ✅ Complete |
 | Phase 2R | Analog behavior model (bilinear transform inverse) | ✅ Complete |
-| Phase 3R | Circuit design + per-block KiCad schematics — 10/10 blocks + shared-Q; `components.yaml` finalized | ✅ Complete |
+| Phase 3R | Circuit design + per-block KiCad schematics — 10/10 blocks; `components.yaml` finalized | ✅ Complete |
 | Phase 4R | Panel — 48HP, DRC-clean, CI-verified | ✅ Complete |
 | Phase 5R | Board layout — 48HP, architecture under review | 🔄 In Progress |
 | Phase 6R | Code validation — CI green, signal-path smoke tests | ✅ Complete |
@@ -93,7 +93,7 @@ POGO/
 ├── specs/                         ← Hardware design documentation
 │   ├── STATUS.md                  ← Phase completion checklist
 │   ├── module-overview.md         ← Signal chain, power budget
-│   ├── components.yaml            ← Global component registry (476 entries)
+│   ├── components.yaml            ← Per-ref design manifest (476 entries; block→ref→part)
 │   ├── analog-design-review.md    ← Trim pots, parts availability, noise analysis
 │   │
 │   ├── aux/                       ← Circuit design library (shared building blocks)
@@ -134,7 +134,7 @@ POGO/
 │   ├── generate_schematic.py      ← specs/block-*/*.nets.yaml → .kicad_sch (--check: coverage + structural + drift)
 │   ├── gen_block6.py              ← Block-6 netlist generator (3-group repetition)
 │   ├── kicad_common.py            ← Symbol library + pin helpers (datasheet-verified)
-│   ├── pogo-*.kicad_sch           ← Generated schematics (per block + shared-q)
+│   ├── pogo-*.kicad_sch           ← Generated schematics (one per block)
 │   ├── pogo-bom.csv               ← Manufacturing BOM
 │   ├── fp-lib-table               ← Generated; maps POGO_* → components/footprints/
 │   ├── pogo.kicad_pro             ← KiCad project (placeholder root; real board = Phase 5R)

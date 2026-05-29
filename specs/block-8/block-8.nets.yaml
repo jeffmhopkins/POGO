@@ -98,10 +98,10 @@ nets:
 
   # ---- L channel SVF ----
   HP_OUT_L:     [R32.1]                       # <- block-7 HP out L (boundary)
-  LP2_SUMINV_L: [U58.2, R32.2, R72.2, R74.1]  # SUM_AMP virtual ground (+ Q-cell, shared-q)
+  LP2_SUMINV_L: [U58.2, R32.2, R72.2, R74.1]  # SUM_AMP virtual ground (+ Q-cell, block-5)
   LP2_HP_L:     [U58.1, R74.2, U56.3]         # SUM_AMP out -> OTA1 In+
   LP2_V1CAP_L:  [U56.5, U56.7, C33A.1]        # OTA1 out -> C1 + BufIn (v1 cap node)
-  LP2_V1_L:     [U56.8, U56.14, R88.1]        # BufOut_A = v1 -> OTA2 In+ + pulldown (+ Q In+, shared-q)
+  LP2_V1_L:     [U56.8, U56.14, R88.1]        # BufOut_A = v1 -> OTA2 In+ + pulldown (+ Q In+, block-5)
   LP2_V2CAP_L:  [U56.12, U56.10, C33B.1]      # OTA2 out -> C2 + BufIn (v2 cap node)
   LP2_LP_L:     [U56.9, U58.5, R72.1, R89.1]  # BufOut_B = v2 -> LP buffer In+ + R_FB + pulldown
   LP2_OUT_L:    [U58.7, U58.6]                # LP buffer out (unity) -> block-B (boundary)
@@ -136,8 +136,8 @@ nets:
   LP2_RES:      [R83.1]                        # resonance CV in (boundary)
   LP2_IRES_SUM: [U65.2, R82.2, R83.2, R84.1]   # IRES_AMP virtual ground
   LP2_VIRES:    [U65.1, R84.2, D11.K, R80.1, R81.1]  # V_ires (>=0 by D11) -> R_Iabc L+R
-  LP2_QIABC_L:  [R80.2]                         # -> shared-q U9 cellB Iabc (boundary)
-  LP2_QIABC_R:  [R81.2]                         # -> shared-q U10 cellB Iabc (boundary)
+  LP2_QIABC_L:  [R80.2]                         # -> block-5 U9 cellB Iabc (boundary)
+  LP2_QIABC_R:  [R81.2]                         # -> block-5 U10 cellB Iabc (boundary)
 
 no_connect:
   # LM13700 linearizing-diode bias pins unused.
@@ -164,9 +164,9 @@ boundary:
   - LP2_OUT_R     # -> block-B
   - LP2_VCTRL     # <- control: LP2 V/oct frequency CV
   - LP2_RES       # <- control/mod: LP2 resonance CV
-  - LP2_V1_L      # -> shared-q (Q-cell B In+, L)
-  - LP2_V1_R      # -> shared-q (Q-cell B In+, R)
-  - LP2_SUMINV_L  # <-> shared-q (Q-cell B In-/Out at SUM_AMP virtual ground, L)
-  - LP2_SUMINV_R  # <-> shared-q (Q-cell B In-/Out, R)
-  - LP2_QIABC_L   # -> shared-q (Q-cell B Iabc, L)
-  - LP2_QIABC_R   # -> shared-q (Q-cell B Iabc, R)
+  - LP2_V1_L      # -> block-5 (Q-cell B In+, L)
+  - LP2_V1_R      # -> block-5 (Q-cell B In+, R)
+  - LP2_SUMINV_L  # <-> block-5 (Q-cell B In-/Out at SUM_AMP virtual ground, L)
+  - LP2_SUMINV_R  # <-> block-5 (Q-cell B In-/Out, R)
+  - LP2_QIABC_L   # -> block-5 (Q-cell B Iabc, L)
+  - LP2_QIABC_R   # -> block-5 (Q-cell B Iabc, R)

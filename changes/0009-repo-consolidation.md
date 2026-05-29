@@ -12,11 +12,13 @@ artifacts in `kicad/`; remove stale duplication; and clearly mark generated vs a
 
 ## Moves & edits (each move + its code edits + regen is atomic)
 
-1. **Netlists → specs.** `kicad/nets/block-N.nets.yaml` → `specs/block-N/block-N.nets.yaml`;
-   `shared-q` → new `specs/block-Q/` (+ stub `spec.md`). Edit `generate_schematic.py` (`_NETS_DIR`
-   + `_block_files()` to scan `specs/block-*/*.nets.yaml`; keep `out_path_for`/`_HERE` so
-   generated `.kicad_sch` stay in `kicad/`) and `gen_block6.py` `OUT`. Generated `.kicad_sch`
-   are byte-stable (they embed `block:`-derived names, not net paths).
+1. **Netlists → specs.** `kicad/nets/block-N.nets.yaml` → `specs/block-N/block-N.nets.yaml`.
+   The former shared-q sheet is **folded into block-5** (its host) under the new shared-resource
+   model — no `block-Q` pseudo-block/sheet (see the shared-resource decision below). Edit
+   `generate_schematic.py` (`_NETS_DIR` + `_block_files()` to scan `specs/block-*/*.nets.yaml`;
+   keep `out_path_for`/`_HERE` so generated `.kicad_sch` stay in `kicad/`) and `gen_block6.py`
+   `OUT`. Generated `.kicad_sch` for the unchanged blocks are byte-stable (nicknames, not paths);
+   block-5 regenerates to include U9/U10.
 2. **Footprints → components.** `kicad/footprints/*.pretty` → `components/footprints/`. Edit
    `_FP_ROOT` in `build_components.py`, `components.py`, `footprint_svg.py`, `panel_kicad.py`,
    **and** the URI literal in `build_components.gen_fplib` →
@@ -54,6 +56,10 @@ artifacts in `kicad/`; remove stale duplication; and clearly mark generated vs a
 - 2026-05-29: delete 40HP cruft incl. dead CI job; **keep + repoint** pogo.kicad_pro.
 - 2026-05-29: shared-q → specs/block-Q/ + stub spec.
 - 2026-05-29: built-file marking = .gitattributes (explicit paths) + safe banners + gated GENERATED.md.
+- 2026-05-29: Shared-resource MODEL change (replaces the block-Q approach): shared parts now carry
+  `block: [block-5, block-8]` + `shared: true` in components.yaml (dual ownership, one refdes), and
+  the U9/U10 Q-VCAs are folded onto block-5's sheet (host) — `specs/block-Q/` + the shared-q sheet
+  removed. BOM renders dual blocks; the docs viewer groups a shared part under each block.
 - 2026-05-29: Shared-component clarity (follow-on to §4 removal): block-5/8 §4 pointers now flag
   the shared block-Q Q-VCAs (`U9`/`U10`, owned by `specs/block-Q/`); fixed the stale `IC_Q_AB`
   generic name → `U9/U10` in block-5/8 §3 prose, and corrected the block-5 power line (the shared

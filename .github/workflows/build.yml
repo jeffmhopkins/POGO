@@ -49,11 +49,11 @@ jobs:
 
       # Publish the hardware outputs (committed + freshly generated) as a downloadable
       # bundle. These are validated by the --check gates above. Done once, from Linux
-      # (OS-independent). Bundles the per-block + shared-q schematics.
+      # (OS-independent). Bundles the per-block schematics.
       - name: Stage hardware artifact (schematics + BOM + panel)
         run: |
           mkdir -p /tmp/hw
-          cp kicad/pogo-block-*.kicad_sch kicad/pogo-shared-q.kicad_sch /tmp/hw/
+          cp kicad/pogo-block-*.kicad_sch /tmp/hw/
           cp kicad/pogo-bom.csv /tmp/hw/
           cp plugin/res/Pogo.svg /tmp/hw/ 2>/dev/null || true
           cp design/panel-debug.html /tmp/hw/ 2>/dev/null || true

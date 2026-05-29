@@ -117,7 +117,6 @@ POGO/
 │   ├── block-7/spec.md           ← HP Filter (OTA-C SVF)
 │   ├── block-8/spec.md           ← LP Filter 2 (OTA-C SVF, independent)
 │   ├── block-B/spec.md           ← Output Buffers (TL072, MAIN + BP3 jacks)
-│   ├── block-Q/spec.md           ← Shared LP1/LP2 Q-VCAs (shared-q sheet)
 │   │   (each block-N/ also holds its block-N.nets.yaml — the netlist SOURCE;
 │   │    the generated .kicad_sch lives in kicad/)
 │   │
@@ -137,7 +136,7 @@ POGO/
 │   ├── generate_schematic.py     ← nets (specs/block-*/) → pogo-*.kicad_sch (--check gate)
 │   ├── gen_block6.py             ← block-6 netlist generator (3-group repetition)
 │   ├── kicad_common.py           ← symbol library + pin helpers (datasheet-verified)
-│   ├── pogo-*.kicad_sch          ← generated per-block schematics (+ shared-q)
+│   ├── pogo-*.kicad_sch          ← generated per-block schematics
 │   ├── fp-lib-table              ← generated; maps POGO_* → components/footprints/
 │   └── pogo.kicad_pro            ← KiCad project (placeholder root; real board = Phase 5R)
 │

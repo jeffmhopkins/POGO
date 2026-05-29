@@ -125,7 +125,7 @@ def gen_bom() -> str:
             "Manufacturer": _clean(reg.get("manufacturer") if reg else ""),
             "Supplier": _clean(reg.get("supplier") if reg else ""),
             "Datasheet": ds,
-            "Block": _clean(c.get("block")),
+            "Block": (", ".join(c["block"]) if isinstance(c.get("block"), list) else _clean(c.get("block"))),
             "Function": _clean(c.get("fn")),
         })
     return buf.getvalue()
