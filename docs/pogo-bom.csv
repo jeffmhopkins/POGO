@@ -47,8 +47,8 @@ audio,C43,Capacitor,1,,100nF,0603,,,,,block-4,U63 +12V decoupling
 audio,C44,Capacitor,1,,100nF,0603,,,,,block-4,U63 -12V decoupling
 audio,U7,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-5,LP1 OTA integrators L
 audio,U8,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-5,LP1 OTA integrators R
-audio,U9,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-Q,"LP1+LP2 Q VCA L (cell A=LP1, cell B=LP2)"
-audio,U10,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-Q,"LP1+LP2 Q VCA R (cell A=LP1, cell B=LP2)"
+audio,U9,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,"block-5, block-8","LP1+LP2 Q VCA L (cell A=LP1, cell B=LP2)"
+audio,U10,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,"block-5, block-8","LP1+LP2 Q VCA R (cell A=LP1, cell B=LP2)"
 audio,U11,IC,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/opa1612.pdf,block-5,LP1 SUM_AMP + output buffer L
 audio,U12,IC,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/opa1612.pdf,block-5,LP1 SUM_AMP + output buffer R
 audio,U13,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-5,LP1 tilt inverter (−V_tilt for R)
@@ -87,18 +87,18 @@ audio,D10,Diode,1,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https:/
 audio,C45,Capacitor,1,,100nF,0603,,,,,block-5,"LP1 expo I_ref node bypass (C_IREF, C0G)"
 audio,C46,Capacitor,1,,10nF,0402,,,,,block-5,LP1 OTA Iabc bypass L (C_IABC_L)
 audio,C47,Capacitor,1,,10nF,0402,,,,,block-5,LP1 OTA Iabc bypass R (C_IABC_R)
-audio,C48,Capacitor,1,,10nF,0402,,,,,block-Q,LP1 Q-cell Iabc bypass L (C_IABC_Q_L)
-audio,C49,Capacitor,1,,10nF,0402,,,,,block-Q,LP1 Q-cell Iabc bypass R (C_IABC_Q_R)
+audio,C48,Capacitor,1,,10nF,0402,,,,,"block-5, block-8",LP1 Q-cell Iabc bypass L (C_IABC_Q_L)
+audio,C49,Capacitor,1,,10nF,0402,,,,,"block-5, block-8",LP1 Q-cell Iabc bypass R (C_IABC_Q_R)
 audio,C50,Capacitor,1,,100nF,0603,,,,,block-5,U7 V+ decoupling
 audio,C51,Capacitor,1,,100nF,0603,,,,,block-5,U7 V- decoupling
 audio,C52,Capacitor,1,,100nF,0603,,,,,block-5,U8 V+ decoupling
 audio,C53,Capacitor,1,,100nF,0603,,,,,block-5,U8 V- decoupling
-audio,C54,Capacitor,1,,100nF,0603,,,,,block-Q,U9 V+ decoupling
-audio,C55,Capacitor,1,,100nF,0603,,,,,block-Q,U9 V- decoupling
-audio,C56,Capacitor,1,,100nF,0603,,,,,block-Q,U10 V+ decoupling
-audio,C57,Capacitor,1,,100nF,0603,,,,,block-Q,U10 V- decoupling
-audio,C84,Capacitor,1,,10nF,0402,,,,,block-Q,LP2 Q-cell Iabc bypass L (U9 cellB)
-audio,C85,Capacitor,1,,10nF,0402,,,,,block-Q,LP2 Q-cell Iabc bypass R (U10 cellB)
+audio,C54,Capacitor,1,,100nF,0603,,,,,"block-5, block-8",U9 V+ decoupling
+audio,C55,Capacitor,1,,100nF,0603,,,,,"block-5, block-8",U9 V- decoupling
+audio,C56,Capacitor,1,,100nF,0603,,,,,"block-5, block-8",U10 V+ decoupling
+audio,C57,Capacitor,1,,100nF,0603,,,,,"block-5, block-8",U10 V- decoupling
+audio,C84,Capacitor,1,,10nF,0402,,,,,"block-5, block-8",LP2 Q-cell Iabc bypass L (U9 cellB)
+audio,C85,Capacitor,1,,10nF,0402,,,,,"block-5, block-8",LP2 Q-cell Iabc bypass R (U10 cellB)
 audio,C58,Capacitor,1,,100nF,0603,,,,,block-5,U11 V+ decoupling
 audio,C59,Capacitor,1,,100nF,0603,,,,,block-5,U11 V- decoupling
 audio,C60,Capacitor,1,,100nF,0603,,,,,block-5,U12 V+ decoupling

@@ -209,68 +209,28 @@ LP1_TILT_INPUT jack + LP1_TILT_ATT attenuverter  →  same tilt bus (sums into V
 
 Audio board. Place LP1_L and LP1_R SVF circuits adjacent to Block VCA outputs. EXPO_LP1
 (THAT340) placed centrally between L and R expo summer inputs to equalize trace lengths for
-I_abc routing. IC_Q_AB placed between LP1 and LP2 OTA sections (shared Q VCA).
+I_abc routing. U9/U10 (the shared LP1/LP2 Q-VCAs) placed between the LP1 and LP2 OTA sections.
 
 ### Power Draw Estimate
 
 - 2× LM13700M (LP1 L/R integrators): ~4 mA × 2 = 8 mA  (TI: 4 mA typ per package)
-- 1× IC_Q_AB LM13700M (shared LP1+LP2 Q VCA, counted here): ~4 mA
+- 2× LM13700M U9/U10 (shared LP1+LP2 Q-VCAs, counted here): ~4 mA × 2 = 8 mA
 - 2× OPA1612 (SUM_AMP L/R, dual SOIC-8): 5.5 mA × 2 = 11 mA  (Iq = 2.75 mA/channel × 2 ch/IC)
 - 1× TL072CDT (IRES_AMP + tilt inverter): ~3 mA  (TI: 1.4 mA/ch × 2 = 2.8 mA)
 - 1× THAT340S14-U (EXPO_LP1): ~1 mA
-- **+12V: ~27 mA | −12V: ~27 mA**
+- **+12V: ~31 mA | −12V: ~31 mA**
 
-Note: IC_Q_AB is shared with block-8 (LP2 Q cell B). It is counted once here (block-5).
-Block-8 power estimate excludes IC_Q_AB accordingly.
+Note: U9/U10 are shared with block-8 (they provide LP2 Q on cell B). They are counted once
+here (block-5); block-8's power estimate excludes them accordingly.
 
 ---
 
 ## 4. Component Requirements
 
-> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
-> It has not been verified against the current panel control set. Do not use for circuit
-> construction until re-verified. See `specs/STATUS.md` for current phase status.
+Component set: see the generated BOM `kicad/pogo-bom.csv` (rows with `Block = block-5`),
+sourced from `specs/components.yaml` (the per-ref design manifest) and enriched by the
+`components/` registry (MPN, footprint, datasheet). Verification status: `specs/STATUS.md`.
 
-| Ref | Part | Package | Value | Qty | Board | Block | Function |
-|---|---|---|---|---|---|---|---|
-| U_OTA_LP1_L | LM13700M | SOIC-16 | — | 1 | audio | block-5 | LP1 L-channel integrators (cells A+B = OTA-A1+OTA-A2) |
-| U_OTA_LP1_R | LM13700M | SOIC-16 | — | 1 | audio | block-5 | LP1 R-channel integrators (cells A+B = OTA-B1+OTA-B2) |
-| IC_Q_AB | LM13700M | SOIC-16 | — | 1 | audio | block-5/8 | Q VCA shared: cell A = LP1 Q (L+R), cell B = LP2 Q (L+R) |
-| U_SUM_LP1_L | OPA1612 | SOIC-8 | — | 1 | audio | block-5 | L-ch: half A = SUM_AMP, half B = LP output buffer; 1.1 nV/√Hz vs TL072 18 nV/√Hz |
-| U_SUM_LP1_R | OPA1612 | SOIC-8 | — | 1 | audio | block-5 | R-ch: half A = SUM_AMP, half B = LP output buffer; pin-compatible with TL072CDT |
-| U_TILT_INV | TL072CDT | SOIC-8 | — | 1 | audio | block-5 | Half A = tilt inverter (G=−1) for R-channel; half B = IRES_AMP |
-| EXPO_LP1 | THAT340S14-U | SOIC-14 | — | 1 | audio | block-5 | Expo V/oct converter; f_ref = 632 Hz; drives LP1 L+R Iabc |
-| C1_L, C2_L | C0G cap | 0603 | 47 nF | 2 | audio | block-5 | LP1 L integrator caps (C0G/NP0 mandatory) |
-| C1_R, C2_R | C0G cap | 0603 | 47 nF | 2 | audio | block-5 | LP1 R integrator caps (C0G/NP0 mandatory) |
-| R_IN_L, R_IN_R | resistor | 0603 | 100 kΩ | 2 | audio | block-5 | SUM_AMP input resistors (signal in) |
-| R_FB_L, R_FB_R | resistor | 0603 | 100 kΩ | 2 | audio | block-5 | SUM_AMP feedback / Q feedback input resistors |
-| R_LIN_A_L, R_LIN_B_L | resistor | 0603 | 1 kΩ | 2 | audio | block-5 | L-ch OTA linearizing resistors (1 per OTA cell) |
-| R_LIN_A_R, R_LIN_B_R | resistor | 0603 | 1 kΩ | 2 | audio | block-5 | R-ch OTA linearizing resistors |
-| R_f_L, R_f_R | resistor | 0603 | 100 kΩ | 2 | audio | block-5 | SUM_AMP feedback resistors |
-| R_HP_L, R_HP_R | resistor | 0603 | 100 kΩ | 2 | audio | block-5 | HP inverting buffer R_in = R_f (not used for LP output; reserved) |
-| R_TILT_SUM_L | resistor | 0603 | 100 kΩ | 1 | audio | block-5 | Tilt summer resistor, L expo input (+V_tilt) |
-| R_TILT_SUM_R | resistor | 0603 | 100 kΩ | 1 | audio | block-5 | Tilt summer resistor, R expo input (−V_tilt from inverter) |
-| R_TILT_INV_IN | resistor | 0603 | 100 kΩ | 1 | audio | block-5 | Tilt inverter input resistor (R_in of G=−1 buffer) |
-| R_TILT_INV_FB | resistor | 0603 | 100 kΩ | 1 | audio | block-5 | Tilt inverter feedback resistor (R_f of G=−1 buffer) |
-| R_Iabc_L | resistor | 0603 | 1 MΩ | 1 | audio | block-5 | Q VCA V→I: L-ch V_ires to IC_Q_AB cell-A Iabc |
-| R_Iabc_R | resistor | 0603 | 1 MΩ | 1 | audio | block-5 | Q VCA V→I: R-ch V_ires to IC_Q_AB cell-A Iabc |
-| R_QBIAS | resistor | 0603 | 100 kΩ | 1 | audio | block-5 | IRES_AMP bias input resistor (sets Butterworth Iabc) |
-| R_QINV | resistor | 0603 | 100 kΩ | 1 | audio | block-5 | IRES_AMP resonance CV input resistor |
-| R_f_q | resistor | 0603 | 100 kΩ | 1 | audio | block-5 | IRES_AMP feedback resistor |
-| R_IREF_A | resistor | 0603 | 1 MΩ | 1 | audio | block-5 | EXPO_LP1 fixed I_ref network R; in series with RV_REF; R_total at midpoint = 1250 kΩ → 9.6 µA |
-| R_VOCT | resistor | 0603 | 47 kΩ | 1 | audio | block-5 | EXPO_LP1 V/oct scaling R (1% tolerance); with R_E=1kΩ and RV_1VOCT≈7.5kΩ → 18.0 mV/V 1V/oct ratio |
-| R_E | resistor | 0603 | 1 kΩ | 1 | audio | block-5 | EXPO_LP1 emitter degeneration |
-| RV_REF | Bourns 3224W | SMD | 500 kΩ | 1 | audio | block-5 | EXPO_LP1 f_ref trim rheostat; in series with R_IREF_A; range ±25% |
-| RV_1VOCT | Bourns 3224W | SMD | 20 kΩ | 1 | audio | block-5 | EXPO_LP1 1V/oct tracking trim; ±10% range |
-| RV_QMAX | Bourns 3224W | SMD | 100 kΩ | 1 | audio | block-5 | LP1 Q max / Butterworth point trim |
-| RV_LP1_TILT_NULL | Bourns 3224W | SMD | 10 kΩ | 1 | audio | block-5 | Tilt center-detent null (L=R at tilt=0) |
-| D_IRES | BAT54 | SOT-23 | — | 1 | audio | block-5 | Clamp V_ires ≥ 0 (prevents reverse Iabc) |
-| C_IREF | C0G cap | 0603 | 100 nF | 1 | audio | block-5 | EXPO_LP1 I_ref node bypass |
-| C_IABC_L, C_IABC_R | C0G cap | 0402 | 10 nF | 2 | audio | block-5 | Integrator OTA Iabc pin bypass (HF noise filter) |
-| C_IABC_Q_L, C_IABC_Q_R | C0G cap | 0402 | 10 nF | 2 | audio | block-5 | IC_Q_AB cell-A Iabc pin bypass |
-| C_VCC_OTA_L, C_VEE_OTA_L | cap, X7R | 0603 | 100 nF | 2 | audio | block-5 | U_OTA_LP1_L supply decoupling |
-| C_VCC_OTA_R, C_VEE_OTA_R | cap, X7R | 0603 | 100 nF | 2 | audio | block-5 | U_OTA_LP1_R supply decoupling |
-| C_VCC_SUM_L, C_VEE_SUM_L | cap, X7R | 0603 | 100 nF | 2 | audio | block-5 | U_SUM_LP1_L supply decoupling |
-| C_VCC_SUM_R, C_VEE_SUM_R | cap, X7R | 0603 | 100 nF | 2 | audio | block-5 | U_SUM_LP1_R supply decoupling |
-| C_VCC_TILT, C_VEE_TILT | cap, X7R | 0603 | 100 nF | 2 | audio | block-5 | U_TILT_INV supply decoupling |
-| C_VCC_EXPO, C_VEE_EXPO | cap, X7R | 0603 | 100 nF | 2 | audio | block-5 | EXPO_LP1 THAT340 supply decoupling |
+**Shared resource:** this block **hosts** the LP1/LP2 resonance Q-VCAs `U9` (L) / `U10` (R) —
+co-owned by block-8 (`components.yaml`: `block: [block-5, block-8]`, `shared: true`). Cell A = LP1 Q
+(internal here); cell B = LP2 Q, reached by block-8 via boundary nets `LP2_V1/SUMINV/QIABC_*`.

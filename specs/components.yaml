@@ -79,8 +79,8 @@ components:
   # block-5: LP Filter 1
   - { ref: U7,   board: audio,   block: block-5, part: LM13700M,   pkg: SOIC-16,  fn: "LP1 OTA integrators L" }
   - { ref: U8,   board: audio,   block: block-5, part: LM13700M,   pkg: SOIC-16,  fn: "LP1 OTA integrators R" }
-  - { ref: U9,   board: audio,   block: block-Q , part: LM13700M,   pkg: SOIC-16,  fn: "LP1+LP2 Q VCA L (cell A=LP1, cell B=LP2)" }
-  - { ref: U10,  board: audio,   block: block-Q , part: LM13700M,   pkg: SOIC-16,  fn: "LP1+LP2 Q VCA R (cell A=LP1, cell B=LP2)" }
+  - { ref: U9,   board: audio,   block: [block-5, block-8], shared: true, part: LM13700M,   pkg: SOIC-16,  fn: "LP1+LP2 Q VCA L (cell A=LP1, cell B=LP2)" }
+  - { ref: U10,  board: audio,   block: [block-5, block-8], shared: true, part: LM13700M,   pkg: SOIC-16,  fn: "LP1+LP2 Q VCA R (cell A=LP1, cell B=LP2)" }
   - { ref: U11,  board: audio,   block: block-5, part: OPA1612,   pkg: SOIC-8,   fn: "LP1 SUM_AMP + output buffer L" }
   - { ref: U12,  board: audio,   block: block-5, part: OPA1612,   pkg: SOIC-8,   fn: "LP1 SUM_AMP + output buffer R" }
   - { ref: U13,  board: audio,   block: block-5, part: TL072CDT,   pkg: SOIC-8,   fn: "LP1 tilt inverter (−V_tilt for R)" }
@@ -121,18 +121,18 @@ components:
   - { ref: C45,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "100nF",  fn: "LP1 expo I_ref node bypass (C_IREF, C0G)" }
   - { ref: C46,  board: audio,   block: block-5, part: ~,          pkg: "0402",   val: "10nF",   fn: "LP1 OTA Iabc bypass L (C_IABC_L)" }
   - { ref: C47,  board: audio,   block: block-5, part: ~,          pkg: "0402",   val: "10nF",   fn: "LP1 OTA Iabc bypass R (C_IABC_R)" }
-  - { ref: C48,  board: audio,   block: block-Q , part: ~,          pkg: "0402",   val: "10nF",   fn: "LP1 Q-cell Iabc bypass L (C_IABC_Q_L)" }
-  - { ref: C49,  board: audio,   block: block-Q , part: ~,          pkg: "0402",   val: "10nF",   fn: "LP1 Q-cell Iabc bypass R (C_IABC_Q_R)" }
+  - { ref: C48,  board: audio,   block: [block-5, block-8], shared: true, part: ~,          pkg: "0402",   val: "10nF",   fn: "LP1 Q-cell Iabc bypass L (C_IABC_Q_L)" }
+  - { ref: C49,  board: audio,   block: [block-5, block-8], shared: true, part: ~,          pkg: "0402",   val: "10nF",   fn: "LP1 Q-cell Iabc bypass R (C_IABC_Q_R)" }
   - { ref: C50,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "100nF",  fn: "U7 V+ decoupling" }
   - { ref: C51,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "100nF",  fn: "U7 V- decoupling" }
   - { ref: C52,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "100nF",  fn: "U8 V+ decoupling" }
   - { ref: C53,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "100nF",  fn: "U8 V- decoupling" }
-  - { ref: C54,  board: audio,   block: block-Q , part: ~,          pkg: "0603",   val: "100nF",  fn: "U9 V+ decoupling" }
-  - { ref: C55,  board: audio,   block: block-Q , part: ~,          pkg: "0603",   val: "100nF",  fn: "U9 V- decoupling" }
-  - { ref: C56,  board: audio,   block: block-Q , part: ~,          pkg: "0603",   val: "100nF",  fn: "U10 V+ decoupling" }
-  - { ref: C57,  board: audio,   block: block-Q , part: ~,          pkg: "0603",   val: "100nF",  fn: "U10 V- decoupling" }
-  - { ref: C84,  board: audio,   block: block-Q , part: ~,          pkg: "0402",   val: "10nF",   fn: "LP2 Q-cell Iabc bypass L (U9 cellB)" }
-  - { ref: C85,  board: audio,   block: block-Q , part: ~,          pkg: "0402",   val: "10nF",   fn: "LP2 Q-cell Iabc bypass R (U10 cellB)" }
+  - { ref: C54,  board: audio,   block: [block-5, block-8], shared: true, part: ~,          pkg: "0603",   val: "100nF",  fn: "U9 V+ decoupling" }
+  - { ref: C55,  board: audio,   block: [block-5, block-8], shared: true, part: ~,          pkg: "0603",   val: "100nF",  fn: "U9 V- decoupling" }
+  - { ref: C56,  board: audio,   block: [block-5, block-8], shared: true, part: ~,          pkg: "0603",   val: "100nF",  fn: "U10 V+ decoupling" }
+  - { ref: C57,  board: audio,   block: [block-5, block-8], shared: true, part: ~,          pkg: "0603",   val: "100nF",  fn: "U10 V- decoupling" }
+  - { ref: C84,  board: audio,   block: [block-5, block-8], shared: true, part: ~,          pkg: "0402",   val: "10nF",   fn: "LP2 Q-cell Iabc bypass L (U9 cellB)" }
+  - { ref: C85,  board: audio,   block: [block-5, block-8], shared: true, part: ~,          pkg: "0402",   val: "10nF",   fn: "LP2 Q-cell Iabc bypass R (U10 cellB)" }
   - { ref: C58,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "100nF",  fn: "U11 V+ decoupling" }
   - { ref: C59,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "100nF",  fn: "U11 V- decoupling" }
   - { ref: C60,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "100nF",  fn: "U12 V+ decoupling" }
@@ -379,7 +379,7 @@ components:
   - { ref: RV20, board: audio,   block: block-8, part: "Bourns 3224W", pkg: SMD,   val: "20kΩ",  fn: "LP2 1V/oct tracking trim; ±10% range" }
   - { ref: RV21, board: audio,   block: block-8, part: ~,          pkg: SMD,      fn: "LP2 Q_max trim" }
   # block-8 full circuit (expanded from spec §4, 2026-05-29): mirrors LP1 minus tilt
-  # (single shared expo); Q VCA = shared-q sheet cell B (U9/U10). Adds the LP2 IRES_AMP
+  # (single shared expo); Q VCA = shared U9/U10 cell B (hosted on block-5). Adds the LP2 IRES_AMP
   # (was missing), SUM_AMP fb, OTA R_LIN, expo network, Iabc bypass, buffer pulldowns,
   # decoupling.
   - { ref: U65,  board: audio,   block: block-8, part: TL072CDT,   pkg: SOIC-8,   fn: "LP2 IRES_AMP (Q driver, half A; half B spare)" }

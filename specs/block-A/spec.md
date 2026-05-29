@@ -156,17 +156,6 @@ jacks are located to keep input traces short and shielded from digital noise.
 
 ## 4. Component Requirements
 
-> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
-> It has not been verified against the current panel control set. Do not use for circuit
-> construction until re-verified. See `specs/STATUS.md` for current phase status.
-
-| Ref | Part | Package | Value | Qty | Board | Block | Function |
-|---|---|---|---|---|---|---|---|
-| U1 | OPA1612 | SOIC-8 | — | 1 | audio | block-A | Input buffers L+R (dual op-amp); 1.1 nV/√Hz |
-| D1 | BAT54S | SOT-23 | — | 1 | audio | block-A | L input protection clamp ±12 V |
-| D2 | BAT54S | SOT-23 | — | 1 | audio | block-A | R input protection clamp ±12 V |
-| R1 | resistor | 0603 | 100 Ω | 1 | audio | block-A | L series input protection |
-| R2 | resistor | 0603 | 100 Ω | 1 | audio | block-A | R series input protection |
-| C1 | cap, X7R | 0603 | 100 nF | 2 | audio | block-A | OPA1612 supply decoupling (+12 V and −12 V) |
-| J1 | PJ301M-12 | panel | — | 1 | panel | block-A | L_IN jack |
-| J2 | PJ301M-12 | panel | — | 1 | panel | block-A | R_IN jack (tip-switching normalling to L) |
+Component set: see the generated BOM `kicad/pogo-bom.csv` (rows with `Block = block-A`),
+sourced from `specs/components.yaml` (the per-ref design manifest) and enriched by the
+`components/` registry (MPN, footprint, datasheet). Verification status: `specs/STATUS.md`.

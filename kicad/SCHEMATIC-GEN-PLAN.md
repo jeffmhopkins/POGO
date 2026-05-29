@@ -4,14 +4,14 @@ Status as of 2026-05-29. The data-driven schematic generator
 (`kicad/generate_schematic.py`) is built and proven on **block-A**. This document
 is the plan for transcribing the remaining blocks. It is the gate doc for that work.
 
-See `kicad/README-STALE.md` for the generator's design; this file is the *rollout
+This file is the *rollout
 order, symbol gaps, and per-block transcription checklist*.
 
 ---
 
 ## How a block gets added (the repeatable unit of work)
 
-1. Write `kicad/nets/<block>.nets.yaml`:
+1. Write `specs/<block>/<block>.nets.yaml`:
    - `parts:` — each `REF: { sym, part?, value }`. `sym` selects the lib symbol +
      pin map from `SYM_TABLE`; `part` (optional) binds to the `components/`
      registry by a `matches[]` string for footprint/MPN; passives use `value` only.
@@ -54,14 +54,13 @@ Ordered by rising symbol/wiring risk so each step de-risks the next. ✅ = done.
 | 3 | **1** Pre-gain | audio | 2× OPA1612, 2× DW3 | DW3 toggle sym + pins (✅ added; DW5 too) | ✅ DONE. DPDT path-select 1×/5×; ALT path protected (R38/R39+D8/D9). |
 | 4 | **2** Dual LFO | utility | 2× TL072 | diode/led syms + trimpot (✅ added) | ✅ DONE. Rate network FINALIZED (drive-attenuator); SOD-123 footprint vendored; LFO LEDs added to BOM. |
 | 5 | **4** VCA | audio | 2× THAT2180, 2× TL072, BAT54S | that2180_pins (✅) | ✅ DONE. THAT2180 pinout/topology CORRECTED from datasheet (current-in/I-V-out); 3224W SMD footprint vendored. |
-| 6 | **5** LP1 | audio | LM13700, OPA1612, TL072, 2× THAT340 | lm13700/that340 (✅) | ✅ DONE (dual-derivation). Per-channel expo (true tilt); shared-q sheet (U9/U10); buffer pulldowns added. |
-| — | **shared-q** | audio | 2× LM13700 (U9/U10) | — | ✅ DONE. Shared LP1/LP2 Q-VCAs; cell A→block-5, cell B→block-8 (boundary). |
-| 8 | **8** LP2 | audio | LM13700, OPA1612, TL072, THAT340 | — (reuse) | ✅ DONE. LP1 minus tilt (single expo); Q via shared-q cell B; own IRES_AMP added. |
+| 6 | **5** LP1 | audio | LM13700, OPA1612, TL072, 2× THAT340 | lm13700/that340 (✅) | ✅ DONE (dual-derivation). Per-channel expo (true tilt); hosts the shared U9/U10 Q-VCAs (co-owned by block-8); buffer pulldowns added. |
+| 8 | **8** LP2 | audio | LM13700, OPA1612, TL072, THAT340 | — (reuse) | ✅ DONE. LP1 minus tilt (single expo); Q via the shared U9/U10 cell B (hosted on block-5); own IRES_AMP added. |
 | 9 | **7** HP | audio | 4× LM13700, OPA1612, TL072, THAT340 | — (reuse) | ✅ DONE. Mono SVF; HP inverting output buffer; own Q-VCAs (cell B spare/terminated); IRES_AMP added. |
 | 10 | **3** Mod bus | utility | 7× TL074, DW5 | tl074 multi-unit (✅), zener (✅) | ✅ DONE. MB proc + 3 lights + ±10V clamp + 19 destinations (generated); MOD_<DEST> outputs; MOD_SRC deferred. |
 | 11 | **6** Triple BP + Dist | audio | 6× LM13700 (int) + 3× LM13700 (Q) + 12× OPA1612/TL072 SVF/aux + 6× THAT340 + 6× CD4053 + 18× TL072 dist/mix | **cd4053 sym pinout FIXED** | ✅ DONE 2026-05-29 (`kicad/gen_block6.py`, 418 parts / 239 nets). Option-B DSP-faithful SVF (v1/BP tap); per-channel expo; per-group Q-VCAs (U67-69); SC/HC/WF cells; 2×CD4053/group stereo 1-of-3 mux. 3 Phase-3R flags (below). |
 
-Remaining: **none** — all 10 blocks + shared-q transcribed and `--check` clean (10/10).
+Remaining: **none** — all 10 blocks transcribed and `--check` clean (10/10). The shared U9/U10 Q-VCAs are hosted on block-5 (dual-owned, `shared: true`).
 
 ### block-6 transcription notes (2026-05-29)
 - **CD4053 symbol bug fixed:** the registered `sym_cd4053`/`cd4053_pins` had scrambled
@@ -118,7 +117,7 @@ validator works. Current state:
 The stale `sym_spdt`/`sym_sp3t` + `spdt_pins`/`sp3t_pins` are 40HP single-pole
 parts and must **not** be reused — the 48HP toggles are the Dailywell DPDT DW3/DW5
 (see the switch-standardization work). Footprints already exist in
-`kicad/footprints/Button_Switch_THT.pretty/` and resolve via the registry.
+`components/footprints/Button_Switch_THT.pretty/` and resolve via the registry.
 
 ---
 
@@ -182,19 +181,26 @@ these controls as boundary CV applied via a Phase-3R control element.
 Build with a generation script (3-group repetition, like block-3), iterate to `--check`
 clean, then commit → **10/10 blocks**.
 
-## Shared / cross-block parts → a dedicated shared sheet (decision 2026-05-29, revised)
+## Shared / cross-block parts → dual ownership + a `shared` flag (decision 2026-05-29, revised again)
 
-Parts that span two blocks are NOT owned by either block — they live in their own
-`kicad/nets/shared-*.nets.yaml` sheet, and the using blocks connect via boundary nets.
-First instance: `shared-q.nets.yaml` owns the LP1/LP2 Q-VCAs **U9** (L) and **U10** (R)
-(each LM13700: cell A = LP1 Q, cell B = LP2 Q), plus their decoupling and Iabc-bypass
-caps. components.yaml groups these under `block: block-Q`.
+Parts that span two blocks are **dual-owned and hosted on the primary block**, not parked in a
+synthetic "shared" block. In `components.yaml` the part carries `block: [block-A, block-B]` +
+`shared: true` (one refdes, listed once); in the schematic it is **placed on the first-listed
+(host) block's sheet**, and the co-owning block reaches it by boundary nets. The earlier
+"dedicated shared-q sheet under `block-Q`" approach was removed (no synthetic block / pseudo-spec).
 
-- block-5 (LP1) connects to cell A via boundary nets: `LP1_V1_{L,R}` (BP node → OTA In+),
+First instance: the LP1/LP2 Q-VCAs **U9** (L) / **U10** (R) (each LM13700: cell A = LP1 Q,
+cell B = LP2 Q) + their decoupling/Iabc caps. `components.yaml`: `block: [block-5, block-8]`,
+`shared: true`. They live on **block-5's** sheet (`specs/block-5/block-5.nets.yaml`):
+
+- block-5 (LP1, host) wires cell A internally: `LP1_V1_{L,R}` (BP node → OTA In+),
   `LP1_SUMINV_{L,R}` (SUM_AMP virtual ground → OTA In−/Out), `LP1_QIABC_{L,R}` (V_ires→Iabc).
-- block-8 (LP2) connects to cell B via `LP2_V1_*`, `LP2_SUMINV_*`, `LP2_QIABC_*`.
+- block-8 (LP2) reaches cell B via boundary nets `LP2_V1_*`, `LP2_SUMINV_*`, `LP2_QIABC_*`
+  (produced on block-5's sheet, consumed on block-8's).
 
-(The expo converter THAT340 is per-block, not shared — LP1 has its own U14.)
+The BOM renders such a part under all its blocks (`Block = "block-5, block-8"`); the docs BOM
+viewer's group-by-block shows it under each. (The expo converter THAT340 is per-block, not
+shared — LP1 has its own U14.)
 
 ## Refdes convention for multi-instance parts (decision 2026-05-29)
 
@@ -231,9 +237,9 @@ Fix any missing `qty` on grouped rows as you go (block-1 fixed R3–R6).
 - [x] block-1 transcribed + verified (DW3/DW5 symbols; refdes-suffix convention)
 - [x] block-2 transcribed + verified (LFO rate net FINALIZED; diode/led/trimpot syms; SOD-123 fp)
 - [x] block-4 transcribed + verified (THAT2180 pinout/topology CORRECTED; vca sym; 3224W SMD fp)
-- [x] block-5 + shared-q transcribed + verified (dual-derivation; LM13700/THAT340 datasheet-corrected;
+- [x] block-5 transcribed + verified — hosts the shared U9/U10 Q-VCAs (dual-derivation; LM13700/THAT340 datasheet-corrected;
       per-channel expo; OTA buffer pulldowns added; SOD-123 already present)
-- [x] block-8 (LP2) transcribed + verified (mirrors LP1 minus tilt; Q via shared-q cell B; IRES_AMP added)
+- [x] block-8 (LP2) transcribed + verified (mirrors LP1 minus tilt; Q via shared U9/U10 cell B on block-5; IRES_AMP added)
 - [x] block-7 (HP) transcribed + verified (mono SVF; HP inverting output buffer; local Q-VCAs cell B terminated; IRES_AMP added)
 - [x] block-3 (mod bus) transcribed + verified (TL074 quad multi-unit; BZX84C10 ±10V clamp; 19 destinations generated; MOD LEDs added; MOD_SRC deferred)
 - [x] GENERATOR FIX: multi-unit op-amps now placed as separate gate instances (units A/B/power at

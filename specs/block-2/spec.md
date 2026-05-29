@@ -23,7 +23,7 @@ jack only, no automatic normalling.
 
 > ✅ **FINALIZED 2026-05-29** — Rate network reworked to the drive-attenuator topology
 > (fixed R_INT + trimpot attenuator on the Schmitt output) and verified against the
-> plugin rate law and the components.yaml BOM. Transcribed in `kicad/nets/block-2.nets.yaml`.
+> plugin rate law and the components.yaml BOM. Transcribed in `specs/block-2/block-2.nets.yaml`.
 
 ### DSP-to-analog mapping
 
@@ -174,7 +174,7 @@ Items 1 and 3 below are intentional DSP advantages kept by design. Item 2 is now
 
 > ✅ **FINALIZED 2026-05-29** — Rate network reworked to the drive-attenuator topology
 > (fixed R_INT + trimpot attenuator on the Schmitt output) and verified against the
-> plugin rate law and the components.yaml BOM. Transcribed in `kicad/nets/block-2.nets.yaml`.
+> plugin rate law and the components.yaml BOM. Transcribed in `specs/block-2/block-2.nets.yaml`.
 
 ### Component values and derivations
 
@@ -266,36 +266,6 @@ output protection but are physically placed on the utility board near the LFO ou
 
 ## 4. Component Requirements
 
-> ✅ **FINALIZED 2026-05-29** — Rate network reworked to the drive-attenuator topology
-> (fixed R_INT + trimpot attenuator on the Schmitt output) and verified against the
-> plugin rate law and the components.yaml BOM. Transcribed in `kicad/nets/block-2.nets.yaml`.
-
-| Ref | Part | Package | Value | Qty | Board | Block | Function |
-|---|---|---|---|---|---|---|---|
-| U_LFO1 | TL072CDT | SOIC-8 | — | 1 | utility | block-2 | LFO1 integrator (half A) + Schmitt trigger (half B) |
-| U_LFO2 | TL072CDT | SOIC-8 | — | 1 | utility | block-2 | LFO2 integrator (half A) + Schmitt trigger (half B) |
-| RV_LFO1 | Bourns 3296W trimpot | through-hole | 1 MΩ | 1 | control | block-2 | LFO1 rate preset (0.05–20 Hz); wiper → R_INT input |
-| RV_LFO2 | Bourns 3296W trimpot | through-hole | 1 MΩ | 1 | control | block-2 | LFO2 rate preset (0.05–20 Hz) |
-| C_INT1 | cap, C0G | 0603 | 47 nF | 1 | utility | block-2 | LFO1 integrator timing cap; C0G mandatory |
-| C_INT2 | cap, C0G | 0603 | 47 nF | 1 | utility | block-2 | LFO2 integrator timing cap; C0G mandatory |
-| R_INT1 (R1) | resistor 1% | 0603 | 590 kΩ | 1 | utility | block-2 | LFO1 integrator input R (fixed); f_max ≈ 20 Hz at full drive |
-| R_INT2 (R2) | resistor 1% | 0603 | 590 kΩ | 1 | utility | block-2 | LFO2 integrator input R (fixed) |
-| R_FLOOR1 (R3) | resistor | 0603 | 2.4 kΩ | 1 | utility | block-2 | LFO1 rate-attenuator floor; sets f_min ≈ 0.05 Hz |
-| R_FLOOR2 (R4) | resistor | 0603 | 2.4 kΩ | 1 | utility | block-2 | LFO2 rate-attenuator floor |
-| R_FB_SQ1 | resistor | 0603 | 100 kΩ | 1 | utility | block-2 | LFO1 Schmitt feedback (output → (+) input) |
-| R_HYS1 | resistor | 0603 | 82 kΩ | 1 | utility | block-2 | LFO1 Schmitt hysteresis ((+) input → GND); sets V_H = 5V |
-| R_FB_SQ2 | resistor | 0603 | 100 kΩ | 1 | utility | block-2 | LFO2 Schmitt feedback |
-| R_HYS2 | resistor | 0603 | 82 kΩ | 1 | utility | block-2 | LFO2 Schmitt hysteresis |
-| R_LED1 | resistor | 0603 | 1.2 kΩ | 1 | utility | block-2 | LFO1 LED current limit (≈2 mA at V_tri=+5V) |
-| R_LED2 | resistor | 0603 | 1.2 kΩ | 1 | utility | block-2 | LFO2 LED current limit |
-| D_LED1 | 1N4148W | SOD-123 | — | 1 | utility | block-2 | LFO1 LED half-wave rectifier (pulsing effect) |
-| D_LED2 | 1N4148W | SOD-123 | — | 1 | utility | block-2 | LFO2 LED half-wave rectifier |
-| LED_LFO1 | warm-white LED | 3 mm | — | 1 | panel | block-2 | LFO1 rate/phase indicator |
-| LED_LFO2 | warm-white LED | 3 mm | — | 1 | panel | block-2 | LFO2 rate/phase indicator |
-| R_OUT1 | resistor | 0603 | 1 kΩ | 1 | utility | block-2 | LFO1 output series protection to jack |
-| R_OUT2 | resistor | 0603 | 1 kΩ | 1 | utility | block-2 | LFO2 output series protection to jack |
-| C_BYPASS_LFO1 | cap, X7R | 0603 | 100 nF | 2 | utility | block-2 | U_LFO1 supply bypass (+12 V and −12 V pins) |
-| C_BYPASS_LFO2 | cap, X7R | 0603 | 100 nF | 2 | utility | block-2 | U_LFO2 supply bypass (+12 V and −12 V pins) |
-| J_LFO1 | PJ301M-12 | panel | — | 1 | panel | block-2 | LFO1 output jack |
-| J_LFO2 | PJ301M-12 | panel | — | 1 | panel | block-2 | LFO2 output jack |
-| J_MOD_IN | PJ301M-12 | panel | — | 1 | panel | block-2 | MOD_IN jack (LFO1 normalled via NC tip-switch) |
+Component set: see the generated BOM `kicad/pogo-bom.csv` (rows with `Block = block-2`),
+sourced from `specs/components.yaml` (the per-ref design manifest) and enriched by the
+`components/` registry (MPN, footprint, datasheet). Verification status: `specs/STATUS.md`.

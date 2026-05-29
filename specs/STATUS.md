@@ -31,10 +31,10 @@ Last updated: 2026-05-29 | Topology: 48HP | Source of truth: `tools/panel-data.y
 | 2 | Dual LFO | ✅ panel-verified | ✅ rate net FINALIZED 2026-05-29 | Integrator+Schmitt; drive-attenuator rate control (fixed R_INT + trimpot attenuator) |
 | 3 | Mod Bus | ✅ panel-verified | ✅ transcribed 2026-05-29 | 19 destinations; 7× TL074; ±10V zener clamp; MOD LEDs added; MOD_SRC deferred |
 | 4 | VCA | ✅ panel-verified | ✅ CORRECTED 2026-05-29 | THAT 2180 current-in/I-V-out (datasheet pinout); Ec+ control; I/V op-amps added |
-| 5 | LP Filter 1 | ✅ panel-verified | ✅ transcribed 2026-05-29 | OTA-C SVF; per-channel expo (true tilt); shared-q Q-VCAs; buffer pulldowns added |
+| 5 | LP Filter 1 | ✅ panel-verified | ✅ transcribed 2026-05-29 | OTA-C SVF; per-channel expo (true tilt); hosts the shared U9/U10 Q-VCAs (co-owned by block-8); buffer pulldowns added |
 | 6 | Triple BP + Dist | ✅ **rewritten 2026-05-28** | ✅ transcribed 2026-05-29 | OTA-C SVF (v1/BP tap) ×3; per-channel expo; per-group Q-VCAs; SC/HC/WF cells + 2×CD4053/group stereo mux. **CD4053 symbol pinout corrected vs datasheet** (was scrambled + overlapping). 3 Phase-3R flags: DRIVE→gain, DW5 2-bit encoding, BP_MIX blend (see spec §2 note) |
 | 7 | HP Filter | ✅ panel-verified | ✅ transcribed 2026-05-29 | OTA-C SVF; HP inverting output buffer; own Q-VCAs; IRES_AMP + buffer pulldowns added |
-| 8 | LP Filter 2 | ✅ panel-verified | ✅ transcribed 2026-05-29 | OTA-C SVF; mono (single expo); Q via shared-q cell B; IRES_AMP + buffer pulldowns added |
+| 8 | LP Filter 2 | ✅ panel-verified | ✅ transcribed 2026-05-29 | OTA-C SVF; mono (single expo); Q via the shared U9/U10 cell B (hosted on block-5); IRES_AMP + buffer pulldowns added |
 | B | Output Buffer | ✅ panel-verified | ⚠️ STALE | TL072; MAIN_L/R from LP2 + BP3_L/R tap |
 
 ## aux/ Circuit Library (`specs/aux/aux-*.md`)
@@ -62,7 +62,7 @@ Circuit diagrams in spec text must be self-sufficient.
 
 | File | Status |
 |---|---|
-| `specs/components.yaml` | ✅ Complete — 267 entries; all boards; all ICs, discretes, and key passives with values; qty field for repeated identical parts |
+| `specs/components.yaml` | ✅ Complete — 476 entries; all boards; all ICs, discretes, and key passives with values; qty field for repeated identical parts |
 
 ## Panels & Layout
 
@@ -75,10 +75,9 @@ Circuit diagrams in spec text must be self-sufficient.
 
 | File | Status |
 |---|---|
-| `kicad/generate_schematic.py` | ✅ 48HP data-driven generator — **all 10 blocks + shared-q complete (10/10)**. Multi-unit op-amp placement + short-detection fixed 2026-05-29; CD4053 symbol pinout datasheet-corrected for block-6. Rollout plan: `kicad/SCHEMATIC-GEN-PLAN.md` |
-| `kicad/nets/*.nets.yaml` | ✅ per-block netlists — `block-A/B/1/2/3/4/5/6/7/8` + `shared-q` all done (10/10) |
-| `kicad/generate_control_board.py`, `generate_utility_board.py` | ⚠️ 40HP-era STALE (see kicad/README-STALE.md) |
-| `kicad/validate_*.py` | ⚠️ 40HP-era STALE |
+| `kicad/generate_schematic.py` | ✅ 48HP data-driven generator — **all 10 blocks complete (10/10)**. Multi-unit op-amp placement + short-detection fixed 2026-05-29; CD4053 symbol pinout datasheet-corrected for block-6. Rollout plan: `kicad/SCHEMATIC-GEN-PLAN.md` |
+| `specs/block-*/*.nets.yaml` | ✅ per-block netlist SOURCES (live with each block spec) — `block-A/B/1/2/3/4/5/6/7/8` all done (10/10); the shared Q-VCAs are hosted on block-5 |
+| `components/footprints/*.pretty` | ✅ vendored KiCad footprint libs (moved from kicad/; resolved via generated `kicad/fp-lib-table`) |
 | `.github/workflows/build.yml` schematic gate | ✅ `generate_schematic.py --check` (validate + structural verify + drift) in all jobs |
 | `.github/workflows/build.yml` KiCad (kiutils) job | Disabled |
 
@@ -119,10 +118,10 @@ corrected; block-B output Z attenuation corrected; BP_MIX wet polarity circuit c
 **Remaining work before PCB layout:**
 1. **48HP KiCad schematic generator** — 🚧 in progress. Data-driven generator
    (`kicad/generate_schematic.py`) built and proven on **block-A**; replaces the
-   40HP-era stale generators. Per-block netlists in `kicad/nets/*.nets.yaml`,
+   40HP-era stale generators (now removed). Per-block netlists in `specs/block-*/*.nets.yaml`,
    footprints resolved from the `components/` registry, byte-stable output, pin-
-   coverage + structural verification gated in CI. Remaining: transcribe block
-   6. **Order, symbol gaps, and per-block checklist:
+   coverage + structural verification gated in CI. **All 10 blocks done (10/10).**
+   **Order, symbol gaps, and per-block checklist:
    `kicad/SCHEMATIC-GEN-PLAN.md`.**
 2. **Phase 6R** — VCV Rack signal-path smoke tests (CI integration)
 
@@ -135,7 +134,7 @@ uses **R_in (V→I)** at the input and a **transimpedance op-amp (I→V) per cha
 output (inverting, unity at 0 dB; the inversion is compensated by LP1's inverting SUM_AMP).
 Gain via Ec+ (+6.1 mV/dB; Ec+ = 244 mV·(control−1)); Ec−/Sym/Gnd → AGND. The bogus
 R_OUT_N_L/R were removed and an I/V op-amp (U6) + CV-conditioning op-amp (U63) added.
-See `kicad/nets/block-4.nets.yaml`, `specs/aux/aux-vca-cell.md`, `specs/block-4/spec.md`.
+See `specs/block-4/block-4.nets.yaml`, `specs/aux/aux-vca-cell.md`, `specs/block-4/spec.md`.
 
 **Open prototype questions:** None. All resolved.
 - block-2 LFO LED: pulsing confirmed (half-wave rectified via D_LED 1N4148W). Signal

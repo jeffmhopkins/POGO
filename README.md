@@ -52,14 +52,14 @@ revision as block-level estimates are refined).
 
 The plugin and panel are complete and CI-passing. Circuit design (Phase 3R) is complete
 for all blocks, and **per-block KiCad schematics are transcribed and CI-gated for all 10
-blocks + the shared-Q sheet** (data-driven generator, see below). Board layout (Phase 5R)
+blocks** (data-driven generator, see below). Board layout (Phase 5R)
 is in progress.
 
 | Phase | Description | Status |
 |---|---|---|
 | Phase 1R | Extract functional spec from plugin code (all blocks) | ✅ Complete |
 | Phase 2R | Analog behavior model (bilinear transform inverse) | ✅ Complete |
-| Phase 3R | Circuit design + per-block KiCad schematics — 10/10 blocks + shared-Q; `components.yaml` finalized | ✅ Complete |
+| Phase 3R | Circuit design + per-block KiCad schematics — 10/10 blocks; `components.yaml` finalized | ✅ Complete |
 | Phase 4R | Panel — 48HP, DRC-clean, CI-verified | ✅ Complete |
 | Phase 5R | Board layout — 48HP, architecture under review | 🔄 In Progress |
 | Phase 6R | Code validation — CI green, signal-path smoke tests | ✅ Complete |
@@ -93,7 +93,7 @@ POGO/
 ├── specs/                         ← Hardware design documentation
 │   ├── STATUS.md                  ← Phase completion checklist
 │   ├── module-overview.md         ← Signal chain, power budget
-│   ├── components.yaml            ← Global component registry (476 entries)
+│   ├── components.yaml            ← Per-ref design manifest (476 entries; block→ref→part)
 │   ├── analog-design-review.md    ← Trim pots, parts availability, noise analysis
 │   │
 │   ├── aux/                       ← Circuit design library (shared building blocks)
@@ -124,19 +124,21 @@ POGO/
 │   ├── board-layout/layout-notes.md
 │   └── archive/40hp-era-2026-05/  ← Superseded 40HP specs
 │
-├── components/                    ← Canonical component registry + datasheet cache
-│   ├── *.yaml                     ← Per-part records (footprint, MPN, datasheet metadata)
+├── components/                    ← Component SOURCING (catalog + footprints + datasheets)
+│   ├── parts/<slug>/              ← Per-part: component.yaml (footprint, MPN, datasheet) + datasheet.pdf
+│   ├── footprints/*.pretty        ← Vendored KiCad footprint libs (resolve as POGO_*)
+│   ├── footprints.yaml            ← panel-type → footprint bindings
 │   └── README.md
 │
-├── kicad/                         ← KiCad schematics — data-driven, per block
-│   ├── generate_schematic.py      ← nets/*.yaml → .kicad_sch (--check: coverage + structural + drift)
+├── kicad/                         ← KiCad generator + generated artifacts
+│   ├── generate_schematic.py      ← specs/block-*/*.nets.yaml → .kicad_sch (--check: coverage + structural + drift)
 │   ├── gen_block6.py              ← Block-6 netlist generator (3-group repetition)
 │   ├── kicad_common.py            ← Symbol library + pin helpers (datasheet-verified)
-│   ├── nets/*.nets.yaml           ← Per-block netlists (10 blocks + shared-q)
-│   ├── pogo-block-*.kicad_sch     ← Generated schematics (one per block)
+│   ├── pogo-*.kicad_sch           ← Generated schematics (one per block)
 │   ├── pogo-bom.csv               ← Manufacturing BOM
-│   ├── SCHEMATIC-GEN-PLAN.md      ← Schematic rollout plan / per-block gate doc
-│   └── README-STALE.md            ← Legacy 40HP board generators (generate_*_board.py) — STALE
+│   ├── fp-lib-table               ← Generated; maps POGO_* → components/footprints/
+│   ├── pogo.kicad_pro             ← KiCad project (placeholder root; real board = Phase 5R)
+│   └── SCHEMATIC-GEN-PLAN.md      ← Schematic rollout plan / per-block gate doc
 │
 ├── changes/                       ← Per-change records (changes/NNNN-<slug>.md) + _TEMPLATE.md
 │
@@ -173,10 +175,11 @@ open design/panel-debug.html
 
 ## KiCad Schematic Generation
 
-Schematics are **data-driven and generated per block**. Each block has a netlist
-(`kicad/nets/<block>.nets.yaml`) listing parts and name-based nets;
+Schematics are **data-driven and generated per block**. Each block's netlist source lives
+with its spec (`specs/<block>/<block>.nets.yaml`) listing parts and name-based nets;
 `kicad/generate_schematic.py` emits a byte-stable `kicad/pogo-<block>.kicad_sch`. All 10
-blocks + the shared-Q sheet are transcribed and verified.
+blocks + the shared-Q sheet are transcribed and verified. (Authored netlist in `specs/`,
+generated schematic in `kicad/` — linked by `--check`, not by directory adjacency.)
 
 ```bash
 # Regenerate all block schematics
@@ -190,13 +193,13 @@ python3 kicad/generate_schematic.py --block block-6
 ```
 
 Connectivity is by net name, so per-block sheets merge at board level by matching boundary
-nets. Symbols/pinouts in `kicad/kicad_common.py` are datasheet-verified. The manufacturing
-BOM (`kicad/pogo-bom.csv`) is generated from `specs/components.yaml` + the `components/`
-registry. See `kicad/SCHEMATIC-GEN-PLAN.md` for the rollout and per-block notes.
+nets. Symbols/pinouts in `kicad/kicad_common.py` are datasheet-verified. Vendored footprints
+live in `components/footprints/*.pretty` (resolved via the generated `kicad/fp-lib-table`). The
+manufacturing BOM (`kicad/pogo-bom.csv`) is generated from `specs/components.yaml` + the
+`components/` registry. See `kicad/SCHEMATIC-GEN-PLAN.md` for the rollout and per-block notes.
 
-> The **legacy 40HP board generators** (`generate_control_board.py`, `generate_utility_board.py`,
-> `validate_*.py`) are superseded and remain **STALE** — see `kicad/README-STALE.md`. They are
-> unrelated to the per-block generator above.
+> The 40HP-era board generators and validators have been removed (the data-driven per-block
+> generator above supersedes them). A real board-level KiCad project is Phase 5R.
 
 ---
 

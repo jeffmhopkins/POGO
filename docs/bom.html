@@ -179,7 +179,9 @@ function render() {
     html += `<tr><td colspan="${ncols}" class="msg">no parts match “${esc(q)}”</td></tr>`;
   } else if (grouping) {
     const groups = {};
-    for (const r of data) (groups[r.Block || "(unassigned)"] ||= []).push(r);
+    for (const r of data)
+      for (const b of (r.Block || "(unassigned)").split(/,\s*/))
+        (groups[b] ||= []).push(r);
     for (const g of Object.keys(groups).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))) {
       const items = groups[g];
       const qty = items.reduce((s, r) => s + (+r.Qty || 0), 0);

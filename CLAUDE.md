@@ -91,7 +91,7 @@ POGO/
 ├── specs/                        ← Hardware design documentation
 │   ├── STATUS.md                 ← Phase completion checklist (the gate document)
 │   ├── module-overview.md        ← Signal chain, power budget, quick reference
-│   ├── components.yaml           ← Global component registry (ref → block → board → part)
+│   ├── components.yaml           ← Per-ref DESIGN manifest (ref → block → board → part → fn)
 │   │
 │   ├── aux/                      ← Circuit design library (shared building blocks)
 │   │   ├── aux-ota-c-svf.md       ← OTA-C SVF core (LP, HP, BP)
@@ -107,16 +107,18 @@ POGO/
 │   │   └── aux-power-filter.md    ← Board power filtering
 │   │   (ASCII schematics in each .md; no SVG files)
 │   │
-│   ├── block-A/spec.md           ← Input Buffers (LM4562)
-│   ├── block-1/spec.md           ← Pre-Gain (NE5532D, 1×/5× switch)
+│   ├── block-A/spec.md           ← Input Buffers (OPA1612, BAT54S clamp)
+│   ├── block-1/spec.md           ← Pre-Gain (OPA1612, 1×/5× switch + ALT path)
 │   ├── block-2/spec.md           ← Dual LFO (triangle, 0.05–20 Hz)
-│   ├── block-3/spec.md           ← Mod Bus (20 destinations, attenuverters)
+│   ├── block-3/spec.md           ← Mod Bus (19 destinations, attenuverters)
 │   ├── block-4/spec.md           ← VCA (THAT 2180, AMT + OFS)
 │   ├── block-5/spec.md           ← LP Filter 1 (OTA-C SVF, stereo tilt)
 │   ├── block-6/spec.md           ← Triple BP + Distortion (3× SVF + SC/HC/WF)
 │   ├── block-7/spec.md           ← HP Filter (OTA-C SVF)
 │   ├── block-8/spec.md           ← LP Filter 2 (OTA-C SVF, independent)
 │   ├── block-B/spec.md           ← Output Buffers (TL072, MAIN + BP3 jacks)
+│   │   (each block-N/ also holds its block-N.nets.yaml — the netlist SOURCE;
+│   │    the generated .kicad_sch lives in kicad/)
 │   │
 │   ├── panel-design/
 │   │   └── panel-notes.md        ← Points to tools/panel-data.yaml (source of truth)
@@ -125,12 +127,18 @@ POGO/
 │   └── archive/
 │       └── 40hp-era-2026-05/     ← Superseded 40HP specs (envelope follower, old block names)
 │
-├── kicad/                        ← KiCad schematics (STALE — 40HP era; see kicad/README-STALE.md)
-│   ├── README-STALE.md           ← 40HP-era; do not regenerate until 48HP Phase 3R complete
-│   ├── generate_control_board.py ← 40HP STALE
-│   ├── generate_utility_board.py ← 40HP STALE
-│   ├── validate_schematic.py     ← 40HP STALE
-│   └── validate_utility_board.py ← 40HP STALE
+├── components/                   ← Component SOURCING (catalog + footprints + datasheets)
+│   ├── parts/<slug>/             ← one sourced part: component.yaml + datasheet.pdf
+│   ├── footprints/*.pretty       ← vendored KiCad footprint libs (resolve as POGO_*)
+│   └── footprints.yaml           ← panel-type → footprint bindings
+│
+├── kicad/                        ← KiCad generator + generated artifacts
+│   ├── generate_schematic.py     ← nets (specs/block-*/) → pogo-*.kicad_sch (--check gate)
+│   ├── gen_block6.py             ← block-6 netlist generator (3-group repetition)
+│   ├── kicad_common.py           ← symbol library + pin helpers (datasheet-verified)
+│   ├── pogo-*.kicad_sch          ← generated per-block schematics
+│   ├── fp-lib-table              ← generated; maps POGO_* → components/footprints/
+│   └── pogo.kicad_pro            ← KiCad project (placeholder root; real board = Phase 5R)
 │
 └── design/                       ← Generated HTML (do not hand-edit)
     └── panel-debug.html          ← Interactive layer viewer (keepouts, footprints, DRC)
@@ -240,10 +248,10 @@ Sonic purpose. What the user hears. Where it sits. No circuit details.
 - → References aux/* for shared circuit designs
 
 ## 4. Component Requirements
-| Ref | Part | Package | Value | Qty | Board | Block | Function |
-|---|---|---|---|---|---|---|---|
-| U1 | LM13700M | SOIC-16 | — | 1 | audio | block-5 | LP1 integrators L+R |
-Ref must match components.yaml. Globally unique within board.
+Pointer only — do NOT hand-maintain a table here. The component set is the generated BOM
+`kicad/pogo-bom.csv` (rows with `Block = block-N`), sourced from `specs/components.yaml`
+(the per-ref design manifest) enriched by the `components/` registry. Verification status:
+`specs/STATUS.md`. (Refs are authored in `specs/components.yaml`, globally unique within board.)
 ```
 
 ## aux/ Library Template (`specs/aux/aux-name.md`)
@@ -360,8 +368,8 @@ spawns a **separate Lane A change** — the plugin leads; the schematic never si
 3. **Build + Verify** — CI builds the `.vcvplugin`; you load it in VCV Rack. Iterate Steps 2/3. **G3**: you confirm behavior matches intent.
 4. **Lock** [assistant, auto on G3] — record `Plugin LOCKED @ <blob-hashes>` (the locked `plugin/src/**` DSP files + `panel-data.yaml`) in the change file. These are frozen for the change; any further plugin/panel edit re-opens G2/G3. (Blob hashes, not commit SHA, so the record survives squash-merge.)
 5. **Spec** [assistant] — update affected block spec(s): §1 Intent + the functional spec to the locked behavior; assistant asserts parity vs the locked plugin. **G4**: you approve.
-6. **Topology + components** [assistant proposes] — topology prose only (spec §2, referencing `aux/*`); list any new component with rationale + candidate part/footprint. **G5**: you approve the topology. **G6a**: you approve each new component → it is added to `specs/components.yaml` (ref-uniqueness + `qty` rules) + the `components/` registry (`matches[]`) + datasheet entry. **G6b**: its footprint exists — resolves to a real library footprint, or a vendored `.kicad_mod` committed under `kicad/footprints/` with a datasheet land-pattern citation. **G6 must close before any netlist references the part.**
-7. **Schematic + artifacts** [assistant] — update `kicad/nets/*.nets.yaml` (+ datasheet-verified symbols in `kicad_common.py`), regenerate, **commit the generated `.kicad_sch` beside its `.nets.yaml`**; for every changed `boundary:` net, update *both* sheets and re-check. Build/refresh artifacts: schematic, `kicad/pogo-bom.csv`, panel (`plugin/res/Pogo*.svg` + `design/panel-debug.html`). Link them in the change file (paths/links, not copies; the `.vcvplugin` lives only in the Actions run).
+6. **Topology + components** [assistant proposes] — topology prose only (spec §2, referencing `aux/*`); list any new component with rationale + candidate part/footprint. **G5**: you approve the topology. **G6a**: you approve each new component → it is added to `specs/components.yaml` (ref-uniqueness + `qty` rules) + the `components/` registry (`matches[]`) + datasheet entry. **G6b**: its footprint exists — resolves to a real library footprint, or a vendored `.kicad_mod` committed under `components/footprints/` with a datasheet land-pattern citation. **G6 must close before any netlist references the part.**
+7. **Schematic + artifacts** [assistant] — update the block's netlist source `specs/<block>/<block>.nets.yaml` (+ datasheet-verified symbols in `kicad_common.py`), regenerate, **commit the generated `kicad/pogo-<block>.kicad_sch`** (it stays in `kicad/`, kept in sync with its `specs/` netlist by `generate_schematic.py --check`, not by directory adjacency); for every changed `boundary:` net, update *both* sheets and re-check. Build/refresh artifacts: schematic, `kicad/pogo-bom.csv`, panel (`plugin/res/Pogo*.svg` + `design/panel-debug.html`). Link them in the change file (paths/links, not copies; the `.vcvplugin` lives only in the Actions run).
 8. **Close** [assistant] — for a Lane A behavioral change, bump `plugin/plugin.json` `version` (semver) and tag the squash-merge; update `specs/STATUS.md` (reuse the `✅ ⚠️ 🔲 🚧` vocabulary; bump `Last updated`) and `kicad/SCHEMATIC-GEN-PLAN.md` if a block's schematic moved; PR `change/<slug>` → `dev`; squash-merge on green CI. **Abandoned change** → set the change file `Status: ABANDONED` + reason, close-out PR with *only* the change file (discard the code commits).
 
 **Gates are hard stops** (assistant waits for your explicit OK): G1 intent · G2 panel · G3 behavior · G4 spec · G5 topology · G6a/b component+footprint. On rejection: log the reason in the decisions log, revert dependent work to the last gate-approved state, and re-enter at the failed step.
@@ -371,7 +379,7 @@ spawns a **separate Lane A change** — the plugin leads; the schematic never si
 - One change per branch/PR; the change file is committed and never deleted (abandoned → `ABANDONED`).
 - **Plugin = ground truth.** Spec and schematic follow the locked plugin; they never lead it.
 - **All five CI `--check` gates pass**: `components.py`, `fetch_datasheets.py` (enforces "symbols datasheet-verified"), `build_components.py`, `generate_schematic.py` (pin coverage + structural + byte-drift), `build_panel.py` (DRC).
-- Generated `.kicad_sch` is committed beside its `.nets.yaml`.
+- The `.nets.yaml` is authored design (lives in `specs/<block>/`); the generated `.kicad_sch` is a build artifact (lives in `kicad/`). They are linked by `generate_schematic.py --check`, not by directory adjacency.
 - No component is used in a netlist before G6 closes (in `components.yaml` + registry + footprint + datasheet).
 - Locked files stay unchanged after lock unless G2/G3 are re-opened.
 

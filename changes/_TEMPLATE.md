@@ -52,7 +52,8 @@ What this change does and explicitly does not touch.
 
 - Plugin:    CI run <link> (`.vcvplugin`; artifacts expire ~30 days)
 - Panel:     `plugin/res/Pogo.svg`, `design/panel-debug.html`
-- Schematic: `kicad/pogo-<block>.kicad_sch` (+ `kicad/nets/<block>.nets.yaml`)
+- Netlist (source): `specs/<block>/<block>.nets.yaml`
+- Schematic (generated): `kicad/pogo-<block>.kicad_sch`
 - BOM:       `kicad/pogo-bom.csv`
 - Specs:     `specs/block-N/spec.md`
 - STATUS.md row updated: yes / no

@@ -21,7 +21,7 @@ components/
                            supplier-page parts have no PDF). Fetched by fetch_datasheets.py.
 ```
 
-Footprints themselves stay in `kicad/footprints/*.pretty/` (KiCad-native libraries);
+Footprints themselves live in `components/footprints/*.pretty/` (KiCad-native libraries);
 `component.yaml` and `footprints.yaml` *reference* them by `{lib, name}`.
 
 ## Tools
