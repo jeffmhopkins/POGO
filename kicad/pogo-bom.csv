@@ -63,7 +63,7 @@ audio,U23,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas In
 audio,U24,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/opa1612.pdf,block-6,BP2 SUM_AMP + buffer R
 audio,U25,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/opa1612.pdf,block-6,BP3 SUM_AMP + buffer L
 audio,U26,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/opa1612.pdf,block-6,BP3 SUM_AMP + buffer R
-audio,U27,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6,BP tilt inverter half A (−V_tilt for R); BP_POL G=−1 inverter half B
+audio,U27,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6,BP tilt inverter half A (−V_tilt for R); fixed BP output polarity-restore inverter (G=−1) half B
 audio,U28,1,THAT340S14-U,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,THAT Corporation,,https://thatcorp.com/datashts/THAT_300-Series_Datasheet.pdf,block-6,BP1 expo converter
 audio,U29,1,THAT340S14-U,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,THAT Corporation,,https://thatcorp.com/datashts/THAT_300-Series_Datasheet.pdf,block-6,BP2 expo converter
 audio,U30,1,THAT340S14-U,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,THAT Corporation,,https://thatcorp.com/datashts/THAT_300-Series_Datasheet.pdf,block-6,BP3 expo converter
@@ -108,7 +108,7 @@ audio,R13,6,,100kΩ,0603,,,,,block-6,SVF SUM_AMP R_in; 1 per group per channel (
 audio,R14,6,,100kΩ,0603,,,,,block-6,SVF SUM_AMP R_fb; 1 per group per channel
 audio,R15,6,,100kΩ,0603,,,,,block-6,SVF SUM_AMP R_Q input; 1 per group per channel
 audio,R16,2,,100kΩ,0603,,,,,block-6,BP tilt inverter R_in + R_fb in U27 half A
-audio,R17,2,,100kΩ,0603,,,,,block-6,BP_POL inverter R_in + R_fb in U27 half B
+audio,R17,2,,100kΩ,0603,,,,,block-6,BP output polarity-restore inverter R_in + R_fb in U27 half B
 audio,R18,6,,10kΩ,0603,,,,,block-6,R_SC_in; SC path input R; 1 per path × 6 paths
 audio,R19,6,,10kΩ,0603,,,,,block-6,R_SC_fb_fixed; SC minimum feedback R (G≥1× at zero drive)
 audio,R20,6,,10kΩ,0603,,,,,block-6,R_HC_in; HC path input R; 1 per path × 6 paths
@@ -227,11 +227,10 @@ control,RV25,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD9
 control,RV26,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-5,LP1_FREQ (±5V/oct)
 control,RV27,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-5,LP1_TILT (±1)
 control,RV28,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-5,LP1_RES (0–1)
-control,SW3,1,DW3 (2M DPDT ON-ON),,sub-mini toggle 2M,POGO_Button_Switch_THT:SW_Dailywell_DW3_DPDT,Dailywell,Thonk,https://www.thonk.co.uk/shop/sub-mini-toggle-switches/,block-6,BP_POL (Positive/Negative)
 control,SW4,1,DW5 (2M DPDT ON-ON-ON),,sub-mini toggle 2M,POGO_Button_Switch_THT:SW_Dailywell_DW5_DPDT,Dailywell,Thonk,https://www.thonk.co.uk/shop/sub-mini-toggle-switches/,block-6,BP1_DIST_MODE (Soft/Hard/Fold)
 control,SW5,1,DW5 (2M DPDT ON-ON-ON),,sub-mini toggle 2M,POGO_Button_Switch_THT:SW_Dailywell_DW5_DPDT,Dailywell,Thonk,https://www.thonk.co.uk/shop/sub-mini-toggle-switches/,block-6,BP2_DIST_MODE (Soft/Hard/Fold)
 control,SW6,1,DW5 (2M DPDT ON-ON-ON),,sub-mini toggle 2M,POGO_Button_Switch_THT:SW_Dailywell_DW5_DPDT,Dailywell,Thonk,https://www.thonk.co.uk/shop/sub-mini-toggle-switches/,block-6,BP3_DIST_MODE (Soft/Hard/Fold)
-control,SW7,1,DW5 (2M DPDT ON-ON-ON),,sub-mini toggle 2M,POGO_Button_Switch_THT:SW_Dailywell_DW5_DPDT,Dailywell,Thonk,https://www.thonk.co.uk/shop/sub-mini-toggle-switches/,block-3,MOD_SRC (3-way mod source select)
+control,SW7,1,DW5 (2M DPDT ON-ON-ON),,sub-mini toggle 2M,POGO_Button_Switch_THT:SW_Dailywell_DW5_DPDT,Dailywell,Thonk,https://www.thonk.co.uk/shop/sub-mini-toggle-switches/,block-3,MOD_SRC (3-way mod source select) — PLANNED; no plugin param yet
 control,RV29,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6,BP_OFFSET master freq (±5V/oct)
 control,RV30,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6,BP_MIX dry/wet (0–1)
 control,RV31,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6,BP1_FREQ

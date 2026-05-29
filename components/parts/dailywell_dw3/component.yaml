@@ -14,4 +14,4 @@ datasheet:
   version: supplier page (DW3 datasheet linked)
 panel_types:
 - toggle_dw3
-notes: DPDT ON-ON sub-mini toggle (GAIN, BP_POL).
+notes: DPDT ON-ON sub-mini toggle (GAIN_MAIN, GAIN_BP3).

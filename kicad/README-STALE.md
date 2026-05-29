@@ -20,9 +20,9 @@ A new KiCad generator will be written after the Phase 3R specs are complete and 
 component registry (`specs/components.yaml`) is finalized.
 
 > **Switch parts (48HP):** all toggle switches are now Thonk-sourced Dailywell 2M
-> sub-mini toggles — `SW_Dailywell_DW3_DPDT` (2-position ON-ON: GAIN_MAIN, GAIN_BP3,
-> BP_POL) and `SW_Dailywell_DW5_DPDT` (3-position ON-ON-ON: BP1/2/3_DIST_MODE,
-> MOD_SRC), in `kicad/footprints/Button_Switch_THT.pretty/`. The 40HP generators
+> sub-mini toggles — `SW_Dailywell_DW3_DPDT` (2-position ON-ON: GAIN_MAIN, GAIN_BP3)
+> and `SW_Dailywell_DW5_DPDT` (3-position ON-ON-ON: BP1/2/3_DIST_MODE; MOD_SRC is
+> planned/unimplemented), in `kicad/footprints/Button_Switch_THT.pretty/`. The 40HP generators
 > below still emit generic `SW_SPDT`/`SW_SP3T` symbols and must NOT be used; the
 > Phase 3R generator will assign the Dailywell footprints.
 
