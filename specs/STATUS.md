@@ -24,7 +24,7 @@ Last updated: 2026-05-28 | Topology: 48HP | Source of truth: `tools/panel-data.y
 | A | Input Buffer | ✅ panel-verified | ⚠️ STALE | OPA1612 follower, BAT54S clamp |
 | 1 | Pre-Gain | ✅ panel-verified | ⚠️ STALE | OPA1612, 1×/5× switch; ALT_BP path |
 | 2 | Dual LFO | ✅ panel-verified | ✅ rate net FINALIZED 2026-05-29 | Integrator+Schmitt; drive-attenuator rate control (fixed R_INT + trimpot attenuator) |
-| 3 | Mod Bus | ✅ panel-verified | ⚠️ STALE | 19 destinations; 7× TL074CDT |
+| 3 | Mod Bus | ✅ panel-verified | ✅ transcribed 2026-05-29 | 19 destinations; 7× TL074; ±10V zener clamp; MOD LEDs added; MOD_SRC deferred |
 | 4 | VCA | ✅ panel-verified | ✅ CORRECTED 2026-05-29 | THAT 2180 current-in/I-V-out (datasheet pinout); Ec+ control; I/V op-amps added |
 | 5 | LP Filter 1 | ✅ panel-verified | ✅ transcribed 2026-05-29 | OTA-C SVF; per-channel expo (true tilt); shared-q Q-VCAs; buffer pulldowns added |
 | 6 | Triple BP + Dist | ✅ **rewritten 2026-05-28** | ⚠️ STALE | Panel redesigned: per-band DIST switch, FOCUS, TILT; BP_BYPASS+WET model |
@@ -45,7 +45,7 @@ Last updated: 2026-05-28 | Topology: 48HP | Source of truth: `tools/panel-data.y
 | aux-unity-buffer | ⚠️ STALE | G=+1 and G=−1 variants |
 | aux-distortion | ⚠️ STALE | SC/HC/WF + CD4053 mux wiring |
 | aux-attenuverter | ⚠️ STALE | Bipolar pot + TL074 inverter |
-| aux-mod-bus-core | ⚠️ STALE | MB_AMP + MB_INV; ±10V clamp |
+| aux-mod-bus-core | ✅ transcribed 2026-05-29 | MB_AMP + MB_INV; ±10V BZX84C10 clamp |
 | aux-lfo-core | ⚠️ STALE | Integrator + Schmitt; 0.05–20 Hz |
 | aux-cv-protection | ⚠️ STALE | Moved from shared/; content unchanged |
 | aux-power-filter | ⚠️ STALE | Moved from shared/; content unchanged |
@@ -70,8 +70,8 @@ Circuit diagrams in spec text must be self-sufficient.
 
 | File | Status |
 |---|---|
-| `kicad/generate_schematic.py` | 🚧 48HP data-driven generator — framework done, **blocks A, B, 1, 2, 4, 5, 7, 8 + shared-q complete** (8/10 blocks). Multi-unit op-amp placement + short-detection fixed 2026-05-29. Rollout plan: `kicad/SCHEMATIC-GEN-PLAN.md` |
-| `kicad/nets/*.nets.yaml` | 🚧 per-block netlists — `block-A/B/1/2/4/5/7/8` + `shared-q` done |
+| `kicad/generate_schematic.py` | 🚧 48HP data-driven generator — framework done, **blocks A, B, 1, 2, 3, 4, 5, 7, 8 + shared-q complete** (9/10 blocks). Multi-unit op-amp placement + short-detection fixed 2026-05-29. Rollout plan: `kicad/SCHEMATIC-GEN-PLAN.md` |
+| `kicad/nets/*.nets.yaml` | 🚧 per-block netlists — `block-A/B/1/2/3/4/5/7/8` + `shared-q` done (only block-6 left) |
 | `kicad/generate_control_board.py`, `generate_utility_board.py` | ⚠️ 40HP-era STALE (see kicad/README-STALE.md) |
 | `kicad/validate_*.py` | ⚠️ 40HP-era STALE |
 | `.github/workflows/build.yml` schematic gate | ✅ `generate_schematic.py --check` (validate + structural verify + drift) in all jobs |
@@ -116,8 +116,8 @@ corrected; block-B output Z attenuation corrected; BP_MIX wet polarity circuit c
    (`kicad/generate_schematic.py`) built and proven on **block-A**; replaces the
    40HP-era stale generators. Per-block netlists in `kicad/nets/*.nets.yaml`,
    footprints resolved from the `components/` registry, byte-stable output, pin-
-   coverage + structural verification gated in CI. Remaining: transcribe blocks
-   6, 3. **Order, symbol gaps, and per-block checklist:
+   coverage + structural verification gated in CI. Remaining: transcribe block
+   6. **Order, symbol gaps, and per-block checklist:
    `kicad/SCHEMATIC-GEN-PLAN.md`.**
 2. **Phase 6R** — VCV Rack signal-path smoke tests (CI integration)
 

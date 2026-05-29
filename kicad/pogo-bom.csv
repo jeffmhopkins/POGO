@@ -164,9 +164,9 @@ audio,RV13,1,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_
 audio,RV14,1,3224W-1-xxx,20kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6,BP3 1V/oct tracking trim; ±10% range
 audio,RV15,1,,,SMD,,,,,block-6,BP3 Q_max trim
 audio,D4,24,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6,SC soft-clip diodes; 4 per path (2 antiparallel pairs) × 6 paths
-audio,D5,12,BZX84C5V1,,SOT-23,,Nexperia,,https://assets.nexperia.com/documents/data-sheet/BZX84_SER.pdf,block-6,HC back-to-back zener clamps (±5.8V clip); 2 per path × 6 paths
+audio,D5,12,BZX84C5V1,,SOT-23,POGO_Package_TO_SOT_SMD:SOT-23,Nexperia,,https://assets.nexperia.com/documents/data-sheet/BZX84_SER.pdf,block-6,HC back-to-back zener clamps (±5.8V clip); 2 per path × 6 paths
 audio,D6,24,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6,"WF passive clamp diodes; 4 per path (2 per polarity, Vth=±1.4V) × 6 paths; true symmetric fold"
-audio,D7,1,BZX84C5V1,,SOT-23,,Nexperia,,https://assets.nexperia.com/documents/data-sheet/BZX84_SER.pdf,block-6,CD4053 logic supply 5.1V zener shunt (from +12V with R_5V_logic)
+audio,D7,1,BZX84C5V1,,SOT-23,POGO_Package_TO_SOT_SMD:SOT-23,Nexperia,,https://assets.nexperia.com/documents/data-sheet/BZX84_SER.pdf,block-6,CD4053 logic supply 5.1V zener shunt (from +12V with R_5V_logic)
 audio,C15,4,,150nF,0805,,,,,block-6,BP1 integrator caps (C0G; 2 per channel × L+R)
 audio,C19,4,,22nF,0603,,,,,block-6,BP2 integrator caps (C0G; 2 per channel × L+R)
 audio,C23,4,,4.7nF,0603,,,,,block-6,BP3 integrator caps (C0G; 2 per channel × L+R)
@@ -356,6 +356,15 @@ utility,R58,1,,1kΩ,0603,,,,,block-3,"R_LED_CLIP: current limit, MOD_CLIP LED"
 utility,R59,1,,9.9kΩ,0603,,,,,block-3,R_CLIP_DIV_H: upper leg of MOD_CLIP 9.9V threshold divider
 utility,R60,1,,100Ω,0603,,,,,block-3,R_CLIP_DIV_L: lower leg of MOD_CLIP threshold divider
 utility,C7,14,,100nF,0603,,,,,block-3,C_BYPASS_MB: supply bypass; one per op-amp supply pin (7 ICs × 2 rails)
+utility,R_INV_IN,19,,10kΩ,0603,,,,,block-3,R_inv_in: attenuverter −V_src inverter input R; 1 per destination
+utility,R_INV_FB,19,,10kΩ,0603,,,,,block-3,R_inv_fb: attenuverter −V_src inverter feedback R; 1 per destination
+utility,R99,1,,100Ω,0603,,,,,block-3,R_MODIN: MOD_IN series input protection
+utility,D4,1,BAT54S,,SOT-23,POGO_Package_TO_SOT_SMD:SOT-23,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds11005.pdf,block-3,D_MODIN: MOD_IN input clamp ±12V
+utility,D5,1,BZX84C10,,SOT-23,POGO_Package_TO_SOT_SMD:SOT-23,Nexperia,,,block-3,D_ZCLAMP_P: mod-bus +10V clamp zener (back-to-back with D6)
+utility,D6,1,BZX84C10,,SOT-23,POGO_Package_TO_SOT_SMD:SOT-23,Nexperia,,,block-3,D_ZCLAMP_N: mod-bus -10V clamp zener (cathode-to-cathode with D5)
+panel,LED3,1,,,3mm,POGO_LED_THT:LED_D3.0mm,generic,,https://www.thonk.co.uk/product-category/electronic-component/led/,block-3,MOD_POS indicator (green)
+panel,LED4,1,,,3mm,POGO_LED_THT:LED_D3.0mm,generic,,https://www.thonk.co.uk/product-category/electronic-component/led/,block-3,MOD_NEG indicator (red)
+panel,LED5,1,,,3mm,POGO_LED_THT:LED_D3.0mm,generic,,https://www.thonk.co.uk/product-category/electronic-component/led/,block-3,MOD_CLIP indicator (amber)
 control,SW1,1,DW3 (2M DPDT ON-ON),,sub-mini toggle 2M,POGO_Button_Switch_THT:SW_Dailywell_DW3_DPDT,Dailywell,Thonk,https://www.thonk.co.uk/shop/sub-mini-toggle-switches/,block-1,GAIN_MAIN 1×/5×
 control,SW2,1,DW3 (2M DPDT ON-ON),,sub-mini toggle 2M,POGO_Button_Switch_THT:SW_Dailywell_DW3_DPDT,Dailywell,Thonk,https://www.thonk.co.uk/shop/sub-mini-toggle-switches/,block-1,GAIN_BP3 1×/5×
 control,RV1,1,3296W-1-xxx,1MΩ,through-hole,POGO_Potentiometer_THT:Potentiometer_Bourns_3296W_Vertical,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3296.pdf,block-2,"LFO1_RATE trimpot (preset; rate attenuator on Schmitt output, 0.05–20 Hz)"

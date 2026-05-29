@@ -426,6 +426,34 @@ def sym_diode():
   )'''
 
 
+def sym_zener():
+    """Zener diode (Diode:D_Zener), e.g. BZX84C10. Pins 1=A (anode, top), 3=K (cathode,
+    bottom) to match the BZX84 SOT-23 land (pin 2 = N/C, not on the symbol)."""
+    return '''  (symbol "Diode:D_Zener"
+    (pin_names (offset 0) hide)
+    (pin_numbers hide)
+    (property "Reference" "D" (at 2.032 0 90) (effects (font (size 1.27 1.27))))
+    (property "Value" "D_Zener" (at -2.032 0 90) (effects (font (size 1.27 1.27))))
+    (symbol "D_Zener_0_1"
+      (polyline (pts (xy -1.27 1.016) (xy 1.27 1.016) (xy 0 -1.27) (xy -1.27 1.016)) (stroke (width 0.254) (type default)) (fill (type none)))
+      (polyline (pts (xy -1.778 1.27) (xy -1.27 1.27) (xy -1.27 1.016) (xy 1.27 1.016) (xy 1.27 0.762) (xy 1.778 0.762)) (stroke (width 0.254) (type default)) (fill (type none)))
+    )
+    (symbol "D_Zener_1_1"
+      (pin passive line (at 0 3.81 270) (length 2.794) (name "A" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27)))))
+      (pin passive line (at 0 -3.81 90) (length 2.794) (name "K" (effects (font (size 1.27 1.27)))) (number "3" (effects (font (size 1.27 1.27)))))
+    )
+  )'''
+
+
+def zener_pins(ox, oy, angle=0):
+    """Zener (BZX84 SOT-23): pin 1 = A (anode, top), 3 = K (cathode, bottom).
+    Pad 2 (N/C) is intentionally not a symbol pin. Matches sym_zener()."""
+    return {
+        "1": _rot(ox, oy, angle, 0,  3.81),
+        "3": _rot(ox, oy, angle, 0, -3.81),
+    }
+
+
 def sym_led():
     """LED (Device:LED). Pins A (anode, top), K (cathode, bottom). Pad names A/K
     match LED_THT/LED_D3.0mm."""

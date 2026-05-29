@@ -68,6 +68,7 @@ SYM_TABLE = {
     "dw3":    ("Switch:SW_Dailywell_DW3",           kc.sym_dw3,     kc.dpdt6_pins),
     "dw5":    ("Switch:SW_Dailywell_DW5",           kc.sym_dw5,     kc.dpdt6_pins),
     "diode":  ("Device:D",                          kc.sym_diode,   kc.diode2_pins),
+    "zener":  ("Diode:D_Zener",                     kc.sym_zener,   kc.zener_pins),
     "led":    ("Device:LED",                        kc.sym_led,     kc.diode2_pins),
     "trimpot":("Device:R_POT",                      kc.sym_rpot,    kc.rpot_pins),
     "vca":    ("POGO:THAT2180",                     kc.sym_that2180, kc.that2180_pins),

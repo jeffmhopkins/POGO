@@ -1,0 +1,14 @@
+# bzx84c10 — POGO sourced component (hand-maintained)
+slug: bzx84c10
+mpn: BZX84C10
+manufacturer: Nexperia
+supplier: '~'
+package: SOT-23
+matches:
+- BZX84C10
+footprint:
+  lib: Package_TO_SOT_SMD
+  name: SOT-23
+panel_types: []
+notes: 10V zener; ±10V mod-bus clamp (back-to-back pair). Same BZX84 series datasheet
+  as bzx84c5v1 (Nexperia BZX84_SER). SOT-23 pinout 1=A, 2=NC, 3=K.

@@ -58,11 +58,11 @@ Ordered by rising symbol/wiring risk so each step de-risks the next. ✅ = done.
 | — | **shared-q** | audio | 2× LM13700 (U9/U10) | — | ✅ DONE. Shared LP1/LP2 Q-VCAs; cell A→block-5, cell B→block-8 (boundary). |
 | 8 | **8** LP2 | audio | LM13700, OPA1612, TL072, THAT340 | — (reuse) | ✅ DONE. LP1 minus tilt (single expo); Q via shared-q cell B; own IRES_AMP added. |
 | 9 | **7** HP | audio | 4× LM13700, OPA1612, TL072, THAT340 | — (reuse) | ✅ DONE. Mono SVF; HP inverting output buffer; own Q-VCAs (cell B spare/terminated); IRES_AMP added. |
-| 10 | **3** Mod bus | utility | 7× TL074, DW5 | **tl074 all-pins (+power 4/11)**, **DW5 toggle** | 19 attenuverters (repetitive), 19 override jacks. |
+| 10 | **3** Mod bus | utility | 7× TL074, DW5 | tl074 multi-unit (✅), zener (✅) | ✅ DONE. MB proc + 3 lights + ±10V clamp + 19 destinations (generated); MOD_<DEST> outputs; MOD_SRC deferred. |
 | 11 | **6** Triple BP + Dist | audio | 6× LM13700, 6× OPA1612, 3× THAT340, 3× CD4053, 15× TL072, 3× DW5 | — (reuse; **cd4053 all-pins use**) | Largest/last; per-band DIST mux + FOCUS + TILT; verify `aux-distortion` (STALE). |
 
-Remaining: block-3 (mod bus) introduces the DW5 toggle + a TL074 power helper that
-block-6 also needs, so do 3 before 6.
+Remaining: **block-6** (triple BP + distortion) — the largest block; all its symbols
+(LM13700, THAT340, CD4053, TL072, DW5) and helpers are already in place.
 
 ---
 
@@ -169,9 +169,10 @@ Fix any missing `qty` on grouped rows as you go (block-1 fixed R3–R6).
       per-channel expo; OTA buffer pulldowns added; SOD-123 already present)
 - [x] block-8 (LP2) transcribed + verified (mirrors LP1 minus tilt; Q via shared-q cell B; IRES_AMP added)
 - [x] block-7 (HP) transcribed + verified (mono SVF; HP inverting output buffer; local Q-VCAs cell B terminated; IRES_AMP added)
+- [x] block-3 (mod bus) transcribed + verified (TL074 quad multi-unit; BZX84C10 ±10V clamp; 19 destinations generated; MOD LEDs added; MOD_SRC deferred)
 - [x] GENERATOR FIX: multi-unit op-amps now placed as separate gate instances (units A/B/power at
       distinct offsets) — previously overlapped → shorted halves; structural_check now unit-aware
       and detects coincident-distinct-net shorts. All blocks regenerated.
-- [ ] blocks 6, 3 transcribed + verified
+- [ ] block 6 transcribed + verified
 - [ ] (optional) board-level sheets combining per-block schematics by board
 - [ ] (gated separately) enable a KiCad CI job (kiutils) — currently disabled
