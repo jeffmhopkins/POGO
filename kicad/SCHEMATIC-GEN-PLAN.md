@@ -80,7 +80,8 @@ validator works. Current state:
 | THAT340 | ✅ | `that340_pins` ✅ (all 16) | wire into SYM_TABLE |
 | CD4053 | ✅ | `cd4053_pins` ✅ (all 16) | wire into SYM_TABLE |
 | THAT2180 | ✅ sym (pinout CORRECTED) | ✅ `that2180_pins` | done (sym `vca`); datasheet pinout Input=1,Ec+=2,Ec−=3,Sym=4,V−=5,Gnd=6,V+=7,Output=8 |
-| **LM13700** | ✅ sym | ❌ | add `lm13700_pins` (16 pins; pin 12 NC) |
+| THAT340 | ✅ sym (CORRECTED to SO14) | ✅ `that340_pins` (SO14) | done; datasheet-verified 14-pin (2 NPN Q1/Q2 + 2 PNP Q3/Q4); expo uses NPN pair |
+| **LM13700** | ✅ sym (CORRECTED) | ✅ `lm13700_pins` | done; datasheet-verified (prior symbol had 13/16 pins wrong incl. V+/V−) |
 | **TL074** | ✅ sym | partial (`opamp_quad_pins`, no power) | add `opamp_quad_all_pins` (units 1–4 + V+ 4, V− 11) |
 | DW3 toggle (DPDT ON-ON) | ✅ `sym_dw3` | ✅ `dpdt6_pins` | done (sym `dw3` in SYM_TABLE) |
 | DW5 toggle (DPDT ON-ON-ON) | ✅ `sym_dw5` | ✅ `dpdt6_pins` (shared) | done (sym `dw5`); same 6-pin body as DW3 |

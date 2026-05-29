@@ -525,10 +525,10 @@ def sym_tl074():
 
 
 def sym_lm13700():
-    """LM13700 dual OTA SOIC-16.
-    Cell A: IABC=1, IN-=2, IN+=3, V-=4, Out=5, DiodeIn=6, DiodeOut=7, V+=8.
-    Cell B: DiodeOut=9, DiodeIn=10, Out=11, V+=12(NC tie), IN+=13, IN-=14, IABC=15, V-=16.
-    Verify against TI SNAS602 datasheet before PCB layout — pin 12 and 16 in particular."""
+    """LM13700 dual OTA SOIC-16. Pinout per TI SNOSBW2F, page 3 Pin Functions:
+    1=Iabc_A, 2=DiodeBias_A, 3=In+_A, 4=In-_A, 5=Out_A, 6=V-, 7=BufIn_A, 8=BufOut_A,
+    9=BufOut_B, 10=BufIn_B, 11=V+, 12=Out_B, 13=In-_B, 14=In+_B, 15=DiodeBias_B, 16=Iabc_B.
+    (Corrected 2026-05-29 from datasheet — prior map had 13/16 pins wrong incl. V+/V-.)"""
     return '''  (symbol "Amplifier_Operational:LM13700"
     (pin_names (offset 0.254) hide)
     (pin_numbers hide)
@@ -538,59 +538,57 @@ def sym_lm13700():
       (rectangle (start -1 -1) (end 1 1) (stroke (width 0) (type default)) (fill (type none)))
     )
     (symbol "LM13700_1_1"
-      (rectangle (start -8.89 -8.89) (end 8.89 8.89) (stroke (width 0.254) (type default)) (fill (type background)))
-      (pin input line (at -11.43 6.35 0) (length 2.54) (name "IABC_A" (effects (font (size 1.016 1.016)))) (number "1" (effects (font (size 1.016 1.016)))))
-      (pin input line (at -11.43 3.81 0) (length 2.54) (name "IN-_A" (effects (font (size 1.016 1.016)))) (number "2" (effects (font (size 1.016 1.016)))))
-      (pin input line (at -11.43 1.27 0) (length 2.54) (name "IN+_A" (effects (font (size 1.016 1.016)))) (number "3" (effects (font (size 1.016 1.016)))))
-      (pin power_in line (at -11.43 -1.27 0) (length 2.54) (name "V-" (effects (font (size 1.016 1.016)))) (number "4" (effects (font (size 1.016 1.016)))))
-      (pin output line (at 11.43 6.35 180) (length 2.54) (name "Out_A" (effects (font (size 1.016 1.016)))) (number "5" (effects (font (size 1.016 1.016)))))
-      (pin input line (at 11.43 3.81 180) (length 2.54) (name "DiodeIn_A" (effects (font (size 1.016 1.016)))) (number "6" (effects (font (size 1.016 1.016)))))
-      (pin output line (at 11.43 1.27 180) (length 2.54) (name "DiodeOut_A" (effects (font (size 1.016 1.016)))) (number "7" (effects (font (size 1.016 1.016)))))
-      (pin power_in line (at 11.43 -1.27 180) (length 2.54) (name "V+" (effects (font (size 1.016 1.016)))) (number "8" (effects (font (size 1.016 1.016)))))
-      (pin output line (at 11.43 -3.81 180) (length 2.54) (name "DiodeOut_B" (effects (font (size 1.016 1.016)))) (number "9" (effects (font (size 1.016 1.016)))))
-      (pin input line (at 11.43 -6.35 180) (length 2.54) (name "DiodeIn_B" (effects (font (size 1.016 1.016)))) (number "10" (effects (font (size 1.016 1.016)))))
-      (pin output line (at -11.43 -3.81 0) (length 2.54) (name "Out_B" (effects (font (size 1.016 1.016)))) (number "11" (effects (font (size 1.016 1.016)))))
-      (pin no_connect line (at -11.43 -5.08 0) (length 2.54) (name "NC" (effects (font (size 1.016 1.016)))) (number "12" (effects (font (size 1.016 1.016)))))
-      (pin input line (at -11.43 -6.35 0) (length 2.54) (name "IN+_B" (effects (font (size 1.016 1.016)))) (number "13" (effects (font (size 1.016 1.016)))))
-      (pin input line (at -11.43 -7.62 0) (length 2.54) (name "IN-_B" (effects (font (size 1.016 1.016)))) (number "14" (effects (font (size 1.016 1.016)))))
-      (pin input line (at -11.43 -8.89 0) (length 2.54) (name "IABC_B" (effects (font (size 1.016 1.016)))) (number "15" (effects (font (size 1.016 1.016)))))
-      (pin power_in line (at 11.43 -8.89 180) (length 2.54) (name "V-" (effects (font (size 1.016 1.016)))) (number "16" (effects (font (size 1.016 1.016)))))
+      (rectangle (start -8.89 -10.16) (end 8.89 10.16) (stroke (width 0.254) (type default)) (fill (type background)))
+      (pin input line (at -11.43 8.89 0) (length 2.54) (name "Iabc_A" (effects (font (size 1.016 1.016)))) (number "1" (effects (font (size 1.016 1.016)))))
+      (pin input line (at -11.43 6.35 0) (length 2.54) (name "DiodeBias_A" (effects (font (size 1.016 1.016)))) (number "2" (effects (font (size 1.016 1.016)))))
+      (pin input line (at -11.43 3.81 0) (length 2.54) (name "In+_A" (effects (font (size 1.016 1.016)))) (number "3" (effects (font (size 1.016 1.016)))))
+      (pin input line (at -11.43 1.27 0) (length 2.54) (name "In-_A" (effects (font (size 1.016 1.016)))) (number "4" (effects (font (size 1.016 1.016)))))
+      (pin output line (at -11.43 -1.27 0) (length 2.54) (name "Out_A" (effects (font (size 1.016 1.016)))) (number "5" (effects (font (size 1.016 1.016)))))
+      (pin power_in line (at -11.43 -3.81 0) (length 2.54) (name "V-" (effects (font (size 1.016 1.016)))) (number "6" (effects (font (size 1.016 1.016)))))
+      (pin input line (at -11.43 -6.35 0) (length 2.54) (name "BufIn_A" (effects (font (size 1.016 1.016)))) (number "7" (effects (font (size 1.016 1.016)))))
+      (pin output line (at -11.43 -8.89 0) (length 2.54) (name "BufOut_A" (effects (font (size 1.016 1.016)))) (number "8" (effects (font (size 1.016 1.016)))))
+      (pin output line (at 11.43 -8.89 180) (length 2.54) (name "BufOut_B" (effects (font (size 1.016 1.016)))) (number "9" (effects (font (size 1.016 1.016)))))
+      (pin input line (at 11.43 -6.35 180) (length 2.54) (name "BufIn_B" (effects (font (size 1.016 1.016)))) (number "10" (effects (font (size 1.016 1.016)))))
+      (pin power_in line (at 11.43 -3.81 180) (length 2.54) (name "V+" (effects (font (size 1.016 1.016)))) (number "11" (effects (font (size 1.016 1.016)))))
+      (pin output line (at 11.43 -1.27 180) (length 2.54) (name "Out_B" (effects (font (size 1.016 1.016)))) (number "12" (effects (font (size 1.016 1.016)))))
+      (pin input line (at 11.43 1.27 180) (length 2.54) (name "In-_B" (effects (font (size 1.016 1.016)))) (number "13" (effects (font (size 1.016 1.016)))))
+      (pin input line (at 11.43 3.81 180) (length 2.54) (name "In+_B" (effects (font (size 1.016 1.016)))) (number "14" (effects (font (size 1.016 1.016)))))
+      (pin input line (at 11.43 6.35 180) (length 2.54) (name "DiodeBias_B" (effects (font (size 1.016 1.016)))) (number "15" (effects (font (size 1.016 1.016)))))
+      (pin input line (at 11.43 8.89 180) (length 2.54) (name "Iabc_B" (effects (font (size 1.016 1.016)))) (number "16" (effects (font (size 1.016 1.016)))))
     )
   )'''
 
 
 def sym_that340():
-    """THAT340 quad NPN expo converter SOIC-16.
-    4 matched NPN transistors: Q1-Q4.
-    Pinout (verify against THAT340 datasheet before PCB layout):
-    Q1: B=1, C=2, E=3. Q2: B=16, C=15, E=14.
-    Q3: B=5, C=6, E=7. Q4: B=12, C=11, E=10.
-    Substrate/GND=4,8,9,13. V+=8 (or substrate tie — check datasheet)."""
+    """THAT340 matched transistor array SO14 (THAT340S14-U): 2 NPN (Q1,Q2) + 2 PNP (Q3,Q4).
+    Pinout per THAT 300-Series datasheet Doc 600041 Rev 04, Fig 3:
+    1=Q1_C, 2=Q1_B, 3=Q1_E, 4=SUB, 5=Q3_E, 6=Q3_B, 7=Q3_C,
+    8=Q4_C, 9=Q4_B, 10=Q4_E, 11=SUB, 12=Q2_E, 13=Q2_B, 14=Q2_C.
+    For the V/oct expo converter use the matched NPN pair Q1 (1,2,3) + Q2 (14,13,12).
+    (Corrected 2026-05-29 — was wrongly a 16-pin all-NPN map.)"""
     return '''  (symbol "POGO:THAT340"
     (pin_names (offset 0.254) hide)
     (pin_numbers hide)
     (property "Reference" "U" (at 9.144 9.144 0) (effects (font (size 1.27 1.27))))
     (property "Value" "THAT340" (at 9.144 -9.144 0) (effects (font (size 1.27 1.27))))
     (symbol "THAT340_0_1"
-      (rectangle (start -8.89 -10.16) (end 8.89 10.16) (stroke (width 0.254) (type default)) (fill (type background)))
+      (rectangle (start -8.89 -8.89) (end 8.89 8.89) (stroke (width 0.254) (type default)) (fill (type background)))
     )
     (symbol "THAT340_1_1"
-      (pin input line (at -11.43 8.89 0) (length 2.54) (name "B1" (effects (font (size 1.016 1.016)))) (number "1" (effects (font (size 1.016 1.016)))))
-      (pin output line (at 11.43 8.89 180) (length 2.54) (name "C1" (effects (font (size 1.016 1.016)))) (number "2" (effects (font (size 1.016 1.016)))))
-      (pin passive line (at 11.43 6.35 180) (length 2.54) (name "E1" (effects (font (size 1.016 1.016)))) (number "3" (effects (font (size 1.016 1.016)))))
-      (pin power_in line (at -11.43 6.35 0) (length 2.54) (name "SUB" (effects (font (size 1.016 1.016)))) (number "4" (effects (font (size 1.016 1.016)))))
-      (pin input line (at -11.43 3.81 0) (length 2.54) (name "B3" (effects (font (size 1.016 1.016)))) (number "5" (effects (font (size 1.016 1.016)))))
-      (pin output line (at 11.43 3.81 180) (length 2.54) (name "C3" (effects (font (size 1.016 1.016)))) (number "6" (effects (font (size 1.016 1.016)))))
-      (pin passive line (at 11.43 1.27 180) (length 2.54) (name "E3" (effects (font (size 1.016 1.016)))) (number "7" (effects (font (size 1.016 1.016)))))
-      (pin power_in line (at -11.43 1.27 0) (length 2.54) (name "SUB" (effects (font (size 1.016 1.016)))) (number "8" (effects (font (size 1.016 1.016)))))
-      (pin power_in line (at -11.43 -1.27 0) (length 2.54) (name "SUB" (effects (font (size 1.016 1.016)))) (number "9" (effects (font (size 1.016 1.016)))))
-      (pin passive line (at 11.43 -1.27 180) (length 2.54) (name "E4" (effects (font (size 1.016 1.016)))) (number "10" (effects (font (size 1.016 1.016)))))
-      (pin output line (at 11.43 -3.81 180) (length 2.54) (name "C4" (effects (font (size 1.016 1.016)))) (number "11" (effects (font (size 1.016 1.016)))))
-      (pin input line (at -11.43 -3.81 0) (length 2.54) (name "B4" (effects (font (size 1.016 1.016)))) (number "12" (effects (font (size 1.016 1.016)))))
-      (pin power_in line (at -11.43 -6.35 0) (length 2.54) (name "SUB" (effects (font (size 1.016 1.016)))) (number "13" (effects (font (size 1.016 1.016)))))
-      (pin passive line (at 11.43 -6.35 180) (length 2.54) (name "E2" (effects (font (size 1.016 1.016)))) (number "14" (effects (font (size 1.016 1.016)))))
-      (pin output line (at 11.43 -8.89 180) (length 2.54) (name "C2" (effects (font (size 1.016 1.016)))) (number "15" (effects (font (size 1.016 1.016)))))
-      (pin input line (at -11.43 -8.89 0) (length 2.54) (name "B2" (effects (font (size 1.016 1.016)))) (number "16" (effects (font (size 1.016 1.016)))))
+      (pin output line (at -11.43 7.62 0) (length 2.54) (name "Q1_C" (effects (font (size 1.016 1.016)))) (number "1" (effects (font (size 1.016 1.016)))))
+      (pin input line (at -11.43 5.08 0) (length 2.54) (name "Q1_B" (effects (font (size 1.016 1.016)))) (number "2" (effects (font (size 1.016 1.016)))))
+      (pin passive line (at -11.43 2.54 0) (length 2.54) (name "Q1_E" (effects (font (size 1.016 1.016)))) (number "3" (effects (font (size 1.016 1.016)))))
+      (pin power_in line (at -11.43 0 0) (length 2.54) (name "SUB" (effects (font (size 1.016 1.016)))) (number "4" (effects (font (size 1.016 1.016)))))
+      (pin passive line (at -11.43 -2.54 0) (length 2.54) (name "Q3_E" (effects (font (size 1.016 1.016)))) (number "5" (effects (font (size 1.016 1.016)))))
+      (pin input line (at -11.43 -5.08 0) (length 2.54) (name "Q3_B" (effects (font (size 1.016 1.016)))) (number "6" (effects (font (size 1.016 1.016)))))
+      (pin output line (at -11.43 -7.62 0) (length 2.54) (name "Q3_C" (effects (font (size 1.016 1.016)))) (number "7" (effects (font (size 1.016 1.016)))))
+      (pin output line (at 11.43 -7.62 180) (length 2.54) (name "Q4_C" (effects (font (size 1.016 1.016)))) (number "8" (effects (font (size 1.016 1.016)))))
+      (pin input line (at 11.43 -5.08 180) (length 2.54) (name "Q4_B" (effects (font (size 1.016 1.016)))) (number "9" (effects (font (size 1.016 1.016)))))
+      (pin passive line (at 11.43 -2.54 180) (length 2.54) (name "Q4_E" (effects (font (size 1.016 1.016)))) (number "10" (effects (font (size 1.016 1.016)))))
+      (pin power_in line (at 11.43 0 180) (length 2.54) (name "SUB" (effects (font (size 1.016 1.016)))) (number "11" (effects (font (size 1.016 1.016)))))
+      (pin passive line (at 11.43 2.54 180) (length 2.54) (name "Q2_E" (effects (font (size 1.016 1.016)))) (number "12" (effects (font (size 1.016 1.016)))))
+      (pin input line (at 11.43 5.08 180) (length 2.54) (name "Q2_B" (effects (font (size 1.016 1.016)))) (number "13" (effects (font (size 1.016 1.016)))))
+      (pin output line (at 11.43 7.62 180) (length 2.54) (name "Q2_C" (effects (font (size 1.016 1.016)))) (number "14" (effects (font (size 1.016 1.016)))))
     )
   )'''
 
@@ -915,26 +913,30 @@ def place_pin_header40(ref, value, net_map, col, row_y):
 # THAT340 and CD4053 pin coordinate helpers
 # ---------------------------------------------------------------------------
 
-def that340_pins(ox, oy):
-    """THAT340 SOIC-16 connection-point coords. Matches sym_that340() geometry."""
-    return {
-        "1":  (ox - 11.43, oy + 8.89),   # B1
-        "2":  (ox + 11.43, oy + 8.89),   # C1
-        "3":  (ox + 11.43, oy + 6.35),   # E1
-        "4":  (ox - 11.43, oy + 6.35),   # SUB
-        "5":  (ox - 11.43, oy + 3.81),   # B3
-        "6":  (ox + 11.43, oy + 3.81),   # C3
-        "7":  (ox + 11.43, oy + 1.27),   # E3
-        "8":  (ox - 11.43, oy + 1.27),   # SUB
-        "9":  (ox - 11.43, oy - 1.27),   # SUB
-        "10": (ox + 11.43, oy - 1.27),   # E4
-        "11": (ox + 11.43, oy - 3.81),   # C4
-        "12": (ox - 11.43, oy - 3.81),   # B4
-        "13": (ox - 11.43, oy - 6.35),   # SUB
-        "14": (ox + 11.43, oy - 6.35),   # E2
-        "15": (ox + 11.43, oy - 8.89),   # C2
-        "16": (ox - 11.43, oy - 8.89),   # B2
-    }
+def lm13700_pins(ox, oy, angle=0):
+    """LM13700 SOIC-16 connection-point coords. Matches sym_lm13700() geometry.
+    1=Iabc_A,2=DiodeBias_A,3=In+_A,4=In-_A,5=Out_A,6=V-,7=BufIn_A,8=BufOut_A,
+    9=BufOut_B,10=BufIn_B,11=V+,12=Out_B,13=In-_B,14=In+_B,15=DiodeBias_B,16=Iabc_B."""
+    left = {"1": 8.89, "2": 6.35, "3": 3.81, "4": 1.27,
+            "5": -1.27, "6": -3.81, "7": -6.35, "8": -8.89}
+    right = {"9": -8.89, "10": -6.35, "11": -3.81, "12": -1.27,
+             "13": 1.27, "14": 3.81, "15": 6.35, "16": 8.89}
+    pins = {p: _rot(ox, oy, angle, -11.43, y) for p, y in left.items()}
+    pins.update({p: _rot(ox, oy, angle, 11.43, y) for p, y in right.items()})
+    return pins
+
+
+def that340_pins(ox, oy, angle=0):
+    """THAT340 SO14 connection-point coords. Matches sym_that340() geometry.
+    1=Q1_C,2=Q1_B,3=Q1_E,4=SUB,5=Q3_E,6=Q3_B,7=Q3_C,
+    8=Q4_C,9=Q4_B,10=Q4_E,11=SUB,12=Q2_E,13=Q2_B,14=Q2_C."""
+    left = {"1": 7.62, "2": 5.08, "3": 2.54, "4": 0.0,
+            "5": -2.54, "6": -5.08, "7": -7.62}
+    right = {"8": -7.62, "9": -5.08, "10": -2.54, "11": 0.0,
+             "12": 2.54, "13": 5.08, "14": 7.62}
+    pins = {p: _rot(ox, oy, angle, -11.43, y) for p, y in left.items()}
+    pins.update({p: _rot(ox, oy, angle, 11.43, y) for p, y in right.items()})
+    return pins
 
 
 def cd4053_pins(ox, oy):
