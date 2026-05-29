@@ -70,9 +70,12 @@ Circuit diagrams in spec text must be self-sufficient.
 
 | File | Status |
 |---|---|
-| `kicad/generate_*.py` | ⚠️ 40HP-era STALE (see kicad/README-STALE.md) |
+| `kicad/generate_schematic.py` | 🚧 48HP data-driven generator — framework done, **block-A complete** (1/10 blocks). Rollout plan: `kicad/SCHEMATIC-GEN-PLAN.md` |
+| `kicad/nets/*.nets.yaml` | 🚧 per-block netlists — `block-A` done |
+| `kicad/generate_control_board.py`, `generate_utility_board.py` | ⚠️ 40HP-era STALE (see kicad/README-STALE.md) |
 | `kicad/validate_*.py` | ⚠️ 40HP-era STALE |
-| `.github/workflows/build.yml` KiCad step | Disabled |
+| `.github/workflows/build.yml` schematic gate | ✅ `generate_schematic.py --check` (validate + structural verify + drift) in all jobs |
+| `.github/workflows/build.yml` KiCad (kiutils) job | Disabled |
 
 ---
 
@@ -109,7 +112,13 @@ termination specified; R_TILT_INV tolerance flags added; block-1 signal-routing 
 corrected; block-B output Z attenuation corrected; BP_MIX wet polarity circuit corrected.
 
 **Remaining work before PCB layout:**
-1. **Write 48HP KiCad generator** — replaces 40HP-era stale generators; inputs from components.yaml + panel-data.yaml
+1. **48HP KiCad schematic generator** — 🚧 in progress. Data-driven generator
+   (`kicad/generate_schematic.py`) built and proven on **block-A**; replaces the
+   40HP-era stale generators. Per-block netlists in `kicad/nets/*.nets.yaml`,
+   footprints resolved from the `components/` registry, byte-stable output, pin-
+   coverage + structural verification gated in CI. Remaining: transcribe blocks
+   B, 1, 2, 4, 5, 6, 7, 8, 3. **Order, symbol gaps, and per-block checklist:
+   `kicad/SCHEMATIC-GEN-PLAN.md`.**
 2. **Phase 6R** — VCV Rack signal-path smoke tests (CI integration)
 
 **THAT 2180 audio I/O resolved (2026-05-28):** Single-ended operation confirmed throughout
