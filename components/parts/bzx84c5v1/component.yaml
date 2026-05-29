@@ -1,0 +1,12 @@
+# bzx84c5v1 — POGO sourced component (hand-maintained)
+slug: bzx84c5v1
+mpn: BZX84C5V1
+manufacturer: Nexperia
+supplier: '~'
+package: SOT-23
+footprint: null
+footprint_needed: SOT-23
+datasheet:
+  url: https://assets.nexperia.com/documents/data-sheet/BZX84_SER.pdf
+  version: verify
+notes: 5.1V zener; reference/clamp.

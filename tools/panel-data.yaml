@@ -38,34 +38,15 @@ colors:
   led_fill:       "#441111"
   led_stroke:     "#cc2222"
 
-# ── Design rules ─────────────────────────────────────────────────────────────
+# ── Panel layout params ──────────────────────────────────────────────────────
+# Only genuine per-panel layout decisions live here; engine constants (keep-outs,
+# render-style defaults, footprint nut radii, knob default cap) are owned by
+# panel_rules.py / panel_svg.py. Any of those may still be overridden by adding a
+# design_rules:/footprints:/knobs: key, but the defaults are the source of truth.
 design_rules:
-  top_keepout:       10.0
-  bot_keepout_start: 118.5
-  cv_jack_cy:        112.0   # PCB courtyard bottom = 118.50 mm — at rail keepout floor
-  att_offset:        -15.0   # att_cy = cv_jack_cy + att_offset = 97.0
-  jack_label_dy:      7.0    # label_y = cy + 7.0
-  output_rect_dy:    -1.76
-  output_rect_h:      2.26
-  output_rect_rx:     0.6
-  jack_pitch:        15.24   # 1 jack per 3 HP
-  indicator_length:   2.5
-  x_offset:           1.905  # shifts all zone/separator x coords right to centre in 48HP
-
-# ── Hardware footprints (for DRC overlay) ────────────────────────────────────
-footprints:
-  jack_thonkiconn:
-    body_r_mm: 4.0
-    nut_r_mm:  5.0      # Thonkiconn hex nut radius
-  pot_alpha9mm:
-    body_r_mm: 4.5
-    nut_r_mm:  5.5      # Alpha 9mm bushing nut radius
-  led_3mm:
-    body_r_mm: 1.5
-
-# ── Knob cap sizing ──────────────────────────────────────────────────────────
-knobs:
-  default_cap_mm: 14.0
+  cv_jack_cy:  112.0   # default CV-jack row Y
+  att_offset:  -15.0   # att_cy = cv_jack_cy + att_offset
+  x_offset:    1.905   # centring shift for all zone/separator x coords (editor-managed)
 
 # ── Mounting holes ────────────────────────────────────────────────────────────
 mounting_holes:

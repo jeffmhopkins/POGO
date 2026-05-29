@@ -1,0 +1,13 @@
+# lm13700 — POGO sourced component (hand-maintained)
+slug: lm13700
+mpn: LM13700M
+manufacturer: Texas Instruments
+supplier: '~'
+package: SOIC-16
+footprint:
+  lib: Package_SO
+  name: SOIC-16_3.9x9.9mm_P1.27mm
+datasheet:
+  url: https://www.ti.com/lit/ds/symlink/lm13700.pdf
+  version: verify
+notes: Dual OTA; OTA-C SVF integrators + Q control.

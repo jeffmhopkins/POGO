@@ -172,25 +172,27 @@ def _comp_label(comp: dict) -> str:
 
 @dataclass
 class DesignRules:
+    # ── Canonical engine constants (source of truth; a layout MAY override any of
+    # these via the optional `design_rules:` / `footprints:` / `knobs:` YAML blocks) ──
+    # Universal Eurorack 3U rail keep-out
     top_keepout: float = 10.0
     bot_keepout_start: float = 118.5
-    cv_jack_cy: float = 112.5
-    att_offset: float = -10.75
-    jack_label_dy: float = 7.0
-    output_rect_dy: float = -1.76
+    # Render-style defaults
+    jack_label_dy: float = 7.0       # default jack label offset below the hole
+    output_rect_dy: float = -1.76    # output-jack label-border rect geometry
     output_rect_h: float = 2.26
     output_rect_rx: float = 0.6
-    jack_pitch: float = 10.16
-    indicator_length: float = 2.5
-    x_offset: float = 0.0       # mm to shift all zone/component x coords inside panel
+    indicator_length: float = 2.5    # knob/trimpot pointer length
+    jack_pitch: float = 15.24        # fallback column pitch (zones set col_pitch explicitly)
+    # Physical part specs (panel-face nut radii; courtyards come from the .kicad_mod files)
+    jack_nut_r: float = 5.0          # Thonkiconn hex nut
+    pot_nut_r: float = 5.5           # Alpha 9mm bushing nut
+    knob_default_cap_mm: float = 14.0  # default knob cap DIAMETER (per-knob cap_mm overrides)
 
-    # Footprint radii (loaded separately from footprints block)
-    jack_nut_r: float = 5.0
-    pot_nut_r: float = 5.5
-
-    # Knob cap default DIAMETER (mm), loaded from the `knobs:` block. A knob whose
-    # cap_mm is unset falls back to this; the radius drawn is cap_mm / 2.
-    knob_default_cap_mm: float = 14.0
+    # ── Panel-layout params (kept in panel-data.yaml; these ARE layout decisions) ──
+    cv_jack_cy: float = 112.0        # default CV-jack row Y for this panel
+    att_offset: float = -15.0        # att_cy = cv_jack_cy + att_offset
+    x_offset: float = 1.905          # centring shift for all zone/component x coords (editor-managed)
 
     # Derived properties
     @property

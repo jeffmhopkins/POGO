@@ -1,0 +1,15 @@
+# dailywell_dw5 — POGO sourced component (hand-maintained)
+slug: dailywell_dw5
+mpn: DW5 (2M DPDT ON-ON-ON)
+manufacturer: Dailywell
+supplier: Thonk
+package: sub-mini toggle 2M
+footprint:
+  lib: Button_Switch_THT
+  name: SW_Dailywell_DW5_DPDT
+datasheet:
+  url: https://www.thonk.co.uk/shop/sub-mini-toggle-switches/
+  version: verify
+panel_types:
+- toggle_dw5
+notes: DPDT ON-ON-ON sub-mini toggle (DIST mode, MOD SRC).

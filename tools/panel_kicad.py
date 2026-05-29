@@ -41,46 +41,15 @@ _FP_ROOT = _REPO / "kicad" / "footprints"
 #
 # Pot (Alpha RD901F): footprint origin = pin1; shaft centre = (7.5, 2.5).
 #   F.Fab shaft circle is at (center 7.5 2.5) → setting ox=7.5, oy=2.5 aligns it to (cx,cy).
-_FOOTPRINT_MAP: dict[str, tuple[str, float, float]] = {
-    "jack_input": (
-        "Connector_Audio.pretty/Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles.kicad_mod",
-        0.0, 6.48,  # origin offset = barrel centre (panel hole) at footprint (0, 6.48)
-    ),
-    "jack_output": (
-        "Connector_Audio.pretty/Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles.kicad_mod",
-        0.0, 6.48,
-    ),
-    "trimpot": (
-        "Potentiometer_THT.pretty/Potentiometer_Bourns_3296W_Vertical.kicad_mod",
-        0.0, 2.5,   # footprint origin = pin1 (0,0); actuator/wiper centre = pin2 (0, 2.5)
-    ),
-    # All knobs share the Alpha RD901F 9mm pot footprint regardless of cap_mm
-    # (the cap diameter is a panel-face visual only, not a PCB feature).
-    "knob": (
-        "Potentiometer_THT.pretty/Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles.kicad_mod",
-        7.5, 2.5,
-    ),
-    "slider_V45": (
-        "Potentiometer_THT.pretty/Potentiometer_Slider_45mm_Vertical.kicad_mod",
-        0.0, 0.0,   # origin = travel centre = panel slot centre
-    ),
-    "led": (
-        "LED_THT.pretty/LED_D3.0mm.kicad_mod",
-        0.0, 0.0,   # origin = LED body centre = panel hole centre
-    ),
-    "led_labeled": (
-        "LED_THT.pretty/LED_D3.0mm.kicad_mod",
-        0.0, 0.0,
-    ),
-    "toggle_dw3": (
-        "Button_Switch_THT.pretty/SW_Dailywell_DW3_DPDT.kicad_mod",
-        0.0, 0.0,   # origin = bushing/actuator centre = panel hole centre
-    ),
-    "toggle_dw5": (
-        "Button_Switch_THT.pretty/SW_Dailywell_DW5_DPDT.kicad_mod",
-        0.0, 0.0,   # origin = bushing/actuator centre = panel hole centre
-    ),
-}
+# Built dynamically from components/footprints.yaml via tools/components.py (was a
+# hardcoded literal). Same shape {panel_type: (rel_path, ox, oy)} and same order, so
+# footprint_courtyard() and the editor payload are byte-identical. Anchor-offset notes:
+#   jack:    (0, 6.48) barrel centre = panel hole; trimpot: (0, 2.5) wiper = pin2;
+#   knob:    (7.5, 2.5) Alpha RD901F shaft (all knob caps share this footprint);
+#   slider/led/toggle: origin already at the panel anchor.
+from components import footprint_map as _component_footprint_map  # noqa: E402
+
+_FOOTPRINT_MAP: dict[str, tuple[str, float, float]] = _component_footprint_map()
 
 # Visual style per KiCad layer.
 # F.CrtYd is intentionally omitted: the KiCad footprints use a component-specific
