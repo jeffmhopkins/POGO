@@ -10,4 +10,6 @@ footprint:
 datasheet:
   url: https://www.thatcorp.com/datashts/THAT_2180-Series_Datasheet.pdf
   version: Doc 600029 Rev 02
+  sha256: 79f4e7cea383fe0e6378ab0d386c720dfdc4e0c98bfdbc68f25f2914d7ff24f3
+  bytes: 327952
 notes: Blackmer VCA; pre-LP1 VCA cell.

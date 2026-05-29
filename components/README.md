@@ -12,8 +12,10 @@ components/
                            ORDER IS SIGNIFICANT (feeds the git-tracked editor payload).
   parts/<slug>/
     component.yaml         one sourced part: mpn, manufacturer, supplier, package,
-                           footprint{lib,name}, datasheet{url,version}, panel_types,
-                           tapers (pots), notes. Hand-maintained.
+                           footprint{lib,name}, datasheet{url,version,sha256,bytes},
+                           panel_types, tapers (pots), notes. Hand-maintained
+                           except datasheet sha256/bytes (written by fetch_datasheets.py).
+  datasheets/            cached datasheet PDFs — GITIGNORED, not committed.
 ```
 
 Footprints themselves stay in `kicad/footprints/*.pretty/` (KiCad-native libraries);
@@ -25,7 +27,13 @@ Footprints themselves stay in `kicad/footprints/*.pretty/` (KiCad-native librari
 python3 tools/components.py --check        validate registry (CI gate)
 python3 tools/components.py --list         list footprint bindings + parts
 python3 tools/build_components.py --gen-fplib   generate kicad/fp-lib-table (POGO_* namespaced)
+python3 tools/fetch_datasheets.py          download PDF datasheets -> gitignored cache, record sha256/bytes
+python3 tools/fetch_datasheets.py --check  offline: every PDF datasheet has sha256/bytes (CI gate)
 ```
+
+Datasheet PDFs are cached under `components/datasheets/` (gitignored — no copyrighted
+binaries committed); their `sha256`+`bytes` are recorded in each `component.yaml` for
+integrity. Supplier/landing-page datasheets (panel hardware) are not cached.
 
 `kicad/fp-lib-table` is **generated** (`DO NOT EDIT`); rerun `--gen-fplib` after adding a
 `*.pretty` library.
@@ -45,6 +53,4 @@ This is the de-risked first slice (see the adversarially-reviewed plan):
 - Passives as first-class parts (need vendored `R_0603`/`C_0603` footprints).
 - Generating `specs/components.yaml` and per-block BOM tables from the registry
   (block-6 uses descriptive refs + has a real `qty 6 vs 12` conflict to reconcile first).
-- Datasheet PDF fetch/cache script (today: `datasheet.url` + `version` text only;
-  several URLs are marked `version: verify` and should be confirmed before manufacture).
 - KiCad schematic symbols / `sym-lib-table` (gated on the 48HP schematic-gen rewrite).

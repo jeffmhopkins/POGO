@@ -10,6 +10,8 @@ footprint:
 datasheet:
   url: https://www.bourns.com/docs/Product-Datasheets/3296.pdf
   version: rev 2019-08-07
+  sha256: 8492a5d67ee2785d4716ec3131b8fa6f9aaef9fa9e9eff65999b1d1a50d9baef
+  bytes: 577872
 panel_types:
 - trimpot
 notes: 25-turn trimmer; calibration/attenuverters.

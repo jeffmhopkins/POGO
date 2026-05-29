@@ -10,4 +10,6 @@ footprint:
 datasheet:
   url: https://thatcorp.com/datashts/THAT_300-Series_Datasheet.pdf
   version: Doc 600041 Rev 04
+  sha256: 721a07f1fccfca770224174f1c91e5b76f19fa6306dcf413d7960ec3733f4f5c
+  bytes: 107680
 notes: Matched transistor array; V/oct expo converter.
