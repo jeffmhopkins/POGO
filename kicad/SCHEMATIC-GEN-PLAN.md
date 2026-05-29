@@ -50,7 +50,7 @@ Ordered by rising symbol/wiring risk so each step de-risks the next. ✅ = done.
 | # | Block | Board | Key actives | New symbols/helpers needed | Notes |
 |---|---|---|---|---|---|
 | 1 | **A** Input buffers | audio | OPA1612, BAT54S | — (✅ all added) | ✅ DONE |
-| 2 | **B** Output buffers | audio | 2× TL072 | — (jack/opamp exist) | Smallest; pairs with A. Do next. |
+| 2 | **B** Output buffers | audio | 2× TL072 | — (jack/opamp exist) | ✅ DONE. MAIN (U61) + BP3 tap (U62); BP3/LFO jacks live in other blocks (boundary nets). |
 | 3 | **1** Pre-gain | audio | 2× OPA1612, 2× DW3 | **DW3 toggle** sym + pins | First toggle; ALT_BP path. |
 | 4 | **2** Dual LFO | utility | 2× TL072 | — (trimpots = rpot) | Re-verify `aux-lfo-core` (STALE). |
 | 5 | **4** VCA | audio | 2× THAT2180, TL072, BAT54S | **that2180_pins** all-pins | First THAT2180; AMT/OFS trims. |
@@ -92,6 +92,20 @@ parts and must **not** be reused — the 48HP toggles are the Dailywell DPDT DW3
 
 ---
 
+## Boundary-net registry (cross-block net names)
+
+Per-block sheets join at board level by **matching net name**, so boundary nets
+must use one canonical name on both sides. Registry (extend as blocks are added):
+
+| Net | Producer → Consumer | Meaning |
+|---|---|---|
+| `L_OUT`, `R_OUT` | block-A → block-1 | buffered stereo input |
+| `LP2_OUT_L`, `LP2_OUT_R` | block-8 → block-B | final LP2 stereo to MAIN buffers |
+| `BP3_TAP_L`, `BP3_TAP_R` | block-6 → block-B | BP3 group tap to BP3 buffers |
+| `BP3_L_OUT`, `BP3_R_OUT` | block-B → block-6 | buffered BP3 to panel jacks J27/J28 |
+
+When transcribing block-1/6/8, use these exact names on the matching pins.
+
 ## Conventions / open decisions
 
 - **Power rails:** currently global labels (`+12V`/`-12V`/`GND`) — uniform with
@@ -114,6 +128,7 @@ parts and must **not** be reused — the 48HP toggles are the Dailywell DPDT DW3
 
 - [x] block-A vertical slice + framework + CI gate
 - [x] BAT54S SOT-23 footprint vendored; structural verifier
-- [ ] blocks B, 1, 2, 4, 5, 6, 7, 8, 3 transcribed + verified
+- [x] block-B transcribed + verified
+- [ ] blocks 1, 2, 4, 5, 6, 7, 8, 3 transcribed + verified
 - [ ] (optional) board-level sheets combining per-block schematics by board
 - [ ] (gated separately) enable a KiCad CI job (kiutils) — currently disabled
