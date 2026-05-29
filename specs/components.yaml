@@ -131,6 +131,8 @@ components:
   - { ref: C55,  board: audio,   block: block-Q , part: ~,          pkg: "0603",   val: "100nF",  fn: "U9 V- decoupling" }
   - { ref: C56,  board: audio,   block: block-Q , part: ~,          pkg: "0603",   val: "100nF",  fn: "U10 V+ decoupling" }
   - { ref: C57,  board: audio,   block: block-Q , part: ~,          pkg: "0603",   val: "100nF",  fn: "U10 V- decoupling" }
+  - { ref: C84,  board: audio,   block: block-Q , part: ~,          pkg: "0402",   val: "10nF",   fn: "LP2 Q-cell Iabc bypass L (U9 cellB)" }
+  - { ref: C85,  board: audio,   block: block-Q , part: ~,          pkg: "0402",   val: "10nF",   fn: "LP2 Q-cell Iabc bypass R (U10 cellB)" }
   - { ref: C58,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "100nF",  fn: "U11 V+ decoupling" }
   - { ref: C59,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "100nF",  fn: "U11 V- decoupling" }
   - { ref: C60,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "100nF",  fn: "U12 V+ decoupling" }
@@ -291,6 +293,47 @@ components:
   - { ref: RV19, board: audio,   block: block-8, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "LP2 f_ref trim rheostat; in series with R_IREF_A 1MΩ; ±25% range" }
   - { ref: RV20, board: audio,   block: block-8, part: "Bourns 3224W", pkg: SMD,   val: "20kΩ",  fn: "LP2 1V/oct tracking trim; ±10% range" }
   - { ref: RV21, board: audio,   block: block-8, part: ~,          pkg: SMD,      fn: "LP2 Q_max trim" }
+  # block-8 full circuit (expanded from spec §4, 2026-05-29): mirrors LP1 minus tilt
+  # (single shared expo); Q VCA = shared-q sheet cell B (U9/U10). Adds the LP2 IRES_AMP
+  # (was missing), SUM_AMP fb, OTA R_LIN, expo network, Iabc bypass, buffer pulldowns,
+  # decoupling.
+  - { ref: U65,  board: audio,   block: block-8, part: TL072CDT,   pkg: SOIC-8,   fn: "LP2 IRES_AMP (Q driver, half A; half B spare)" }
+  - { ref: R72,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "LP2 SUM_AMP v2 feedback input R L (R_FB_L)" }
+  - { ref: R73,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "LP2 SUM_AMP v2 feedback input R R (R_FB_R)" }
+  - { ref: R74,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "LP2 SUM_AMP feedback R L (R_f_L)" }
+  - { ref: R75,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "LP2 SUM_AMP feedback R R (R_f_R)" }
+  - { ref: R76,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "LP2 OTA1 linearizing R L (R_LIN_A_L)" }
+  - { ref: R77,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "LP2 OTA2 linearizing R L (R_LIN_B_L)" }
+  - { ref: R78,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "LP2 OTA1 linearizing R R (R_LIN_A_R)" }
+  - { ref: R79,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "LP2 OTA2 linearizing R R (R_LIN_B_R)" }
+  - { ref: R80,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "1MΩ",    fn: "LP2 Q V→I: V_ires_L → U9 cellB Iabc (R_Iabc_L)" }
+  - { ref: R81,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "1MΩ",    fn: "LP2 Q V→I: V_ires_R → U10 cellB Iabc (R_Iabc_R)" }
+  - { ref: R82,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "LP2 IRES_AMP V_bias input R (R_QBIAS)" }
+  - { ref: R83,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "LP2 IRES_AMP resonance CV input R (R_QINV)" }
+  - { ref: R84,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "LP2 IRES_AMP feedback R (R_f_q)" }
+  - { ref: R85,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "1MΩ",    fn: "LP2 expo I_ref fixed R; series with RV19 (R_IREF_A)" }
+  - { ref: R86,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "47kΩ",   tol: "1%", fn: "LP2 expo V/oct scaling R (R_VOCT)" }
+  - { ref: R87,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "LP2 expo emitter degeneration (R_E)" }
+  - { ref: R88,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "LP2 L OTA1 buffer (v1) emitter pulldown to V-" }
+  - { ref: R89,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "LP2 L OTA2 buffer (v2) emitter pulldown to V-" }
+  - { ref: R90,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "LP2 R OTA1 buffer (v1) emitter pulldown to V-" }
+  - { ref: R91,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "LP2 R OTA2 buffer (v2) emitter pulldown to V-" }
+  - { ref: D11,  board: audio,   block: block-8, part: 1N4148W,    pkg: SOD-123,  fn: "LP2 V_ires ≥0 clamp (anode GND, cathode V_ires)" }
+  - { ref: C69,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100nF",  fn: "LP2 expo I_ref node bypass (C0G)" }
+  - { ref: C70,  board: audio,   block: block-8, part: ~,          pkg: "0402",   val: "10nF",   fn: "LP2 OTA Iabc bypass L (C_IABC_L)" }
+  - { ref: C71,  board: audio,   block: block-8, part: ~,          pkg: "0402",   val: "10nF",   fn: "LP2 OTA Iabc bypass R (C_IABC_R)" }
+  - { ref: C72,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100nF",  fn: "U56 V+ decoupling" }
+  - { ref: C73,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100nF",  fn: "U56 V- decoupling" }
+  - { ref: C74,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100nF",  fn: "U57 V+ decoupling" }
+  - { ref: C75,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100nF",  fn: "U57 V- decoupling" }
+  - { ref: C76,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100nF",  fn: "U58 V+ decoupling" }
+  - { ref: C77,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100nF",  fn: "U58 V- decoupling" }
+  - { ref: C78,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100nF",  fn: "U59 V+ decoupling" }
+  - { ref: C79,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100nF",  fn: "U59 V- decoupling" }
+  - { ref: C80,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100nF",  fn: "U65 V+ decoupling" }
+  - { ref: C81,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100nF",  fn: "U65 V- decoupling" }
+  - { ref: C82,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100nF",  fn: "U60 +12V rail bypass (THAT340 no Vcc pin)" }
+  - { ref: C83,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100nF",  fn: "U60 -12V rail bypass" }
 
   # block-B: Output Buffers (refs shifted from old U46–U47 to U61–U62)
   - { ref: U61,  board: audio,   block: block-B, part: TL072CDT,   pkg: SOIC-8,   fn: "MAIN_L + MAIN_R output buffers" }

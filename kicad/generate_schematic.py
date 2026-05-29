@@ -76,7 +76,14 @@ SYM_TABLE = {
 }
 
 # Layout grid (mm). Symbols only need to not overlap — nets connect by name.
-_COL_DX, _ROW_DY, _NCOLS, _X0, _Y0 = 45.0, 40.0, 3, 40.0, 40.0
+_COL_DX, _ROW_DY, _NCOLS, _X0, _Y0 = 60.0, 55.0, 3, 40.0, 40.0
+
+# Multi-unit symbols: one ref → several gate instances at distinct offsets so their
+# pins don't overlap (the lib_symbol draws every unit at the same local origin).
+#   sym -> (per_unit_pins_fn, [(unit_no, dx, dy), ...])
+MULTI_UNIT = {
+    "opamp2": (kc.opamp_unit_pins, [(1, 0.0, 0.0), (2, 0.0, 22.0), (3, 24.0, 11.0)]),
+}
 
 
 def _resolve_footprint(part_str: str | None) -> str:
@@ -221,27 +228,28 @@ def structural_check(text: str, block: dict) -> list[str]:
     if not root or root[0] != "kicad_sch":
         return ["root node is not kicad_sch"]
 
-    # lib_symbols: lib_id -> {pin_number: (local_x, local_y)}
-    libs: dict[str, dict[str, tuple[float, float]]] = {}
+    # lib_symbols: lib_id -> {unit_int: {pin_number: (local_x, local_y)}}
+    # Sub-symbols are named "<value>_<unit>_<style>"; pins belong to that unit.
+    libs: dict[str, dict[int, dict[str, tuple[float, float]]]] = {}
     libnode = _first(root, "lib_symbols")
     for sym in _children(libnode or [], "symbol"):
         name = sym[1] if len(sym) > 1 and isinstance(sym[1], str) else None
         if not name:
             continue
-        pins: dict[str, tuple[float, float]] = {}
-
-        def collect(n):
-            for pin in _children(n, "pin"):
+        units: dict[int, dict[str, tuple[float, float]]] = {}
+        for sub in _children(sym, "symbol"):
+            subname = sub[1] if len(sub) > 1 and isinstance(sub[1], str) else ""
+            m = re.search(r"_(\d+)_\d+$", subname)
+            u = int(m.group(1)) if m else 1
+            for pin in _children(sub, "pin"):
                 at = _first(pin, "at")
                 num = _first(pin, "number")
                 if at and num:
-                    pins[num[1]] = (float(at[1]), float(at[2]))
-            for sub in _children(n, "symbol"):
-                collect(sub)
-        collect(sym)
-        libs[name] = pins
+                    units.setdefault(u, {})[num[1]] = (float(at[1]), float(at[2]))
+        libs[name] = units
 
-    # placements: REF.PIN -> (x, y)  (top-level symbols carrying a lib_id)
+    # placements: REF.PIN -> (x, y). Each placement carries its (unit N); only that
+    # unit's pins exist at that instance (multi-unit symbols → one instance per unit).
     pin_xy: dict[str, tuple[float, float]] = {}
     for sym in _children(root, "symbol"):
         libid = _first(sym, "lib_id")
@@ -256,8 +264,10 @@ def structural_check(text: str, block: dict) -> list[str]:
         for prop in _children(sym, "property"):
             if len(prop) > 2 and prop[1] == "Reference":
                 ref = prop[2]
+        unit_node = _first(sym, "unit")
+        unit = int(unit_node[1]) if unit_node and len(unit_node) > 1 else 1
         ox, oy, ang = float(at[1]), float(at[2]), float(at[3]) if len(at) > 3 else 0.0
-        for num, (px, py) in libs[lib].items():
+        for num, (px, py) in libs[lib].get(unit, {}).items():
             pin_xy[f"{ref}.{num}"] = _xform(ox, oy, ang, px, py)
 
     # global labels: net -> list of (x, y)
@@ -269,6 +279,15 @@ def structural_check(text: str, block: dict) -> list[str]:
 
     def near(a, b):
         return abs(a[0] - b[0]) < _EPS and abs(a[1] - b[1]) < _EPS
+
+    # (0) shorts: two or more DISTINCT nets whose labels land on the same point
+    # (catches overlapping symbol pins — e.g. multi-unit gates placed at one origin).
+    by_coord: dict[tuple[float, float], set[str]] = {}
+    for net, lx, ly in label_pts:
+        by_coord.setdefault((round(lx, 3), round(ly, 3)), set()).add(net)
+    for (x, y), nets_here in sorted(by_coord.items()):
+        if len(nets_here) > 1:
+            errs.append(f"short: nets {sorted(nets_here)} coincide at ({x:.3f},{y:.3f})")
 
     # (1) every label sits exactly on a pin; record which pins are labeled.
     labeled: set[str] = set()
@@ -312,11 +331,21 @@ def build(block: dict) -> str:
     for i, (ref, spec) in enumerate(parts.items()):
         col, row = i % _NCOLS, i // _NCOLS
         ox, oy = _X0 + col * _COL_DX, _Y0 + row * _ROW_DY
-        lib_id, _, pins_fn = SYM_TABLE[spec["sym"]]
+        sym = spec["sym"]
+        lib_id, _, pins_fn = SYM_TABLE[sym]
         fp = _resolve_footprint(spec.get("part"))
-        kc.place_symbol(lib_id, ref, spec.get("value", ""), ox, oy, footprint=fp)
-        for pin, (px, py) in pins_fn(ox, oy).items():
-            pin_xy[f"{ref}.{pin}"] = (px, py)
+        if sym in MULTI_UNIT:
+            # Place each gate unit as its own instance at a distinct offset.
+            unit_pins_fn, layout = MULTI_UNIT[sym]
+            for unit, dx, dy in layout:
+                kc.place_symbol(lib_id, ref, spec.get("value", ""), ox + dx, oy + dy,
+                                unit=unit, footprint=(fp if unit == 1 else ""))
+                for pin, (px, py) in unit_pins_fn(ox + dx, oy + dy, unit).items():
+                    pin_xy[f"{ref}.{pin}"] = (px, py)
+        else:
+            kc.place_symbol(lib_id, ref, spec.get("value", ""), ox, oy, footprint=fp)
+            for pin, (px, py) in pins_fn(ox, oy).items():
+                pin_xy[f"{ref}.{pin}"] = (px, py)
 
     # Drop a global label at every wired pin (name-based connectivity).
     boundary = set(block.get("boundary") or [])

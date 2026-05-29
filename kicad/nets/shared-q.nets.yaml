@@ -36,12 +36,14 @@ parts:
   C55: { sym: c, value: 100nF }   # U9 V-
   C56: { sym: c, value: 100nF }   # U10 V+
   C57: { sym: c, value: 100nF }   # U10 V-
+  C84: { sym: c, value: 10nF }    # LP2 Q-cell Iabc bypass L (U9 cellB)
+  C85: { sym: c, value: 10nF }    # LP2 Q-cell Iabc bypass R (U10 cellB)
 
 nets:
   # ---- power (LM13700 V+ = 11, V- = 6) ----
   "+12V":  [U9.11, U10.11, C54.1, C56.1]
   "-12V":  [U9.6, U10.6, C55.1, C57.1]
-  GND:     [C48.2, C49.2, C54.2, C55.2, C56.2, C57.2]
+  GND:     [C48.2, C49.2, C54.2, C55.2, C56.2, C57.2, C84.2, C85.2]
 
   # ---- U9 (L channel) ----
   # cell A = LP1 Q (L)
@@ -51,7 +53,7 @@ nets:
   # cell B = LP2 Q (L) — joined by block-8
   LP2_V1_L:     [U9.14]           # In+_B <- LP2 v1/BP (boundary)
   LP2_SUMINV_L: [U9.13, U9.12]    # In-_B + Out_B -> LP2 SUM_AMP virtual ground (boundary)
-  LP2_QIABC_L:  [U9.16]           # Iabc_B <- LP2 V_ires/R_Iabc (boundary)
+  LP2_QIABC_L:  [U9.16, C84.1]    # Iabc_B <- LP2 V_ires/R_Iabc (boundary) + bypass
 
   # ---- U10 (R channel) ----
   # cell A = LP1 Q (R)
@@ -61,7 +63,7 @@ nets:
   # cell B = LP2 Q (R)
   LP2_V1_R:     [U10.14]
   LP2_SUMINV_R: [U10.13, U10.12]
-  LP2_QIABC_R:  [U10.16]
+  LP2_QIABC_R:  [U10.16, C85.1]
 
 no_connect:
   # Q-cell Darlington output buffers unused (both channels, both cells).

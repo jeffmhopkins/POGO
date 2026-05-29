@@ -744,6 +744,20 @@ def opamp_dual_pins(ox, oy, unit, angle=0):
         }
 
 
+def opamp_unit_pins(ox, oy, unit, angle=0):
+    """Per-unit pins of a dual op-amp, relative to THAT UNIT's own placement origin.
+    Used by the multi-unit placer so units A/B/power sit at distinct canvas positions
+    (the lib_symbol draws every unit at the same local origin, so a single placement
+    would overlap their pins). unit 1=A {1,2,3}, 2=B {7,6,5}, 3=power {8,4}."""
+    if unit == 1:
+        d = {"2": (-7.62, 2.54), "3": (-7.62, -2.54), "1": (7.62, 0)}
+    elif unit == 2:
+        d = {"6": (-7.62, 2.54), "5": (-7.62, -2.54), "7": (7.62, 0)}
+    else:  # unit 3 = power
+        d = {"8": (0, 7.62), "4": (0, -7.62)}
+    return {p: _rot(ox, oy, angle, x, y) for p, (x, y) in d.items()}
+
+
 def opamp_dual_all_pins(ox, oy, angle=0):
     """All pins of a dual op-amp (TL072/LM4562/NE5532/OPA1612): both units + power.
     Unit A: 1/2/3, Unit B: 7/6/5, Power: V+=8 (top), V-=4 (bottom)."""

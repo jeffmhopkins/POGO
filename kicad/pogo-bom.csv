@@ -97,6 +97,8 @@ audio,C54,1,,100nF,0603,,,,,block-Q,U9 V+ decoupling
 audio,C55,1,,100nF,0603,,,,,block-Q,U9 V- decoupling
 audio,C56,1,,100nF,0603,,,,,block-Q,U10 V+ decoupling
 audio,C57,1,,100nF,0603,,,,,block-Q,U10 V- decoupling
+audio,C84,1,,10nF,0402,,,,,block-Q,LP2 Q-cell Iabc bypass L (U9 cellB)
+audio,C85,1,,10nF,0402,,,,,block-Q,LP2 Q-cell Iabc bypass R (U10 cellB)
 audio,C58,1,,100nF,0603,,,,,block-5,U11 V+ decoupling
 audio,C59,1,,100nF,0603,,,,,block-5,U11 V- decoupling
 audio,C60,1,,100nF,0603,,,,,block-5,U12 V+ decoupling
@@ -218,6 +220,43 @@ audio,R33,1,,100kΩ,0603,,,,,block-8,LP2 SUM_AMP R_in R
 audio,RV19,1,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-8,LP2 f_ref trim rheostat; in series with R_IREF_A 1MΩ; ±25% range
 audio,RV20,1,3224W-1-xxx,20kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-8,LP2 1V/oct tracking trim; ±10% range
 audio,RV21,1,,,SMD,,,,,block-8,LP2 Q_max trim
+audio,U65,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-8,"LP2 IRES_AMP (Q driver, half A; half B spare)"
+audio,R72,1,,100kΩ,0603,,,,,block-8,LP2 SUM_AMP v2 feedback input R L (R_FB_L)
+audio,R73,1,,100kΩ,0603,,,,,block-8,LP2 SUM_AMP v2 feedback input R R (R_FB_R)
+audio,R74,1,,100kΩ,0603,,,,,block-8,LP2 SUM_AMP feedback R L (R_f_L)
+audio,R75,1,,100kΩ,0603,,,,,block-8,LP2 SUM_AMP feedback R R (R_f_R)
+audio,R76,1,,1kΩ,0603,,,,,block-8,LP2 OTA1 linearizing R L (R_LIN_A_L)
+audio,R77,1,,1kΩ,0603,,,,,block-8,LP2 OTA2 linearizing R L (R_LIN_B_L)
+audio,R78,1,,1kΩ,0603,,,,,block-8,LP2 OTA1 linearizing R R (R_LIN_A_R)
+audio,R79,1,,1kΩ,0603,,,,,block-8,LP2 OTA2 linearizing R R (R_LIN_B_R)
+audio,R80,1,,1MΩ,0603,,,,,block-8,LP2 Q V→I: V_ires_L → U9 cellB Iabc (R_Iabc_L)
+audio,R81,1,,1MΩ,0603,,,,,block-8,LP2 Q V→I: V_ires_R → U10 cellB Iabc (R_Iabc_R)
+audio,R82,1,,100kΩ,0603,,,,,block-8,LP2 IRES_AMP V_bias input R (R_QBIAS)
+audio,R83,1,,100kΩ,0603,,,,,block-8,LP2 IRES_AMP resonance CV input R (R_QINV)
+audio,R84,1,,100kΩ,0603,,,,,block-8,LP2 IRES_AMP feedback R (R_f_q)
+audio,R85,1,,1MΩ,0603,,,,,block-8,LP2 expo I_ref fixed R; series with RV19 (R_IREF_A)
+audio,R86,1,,47kΩ,0603,,,,,block-8,LP2 expo V/oct scaling R (R_VOCT)
+audio,R87,1,,1kΩ,0603,,,,,block-8,LP2 expo emitter degeneration (R_E)
+audio,R88,1,,10kΩ,0603,,,,,block-8,LP2 L OTA1 buffer (v1) emitter pulldown to V-
+audio,R89,1,,10kΩ,0603,,,,,block-8,LP2 L OTA2 buffer (v2) emitter pulldown to V-
+audio,R90,1,,10kΩ,0603,,,,,block-8,LP2 R OTA1 buffer (v1) emitter pulldown to V-
+audio,R91,1,,10kΩ,0603,,,,,block-8,LP2 R OTA2 buffer (v2) emitter pulldown to V-
+audio,D11,1,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-8,"LP2 V_ires ≥0 clamp (anode GND, cathode V_ires)"
+audio,C69,1,,100nF,0603,,,,,block-8,LP2 expo I_ref node bypass (C0G)
+audio,C70,1,,10nF,0402,,,,,block-8,LP2 OTA Iabc bypass L (C_IABC_L)
+audio,C71,1,,10nF,0402,,,,,block-8,LP2 OTA Iabc bypass R (C_IABC_R)
+audio,C72,1,,100nF,0603,,,,,block-8,U56 V+ decoupling
+audio,C73,1,,100nF,0603,,,,,block-8,U56 V- decoupling
+audio,C74,1,,100nF,0603,,,,,block-8,U57 V+ decoupling
+audio,C75,1,,100nF,0603,,,,,block-8,U57 V- decoupling
+audio,C76,1,,100nF,0603,,,,,block-8,U58 V+ decoupling
+audio,C77,1,,100nF,0603,,,,,block-8,U58 V- decoupling
+audio,C78,1,,100nF,0603,,,,,block-8,U59 V+ decoupling
+audio,C79,1,,100nF,0603,,,,,block-8,U59 V- decoupling
+audio,C80,1,,100nF,0603,,,,,block-8,U65 V+ decoupling
+audio,C81,1,,100nF,0603,,,,,block-8,U65 V- decoupling
+audio,C82,1,,100nF,0603,,,,,block-8,U60 +12V rail bypass (THAT340 no Vcc pin)
+audio,C83,1,,100nF,0603,,,,,block-8,U60 -12V rail bypass
 audio,U61,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-B,MAIN_L + MAIN_R output buffers
 audio,U62,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-B,BP3_L + BP3_R output buffers
 audio,R34,1,,1kΩ,0603,,,,,block-B,MAIN_L output protection
