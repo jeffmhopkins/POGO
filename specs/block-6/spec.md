@@ -537,12 +537,12 @@ Icc figures use ±12V operating point (~2.6 mA/pkg), not the ±15V datasheet spe
 | R_clamp | resistor | 0603 | 10 kΩ | 6 | audio | block-6 | WF clamp network series R (limits diode current) |
 | R_g | resistor | 0603 | 10 kΩ | 6 | audio | block-6 | WF folder (−) input resistor |
 | R_f | resistor | 0603 | 10 kΩ | 6 | audio | block-6 | WF folder feedback resistor; R_g = R_f → G=+2 at (+) |
-| D_WF_1N4148 | 1N4148W | SOD-123 | — | 48 | audio | block-6 | WF passive clamp: 4 per path (2 per polarity); Vth = ±1.4V |
+| D_WF_1N4148 | 1N4148W | SOD-123 | — | 24 | audio | block-6 | WF passive clamp: 4 per path (2 per polarity) × 6 paths; Vth = ±1.4V |
 | C_WF_wiper | ceramic, X7R | 0603 | 47 pF | 12 | audio | block-6 | RV_DRIVE wiper bypass cap; pole ≈288 kHz; anti-RF on each path |
 | *— BP_MIX circuit —* | | | | | | | |
 | BP_WET_SUM_L, _R | TL072CDT | SOIC-8 | — | 2 | audio | block-6 | Half A = BP1+BP2+BP3 wet summer; half B = MIX output buffer |
 | BP_MIX_BUF_L, _R | TL072CDT | SOIC-8 | — | 2 | audio | block-6 | Half A = MIX output polarity buffer; half B = spare |
-| R_sum | resistor | 0603 | 33 kΩ | 12 | audio | block-6 | BP wet summer input R (3 inputs × L + R × 2 channels) |
+| R_sum | resistor | 0603 | 33 kΩ | 8 | audio | block-6 | BP wet summer R (3 inputs + 1 feedback per channel × L+R = 8) |
 | R_dry | resistor | 0603 | 100 kΩ | 2 | audio | block-6 | MIX dry input R (L and R) |
 | R_mix_f | resistor | 0603 | 100 kΩ | 2 | audio | block-6 | MIX feedback R |
 | R_pol_in | resistor | 0603 | 100 kΩ | 2 | audio | block-6 | BP_POL G=−1 inverter input R (L and R); uses BP_TILT_INV half B |

@@ -159,7 +159,7 @@ struct Pogo : Module {
 		// LP2
 		LP2_FREQ_PARAM, LP2_RES_PARAM,
 		LP2_FREQ_ATT_PARAM, LP2_RES_ATT_PARAM,
-		NUM_PARAMS   // 48
+		NUM_PARAMS   // 52
 	};
 
 	enum InputId {

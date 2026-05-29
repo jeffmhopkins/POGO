@@ -96,7 +96,7 @@ audio,RV14,1,3224W-1-xxx,20kΩ,SMD,,Bourns,,https://www.bourns.com/docs/Product-
 audio,RV15,1,,,SMD,,,,,block-6,BP3 Q_max trim
 audio,D4,24,1N4148W,,SOD-123,,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6,SC soft-clip diodes; 4 per path (2 antiparallel pairs) × 6 paths
 audio,D5,12,BZX84C5V1,,SOT-23,,Nexperia,,https://assets.nexperia.com/documents/data-sheet/BZX84_SER.pdf,block-6,HC back-to-back zener clamps (±5.8V clip); 2 per path × 6 paths
-audio,D6,48,1N4148W,,SOD-123,,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6,"WF passive clamp diodes; 4 per path (2 per polarity, Vth=±1.4V) × 6 paths; true symmetric fold"
+audio,D6,24,1N4148W,,SOD-123,,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6,"WF passive clamp diodes; 4 per path (2 per polarity, Vth=±1.4V) × 6 paths; true symmetric fold"
 audio,D7,1,BZX84C5V1,,SOT-23,,Nexperia,,https://assets.nexperia.com/documents/data-sheet/BZX84_SER.pdf,block-6,CD4053 logic supply 5.1V zener shunt (from +12V with R_5V_logic)
 audio,C15,4,,150nF,0805,,,,,block-6,BP1 integrator caps (C0G; 2 per channel × L+R)
 audio,C19,4,,22nF,0603,,,,,block-6,BP2 integrator caps (C0G; 2 per channel × L+R)
