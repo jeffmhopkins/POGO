@@ -71,6 +71,8 @@ SYM_TABLE = {
     "led":    ("Device:LED",                        kc.sym_led,     kc.diode2_pins),
     "trimpot":("Device:R_POT",                      kc.sym_rpot,    kc.rpot_pins),
     "vca":    ("POGO:THAT2180",                     kc.sym_that2180, kc.that2180_pins),
+    "ota":    ("Amplifier_Operational:LM13700",     kc.sym_lm13700, kc.lm13700_pins),
+    "expo":   ("POGO:THAT340",                      kc.sym_that340, kc.that340_pins),
 }
 
 # Layout grid (mm). Symbols only need to not overlap — nets connect by name.
