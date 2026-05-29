@@ -184,7 +184,7 @@ zones:
         type: toggle_dw3
         cx: 28.575
         cy: 17
-        label_above: "MAIN"
+        label: "MAIN"
         pos_labels: ["1×", "5×"]
         pos_xs: [23.775, 33.375]   # cx ± 4.8mm (flank the DW3 toggle bushing)
         cpp_param: "GAIN_PARAM"
@@ -208,7 +208,7 @@ zones:
         type: toggle_dw3
         cx: 28.575
         cy: 31.5
-        label_above: "BP3"
+        label: "BP3"
         pos_labels: ["1×", "5×"]
         pos_xs: [23.775, 33.375]   # cx ± 4.8mm
         cpp_param: "ALT_GAIN_PARAM"
@@ -473,7 +473,7 @@ zones:
         type: toggle_dw5
         cx: 96.0
         cy: 24.80
-        label_below: "DIST"
+        label: "DIST"
         label_below_y: 36.0
         cpp_param: "BP1_DIST_MODE_PARAM"
       - id: BP1_FREQ
@@ -559,7 +559,7 @@ zones:
         type: toggle_dw5
         cx: 130.29
         cy: 24.80
-        label_below: "DIST"
+        label: "DIST"
         label_below_y: 36.0
         cpp_param: "BP2_DIST_MODE_PARAM"
       - id: BP2_FREQ
@@ -645,7 +645,7 @@ zones:
         type: toggle_dw5
         cx: 164.58
         cy: 24.80
-        label_below: "DIST"
+        label: "DIST"
         label_below_y: 36.0
         cpp_param: "BP3_DIST_MODE_PARAM"
       - id: BP3_FREQ
