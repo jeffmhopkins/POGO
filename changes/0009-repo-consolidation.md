@@ -54,6 +54,11 @@ artifacts in `kicad/`; remove stale duplication; and clearly mark generated vs a
 - 2026-05-29: delete 40HP cruft incl. dead CI job; **keep + repoint** pogo.kicad_pro.
 - 2026-05-29: shared-q → specs/block-Q/ + stub spec.
 - 2026-05-29: built-file marking = .gitattributes (explicit paths) + safe banners + gated GENERATED.md.
+- 2026-05-29: Shared-component clarity (follow-on to §4 removal): block-5/8 §4 pointers now flag
+  the shared block-Q Q-VCAs (`U9`/`U10`, owned by `specs/block-Q/`); fixed the stale `IC_Q_AB`
+  generic name → `U9/U10` in block-5/8 §3 prose, and corrected the block-5 power line (the shared
+  Q-VCAs are 2 ICs: ~4 mA × 2 = 8 mA, block-5 total ~31 mA). `aux/aux-q-control.md` keeps `IC_Q_AB`
+  as a generic building-block label (aux convention).
 - 2026-05-29: Lane B (build-system surgery), not Lane C. Hardened via adversarial + review agents:
   KiCad ${KIPRJMOD}/../ resolution + the broken .kicad_pro root sheet, atomic-commit ordering,
   CSV-banner hazard, .gitattributes over-glob, §4 prose preservation, full scrub list.

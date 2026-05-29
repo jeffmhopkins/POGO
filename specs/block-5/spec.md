@@ -209,19 +209,19 @@ LP1_TILT_INPUT jack + LP1_TILT_ATT attenuverter  →  same tilt bus (sums into V
 
 Audio board. Place LP1_L and LP1_R SVF circuits adjacent to Block VCA outputs. EXPO_LP1
 (THAT340) placed centrally between L and R expo summer inputs to equalize trace lengths for
-I_abc routing. IC_Q_AB placed between LP1 and LP2 OTA sections (shared Q VCA).
+I_abc routing. U9/U10 (the shared LP1/LP2 Q-VCAs) placed between the LP1 and LP2 OTA sections.
 
 ### Power Draw Estimate
 
 - 2× LM13700M (LP1 L/R integrators): ~4 mA × 2 = 8 mA  (TI: 4 mA typ per package)
-- 1× IC_Q_AB LM13700M (shared LP1+LP2 Q VCA, counted here): ~4 mA
+- 2× LM13700M U9/U10 (shared LP1+LP2 Q-VCAs, counted here): ~4 mA × 2 = 8 mA
 - 2× OPA1612 (SUM_AMP L/R, dual SOIC-8): 5.5 mA × 2 = 11 mA  (Iq = 2.75 mA/channel × 2 ch/IC)
 - 1× TL072CDT (IRES_AMP + tilt inverter): ~3 mA  (TI: 1.4 mA/ch × 2 = 2.8 mA)
 - 1× THAT340S14-U (EXPO_LP1): ~1 mA
-- **+12V: ~27 mA | −12V: ~27 mA**
+- **+12V: ~31 mA | −12V: ~31 mA**
 
-Note: IC_Q_AB is shared with block-8 (LP2 Q cell B). It is counted once here (block-5).
-Block-8 power estimate excludes IC_Q_AB accordingly.
+Note: U9/U10 are shared with block-8 (they provide LP2 Q on cell B). They are counted once
+here (block-5); block-8's power estimate excludes them accordingly.
 
 ---
 
@@ -230,3 +230,6 @@ Block-8 power estimate excludes IC_Q_AB accordingly.
 Component set: see the generated BOM `kicad/pogo-bom.csv` (rows with `Block = block-5`),
 sourced from `specs/components.yaml` (the per-ref design manifest) and enriched by the
 `components/` registry (MPN, footprint, datasheet). Verification status: `specs/STATUS.md`.
+
+**Shared dependency:** LP1's resonance Q-VCAs (`U9` L / `U10` R, cell A) are the shared
+LP1/LP2 cells owned by `specs/block-Q/` (BOM rows with `Block = block-Q`), not listed above.

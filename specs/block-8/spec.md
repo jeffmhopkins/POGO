@@ -94,9 +94,9 @@ When HP is active between LP1 and LP2, the combined LP1 + HP + LP2 response is a
 envelope: HP sets a lower cutoff; LP2 sets an upper cutoff; LP1 shapes the overall entry into the
 passband. This is a useful configuration for narrow-band spectral shaping downstream of the BP formant section.
 
-### IC_Q_AB sharing with LP1
+### Shared Q-VCAs (U9/U10) — sharing with LP1
 
-LP2 Q uses cell B of IC_Q_AB — the same LM13700 SOIC-16 package whose cell A provides LP1 Q.
+LP2 Q uses cell B of U9/U10 — the same LM13700 packages whose cell A provides LP1 Q.
 This means LP1 and LP2 Q cells are on the same die; their I_abc_q signals are independently
 driven by separate IRES_AMP circuits. Thermal coupling between cells A and B is negligible at the
 operating Iabc (<1 µA, <10 µW per cell). See `aux/aux-q-control.md` §LM13700 Cell Sharing.
@@ -163,20 +163,20 @@ Block HP out R  →  LP2_R SVF (SUM_AMP + OTA-B1 + OTA-B2)  →  LP2 out R  → 
 LP2_FREQ_PARAM (−5 to +5 V, default +2V) + LP2_FREQ_INPUT (attenuated by LP2_FREQ_ATT_PARAM)
   →  V_ctrl  →  EXPO_LP2  →  I_abc (shared L+R)
 
-LP2_RES_PARAM (0 to 1, default 0) + LP2_RES_INPUT / 10  →  IRES_AMP_LP2  →  I_abc_q via IC_Q_AB cell B
+LP2_RES_PARAM (0 to 1, default 0) + LP2_RES_INPUT / 10  →  IRES_AMP_LP2  →  I_abc_q via U9/U10 cell B
 ```
 
 ### Board assignment
 
 Audio board. LP2 should be placed between the HP output nodes and Block B. EXPO_LP2 (THAT340)
 is a separate IC from EXPO_LP1, placed adjacent to LP2's V_ctrl summing network.
-IC_Q_AB is shared with LP1 and should be placed between the two filter sections so traces to
+U9/U10 are shared with LP1 and should be placed between the two filter sections so traces to
 both cell A (LP1 Q) and cell B (LP2 Q) are of comparable length.
 
 ### Power Draw Estimate
 
 - 2× LM13700M (LP2 L/R integrators): ~4 mA × 2 = 8 mA  (TI: 4 mA typ per package)
-- (IC_Q_AB shared with block-5 — counted in block-5 power estimate, not here)
+- (U9/U10 shared with block-5 — counted in block-5's power estimate, not here)
 - 2× OPA1612 (SUM_AMP L/R, dual SOIC-8): 5.5 mA × 2 = 11 mA  (Iq = 2.75 mA/channel × 2 ch/IC)
 - 1× TL072CDT (IRES_AMP): ~3 mA  (TI: 1.4 mA/ch × 2 = 2.8 mA)
 - 1× THAT340S14-U (EXPO_LP2): ~1 mA
@@ -189,3 +189,6 @@ both cell A (LP1 Q) and cell B (LP2 Q) are of comparable length.
 Component set: see the generated BOM `kicad/pogo-bom.csv` (rows with `Block = block-8`),
 sourced from `specs/components.yaml` (the per-ref design manifest) and enriched by the
 `components/` registry (MPN, footprint, datasheet). Verification status: `specs/STATUS.md`.
+
+**Shared dependency:** LP2's resonance Q-VCAs (`U9` L / `U10` R, cell B) are the shared
+LP1/LP2 cells owned by `specs/block-Q/` (BOM rows with `Block = block-Q`), not listed above.
