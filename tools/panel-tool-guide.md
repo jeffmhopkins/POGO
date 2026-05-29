@@ -51,6 +51,12 @@ in-browser DRC and footprint overlays match `build_panel.py` exactly (no drift).
 - **Right** — inspector for the selected component: `id`, `type`, resolved `cx`/`cy` (numeric
   entry), `rotate` (cycle button), `label`, `font_size`, `cpp_id`/`cpp_param`, and the read-only
   KiCad footprint name. Includes a delete button.
+  - **Label offset** — every component's label sits at a per-type DEFAULT offset from the
+    anchor; `label_dx`/`label_dy` *nudge* it (0,0 = default), with a **Reset label offset**
+    button. For toggles/sliders the default offset follows the component's rotation (the text
+    stays upright); for jacks/knobs the label stays screen-fixed (their `rotate` is PCB-only).
+  - **Position labels** (switches) — edit the `1×`/`5×` text (comma-separated) and nudge them
+    as a group with `pos_dx`/`pos_dy`/`pos_spread`, with a **Reset position-label offset** button.
 - **Top bar** — panel **HP** field + **Recenter** (recomputes `x_offset`), **Dividers…** modal
   (add/remove separators), **Export YAML**, and a live DRC pass/fail badge.
 

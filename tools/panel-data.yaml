@@ -186,7 +186,6 @@ zones:
         cy: 17
         label: "MAIN"
         pos_labels: ["1×", "5×"]
-        pos_xs: [23.775, 33.375]   # cx ± 4.8mm (flank the DW3 toggle bushing)
         cpp_param: "GAIN_PARAM"
       - id: BP3_L
         type: jack_input
@@ -210,7 +209,6 @@ zones:
         cy: 31.5
         label: "BP3"
         pos_labels: ["1×", "5×"]
-        pos_xs: [23.775, 33.375]   # cx ± 4.8mm
         cpp_param: "ALT_GAIN_PARAM"
 
   # ── Section 0b: LFO ───────────────────────────────────────────────────────
@@ -283,7 +281,6 @@ zones:
         col: 0
         cy: 89.5
         label: "MOD SRC"
-        label_below_y: 100.5
         cpp_param: "MOD_SRC_PARAM"
       - id: SCALE
         type: trimpot
@@ -474,7 +471,6 @@ zones:
         cx: 96.0
         cy: 24.80
         label: "DIST"
-        label_below_y: 36.0
         cpp_param: "BP1_DIST_MODE_PARAM"
       - id: BP1_FREQ
         type: knob
@@ -560,7 +556,6 @@ zones:
         cx: 130.29
         cy: 24.80
         label: "DIST"
-        label_below_y: 36.0
         cpp_param: "BP2_DIST_MODE_PARAM"
       - id: BP2_FREQ
         type: knob
@@ -646,7 +641,6 @@ zones:
         cx: 164.58
         cy: 24.80
         label: "DIST"
-        label_below_y: 36.0
         cpp_param: "BP3_DIST_MODE_PARAM"
       - id: BP3_FREQ
         type: knob
