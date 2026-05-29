@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POGO — Bill of Materials</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; background: #0d0d0d; color: #ccc;
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      padding: 24px; font-size: 13px;
+    }
+    .wrap { width: min(1180px, 100%); margin: 0 auto; }
+    a { color: #7fe7ff; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    h1 { color: #00d4ff; letter-spacing: .08em; margin: 0 0 2px; font-size: 20px; }
+    h1 .dot { color: #ff8800; }
+    .sub { color: #4a6070; margin: 0 0 18px; letter-spacing: .1em; font-size: 12px; }
+    .bar { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; margin-bottom: 14px; }
+    input[type=search] {
+      background: #141414; border: 1px solid #2a2a2a; border-radius: 5px; color: #ddd;
+      padding: 7px 10px; font: inherit; min-width: 240px; flex: 1 1 240px;
+    }
+    input[type=search]:focus { outline: none; border-color: #00d4ff; }
+    label.toggle { color: #9ab; cursor: pointer; user-select: none; display: inline-flex; align-items: center; gap: 6px; }
+    .count { color: #4a6070; margin-left: auto; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { text-align: left; padding: 5px 9px; border-bottom: 1px solid #1c1c1c; vertical-align: top; }
+    th { color: #7fe7ff; cursor: pointer; white-space: nowrap; position: sticky; top: 0; background: #0d0d0d; }
+    th:hover { color: #fff; }
+    th .arr { color: #ff8800; font-size: 10px; }
+    tr:hover td { background: #141414; }
+    td.num { text-align: right; color: #cfcfcf; }
+    td.ref { color: #fff; font-weight: bold; white-space: nowrap; }
+    td.fn { color: #888; }
+    .grp td {
+      background: #11181c; color: #7fe7ff; font-weight: bold; letter-spacing: .05em;
+      border-top: 1px solid #243; border-bottom: 1px solid #243; position: sticky; top: 26px;
+    }
+    .grp .gn { color: #4a6070; font-weight: normal; margin-left: 8px; }
+    .ds { color: #4a6070; }
+    .msg { color: #ff8800; padding: 24px 0; }
+    footer { color: #3a3a3a; font-size: 11px; margin-top: 24px; }
+    footer a { color: #4a6070; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>POGO <span class="dot">·</span> BILL OF MATERIALS</h1>
+    <p class="sub"><a href="index.html">&larr; docs</a> &nbsp;·&nbsp; generated from <code>specs/components.yaml</code> + the components/ registry</p>
+
+    <div class="bar">
+      <input type="search" id="q" placeholder="search ref / value / MPN / function / block…" autocomplete="off">
+      <label class="toggle"><input type="checkbox" id="grp"> group by block</label>
+      <span class="count" id="count"></span>
+    </div>
+
+    <div id="out"><div class="msg">Loading BOM…</div></div>
+
+    <footer>
+      Source of truth: <a href="https://github.com/jeffmhopkins/POGO/blob/main/specs/components.yaml" target="_blank" rel="noopener">components.yaml</a>
+      · raw CSV: <a href="pogo-bom.csv">pogo-bom.csv</a>
+      · <a href="https://github.com/jeffmhopkins/POGO" target="_blank" rel="noopener">github.com/jeffmhopkins/POGO</a>
+    </footer>
+  </div>
+
+<script>
+// Columns shown (key, label, css class). "Block" is shown only when not grouping.
+const COLS = [
+  ["Board", "Board", ""],
+  ["Block", "Block", ""],
+  ["Ref", "Ref", "ref"],
+  ["Qty", "Qty", "num"],
+  ["Value", "Value", ""],
+  ["MPN", "MPN", ""],
+  ["Package", "Pkg", ""],
+  ["Datasheet", "DS", "ds"],
+  ["Function", "Function", "fn"],
+];
+
+let rows = [], sortKey = null, sortDir = 1;
+
+function parseCSV(text) {
+  const out = []; let i = 0, field = "", row = [], inQ = false;
+  while (i < text.length) {
+    const c = text[i];
+    if (inQ) {
+      if (c === '"') { if (text[i + 1] === '"') { field += '"'; i += 2; continue; } inQ = false; i++; continue; }
+      field += c; i++; continue;
+    }
+    if (c === '"') { inQ = true; i++; continue; }
+    if (c === ",") { row.push(field); field = ""; i++; continue; }
+    if (c === "\n") { row.push(field); out.push(row); row = []; field = ""; i++; continue; }
+    if (c === "\r") { i++; continue; }
+    field += c; i++;
+  }
+  if (field !== "" || row.length) { row.push(field); out.push(row); }
+  return out;
+}
+
+function esc(s) { return (s || "").replace(/[&<>]/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[m])); }
+
+function cell(key, v) {
+  if (key === "Datasheet" && v) return `<a href="${esc(v)}" target="_blank" rel="noopener" title="${esc(v)}">PDF&nearr;</a>`;
+  return esc(v);
+}
+
+function cls(key) { return (COLS.find(c => c[0] === key) || [,, ""])[2]; }
+
+function sorted(data) {
+  if (!sortKey) return data;
+  const copy = data.slice();
+  copy.sort((a, b) => {
+    let x = a[sortKey] || "", y = b[sortKey] || "";
+    if (sortKey === "Qty") { x = +x || 0; y = +y || 0; return (x - y) * sortDir; }
+    return x.localeCompare(y, undefined, { numeric: true }) * sortDir;
+  });
+  return copy;
+}
+
+function headRow(grouping) {
+  return "<tr>" + COLS.filter(c => !(grouping && c[0] === "Block")).map(([k, lbl]) => {
+    const arr = sortKey === k ? `<span class="arr">${sortDir > 0 ? "▲" : "▼"}</span>` : "";
+    return `<th data-k="${k}">${esc(lbl)} ${arr}</th>`;
+  }).join("") + "</tr>";
+}
+
+function bodyRow(r, grouping) {
+  return "<tr>" + COLS.filter(c => !(grouping && c[0] === "Block")).map(([k]) =>
+    `<td class="${cls(k)}">${cell(k, r[k])}</td>`).join("") + "</tr>";
+}
+
+function render() {
+  const q = document.getElementById("q").value.trim().toLowerCase();
+  const grouping = document.getElementById("grp").checked;
+  let data = rows;
+  if (q) data = data.filter(r => COLS.some(([k]) => (r[k] || "").toLowerCase().includes(q)));
+  data = sorted(data);
+
+  const ncols = COLS.length - (grouping ? 1 : 0);
+  let html = `<table><thead>${headRow(grouping)}</thead><tbody>`;
+  if (!data.length) {
+    html += `<tr><td colspan="${ncols}" class="msg">no parts match “${esc(q)}”</td></tr>`;
+  } else if (grouping) {
+    const groups = {};
+    for (const r of data) (groups[r.Block || "(unassigned)"] ||= []).push(r);
+    for (const g of Object.keys(groups).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))) {
+      const items = groups[g];
+      const qty = items.reduce((s, r) => s + (+r.Qty || 0), 0);
+      html += `<tr class="grp"><td colspan="${ncols}">${esc(g)}<span class="gn">${items.length} refs · ${qty} pcs</span></td></tr>`;
+      for (const r of items) html += bodyRow(r, grouping);
+    }
+  } else {
+    for (const r of data) html += bodyRow(r, grouping);
+  }
+  html += "</tbody></table>";
+  document.getElementById("out").innerHTML = html;
+
+  const totQty = data.reduce((s, r) => s + (+r.Qty || 0), 0);
+  document.getElementById("count").textContent = `${data.length} refs · ${totQty} pcs`;
+
+  document.querySelectorAll("th[data-k]").forEach(th => th.onclick = () => {
+    const k = th.dataset.k;
+    if (sortKey === k) sortDir = -sortDir; else { sortKey = k; sortDir = 1; }
+    render();
+  });
+}
+
+fetch("pogo-bom.csv")
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
+  .then(text => {
+    const table = parseCSV(text);
+    const header = table[0];
+    rows = table.slice(1).filter(r => r.length > 1).map(r => {
+      const o = {}; header.forEach((h, i) => o[h] = r[i] ?? ""); return o;
+    });
+    document.getElementById("q").addEventListener("input", render);
+    document.getElementById("grp").addEventListener("change", render);
+    render();
+  })
+  .catch(e => {
+    document.getElementById("out").innerHTML =
+      `<div class="msg">Couldn't load <code>pogo-bom.csv</code> (${esc(String(e))}).<br>
+       This page must be served over HTTP (GitHub Pages) — a local <code>file://</code> open can't fetch the CSV.
+       View the raw data on <a href="https://github.com/jeffmhopkins/POGO/blob/main/kicad/pogo-bom.csv" target="_blank" rel="noopener">GitHub</a>.</div>`;
+  });
+</script>
+</body>
+</html>

@@ -24,6 +24,9 @@
     a.card:hover { border-color: #00d4ff; background: #181818; }
     a.card .t { color: #7fe7ff; font-size: 15px; font-weight: bold; }
     a.card .d { color: #888; font-size: 12px; margin-top: 5px; line-height: 1.45; }
+    a.card .d code { color: #9ab; background: #1d1d1d; padding: 0 4px; border-radius: 3px; }
+    .soon { color: #ff8800; font-size: 10px; font-weight: normal; letter-spacing: .06em;
+            border: 1px solid #4a3a1a; border-radius: 3px; padding: 1px 5px; margin-left: 6px; }
     footer { color: #3a3a3a; font-size: 11px; margin-top: 26px; text-align: center; }
     footer a { color: #4a6070; }
   </style>
@@ -41,6 +44,31 @@
       <a class="card" href="plugin-topology.md">
         <div class="t">Plugin Topology &rarr;</div>
         <div class="d">Authoritative 48HP plugin spec — parameters, I/O, and DSP signal chain.</div>
+      </a>
+      <a class="card" href="https://github.com/jeffmhopkins/POGO/tree/main/plugin/src" target="_blank" rel="noopener">
+        <div class="t">Plugin Source (DSP) &rarr;</div>
+        <div class="d">The ground-truth software prototype: <code>Pogo.cpp</code> (module) and
+          <code>dsp/*.hpp</code> (per-block DSP). Specs and schematics are reverse-engineered from it.</div>
+      </a>
+      <a class="card" href="bom.html">
+        <div class="t">Bill of Materials &rarr;</div>
+        <div class="d">Interactive BOM — 476 parts with MPN, footprint, and datasheet. View the whole
+          project or group by block; search and sort.</div>
+      </a>
+      <a class="card" href="https://github.com/jeffmhopkins/POGO/tree/main/kicad" target="_blank" rel="noopener">
+        <div class="t">Schematics &rarr;</div>
+        <div class="d">Per-block KiCad schematics (10 blocks + shared-Q), generated from the netlists and
+          rendered in-browser by GitHub. See <code>SCHEMATIC-GEN-PLAN.md</code>.</div>
+      </a>
+      <a class="card" href="https://github.com/jeffmhopkins/POGO/blob/main/plugin/res/Pogo.svg" target="_blank" rel="noopener">
+        <div class="t">Front Panel (SVG) &rarr;</div>
+        <div class="d">48HP faceplate artwork, generated from <code>panel-data.yaml</code>. Edit it live in
+          the Panel Editor above.</div>
+      </a>
+      <a class="card" href="https://github.com/jeffmhopkins/POGO/blob/main/specs/board-layout/layout-notes.md" target="_blank" rel="noopener">
+        <div class="t">PCB Layout <span class="soon">Phase 5R · pending</span> &rarr;</div>
+        <div class="d">Board layout (placement + routing → Gerbers) is in progress; no
+          <code>.kicad_pcb</code> files yet. Current architecture notes.</div>
       </a>
     </div>
     <footer><a href="https://github.com/jeffmhopkins/POGO">github.com/jeffmhopkins/POGO</a></footer>
