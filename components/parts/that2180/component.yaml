@@ -1,0 +1,13 @@
+# that2180 — POGO sourced component (hand-maintained)
+slug: that2180
+mpn: THAT2180LD
+manufacturer: THAT Corporation
+supplier: '~'
+package: SOIC-8
+footprint:
+  lib: Package_SO
+  name: SOIC-8_3.9x4.9mm_P1.27mm
+datasheet:
+  url: https://thatcorp.com/2180-series-blackmer-voltage-controlled-amplifiers/
+  version: verify
+notes: Blackmer VCA; pre-LP1 VCA cell.

@@ -1,0 +1,19 @@
+# alpha_rd901f — POGO sourced component (hand-maintained)
+slug: alpha_rd901f
+mpn: RD901F-40-00D
+manufacturer: Alpha (Taiwan)
+supplier: Thonk
+package: 9mm
+footprint:
+  lib: Potentiometer_THT
+  name: Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles
+datasheet:
+  url: https://www.thonk.co.uk/shop/alpha-9mm-pots-vertical/
+  version: verify
+panel_types:
+- knob
+tapers:
+- lin
+- log
+- bipolar
+notes: 9mm panel potentiometer. Taper (lin/log/bipolar) and knob-cap size are chosen per placement.

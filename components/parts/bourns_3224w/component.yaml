@@ -1,0 +1,12 @@
+# bourns_3224w — POGO sourced component (hand-maintained)
+slug: bourns_3224w
+mpn: 3224W-1-xxx
+manufacturer: Bourns
+supplier: '~'
+package: SMD
+footprint: null
+footprint_needed: SMD trimmer 3224W
+datasheet:
+  url: https://www.bourns.com/docs/Product-Datasheets/3224.pdf
+  version: verify
+notes: SMD multiturn trimmer; audio-board bias trims.

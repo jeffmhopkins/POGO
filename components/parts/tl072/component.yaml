@@ -1,0 +1,13 @@
+# tl072 — POGO sourced component (hand-maintained)
+slug: tl072
+mpn: TL072CDT
+manufacturer: Texas Instruments
+supplier: '~'
+package: SOIC-8
+footprint:
+  lib: Package_SO
+  name: SOIC-8_3.9x4.9mm_P1.27mm
+datasheet:
+  url: https://www.ti.com/lit/ds/symlink/tl072.pdf
+  version: verify
+notes: JFET dual op-amp; general purpose / output buffers.
