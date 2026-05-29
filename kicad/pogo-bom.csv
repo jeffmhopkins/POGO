@@ -209,6 +209,53 @@ audio,R_QB_IABC_L,1,,100kΩ,0603,,,,,block-7,U51 cell B Iabc termination resisto
 audio,R_QB_IABC_R,1,,100kΩ,0603,,,,,block-7,U52 cell B Iabc termination resistor to GND
 audio,R_QB_OUT_L,1,,1kΩ,0603,,,,,block-7,U51 cell B OTA output termination resistor to GND
 audio,R_QB_OUT_R,1,,1kΩ,0603,,,,,block-7,U52 cell B OTA output termination resistor to GND
+audio,U66,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-7,"HP IRES_AMP (Q driver, half A; half B spare)"
+audio,R92,1,,100kΩ,0603,,,,,block-7,HP SUM_AMP v2 feedback input R L (R_FB_L)
+audio,R93,1,,100kΩ,0603,,,,,block-7,HP SUM_AMP v2 feedback input R R (R_FB_R)
+audio,R94,1,,100kΩ,0603,,,,,block-7,HP SUM_AMP feedback R L (R_f_L)
+audio,R95,1,,100kΩ,0603,,,,,block-7,HP SUM_AMP feedback R R (R_f_R)
+audio,R96,1,,1kΩ,0603,,,,,block-7,HP OTA1 linearizing R L (R_LIN_A_L)
+audio,R97,1,,1kΩ,0603,,,,,block-7,HP OTA2 linearizing R L (R_LIN_B_L)
+audio,R98,1,,1kΩ,0603,,,,,block-7,HP OTA1 linearizing R R (R_LIN_A_R)
+audio,R99,1,,1kΩ,0603,,,,,block-7,HP OTA2 linearizing R R (R_LIN_B_R)
+audio,R100,1,,100kΩ,0603,,,,,block-7,HP output inverting buffer R_in L (R_HP_IN_L)
+audio,R101,1,,100kΩ,0603,,,,,block-7,HP output inverting buffer R_in R (R_HP_IN_R)
+audio,R102,1,,100kΩ,0603,,,,,block-7,HP output inverting buffer R_f L (R_HP_FB_L)
+audio,R103,1,,100kΩ,0603,,,,,block-7,HP output inverting buffer R_f R (R_HP_FB_R)
+audio,R104,1,,1MΩ,0603,,,,,block-7,HP Q V→I: V_ires_L → U51 cellA Iabc (R_Iabc_L)
+audio,R105,1,,1MΩ,0603,,,,,block-7,HP Q V→I: V_ires_R → U52 cellA Iabc (R_Iabc_R)
+audio,R106,1,,100kΩ,0603,,,,,block-7,HP IRES_AMP V_bias input R (R_QBIAS)
+audio,R107,1,,100kΩ,0603,,,,,block-7,HP IRES_AMP resonance CV input R (R_QINV)
+audio,R108,1,,100kΩ,0603,,,,,block-7,HP IRES_AMP feedback R (R_f_q)
+audio,R109,1,,1MΩ,0603,,,,,block-7,HP expo I_ref fixed R; series with RV16 (R_IREF_A)
+audio,R110,1,,47kΩ,0603,,,,,block-7,HP expo V/oct scaling R (R_VOCT)
+audio,R111,1,,1kΩ,0603,,,,,block-7,HP expo emitter degeneration (R_E)
+audio,R112,1,,10kΩ,0603,,,,,block-7,HP L OTA1 buffer (v1) emitter pulldown to V-
+audio,R113,1,,10kΩ,0603,,,,,block-7,HP L OTA2 buffer (v2) emitter pulldown to V-
+audio,R114,1,,10kΩ,0603,,,,,block-7,HP R OTA1 buffer (v1) emitter pulldown to V-
+audio,R115,1,,10kΩ,0603,,,,,block-7,HP R OTA2 buffer (v2) emitter pulldown to V-
+audio,D12,1,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-7,"HP V_ires ≥0 clamp (anode GND, cathode V_ires)"
+audio,C86,1,,100nF,0603,,,,,block-7,HP expo I_ref node bypass (C0G)
+audio,C87,1,,10nF,0402,,,,,block-7,HP OTA Iabc bypass L (C_IABC_L)
+audio,C88,1,,10nF,0402,,,,,block-7,HP OTA Iabc bypass R (C_IABC_R)
+audio,C89,1,,10nF,0402,,,,,block-7,HP Q-cell A Iabc bypass L (U51)
+audio,C90,1,,10nF,0402,,,,,block-7,HP Q-cell A Iabc bypass R (U52)
+audio,C91,1,,100nF,0603,,,,,block-7,U49 V+ decoupling
+audio,C92,1,,100nF,0603,,,,,block-7,U49 V- decoupling
+audio,C93,1,,100nF,0603,,,,,block-7,U50 V+ decoupling
+audio,C94,1,,100nF,0603,,,,,block-7,U50 V- decoupling
+audio,C95,1,,100nF,0603,,,,,block-7,U51 V+ decoupling
+audio,C96,1,,100nF,0603,,,,,block-7,U51 V- decoupling
+audio,C97,1,,100nF,0603,,,,,block-7,U52 V+ decoupling
+audio,C98,1,,100nF,0603,,,,,block-7,U52 V- decoupling
+audio,C99,1,,100nF,0603,,,,,block-7,U53 V+ decoupling
+audio,C100,1,,100nF,0603,,,,,block-7,U53 V- decoupling
+audio,C101,1,,100nF,0603,,,,,block-7,U54 V+ decoupling
+audio,C102,1,,100nF,0603,,,,,block-7,U54 V- decoupling
+audio,C103,1,,100nF,0603,,,,,block-7,U55 +12V rail bypass (THAT340 no Vcc pin)
+audio,C104,1,,100nF,0603,,,,,block-7,U55 -12V rail bypass
+audio,C105,1,,100nF,0603,,,,,block-7,U66 V+ decoupling
+audio,C106,1,,100nF,0603,,,,,block-7,U66 V- decoupling
 audio,U56,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-8,LP2 OTA integrators L
 audio,U57,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-8,LP2 OTA integrators R
 audio,U58,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/opa1612.pdf,block-8,LP2 SUM_AMP + output buffer L
