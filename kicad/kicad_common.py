@@ -323,6 +323,203 @@ def sym_ne5532():
   )'''
 
 
+def sym_opa1612():
+    """OPA1612 low-noise dual op-amp SOIC-8. Pin-compatible with TL072.
+    Unit A: Out=1, In-=2, In+=3. Unit B: Out=7, In-=6, In+=5. V+=8, V-=4.
+    Verify against TI SBOS450 datasheet before PCB layout."""
+    t = _opamp_triangle()
+    return f'''  (symbol "Amplifier_Operational:OPA1612"
+    (pin_names (offset 0.254) hide)
+    (pin_numbers hide)
+    (property "Reference" "U" (at 5.08 5.08 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "OPA1612" (at 5.08 -5.08 0) (effects (font (size 1.27 1.27))))
+    (symbol "OPA1612_0_1"
+      (rectangle (start -1 -1) (end 1 1) (stroke (width 0) (type default)) (fill (type none)))
+    )
+    (symbol "OPA1612_1_1"
+      {t}
+      (pin input line (at -7.62 2.54 0) (length 2.54) (name "In-" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27)))))
+      (pin input line (at -7.62 -2.54 0) (length 2.54) (name "In+" (effects (font (size 1.27 1.27)))) (number "3" (effects (font (size 1.27 1.27)))))
+      (pin output line (at 7.62 0 180) (length 2.54) (name "Out" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27)))))
+    )
+    (symbol "OPA1612_2_1"
+      {t}
+      (pin input line (at -7.62 2.54 0) (length 2.54) (name "In-" (effects (font (size 1.27 1.27)))) (number "6" (effects (font (size 1.27 1.27)))))
+      (pin input line (at -7.62 -2.54 0) (length 2.54) (name "In+" (effects (font (size 1.27 1.27)))) (number "5" (effects (font (size 1.27 1.27)))))
+      (pin output line (at 7.62 0 180) (length 2.54) (name "Out" (effects (font (size 1.27 1.27)))) (number "7" (effects (font (size 1.27 1.27)))))
+    )
+    (symbol "OPA1612_3_1"
+      (pin power_in line (at 0 7.62 270) (length 2.54) (name "V+" (effects (font (size 1.27 1.27)))) (number "8" (effects (font (size 1.27 1.27)))))
+      (pin power_in line (at 0 -7.62 90) (length 2.54) (name "V-" (effects (font (size 1.27 1.27)))) (number "4" (effects (font (size 1.27 1.27)))))
+    )
+  )'''
+
+
+def sym_bat54s():
+    """BAT54S dual series Schottky SOT-23.
+    Series config: Pin1=Anode D1, Pin2=Common (cathode D1 + anode D2, signal node),
+    Pin3=Cathode D2. Both diodes conduct pin1→pin2→pin3.
+    In POGO input clamps: Pin1→-12V, Pin2→signal node, Pin3→+12V
+    (see specs/aux/aux-cv-protection.md — pin orientation is CRITICAL).
+    Verify against Diodes Inc. DS11005 datasheet before PCB layout."""
+    return '''  (symbol "Diode:BAT54S"
+    (pin_names (offset 0.254) hide)
+    (pin_numbers hide)
+    (property "Reference" "D" (at 0 3.81 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "BAT54S" (at 0 2.54 0) (effects (font (size 1.27 1.27))))
+    (symbol "BAT54S_0_1"
+      (polyline (pts (xy -5.08 0) (xy 5.08 0)) (stroke (width 0.254) (type default)) (fill (type none)))
+      (polyline (pts (xy 0 0) (xy 0 -2.54)) (stroke (width 0.254) (type default)) (fill (type none)))
+      (polyline (pts (xy -3.302 1.016) (xy -1.778 0) (xy -3.302 -1.016) (xy -3.302 1.016)) (stroke (width 0.254) (type default)) (fill (type none)))
+      (polyline (pts (xy -1.778 1.016) (xy -1.778 -1.016)) (stroke (width 0.254) (type default)) (fill (type none)))
+      (polyline (pts (xy 1.778 1.016) (xy 3.302 0) (xy 1.778 -1.016) (xy 1.778 1.016)) (stroke (width 0.254) (type default)) (fill (type none)))
+      (polyline (pts (xy 3.302 1.016) (xy 3.302 -1.016)) (stroke (width 0.254) (type default)) (fill (type none)))
+    )
+    (symbol "BAT54S_1_1"
+      (pin passive line (at -7.62 0 0) (length 2.54) (name "A1" (effects (font (size 1.016 1.016)))) (number "1" (effects (font (size 1.016 1.016)))))
+      (pin passive line (at 0 -5.08 90) (length 2.54) (name "COM" (effects (font (size 1.016 1.016)))) (number "2" (effects (font (size 1.016 1.016)))))
+      (pin passive line (at 7.62 0 180) (length 2.54) (name "K2" (effects (font (size 1.016 1.016)))) (number "3" (effects (font (size 1.016 1.016)))))
+    )
+  )'''
+
+
+def sym_jack():
+    """Audio_Jack_3.5mm_SwitchT with tip-switching lug (Thonkiconn PJ301M-12 / PJ398SM).
+    Pins: T=Tip(1), S=Sleeve(2), SW=Switch-lug(3, normalled to tip when unpatched)."""
+    return '''  (symbol "Device:Audio_Jack_3.5mm_SwitchT"
+    (pin_names (offset 1.016) hide)
+    (pin_numbers hide)
+    (property "Reference" "J" (at 0 5.08 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "Audio_Jack_3.5mm_SwitchT" (at 0 -7.62 0) (effects (font (size 1.27 1.27))))
+    (symbol "Audio_Jack_3.5mm_SwitchT_0_1"
+      (circle (center 0 0) (radius 2.159) (stroke (width 0.254) (type default)) (fill (type none)))
+      (polyline (pts (xy -2.159 0) (xy -3.175 0)) (stroke (width 0.254) (type default)) (fill (type none)))
+      (polyline (pts (xy 2.159 0) (xy 3.175 0)) (stroke (width 0.254) (type default)) (fill (type none)))
+    )
+    (symbol "Audio_Jack_3.5mm_SwitchT_1_1"
+      (pin passive line (at -5.08 0 0) (length 1.905)
+        (name "T" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27)))))
+      (pin passive line (at 5.08 0 180) (length 1.905)
+        (name "S" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27)))))
+      (pin passive line (at 0 -5.08 90) (length 1.905)
+        (name "SW" (effects (font (size 1.27 1.27)))) (number "3" (effects (font (size 1.27 1.27)))))
+    )
+  )'''
+
+
+def sym_diode():
+    """Generic diode (Device:D), e.g. 1N4148W. Pins A (anode, top), K (cathode, bottom).
+    Pad names A/K match the SOD-123 footprint."""
+    return '''  (symbol "Device:D"
+    (pin_names (offset 0) hide)
+    (pin_numbers hide)
+    (property "Reference" "D" (at 2.032 0 90) (effects (font (size 1.27 1.27))))
+    (property "Value" "D" (at -2.032 0 90) (effects (font (size 1.27 1.27))))
+    (symbol "D_0_1"
+      (polyline (pts (xy -1.27 1.27) (xy 1.27 1.27) (xy 0 -1.016) (xy -1.27 1.27)) (stroke (width 0.254) (type default)) (fill (type none)))
+      (polyline (pts (xy -1.27 -1.016) (xy 1.27 -1.016)) (stroke (width 0.254) (type default)) (fill (type none)))
+    )
+    (symbol "D_1_1"
+      (pin passive line (at 0 3.81 270) (length 2.794) (name "A" (effects (font (size 1.27 1.27)))) (number "A" (effects (font (size 1.27 1.27)))))
+      (pin passive line (at 0 -3.81 90) (length 2.794) (name "K" (effects (font (size 1.27 1.27)))) (number "K" (effects (font (size 1.27 1.27)))))
+    )
+  )'''
+
+
+def sym_zener():
+    """Zener diode (Diode:D_Zener), e.g. BZX84C10. Pins 1=A (anode, top), 3=K (cathode,
+    bottom) to match the BZX84 SOT-23 land (pin 2 = N/C, not on the symbol)."""
+    return '''  (symbol "Diode:D_Zener"
+    (pin_names (offset 0) hide)
+    (pin_numbers hide)
+    (property "Reference" "D" (at 2.032 0 90) (effects (font (size 1.27 1.27))))
+    (property "Value" "D_Zener" (at -2.032 0 90) (effects (font (size 1.27 1.27))))
+    (symbol "D_Zener_0_1"
+      (polyline (pts (xy -1.27 1.016) (xy 1.27 1.016) (xy 0 -1.27) (xy -1.27 1.016)) (stroke (width 0.254) (type default)) (fill (type none)))
+      (polyline (pts (xy -1.778 1.27) (xy -1.27 1.27) (xy -1.27 1.016) (xy 1.27 1.016) (xy 1.27 0.762) (xy 1.778 0.762)) (stroke (width 0.254) (type default)) (fill (type none)))
+    )
+    (symbol "D_Zener_1_1"
+      (pin passive line (at 0 3.81 270) (length 2.794) (name "A" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27)))))
+      (pin passive line (at 0 -3.81 90) (length 2.794) (name "K" (effects (font (size 1.27 1.27)))) (number "3" (effects (font (size 1.27 1.27)))))
+    )
+  )'''
+
+
+def zener_pins(ox, oy, angle=0):
+    """Zener (BZX84 SOT-23): pin 1 = A (anode, top), 3 = K (cathode, bottom).
+    Pad 2 (N/C) is intentionally not a symbol pin. Matches sym_zener()."""
+    return {
+        "1": _rot(ox, oy, angle, 0,  3.81),
+        "3": _rot(ox, oy, angle, 0, -3.81),
+    }
+
+
+def sym_led():
+    """LED (Device:LED). Pins A (anode, top), K (cathode, bottom). Pad names A/K
+    match LED_THT/LED_D3.0mm."""
+    return '''  (symbol "Device:LED"
+    (pin_names (offset 1.016) hide)
+    (pin_numbers hide)
+    (property "Reference" "LED" (at 2.54 0 90) (effects (font (size 1.27 1.27))))
+    (property "Value" "LED" (at -2.54 0 90) (effects (font (size 1.27 1.27))))
+    (symbol "LED_0_1"
+      (polyline (pts (xy -1.27 1.27) (xy 1.27 1.27) (xy 0 -1.016) (xy -1.27 1.27)) (stroke (width 0.254) (type default)) (fill (type none)))
+      (polyline (pts (xy -1.27 -1.016) (xy 1.27 -1.016)) (stroke (width 0.254) (type default)) (fill (type none)))
+      (polyline (pts (xy 1.27 1.778) (xy 2.286 2.794)) (stroke (width 0.254) (type default)) (fill (type none)))
+      (polyline (pts (xy 0.254 2.032) (xy 1.27 3.048)) (stroke (width 0.254) (type default)) (fill (type none)))
+    )
+    (symbol "LED_1_1"
+      (pin passive line (at 0 3.81 270) (length 2.794) (name "A" (effects (font (size 1.27 1.27)))) (number "A" (effects (font (size 1.27 1.27)))))
+      (pin passive line (at 0 -3.81 90) (length 2.794) (name "K" (effects (font (size 1.27 1.27)))) (number "K" (effects (font (size 1.27 1.27)))))
+    )
+  )'''
+
+
+def diode2_pins(ox, oy, angle=0):
+    """2-pin diode/LED: A (anode, top), K (cathode, bottom). Matches sym_diode/sym_led."""
+    return {
+        "A": _rot(ox, oy, angle, 0,  3.81),
+        "K": _rot(ox, oy, angle, 0, -3.81),
+    }
+
+
+def _sym_dpdt(lib_id, value):
+    """Shared DPDT 6-pin toggle lib_symbol (Dailywell DW3/DW5 2M body).
+    Pole A: 1=A1, 2=A_COM, 3=A2.  Pole B: 4=B1, 5=B_COM, 6=B2.
+    Commons (2,5) on the left; throws (1,3,4,6) on the right. Matches dpdt6_pins().
+    Footprint pad map (2x3 grid) lives in the .kicad_mod; symbol geometry is
+    independent — connectivity is by pin number."""
+    return f'''  (symbol "{lib_id}"
+    (pin_names (offset 0.254) hide)
+    (pin_numbers hide)
+    (property "Reference" "SW" (at 0 9.144 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "{value}" (at 0 -9.144 0) (effects (font (size 1.27 1.27))))
+    (symbol "{value}_0_1"
+      (rectangle (start -2.54 -7.62) (end 2.54 7.62) (stroke (width 0.254) (type default)) (fill (type background)))
+      (polyline (pts (xy -2.54 5.08) (xy 1.27 6.35)) (stroke (width 0.254) (type default)) (fill (type none)))
+      (polyline (pts (xy -2.54 -5.08) (xy 1.27 -3.81)) (stroke (width 0.254) (type default)) (fill (type none)))
+    )
+    (symbol "{value}_1_1"
+      (pin passive line (at 5.08 6.35 180) (length 2.54) (name "A1" (effects (font (size 1.016 1.016)))) (number "1" (effects (font (size 1.016 1.016)))))
+      (pin passive line (at -5.08 5.08 0) (length 2.54) (name "A_COM" (effects (font (size 1.016 1.016)))) (number "2" (effects (font (size 1.016 1.016)))))
+      (pin passive line (at 5.08 3.81 180) (length 2.54) (name "A2" (effects (font (size 1.016 1.016)))) (number "3" (effects (font (size 1.016 1.016)))))
+      (pin passive line (at 5.08 -3.81 180) (length 2.54) (name "B1" (effects (font (size 1.016 1.016)))) (number "4" (effects (font (size 1.016 1.016)))))
+      (pin passive line (at -5.08 -5.08 0) (length 2.54) (name "B_COM" (effects (font (size 1.016 1.016)))) (number "5" (effects (font (size 1.016 1.016)))))
+      (pin passive line (at 5.08 -6.35 180) (length 2.54) (name "B2" (effects (font (size 1.016 1.016)))) (number "6" (effects (font (size 1.016 1.016)))))
+    )
+  )'''
+
+
+def sym_dw3():
+    """Dailywell DW3 (2M DPDT ON-ON) sub-mini toggle — 2-position. 6-pin DPDT body."""
+    return _sym_dpdt("Switch:SW_Dailywell_DW3", "SW_DW3")
+
+
+def sym_dw5():
+    """Dailywell DW5 (2M DPDT ON-ON-ON) sub-mini toggle — 3-position. Same 6-pin body."""
+    return _sym_dpdt("Switch:SW_Dailywell_DW5", "SW_DW5")
+
+
 def sym_tl074():
     """TL074 quad op-amp SOIC-14.
     Unit A: Out=1, In-=2, In+=3. Unit B: Out=7, In-=6, In+=5.
@@ -356,10 +553,10 @@ def sym_tl074():
 
 
 def sym_lm13700():
-    """LM13700 dual OTA SOIC-16.
-    Cell A: IABC=1, IN-=2, IN+=3, V-=4, Out=5, DiodeIn=6, DiodeOut=7, V+=8.
-    Cell B: DiodeOut=9, DiodeIn=10, Out=11, V+=12(NC tie), IN+=13, IN-=14, IABC=15, V-=16.
-    Verify against TI SNAS602 datasheet before PCB layout — pin 12 and 16 in particular."""
+    """LM13700 dual OTA SOIC-16. Pinout per TI SNOSBW2F, page 3 Pin Functions:
+    1=Iabc_A, 2=DiodeBias_A, 3=In+_A, 4=In-_A, 5=Out_A, 6=V-, 7=BufIn_A, 8=BufOut_A,
+    9=BufOut_B, 10=BufIn_B, 11=V+, 12=Out_B, 13=In-_B, 14=In+_B, 15=DiodeBias_B, 16=Iabc_B.
+    (Corrected 2026-05-29 from datasheet — prior map had 13/16 pins wrong incl. V+/V-.)"""
     return '''  (symbol "Amplifier_Operational:LM13700"
     (pin_names (offset 0.254) hide)
     (pin_numbers hide)
@@ -369,117 +566,125 @@ def sym_lm13700():
       (rectangle (start -1 -1) (end 1 1) (stroke (width 0) (type default)) (fill (type none)))
     )
     (symbol "LM13700_1_1"
-      (rectangle (start -8.89 -8.89) (end 8.89 8.89) (stroke (width 0.254) (type default)) (fill (type background)))
-      (pin input line (at -11.43 6.35 0) (length 2.54) (name "IABC_A" (effects (font (size 1.016 1.016)))) (number "1" (effects (font (size 1.016 1.016)))))
-      (pin input line (at -11.43 3.81 0) (length 2.54) (name "IN-_A" (effects (font (size 1.016 1.016)))) (number "2" (effects (font (size 1.016 1.016)))))
-      (pin input line (at -11.43 1.27 0) (length 2.54) (name "IN+_A" (effects (font (size 1.016 1.016)))) (number "3" (effects (font (size 1.016 1.016)))))
-      (pin power_in line (at -11.43 -1.27 0) (length 2.54) (name "V-" (effects (font (size 1.016 1.016)))) (number "4" (effects (font (size 1.016 1.016)))))
-      (pin output line (at 11.43 6.35 180) (length 2.54) (name "Out_A" (effects (font (size 1.016 1.016)))) (number "5" (effects (font (size 1.016 1.016)))))
-      (pin input line (at 11.43 3.81 180) (length 2.54) (name "DiodeIn_A" (effects (font (size 1.016 1.016)))) (number "6" (effects (font (size 1.016 1.016)))))
-      (pin output line (at 11.43 1.27 180) (length 2.54) (name "DiodeOut_A" (effects (font (size 1.016 1.016)))) (number "7" (effects (font (size 1.016 1.016)))))
-      (pin power_in line (at 11.43 -1.27 180) (length 2.54) (name "V+" (effects (font (size 1.016 1.016)))) (number "8" (effects (font (size 1.016 1.016)))))
-      (pin output line (at 11.43 -3.81 180) (length 2.54) (name "DiodeOut_B" (effects (font (size 1.016 1.016)))) (number "9" (effects (font (size 1.016 1.016)))))
-      (pin input line (at 11.43 -6.35 180) (length 2.54) (name "DiodeIn_B" (effects (font (size 1.016 1.016)))) (number "10" (effects (font (size 1.016 1.016)))))
-      (pin output line (at -11.43 -3.81 0) (length 2.54) (name "Out_B" (effects (font (size 1.016 1.016)))) (number "11" (effects (font (size 1.016 1.016)))))
-      (pin no_connect line (at -11.43 -5.08 0) (length 2.54) (name "NC" (effects (font (size 1.016 1.016)))) (number "12" (effects (font (size 1.016 1.016)))))
-      (pin input line (at -11.43 -6.35 0) (length 2.54) (name "IN+_B" (effects (font (size 1.016 1.016)))) (number "13" (effects (font (size 1.016 1.016)))))
-      (pin input line (at -11.43 -7.62 0) (length 2.54) (name "IN-_B" (effects (font (size 1.016 1.016)))) (number "14" (effects (font (size 1.016 1.016)))))
-      (pin input line (at -11.43 -8.89 0) (length 2.54) (name "IABC_B" (effects (font (size 1.016 1.016)))) (number "15" (effects (font (size 1.016 1.016)))))
-      (pin power_in line (at 11.43 -8.89 180) (length 2.54) (name "V-" (effects (font (size 1.016 1.016)))) (number "16" (effects (font (size 1.016 1.016)))))
+      (rectangle (start -8.89 -10.16) (end 8.89 10.16) (stroke (width 0.254) (type default)) (fill (type background)))
+      (pin input line (at -11.43 8.89 0) (length 2.54) (name "Iabc_A" (effects (font (size 1.016 1.016)))) (number "1" (effects (font (size 1.016 1.016)))))
+      (pin input line (at -11.43 6.35 0) (length 2.54) (name "DiodeBias_A" (effects (font (size 1.016 1.016)))) (number "2" (effects (font (size 1.016 1.016)))))
+      (pin input line (at -11.43 3.81 0) (length 2.54) (name "In+_A" (effects (font (size 1.016 1.016)))) (number "3" (effects (font (size 1.016 1.016)))))
+      (pin input line (at -11.43 1.27 0) (length 2.54) (name "In-_A" (effects (font (size 1.016 1.016)))) (number "4" (effects (font (size 1.016 1.016)))))
+      (pin output line (at -11.43 -1.27 0) (length 2.54) (name "Out_A" (effects (font (size 1.016 1.016)))) (number "5" (effects (font (size 1.016 1.016)))))
+      (pin power_in line (at -11.43 -3.81 0) (length 2.54) (name "V-" (effects (font (size 1.016 1.016)))) (number "6" (effects (font (size 1.016 1.016)))))
+      (pin input line (at -11.43 -6.35 0) (length 2.54) (name "BufIn_A" (effects (font (size 1.016 1.016)))) (number "7" (effects (font (size 1.016 1.016)))))
+      (pin output line (at -11.43 -8.89 0) (length 2.54) (name "BufOut_A" (effects (font (size 1.016 1.016)))) (number "8" (effects (font (size 1.016 1.016)))))
+      (pin output line (at 11.43 -8.89 180) (length 2.54) (name "BufOut_B" (effects (font (size 1.016 1.016)))) (number "9" (effects (font (size 1.016 1.016)))))
+      (pin input line (at 11.43 -6.35 180) (length 2.54) (name "BufIn_B" (effects (font (size 1.016 1.016)))) (number "10" (effects (font (size 1.016 1.016)))))
+      (pin power_in line (at 11.43 -3.81 180) (length 2.54) (name "V+" (effects (font (size 1.016 1.016)))) (number "11" (effects (font (size 1.016 1.016)))))
+      (pin output line (at 11.43 -1.27 180) (length 2.54) (name "Out_B" (effects (font (size 1.016 1.016)))) (number "12" (effects (font (size 1.016 1.016)))))
+      (pin input line (at 11.43 1.27 180) (length 2.54) (name "In-_B" (effects (font (size 1.016 1.016)))) (number "13" (effects (font (size 1.016 1.016)))))
+      (pin input line (at 11.43 3.81 180) (length 2.54) (name "In+_B" (effects (font (size 1.016 1.016)))) (number "14" (effects (font (size 1.016 1.016)))))
+      (pin input line (at 11.43 6.35 180) (length 2.54) (name "DiodeBias_B" (effects (font (size 1.016 1.016)))) (number "15" (effects (font (size 1.016 1.016)))))
+      (pin input line (at 11.43 8.89 180) (length 2.54) (name "Iabc_B" (effects (font (size 1.016 1.016)))) (number "16" (effects (font (size 1.016 1.016)))))
     )
   )'''
 
 
 def sym_that340():
-    """THAT340 quad NPN expo converter SOIC-16.
-    4 matched NPN transistors: Q1-Q4.
-    Pinout (verify against THAT340 datasheet before PCB layout):
-    Q1: B=1, C=2, E=3. Q2: B=16, C=15, E=14.
-    Q3: B=5, C=6, E=7. Q4: B=12, C=11, E=10.
-    Substrate/GND=4,8,9,13. V+=8 (or substrate tie — check datasheet)."""
+    """THAT340 matched transistor array SO14 (THAT340S14-U): 2 NPN (Q1,Q2) + 2 PNP (Q3,Q4).
+    Pinout per THAT 300-Series datasheet Doc 600041 Rev 04, Fig 3:
+    1=Q1_C, 2=Q1_B, 3=Q1_E, 4=SUB, 5=Q3_E, 6=Q3_B, 7=Q3_C,
+    8=Q4_C, 9=Q4_B, 10=Q4_E, 11=SUB, 12=Q2_E, 13=Q2_B, 14=Q2_C.
+    For the V/oct expo converter use the matched NPN pair Q1 (1,2,3) + Q2 (14,13,12).
+    (Corrected 2026-05-29 — was wrongly a 16-pin all-NPN map.)"""
     return '''  (symbol "POGO:THAT340"
     (pin_names (offset 0.254) hide)
     (pin_numbers hide)
     (property "Reference" "U" (at 9.144 9.144 0) (effects (font (size 1.27 1.27))))
     (property "Value" "THAT340" (at 9.144 -9.144 0) (effects (font (size 1.27 1.27))))
     (symbol "THAT340_0_1"
-      (rectangle (start -8.89 -10.16) (end 8.89 10.16) (stroke (width 0.254) (type default)) (fill (type background)))
+      (rectangle (start -8.89 -8.89) (end 8.89 8.89) (stroke (width 0.254) (type default)) (fill (type background)))
     )
     (symbol "THAT340_1_1"
-      (pin input line (at -11.43 8.89 0) (length 2.54) (name "B1" (effects (font (size 1.016 1.016)))) (number "1" (effects (font (size 1.016 1.016)))))
-      (pin output line (at 11.43 8.89 180) (length 2.54) (name "C1" (effects (font (size 1.016 1.016)))) (number "2" (effects (font (size 1.016 1.016)))))
-      (pin passive line (at 11.43 6.35 180) (length 2.54) (name "E1" (effects (font (size 1.016 1.016)))) (number "3" (effects (font (size 1.016 1.016)))))
-      (pin power_in line (at -11.43 6.35 0) (length 2.54) (name "SUB" (effects (font (size 1.016 1.016)))) (number "4" (effects (font (size 1.016 1.016)))))
-      (pin input line (at -11.43 3.81 0) (length 2.54) (name "B3" (effects (font (size 1.016 1.016)))) (number "5" (effects (font (size 1.016 1.016)))))
-      (pin output line (at 11.43 3.81 180) (length 2.54) (name "C3" (effects (font (size 1.016 1.016)))) (number "6" (effects (font (size 1.016 1.016)))))
-      (pin passive line (at 11.43 1.27 180) (length 2.54) (name "E3" (effects (font (size 1.016 1.016)))) (number "7" (effects (font (size 1.016 1.016)))))
-      (pin power_in line (at -11.43 1.27 0) (length 2.54) (name "SUB" (effects (font (size 1.016 1.016)))) (number "8" (effects (font (size 1.016 1.016)))))
-      (pin power_in line (at -11.43 -1.27 0) (length 2.54) (name "SUB" (effects (font (size 1.016 1.016)))) (number "9" (effects (font (size 1.016 1.016)))))
-      (pin passive line (at 11.43 -1.27 180) (length 2.54) (name "E4" (effects (font (size 1.016 1.016)))) (number "10" (effects (font (size 1.016 1.016)))))
-      (pin output line (at 11.43 -3.81 180) (length 2.54) (name "C4" (effects (font (size 1.016 1.016)))) (number "11" (effects (font (size 1.016 1.016)))))
-      (pin input line (at -11.43 -3.81 0) (length 2.54) (name "B4" (effects (font (size 1.016 1.016)))) (number "12" (effects (font (size 1.016 1.016)))))
-      (pin power_in line (at -11.43 -6.35 0) (length 2.54) (name "SUB" (effects (font (size 1.016 1.016)))) (number "13" (effects (font (size 1.016 1.016)))))
-      (pin passive line (at 11.43 -6.35 180) (length 2.54) (name "E2" (effects (font (size 1.016 1.016)))) (number "14" (effects (font (size 1.016 1.016)))))
-      (pin output line (at 11.43 -8.89 180) (length 2.54) (name "C2" (effects (font (size 1.016 1.016)))) (number "15" (effects (font (size 1.016 1.016)))))
-      (pin input line (at -11.43 -8.89 0) (length 2.54) (name "B2" (effects (font (size 1.016 1.016)))) (number "16" (effects (font (size 1.016 1.016)))))
+      (pin output line (at -11.43 7.62 0) (length 2.54) (name "Q1_C" (effects (font (size 1.016 1.016)))) (number "1" (effects (font (size 1.016 1.016)))))
+      (pin input line (at -11.43 5.08 0) (length 2.54) (name "Q1_B" (effects (font (size 1.016 1.016)))) (number "2" (effects (font (size 1.016 1.016)))))
+      (pin passive line (at -11.43 2.54 0) (length 2.54) (name "Q1_E" (effects (font (size 1.016 1.016)))) (number "3" (effects (font (size 1.016 1.016)))))
+      (pin power_in line (at -11.43 0 0) (length 2.54) (name "SUB" (effects (font (size 1.016 1.016)))) (number "4" (effects (font (size 1.016 1.016)))))
+      (pin passive line (at -11.43 -2.54 0) (length 2.54) (name "Q3_E" (effects (font (size 1.016 1.016)))) (number "5" (effects (font (size 1.016 1.016)))))
+      (pin input line (at -11.43 -5.08 0) (length 2.54) (name "Q3_B" (effects (font (size 1.016 1.016)))) (number "6" (effects (font (size 1.016 1.016)))))
+      (pin output line (at -11.43 -7.62 0) (length 2.54) (name "Q3_C" (effects (font (size 1.016 1.016)))) (number "7" (effects (font (size 1.016 1.016)))))
+      (pin output line (at 11.43 -7.62 180) (length 2.54) (name "Q4_C" (effects (font (size 1.016 1.016)))) (number "8" (effects (font (size 1.016 1.016)))))
+      (pin input line (at 11.43 -5.08 180) (length 2.54) (name "Q4_B" (effects (font (size 1.016 1.016)))) (number "9" (effects (font (size 1.016 1.016)))))
+      (pin passive line (at 11.43 -2.54 180) (length 2.54) (name "Q4_E" (effects (font (size 1.016 1.016)))) (number "10" (effects (font (size 1.016 1.016)))))
+      (pin power_in line (at 11.43 0 180) (length 2.54) (name "SUB" (effects (font (size 1.016 1.016)))) (number "11" (effects (font (size 1.016 1.016)))))
+      (pin passive line (at 11.43 2.54 180) (length 2.54) (name "Q2_E" (effects (font (size 1.016 1.016)))) (number "12" (effects (font (size 1.016 1.016)))))
+      (pin input line (at 11.43 5.08 180) (length 2.54) (name "Q2_B" (effects (font (size 1.016 1.016)))) (number "13" (effects (font (size 1.016 1.016)))))
+      (pin output line (at 11.43 7.62 180) (length 2.54) (name "Q2_C" (effects (font (size 1.016 1.016)))) (number "14" (effects (font (size 1.016 1.016)))))
     )
   )'''
 
 
 def sym_that2180():
-    """THAT2180 current-controlled VCA SOIC-8.
-    Pins (verify against THAT2180 datasheet):
-    1=IN+, 2=IN-, 3=GAIN, 4=V-, 5=OUT-, 6=OUT+, 7=NC, 8=V+."""
+    """THAT2180 Blackmer current-in/current-out VCA SOIC-8.
+    Pinout per THAT 2180-Series datasheet (Doc 600029 Rev 02), Table 1:
+    1=Input, 2=Ec+, 3=Ec-, 4=Sym, 5=V-, 6=Gnd, 7=V+, 8=Output.
+    Current-in (pin 1) / current-out (pin 8): needs an R_in (V->I) at the input and
+    a transimpedance op-amp (I->V) at the output. Gain via Ec+ (pin 2, +6.1 mV/dB)."""
     return '''  (symbol "POGO:THAT2180"
     (pin_names (offset 0.254) hide)
     (pin_numbers hide)
-    (property "Reference" "U" (at 5.08 5.08 0) (effects (font (size 1.27 1.27))))
-    (property "Value" "THAT2180" (at 5.08 -5.08 0) (effects (font (size 1.27 1.27))))
+    (property "Reference" "U" (at 5.08 7.62 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "THAT2180" (at 5.08 -7.62 0) (effects (font (size 1.27 1.27))))
     (symbol "THAT2180_0_1"
       (rectangle (start -6.35 -6.35) (end 6.35 6.35) (stroke (width 0.254) (type default)) (fill (type background)))
     )
     (symbol "THAT2180_1_1"
-      (pin input line (at -8.89 5.08 0) (length 2.54) (name "IN+" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27)))))
-      (pin input line (at -8.89 2.54 0) (length 2.54) (name "IN-" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27)))))
-      (pin input line (at -8.89 0 0) (length 2.54) (name "GAIN" (effects (font (size 1.27 1.27)))) (number "3" (effects (font (size 1.27 1.27)))))
-      (pin power_in line (at -8.89 -2.54 0) (length 2.54) (name "V-" (effects (font (size 1.27 1.27)))) (number "4" (effects (font (size 1.27 1.27)))))
-      (pin output line (at 8.89 -2.54 180) (length 2.54) (name "OUT-" (effects (font (size 1.27 1.27)))) (number "5" (effects (font (size 1.27 1.27)))))
-      (pin output line (at 8.89 0 180) (length 2.54) (name "OUT+" (effects (font (size 1.27 1.27)))) (number "6" (effects (font (size 1.27 1.27)))))
-      (pin no_connect line (at 8.89 2.54 180) (length 2.54) (name "NC" (effects (font (size 1.27 1.27)))) (number "7" (effects (font (size 1.27 1.27)))))
-      (pin power_in line (at 8.89 5.08 180) (length 2.54) (name "V+" (effects (font (size 1.27 1.27)))) (number "8" (effects (font (size 1.27 1.27)))))
+      (pin input line (at -8.89 5.08 0) (length 2.54) (name "Input" (effects (font (size 1.016 1.016)))) (number "1" (effects (font (size 1.016 1.016)))))
+      (pin input line (at -8.89 2.54 0) (length 2.54) (name "Ec+" (effects (font (size 1.016 1.016)))) (number "2" (effects (font (size 1.016 1.016)))))
+      (pin input line (at -8.89 0 0) (length 2.54) (name "Ec-" (effects (font (size 1.016 1.016)))) (number "3" (effects (font (size 1.016 1.016)))))
+      (pin input line (at -8.89 -2.54 0) (length 2.54) (name "Sym" (effects (font (size 1.016 1.016)))) (number "4" (effects (font (size 1.016 1.016)))))
+      (pin power_in line (at -8.89 -5.08 0) (length 2.54) (name "Gnd" (effects (font (size 1.016 1.016)))) (number "6" (effects (font (size 1.016 1.016)))))
+      (pin output line (at 8.89 5.08 180) (length 2.54) (name "Output" (effects (font (size 1.016 1.016)))) (number "8" (effects (font (size 1.016 1.016)))))
+      (pin power_in line (at 8.89 2.54 180) (length 2.54) (name "V+" (effects (font (size 1.016 1.016)))) (number "7" (effects (font (size 1.016 1.016)))))
+      (pin power_in line (at 8.89 -2.54 180) (length 2.54) (name "V-" (effects (font (size 1.016 1.016)))) (number "5" (effects (font (size 1.016 1.016)))))
     )
   )'''
 
 
 def sym_cd4053():
-    """CD4053 triple 2-channel analog switch SOIC-16.
-    Three independent SPDT switches (A, B, C) with shared INH and V_EE.
-    Verify against TI CD4053B datasheet before PCB layout."""
+    """CD4053 triple 2-channel (SPDT) analog switch, SOIC-16.
+
+    Datasheet-correct pinout (TI CD4053B, SCHS059 / global-OUP CD4051-53 sheet):
+      selects  A=11 (ch X), B=10 (ch Y), C=9 (ch Z);  INH=6
+      supplies VDD=16, VSS=8 (digital GND / 0V), VEE=7 (negative analog rail)
+      channel X (sel A): common X=14, X0=12, X1=13
+      channel Y (sel B): common Y=15, Y0=2,  Y1=1
+      channel Z (sel C): common Z=4,  Z0=5,  Z1=3
+    The prior symbol scrambled the channel pin numbers (e.g. 15 is the Y common,
+    not X1; 1/2/3 and 4/5 were swapped) and overlapped VEE(7) with X1_C(12) at one
+    coordinate — both corrected here. Pin geometry mirrored in cd4053_pins()."""
     return '''  (symbol "Analog_Switch:CD4053"
     (pin_names (offset 0.254) hide)
     (pin_numbers hide)
-    (property "Reference" "U" (at 7.62 7.62 0) (effects (font (size 1.27 1.27))))
-    (property "Value" "CD4053" (at 7.62 -7.62 0) (effects (font (size 1.27 1.27))))
+    (property "Reference" "U" (at 7.62 12.7 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "CD4053" (at 7.62 -12.7 0) (effects (font (size 1.27 1.27))))
     (symbol "CD4053_0_1"
-      (rectangle (start -6.35 -7.62) (end 6.35 7.62) (stroke (width 0.254) (type default)) (fill (type background)))
+      (rectangle (start -6.35 -11.43) (end 6.35 11.43) (stroke (width 0.254) (type default)) (fill (type background)))
     )
     (symbol "CD4053_1_1"
-      (pin input line (at -8.89 6.35 0) (length 2.54) (name "A" (effects (font (size 1.016 1.016)))) (number "11" (effects (font (size 1.016 1.016)))))
-      (pin input line (at -8.89 3.81 0) (length 2.54) (name "B" (effects (font (size 1.016 1.016)))) (number "10" (effects (font (size 1.016 1.016)))))
-      (pin input line (at -8.89 1.27 0) (length 2.54) (name "C" (effects (font (size 1.016 1.016)))) (number "9" (effects (font (size 1.016 1.016)))))
-      (pin input line (at -8.89 -1.27 0) (length 2.54) (name "INH" (effects (font (size 1.016 1.016)))) (number "6" (effects (font (size 1.016 1.016)))))
-      (pin power_in line (at -8.89 -3.81 0) (length 2.54) (name "VDD" (effects (font (size 1.016 1.016)))) (number "16" (effects (font (size 1.016 1.016)))))
-      (pin power_in line (at -8.89 -6.35 0) (length 2.54) (name "VSS" (effects (font (size 1.016 1.016)))) (number "8" (effects (font (size 1.016 1.016)))))
-      (pin power_in line (at 8.89 -6.35 180) (length 2.54) (name "VEE" (effects (font (size 1.016 1.016)))) (number "7" (effects (font (size 1.016 1.016)))))
-      (pin bidirectional line (at 8.89 6.35 180) (length 2.54) (name "X_A" (effects (font (size 1.016 1.016)))) (number "14" (effects (font (size 1.016 1.016)))))
-      (pin bidirectional line (at 8.89 5.08 180) (length 2.54) (name "X0_A" (effects (font (size 1.016 1.016)))) (number "13" (effects (font (size 1.016 1.016)))))
-      (pin bidirectional line (at 8.89 3.81 180) (length 2.54) (name "X1_A" (effects (font (size 1.016 1.016)))) (number "15" (effects (font (size 1.016 1.016)))))
-      (pin bidirectional line (at 8.89 1.27 180) (length 2.54) (name "X_B" (effects (font (size 1.016 1.016)))) (number "2" (effects (font (size 1.016 1.016)))))
-      (pin bidirectional line (at 8.89 0 180) (length 2.54) (name "X0_B" (effects (font (size 1.016 1.016)))) (number "1" (effects (font (size 1.016 1.016)))))
-      (pin bidirectional line (at 8.89 -1.27 180) (length 2.54) (name "X1_B" (effects (font (size 1.016 1.016)))) (number "3" (effects (font (size 1.016 1.016)))))
-      (pin bidirectional line (at 8.89 -3.81 180) (length 2.54) (name "X_C" (effects (font (size 1.016 1.016)))) (number "5" (effects (font (size 1.016 1.016)))))
-      (pin bidirectional line (at 8.89 -5.08 180) (length 2.54) (name "X0_C" (effects (font (size 1.016 1.016)))) (number "4" (effects (font (size 1.016 1.016)))))
-      (pin bidirectional line (at 8.89 -6.35 180) (length 2.54) (name "X1_C" (effects (font (size 1.016 1.016)))) (number "12" (effects (font (size 1.016 1.016)))))
+      (pin input line (at -8.89 7.62 0) (length 2.54) (name "A" (effects (font (size 1.016 1.016)))) (number "11" (effects (font (size 1.016 1.016)))))
+      (pin input line (at -8.89 5.08 0) (length 2.54) (name "B" (effects (font (size 1.016 1.016)))) (number "10" (effects (font (size 1.016 1.016)))))
+      (pin input line (at -8.89 2.54 0) (length 2.54) (name "C" (effects (font (size 1.016 1.016)))) (number "9" (effects (font (size 1.016 1.016)))))
+      (pin input line (at -8.89 0 0) (length 2.54) (name "INH" (effects (font (size 1.016 1.016)))) (number "6" (effects (font (size 1.016 1.016)))))
+      (pin power_in line (at -8.89 -2.54 0) (length 2.54) (name "VDD" (effects (font (size 1.016 1.016)))) (number "16" (effects (font (size 1.016 1.016)))))
+      (pin power_in line (at -8.89 -5.08 0) (length 2.54) (name "VSS" (effects (font (size 1.016 1.016)))) (number "8" (effects (font (size 1.016 1.016)))))
+      (pin power_in line (at -8.89 -7.62 0) (length 2.54) (name "VEE" (effects (font (size 1.016 1.016)))) (number "7" (effects (font (size 1.016 1.016)))))
+      (pin bidirectional line (at 8.89 10.16 180) (length 2.54) (name "X" (effects (font (size 1.016 1.016)))) (number "14" (effects (font (size 1.016 1.016)))))
+      (pin bidirectional line (at 8.89 7.62 180) (length 2.54) (name "X1" (effects (font (size 1.016 1.016)))) (number "13" (effects (font (size 1.016 1.016)))))
+      (pin bidirectional line (at 8.89 5.08 180) (length 2.54) (name "X0" (effects (font (size 1.016 1.016)))) (number "12" (effects (font (size 1.016 1.016)))))
+      (pin bidirectional line (at 8.89 2.54 180) (length 2.54) (name "Y" (effects (font (size 1.016 1.016)))) (number "15" (effects (font (size 1.016 1.016)))))
+      (pin bidirectional line (at 8.89 0 180) (length 2.54) (name "Y1" (effects (font (size 1.016 1.016)))) (number "1" (effects (font (size 1.016 1.016)))))
+      (pin bidirectional line (at 8.89 -2.54 180) (length 2.54) (name "Y0" (effects (font (size 1.016 1.016)))) (number "2" (effects (font (size 1.016 1.016)))))
+      (pin bidirectional line (at 8.89 -5.08 180) (length 2.54) (name "Z" (effects (font (size 1.016 1.016)))) (number "4" (effects (font (size 1.016 1.016)))))
+      (pin bidirectional line (at 8.89 -7.62 180) (length 2.54) (name "Z1" (effects (font (size 1.016 1.016)))) (number "3" (effects (font (size 1.016 1.016)))))
+      (pin bidirectional line (at 8.89 -10.16 180) (length 2.54) (name "Z0" (effects (font (size 1.016 1.016)))) (number "5" (effects (font (size 1.016 1.016)))))
     )
   )'''
 
@@ -575,6 +780,69 @@ def opamp_dual_pins(ox, oy, unit, angle=0):
         }
 
 
+def opamp_unit_pins(ox, oy, unit, angle=0):
+    """Per-unit pins of a dual op-amp, relative to THAT UNIT's own placement origin.
+    Used by the multi-unit placer so units A/B/power sit at distinct canvas positions
+    (the lib_symbol draws every unit at the same local origin, so a single placement
+    would overlap their pins). unit 1=A {1,2,3}, 2=B {7,6,5}, 3=power {8,4}."""
+    if unit == 1:
+        d = {"2": (-7.62, 2.54), "3": (-7.62, -2.54), "1": (7.62, 0)}
+    elif unit == 2:
+        d = {"6": (-7.62, 2.54), "5": (-7.62, -2.54), "7": (7.62, 0)}
+    else:  # unit 3 = power
+        d = {"8": (0, 7.62), "4": (0, -7.62)}
+    return {p: _rot(ox, oy, angle, x, y) for p, (x, y) in d.items()}
+
+
+def opamp_dual_all_pins(ox, oy, angle=0):
+    """All pins of a dual op-amp (TL072/LM4562/NE5532/OPA1612): both units + power.
+    Unit A: 1/2/3, Unit B: 7/6/5, Power: V+=8 (top), V-=4 (bottom)."""
+    pins = {}
+    pins.update(opamp_dual_pins(ox, oy, 1, angle))
+    pins.update(opamp_dual_pins(ox, oy, 2, angle))
+    pins["8"] = _rot(ox, oy, angle, 0,  7.62)   # V+
+    pins["4"] = _rot(ox, oy, angle, 0, -7.62)   # V-
+    return pins
+
+
+def dpdt6_pins(ox, oy, angle=0):
+    """DW3/DW5 DPDT 6-pin toggle: 1=A1, 2=A_COM, 3=A2, 4=B1, 5=B_COM, 6=B2.
+    Matches _sym_dpdt() geometry (commons left, throws right)."""
+    return {
+        "1": _rot(ox, oy, angle,  5.08,  6.35),
+        "2": _rot(ox, oy, angle, -5.08,  5.08),
+        "3": _rot(ox, oy, angle,  5.08,  3.81),
+        "4": _rot(ox, oy, angle,  5.08, -3.81),
+        "5": _rot(ox, oy, angle, -5.08, -5.08),
+        "6": _rot(ox, oy, angle,  5.08, -6.35),
+    }
+
+
+def bat54s_pins(ox, oy, angle=0):
+    """BAT54S: pin1=A1 (left), pin2=COM (bottom, signal node), pin3=K2 (right).
+    Matches sym_bat54s() geometry."""
+    return {
+        "1": _rot(ox, oy, angle, -7.62, 0),
+        "2": _rot(ox, oy, angle, 0, -5.08),
+        "3": _rot(ox, oy, angle,  7.62, 0),
+    }
+
+
+def that2180_pins(ox, oy, angle=0):
+    """THAT2180: 1=Input, 2=Ec+, 3=Ec-, 4=Sym, 6=Gnd (left); 8=Output, 7=V+, 5=V- (right).
+    Matches sym_that2180() geometry."""
+    return {
+        "1": _rot(ox, oy, angle, -8.89,  5.08),
+        "2": _rot(ox, oy, angle, -8.89,  2.54),
+        "3": _rot(ox, oy, angle, -8.89,  0),
+        "4": _rot(ox, oy, angle, -8.89, -2.54),
+        "6": _rot(ox, oy, angle, -8.89, -5.08),
+        "8": _rot(ox, oy, angle,  8.89,  5.08),
+        "7": _rot(ox, oy, angle,  8.89,  2.54),
+        "5": _rot(ox, oy, angle,  8.89, -2.54),
+    }
+
+
 def opamp_quad_pins(ox, oy, unit, angle=0):
     """Quad op-amp (TL074) pin coords for unit 1-4. Power unit (5) not included."""
     unit_map = {
@@ -586,12 +854,31 @@ def opamp_quad_pins(ox, oy, unit, angle=0):
     return {p: _rot(ox, oy, angle, dx, dy) for p, (dx, dy) in unit_map[unit].items()}
 
 
+def opamp_quad_unit_pins(ox, oy, unit, angle=0):
+    """Per-unit pins of a quad op-amp (TL074), relative to that unit's placement origin.
+    units 1-4 = gates; unit 5 = power {4=V+, 11=V-}. For the multi-unit placer."""
+    if unit == 5:
+        return {"4": _rot(ox, oy, angle, 0, 3.81), "11": _rot(ox, oy, angle, 0, -3.81)}
+    return opamp_quad_pins(ox, oy, unit, angle)
+
+
+def opamp_quad_all_pins(ox, oy, angle=0):
+    """All 14 TL074 pins (units 1-4 signal + power 4/11) — name set for coverage."""
+    pins: dict = {}
+    for u in (1, 2, 3, 4):
+        pins.update(opamp_quad_pins(ox, oy, u, angle))
+    pins.update(opamp_quad_unit_pins(ox, oy, 5, angle))
+    return pins
+
+
 # ---------------------------------------------------------------------------
 # Generic schematic emitters
 # ---------------------------------------------------------------------------
 
-def place_symbol(lib_id, ref, value, ox, oy, angle=0, mirror="", unit=1):
+def place_symbol(lib_id, ref, value, ox, oy, angle=0, mirror="", unit=1, footprint=""):
     mirror_str = f'\n    (mirror {mirror})' if mirror else ""
+    fp_str = (f'\n  (property "Footprint" "{footprint}" (at {ox:.3f} {oy:.3f} 0)\n'
+              f'    (effects (font (size 1.016 1.016)) (hide yes)))') if footprint else ""
     emit(f'''(symbol
   (lib_id "{lib_id}")
   (at {ox:.3f} {oy:.3f} {angle}){mirror_str}
@@ -602,7 +889,7 @@ def place_symbol(lib_id, ref, value, ox, oy, angle=0, mirror="", unit=1):
   (property "Reference" "{ref}" (at {ox+3:.3f} {oy+3:.3f} 0)
     (effects (font (size 1.27 1.27)) (justify left)))
   (property "Value" "{value}" (at {ox+3:.3f} {oy-0.5:.3f} 0)
-    (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
+    (effects (font (size 1.016 1.016)) (justify left) (hide yes))){fp_str}
 )''')
 
 
@@ -693,45 +980,50 @@ def place_pin_header40(ref, value, net_map, col, row_y):
 # THAT340 and CD4053 pin coordinate helpers
 # ---------------------------------------------------------------------------
 
-def that340_pins(ox, oy):
-    """THAT340 SOIC-16 connection-point coords. Matches sym_that340() geometry."""
-    return {
-        "1":  (ox - 11.43, oy + 8.89),   # B1
-        "2":  (ox + 11.43, oy + 8.89),   # C1
-        "3":  (ox + 11.43, oy + 6.35),   # E1
-        "4":  (ox - 11.43, oy + 6.35),   # SUB
-        "5":  (ox - 11.43, oy + 3.81),   # B3
-        "6":  (ox + 11.43, oy + 3.81),   # C3
-        "7":  (ox + 11.43, oy + 1.27),   # E3
-        "8":  (ox - 11.43, oy + 1.27),   # SUB
-        "9":  (ox - 11.43, oy - 1.27),   # SUB
-        "10": (ox + 11.43, oy - 1.27),   # E4
-        "11": (ox + 11.43, oy - 3.81),   # C4
-        "12": (ox - 11.43, oy - 3.81),   # B4
-        "13": (ox - 11.43, oy - 6.35),   # SUB
-        "14": (ox + 11.43, oy - 6.35),   # E2
-        "15": (ox + 11.43, oy - 8.89),   # C2
-        "16": (ox - 11.43, oy - 8.89),   # B2
-    }
+def lm13700_pins(ox, oy, angle=0):
+    """LM13700 SOIC-16 connection-point coords. Matches sym_lm13700() geometry.
+    1=Iabc_A,2=DiodeBias_A,3=In+_A,4=In-_A,5=Out_A,6=V-,7=BufIn_A,8=BufOut_A,
+    9=BufOut_B,10=BufIn_B,11=V+,12=Out_B,13=In-_B,14=In+_B,15=DiodeBias_B,16=Iabc_B."""
+    left = {"1": 8.89, "2": 6.35, "3": 3.81, "4": 1.27,
+            "5": -1.27, "6": -3.81, "7": -6.35, "8": -8.89}
+    right = {"9": -8.89, "10": -6.35, "11": -3.81, "12": -1.27,
+             "13": 1.27, "14": 3.81, "15": 6.35, "16": 8.89}
+    pins = {p: _rot(ox, oy, angle, -11.43, y) for p, y in left.items()}
+    pins.update({p: _rot(ox, oy, angle, 11.43, y) for p, y in right.items()})
+    return pins
+
+
+def that340_pins(ox, oy, angle=0):
+    """THAT340 SO14 connection-point coords. Matches sym_that340() geometry.
+    1=Q1_C,2=Q1_B,3=Q1_E,4=SUB,5=Q3_E,6=Q3_B,7=Q3_C,
+    8=Q4_C,9=Q4_B,10=Q4_E,11=SUB,12=Q2_E,13=Q2_B,14=Q2_C."""
+    left = {"1": 7.62, "2": 5.08, "3": 2.54, "4": 0.0,
+            "5": -2.54, "6": -5.08, "7": -7.62}
+    right = {"8": -7.62, "9": -5.08, "10": -2.54, "11": 0.0,
+             "12": 2.54, "13": 5.08, "14": 7.62}
+    pins = {p: _rot(ox, oy, angle, -11.43, y) for p, y in left.items()}
+    pins.update({p: _rot(ox, oy, angle, 11.43, y) for p, y in right.items()})
+    return pins
 
 
 def cd4053_pins(ox, oy):
-    """CD4053 SOIC-16 connection-point coords. Matches sym_cd4053() geometry."""
+    """CD4053 SOIC-16 connection-point coords. Matches sym_cd4053() geometry
+    (datasheet-correct TI CD4053B pinout; no coincident pins)."""
     return {
-        "11": (ox - 8.89, oy + 6.35),   # A
-        "10": (ox - 8.89, oy + 3.81),   # B
-        "9":  (ox - 8.89, oy + 1.27),   # C
-        "6":  (ox - 8.89, oy - 1.27),   # INH
-        "16": (ox - 8.89, oy - 3.81),   # VDD
-        "8":  (ox - 8.89, oy - 6.35),   # VSS
-        "7":  (ox + 8.89, oy - 6.35),   # VEE
-        "14": (ox + 8.89, oy + 6.35),   # X_A
-        "13": (ox + 8.89, oy + 5.08),   # X0_A
-        "15": (ox + 8.89, oy + 3.81),   # X1_A
-        "2":  (ox + 8.89, oy + 1.27),   # X_B
-        "1":  (ox + 8.89, oy + 0.00),   # X0_B
-        "3":  (ox + 8.89, oy - 1.27),   # X1_B
-        "5":  (ox + 8.89, oy - 3.81),   # X_C
-        "4":  (ox + 8.89, oy - 5.08),   # X0_C
-        "12": (ox + 8.89, oy - 6.35),   # X1_C
+        "11": (ox - 8.89, oy + 7.62),    # A select (ch X)
+        "10": (ox - 8.89, oy + 5.08),    # B select (ch Y)
+        "9":  (ox - 8.89, oy + 2.54),    # C select (ch Z)
+        "6":  (ox - 8.89, oy + 0.00),    # INH
+        "16": (ox - 8.89, oy - 2.54),    # VDD
+        "8":  (ox - 8.89, oy - 5.08),    # VSS (digital GND / 0V)
+        "7":  (ox - 8.89, oy - 7.62),    # VEE (negative analog rail)
+        "14": (ox + 8.89, oy + 10.16),   # X  (ch X common)
+        "13": (ox + 8.89, oy + 7.62),    # X1
+        "12": (ox + 8.89, oy + 5.08),    # X0
+        "15": (ox + 8.89, oy + 2.54),    # Y  (ch Y common)
+        "1":  (ox + 8.89, oy + 0.00),    # Y1
+        "2":  (ox + 8.89, oy - 2.54),    # Y0
+        "4":  (ox + 8.89, oy - 5.08),    # Z  (ch Z common)
+        "3":  (ox + 8.89, oy - 7.62),    # Z1
+        "5":  (ox + 8.89, oy - 10.16),   # Z0
     }

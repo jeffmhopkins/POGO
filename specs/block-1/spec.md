@@ -150,10 +150,15 @@ pgL/pgR → Block VCA
 
 ALT path:
 ```
-J_ALT_L → R_ALT_g (4.7 kΩ) → U3A non-inverting amp → SW2 → altL
-J_ALT_R → R_ALT_g (4.7 kΩ) → U3B non-inverting amp → SW2 → altR
+J_ALT_L → R38 (100 Ω) → D8 clamp → U3A(+) non-inverting amp → SW2 → altL
+J_ALT_R → R39 (100 Ω) → D9 clamp → U3B(+) non-inverting amp → SW2 → altR
 altL/altR → Block BP (direct input, bypassing VCA and LP1)
 ```
+
+ALT inputs carry the standard POGO jack protection (100 Ω series + BAT54S clamp to
+±12 V, per `aux/cv-protection.md` — every jack input). J4 (ALT_BP_R) tip-switch
+normalls to the protected ALT_L input node so an unpatched R channel duplicates L
+through R's own identical gain stage and the shared toggle (added 2026-05-29).
 
 ### Calibration points
 
@@ -195,6 +200,10 @@ length carrying unshielded pre-gain signals.
 | R6 | resistor 1% | 0603 | 18 kΩ | 2 | audio | block-1 | R_f ALT gain stage (×2 ch) |
 | SW1 | Dailywell DW3 | sub-mini toggle 2M | DPDT ON-ON | 1 | panel | block-1 | GAIN_MAIN 1×/5× |
 | SW2 | Dailywell DW3 | sub-mini toggle 2M | DPDT ON-ON | 1 | panel | block-1 | GAIN_BP3 1×/5× (ALT path) |
+| R38 | resistor | 0603 | 100 Ω | 1 | audio | block-1 | ALT_BP_L series input protection |
+| R39 | resistor | 0603 | 100 Ω | 1 | audio | block-1 | ALT_BP_R series input protection |
+| D8 | BAT54S | SOT-23 | — | 1 | audio | block-1 | ALT_BP_L input clamp ±12 V |
+| D9 | BAT54S | SOT-23 | — | 1 | audio | block-1 | ALT_BP_R input clamp ±12 V |
 | C2 | cap, X7R | 0603 | 100 nF | 4 | audio | block-1 | OPA1612 supply decoupling (2 ICs × 2 pins) |
 | J3 | PJ301M-12 | panel | — | 1 | panel | block-1 | ALT_BP_L input jack |
 | J4 | PJ301M-12 | panel | — | 1 | panel | block-1 | ALT_BP_R input jack (normalled to ALT_BP_L) |

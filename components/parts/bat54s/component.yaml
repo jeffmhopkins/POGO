@@ -6,8 +6,9 @@ supplier: '~'
 package: SOT-23
 matches:
 - BAT54S
-footprint: null
-footprint_needed: SOT-23
+footprint:
+  lib: Package_TO_SOT_SMD
+  name: SOT-23
 datasheet:
   url: https://www.diodes.com/assets/Datasheets/ds11005.pdf
   version: DS11005

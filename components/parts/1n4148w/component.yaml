@@ -6,8 +6,9 @@ supplier: '~'
 package: SOD-123
 matches:
 - 1N4148W
-footprint: null
-footprint_needed: SOD-123
+footprint:
+  lib: Diode_SMD
+  name: D_SOD-123
 datasheet:
   url: https://www.diodes.com/assets/Datasheets/ds30086.pdf
   version: DS30086

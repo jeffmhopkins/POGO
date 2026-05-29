@@ -16,8 +16,33 @@ These Python scripts (`generate_control_board.py`, `generate_utility_board.py`) 
 ## What Replaced Them
 
 The 48HP hardware design lives in `specs/` (see `specs/STATUS.md`).
-A new KiCad generator will be written after the Phase 3R specs are complete and the
-component registry (`specs/components.yaml`) is finalized.
+
+### 48HP schematic generator (data-driven) — `generate_schematic.py`
+
+The new generator is **data-driven** and replaces the hand-encoded per-net Python
+in the stale board generators:
+
+- Connectivity lives in `kicad/nets/<block>.nets.yaml` (net name → list of
+  `REF.PIN`), transcribed from the block + aux specs. Name-based: pins on the
+  same net get matching global labels.
+- `generate_schematic.py` resolves each part's symbol/pin geometry from
+  `kicad_common.py` and its footprint/MPN from the `components/` registry
+  (`tools/components.py`), then emits `kicad/pogo-<block>.kicad_sch`.
+- Output is **byte-stable** (deterministic UUIDs); a pin-coverage validator
+  asserts every pin of every part is wired or explicitly `no_connect`.
+- A **structural verifier** re-parses the emitted `.kicad_sch` as an s-expression
+  (independently of the generator), re-derives every pin's connection point from
+  the `lib_symbols` geometry, and confirms each global label lands exactly on a
+  pin and each pin is labeled or an intended no-connect. This is the
+  "would it connect in KiCad?" check, done without KiCad — it catches malformed
+  s-expr, dangling `lib_id`s, and any drift between `sym_*()` geometry and the
+  `*_pins()` helpers.
+- CI gate: `python3 kicad/generate_schematic.py --check` (validate + structural
+  verify + byte-drift).
+
+First vertical slice: **block-A** (input buffers — OPA1612 followers, BAT54S
+clamps, 100Ω series, R→L normalling). Add a block by adding a `*.nets.yaml`.
+All block-A parts have vendored footprints (BAT54S → `Package_TO_SOT_SMD:SOT-23`).
 
 > **Switch parts (48HP):** all toggle switches are now Thonk-sourced Dailywell 2M
 > sub-mini toggles — `SW_Dailywell_DW3_DPDT` (2-position ON-ON: GAIN_MAIN, GAIN_BP3)

@@ -11,10 +11,13 @@ feedback loop. Produces a ±5V triangle wave over the range 0.05–20 Hz. Two in
 instances (LFO1, LFO2) are present on the control board. LFO1 has a normalled
 connection to MOD_IN; LFO2 outputs to its own panel jack only.
 
-Rate control uses a panel pot to set the R-C integrator time constant. Exponential
-frequency taper (0.05–20 Hz over one pot rotation) is achieved either via a THAT340
-expo converter (same architecture as aux-expo-converter) or via a log-taper pot with
-end resistors. Phase 3R will finalize the taper method.
+Rate control (FINALIZED 2026-05-29): R_INT is **fixed** and the preset trimpot
+attenuates the Schmitt square-wave drive into the integrator (wiper → R_INT), so
+f ∝ wiper fraction k. A single 1 MΩ linear trimpot covers the full 0.05–20 Hz (400:1)
+range this way — a plain rheostat cannot (a 1 MΩ pot only adds ~1 MΩ of series swing,
+far short of the ≈590 kΩ→234 MΩ needed). The earlier "log-pot / THAT340-expo, Phase-3R
+TBD" note is superseded: these are set-once presets, so taper law across rotation is
+irrelevant and no expo converter is needed. See `specs/block-2/spec.md` §2/§3.
 
 Chosen because:
 - Integrator + comparator is the minimal, most reliable triangle oscillator topology

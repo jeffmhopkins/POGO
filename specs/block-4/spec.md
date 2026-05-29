@@ -33,9 +33,10 @@ to both, maintaining stereo balance.
 
 ## 2. Theoretical Design and Topology
 
-> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
-> It has not been verified against the current panel control set. Do not use for circuit
-> construction until re-verified. See `specs/STATUS.md` for current phase status.
+> ✅ **CORRECTED 2026-05-29** — THAT2180 reworked to its real current-in/current-out
+> topology (datasheet pinout) with R_in + I/V op-amp per channel and Ec+ control; the
+> prior differential-voltage model (IN+/IN−/OUT+/OUT−, R_OUT_N) was wrong and is removed.
+> Verified in `kicad/nets/block-4.nets.yaml`. CV-conditioning scaling is Phase-3R bring-up.
 
 ### Gain Law (DSP and hardware)
 
@@ -73,89 +74,65 @@ eff_CV = clamp(raw_CV + VCA_OFS × 5, 0, 10)
 At default OFS = 0.5: eff_CV = raw_CV + 2.5 V (floor 2.5 V; signal never fully silenced
 at positive AMT unless raw_CV goes negative, which is clamped away).
 
-### Hardware Analog Model — THAT 2180
+### Hardware Analog Model — THAT 2180 (current-in / current-out)
 
-The THAT 2180 is an SSM2164-compatible dB-law VCA in SOIC-8. Its gain is controlled by a
-current into the GAIN pin:
-
-```
-Gain (dB) = –6 dB × I_gain / I_ref    (approximately, from THAT 2180 datasheet)
-```
-
-The VCA_AMT pot and VCA_OFS resistor network are connected to the GAIN pin to implement a
-hardware equivalent of the DSP gain law. The DSP dB-law matches the THAT 2180 exponential characteristic: equal control-voltage steps produce equal dB steps, tracking human loudness perception.
-
-**Unity gain calibration:** A Bourns 3224W SMD trimmer (500 Ω) in series with R_gain sets the
-exact bias current for 0 dB gain. One trimmer per channel allows the two channels to be
-matched. Nominal R_gain = 15 kΩ (verify from THAT 2180 application note for ±12 V supply).
-
-**CV conditioning:**
-
-1. Raw CV enters through a 100 Ω series resistor and BAT54S clamp (same protection topology
-   as all other CV inputs in the module).
-2. VCA_OFS trimpot (0–1) provides a DC voltage 0–5 V that is summed with raw CV at a TL072
-   input summing node, implementing `eff_CV = raw_CV + VCA_OFS × 5`.
-3. VCA_AMT trimpot (–1 to +1, centre detent) is wired as a bipolar voltage divider (same
-   topology as mod bus attenuverters) to scale and optionally invert eff_CV before it reaches
-   the GAIN pin of each THAT 2180.
-4. For negative AMT (duck mode), the inverted CV drives the GAIN pin so that rising CV
-   reduces gain. The inversion is implemented by a TL072 half configured as a unity-gain
-   inverter, whose output is selected by AMT pot wiper direction (CCW = inverted path).
-
-In practice, the AMT pot wiper voltage drives the GAIN pin through R_gain. A TL072 single op-
-amp (one per channel) handles the OFS summing and inversion buffer. Two TL072s total (one per
-channel) are required; they can be combined as one TL072 dual op-amp (SOIC-8) package.
-
-**AMT pot loading note:** The AMT pot (10 kΩ) wiper has a source impedance of up to
-R_pot / 4 = 2.5 kΩ at mid-travel. In series with R_GAIN (15 kΩ), this creates a
-position-dependent gain error of up to 2.5 / (2.5 + 15) = 14 %. This shifts the
-THAT 2180 gain law and must be absorbed by the RV_VCA_UNITY trim — but the error
-varies with pot position, creating a non-uniform gain law.
-
-Recommended fix: reduce the AMT pot value to **1 kΩ** (max wiper impedance = 250 Ω;
-error < 1.6 %). The 1 kΩ pot must be driven from the TL072 output (low impedance);
-connect the pot CW lug to eff_CV and CCW lug to −eff_CV (from the inverter), then
-route the wiper through a 47 Ω series resistor directly to R_GAIN. Alternatively,
-add a TL072 unity-gain follower between the wiper and R_GAIN, but this requires a
-third IC half; lowering the pot value is simpler.
-
-### Audio Signal Path and I/O Impedances
-
-POGO's signal chain is single-ended throughout. The THAT 2180 is operated single-ended:
-
-- **IN+**: Audio signal input (from Block 1 OPA1612 output; closed-loop Z ≈ 10–20 Ω).
-- **IN−**: Connected directly to AGND. No matching resistor required; differential
-  common-mode rejection is not needed within a single-ended module.
-- **OUT+**: Audio signal output to LP1 input resistor R_in (100 kΩ).
-- **OUT−**: Terminated to AGND via R_OUT_N (10 kΩ per channel). Prevents the pin from
-  floating, which would produce noise current through the internal translinear cell.
-  The OUT− node is not used as a signal.
-
-**Stage boundary compatibility:**
+Per the datasheet (Doc 600029 Rev 02, Table 1), the THAT 2180 is a **current-in / current-out**
+Blackmer VCA. Pinout: **Input=1, Ec+=2, Ec−=3, Sym=4, V−=5, Gnd=6, V+=7, Output=8**. Gain is
+set by a voltage at the **Ec+** control port:
 
 ```
-Block 1 → VCA IN+:
-  Source Z = OPA1612 output, closed-loop ≈ 10–20 Ω
-  Load Z   = THAT 2180 IN+ ≈ 20 kΩ (small-signal; translinear cell base-emitter network)
-  Divider  = 20k / (20k + 15) = 0.9993 → −0.006 dB   negligible ✓
-
-VCA OUT+ → LP1:
-  Source Z = THAT 2180 OUT+ < 100 Ω (low-impedance transimpedance output stage)
-  Load Z   = LP1 R_in = 100 kΩ
-  Divider  = 100k / (100k + 100) = 0.999  → −0.009 dB   negligible ✓
+G_dB = Ec+ / (6.1 mV/dB)      (Ec+/Gain constant = +6.1 mV/dB; Ec−/Gain = −6.1 mV/dB)
 ```
 
-Impedance values (IN+ ~20 kΩ, OUT+ <100 Ω) are consistent with THAT Corporation
-application notes for the THAT 2180 series; verify exact figures against the
-THAT 2180A14-U datasheet before PCB layout.
+Matching the DSP law `G = 10^(2·(control−1))` ⇒ `G_dB = 40·(control−1)` gives the control target:
+
+```
+Ec+ = 6.1 mV/dB × 40 × (control−1) = 244 mV × (control−1)
+       control = 1 → Ec+ = 0   (0 dB, unity)
+       control = 0 → Ec+ = −244 mV   (−40 dB)
+```
+
+**Audio path (per channel, single inversion):**
+- `AUDIO_IN → R_in (20 kΩ) → Input (pin 1)`. Pin 1 is a current input (≈ virtual ground);
+  `I_in = AUDIO_IN / R_in`.
+- `Output (pin 8) → transimpedance op-amp (TL072 half, (+)=AGND, R_f feedback) → AUDIO_OUT`.
+  `AUDIO_OUT = −I_out·R_f`; with `R_f = R_in (20 kΩ)`, gain = −1 at 0 dB. The single inversion
+  is compensated by LP1's inverting SUM_AMP downstream.
+- `Ec− (pin 3)`, `Sym (pin 4, factory pre-trimmed)` and `Gnd (pin 6)` → AGND. `V+ (7)=+12 V`,
+  `V− (5)=−12 V`.
+
+This requires **one I/V op-amp half per channel** (U6 = dual TL072) — there is no voltage
+output pin and no IN−/OUT−/OUT-termination (the earlier differential-VCA model was wrong).
+
+**Unity-gain calibration:** a Bourns 3224W (500 Ω) per channel trims the Ec+ offset so
+`Ec+ = 0` ⇒ exactly 0 dB, matching L and R.
+
+**CV conditioning (U63 = dual TL072):**
+
+1. Raw CV enters through a 100 Ω series resistor + BAT54S clamp (standard CV protection); call
+   the protected node CVP.
+2. **AMT attenuverter:** a TL072 half (U63-A) inverts CVP to −CVP; the bipolar VCA_AMT pot
+   (RV24, CW=CVP, CCW=−CVP, wiper = AMT·CVP) produces the bipolar-scaled CV. Center detent = 0.
+3. **OFS floor:** the VCA_OFS pot (RV25) adds a DC floor.
+4. **Summer/scaler:** a TL072 half (U63-B) sums AMT·CVP + OFS and scales toward the
+   6.1 mV/dB Ec range → `V_ctrl`, which drives both channels' Ec+ via the per-channel unity
+   trims (RV1/RV2).
+
+The exact summer/Ec scaling (to hit `Ec+ = 244 mV·(control−1)`) and the precise piecewise AMT
+law are nominal here and set at **Phase-3R bring-up** — consistent with the project's
+intentional DSP↔hardware deviation (linear DSP gain index vs. true dB-law hardware).
+
+**Stage boundaries:** Block 1 (OPA1612 output, <50 Ω) drives R_in (20 kΩ) — negligible loss;
+VCA I/V output (op-amp, <100 Ω) drives LP1's input resistor — negligible loss.
 
 ---
 
 ## 3. Physical Design
 
-> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
-> It has not been verified against the current panel control set. Do not use for circuit
-> construction until re-verified. See `specs/STATUS.md` for current phase status.
+> ✅ **CORRECTED 2026-05-29** — THAT2180 reworked to its real current-in/current-out
+> topology (datasheet pinout) with R_in + I/V op-amp per channel and Ec+ control; the
+> prior differential-voltage model (IN+/IN−/OUT+/OUT−, R_OUT_N) was wrong and is removed.
+> Verified in `kicad/nets/block-4.nets.yaml`. CV-conditioning scaling is Phase-3R bring-up.
 
 **Board assignment:** Audio board (carries audio-frequency signal; THAT 2180 and CV
 conditioning are co-located with the signal path).
@@ -172,16 +149,16 @@ No LEDs for this block; status is not indicated on panel.
 
 **Stereo implementation:**
 
-Two THAT 2180 ICs process L and R channels independently. The CV path is shared (same eff_CV
-applied to both GAIN pins), maintaining the stereo image. Unity-gain trimmers RV_VCA_UNITY_L
-and RV_VCA_UNITY_R allow the two channels to be matched for DC offset and gain accuracy.
+Two THAT 2180 ICs process L and R channels independently. The CV path is shared (same V_ctrl
+applied to both Ec+ pins via the per-channel unity trims), maintaining the stereo image.
+Unity-gain trimmers RV1/RV2 match the two channels for gain accuracy.
 
 **Signal levels:**
 
-- Input to THAT 2180 IN+ pin: audio from pre-gain block, ±10.5 V max (clipped by Block 1).
-- THAT 2180 output: same range, attenuated.
+- Audio into R_in → Input (pin 1): from pre-gain block, ±10.5 V max (clipped by Block 1).
+- I/V op-amp output: same range, attenuated by the dB-law gain.
 - eff_CV: 0–10 V (clamped).
-- GAIN pin drive: 0–500 µA (set by R_gain and supply rails, per THAT 2180 datasheet).
+- Ec+ control: 0 V (unity) down to ≈ −244 mV (−40 dB), per the 6.1 mV/dB constant.
 
 **Power estimate:**
 
@@ -193,29 +170,29 @@ and RV_VCA_UNITY_R allow the two channels to be matched for DC offset and gain a
 
 ## 4. Component Requirements
 
-> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
-> It has not been verified against the current panel control set. Do not use for circuit
-> construction until re-verified. See `specs/STATUS.md` for current phase status.
+> ✅ **CORRECTED 2026-05-29** — THAT2180 reworked to its real current-in/current-out
+> topology (datasheet pinout) with R_in + I/V op-amp per channel and Ec+ control; the
+> prior differential-voltage model (IN+/IN−/OUT+/OUT−, R_OUT_N) was wrong and is removed.
+> Verified in `kicad/nets/block-4.nets.yaml`. CV-conditioning scaling is Phase-3R bring-up.
+
+Mirrors `specs/components.yaml` block-4 (authoritative). Refs as in components.yaml.
 
 | Ref | Part | Package | Value | Qty | Board | Block | Function |
 |---|---|---|---|---|---|---|---|
-| VCA_L | THAT 2180 | SOIC-8 | — | 1 | audio | 4 | L-channel dB-law VCA |
-| VCA_R | THAT 2180 | SOIC-8 | — | 1 | audio | 4 | R-channel dB-law VCA |
-| U_VCA_CV | TL072CDT | SOIC-8 | — | 1 | audio | 4 | CV summing (OFS) and inversion buffer, both channels |
-| RV_VCA_AMT | Bipolar pot, 9 mm, centre detent | panel | 1 kΩ | 1 | control | 4 | VCA_AMT attenuverter –1× to +1×; 1 kΩ limits wiper impedance to 250 Ω max → < 1.6 % THAT 2180 gain error |
-| RV_VCA_OFS | Linear pot, 9 mm | panel | 50 kΩ | 1 | control | 4 | VCA_OFS CV floor 0–5 V |
-| RV_VCA_UNITY_L | Bourns 3224W | SMD | 500 Ω | 1 | audio | 4 | L unity-gain trim (GAIN pin bias adjust) |
-| RV_VCA_UNITY_R | Bourns 3224W | SMD | 500 Ω | 1 | audio | 4 | R unity-gain trim |
-| R_GAIN_L | Resistor | 0603 | 15 kΩ | 1 | audio | 4 | L V-to-I at THAT 2180 GAIN pin (nominal; verify from datasheet) |
-| R_GAIN_R | Resistor | 0603 | 15 kΩ | 1 | audio | 4 | R V-to-I at THAT 2180 GAIN pin |
-| R_VCA_CV | Resistor | 0603 | 100 Ω | 1 | audio | 4 | Series protection on VCA_INPUT |
-| D_VCA | BAT54S | SOT-23 | — | 1 | audio | 4 | Dual Schottky clamp on VCA CV input |
-| R_OFS_IN | Resistor | 0603 | 100 kΩ | 1 | audio | 4 | Input resistor for VCA_OFS summing node |
-| R_OFS_CV | Resistor | 0603 | 100 kΩ | 1 | audio | 4 | Input resistor for raw CV at summing node |
-| R_OFS_F | Resistor | 0603 | 100 kΩ | 1 | audio | 4 | Feedback resistor for OFS summing op-amp stage |
-| C_VCA_L | Capacitor | 0603 | 100 nF | 2 | audio | 4 | THAT 2180 L supply decoupling (V+ and V–) |
-| C_VCA_R | Capacitor | 0603 | 100 nF | 2 | audio | 4 | THAT 2180 R supply decoupling (V+ and V–) |
-| C_U_VCA | Capacitor | 0603 | 100 nF | 2 | audio | 4 | TL072 supply decoupling (V+ and V–) |
-| J_VCA_IN | PJ301M-12 | panel | — | 1 | panel | 4 | VCA_INPUT jack (normalles to mod bus) |
-| R_OUT_N_L | resistor | 0603 | 10 kΩ | 1 | audio | 4 | L-channel THAT 2180 OUT− termination to AGND (single-ended operation) |
-| R_OUT_N_R | resistor | 0603 | 10 kΩ | 1 | audio | 4 | R-channel THAT 2180 OUT− termination to AGND |
+| U4 | THAT2180 | SOIC-8 | — | 1 | audio | 4 | L-channel dB-law VCA (current-in/out) |
+| U5 | THAT2180 | SOIC-8 | — | 1 | audio | 4 | R-channel dB-law VCA (current-in/out) |
+| U6 | TL072CDT | SOIC-8 | — | 1 | audio | 4 | I/V transimpedance converters (L=A, R=B) |
+| U63 | TL072CDT | SOIC-8 | — | 1 | audio | 4 | CV conditioning: AMT inverter (A) + CV/OFS summer (B) |
+| R7, R8 | Resistor 1% | 0603 | 20 kΩ | 2 | audio | 4 | R_in L/R: audio V→I into Input (pin 1) |
+| R40, R41 | Resistor 1% | 0603 | 20 kΩ | 2 | audio | 4 | R_f L/R: I/V feedback (unity @0 dB; inverting) |
+| R42, R43 | Resistor | 0603 | 10 kΩ | 2 | audio | 4 | AMT attenuverter inverter in/fb |
+| R44, R45 | Resistor | 0603 | 100 kΩ | 2 | audio | 4 | CV summer inputs (AMT-scaled CV, OFS) |
+| R46 | Resistor | 0603 | 2.4 kΩ | 1 | audio | 4 | CV summer feedback (Ec scaling; Phase-3R trim) |
+| R9 | Resistor | 0603 | 100 Ω | 1 | audio | 4 | VCA_INPUT series protection |
+| D3 | BAT54S | SOT-23 | — | 1 | audio | 4 | VCA CV input clamp ±12 V |
+| RV1, RV2 | Bourns 3224W | SMD | 500 Ω | 2 | audio | 4 | L/R unity-gain trim (Ec+ offset) |
+| RV24 | Bipolar pot, 9 mm | panel | 1 kΩ | 1 | control | 4 | VCA_AMT attenuverter −1×…+1× |
+| RV25 | Linear pot, 9 mm | panel | — | 1 | control | 4 | VCA_OFS CV floor |
+| C7–C10 | Capacitor | 0603 | 100 nF | 4 | audio | 4 | THAT2180 L/R supply decoupling (V+ and V−) |
+| C41–C44 | Capacitor | 0603 | 100 nF | 4 | audio | 4 | U6, U63 supply decoupling |
+| J26 | PJ301M-12 | panel | — | 1 | panel | 4 | VCA_INPUT jack (normalles to mod bus) |
