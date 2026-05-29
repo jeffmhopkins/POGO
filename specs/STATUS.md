@@ -1,6 +1,11 @@
 # POGO — Hardware Spec Status
 
-Last updated: 2026-05-28 | Topology: 48HP | Source of truth: `tools/panel-data.yaml`
+Last updated: 2026-05-29 | Topology: 48HP | Source of truth: `tools/panel-data.yaml`
+
+> **Change process:** all changes follow the gated, plugin-first, one-change-per-branch
+> workflow in `CLAUDE.md` → "Git Workflow & Change Process" (Lanes A/B/C, Steps 0–8, gates
+> G1–G6), tracked in `changes/NNNN-<slug>.md`. The Phase 1R–6R milestones below are the
+> whole-project maturity track; the per-change Steps 0–8 are orthogonal to them.
 
 ## Phase Key
 
