@@ -30,12 +30,19 @@ in the stale board generators:
   (`tools/components.py`), then emits `kicad/pogo-<block>.kicad_sch`.
 - Output is **byte-stable** (deterministic UUIDs); a pin-coverage validator
   asserts every pin of every part is wired or explicitly `no_connect`.
-- CI gate: `python3 kicad/generate_schematic.py --check` (validate + drift).
+- A **structural verifier** re-parses the emitted `.kicad_sch` as an s-expression
+  (independently of the generator), re-derives every pin's connection point from
+  the `lib_symbols` geometry, and confirms each global label lands exactly on a
+  pin and each pin is labeled or an intended no-connect. This is the
+  "would it connect in KiCad?" check, done without KiCad — it catches malformed
+  s-expr, dangling `lib_id`s, and any drift between `sym_*()` geometry and the
+  `*_pins()` helpers.
+- CI gate: `python3 kicad/generate_schematic.py --check` (validate + structural
+  verify + byte-drift).
 
 First vertical slice: **block-A** (input buffers — OPA1612 followers, BAT54S
 clamps, 100Ω series, R→L normalling). Add a block by adding a `*.nets.yaml`.
-Open items: BAT54S has no vendored SOT-23 footprint yet (registry `footprint:
-null`), and KiCad-load verification is manual (the KiCad CI job is disabled).
+All block-A parts have vendored footprints (BAT54S → `Package_TO_SOT_SMD:SOT-23`).
 
 > **Switch parts (48HP):** all toggle switches are now Thonk-sourced Dailywell 2M
 > sub-mini toggles — `SW_Dailywell_DW3_DPDT` (2-position ON-ON: GAIN_MAIN, GAIN_BP3)

@@ -24,6 +24,8 @@ Usage:
 
 from __future__ import annotations
 
+import math
+import re
 import sys
 import uuid as _uuid
 from pathlib import Path
@@ -146,6 +148,141 @@ def validate_block(block: dict) -> list[str]:
     return errs
 
 
+# ── structural verification (independent re-parse of the emitted file) ───────
+# This is the "would it connect in KiCad?" check done without KiCad: parse the
+# generated s-expr, re-derive every pin's connection point straight from the
+# lib_symbols geometry, and confirm each global label lands exactly on a pin and
+# each pin is either labeled or an intended no-connect. Catches malformed s-expr,
+# dangling lib_ids, and any drift between sym_*() geometry and *_pins() helpers.
+
+_EPS = 1e-3
+
+
+def _parse_sexpr(text: str):
+    """Parse KiCad s-expression text into nested lists (quoted strings unquoted)."""
+    toks = re.findall(r'\(|\)|"(?:[^"\\]|\\.)*"|[^\s()]+', text)
+    pos = 0
+
+    def atom(t):
+        return t[1:-1].replace('\\"', '"') if t.startswith('"') else t
+
+    def parse():
+        nonlocal pos
+        node = []
+        while pos < len(toks):
+            t = toks[pos]; pos += 1
+            if t == "(":
+                node.append(parse())
+            elif t == ")":
+                return node
+            else:
+                node.append(atom(t))
+        raise ValueError("unexpected end of input (unbalanced parentheses)")
+
+    if not toks or toks[0] != "(":
+        raise ValueError("not an s-expression")
+    pos = 1
+    root = parse()
+    if pos != len(toks):
+        raise ValueError("trailing tokens after top-level form")
+    return root
+
+
+def _children(node, head):
+    return [c for c in node if isinstance(c, list) and c and c[0] == head]
+
+
+def _first(node, head):
+    cs = _children(node, head)
+    return cs[0] if cs else None
+
+
+def _xform(ox, oy, angle, px, py):
+    a = math.radians(angle)
+    return (ox + px * math.cos(a) - py * math.sin(a),
+            oy + px * math.sin(a) + py * math.cos(a))
+
+
+def structural_check(text: str, block: dict) -> list[str]:
+    """Re-parse the emitted schematic and verify geometry/connectivity."""
+    errs: list[str] = []
+    try:
+        root = _parse_sexpr(text)
+    except Exception as e:           # noqa: BLE001
+        return [f"s-expr parse failed: {e}"]
+    if not root or root[0] != "kicad_sch":
+        return ["root node is not kicad_sch"]
+
+    # lib_symbols: lib_id -> {pin_number: (local_x, local_y)}
+    libs: dict[str, dict[str, tuple[float, float]]] = {}
+    libnode = _first(root, "lib_symbols")
+    for sym in _children(libnode or [], "symbol"):
+        name = sym[1] if len(sym) > 1 and isinstance(sym[1], str) else None
+        if not name:
+            continue
+        pins: dict[str, tuple[float, float]] = {}
+
+        def collect(n):
+            for pin in _children(n, "pin"):
+                at = _first(pin, "at")
+                num = _first(pin, "number")
+                if at and num:
+                    pins[num[1]] = (float(at[1]), float(at[2]))
+            for sub in _children(n, "symbol"):
+                collect(sub)
+        collect(sym)
+        libs[name] = pins
+
+    # placements: REF.PIN -> (x, y)  (top-level symbols carrying a lib_id)
+    pin_xy: dict[str, tuple[float, float]] = {}
+    for sym in _children(root, "symbol"):
+        libid = _first(sym, "lib_id")
+        at = _first(sym, "at")
+        if not libid or not at:
+            continue
+        lib = libid[1]
+        if lib not in libs:
+            errs.append(f"placement lib_id '{lib}' not in lib_symbols")
+            continue
+        ref = None
+        for prop in _children(sym, "property"):
+            if len(prop) > 2 and prop[1] == "Reference":
+                ref = prop[2]
+        ox, oy, ang = float(at[1]), float(at[2]), float(at[3]) if len(at) > 3 else 0.0
+        for num, (px, py) in libs[lib].items():
+            pin_xy[f"{ref}.{num}"] = _xform(ox, oy, ang, px, py)
+
+    # global labels: net -> list of (x, y)
+    label_pts: list[tuple[str, float, float]] = []
+    for gl in _children(root, "global_label"):
+        at = _first(gl, "at")
+        if at:
+            label_pts.append((gl[1], float(at[1]), float(at[2])))
+
+    def near(a, b):
+        return abs(a[0] - b[0]) < _EPS and abs(a[1] - b[1]) < _EPS
+
+    # (1) every label sits exactly on a pin; record which pins are labeled.
+    labeled: set[str] = set()
+    for net, lx, ly in label_pts:
+        hit = [pt for pt, xy in pin_xy.items() if near(xy, (lx, ly))]
+        if not hit:
+            errs.append(f"net '{net}' label at ({lx:.3f},{ly:.3f}) is not on any pin")
+        else:
+            labeled.update(hit)
+
+    # (2) coverage: each pin is labeled or an intended no-connect (geometric).
+    no_connect = set(block.get("no_connect") or [])
+    for pt in sorted(pin_xy):
+        if pt not in labeled and pt not in no_connect:
+            errs.append(f"pin {pt} has no label and is not in no_connect")
+    for pt in sorted(no_connect):
+        if pt in labeled:
+            errs.append(f"no_connect pin {pt} unexpectedly carries a label")
+
+    return errs
+
+
 # ── generation ───────────────────────────────────────────────────────────────
 
 def build(block: dict) -> str:
@@ -219,6 +356,14 @@ def _main(argv: list[str]) -> int:
             continue
 
         text = build(block)
+        serrs = structural_check(text, block)
+        if serrs:
+            print(f"SCHEMATIC CHECK — FAIL ({f.name}, structural):")
+            for e in serrs:
+                print(f"  - {e}")
+            rc = 1
+            continue
+
         out = out_path_for(block)
         if check:
             if not out.is_file():

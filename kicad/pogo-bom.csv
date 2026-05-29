@@ -1,7 +1,7 @@
 Board,Ref,Qty,MPN,Value,Package,Footprint,Manufacturer,Supplier,Datasheet,Block,Function
 audio,U1,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/opa1612.pdf,block-A,Input buffers L+R (non-inv followers); 1.1 nV/√Hz
-audio,D1,1,BAT54S,,SOT-23,,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds11005.pdf,block-A,L input clamp ±12V
-audio,D2,1,BAT54S,,SOT-23,,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds11005.pdf,block-A,R input clamp ±12V
+audio,D1,1,BAT54S,,SOT-23,POGO_Package_TO_SOT_SMD:SOT-23,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds11005.pdf,block-A,L input clamp ±12V
+audio,D2,1,BAT54S,,SOT-23,POGO_Package_TO_SOT_SMD:SOT-23,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds11005.pdf,block-A,R input clamp ±12V
 audio,R1,1,,100Ω,0603,,,,,block-A,L series protection
 audio,R2,1,,100Ω,0603,,,,,block-A,R series protection
 audio,C1,1,,100nF,0603,,,,,block-A,U1 +12V decoupling
@@ -24,7 +24,7 @@ audio,RV2,1,3224W-1-xxx,500Ω,SMD,,Bourns,,https://www.bourns.com/docs/Product-D
 audio,R7,1,,15kΩ,0603,,,,,block-4,R_gain L (V→I at THAT2180 GAIN pin; nominal)
 audio,R8,1,,15kΩ,0603,,,,,block-4,R_gain R
 audio,R9,1,,100Ω,0603,,,,,block-4,VCA CV input series protection
-audio,D3,1,BAT54S,,SOT-23,,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds11005.pdf,block-4,VCA CV input clamp ±12V
+audio,D3,1,BAT54S,,SOT-23,POGO_Package_TO_SOT_SMD:SOT-23,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds11005.pdf,block-4,VCA CV input clamp ±12V
 audio,C7,1,,100nF,0603,,,,,block-4,U4 +12V decoupling
 audio,C8,1,,100nF,0603,,,,,block-4,U4 -12V decoupling
 audio,C9,1,,100nF,0603,,,,,block-4,U5 +12V decoupling
@@ -190,7 +190,7 @@ utility,R15,1,,100kΩ,0603,,,,,block-3,R_MB_OFF: offset pot input R
 utility,R16,2,,100kΩ,0603,,,,,block-3,R_MB_INV: equal R_in + R_fb for polarity inverter stage
 utility,R18,19,,100kΩ,0603,,,,,block-3,R_SRC_NORM: bus normalling R per destination jack (19 destinations)
 utility,R37,19,,100Ω,0603,,,,,block-3,R_CLAMP: series CV protection per destination
-utility,D3,19,BAT54S,,SOT-23,,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds11005.pdf,block-3,D_CLAMP: dual Schottky clamp per destination CV input (19 total)
+utility,D3,19,BAT54S,,SOT-23,POGO_Package_TO_SOT_SMD:SOT-23,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds11005.pdf,block-3,D_CLAMP: dual Schottky clamp per destination CV input (19 total)
 utility,R56,1,,1kΩ,0603,,,,,block-3,"R_LED_POS: current limit, MOD_POS LED"
 utility,R57,1,,1kΩ,0603,,,,,block-3,"R_LED_NEG: current limit, MOD_NEG LED"
 utility,R58,1,,1kΩ,0603,,,,,block-3,"R_LED_CLIP: current limit, MOD_CLIP LED"
