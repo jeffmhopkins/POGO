@@ -70,8 +70,8 @@ Circuit diagrams in spec text must be self-sufficient.
 
 | File | Status |
 |---|---|
-| `kicad/generate_schematic.py` | 🚧 48HP data-driven generator — framework done, **blocks A, B complete** (2/10 blocks). Rollout plan: `kicad/SCHEMATIC-GEN-PLAN.md` |
-| `kicad/nets/*.nets.yaml` | 🚧 per-block netlists — `block-A`, `block-B` done |
+| `kicad/generate_schematic.py` | 🚧 48HP data-driven generator — framework done, **blocks A, B, 1 complete** (3/10 blocks). Rollout plan: `kicad/SCHEMATIC-GEN-PLAN.md` |
+| `kicad/nets/*.nets.yaml` | 🚧 per-block netlists — `block-A`, `block-B`, `block-1` done |
 | `kicad/generate_control_board.py`, `generate_utility_board.py` | ⚠️ 40HP-era STALE (see kicad/README-STALE.md) |
 | `kicad/validate_*.py` | ⚠️ 40HP-era STALE |
 | `.github/workflows/build.yml` schematic gate | ✅ `generate_schematic.py --check` (validate + structural verify + drift) in all jobs |
@@ -117,7 +117,7 @@ corrected; block-B output Z attenuation corrected; BP_MIX wet polarity circuit c
    40HP-era stale generators. Per-block netlists in `kicad/nets/*.nets.yaml`,
    footprints resolved from the `components/` registry, byte-stable output, pin-
    coverage + structural verification gated in CI. Remaining: transcribe blocks
-   1, 2, 4, 5, 6, 7, 8, 3. **Order, symbol gaps, and per-block checklist:
+   2, 4, 5, 6, 7, 8, 3. **Order, symbol gaps, and per-block checklist:
    `kicad/SCHEMATIC-GEN-PLAN.md`.**
 2. **Phase 6R** — VCV Rack signal-path smoke tests (CI integration)
 

@@ -407,6 +407,43 @@ def sym_jack():
   )'''
 
 
+def _sym_dpdt(lib_id, value):
+    """Shared DPDT 6-pin toggle lib_symbol (Dailywell DW3/DW5 2M body).
+    Pole A: 1=A1, 2=A_COM, 3=A2.  Pole B: 4=B1, 5=B_COM, 6=B2.
+    Commons (2,5) on the left; throws (1,3,4,6) on the right. Matches dpdt6_pins().
+    Footprint pad map (2x3 grid) lives in the .kicad_mod; symbol geometry is
+    independent — connectivity is by pin number."""
+    return f'''  (symbol "{lib_id}"
+    (pin_names (offset 0.254) hide)
+    (pin_numbers hide)
+    (property "Reference" "SW" (at 0 9.144 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "{value}" (at 0 -9.144 0) (effects (font (size 1.27 1.27))))
+    (symbol "{value}_0_1"
+      (rectangle (start -2.54 -7.62) (end 2.54 7.62) (stroke (width 0.254) (type default)) (fill (type background)))
+      (polyline (pts (xy -2.54 5.08) (xy 1.27 6.35)) (stroke (width 0.254) (type default)) (fill (type none)))
+      (polyline (pts (xy -2.54 -5.08) (xy 1.27 -3.81)) (stroke (width 0.254) (type default)) (fill (type none)))
+    )
+    (symbol "{value}_1_1"
+      (pin passive line (at 5.08 6.35 180) (length 2.54) (name "A1" (effects (font (size 1.016 1.016)))) (number "1" (effects (font (size 1.016 1.016)))))
+      (pin passive line (at -5.08 5.08 0) (length 2.54) (name "A_COM" (effects (font (size 1.016 1.016)))) (number "2" (effects (font (size 1.016 1.016)))))
+      (pin passive line (at 5.08 3.81 180) (length 2.54) (name "A2" (effects (font (size 1.016 1.016)))) (number "3" (effects (font (size 1.016 1.016)))))
+      (pin passive line (at 5.08 -3.81 180) (length 2.54) (name "B1" (effects (font (size 1.016 1.016)))) (number "4" (effects (font (size 1.016 1.016)))))
+      (pin passive line (at -5.08 -5.08 0) (length 2.54) (name "B_COM" (effects (font (size 1.016 1.016)))) (number "5" (effects (font (size 1.016 1.016)))))
+      (pin passive line (at 5.08 -6.35 180) (length 2.54) (name "B2" (effects (font (size 1.016 1.016)))) (number "6" (effects (font (size 1.016 1.016)))))
+    )
+  )'''
+
+
+def sym_dw3():
+    """Dailywell DW3 (2M DPDT ON-ON) sub-mini toggle — 2-position. 6-pin DPDT body."""
+    return _sym_dpdt("Switch:SW_Dailywell_DW3", "SW_DW3")
+
+
+def sym_dw5():
+    """Dailywell DW5 (2M DPDT ON-ON-ON) sub-mini toggle — 3-position. Same 6-pin body."""
+    return _sym_dpdt("Switch:SW_Dailywell_DW5", "SW_DW5")
+
+
 def sym_tl074():
     """TL074 quad op-amp SOIC-14.
     Unit A: Out=1, In-=2, In+=3. Unit B: Out=7, In-=6, In+=5.
@@ -668,6 +705,19 @@ def opamp_dual_all_pins(ox, oy, angle=0):
     pins["8"] = _rot(ox, oy, angle, 0,  7.62)   # V+
     pins["4"] = _rot(ox, oy, angle, 0, -7.62)   # V-
     return pins
+
+
+def dpdt6_pins(ox, oy, angle=0):
+    """DW3/DW5 DPDT 6-pin toggle: 1=A1, 2=A_COM, 3=A2, 4=B1, 5=B_COM, 6=B2.
+    Matches _sym_dpdt() geometry (commons left, throws right)."""
+    return {
+        "1": _rot(ox, oy, angle,  5.08,  6.35),
+        "2": _rot(ox, oy, angle, -5.08,  5.08),
+        "3": _rot(ox, oy, angle,  5.08,  3.81),
+        "4": _rot(ox, oy, angle,  5.08, -3.81),
+        "5": _rot(ox, oy, angle, -5.08, -5.08),
+        "6": _rot(ox, oy, angle,  5.08, -6.35),
+    }
 
 
 def bat54s_pins(ox, oy, angle=0):

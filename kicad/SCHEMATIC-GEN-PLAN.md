@@ -51,7 +51,7 @@ Ordered by rising symbol/wiring risk so each step de-risks the next. ✅ = done.
 |---|---|---|---|---|---|
 | 1 | **A** Input buffers | audio | OPA1612, BAT54S | — (✅ all added) | ✅ DONE |
 | 2 | **B** Output buffers | audio | 2× TL072 | — (jack/opamp exist) | ✅ DONE. MAIN (U61) + BP3 tap (U62); BP3/LFO jacks live in other blocks (boundary nets). |
-| 3 | **1** Pre-gain | audio | 2× OPA1612, 2× DW3 | **DW3 toggle** sym + pins | First toggle; ALT_BP path. |
+| 3 | **1** Pre-gain | audio | 2× OPA1612, 2× DW3 | DW3 toggle sym + pins (✅ added; DW5 too) | ✅ DONE. DPDT path-select 1×/5×; ALT path protected (R38/R39+D8/D9). |
 | 4 | **2** Dual LFO | utility | 2× TL072 | — (trimpots = rpot) | Re-verify `aux-lfo-core` (STALE). |
 | 5 | **4** VCA | audio | 2× THAT2180, TL072, BAT54S | **that2180_pins** all-pins | First THAT2180; AMT/OFS trims. |
 | 6 | **5** LP1 | audio | 4× LM13700, 2× OPA1612, TL072, THAT340 | **lm13700_pins**, **that340 all-pins use** | First OTA-C SVF; re-verify `aux-ota-c-svf`, `aux-expo-converter`, `aux-q-control` (all STALE). |
@@ -82,8 +82,8 @@ validator works. Current state:
 | **THAT2180** | ✅ sym | ❌ | add `that2180_pins` (8 pins; pin 7 NC) |
 | **LM13700** | ✅ sym | ❌ | add `lm13700_pins` (16 pins; pin 12 NC) |
 | **TL074** | ✅ sym | partial (`opamp_quad_pins`, no power) | add `opamp_quad_all_pins` (units 1–4 + V+ 4, V− 11) |
-| **DW3 toggle** (DPDT ON-ON) | ❌ | ❌ | add `sym_dw3` + `dw3_pins` (6-pin DPDT; panel type `toggle_dw3`) |
-| **DW5 toggle** (DPDT ON-ON-ON) | ❌ | ❌ | add `sym_dw5` + `dw5_pins` (6-pin, 3-pos; panel type `toggle_dw5`) |
+| DW3 toggle (DPDT ON-ON) | ✅ `sym_dw3` | ✅ `dpdt6_pins` | done (sym `dw3` in SYM_TABLE) |
+| DW5 toggle (DPDT ON-ON-ON) | ✅ `sym_dw5` | ✅ `dpdt6_pins` (shared) | done (sym `dw5`); same 6-pin body as DW3 |
 
 The stale `sym_spdt`/`sym_sp3t` + `spdt_pins`/`sp3t_pins` are 40HP single-pole
 parts and must **not** be reused — the 48HP toggles are the Dailywell DPDT DW3/DW5
@@ -100,11 +100,22 @@ must use one canonical name on both sides. Registry (extend as blocks are added)
 | Net | Producer → Consumer | Meaning |
 |---|---|---|
 | `L_OUT`, `R_OUT` | block-A → block-1 | buffered stereo input |
+| `PG_OUT_L`, `PG_OUT_R` | block-1 → block-VCA | main pre-gain out (post 1×/5× toggle) |
+| `ALT_OUT_L`, `ALT_OUT_R` | block-1 → block-6 | ALT path direct into BP (post toggle) |
 | `LP2_OUT_L`, `LP2_OUT_R` | block-8 → block-B | final LP2 stereo to MAIN buffers |
 | `BP3_TAP_L`, `BP3_TAP_R` | block-6 → block-B | BP3 group tap to BP3 buffers |
 | `BP3_L_OUT`, `BP3_R_OUT` | block-B → block-6 | buffered BP3 to panel jacks J27/J28 |
 
-When transcribing block-1/6/8, use these exact names on the matching pins.
+When transcribing the consuming block, use these exact names on the matching pins.
+
+## Refdes convention for multi-instance parts (decision 2026-05-29)
+
+`specs/components.yaml` keeps grouped refs with `qty>1` for stereo pairs / repeated
+parts (e.g. `R3` qty 2 = R_g for L and R). Per-instance **schematic** refdes are
+derived by suffix — **L/R** for stereo pairs (`R3`→`R3L`/`R3R`), and letters
+`A,B,C…` for non-channel repeats (e.g. block-6 `C15` qty 4 → `C15A…C15D`). This is
+non-destructive (no whole-board renumber) and keeps the grouped BOM traceable.
+Fix any missing `qty` on grouped rows as you go (block-1 fixed R3–R6).
 
 ## Conventions / open decisions
 
@@ -129,6 +140,7 @@ When transcribing block-1/6/8, use these exact names on the matching pins.
 - [x] block-A vertical slice + framework + CI gate
 - [x] BAT54S SOT-23 footprint vendored; structural verifier
 - [x] block-B transcribed + verified
-- [ ] blocks 1, 2, 4, 5, 6, 7, 8, 3 transcribed + verified
+- [x] block-1 transcribed + verified (DW3/DW5 symbols; refdes-suffix convention)
+- [ ] blocks 2, 4, 5, 6, 7, 8, 3 transcribed + verified
 - [ ] (optional) board-level sheets combining per-block schematics by board
 - [ ] (gated separately) enable a KiCad CI job (kiutils) — currently disabled

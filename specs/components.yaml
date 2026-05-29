@@ -34,10 +34,14 @@ components:
   # block-1: Pre-Gain
   - { ref: U2,   board: audio,   block: block-1, part: OPA1612,    pkg: SOIC-8,   fn: "Main pre-gain amp L+R; 1.1 nV/√Hz" }
   - { ref: U3,   board: audio,   block: block-1, part: OPA1612,    pkg: SOIC-8,   fn: "Alt BP pre-gain amp L+R; 1.1 nV/√Hz" }
-  - { ref: R3,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "4.7kΩ",  tol: "1%", fn: "R_in main gain stage (×2 ch); 1% for L/R match; low i_n×R noise" }
-  - { ref: R4,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "18kΩ",   tol: "1%", fn: "R_f main gain stage (×2 ch); G = 1 + 18/4.7 = 4.83× ≈ 5×" }
-  - { ref: R5,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "4.7kΩ",  tol: "1%", fn: "R_in alt gain stage (×2 ch)" }
-  - { ref: R6,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "18kΩ",   tol: "1%", fn: "R_f alt gain stage (×2 ch)" }
+  - { ref: R3,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "4.7kΩ",  tol: "1%", qty: 2, fn: "R_in main gain stage (×2 ch: R3L/R3R); 1% for L/R match; low i_n×R noise" }
+  - { ref: R4,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "18kΩ",   tol: "1%", qty: 2, fn: "R_f main gain stage (×2 ch: R4L/R4R); G = 1 + 18/4.7 = 4.83× ≈ 5×" }
+  - { ref: R5,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "4.7kΩ",  tol: "1%", qty: 2, fn: "R_in alt gain stage (×2 ch: R5L/R5R)" }
+  - { ref: R6,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "18kΩ",   tol: "1%", qty: 2, fn: "R_f alt gain stage (×2 ch: R6L/R6R)" }
+  - { ref: R38,  board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "100Ω",   fn: "ALT_BP_L series input protection" }
+  - { ref: R39,  board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "100Ω",   fn: "ALT_BP_R series input protection" }
+  - { ref: D8,   board: audio,   block: block-1, part: BAT54S,     pkg: SOT-23,   fn: "ALT_BP_L input clamp ±12V" }
+  - { ref: D9,   board: audio,   block: block-1, part: BAT54S,     pkg: SOT-23,   fn: "ALT_BP_R input clamp ±12V" }
   - { ref: C3,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "100nF",  fn: "U2 +12V decoupling" }
   - { ref: C4,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "100nF",  fn: "U2 -12V decoupling" }
   - { ref: C5,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "100nF",  fn: "U3 +12V decoupling" }
