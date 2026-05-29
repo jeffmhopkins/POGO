@@ -75,6 +75,7 @@ SYM_TABLE = {
     "ota":    ("Amplifier_Operational:LM13700",     kc.sym_lm13700, kc.lm13700_pins),
     "expo":   ("POGO:THAT340",                      kc.sym_that340, kc.that340_pins),
     "opamp4": ("Amplifier_Operational:TL074",       kc.sym_tl074,   kc.opamp_quad_all_pins),
+    "cd4053": ("Analog_Switch:CD4053",              kc.sym_cd4053,  kc.cd4053_pins),
 }
 
 # Layout grid (mm). Symbols only need to not overlap — nets connect by name.
