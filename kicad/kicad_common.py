@@ -649,34 +649,42 @@ def sym_that2180():
 
 
 def sym_cd4053():
-    """CD4053 triple 2-channel analog switch SOIC-16.
-    Three independent SPDT switches (A, B, C) with shared INH and V_EE.
-    Verify against TI CD4053B datasheet before PCB layout."""
+    """CD4053 triple 2-channel (SPDT) analog switch, SOIC-16.
+
+    Datasheet-correct pinout (TI CD4053B, SCHS059 / global-OUP CD4051-53 sheet):
+      selects  A=11 (ch X), B=10 (ch Y), C=9 (ch Z);  INH=6
+      supplies VDD=16, VSS=8 (digital GND / 0V), VEE=7 (negative analog rail)
+      channel X (sel A): common X=14, X0=12, X1=13
+      channel Y (sel B): common Y=15, Y0=2,  Y1=1
+      channel Z (sel C): common Z=4,  Z0=5,  Z1=3
+    The prior symbol scrambled the channel pin numbers (e.g. 15 is the Y common,
+    not X1; 1/2/3 and 4/5 were swapped) and overlapped VEE(7) with X1_C(12) at one
+    coordinate — both corrected here. Pin geometry mirrored in cd4053_pins()."""
     return '''  (symbol "Analog_Switch:CD4053"
     (pin_names (offset 0.254) hide)
     (pin_numbers hide)
-    (property "Reference" "U" (at 7.62 7.62 0) (effects (font (size 1.27 1.27))))
-    (property "Value" "CD4053" (at 7.62 -7.62 0) (effects (font (size 1.27 1.27))))
+    (property "Reference" "U" (at 7.62 12.7 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "CD4053" (at 7.62 -12.7 0) (effects (font (size 1.27 1.27))))
     (symbol "CD4053_0_1"
-      (rectangle (start -6.35 -7.62) (end 6.35 7.62) (stroke (width 0.254) (type default)) (fill (type background)))
+      (rectangle (start -6.35 -11.43) (end 6.35 11.43) (stroke (width 0.254) (type default)) (fill (type background)))
     )
     (symbol "CD4053_1_1"
-      (pin input line (at -8.89 6.35 0) (length 2.54) (name "A" (effects (font (size 1.016 1.016)))) (number "11" (effects (font (size 1.016 1.016)))))
-      (pin input line (at -8.89 3.81 0) (length 2.54) (name "B" (effects (font (size 1.016 1.016)))) (number "10" (effects (font (size 1.016 1.016)))))
-      (pin input line (at -8.89 1.27 0) (length 2.54) (name "C" (effects (font (size 1.016 1.016)))) (number "9" (effects (font (size 1.016 1.016)))))
-      (pin input line (at -8.89 -1.27 0) (length 2.54) (name "INH" (effects (font (size 1.016 1.016)))) (number "6" (effects (font (size 1.016 1.016)))))
-      (pin power_in line (at -8.89 -3.81 0) (length 2.54) (name "VDD" (effects (font (size 1.016 1.016)))) (number "16" (effects (font (size 1.016 1.016)))))
-      (pin power_in line (at -8.89 -6.35 0) (length 2.54) (name "VSS" (effects (font (size 1.016 1.016)))) (number "8" (effects (font (size 1.016 1.016)))))
-      (pin power_in line (at 8.89 -6.35 180) (length 2.54) (name "VEE" (effects (font (size 1.016 1.016)))) (number "7" (effects (font (size 1.016 1.016)))))
-      (pin bidirectional line (at 8.89 6.35 180) (length 2.54) (name "X_A" (effects (font (size 1.016 1.016)))) (number "14" (effects (font (size 1.016 1.016)))))
-      (pin bidirectional line (at 8.89 5.08 180) (length 2.54) (name "X0_A" (effects (font (size 1.016 1.016)))) (number "13" (effects (font (size 1.016 1.016)))))
-      (pin bidirectional line (at 8.89 3.81 180) (length 2.54) (name "X1_A" (effects (font (size 1.016 1.016)))) (number "15" (effects (font (size 1.016 1.016)))))
-      (pin bidirectional line (at 8.89 1.27 180) (length 2.54) (name "X_B" (effects (font (size 1.016 1.016)))) (number "2" (effects (font (size 1.016 1.016)))))
-      (pin bidirectional line (at 8.89 0 180) (length 2.54) (name "X0_B" (effects (font (size 1.016 1.016)))) (number "1" (effects (font (size 1.016 1.016)))))
-      (pin bidirectional line (at 8.89 -1.27 180) (length 2.54) (name "X1_B" (effects (font (size 1.016 1.016)))) (number "3" (effects (font (size 1.016 1.016)))))
-      (pin bidirectional line (at 8.89 -3.81 180) (length 2.54) (name "X_C" (effects (font (size 1.016 1.016)))) (number "5" (effects (font (size 1.016 1.016)))))
-      (pin bidirectional line (at 8.89 -5.08 180) (length 2.54) (name "X0_C" (effects (font (size 1.016 1.016)))) (number "4" (effects (font (size 1.016 1.016)))))
-      (pin bidirectional line (at 8.89 -6.35 180) (length 2.54) (name "X1_C" (effects (font (size 1.016 1.016)))) (number "12" (effects (font (size 1.016 1.016)))))
+      (pin input line (at -8.89 7.62 0) (length 2.54) (name "A" (effects (font (size 1.016 1.016)))) (number "11" (effects (font (size 1.016 1.016)))))
+      (pin input line (at -8.89 5.08 0) (length 2.54) (name "B" (effects (font (size 1.016 1.016)))) (number "10" (effects (font (size 1.016 1.016)))))
+      (pin input line (at -8.89 2.54 0) (length 2.54) (name "C" (effects (font (size 1.016 1.016)))) (number "9" (effects (font (size 1.016 1.016)))))
+      (pin input line (at -8.89 0 0) (length 2.54) (name "INH" (effects (font (size 1.016 1.016)))) (number "6" (effects (font (size 1.016 1.016)))))
+      (pin power_in line (at -8.89 -2.54 0) (length 2.54) (name "VDD" (effects (font (size 1.016 1.016)))) (number "16" (effects (font (size 1.016 1.016)))))
+      (pin power_in line (at -8.89 -5.08 0) (length 2.54) (name "VSS" (effects (font (size 1.016 1.016)))) (number "8" (effects (font (size 1.016 1.016)))))
+      (pin power_in line (at -8.89 -7.62 0) (length 2.54) (name "VEE" (effects (font (size 1.016 1.016)))) (number "7" (effects (font (size 1.016 1.016)))))
+      (pin bidirectional line (at 8.89 10.16 180) (length 2.54) (name "X" (effects (font (size 1.016 1.016)))) (number "14" (effects (font (size 1.016 1.016)))))
+      (pin bidirectional line (at 8.89 7.62 180) (length 2.54) (name "X1" (effects (font (size 1.016 1.016)))) (number "13" (effects (font (size 1.016 1.016)))))
+      (pin bidirectional line (at 8.89 5.08 180) (length 2.54) (name "X0" (effects (font (size 1.016 1.016)))) (number "12" (effects (font (size 1.016 1.016)))))
+      (pin bidirectional line (at 8.89 2.54 180) (length 2.54) (name "Y" (effects (font (size 1.016 1.016)))) (number "15" (effects (font (size 1.016 1.016)))))
+      (pin bidirectional line (at 8.89 0 180) (length 2.54) (name "Y1" (effects (font (size 1.016 1.016)))) (number "1" (effects (font (size 1.016 1.016)))))
+      (pin bidirectional line (at 8.89 -2.54 180) (length 2.54) (name "Y0" (effects (font (size 1.016 1.016)))) (number "2" (effects (font (size 1.016 1.016)))))
+      (pin bidirectional line (at 8.89 -5.08 180) (length 2.54) (name "Z" (effects (font (size 1.016 1.016)))) (number "4" (effects (font (size 1.016 1.016)))))
+      (pin bidirectional line (at 8.89 -7.62 180) (length 2.54) (name "Z1" (effects (font (size 1.016 1.016)))) (number "3" (effects (font (size 1.016 1.016)))))
+      (pin bidirectional line (at 8.89 -10.16 180) (length 2.54) (name "Z0" (effects (font (size 1.016 1.016)))) (number "5" (effects (font (size 1.016 1.016)))))
     )
   )'''
 
@@ -999,22 +1007,23 @@ def that340_pins(ox, oy, angle=0):
 
 
 def cd4053_pins(ox, oy):
-    """CD4053 SOIC-16 connection-point coords. Matches sym_cd4053() geometry."""
+    """CD4053 SOIC-16 connection-point coords. Matches sym_cd4053() geometry
+    (datasheet-correct TI CD4053B pinout; no coincident pins)."""
     return {
-        "11": (ox - 8.89, oy + 6.35),   # A
-        "10": (ox - 8.89, oy + 3.81),   # B
-        "9":  (ox - 8.89, oy + 1.27),   # C
-        "6":  (ox - 8.89, oy - 1.27),   # INH
-        "16": (ox - 8.89, oy - 3.81),   # VDD
-        "8":  (ox - 8.89, oy - 6.35),   # VSS
-        "7":  (ox + 8.89, oy - 6.35),   # VEE
-        "14": (ox + 8.89, oy + 6.35),   # X_A
-        "13": (ox + 8.89, oy + 5.08),   # X0_A
-        "15": (ox + 8.89, oy + 3.81),   # X1_A
-        "2":  (ox + 8.89, oy + 1.27),   # X_B
-        "1":  (ox + 8.89, oy + 0.00),   # X0_B
-        "3":  (ox + 8.89, oy - 1.27),   # X1_B
-        "5":  (ox + 8.89, oy - 3.81),   # X_C
-        "4":  (ox + 8.89, oy - 5.08),   # X0_C
-        "12": (ox + 8.89, oy - 6.35),   # X1_C
+        "11": (ox - 8.89, oy + 7.62),    # A select (ch X)
+        "10": (ox - 8.89, oy + 5.08),    # B select (ch Y)
+        "9":  (ox - 8.89, oy + 2.54),    # C select (ch Z)
+        "6":  (ox - 8.89, oy + 0.00),    # INH
+        "16": (ox - 8.89, oy - 2.54),    # VDD
+        "8":  (ox - 8.89, oy - 5.08),    # VSS (digital GND / 0V)
+        "7":  (ox - 8.89, oy - 7.62),    # VEE (negative analog rail)
+        "14": (ox + 8.89, oy + 10.16),   # X  (ch X common)
+        "13": (ox + 8.89, oy + 7.62),    # X1
+        "12": (ox + 8.89, oy + 5.08),    # X0
+        "15": (ox + 8.89, oy + 2.54),    # Y  (ch Y common)
+        "1":  (ox + 8.89, oy + 0.00),    # Y1
+        "2":  (ox + 8.89, oy - 2.54),    # Y0
+        "4":  (ox + 8.89, oy - 5.08),    # Z  (ch Z common)
+        "3":  (ox + 8.89, oy - 7.62),    # Z1
+        "5":  (ox + 8.89, oy - 10.16),   # Z0
     }

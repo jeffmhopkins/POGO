@@ -59,10 +59,34 @@ Ordered by rising symbol/wiring risk so each step de-risks the next. ✅ = done.
 | 8 | **8** LP2 | audio | LM13700, OPA1612, TL072, THAT340 | — (reuse) | ✅ DONE. LP1 minus tilt (single expo); Q via shared-q cell B; own IRES_AMP added. |
 | 9 | **7** HP | audio | 4× LM13700, OPA1612, TL072, THAT340 | — (reuse) | ✅ DONE. Mono SVF; HP inverting output buffer; own Q-VCAs (cell B spare/terminated); IRES_AMP added. |
 | 10 | **3** Mod bus | utility | 7× TL074, DW5 | tl074 multi-unit (✅), zener (✅) | ✅ DONE. MB proc + 3 lights + ±10V clamp + 19 destinations (generated); MOD_<DEST> outputs; MOD_SRC deferred. |
-| 11 | **6** Triple BP + Dist | audio | 6× LM13700, 6× OPA1612, 3× THAT340, 3× CD4053, 15× TL072, 3× DW5 | — (reuse; **cd4053 all-pins use**) | Largest/last; per-band DIST mux + FOCUS + TILT; verify `aux-distortion` (STALE). |
+| 11 | **6** Triple BP + Dist | audio | 6× LM13700 (int) + 3× LM13700 (Q) + 12× OPA1612/TL072 SVF/aux + 6× THAT340 + 6× CD4053 + 18× TL072 dist/mix | **cd4053 sym pinout FIXED** | ✅ DONE 2026-05-29 (`kicad/gen_block6.py`, 418 parts / 239 nets). Option-B DSP-faithful SVF (v1/BP tap); per-channel expo; per-group Q-VCAs (U67-69); SC/HC/WF cells; 2×CD4053/group stereo 1-of-3 mux. 3 Phase-3R flags (below). |
 
-Remaining: **block-6** (triple BP + distortion) — the largest block; all its symbols
-(LM13700, THAT340, CD4053, TL072, DW5) and helpers are already in place.
+Remaining: **none** — all 10 blocks + shared-q transcribed and `--check` clean (10/10).
+
+### block-6 transcription notes (2026-05-29)
+- **CD4053 symbol bug fixed:** the registered `sym_cd4053`/`cd4053_pins` had scrambled
+  channel pin numbers (e.g. pin 15 is the Y-channel common, not X1_A; pins 1/2/3 and
+  4/5 were swapped) **and** overlapped VEE(7) with X1_C(12) at one coordinate. Both
+  corrected against the TI CD4053B datasheet (selects A/B/C = 11/10/9; X com/0/1 =
+  14/12/13; Y = 15/2/1; Z = 4/5/3). No other block uses CD4053, so no drift.
+- **Built by script** `kicad/gen_block6.py` (3-group repetition, like block-3). Only
+  audio-board parts are placed; control-board pots (RV29-39) and DW5 mode switches
+  (SW4-6) arrive as boundary CV, exactly like block-5/7/8 scope their panel controls.
+- **3 Phase-3R / prototype flags** (under-specified in the STALE specs; signal path wired
+  faithfully, control treated as boundary CV — see the YAML header for detail):
+  1. **DRIVE→variable gain** — no in-block variable-gain element exists; the 6 distortion
+     cells run at fixed minimum gain (still clip at their diode/zener thresholds). DRIVE
+     depth is a Phase-3R element fed by BP{g}_DIST CV. The C_WF 47pF caps were relocated
+     from the (off-board) drive-pot wiper to the distortion-input nodes as anti-RF caps.
+  2. **DW5 ON-ON-ON → 2-bit encoding** — BP{g}_SEL_SC/SEL_WF leave as boundary nets to
+     SW4-6; pull-ups (R128) to a 5V logic rail (D7/R29/C27/C28). 5V-high vs VDD=+12V is
+     marginal per the CD4053B datasheet → prototype-verify (level shift or VDD=+5V).
+  3. **BP_MIX blend** — plugin uses two scalers (BYPASS+WET); BOM models one MIX pot.
+     Wired: wet summer → U48 buffer → off-board MIX pot (BP_WETPOS) → wiper returns as
+     BP_MIX_CV into the MIX-amp virtual ground (pot = R_wet) + dry via R27. BP_OUT taken
+     directly from the (inverting) MIX amps, L/R symmetric (HP re-inverts downstream);
+     U27-B + R17 (the BOM's lone output-restore inverter) is redundant here and wired as
+     a reserved Phase-3R inverter off the L MIX output.
 
 ---
 
@@ -83,6 +107,7 @@ validator works. Current state:
 | THAT2180 | ✅ sym (pinout CORRECTED) | ✅ `that2180_pins` | done (sym `vca`); datasheet pinout Input=1,Ec+=2,Ec−=3,Sym=4,V−=5,Gnd=6,V+=7,Output=8 |
 | THAT340 | ✅ sym (CORRECTED to SO14) | ✅ `that340_pins` (SO14) | done; datasheet-verified 14-pin (2 NPN Q1/Q2 + 2 PNP Q3/Q4); expo uses NPN pair |
 | **LM13700** | ✅ sym (CORRECTED) | ✅ `lm13700_pins` | done; datasheet-verified (prior symbol had 13/16 pins wrong incl. V+/V−) |
+| **CD4053** | ✅ sym (CORRECTED 2026-05-29) | ✅ `cd4053_pins` | done; channel pin numbers were scrambled + VEE(7)/X1_C(12) overlapped — fixed to TI CD4053B pinout |
 | **TL074** | ✅ sym | partial (`opamp_quad_pins`, no power) | add `opamp_quad_all_pins` (units 1–4 + V+ 4, V− 11) |
 | DW3 toggle (DPDT ON-ON) | ✅ `sym_dw3` | ✅ `dpdt6_pins` | done (sym `dw3` in SYM_TABLE) |
 | DW5 toggle (DPDT ON-ON-ON) | ✅ `sym_dw5` | ✅ `dpdt6_pins` (shared) | done (sym `dw5`); same 6-pin body as DW3 |
@@ -214,6 +239,8 @@ Fix any missing `qty` on grouped rows as you go (block-1 fixed R3–R6).
 - [x] GENERATOR FIX: multi-unit op-amps now placed as separate gate instances (units A/B/power at
       distinct offsets) — previously overlapped → shorted halves; structural_check now unit-aware
       and detects coincident-distinct-net shorts. All blocks regenerated.
-- [ ] block 6 transcribed + verified
+- [x] block 6 transcribed + verified (gen_block6.py; CD4053 symbol datasheet-corrected;
+      Option-B SVF v1/BP tap; per-channel expo; per-group Q-VCAs; SC/HC/WF + 2×CD4053/group
+      stereo mux; 3 Phase-3R flags documented) — **10/10 blocks**
 - [ ] (optional) board-level sheets combining per-block schematics by board
 - [ ] (gated separately) enable a KiCad CI job (kiutils) — currently disabled
