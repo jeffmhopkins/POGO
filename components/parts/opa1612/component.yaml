@@ -9,5 +9,5 @@ footprint:
   name: SOIC-8_3.9x4.9mm_P1.27mm
 datasheet:
   url: https://www.ti.com/lit/ds/symlink/opa1612.pdf
-  version: verify
+  version: SBOS450C (2014-08)
 notes: Low-noise dual op-amp; input buffers, pre-gain, filters.

@@ -10,7 +10,7 @@ footprint:
   name: Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles
 datasheet:
   url: https://www.thonk.co.uk/shop/thonkiconn/
-  version: verify
+  version: supplier page
 panel_types:
 - jack_input
 - jack_output

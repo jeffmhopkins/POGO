@@ -9,7 +9,7 @@ footprint:
   name: SW_Dailywell_DW3_DPDT
 datasheet:
   url: https://www.thonk.co.uk/shop/sub-mini-toggle-switches/
-  version: verify
+  version: supplier page (DW3 datasheet linked)
 panel_types:
 - toggle_dw3
 notes: DPDT ON-ON sub-mini toggle (GAIN, BP_POL).

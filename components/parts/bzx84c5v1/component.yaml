@@ -8,5 +8,5 @@ footprint: null
 footprint_needed: SOT-23
 datasheet:
   url: https://assets.nexperia.com/documents/data-sheet/BZX84_SER.pdf
-  version: verify
+  version: Rev.7 (2023-01-01)
 notes: 5.1V zener; reference/clamp.

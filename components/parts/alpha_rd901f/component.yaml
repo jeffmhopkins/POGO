@@ -8,8 +8,8 @@ footprint:
   lib: Potentiometer_THT
   name: Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles
 datasheet:
-  url: https://www.thonk.co.uk/shop/alpha-9mm-pots-vertical/
-  version: verify
+  url: https://www.thonk.co.uk/shop/alpha-9mm-pots/
+  version: supplier page
 panel_types:
 - knob
 tapers:

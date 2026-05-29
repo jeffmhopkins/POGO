@@ -8,5 +8,5 @@ footprint: null
 footprint_needed: SOD-123
 datasheet:
   url: https://www.diodes.com/assets/Datasheets/ds30086.pdf
-  version: verify
+  version: DS30086
 notes: Switching diode.
