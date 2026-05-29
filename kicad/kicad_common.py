@@ -323,6 +323,90 @@ def sym_ne5532():
   )'''
 
 
+def sym_opa1612():
+    """OPA1612 low-noise dual op-amp SOIC-8. Pin-compatible with TL072.
+    Unit A: Out=1, In-=2, In+=3. Unit B: Out=7, In-=6, In+=5. V+=8, V-=4.
+    Verify against TI SBOS450 datasheet before PCB layout."""
+    t = _opamp_triangle()
+    return f'''  (symbol "Amplifier_Operational:OPA1612"
+    (pin_names (offset 0.254) hide)
+    (pin_numbers hide)
+    (property "Reference" "U" (at 5.08 5.08 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "OPA1612" (at 5.08 -5.08 0) (effects (font (size 1.27 1.27))))
+    (symbol "OPA1612_0_1"
+      (rectangle (start -1 -1) (end 1 1) (stroke (width 0) (type default)) (fill (type none)))
+    )
+    (symbol "OPA1612_1_1"
+      {t}
+      (pin input line (at -7.62 2.54 0) (length 2.54) (name "In-" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27)))))
+      (pin input line (at -7.62 -2.54 0) (length 2.54) (name "In+" (effects (font (size 1.27 1.27)))) (number "3" (effects (font (size 1.27 1.27)))))
+      (pin output line (at 7.62 0 180) (length 2.54) (name "Out" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27)))))
+    )
+    (symbol "OPA1612_2_1"
+      {t}
+      (pin input line (at -7.62 2.54 0) (length 2.54) (name "In-" (effects (font (size 1.27 1.27)))) (number "6" (effects (font (size 1.27 1.27)))))
+      (pin input line (at -7.62 -2.54 0) (length 2.54) (name "In+" (effects (font (size 1.27 1.27)))) (number "5" (effects (font (size 1.27 1.27)))))
+      (pin output line (at 7.62 0 180) (length 2.54) (name "Out" (effects (font (size 1.27 1.27)))) (number "7" (effects (font (size 1.27 1.27)))))
+    )
+    (symbol "OPA1612_3_1"
+      (pin power_in line (at 0 7.62 270) (length 2.54) (name "V+" (effects (font (size 1.27 1.27)))) (number "8" (effects (font (size 1.27 1.27)))))
+      (pin power_in line (at 0 -7.62 90) (length 2.54) (name "V-" (effects (font (size 1.27 1.27)))) (number "4" (effects (font (size 1.27 1.27)))))
+    )
+  )'''
+
+
+def sym_bat54s():
+    """BAT54S dual series Schottky SOT-23.
+    Series config: Pin1=Anode D1, Pin2=Common (cathode D1 + anode D2, signal node),
+    Pin3=Cathode D2. Both diodes conduct pin1→pin2→pin3.
+    In POGO input clamps: Pin1→-12V, Pin2→signal node, Pin3→+12V
+    (see specs/aux/aux-cv-protection.md — pin orientation is CRITICAL).
+    Verify against Diodes Inc. DS11005 datasheet before PCB layout."""
+    return '''  (symbol "Diode:BAT54S"
+    (pin_names (offset 0.254) hide)
+    (pin_numbers hide)
+    (property "Reference" "D" (at 0 3.81 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "BAT54S" (at 0 2.54 0) (effects (font (size 1.27 1.27))))
+    (symbol "BAT54S_0_1"
+      (polyline (pts (xy -5.08 0) (xy 5.08 0)) (stroke (width 0.254) (type default)) (fill (type none)))
+      (polyline (pts (xy 0 0) (xy 0 -2.54)) (stroke (width 0.254) (type default)) (fill (type none)))
+      (polyline (pts (xy -3.302 1.016) (xy -1.778 0) (xy -3.302 -1.016) (xy -3.302 1.016)) (stroke (width 0.254) (type default)) (fill (type none)))
+      (polyline (pts (xy -1.778 1.016) (xy -1.778 -1.016)) (stroke (width 0.254) (type default)) (fill (type none)))
+      (polyline (pts (xy 1.778 1.016) (xy 3.302 0) (xy 1.778 -1.016) (xy 1.778 1.016)) (stroke (width 0.254) (type default)) (fill (type none)))
+      (polyline (pts (xy 3.302 1.016) (xy 3.302 -1.016)) (stroke (width 0.254) (type default)) (fill (type none)))
+    )
+    (symbol "BAT54S_1_1"
+      (pin passive line (at -7.62 0 0) (length 2.54) (name "A1" (effects (font (size 1.016 1.016)))) (number "1" (effects (font (size 1.016 1.016)))))
+      (pin passive line (at 0 -5.08 90) (length 2.54) (name "COM" (effects (font (size 1.016 1.016)))) (number "2" (effects (font (size 1.016 1.016)))))
+      (pin passive line (at 7.62 0 180) (length 2.54) (name "K2" (effects (font (size 1.016 1.016)))) (number "3" (effects (font (size 1.016 1.016)))))
+    )
+  )'''
+
+
+def sym_jack():
+    """Audio_Jack_3.5mm_SwitchT with tip-switching lug (Thonkiconn PJ301M-12 / PJ398SM).
+    Pins: T=Tip(1), S=Sleeve(2), SW=Switch-lug(3, normalled to tip when unpatched)."""
+    return '''  (symbol "Device:Audio_Jack_3.5mm_SwitchT"
+    (pin_names (offset 1.016) hide)
+    (pin_numbers hide)
+    (property "Reference" "J" (at 0 5.08 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "Audio_Jack_3.5mm_SwitchT" (at 0 -7.62 0) (effects (font (size 1.27 1.27))))
+    (symbol "Audio_Jack_3.5mm_SwitchT_0_1"
+      (circle (center 0 0) (radius 2.159) (stroke (width 0.254) (type default)) (fill (type none)))
+      (polyline (pts (xy -2.159 0) (xy -3.175 0)) (stroke (width 0.254) (type default)) (fill (type none)))
+      (polyline (pts (xy 2.159 0) (xy 3.175 0)) (stroke (width 0.254) (type default)) (fill (type none)))
+    )
+    (symbol "Audio_Jack_3.5mm_SwitchT_1_1"
+      (pin passive line (at -5.08 0 0) (length 1.905)
+        (name "T" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27)))))
+      (pin passive line (at 5.08 0 180) (length 1.905)
+        (name "S" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27)))))
+      (pin passive line (at 0 -5.08 90) (length 1.905)
+        (name "SW" (effects (font (size 1.27 1.27)))) (number "3" (effects (font (size 1.27 1.27)))))
+    )
+  )'''
+
+
 def sym_tl074():
     """TL074 quad op-amp SOIC-14.
     Unit A: Out=1, In-=2, In+=3. Unit B: Out=7, In-=6, In+=5.
@@ -575,6 +659,27 @@ def opamp_dual_pins(ox, oy, unit, angle=0):
         }
 
 
+def opamp_dual_all_pins(ox, oy, angle=0):
+    """All pins of a dual op-amp (TL072/LM4562/NE5532/OPA1612): both units + power.
+    Unit A: 1/2/3, Unit B: 7/6/5, Power: V+=8 (top), V-=4 (bottom)."""
+    pins = {}
+    pins.update(opamp_dual_pins(ox, oy, 1, angle))
+    pins.update(opamp_dual_pins(ox, oy, 2, angle))
+    pins["8"] = _rot(ox, oy, angle, 0,  7.62)   # V+
+    pins["4"] = _rot(ox, oy, angle, 0, -7.62)   # V-
+    return pins
+
+
+def bat54s_pins(ox, oy, angle=0):
+    """BAT54S: pin1=A1 (left), pin2=COM (bottom, signal node), pin3=K2 (right).
+    Matches sym_bat54s() geometry."""
+    return {
+        "1": _rot(ox, oy, angle, -7.62, 0),
+        "2": _rot(ox, oy, angle, 0, -5.08),
+        "3": _rot(ox, oy, angle,  7.62, 0),
+    }
+
+
 def opamp_quad_pins(ox, oy, unit, angle=0):
     """Quad op-amp (TL074) pin coords for unit 1-4. Power unit (5) not included."""
     unit_map = {
@@ -590,8 +695,10 @@ def opamp_quad_pins(ox, oy, unit, angle=0):
 # Generic schematic emitters
 # ---------------------------------------------------------------------------
 
-def place_symbol(lib_id, ref, value, ox, oy, angle=0, mirror="", unit=1):
+def place_symbol(lib_id, ref, value, ox, oy, angle=0, mirror="", unit=1, footprint=""):
     mirror_str = f'\n    (mirror {mirror})' if mirror else ""
+    fp_str = (f'\n  (property "Footprint" "{footprint}" (at {ox:.3f} {oy:.3f} 0)\n'
+              f'    (effects (font (size 1.016 1.016)) (hide yes)))') if footprint else ""
     emit(f'''(symbol
   (lib_id "{lib_id}")
   (at {ox:.3f} {oy:.3f} {angle}){mirror_str}
@@ -602,7 +709,7 @@ def place_symbol(lib_id, ref, value, ox, oy, angle=0, mirror="", unit=1):
   (property "Reference" "{ref}" (at {ox+3:.3f} {oy+3:.3f} 0)
     (effects (font (size 1.27 1.27)) (justify left)))
   (property "Value" "{value}" (at {ox+3:.3f} {oy-0.5:.3f} 0)
-    (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
+    (effects (font (size 1.016 1.016)) (justify left) (hide yes))){fp_str}
 )''')
 
 
