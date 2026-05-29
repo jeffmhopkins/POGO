@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="44.1" height="318.3" viewBox="0 0 44.1 318.3" role="img" aria-label="footprint POGO_Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Vertical">
+<rect x="0" y="0" width="44.1" height="318.3" fill="#141414"/>
+<g transform="translate(14.4,14.4) scale(6)">
+<line x1="0" y1="-1.27" x2="3.81" y2="-1.27" stroke="#4a5a66" stroke-width="0.12" stroke-linecap="round"/>
+<line x1="3.81" y1="-1.27" x2="3.81" y2="49.53" stroke="#4a5a66" stroke-width="0.12" stroke-linecap="round"/>
+<line x1="3.81" y1="49.53" x2="-1.27" y2="49.53" stroke="#4a5a66" stroke-width="0.12" stroke-linecap="round"/>
+<line x1="-1.27" y1="49.53" x2="-1.27" y2="0" stroke="#4a5a66" stroke-width="0.12" stroke-linecap="round"/>
+<line x1="-1.27" y1="0" x2="0" y2="-1.27" stroke="#4a5a66" stroke-width="0.12" stroke-linecap="round"/>
+<line x1="-1.33" y1="49.59" x2="3.87" y2="49.59" stroke="#c9d4da" stroke-width="0.12" stroke-linecap="round"/>
+<line x1="-1.33" y1="1.27" x2="-1.33" y2="49.59" stroke="#c9d4da" stroke-width="0.12" stroke-linecap="round"/>
+<line x1="3.87" y1="-1.33" x2="3.87" y2="49.59" stroke="#c9d4da" stroke-width="0.12" stroke-linecap="round"/>
+<line x1="-1.33" y1="1.27" x2="1.27" y2="1.27" stroke="#c9d4da" stroke-width="0.12" stroke-linecap="round"/>
+<line x1="1.27" y1="1.27" x2="1.27" y2="-1.33" stroke="#c9d4da" stroke-width="0.12" stroke-linecap="round"/>
+<line x1="1.27" y1="-1.33" x2="3.87" y2="-1.33" stroke="#c9d4da" stroke-width="0.12" stroke-linecap="round"/>
+<line x1="-1.33" y1="0" x2="-1.33" y2="-1.33" stroke="#c9d4da" stroke-width="0.12" stroke-linecap="round"/>
+<line x1="-1.33" y1="-1.33" x2="0" y2="-1.33" stroke="#c9d4da" stroke-width="0.12" stroke-linecap="round"/>
+<line x1="-1.8" y1="-1.8" x2="-1.8" y2="50.05" stroke="#2a8a5a" stroke-width="0.12" stroke-dasharray="0.4,0.3" stroke-linecap="round"/>
+<line x1="-1.8" y1="50.05" x2="4.35" y2="50.05" stroke="#2a8a5a" stroke-width="0.12" stroke-dasharray="0.4,0.3" stroke-linecap="round"/>
+<line x1="4.35" y1="50.05" x2="4.35" y2="-1.8" stroke="#2a8a5a" stroke-width="0.12" stroke-dasharray="0.4,0.3" stroke-linecap="round"/>
+<line x1="4.35" y1="-1.8" x2="-1.8" y2="-1.8" stroke="#2a8a5a" stroke-width="0.12" stroke-dasharray="0.4,0.3" stroke-linecap="round"/>
+<g><rect x="-0.85" y="-0.85" width="1.7" height="1.7" rx="0" fill="#c9892f"/></g>
+<circle cx="0" cy="0" r="0.5" fill="#0d0d0d"/>
+<text x="0" y="0" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">1</text>
+<g><rect x="1.69" y="-0.85" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="2.54" cy="0" r="0.5" fill="#0d0d0d"/>
+<text x="2.54" y="0" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">2</text>
+<g><rect x="-0.85" y="1.69" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="0" cy="2.54" r="0.5" fill="#0d0d0d"/>
+<text x="0" y="2.54" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">3</text>
+<g><rect x="1.69" y="1.69" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="2.54" cy="2.54" r="0.5" fill="#0d0d0d"/>
+<text x="2.54" y="2.54" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">4</text>
+<g><rect x="-0.85" y="4.23" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="0" cy="5.08" r="0.5" fill="#0d0d0d"/>
+<text x="0" y="5.08" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">5</text>
+<g><rect x="1.69" y="4.23" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="2.54" cy="5.08" r="0.5" fill="#0d0d0d"/>
+<text x="2.54" y="5.08" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">6</text>
+<g><rect x="-0.85" y="6.77" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="0" cy="7.62" r="0.5" fill="#0d0d0d"/>
+<text x="0" y="7.62" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">7</text>
+<g><rect x="1.69" y="6.77" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="2.54" cy="7.62" r="0.5" fill="#0d0d0d"/>
+<text x="2.54" y="7.62" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">8</text>
+<g><rect x="-0.85" y="9.31" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="0" cy="10.16" r="0.5" fill="#0d0d0d"/>
+<text x="0" y="10.16" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">9</text>
+<g><rect x="1.69" y="9.31" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="2.54" cy="10.16" r="0.5" fill="#0d0d0d"/>
+<text x="2.54" y="10.16" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">10</text>
+<g><rect x="-0.85" y="11.85" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="0" cy="12.7" r="0.5" fill="#0d0d0d"/>
+<text x="0" y="12.7" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">11</text>
+<g><rect x="1.69" y="11.85" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="2.54" cy="12.7" r="0.5" fill="#0d0d0d"/>
+<text x="2.54" y="12.7" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">12</text>
+<g><rect x="-0.85" y="14.39" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="0" cy="15.24" r="0.5" fill="#0d0d0d"/>
+<text x="0" y="15.24" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">13</text>
+<g><rect x="1.69" y="14.39" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="2.54" cy="15.24" r="0.5" fill="#0d0d0d"/>
+<text x="2.54" y="15.24" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">14</text>
+<g><rect x="-0.85" y="16.93" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="0" cy="17.78" r="0.5" fill="#0d0d0d"/>
+<text x="0" y="17.78" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">15</text>
+<g><rect x="1.69" y="16.93" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="2.54" cy="17.78" r="0.5" fill="#0d0d0d"/>
+<text x="2.54" y="17.78" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">16</text>
+<g><rect x="-0.85" y="19.47" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="0" cy="20.32" r="0.5" fill="#0d0d0d"/>
+<text x="0" y="20.32" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">17</text>
+<g><rect x="1.69" y="19.47" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="2.54" cy="20.32" r="0.5" fill="#0d0d0d"/>
+<text x="2.54" y="20.32" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">18</text>
+<g><rect x="-0.85" y="22.01" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="0" cy="22.86" r="0.5" fill="#0d0d0d"/>
+<text x="0" y="22.86" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">19</text>
+<g><rect x="1.69" y="22.01" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="2.54" cy="22.86" r="0.5" fill="#0d0d0d"/>
+<text x="2.54" y="22.86" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">20</text>
+<g><rect x="-0.85" y="24.55" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="0" cy="25.4" r="0.5" fill="#0d0d0d"/>
+<text x="0" y="25.4" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">21</text>
+<g><rect x="1.69" y="24.55" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="2.54" cy="25.4" r="0.5" fill="#0d0d0d"/>
+<text x="2.54" y="25.4" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">22</text>
+<g><rect x="-0.85" y="27.09" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="0" cy="27.94" r="0.5" fill="#0d0d0d"/>
+<text x="0" y="27.94" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">23</text>
+<g><rect x="1.69" y="27.09" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="2.54" cy="27.94" r="0.5" fill="#0d0d0d"/>
+<text x="2.54" y="27.94" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">24</text>
+<g><rect x="-0.85" y="29.63" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="0" cy="30.48" r="0.5" fill="#0d0d0d"/>
+<text x="0" y="30.48" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">25</text>
+<g><rect x="1.69" y="29.63" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="2.54" cy="30.48" r="0.5" fill="#0d0d0d"/>
+<text x="2.54" y="30.48" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">26</text>
+<g><rect x="-0.85" y="32.17" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="0" cy="33.02" r="0.5" fill="#0d0d0d"/>
+<text x="0" y="33.02" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">27</text>
+<g><rect x="1.69" y="32.17" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="2.54" cy="33.02" r="0.5" fill="#0d0d0d"/>
+<text x="2.54" y="33.02" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">28</text>
+<g><rect x="-0.85" y="34.71" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="0" cy="35.56" r="0.5" fill="#0d0d0d"/>
+<text x="0" y="35.56" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">29</text>
+<g><rect x="1.69" y="34.71" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="2.54" cy="35.56" r="0.5" fill="#0d0d0d"/>
+<text x="2.54" y="35.56" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">30</text>
+<g><rect x="-0.85" y="37.25" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="0" cy="38.1" r="0.5" fill="#0d0d0d"/>
+<text x="0" y="38.1" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">31</text>
+<g><rect x="1.69" y="37.25" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="2.54" cy="38.1" r="0.5" fill="#0d0d0d"/>
+<text x="2.54" y="38.1" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">32</text>
+<g><rect x="-0.85" y="39.79" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="0" cy="40.64" r="0.5" fill="#0d0d0d"/>
+<text x="0" y="40.64" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">33</text>
+<g><rect x="1.69" y="39.79" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="2.54" cy="40.64" r="0.5" fill="#0d0d0d"/>
+<text x="2.54" y="40.64" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">34</text>
+<g><rect x="-0.85" y="42.33" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="0" cy="43.18" r="0.5" fill="#0d0d0d"/>
+<text x="0" y="43.18" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">35</text>
+<g><rect x="1.69" y="42.33" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="2.54" cy="43.18" r="0.5" fill="#0d0d0d"/>
+<text x="2.54" y="43.18" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">36</text>
+<g><rect x="-0.85" y="44.87" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="0" cy="45.72" r="0.5" fill="#0d0d0d"/>
+<text x="0" y="45.72" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">37</text>
+<g><rect x="1.69" y="44.87" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="2.54" cy="45.72" r="0.5" fill="#0d0d0d"/>
+<text x="2.54" y="45.72" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">38</text>
+<g><rect x="-0.85" y="47.41" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="0" cy="48.26" r="0.5" fill="#0d0d0d"/>
+<text x="0" y="48.26" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">39</text>
+<g><rect x="1.69" y="47.41" width="1.7" height="1.7" rx="0.425" fill="#c9892f"/></g>
+<circle cx="2.54" cy="48.26" r="0.5" fill="#0d0d0d"/>
+<text x="2.54" y="48.26" fill="#1a1200" font-size="0.935" font-family="monospace" text-anchor="middle" dominant-baseline="central">40</text>
+</g></svg>

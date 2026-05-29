@@ -27,6 +27,13 @@
     a.card .d code { color: #9ab; background: #1d1d1d; padding: 0 4px; border-radius: 3px; }
     .soon { color: #ff8800; font-size: 10px; font-weight: normal; letter-spacing: .06em;
             border: 1px solid #4a3a1a; border-radius: 3px; padding: 1px 5px; margin-left: 6px; }
+    .commit { margin-top: 28px; border-top: 1px solid #1c1c1c; padding-top: 16px; }
+    .commit h2 { color: #7fe7ff; font-size: 14px; letter-spacing: .04em; margin: 0 0 8px; }
+    .commit p, .commit li { color: #999; font-size: 12px; line-height: 1.5; }
+    .commit ul { margin: 8px 0; padding-left: 18px; }
+    .commit b { color: #bcd; }
+    .commit code { color: #9ab; background: #1d1d1d; padding: 0 4px; border-radius: 3px; }
+    .commit a { color: #7fe7ff; }
     footer { color: #3a3a3a; font-size: 11px; margin-top: 26px; text-align: center; }
     footer a { color: #4a6070; }
   </style>
@@ -60,17 +67,40 @@
         <div class="d">Per-block KiCad schematics (10 blocks + shared-Q), generated from the netlists and
           rendered in-browser by GitHub. See <code>SCHEMATIC-GEN-PLAN.md</code>.</div>
       </a>
-      <a class="card" href="https://github.com/jeffmhopkins/POGO/blob/main/plugin/res/Pogo.svg" target="_blank" rel="noopener">
-        <div class="t">Front Panel (SVG) &rarr;</div>
-        <div class="d">48HP faceplate artwork, generated from <code>panel-data.yaml</code>. Edit it live in
-          the Panel Editor above.</div>
+      <a class="card" href="panel.html">
+        <div class="t">Front Panel &rarr;</div>
+        <div class="d">48HP faceplate artwork (generated from <code>panel-data.yaml</code>), embedded for
+          viewing. Edit it live in the Panel Editor above.</div>
       </a>
       <a class="card" href="https://github.com/jeffmhopkins/POGO/blob/main/specs/board-layout/layout-notes.md" target="_blank" rel="noopener">
         <div class="t">PCB Layout <span class="soon">Phase 5R · pending</span> &rarr;</div>
         <div class="d">Board layout (placement + routing → Gerbers) is in progress; no
           <code>.kicad_pcb</code> files yet. Current architecture notes.</div>
       </a>
+      <a class="card" href="change-process.html">
+        <div class="t">Change Process &rarr;</div>
+        <div class="d">How the project is modified: plugin-first lanes (A/B/C), <code>change/&lt;slug&gt;</code>
+          branches, <code>changes/NNNN-slug.md</code> records, and the Step 0–8 / G1–G6 gates.</div>
+      </a>
     </div>
+
+    <section class="commit">
+      <h2>What happens when you commit</h2>
+      <p>Push a <code>change/&lt;slug&gt;</code> branch and CI (<code>.github/workflows/build.yml</code>) runs:</p>
+      <ul>
+        <li><b>Five <code>--check</code> gates</b> — <code>components.py</code>, <code>fetch_datasheets.py</code>,
+          <code>build_components.py</code> (BOM + footprint SVGs + this page's data),
+          <code>generate_schematic.py</code> (pin coverage + structural + byte-drift),
+          <code>build_panel.py</code> (panel DRC). A stale generated artifact fails the build.</li>
+        <li><b>Plugin builds</b> — cross-compiled <code>.vcvplugin</code> for Linux, Windows and macOS
+          (there's no Rack runtime in CI, so you verify it in VCV Rack).</li>
+        <li><b>Artifacts</b> — each run publishes the <code>.vcvplugin</code> per OS and a
+          <code>POGO-hardware</code> bundle (schematics + BOM + panel SVG + debug HTML).</li>
+      </ul>
+      <p>Then a PR <code>change/&lt;slug&gt;</code> → <code>dev</code>, squash-merged on green CI; <code>dev</code> → <code>main</code> promotes releases.
+        See <a href="change-process.html">Change Process</a> for the full workflow.</p>
+    </section>
+
     <footer><a href="https://github.com/jeffmhopkins/POGO">github.com/jeffmhopkins/POGO</a></footer>
   </div>
 </body>

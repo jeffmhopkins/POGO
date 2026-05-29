@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="124.5174" height="150" viewBox="0 0 124.5174 150" role="img" aria-label="footprint POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm">
+<rect x="0" y="0" width="124.5174" height="150" fill="#141414"/>
+<g transform="translate(62.2587,75) scale(14.4788)">
+<line x1="0" y1="4.435" x2="1.95" y2="4.435" stroke="#c9d4da" stroke-width="0.12" stroke-linecap="round"/>
+<line x1="0" y1="4.435" x2="-1.95" y2="4.435" stroke="#c9d4da" stroke-width="0.12" stroke-linecap="round"/>
+<line x1="0" y1="-4.435" x2="1.95" y2="-4.435" stroke="#c9d4da" stroke-width="0.12" stroke-linecap="round"/>
+<line x1="0" y1="-4.435" x2="-3.45" y2="-4.435" stroke="#c9d4da" stroke-width="0.12" stroke-linecap="round"/>
+<line x1="-0.975" y1="-4.325" x2="1.95" y2="-4.325" stroke="#4a5a66" stroke-width="0.12" stroke-linecap="round"/>
+<line x1="1.95" y1="-4.325" x2="1.95" y2="4.325" stroke="#4a5a66" stroke-width="0.12" stroke-linecap="round"/>
+<line x1="1.95" y1="4.325" x2="-1.95" y2="4.325" stroke="#4a5a66" stroke-width="0.12" stroke-linecap="round"/>
+<line x1="-1.95" y1="4.325" x2="-1.95" y2="-3.35" stroke="#4a5a66" stroke-width="0.12" stroke-linecap="round"/>
+<line x1="-1.95" y1="-3.35" x2="-0.975" y2="-4.325" stroke="#4a5a66" stroke-width="0.12" stroke-linecap="round"/>
+<line x1="-3.7" y1="-4.58" x2="-3.7" y2="4.58" stroke="#2a8a5a" stroke-width="0.12" stroke-dasharray="0.4,0.3" stroke-linecap="round"/>
+<line x1="-3.7" y1="4.58" x2="3.7" y2="4.58" stroke="#2a8a5a" stroke-width="0.12" stroke-dasharray="0.4,0.3" stroke-linecap="round"/>
+<line x1="3.7" y1="4.58" x2="3.7" y2="-4.58" stroke="#2a8a5a" stroke-width="0.12" stroke-dasharray="0.4,0.3" stroke-linecap="round"/>
+<line x1="3.7" y1="-4.58" x2="-3.7" y2="-4.58" stroke="#2a8a5a" stroke-width="0.12" stroke-dasharray="0.4,0.3" stroke-linecap="round"/>
+<g><rect x="-3.45" y="-4.11" width="1.95" height="0.6" rx="0.066" fill="#c9892f"/></g>
+<text x="-2.475" y="-3.81" fill="#1a1200" font-size="0.5" font-family="monospace" text-anchor="middle" dominant-baseline="central">1</text>
+<g><rect x="-3.45" y="-2.84" width="1.95" height="0.6" rx="0.066" fill="#c9892f"/></g>
+<text x="-2.475" y="-2.54" fill="#1a1200" font-size="0.5" font-family="monospace" text-anchor="middle" dominant-baseline="central">2</text>
+<g><rect x="-3.45" y="-1.57" width="1.95" height="0.6" rx="0.066" fill="#c9892f"/></g>
+<text x="-2.475" y="-1.27" fill="#1a1200" font-size="0.5" font-family="monospace" text-anchor="middle" dominant-baseline="central">3</text>
+<g><rect x="-3.45" y="-0.3" width="1.95" height="0.6" rx="0.066" fill="#c9892f"/></g>
+<text x="-2.475" y="0" fill="#1a1200" font-size="0.5" font-family="monospace" text-anchor="middle" dominant-baseline="central">4</text>
+<g><rect x="-3.45" y="0.97" width="1.95" height="0.6" rx="0.066" fill="#c9892f"/></g>
+<text x="-2.475" y="1.27" fill="#1a1200" font-size="0.5" font-family="monospace" text-anchor="middle" dominant-baseline="central">5</text>
+<g><rect x="-3.45" y="2.24" width="1.95" height="0.6" rx="0.066" fill="#c9892f"/></g>
+<text x="-2.475" y="2.54" fill="#1a1200" font-size="0.5" font-family="monospace" text-anchor="middle" dominant-baseline="central">6</text>
+<g><rect x="-3.45" y="3.51" width="1.95" height="0.6" rx="0.066" fill="#c9892f"/></g>
+<text x="-2.475" y="3.81" fill="#1a1200" font-size="0.5" font-family="monospace" text-anchor="middle" dominant-baseline="central">7</text>
+<g><rect x="1.5" y="3.51" width="1.95" height="0.6" rx="0.066" fill="#c9892f"/></g>
+<text x="2.475" y="3.81" fill="#1a1200" font-size="0.5" font-family="monospace" text-anchor="middle" dominant-baseline="central">8</text>
+<g><rect x="1.5" y="2.24" width="1.95" height="0.6" rx="0.066" fill="#c9892f"/></g>
+<text x="2.475" y="2.54" fill="#1a1200" font-size="0.5" font-family="monospace" text-anchor="middle" dominant-baseline="central">9</text>
+<g><rect x="1.5" y="0.97" width="1.95" height="0.6" rx="0.066" fill="#c9892f"/></g>
+<text x="2.475" y="1.27" fill="#1a1200" font-size="0.5" font-family="monospace" text-anchor="middle" dominant-baseline="central">10</text>
+<g><rect x="1.5" y="-0.3" width="1.95" height="0.6" rx="0.066" fill="#c9892f"/></g>
+<text x="2.475" y="0" fill="#1a1200" font-size="0.5" font-family="monospace" text-anchor="middle" dominant-baseline="central">11</text>
+<g><rect x="1.5" y="-1.57" width="1.95" height="0.6" rx="0.066" fill="#c9892f"/></g>
+<text x="2.475" y="-1.27" fill="#1a1200" font-size="0.5" font-family="monospace" text-anchor="middle" dominant-baseline="central">12</text>
+<g><rect x="1.5" y="-2.84" width="1.95" height="0.6" rx="0.066" fill="#c9892f"/></g>
+<text x="2.475" y="-2.54" fill="#1a1200" font-size="0.5" font-family="monospace" text-anchor="middle" dominant-baseline="central">13</text>
+<g><rect x="1.5" y="-4.11" width="1.95" height="0.6" rx="0.066" fill="#c9892f"/></g>
+<text x="2.475" y="-3.81" fill="#1a1200" font-size="0.5" font-family="monospace" text-anchor="middle" dominant-baseline="central">14</text>
+</g></svg>
