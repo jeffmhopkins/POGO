@@ -9,5 +9,5 @@ footprint:
   name: SOIC-16_3.9x9.9mm_P1.27mm
 datasheet:
   url: https://www.ti.com/lit/ds/symlink/cd4053b.pdf
-  version: verify
+  version: SCHS047O
 notes: Triple 2:1 analog mux; distortion mode select.

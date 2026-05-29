@@ -8,6 +8,6 @@ footprint:
   lib: Package_SO
   name: SOIC-14_3.9x8.7mm_P1.27mm
 datasheet:
-  url: https://thatcorp.com/300-series-matched-bipolar-transistor-arrays/
-  version: verify
+  url: https://thatcorp.com/datashts/THAT_300-Series_Datasheet.pdf
+  version: Doc 600041 Rev 04
 notes: Matched transistor array; V/oct expo converter.

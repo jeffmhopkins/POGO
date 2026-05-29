@@ -9,5 +9,5 @@ footprint:
   name: SOIC-14_3.9x8.7mm_P1.27mm
 datasheet:
   url: https://www.ti.com/lit/ds/symlink/tl074.pdf
-  version: verify
+  version: SLOS080W (2025-07)
 notes: JFET quad op-amp; utility board.

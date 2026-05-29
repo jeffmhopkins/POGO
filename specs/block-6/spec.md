@@ -522,21 +522,21 @@ Icc figures use ±12V operating point (~2.6 mA/pkg), not the ±15V datasheet spe
 | D_5V | BZX84C5V1 | SOT-23 | 5.1V | 1 | audio | block-6 | Zener shunt for CD4053 logic supply rail |
 | *— SC + HC sub-circuits (per group, per channel: 6 shared ICs) —* | | | | | | | |
 | BP_SC_HC_AMP_G1–G3_L/R | TL072CDT | SOIC-8 | — | 6 | audio | block-6 | Shared SC/HC amp IC: half A = SC gain stage, half B = HC gain stage; both paths always biased, CD4053 mux selects which output reaches the mix |
-| R_SC_in | resistor | 0603 | 10 kΩ | 12 | audio | block-6 | SC input resistor (1 per channel per group) |
-| R_SC_fb_fixed | resistor | 0603 | 10 kΩ | 12 | audio | block-6 | SC minimum feedback R (ensures G≥1× at zero drive) |
+| R_SC_in | resistor | 0603 | 10 kΩ | 6 | audio | block-6 | SC input resistor (1 per channel per group) |
+| R_SC_fb_fixed | resistor | 0603 | 10 kΩ | 6 | audio | block-6 | SC minimum feedback R (ensures G≥1× at zero drive) |
 | RV_DRIVE_SC_G1–G3 | log-taper pot | 9 mm | 470 kΩ | 6 | control | block-6 | SC DRIVE per group (shared with HC/WF; same pot) |
-| D_SC_1N4148 | 1N4148W | SOD-123 | — | 48 | audio | block-6 | SC diodes: 4 per path (2 antiparallel pairs), 12 paths |
-| R_HC_in | resistor | 0603 | 10 kΩ | 12 | audio | block-6 | HC input resistor |
-| R_HC_fb_fixed | resistor | 0603 | 10 kΩ | 12 | audio | block-6 | HC minimum feedback R |
+| D_SC_1N4148 | 1N4148W | SOD-123 | — | 24 | audio | block-6 | SC diodes: 4 per path (2 antiparallel pairs), 6 paths |
+| R_HC_in | resistor | 0603 | 10 kΩ | 6 | audio | block-6 | HC input resistor |
+| R_HC_fb_fixed | resistor | 0603 | 10 kΩ | 6 | audio | block-6 | HC minimum feedback R |
 | RV_DRIVE_HC_G1–G3 | log-taper pot | 9 mm | 47 kΩ | 6 | control | block-6 | HC DRIVE per group (can share pot with SC if dual-gang) |
 | D_HC_Z | BZX84C5V1 | SOT-23 | 5.1V | 12 | audio | block-6 | HC zener clamp: 2 back-to-back per path → ±5.8V clip |
 | *— WF sub-circuit (per group, per channel: 6 sets) —* | | | | | | | |
 | BP_WF_AMP_G1–G3_L/R | TL072CDT | SOIC-8 | — | 6 | audio | block-6 | WF pre-gain (half A) + symmetric folder (half B); 1 IC per path |
-| R_WF_in | resistor | 0603 | 10 kΩ | 12 | audio | block-6 | WF pre-gain input R |
-| R_WF_fb_fixed | resistor | 0603 | 10 kΩ | 12 | audio | block-6 | WF pre-gain minimum feedback R |
-| R_clamp | resistor | 0603 | 10 kΩ | 12 | audio | block-6 | WF clamp network series R (limits diode current) |
-| R_g | resistor | 0603 | 10 kΩ | 12 | audio | block-6 | WF folder (−) input resistor |
-| R_f | resistor | 0603 | 10 kΩ | 12 | audio | block-6 | WF folder feedback resistor; R_g = R_f → G=+2 at (+) |
+| R_WF_in | resistor | 0603 | 10 kΩ | 6 | audio | block-6 | WF pre-gain input R |
+| R_WF_fb_fixed | resistor | 0603 | 10 kΩ | 6 | audio | block-6 | WF pre-gain minimum feedback R |
+| R_clamp | resistor | 0603 | 10 kΩ | 6 | audio | block-6 | WF clamp network series R (limits diode current) |
+| R_g | resistor | 0603 | 10 kΩ | 6 | audio | block-6 | WF folder (−) input resistor |
+| R_f | resistor | 0603 | 10 kΩ | 6 | audio | block-6 | WF folder feedback resistor; R_g = R_f → G=+2 at (+) |
 | D_WF_1N4148 | 1N4148W | SOD-123 | — | 48 | audio | block-6 | WF passive clamp: 4 per path (2 per polarity); Vth = ±1.4V |
 | C_WF_wiper | ceramic, X7R | 0603 | 47 pF | 12 | audio | block-6 | RV_DRIVE wiper bypass cap; pole ≈288 kHz; anti-RF on each path |
 | *— BP_MIX circuit —* | | | | | | | |

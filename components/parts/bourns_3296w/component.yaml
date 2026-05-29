@@ -9,7 +9,7 @@ footprint:
   name: Potentiometer_Bourns_3296W_Vertical
 datasheet:
   url: https://www.bourns.com/docs/Product-Datasheets/3296.pdf
-  version: verify
+  version: rev 2019-08-07
 panel_types:
 - trimpot
 notes: 25-turn trimmer; calibration/attenuverters.

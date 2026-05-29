@@ -8,5 +8,5 @@ footprint: null
 footprint_needed: SMD trimmer 3224W
 datasheet:
   url: https://www.bourns.com/docs/Product-Datasheets/3224.pdf
-  version: verify
+  version: rev 2024
 notes: SMD multiturn trimmer; audio-board bias trims.

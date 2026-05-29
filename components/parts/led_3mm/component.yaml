@@ -8,8 +8,8 @@ footprint:
   lib: LED_THT
   name: LED_D3.0mm
 datasheet:
-  url: https://www.thonk.co.uk/product-category/parts/leds/
-  version: verify
+  url: https://www.thonk.co.uk/product-category/electronic-component/led/
+  version: supplier page
 panel_types:
 - led
 - led_labeled
