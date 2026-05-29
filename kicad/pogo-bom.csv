@@ -192,6 +192,29 @@ audio,R26,8,,33kΩ,0603,,,,,block-6,R_sum; BP wet summer input R; 3 inputs + 1 f
 audio,R27,2,,100kΩ,0603,,,,,block-6,R_dry; MIX dry path input R (L and R; in U46/U47 half B)
 audio,R28,2,,100kΩ,0603,,,,,block-6,R_mix_f; MIX crossfade feedback R (L and R)
 audio,R29,1,,1kΩ,0603,,,,,block-6,R_5V_logic; series R from +12V to D7 zener shunt (5.1V logic rail for CD4053)
+audio,U67,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-6,"BP1 Q VCA (cell A = L Q, cell B = R Q)"
+audio,U68,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-6,"BP2 Q VCA (cell A = L Q, cell B = R Q)"
+audio,U69,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-6,"BP3 Q VCA (cell A = L Q, cell B = R Q)"
+audio,U70,1,THAT340S14-U,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,THAT Corporation,,https://thatcorp.com/datashts/THAT_300-Series_Datasheet.pdf,block-6,BP1 expo converter R channel (per-channel tilt; U28 = L)
+audio,U71,1,THAT340S14-U,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,THAT Corporation,,https://thatcorp.com/datashts/THAT_300-Series_Datasheet.pdf,block-6,BP2 expo converter R channel (U29 = L)
+audio,U72,1,THAT340S14-U,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,THAT Corporation,,https://thatcorp.com/datashts/THAT_300-Series_Datasheet.pdf,block-6,BP3 expo converter R channel (U30 = L)
+audio,U73,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6,BP Q IRES_AMP: BP1 (half A) + BP2 (half B)
+audio,U74,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6,BP Q IRES_AMP: BP3 (half A); half B spare
+audio,R116,6,,1MΩ,0603,,,,,block-6,R_Iabc_Q: V_ires → BP Q OTA Iabc; 1 per group per channel
+audio,R117,3,,100kΩ,0603,,,,,block-6,R_QBIAS: BP Q IRES_AMP V_bias input; 1 per group
+audio,R118,3,,100kΩ,0603,,,,,block-6,R_QINV: BP Q IRES_AMP FOCUS CV input; 1 per group
+audio,R119,3,,100kΩ,0603,,,,,block-6,R_f_q: BP Q IRES_AMP feedback; 1 per group
+audio,R120,3,,1MΩ,0603,,,,,block-6,R_IREF_A_R: R-channel expo I_ref fixed R; 1 per group
+audio,R121,3,,47kΩ,0603,,,,,block-6,R_VOCT_R: R-channel expo V/oct scaling; 1 per group
+audio,R122,3,,1kΩ,0603,,,,,block-6,R_E_R: R-channel expo emitter degeneration; 1 per group
+audio,R123,12,,10kΩ,0603,,,,,block-6,R_BUF_PD: BP integrator Darlington buffer emitter pulldown to V-; 2 per group-channel
+audio,D13,3,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6,D_IRES: BP Q V_ires ≥0 clamp; 1 per group
+audio,C107,6,,10nF,0402,,,,,block-6,C_IABC_Q: BP Q-cell Iabc bypass; 1 per group per channel
+audio,C108,6,,10nF,0402,,,,,block-6,C_IABC_INT: BP integrator OTA Iabc bypass; 1 per group per channel
+audio,C109,6,,100nF,0603,,,,,block-6,C_IREF: expo I_ref node bypass; 1 per expo (6 expo: U28-30 L + U70-72 R)
+audio,RV24,3,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6,BP R-channel expo f_ref trim; 1 per group
+audio,RV25,3,3224W-1-xxx,20kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6,BP R-channel expo 1V/oct trim; 1 per group
+audio,C110,84,,100nF,0603,,,,,block-6,"C_BYP: per-IC supply decoupling; 2 per IC × 42 block-6 ICs (U15-U48, U67-U74)"
 audio,U49,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-7,HP OTA integrators L
 audio,U50,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-7,HP OTA integrators R
 audio,U51,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-7,HP Q VCA L (cell A; cell B spare)

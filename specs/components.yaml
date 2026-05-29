@@ -260,6 +260,32 @@ components:
 
   # block-6: Passives — CD4053 logic supply
   - { ref: R29,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "R_5V_logic; series R from +12V to D7 zener shunt (5.1V logic rail for CD4053)" }
+  # block-6 additions (2026-05-29): Option B BP Q-VCAs (DSP-faithful 2-integrator SVF
+  # + separate Q OTAs per aux-q-control), per-channel expo (true BP_TILT), and the
+  # integrator support + decoupling the rewrite omitted.
+  - { ref: U67,  board: audio,   block: block-6, part: LM13700M,   pkg: SOIC-16,  fn: "BP1 Q VCA (cell A = L Q, cell B = R Q)" }
+  - { ref: U68,  board: audio,   block: block-6, part: LM13700M,   pkg: SOIC-16,  fn: "BP2 Q VCA (cell A = L Q, cell B = R Q)" }
+  - { ref: U69,  board: audio,   block: block-6, part: LM13700M,   pkg: SOIC-16,  fn: "BP3 Q VCA (cell A = L Q, cell B = R Q)" }
+  - { ref: U70,  board: audio,   block: block-6, part: THAT340S14-U, pkg: SOIC-14, fn: "BP1 expo converter R channel (per-channel tilt; U28 = L)" }
+  - { ref: U71,  board: audio,   block: block-6, part: THAT340S14-U, pkg: SOIC-14, fn: "BP2 expo converter R channel (U29 = L)" }
+  - { ref: U72,  board: audio,   block: block-6, part: THAT340S14-U, pkg: SOIC-14, fn: "BP3 expo converter R channel (U30 = L)" }
+  - { ref: U73,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "BP Q IRES_AMP: BP1 (half A) + BP2 (half B)" }
+  - { ref: U74,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "BP Q IRES_AMP: BP3 (half A); half B spare" }
+  - { ref: R116, board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "1MΩ",    qty: 6,  fn: "R_Iabc_Q: V_ires → BP Q OTA Iabc; 1 per group per channel" }
+  - { ref: R117, board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 3,  fn: "R_QBIAS: BP Q IRES_AMP V_bias input; 1 per group" }
+  - { ref: R118, board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 3,  fn: "R_QINV: BP Q IRES_AMP FOCUS CV input; 1 per group" }
+  - { ref: R119, board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 3,  fn: "R_f_q: BP Q IRES_AMP feedback; 1 per group" }
+  - { ref: R120, board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "1MΩ",    qty: 3,  fn: "R_IREF_A_R: R-channel expo I_ref fixed R; 1 per group" }
+  - { ref: R121, board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "47kΩ",   qty: 3, tol: "1%", fn: "R_VOCT_R: R-channel expo V/oct scaling; 1 per group" }
+  - { ref: R122, board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "1kΩ",    qty: 3,  fn: "R_E_R: R-channel expo emitter degeneration; 1 per group" }
+  - { ref: R123, board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 12, fn: "R_BUF_PD: BP integrator Darlington buffer emitter pulldown to V-; 2 per group-channel" }
+  - { ref: D13,  board: audio,   block: block-6, part: 1N4148W,    pkg: SOD-123,  qty: 3,  fn: "D_IRES: BP Q V_ires ≥0 clamp; 1 per group" }
+  - { ref: C107, board: audio,   block: block-6, part: ~,          pkg: "0402",   val: "10nF",   qty: 6,  fn: "C_IABC_Q: BP Q-cell Iabc bypass; 1 per group per channel" }
+  - { ref: C108, board: audio,   block: block-6, part: ~,          pkg: "0402",   val: "10nF",   qty: 6,  fn: "C_IABC_INT: BP integrator OTA Iabc bypass; 1 per group per channel" }
+  - { ref: C109, board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "100nF",  qty: 6,  fn: "C_IREF: expo I_ref node bypass; 1 per expo (6 expo: U28-30 L + U70-72 R)" }
+  - { ref: RV24, board: audio,   block: block-6, part: "Bourns 3224W", pkg: SMD, val: "500kΩ", qty: 3, fn: "BP R-channel expo f_ref trim; 1 per group" }
+  - { ref: RV25, board: audio,   block: block-6, part: "Bourns 3224W", pkg: SMD, val: "20kΩ",  qty: 3, fn: "BP R-channel expo 1V/oct trim; 1 per group" }
+  - { ref: C110, board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "100nF",  qty: 84, fn: "C_BYP: per-IC supply decoupling; 2 per IC × 42 block-6 ICs (U15-U48, U67-U74)" }
 
   # block-7: HP Filter (refs shifted from old U34–U40 to U49–U55)
   - { ref: U49,  board: audio,   block: block-7, part: LM13700M,   pkg: SOIC-16,  fn: "HP OTA integrators L" }
