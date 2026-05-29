@@ -10,4 +10,6 @@ footprint:
 datasheet:
   url: https://www.ti.com/lit/ds/symlink/cd4053b.pdf
   version: SCHS047O
+  sha256: 242956f83e9431efac1aa62d92ffe4abe1b8d67b6ba31da78d10e5159dfef07b
+  bytes: 1725828
 notes: Triple 2:1 analog mux; distortion mode select.

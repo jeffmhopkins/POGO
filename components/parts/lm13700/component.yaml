@@ -10,4 +10,6 @@ footprint:
 datasheet:
   url: https://www.ti.com/lit/ds/symlink/lm13700.pdf
   version: SNOSBW2F (2015-11)
+  sha256: dabaad74d931e704464f794ff1da781945e7b36f22e0b907e22a3f74478cd59e
+  bytes: 1758498
 notes: Dual OTA; OTA-C SVF integrators + Q control.
