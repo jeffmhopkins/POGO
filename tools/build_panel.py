@@ -816,10 +816,16 @@ def _component_svg(comp: dict, rules: DesignRules, colors: dict) -> str:
                             weight=comp.get("font_weight", "normal"),
                             anchor=comp.get("text_anchor", "middle"))
 
+    # Per-instance label nudges (0 = component-standard default position)
+    ldx = float(comp.get("label_dx", 0.0))
+    ldy = float(comp.get("label_dy", 0.0))
+    rot = int(comp.get("rotate", 0))
+
     if ctype == "jack_input":
         rect_w = comp.get("rect_w")
         return svg.svg_jack(cx, cy, label, "input", rules, colors, font_size=font_size,
-                            rect_w=rect_w, label_border=bool(comp.get("label_border", False)))
+                            rect_w=rect_w, label_border=bool(comp.get("label_border", False)),
+                            label_dx=ldx, label_dy=ldy)
 
     elif ctype == "jack_output":
         rect_w = comp.get("rect_w")
@@ -827,6 +833,7 @@ def _component_svg(comp: dict, rules: DesignRules, colors: dict) -> str:
         explicit_rect = comp.get("rect")
         if explicit_rect:
             # Use the explicitly stored rect coordinates (e.g. LFO outputs)
+            lx, ly = svg.label_xy(cx, cy, 0.0, rules.jack_label_dy, ldx, ldy)
             parts = [
                 f'<circle cx="{cx}" cy="{cy}" r="3.5" fill="none" '
                 f'stroke="{colors["jack_outer"]}" stroke-width="0.6"/>',
@@ -836,18 +843,19 @@ def _component_svg(comp: dict, rules: DesignRules, colors: dict) -> str:
                 f'width="{explicit_rect["w"]}" height="{explicit_rect["h"]}" '
                 f'rx="{rules.output_rect_rx}" fill="none" '
                 f'stroke="{colors["output_rect_s"]}" stroke-width="0.3"/>',
-                f'<text x="{cx}" y="{cy + rules.jack_label_dy:.1f}" fill="{colors["jack_text"]}" '
+                f'<text x="{lx}" y="{ly:.1f}" fill="{colors["jack_text"]}" '
                 f'font-family="monospace" font-size="{font_size}" text-anchor="middle">{label}</text>',
             ]
             return "\n".join(parts)
         return svg.svg_jack(cx, cy, label, "output", rules, colors, font_size=font_size,
-                            rect_w=rect_w, label_border=bool(comp.get("label_border", False)))
+                            rect_w=rect_w, label_border=bool(comp.get("label_border", False)),
+                            label_dx=ldx, label_dy=ldy)
 
     elif ctype == "trimpot":
         tp_label       = comp.get("label", "")
         lfs            = float(comp.get("label_font_size", 1.8))
         return svg.svg_trimpot(cx, cy, tp_label, rules, colors, label_font_size=lfs,
-                               rotate=int(comp.get("rotate", 0)))
+                               rotate=rot, label_dx=ldx, label_dy=ldy)
 
     elif ctype == "knob":
         # cap_mm = cap DIAMETER; the drawn circle radius is cap_mm / 2.
@@ -855,11 +863,12 @@ def _component_svg(comp: dict, rules: DesignRules, colors: dict) -> str:
         r      = cap_mm / 2.0
         lbl    = label if not label_lines else ""
         return svg.svg_knob(cx, cy, r, lbl, rules, colors,
-                            label_lines=label_lines, label_fill=label_fill)
+                            label_lines=label_lines, label_fill=label_fill,
+                            label_dx=ldx, label_dy=ldy)
 
     elif ctype == "slider_V45":
         return svg.svg_slider_V45(cx, cy, comp.get("label", ""), colors,
-                                  rotate=int(comp.get("rotate", 0)))
+                                  rotate=rot, label_dx=ldx, label_dy=ldy)
 
     elif ctype == "slider":
         # Legacy: slider widget drawn by VCV Rack only (no SVG body)
@@ -869,28 +878,23 @@ def _component_svg(comp: dict, rules: DesignRules, colors: dict) -> str:
         return svg.svg_slider_label(float(comp.get("cx", cx)), float(comp.get("y", 38)), colors)
 
     elif ctype == "toggle_dw3":
-        ox = rules.x_offset
-        pos_xs = [px + ox for px in comp.get("pos_xs", [])]
         return svg.svg_toggle_2pos(
-            cx=cx, cy=cy,
-            label_above=comp.get("label_above", comp.get("label", "")),
-            label_above_y=float(comp.get("label_above_y", cy - 3.5)),
+            cx, cy, comp.get("label", ""), colors,
             pos_labels=comp.get("pos_labels", []),
-            pos_xs=pos_xs,
-            pos_y=float(comp.get("pos_y", cy + 4.0)),
-            colors=colors,
-            rotate=int(comp.get("rotate", 0)),
+            label_dx=ldx, label_dy=ldy,
+            pos_dx=float(comp.get("pos_dx", 0.0)), pos_dy=float(comp.get("pos_dy", 0.0)),
+            pos_spread=float(comp.get("pos_spread", svg.POS_SPREAD_DEFAULT)),
+            rotate=rot,
         )
 
     elif ctype == "toggle_dw5":
         return svg.svg_toggle_3pos(
-            cx=cx, cy=cy,
+            cx, cy, comp.get("label", ""), colors,
             pos_labels=comp.get("pos_labels", []),
-            pos_ys=comp.get("pos_ys", []),
-            label_below=comp.get("label_below", comp.get("label", "")),
-            label_below_y=float(comp.get("label_below_y", cy + 7.0)),
-            colors=colors,
-            rotate=int(comp.get("rotate", 0)),
+            label_dx=ldx, label_dy=ldy,
+            pos_dx=float(comp.get("pos_dx", 0.0)), pos_dy=float(comp.get("pos_dy", 0.0)),
+            pos_spread=float(comp.get("pos_spread", svg.POS_SPREAD_DEFAULT)),
+            rotate=rot,
         )
 
     elif ctype == "led":
@@ -901,11 +905,10 @@ def _component_svg(comp: dict, rules: DesignRules, colors: dict) -> str:
     elif ctype == "led_labeled":
         lbl_fill = comp.get("label_fill", colors["jack_text"])
         lbl      = comp.get("label", "")
-        lbl_dy   = comp.get("label_dy", None)
         return svg.svg_led_labeled(cx, cy, lbl, lbl_fill, rules, colors,
                                    fill=comp.get("led_fill", ""),
                                    stroke=comp.get("led_stroke", ""),
-                                   label_dy=lbl_dy,
+                                   label_dx=ldx, label_dy=ldy,
                                    label_border=bool(comp.get("label_border", False)),
                                    rect_w=comp.get("rect_w"))
 
