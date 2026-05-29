@@ -1,9 +1,9 @@
 """fetch_datasheets.py — cache component datasheet PDFs + record integrity metadata.
 
 Each components/parts/<slug>/component.yaml has a `datasheet: {url, version}`. This
-tool downloads PDF datasheets into a GITIGNORED cache and records `sha256` + `bytes`
-back into component.yaml (committed), so the BOM has verifiable datasheet integrity
-without committing copyrighted binaries.
+tool downloads each PDF datasheet to components/parts/<slug>/datasheet.pdf (committed
+alongside the part) and records `sha256` + `bytes` back into component.yaml, so the
+BOM has the datasheet on hand with verifiable integrity.
 
 Only PDF URLs are cached. Supplier/landing pages (version: "supplier page") are
 skipped — there is no manufacturer PDF for that panel hardware.
@@ -27,7 +27,7 @@ import yaml
 
 _REPO = Path(__file__).resolve().parent.parent
 _PARTS = _REPO / "components" / "parts"
-_CACHE = _REPO / "components" / "datasheets"
+# Datasheet PDFs are committed alongside each part: components/parts/<slug>/datasheet.pdf
 _UA = "Mozilla/5.0 (X11; Linux x86_64) POGO-datasheet-fetch/1.0"
 
 
@@ -55,7 +55,6 @@ def _download(url: str) -> bytes:
 
 
 def fetch(force: bool) -> int:
-    _CACHE.mkdir(parents=True, exist_ok=True)
     ok = fail = skip = 0
     for path, doc in _parts():
         ds = doc.get("datasheet") or {}
@@ -63,7 +62,7 @@ def fetch(force: bool) -> int:
         if not _is_pdf(ds):
             skip += 1
             continue
-        cached = _CACHE / f"{slug}.pdf"
+        cached = path.parent / "datasheet.pdf"
         if cached.exists() and not force and ds.get("sha256"):
             ok += 1
             continue
@@ -98,7 +97,7 @@ def check(verify_online: bool) -> int:
         if not ds.get("sha256") or not ds.get("bytes"):
             errs.append(f"{slug}: PDF datasheet missing sha256/bytes (run fetch_datasheets.py)")
             continue
-        cached = _CACHE / f"{slug}.pdf"
+        cached = path.parent / "datasheet.pdf"
         if verify_online:
             try:
                 data = _download(ds["url"])

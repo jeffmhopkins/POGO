@@ -17,7 +17,8 @@ components/
                            datasheet{url,version,sha256,bytes}, panel_types,
                            tapers (pots), notes. Hand-maintained except datasheet
                            sha256/bytes (written by fetch_datasheets.py).
-  datasheets/            cached datasheet PDFs — GITIGNORED, not committed.
+    datasheet.pdf          the part's datasheet, committed alongside (PDF parts only;
+                           supplier-page parts have no PDF). Fetched by fetch_datasheets.py.
 ```
 
 Footprints themselves stay in `kicad/footprints/*.pretty/` (KiCad-native libraries);
@@ -32,13 +33,13 @@ python3 tools/build_components.py --gen-fplib   generate kicad/fp-lib-table (POG
 python3 tools/build_components.py --gen-bom     generate kicad/pogo-bom.csv (manufacturing BOM)
 python3 tools/build_components.py --all          regenerate both
 python3 tools/build_components.py --check        CI drift gate (both up to date)
-python3 tools/fetch_datasheets.py          download PDF datasheets -> gitignored cache, record sha256/bytes
+python3 tools/fetch_datasheets.py          download PDF datasheets -> components/parts/<slug>/datasheet.pdf (committed) + record sha256/bytes
 python3 tools/fetch_datasheets.py --check  offline: every PDF datasheet has sha256/bytes (CI gate)
 ```
 
-Datasheet PDFs are cached under `components/datasheets/` (gitignored — no copyrighted
-binaries committed); their `sha256`+`bytes` are recorded in each `component.yaml` for
-integrity. Supplier/landing-page datasheets (panel hardware) are not cached.
+Datasheet PDFs are committed per-part as `components/parts/<slug>/datasheet.pdf`; their
+`sha256`+`bytes` are recorded in each `component.yaml` for integrity (`--check` verifies
+the committed PDF matches). Supplier/landing-page datasheets (panel hardware) have no PDF.
 
 `kicad/fp-lib-table` and `kicad/pogo-bom.csv` are **generated** (CI fails if stale).
 The BOM is a derived view of the authoritative, hand-maintained `specs/components.yaml`,

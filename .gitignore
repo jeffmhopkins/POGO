@@ -15,5 +15,3 @@ plugin.so
 *.swp
 *~
 
-# Cached datasheet PDFs (fetched by tools/fetch_datasheets.py; not committed)
-components/datasheets/
