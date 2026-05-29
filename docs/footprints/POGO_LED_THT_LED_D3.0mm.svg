@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="119.5522" height="150" viewBox="0 0 119.5522 150" role="img" aria-label="footprint POGO_LED_THT:LED_D3.0mm">
+<rect x="0" y="0" width="119.5522" height="150" fill="#141414"/>
+<g transform="translate(59.7761,47.0149) scale(22.3881)">
+<circle cx="0" cy="0" r="1.5" fill="none" stroke="#4a5a66" stroke-width="0.12"/>
+<circle cx="0" cy="0" r="1.5" fill="none" stroke="#c9d4da" stroke-width="0.12"/>
+<line x1="-2" y1="-1.5" x2="2" y2="-1.5" stroke="#2a8a5a" stroke-width="0.12" stroke-dasharray="0.4,0.3" stroke-linecap="round"/>
+<line x1="2" y1="-1.5" x2="2" y2="4" stroke="#2a8a5a" stroke-width="0.12" stroke-dasharray="0.4,0.3" stroke-linecap="round"/>
+<line x1="2" y1="4" x2="-2" y2="4" stroke="#2a8a5a" stroke-width="0.12" stroke-dasharray="0.4,0.3" stroke-linecap="round"/>
+<line x1="-2" y1="4" x2="-2" y2="-1.5" stroke="#2a8a5a" stroke-width="0.12" stroke-dasharray="0.4,0.3" stroke-linecap="round"/>
+<line x1="-1.06" y1="-1.06" x2="-1.06" y2="1.06" stroke="#4a5a66" stroke-width="0.12" stroke-linecap="round"/>
+<g><circle cx="1.27" cy="2.54" r="0.8" fill="#c9892f"/></g>
+<circle cx="1.27" cy="2.54" r="0.4" fill="#0d0d0d"/>
+<text x="1.27" y="2.54" fill="#1a1200" font-size="0.88" font-family="monospace" text-anchor="middle" dominant-baseline="central">A</text>
+<g><circle cx="-1.27" cy="2.54" r="0.8" fill="#c9892f"/></g>
+<circle cx="-1.27" cy="2.54" r="0.4" fill="#0d0d0d"/>
+<text x="-1.27" y="2.54" fill="#1a1200" font-size="0.88" font-family="monospace" text-anchor="middle" dominant-baseline="central">K</text>
+</g></svg>

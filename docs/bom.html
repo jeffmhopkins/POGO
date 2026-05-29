@@ -40,6 +40,13 @@
     }
     .grp .gn { color: #4a6070; font-weight: normal; margin-left: 8px; }
     .ds { color: #4a6070; }
+    .fp { border-bottom: 1px dotted #4a6070; cursor: help; white-space: nowrap; }
+    .fp:hover, .fp:focus { color: #fff; outline: none; }
+    .fp .fpi { color: #c9892f; font-size: 11px; }
+    #fppop { display: none; position: fixed; z-index: 50; background: #0d0d0d; border: 1px solid #2a2a2a;
+             border-radius: 6px; padding: 8px; box-shadow: 0 8px 28px #000c; pointer-events: none; }
+    #fppop img { display: block; width: 240px; max-height: 200px; object-fit: contain; }
+    #fppop .fpn { color: #7fe7ff; font-size: 10px; margin-top: 6px; width: 240px; word-break: break-all; }
     .msg { color: #ff8800; padding: 24px 0; }
     footer { color: #3a3a3a; font-size: 11px; margin-top: 24px; }
     footer a { color: #4a6070; }
@@ -71,6 +78,7 @@ const COLS = [
   ["Board", "Board", ""],
   ["Block", "Block", ""],
   ["Ref", "Ref", "ref"],
+  ["Type", "Type", ""],
   ["Qty", "Qty", "num"],
   ["Value", "Value", ""],
   ["MPN", "MPN", ""],
@@ -79,7 +87,32 @@ const COLS = [
   ["Function", "Function", "fn"],
 ];
 
+function fpslug(s) { return (s || "").replace(/[^A-Za-z0-9._-]/g, "_"); }
+
 let rows = [], sortKey = null, sortDir = 1;
+
+// footprint hover/focus popup (delegated; survives re-renders)
+const fppop = document.createElement("div");
+fppop.id = "fppop";
+document.body.appendChild(fppop);
+function showFP(el) {
+  const slug = el.dataset.fp, name = el.dataset.name;
+  fppop.innerHTML = `<img src="footprints/${slug}.svg" alt="footprint ${name}" loading="lazy">` +
+                    `<div class="fpn">${name.replace(/[&<>]/g, "")}</div>`;
+  fppop.style.display = "block";
+  const r = el.getBoundingClientRect();
+  const w = fppop.offsetWidth, h = fppop.offsetHeight;
+  let left = Math.min(r.left, window.innerWidth - w - 10);
+  let top = r.bottom + 8;
+  if (top + h > window.innerHeight - 6) top = r.top - h - 8;   // flip above if no room below
+  fppop.style.left = Math.max(8, left) + "px";
+  fppop.style.top = Math.max(8, top) + "px";
+}
+function hideFP() { fppop.style.display = "none"; }
+document.addEventListener("mouseover", e => { const t = e.target.closest(".fp"); if (t) showFP(t); });
+document.addEventListener("mouseout", e => { const t = e.target.closest(".fp"); if (t && !t.contains(e.relatedTarget)) hideFP(); });
+document.addEventListener("focusin", e => { const t = e.target.closest && e.target.closest(".fp"); if (t) showFP(t); });
+document.addEventListener("focusout", e => { const t = e.target.closest && e.target.closest(".fp"); if (t) hideFP(); });
 
 function parseCSV(text) {
   const out = []; let i = 0, field = "", row = [], inQ = false;
@@ -101,8 +134,10 @@ function parseCSV(text) {
 
 function esc(s) { return (s || "").replace(/[&<>]/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[m])); }
 
-function cell(key, v) {
+function cell(key, v, r) {
   if (key === "Datasheet" && v) return `<a href="${esc(v)}" target="_blank" rel="noopener" title="${esc(v)}">PDF&nearr;</a>`;
+  if (key === "Package" && r && r.Footprint)
+    return `<span class="fp" data-fp="${esc(fpslug(r.Footprint))}" data-name="${esc(r.Footprint)}" tabindex="0">${esc(v)} <span class="fpi">&#9635;</span></span>`;
   return esc(v);
 }
 
@@ -128,7 +163,7 @@ function headRow(grouping) {
 
 function bodyRow(r, grouping) {
   return "<tr>" + COLS.filter(c => !(grouping && c[0] === "Block")).map(([k]) =>
-    `<td class="${cls(k)}">${cell(k, r[k])}</td>`).join("") + "</tr>";
+    `<td class="${cls(k)}">${cell(k, r[k], r)}</td>`).join("") + "</tr>";
 }
 
 function render() {

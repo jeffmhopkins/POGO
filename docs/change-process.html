@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POGO — Change Process</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; background: #0d0d0d; color: #ccc;
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; padding: 24px; line-height: 1.55;
+    }
+    .wrap { width: min(820px, 100%); margin: 0 auto; }
+    a { color: #7fe7ff; text-decoration: none; } a:hover { text-decoration: underline; }
+    h1 { color: #00d4ff; letter-spacing: .08em; margin: 0 0 2px; font-size: 20px; }
+    h1 .dot { color: #ff8800; }
+    .sub { color: #4a6070; margin: 0 0 22px; letter-spacing: .1em; font-size: 12px; }
+    h2 { color: #7fe7ff; font-size: 14px; margin: 26px 0 8px; letter-spacing: .04em; }
+    p, li { font-size: 13px; color: #bbb; }
+    code { color: #9ab; background: #1d1d1d; padding: 0 4px; border-radius: 3px; }
+    table { border-collapse: collapse; width: 100%; margin: 8px 0; font-size: 12.5px; }
+    th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid #1c1c1c; vertical-align: top; }
+    th { color: #7fe7ff; }
+    td .lane { color: #fff; font-weight: bold; }
+    .gates { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+    .gate { background: #141414; border: 1px solid #2a2a2a; border-radius: 5px; padding: 6px 10px; font-size: 12px; }
+    .gate b { color: #ff8800; }
+    .note { background: #11181c; border: 1px solid #243; border-radius: 6px; padding: 12px 14px; font-size: 12.5px; color: #9ab; margin: 16px 0; }
+    footer { color: #3a3a3a; font-size: 11px; margin-top: 26px; }
+    footer a { color: #4a6070; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>POGO <span class="dot">·</span> CHANGE PROCESS</h1>
+    <p class="sub"><a href="index.html">&larr; docs</a> &nbsp;·&nbsp; how the project is modified</p>
+
+    <p>Every change is <b>plugin-first</b> and lives on its own <code>change/&lt;slug&gt;</code> branch off
+      <code>dev</code>, merging back by PR. Never commit directly to <code>dev</code> or <code>main</code>.
+      The VCV Rack plugin is the <b>ground truth</b>; the hardware spec and KiCad schematics follow the
+      locked plugin and never lead it.</p>
+
+    <div class="note">
+      <b>Source of truth:</b> this page summarizes <code>CLAUDE.md</code> →
+      <a href="https://github.com/jeffmhopkins/POGO/blob/main/CLAUDE.md#git-workflow--change-process" target="_blank" rel="noopener">“Git Workflow &amp; Change Process”</a>.
+      If the two ever disagree, CLAUDE.md wins.
+    </div>
+
+    <h2>Pick a lane first</h2>
+    <table>
+      <tr><th>Lane</th><th>When</th><th>Path</th></tr>
+      <tr><td><span class="lane">A — Behavioral</span></td><td>changes audible DSP or panel-control behavior</td><td>full Steps&nbsp;0–8, gates G1–G6</td></tr>
+      <tr><td><span class="lane">B — Hardware-only</span></td><td>plugin already locked; only spec §2–4 / nets / components / schematic</td><td>enter at Step&nbsp;5 (G4–G6 + <code>--check</code>)</td></tr>
+      <tr><td><span class="lane">C — Trivial</span></td><td>docs / comments / tests / typos; no DSP math, panel geometry, <code>components.yaml</code>, or net connectivity</td><td>minimal change file + a PR that passes CI</td></tr>
+    </table>
+    <p>If unsure whether behavior changes, use <b>Lane A</b>. A “refactor” that alters audio output is a Lane A change.
+      If hardware work uncovers a plugin bug, that spawns a <i>separate</i> Lane A change — the plugin always leads.</p>
+
+    <h2>Conventions</h2>
+    <ul>
+      <li><b>Branch:</b> <code>change/&lt;slug&gt;</code>, one change per branch/PR.</li>
+      <li><b>Change file:</b> every change gets a persistent <code>changes/NNNN-&lt;slug&gt;.md</code> (from
+        <code>changes/_TEMPLATE.md</code>), committed as the <i>first commit on the branch, before the PR</i>,
+        and never deleted (<code>NNNN</code> = highest on <code>dev</code> + 1).</li>
+      <li><b>PR title:</b> <code>NNNN-slug: summary</code>.</li>
+    </ul>
+
+    <h2>Steps &amp; gates (Lane A)</h2>
+    <ol>
+      <li><b>Open</b> — branch + change file.</li>
+      <li><b>Intent</b> — you state audio/UX intent; assistant restates. <b>G1</b>.</li>
+      <li><b>Plugin + Panel</b> — DSP + <code>panel-data.yaml</code>, DRC clean, push. <b>G2</b> = panel layout.</li>
+      <li><b>Build + Verify</b> — CI builds the <code>.vcvplugin</code>; you verify in VCV Rack. <b>G3</b>.</li>
+      <li><b>Lock</b> — record the locked plugin/panel blob hashes; they freeze for the change.</li>
+      <li><b>Spec</b> — block §1 intent + functional spec to the locked behavior. <b>G4</b>.</li>
+      <li><b>Topology + components</b> — topology prose; new parts approved into <code>components.yaml</code> + registry + footprint. <b>G5 / G6</b>.</li>
+      <li><b>Schematic + artifacts</b> — netlists → <code>.kicad_sch</code>, BOM, panel; <code>--check</code> clean.</li>
+      <li><b>Close</b> — STATUS.md + change file; PR → <code>dev</code>; squash-merge on green CI.</li>
+    </ol>
+    <div class="gates">
+      <span class="gate"><b>G1</b> intent</span>
+      <span class="gate"><b>G2</b> panel</span>
+      <span class="gate"><b>G3</b> behavior</span>
+      <span class="gate"><b>G4</b> spec</span>
+      <span class="gate"><b>G5</b> topology</span>
+      <span class="gate"><b>G6</b> component+footprint</span>
+    </div>
+    <p>Gates are hard stops — work waits for explicit approval. On rejection: log the reason, revert to the
+      last approved state, and re-enter at the failed step.</p>
+
+    <footer><a href="https://github.com/jeffmhopkins/POGO" target="_blank" rel="noopener">github.com/jeffmhopkins/POGO</a></footer>
+  </div>
+</body>
+</html>

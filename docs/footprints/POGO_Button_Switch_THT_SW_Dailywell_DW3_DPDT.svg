@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="136.1624" height="150" viewBox="0 0 136.1624 150" role="img" aria-label="footprint POGO_Button_Switch_THT:SW_Dailywell_DW3_DPDT">
+<rect x="0" y="0" width="136.1624" height="150" fill="#141414"/>
+<g transform="translate(68.0812,75) scale(13.8376)">
+<line x1="-4.07" y1="-4.57" x2="4.07" y2="-4.57" stroke="#4a5a66" stroke-width="0.12" stroke-linecap="round"/>
+<line x1="4.07" y1="-4.57" x2="4.07" y2="4.57" stroke="#4a5a66" stroke-width="0.12" stroke-linecap="round"/>
+<line x1="4.07" y1="4.57" x2="-4.07" y2="4.57" stroke="#4a5a66" stroke-width="0.12" stroke-linecap="round"/>
+<line x1="-4.07" y1="4.57" x2="-4.07" y2="-4.57" stroke="#4a5a66" stroke-width="0.12" stroke-linecap="round"/>
+<line x1="-4.32" y1="-4.82" x2="4.32" y2="-4.82" stroke="#2a8a5a" stroke-width="0.12" stroke-dasharray="0.4,0.3" stroke-linecap="round"/>
+<line x1="4.32" y1="-4.82" x2="4.32" y2="4.82" stroke="#2a8a5a" stroke-width="0.12" stroke-dasharray="0.4,0.3" stroke-linecap="round"/>
+<line x1="4.32" y1="4.82" x2="-4.32" y2="4.82" stroke="#2a8a5a" stroke-width="0.12" stroke-dasharray="0.4,0.3" stroke-linecap="round"/>
+<line x1="-4.32" y1="4.82" x2="-4.32" y2="-4.82" stroke="#2a8a5a" stroke-width="0.12" stroke-dasharray="0.4,0.3" stroke-linecap="round"/>
+<g><circle cx="-2.54" cy="-2.54" r="0.8" fill="#c9892f"/></g>
+<circle cx="-2.54" cy="-2.54" r="0.45" fill="#0d0d0d"/>
+<text x="-2.54" y="-2.54" fill="#1a1200" font-size="0.88" font-family="monospace" text-anchor="middle" dominant-baseline="central">1</text>
+<g><circle cx="0" cy="-2.54" r="0.8" fill="#c9892f"/></g>
+<circle cx="0" cy="-2.54" r="0.45" fill="#0d0d0d"/>
+<text x="0" y="-2.54" fill="#1a1200" font-size="0.88" font-family="monospace" text-anchor="middle" dominant-baseline="central">2</text>
+<g><circle cx="2.54" cy="-2.54" r="0.8" fill="#c9892f"/></g>
+<circle cx="2.54" cy="-2.54" r="0.45" fill="#0d0d0d"/>
+<text x="2.54" y="-2.54" fill="#1a1200" font-size="0.88" font-family="monospace" text-anchor="middle" dominant-baseline="central">3</text>
+<g><circle cx="-2.54" cy="2.54" r="0.8" fill="#c9892f"/></g>
+<circle cx="-2.54" cy="2.54" r="0.45" fill="#0d0d0d"/>
+<text x="-2.54" y="2.54" fill="#1a1200" font-size="0.88" font-family="monospace" text-anchor="middle" dominant-baseline="central">4</text>
+<g><circle cx="0" cy="2.54" r="0.8" fill="#c9892f"/></g>
+<circle cx="0" cy="2.54" r="0.45" fill="#0d0d0d"/>
+<text x="0" y="2.54" fill="#1a1200" font-size="0.88" font-family="monospace" text-anchor="middle" dominant-baseline="central">5</text>
+<g><circle cx="2.54" cy="2.54" r="0.8" fill="#c9892f"/></g>
+<circle cx="2.54" cy="2.54" r="0.45" fill="#0d0d0d"/>
+<text x="2.54" y="2.54" fill="#1a1200" font-size="0.88" font-family="monospace" text-anchor="middle" dominant-baseline="central">6</text>
+</g></svg>
