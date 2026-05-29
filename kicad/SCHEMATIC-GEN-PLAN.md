@@ -115,6 +115,20 @@ must use one canonical name on both sides. Registry (extend as blocks are added)
 
 When transcribing the consuming block, use these exact names on the matching pins.
 
+## Shared / cross-block parts → a dedicated shared sheet (decision 2026-05-29, revised)
+
+Parts that span two blocks are NOT owned by either block — they live in their own
+`kicad/nets/shared-*.nets.yaml` sheet, and the using blocks connect via boundary nets.
+First instance: `shared-q.nets.yaml` owns the LP1/LP2 Q-VCAs **U9** (L) and **U10** (R)
+(each LM13700: cell A = LP1 Q, cell B = LP2 Q), plus their decoupling and Iabc-bypass
+caps. components.yaml groups these under `block: block-Q`.
+
+- block-5 (LP1) connects to cell A via boundary nets: `LP1_V1_{L,R}` (BP node → OTA In+),
+  `LP1_SUMINV_{L,R}` (SUM_AMP virtual ground → OTA In−/Out), `LP1_QIABC_{L,R}` (V_ires→Iabc).
+- block-8 (LP2) connects to cell B via `LP2_V1_*`, `LP2_SUMINV_*`, `LP2_QIABC_*`.
+
+(The expo converter THAT340 is per-block, not shared — LP1 has its own U14.)
+
 ## Refdes convention for multi-instance parts (decision 2026-05-29)
 
 `specs/components.yaml` keeps grouped refs with `qty>1` for stereo pairs / repeated

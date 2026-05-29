@@ -47,8 +47,8 @@ audio,C43,1,,100nF,0603,,,,,block-4,U63 +12V decoupling
 audio,C44,1,,100nF,0603,,,,,block-4,U63 -12V decoupling
 audio,U7,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-5,LP1 OTA integrators L
 audio,U8,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-5,LP1 OTA integrators R
-audio,U9,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-5,"LP1+LP2 Q VCA L (cell A=LP1, cell B=LP2)"
-audio,U10,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-5,"LP1+LP2 Q VCA R (cell A=LP1, cell B=LP2)"
+audio,U9,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-Q,"LP1+LP2 Q VCA L (cell A=LP1, cell B=LP2)"
+audio,U10,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-Q,"LP1+LP2 Q VCA R (cell A=LP1, cell B=LP2)"
 audio,U11,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/opa1612.pdf,block-5,LP1 SUM_AMP + output buffer L
 audio,U12,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/opa1612.pdf,block-5,LP1 SUM_AMP + output buffer R
 audio,U13,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-5,LP1 tilt inverter (−V_tilt for R)
@@ -65,6 +65,46 @@ audio,RV3,1,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3
 audio,RV4,1,3224W-1-xxx,20kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-5,LP1 1V/oct tracking trim; ±10% range
 audio,RV5,1,,,SMD,,,,,block-5,LP1 Q_max trim (IRES_AMP V_bias)
 audio,RV6,1,,,SMD,,,,,block-5,LP1 tilt null trim
+audio,R47,1,,100kΩ,0603,,,,,block-5,LP1 SUM_AMP v2 feedback input R L (R_FB_L)
+audio,R48,1,,100kΩ,0603,,,,,block-5,LP1 SUM_AMP v2 feedback input R R (R_FB_R)
+audio,R49,1,,1kΩ,0603,,,,,block-5,LP1 OTA1 linearizing R L (R_LIN_A_L)
+audio,R50,1,,1kΩ,0603,,,,,block-5,LP1 OTA2 linearizing R L (R_LIN_B_L)
+audio,R51,1,,1kΩ,0603,,,,,block-5,LP1 OTA1 linearizing R R (R_LIN_A_R)
+audio,R52,1,,1kΩ,0603,,,,,block-5,LP1 OTA2 linearizing R R (R_LIN_B_R)
+audio,R53,1,,100kΩ,0603,,,,,block-5,LP1 SUM_AMP feedback R L (R_f_L)
+audio,R54,1,,100kΩ,0603,,,,,block-5,LP1 SUM_AMP feedback R R (R_f_R)
+audio,R55,1,,100kΩ,0603,,,,,block-5,"LP1 tilt summer R, L expo input (+V_tilt)"
+audio,R56,1,,100kΩ,0603,,,,,block-5,"LP1 tilt summer R, R expo input (−V_tilt)"
+audio,R57,1,,1MΩ,0603,,,,,block-5,LP1 Q V→I: V_ires_L → U9 cellA Iabc (R_Iabc_L)
+audio,R58,1,,1MΩ,0603,,,,,block-5,LP1 Q V→I: V_ires_R → U10 cellA Iabc (R_Iabc_R)
+audio,R59,1,,100kΩ,0603,,,,,block-5,LP1 IRES_AMP V_bias input R (R_QBIAS)
+audio,R60,1,,100kΩ,0603,,,,,block-5,LP1 IRES_AMP resonance CV input R (R_QINV)
+audio,R61,1,,100kΩ,0603,,,,,block-5,LP1 IRES_AMP feedback R (R_f_q)
+audio,R62,1,,1MΩ,0603,,,,,block-5,LP1 expo I_ref fixed R; series with RV3 (R_IREF_A)
+audio,R63,1,,47kΩ,0603,,,,,block-5,LP1 expo V/oct scaling R (R_VOCT)
+audio,R64,1,,1kΩ,0603,,,,,block-5,LP1 expo emitter degeneration (R_E)
+audio,D10,1,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-5,"LP1 V_ires ≥0 clamp (anode GND, cathode V_ires); prevents reverse Iabc"
+audio,C45,1,,100nF,0603,,,,,block-5,"LP1 expo I_ref node bypass (C_IREF, C0G)"
+audio,C46,1,,10nF,0402,,,,,block-5,LP1 OTA Iabc bypass L (C_IABC_L)
+audio,C47,1,,10nF,0402,,,,,block-5,LP1 OTA Iabc bypass R (C_IABC_R)
+audio,C48,1,,10nF,0402,,,,,block-Q,LP1 Q-cell Iabc bypass L (C_IABC_Q_L)
+audio,C49,1,,10nF,0402,,,,,block-Q,LP1 Q-cell Iabc bypass R (C_IABC_Q_R)
+audio,C50,1,,100nF,0603,,,,,block-5,U7 V+ decoupling
+audio,C51,1,,100nF,0603,,,,,block-5,U7 V- decoupling
+audio,C52,1,,100nF,0603,,,,,block-5,U8 V+ decoupling
+audio,C53,1,,100nF,0603,,,,,block-5,U8 V- decoupling
+audio,C54,1,,100nF,0603,,,,,block-Q,U9 V+ decoupling
+audio,C55,1,,100nF,0603,,,,,block-Q,U9 V- decoupling
+audio,C56,1,,100nF,0603,,,,,block-Q,U10 V+ decoupling
+audio,C57,1,,100nF,0603,,,,,block-Q,U10 V- decoupling
+audio,C58,1,,100nF,0603,,,,,block-5,U11 V+ decoupling
+audio,C59,1,,100nF,0603,,,,,block-5,U11 V- decoupling
+audio,C60,1,,100nF,0603,,,,,block-5,U12 V+ decoupling
+audio,C61,1,,100nF,0603,,,,,block-5,U12 V- decoupling
+audio,C62,1,,100nF,0603,,,,,block-5,U13 V+ decoupling
+audio,C63,1,,100nF,0603,,,,,block-5,U13 V- decoupling
+audio,C64,1,,100nF,0603,,,,,block-5,U14 V+ decoupling
+audio,C65,1,,100nF,0603,,,,,block-5,U14 V- decoupling
 audio,U15,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-6,BP1 OTA integrators + Q L
 audio,U16,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-6,BP1 OTA integrators + Q R
 audio,U17,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-6,BP2 OTA integrators + Q L
