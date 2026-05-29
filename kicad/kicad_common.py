@@ -596,26 +596,28 @@ def sym_that340():
 
 
 def sym_that2180():
-    """THAT2180 current-controlled VCA SOIC-8.
-    Pins (verify against THAT2180 datasheet):
-    1=IN+, 2=IN-, 3=GAIN, 4=V-, 5=OUT-, 6=OUT+, 7=NC, 8=V+."""
+    """THAT2180 Blackmer current-in/current-out VCA SOIC-8.
+    Pinout per THAT 2180-Series datasheet (Doc 600029 Rev 02), Table 1:
+    1=Input, 2=Ec+, 3=Ec-, 4=Sym, 5=V-, 6=Gnd, 7=V+, 8=Output.
+    Current-in (pin 1) / current-out (pin 8): needs an R_in (V->I) at the input and
+    a transimpedance op-amp (I->V) at the output. Gain via Ec+ (pin 2, +6.1 mV/dB)."""
     return '''  (symbol "POGO:THAT2180"
     (pin_names (offset 0.254) hide)
     (pin_numbers hide)
-    (property "Reference" "U" (at 5.08 5.08 0) (effects (font (size 1.27 1.27))))
-    (property "Value" "THAT2180" (at 5.08 -5.08 0) (effects (font (size 1.27 1.27))))
+    (property "Reference" "U" (at 5.08 7.62 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "THAT2180" (at 5.08 -7.62 0) (effects (font (size 1.27 1.27))))
     (symbol "THAT2180_0_1"
       (rectangle (start -6.35 -6.35) (end 6.35 6.35) (stroke (width 0.254) (type default)) (fill (type background)))
     )
     (symbol "THAT2180_1_1"
-      (pin input line (at -8.89 5.08 0) (length 2.54) (name "IN+" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27)))))
-      (pin input line (at -8.89 2.54 0) (length 2.54) (name "IN-" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27)))))
-      (pin input line (at -8.89 0 0) (length 2.54) (name "GAIN" (effects (font (size 1.27 1.27)))) (number "3" (effects (font (size 1.27 1.27)))))
-      (pin power_in line (at -8.89 -2.54 0) (length 2.54) (name "V-" (effects (font (size 1.27 1.27)))) (number "4" (effects (font (size 1.27 1.27)))))
-      (pin output line (at 8.89 -2.54 180) (length 2.54) (name "OUT-" (effects (font (size 1.27 1.27)))) (number "5" (effects (font (size 1.27 1.27)))))
-      (pin output line (at 8.89 0 180) (length 2.54) (name "OUT+" (effects (font (size 1.27 1.27)))) (number "6" (effects (font (size 1.27 1.27)))))
-      (pin no_connect line (at 8.89 2.54 180) (length 2.54) (name "NC" (effects (font (size 1.27 1.27)))) (number "7" (effects (font (size 1.27 1.27)))))
-      (pin power_in line (at 8.89 5.08 180) (length 2.54) (name "V+" (effects (font (size 1.27 1.27)))) (number "8" (effects (font (size 1.27 1.27)))))
+      (pin input line (at -8.89 5.08 0) (length 2.54) (name "Input" (effects (font (size 1.016 1.016)))) (number "1" (effects (font (size 1.016 1.016)))))
+      (pin input line (at -8.89 2.54 0) (length 2.54) (name "Ec+" (effects (font (size 1.016 1.016)))) (number "2" (effects (font (size 1.016 1.016)))))
+      (pin input line (at -8.89 0 0) (length 2.54) (name "Ec-" (effects (font (size 1.016 1.016)))) (number "3" (effects (font (size 1.016 1.016)))))
+      (pin input line (at -8.89 -2.54 0) (length 2.54) (name "Sym" (effects (font (size 1.016 1.016)))) (number "4" (effects (font (size 1.016 1.016)))))
+      (pin power_in line (at -8.89 -5.08 0) (length 2.54) (name "Gnd" (effects (font (size 1.016 1.016)))) (number "6" (effects (font (size 1.016 1.016)))))
+      (pin output line (at 8.89 5.08 180) (length 2.54) (name "Output" (effects (font (size 1.016 1.016)))) (number "8" (effects (font (size 1.016 1.016)))))
+      (pin power_in line (at 8.89 2.54 180) (length 2.54) (name "V+" (effects (font (size 1.016 1.016)))) (number "7" (effects (font (size 1.016 1.016)))))
+      (pin power_in line (at 8.89 -2.54 180) (length 2.54) (name "V-" (effects (font (size 1.016 1.016)))) (number "5" (effects (font (size 1.016 1.016)))))
     )
   )'''
 
@@ -775,6 +777,21 @@ def bat54s_pins(ox, oy, angle=0):
         "1": _rot(ox, oy, angle, -7.62, 0),
         "2": _rot(ox, oy, angle, 0, -5.08),
         "3": _rot(ox, oy, angle,  7.62, 0),
+    }
+
+
+def that2180_pins(ox, oy, angle=0):
+    """THAT2180: 1=Input, 2=Ec+, 3=Ec-, 4=Sym, 6=Gnd (left); 8=Output, 7=V+, 5=V- (right).
+    Matches sym_that2180() geometry."""
+    return {
+        "1": _rot(ox, oy, angle, -8.89,  5.08),
+        "2": _rot(ox, oy, angle, -8.89,  2.54),
+        "3": _rot(ox, oy, angle, -8.89,  0),
+        "4": _rot(ox, oy, angle, -8.89, -2.54),
+        "6": _rot(ox, oy, angle, -8.89, -5.08),
+        "8": _rot(ox, oy, angle,  8.89,  5.08),
+        "7": _rot(ox, oy, angle,  8.89,  2.54),
+        "5": _rot(ox, oy, angle,  8.89, -2.54),
     }
 
 

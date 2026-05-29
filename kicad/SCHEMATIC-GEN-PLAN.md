@@ -53,7 +53,7 @@ Ordered by rising symbol/wiring risk so each step de-risks the next. ✅ = done.
 | 2 | **B** Output buffers | audio | 2× TL072 | — (jack/opamp exist) | ✅ DONE. MAIN (U61) + BP3 tap (U62); BP3/LFO jacks live in other blocks (boundary nets). |
 | 3 | **1** Pre-gain | audio | 2× OPA1612, 2× DW3 | DW3 toggle sym + pins (✅ added; DW5 too) | ✅ DONE. DPDT path-select 1×/5×; ALT path protected (R38/R39+D8/D9). |
 | 4 | **2** Dual LFO | utility | 2× TL072 | diode/led syms + trimpot (✅ added) | ✅ DONE. Rate network FINALIZED (drive-attenuator); SOD-123 footprint vendored; LFO LEDs added to BOM. |
-| 5 | **4** VCA | audio | 2× THAT2180, TL072, BAT54S | **that2180_pins** all-pins | First THAT2180; AMT/OFS trims. |
+| 5 | **4** VCA | audio | 2× THAT2180, 2× TL072, BAT54S | that2180_pins (✅) | ✅ DONE. THAT2180 pinout/topology CORRECTED from datasheet (current-in/I-V-out); 3224W SMD footprint vendored. |
 | 6 | **5** LP1 | audio | 4× LM13700, 2× OPA1612, TL072, THAT340 | **lm13700_pins**, **that340 all-pins use** | First OTA-C SVF; re-verify `aux-ota-c-svf`, `aux-expo-converter`, `aux-q-control` (all STALE). |
 | 7 | **8** LP2 | audio | 2× LM13700, 2× OPA1612, THAT340 | — (reuse #6) | Same SVF core as LP1, independent. |
 | 8 | **7** HP | audio | 4× LM13700, 2× OPA1612, THAT340 | — (reuse #6) | G=−1 buffer corrects SUM_AMP inversion. |
@@ -79,7 +79,7 @@ validator works. Current state:
 | R / C / pot+trimpot+slider | ✅ | `r_pins`/`c_pins`/`rpot_pins` ✅ | none |
 | THAT340 | ✅ | `that340_pins` ✅ (all 16) | wire into SYM_TABLE |
 | CD4053 | ✅ | `cd4053_pins` ✅ (all 16) | wire into SYM_TABLE |
-| **THAT2180** | ✅ sym | ❌ | add `that2180_pins` (8 pins; pin 7 NC) |
+| THAT2180 | ✅ sym (pinout CORRECTED) | ✅ `that2180_pins` | done (sym `vca`); datasheet pinout Input=1,Ec+=2,Ec−=3,Sym=4,V−=5,Gnd=6,V+=7,Output=8 |
 | **LM13700** | ✅ sym | ❌ | add `lm13700_pins` (16 pins; pin 12 NC) |
 | **TL074** | ✅ sym | partial (`opamp_quad_pins`, no power) | add `opamp_quad_all_pins` (units 1–4 + V+ 4, V− 11) |
 | DW3 toggle (DPDT ON-ON) | ✅ `sym_dw3` | ✅ `dpdt6_pins` | done (sym `dw3` in SYM_TABLE) |
@@ -109,6 +109,8 @@ must use one canonical name on both sides. Registry (extend as blocks are added)
 | `BP3_TAP_L`, `BP3_TAP_R` | block-6 → block-B | BP3 group tap to BP3 buffers |
 | `BP3_L_OUT`, `BP3_R_OUT` | block-B → block-6 | buffered BP3 to panel jacks J27/J28 |
 | `LFO1_OUT` | block-2 → block-3 | LFO1 normals into MOD_IN tip-switch ring |
+| `VCA_OUT_L`, `VCA_OUT_R` | block-4 → block-5 | VCA out to LP1 (inverted; LP1 SUM_AMP restores) |
+| `MOD_BUS` | block-3 → block-4 | mod bus → VCA_IN tip-switch normalling |
 
 When transcribing the consuming block, use these exact names on the matching pins.
 
@@ -146,6 +148,7 @@ Fix any missing `qty` on grouped rows as you go (block-1 fixed R3–R6).
 - [x] block-B transcribed + verified
 - [x] block-1 transcribed + verified (DW3/DW5 symbols; refdes-suffix convention)
 - [x] block-2 transcribed + verified (LFO rate net FINALIZED; diode/led/trimpot syms; SOD-123 fp)
-- [ ] blocks 4, 5, 6, 7, 8, 3 transcribed + verified
+- [x] block-4 transcribed + verified (THAT2180 pinout/topology CORRECTED; vca sym; 3224W SMD fp)
+- [ ] blocks 5, 6, 7, 8, 3 transcribed + verified
 - [ ] (optional) board-level sheets combining per-block schematics by board
 - [ ] (gated separately) enable a KiCad CI job (kiutils) — currently disabled

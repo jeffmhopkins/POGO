@@ -20,21 +20,31 @@ audio,C3,1,,100nF,0603,,,,,block-1,U2 +12V decoupling
 audio,C4,1,,100nF,0603,,,,,block-1,U2 -12V decoupling
 audio,C5,1,,100nF,0603,,,,,block-1,U3 +12V decoupling
 audio,C6,1,,100nF,0603,,,,,block-1,U3 -12V decoupling
-audio,U4,1,THAT2180LD,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,THAT Corporation,,https://www.thatcorp.com/datashts/THAT_2180-Series_Datasheet.pdf,block-4,L-channel dB-law VCA
-audio,U5,1,THAT2180LD,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,THAT Corporation,,https://www.thatcorp.com/datashts/THAT_2180-Series_Datasheet.pdf,block-4,R-channel dB-law VCA
-audio,U6,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-4,VCA CV conditioning (OFS sum)
-audio,RV1,1,3224W-1-xxx,500Ω,SMD,,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-4,L unity-gain trim
-audio,RV2,1,3224W-1-xxx,500Ω,SMD,,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-4,R unity-gain trim
-audio,R7,1,,15kΩ,0603,,,,,block-4,R_gain L (V→I at THAT2180 GAIN pin; nominal)
-audio,R8,1,,15kΩ,0603,,,,,block-4,R_gain R
+audio,U4,1,THAT2180LD,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,THAT Corporation,,https://www.thatcorp.com/datashts/THAT_2180-Series_Datasheet.pdf,block-4,L-channel dB-law VCA (current-in/out)
+audio,U5,1,THAT2180LD,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,THAT Corporation,,https://www.thatcorp.com/datashts/THAT_2180-Series_Datasheet.pdf,block-4,R-channel dB-law VCA (current-in/out)
+audio,U6,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-4,"I/V transimpedance converters (THAT2180 current outputs → V; L=A, R=B)"
+audio,U63,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-4,VCA CV conditioning: AMT attenuverter inverter (A) + CV/OFS summer-scaler (B)
+audio,RV1,1,3224W-1-xxx,500Ω,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-4,L unity-gain trim (Ec+ offset)
+audio,RV2,1,3224W-1-xxx,500Ω,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-4,R unity-gain trim (Ec+ offset)
+audio,R7,1,,20kΩ,0603,,,,,block-4,R_in L: audio V→I into THAT2180 Input (pin 1)
+audio,R8,1,,20kΩ,0603,,,,,block-4,R_in R
+audio,R40,1,,20kΩ,0603,,,,,block-4,R_f L: I/V transimpedance feedback (unity at 0 dB; inverting)
+audio,R41,1,,20kΩ,0603,,,,,block-4,R_f R
+audio,R42,1,,10kΩ,0603,,,,,block-4,R_amt_inv_in: AMT attenuverter inverter input
+audio,R43,1,,10kΩ,0603,,,,,block-4,R_amt_inv_fb: AMT attenuverter inverter feedback
+audio,R44,1,,100kΩ,0603,,,,,block-4,R_sum_cv: CV summer input (AMT-attenuverted CV)
+audio,R45,1,,100kΩ,0603,,,,,block-4,R_sum_ofs: CV summer input (OFS floor)
+audio,R46,1,,2.4kΩ,0603,,,,,block-4,R_sum_fb: CV summer feedback; scales to ~6.1 mV/dB Ec+ range (Phase-3R trim)
 audio,R9,1,,100Ω,0603,,,,,block-4,VCA CV input series protection
 audio,D3,1,BAT54S,,SOT-23,POGO_Package_TO_SOT_SMD:SOT-23,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds11005.pdf,block-4,VCA CV input clamp ±12V
-audio,C7,1,,100nF,0603,,,,,block-4,U4 +12V decoupling
-audio,C8,1,,100nF,0603,,,,,block-4,U4 -12V decoupling
-audio,C9,1,,100nF,0603,,,,,block-4,U5 +12V decoupling
-audio,C10,1,,100nF,0603,,,,,block-4,U5 -12V decoupling
-audio,R_OUT_N_L,1,,10kΩ,0603,,,,,block-4,U4 OUT− termination to AGND (single-ended operation; L channel)
-audio,R_OUT_N_R,1,,10kΩ,0603,,,,,block-4,U5 OUT− termination to AGND (single-ended operation; R channel)
+audio,C7,1,,100nF,0603,,,,,block-4,U4 +12V (V+) decoupling
+audio,C8,1,,100nF,0603,,,,,block-4,U4 -12V (V-) decoupling
+audio,C9,1,,100nF,0603,,,,,block-4,U5 +12V (V+) decoupling
+audio,C10,1,,100nF,0603,,,,,block-4,U5 -12V (V-) decoupling
+audio,C41,1,,100nF,0603,,,,,block-4,U6 +12V decoupling
+audio,C42,1,,100nF,0603,,,,,block-4,U6 -12V decoupling
+audio,C43,1,,100nF,0603,,,,,block-4,U63 +12V decoupling
+audio,C44,1,,100nF,0603,,,,,block-4,U63 -12V decoupling
 audio,U7,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-5,LP1 OTA integrators L
 audio,U8,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-5,LP1 OTA integrators R
 audio,U9,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-5,"LP1+LP2 Q VCA L (cell A=LP1, cell B=LP2)"
@@ -51,8 +61,8 @@ audio,R10,1,,100kΩ,0603,,,,,block-5,LP1 SUM_AMP R_in L
 audio,R11,1,,100kΩ,0603,,,,,block-5,LP1 SUM_AMP R_in R
 audio,R_TILT_INV_IN,1,,100kΩ,0603,,,,,block-5,LP1 tilt inverter input R (U13 half A; 1% for tilt center null depth)
 audio,R_TILT_INV_FB,1,,100kΩ,0603,,,,,block-5,LP1 tilt inverter feedback R (matched pair; G=−1 gives −V_tilt for R channel)
-audio,RV3,1,3224W-1-xxx,500kΩ,SMD,,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-5,LP1 f_ref trim rheostat; in series with R_IREF_A 1MΩ; ±25% range
-audio,RV4,1,3224W-1-xxx,20kΩ,SMD,,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-5,LP1 1V/oct tracking trim; ±10% range
+audio,RV3,1,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-5,LP1 f_ref trim rheostat; in series with R_IREF_A 1MΩ; ±25% range
+audio,RV4,1,3224W-1-xxx,20kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-5,LP1 1V/oct tracking trim; ±10% range
 audio,RV5,1,,,SMD,,,,,block-5,LP1 Q_max trim (IRES_AMP V_bias)
 audio,RV6,1,,,SMD,,,,,block-5,LP1 tilt null trim
 audio,U15,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-6,BP1 OTA integrators + Q L
@@ -89,14 +99,14 @@ audio,U45,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Inst
 audio,U46,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6,BP wet summer half A = L (BP1+BP2+BP3 inv sum); half B = MIX crossfade L
 audio,U47,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6,BP wet summer half A = R; half B = MIX crossfade R
 audio,U48,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6,BP wet polarity restore: half A = V_wet_inv→V_wet_pos (L); half B = V_wet_inv→V_wet_pos (R)
-audio,RV7,1,3224W-1-xxx,500kΩ,SMD,,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6,BP1 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 200 Hz at 0V; ±25% range
-audio,RV8,1,3224W-1-xxx,20kΩ,SMD,,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6,BP1 1V/oct tracking trim; ±10% range
+audio,RV7,1,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6,BP1 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 200 Hz at 0V; ±25% range
+audio,RV8,1,3224W-1-xxx,20kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6,BP1 1V/oct tracking trim; ±10% range
 audio,RV9,1,,,SMD,,,,,block-6,BP1 Q_max trim (Iabc V_bias)
-audio,RV10,1,3224W-1-xxx,500kΩ,SMD,,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6,BP2 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 1500 Hz at 0V; ±25% range
-audio,RV11,1,3224W-1-xxx,20kΩ,SMD,,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6,BP2 1V/oct tracking trim; ±10% range
+audio,RV10,1,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6,BP2 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 1500 Hz at 0V; ±25% range
+audio,RV11,1,3224W-1-xxx,20kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6,BP2 1V/oct tracking trim; ±10% range
 audio,RV12,1,,,SMD,,,,,block-6,BP2 Q_max trim
-audio,RV13,1,3224W-1-xxx,500kΩ,SMD,,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6,BP3 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 6000 Hz at 0V; ±25% range
-audio,RV14,1,3224W-1-xxx,20kΩ,SMD,,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6,BP3 1V/oct tracking trim; ±10% range
+audio,RV13,1,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6,BP3 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 6000 Hz at 0V; ±25% range
+audio,RV14,1,3224W-1-xxx,20kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6,BP3 1V/oct tracking trim; ±10% range
 audio,RV15,1,,,SMD,,,,,block-6,BP3 Q_max trim
 audio,D4,24,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6,SC soft-clip diodes; 4 per path (2 antiparallel pairs) × 6 paths
 audio,D5,12,BZX84C5V1,,SOT-23,,Nexperia,,https://assets.nexperia.com/documents/data-sheet/BZX84_SER.pdf,block-6,HC back-to-back zener clamps (±5.8V clip); 2 per path × 6 paths
@@ -137,8 +147,8 @@ audio,U55,1,THAT340S14-U,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,THAT
 audio,C29,4,,47nF,0603,,,,,block-7,HP integrator caps (C0G; C1L/C2L/C1R/C2R)
 audio,R30,1,,100kΩ,0603,,,,,block-7,HP SUM_AMP R_in L
 audio,R31,1,,100kΩ,0603,,,,,block-7,HP SUM_AMP R_in R
-audio,RV16,1,3224W-1-xxx,500kΩ,SMD,,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-7,HP f_ref trim rheostat; in series with R_IREF_A 1MΩ; ±25% range
-audio,RV17,1,3224W-1-xxx,20kΩ,SMD,,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-7,HP 1V/oct tracking trim; ±10% range
+audio,RV16,1,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-7,HP f_ref trim rheostat; in series with R_IREF_A 1MΩ; ±25% range
+audio,RV17,1,3224W-1-xxx,20kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-7,HP 1V/oct tracking trim; ±10% range
 audio,RV18,1,,,SMD,,,,,block-7,HP Q_max trim
 audio,R_QB_IABC_L,1,,100kΩ,0603,,,,,block-7,U51 cell B Iabc termination resistor to GND (prevents floating)
 audio,R_QB_IABC_R,1,,100kΩ,0603,,,,,block-7,U52 cell B Iabc termination resistor to GND
@@ -152,8 +162,8 @@ audio,U60,1,THAT340S14-U,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,THAT
 audio,C33,4,,47nF,0603,,,,,block-8,LP2 integrator caps (C0G; 4 total)
 audio,R32,1,,100kΩ,0603,,,,,block-8,LP2 SUM_AMP R_in L
 audio,R33,1,,100kΩ,0603,,,,,block-8,LP2 SUM_AMP R_in R
-audio,RV19,1,3224W-1-xxx,500kΩ,SMD,,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-8,LP2 f_ref trim rheostat; in series with R_IREF_A 1MΩ; ±25% range
-audio,RV20,1,3224W-1-xxx,20kΩ,SMD,,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-8,LP2 1V/oct tracking trim; ±10% range
+audio,RV19,1,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-8,LP2 f_ref trim rheostat; in series with R_IREF_A 1MΩ; ±25% range
+audio,RV20,1,3224W-1-xxx,20kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-8,LP2 1V/oct tracking trim; ±10% range
 audio,RV21,1,,,SMD,,,,,block-8,LP2 Q_max trim
 audio,U61,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-B,MAIN_L + MAIN_R output buffers
 audio,U62,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-B,BP3_L + BP3_R output buffers

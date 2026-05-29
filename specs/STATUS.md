@@ -25,7 +25,7 @@ Last updated: 2026-05-28 | Topology: 48HP | Source of truth: `tools/panel-data.y
 | 1 | Pre-Gain | ✅ panel-verified | ⚠️ STALE | OPA1612, 1×/5× switch; ALT_BP path |
 | 2 | Dual LFO | ✅ panel-verified | ✅ rate net FINALIZED 2026-05-29 | Integrator+Schmitt; drive-attenuator rate control (fixed R_INT + trimpot attenuator) |
 | 3 | Mod Bus | ✅ panel-verified | ⚠️ STALE | 19 destinations; 7× TL074CDT |
-| 4 | VCA | ✅ panel-verified | ⚠️ STALE | THAT 2180 dB-law; DSP updated to match |
+| 4 | VCA | ✅ panel-verified | ✅ CORRECTED 2026-05-29 | THAT 2180 current-in/I-V-out (datasheet pinout); Ec+ control; I/V op-amps added |
 | 5 | LP Filter 1 | ✅ panel-verified | ⚠️ STALE | OTA-C SVF; stereo tilt (symmetric ±V_tilt L/R) |
 | 6 | Triple BP + Dist | ✅ **rewritten 2026-05-28** | ⚠️ STALE | Panel redesigned: per-band DIST switch, FOCUS, TILT; BP_BYPASS+WET model |
 | 7 | HP Filter | ✅ panel-verified | ⚠️ STALE | OTA-C SVF; G=−1 buffer corrects SUM_AMP inversion |
@@ -41,7 +41,7 @@ Last updated: 2026-05-28 | Topology: 48HP | Source of truth: `tools/panel-data.y
 | aux-ota-c-svf | ⚠️ STALE | ASCII schematic + full derivations |
 | aux-expo-converter | ⚠️ STALE | Component values + trim procedure |
 | aux-q-control | ⚠️ STALE | IRES_AMP driver + IC sharing plan |
-| aux-vca-cell | ⚠️ STALE | THAT 2180 dB-law; DSP matches |
+| aux-vca-cell | ✅ CORRECTED 2026-05-29 | THAT 2180 current-in/I-V-out; Ec+ control |
 | aux-unity-buffer | ⚠️ STALE | G=+1 and G=−1 variants |
 | aux-distortion | ⚠️ STALE | SC/HC/WF + CD4053 mux wiring |
 | aux-attenuverter | ⚠️ STALE | Bipolar pot + TL074 inverter |
@@ -70,8 +70,8 @@ Circuit diagrams in spec text must be self-sufficient.
 
 | File | Status |
 |---|---|
-| `kicad/generate_schematic.py` | 🚧 48HP data-driven generator — framework done, **blocks A, B, 1, 2 complete** (4/10 blocks). Rollout plan: `kicad/SCHEMATIC-GEN-PLAN.md` |
-| `kicad/nets/*.nets.yaml` | 🚧 per-block netlists — `block-A`, `block-B`, `block-1`, `block-2` done |
+| `kicad/generate_schematic.py` | 🚧 48HP data-driven generator — framework done, **blocks A, B, 1, 2, 4 complete** (5/10 blocks). Rollout plan: `kicad/SCHEMATIC-GEN-PLAN.md` |
+| `kicad/nets/*.nets.yaml` | 🚧 per-block netlists — `block-A`, `block-B`, `block-1`, `block-2`, `block-4` done |
 | `kicad/generate_control_board.py`, `generate_utility_board.py` | ⚠️ 40HP-era STALE (see kicad/README-STALE.md) |
 | `kicad/validate_*.py` | ⚠️ 40HP-era STALE |
 | `.github/workflows/build.yml` schematic gate | ✅ `generate_schematic.py --check` (validate + structural verify + drift) in all jobs |
@@ -117,15 +117,20 @@ corrected; block-B output Z attenuation corrected; BP_MIX wet polarity circuit c
    40HP-era stale generators. Per-block netlists in `kicad/nets/*.nets.yaml`,
    footprints resolved from the `components/` registry, byte-stable output, pin-
    coverage + structural verification gated in CI. Remaining: transcribe blocks
-   4, 5, 6, 7, 8, 3. **Order, symbol gaps, and per-block checklist:
+   5, 6, 7, 8, 3. **Order, symbol gaps, and per-block checklist:
    `kicad/SCHEMATIC-GEN-PLAN.md`.**
 2. **Phase 6R** — VCV Rack signal-path smoke tests (CI integration)
 
-**THAT 2180 audio I/O resolved (2026-05-28):** Single-ended operation confirmed throughout
-(IN+ = signal, IN− → AGND direct; OUT+ = signal out, OUT− → 10 kΩ → AGND via R_OUT_N_L/R).
-Stage boundaries verified: Block 1→VCA −0.006 dB; VCA→LP1 −0.009 dB — both negligible.
-Exact IN+ (~20 kΩ) and OUT+ (<100 Ω) impedance figures are typical values from THAT Corp
-application notes; confirm from THAT 2180A14-U datasheet during PCB layout.
+**THAT 2180 I/O CORRECTED (2026-05-29):** The earlier "single-ended IN+/IN−/OUT+/OUT−,
+no output op-amp, OUT− → 10 kΩ" conclusion was **wrong** — it assumed a differential
+*voltage* part. The committed datasheet (Doc 600029 Rev 02, Table 1) shows the THAT2180
+is **current-in (pin 1 Input) / current-out (pin 8 Output)**, pinout
+Input=1, Ec+=2, Ec−=3, Sym=4, V−=5, Gnd=6, V+=7, Output=8. The corrected block-4 cell
+uses **R_in (V→I)** at the input and a **transimpedance op-amp (I→V) per channel** at the
+output (inverting, unity at 0 dB; the inversion is compensated by LP1's inverting SUM_AMP).
+Gain via Ec+ (+6.1 mV/dB; Ec+ = 244 mV·(control−1)); Ec−/Sym/Gnd → AGND. The bogus
+R_OUT_N_L/R were removed and an I/V op-amp (U6) + CV-conditioning op-amp (U63) added.
+See `kicad/nets/block-4.nets.yaml`, `specs/aux/aux-vca-cell.md`, `specs/block-4/spec.md`.
 
 **Open prototype questions:** None. All resolved.
 - block-2 LFO LED: pulsing confirmed (half-wave rectified via D_LED 1N4148W). Signal

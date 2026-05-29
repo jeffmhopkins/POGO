@@ -6,8 +6,9 @@ supplier: '~'
 package: SMD
 matches:
 - Bourns 3224W
-footprint: null
-footprint_needed: SMD trimmer 3224W
+footprint:
+  lib: Potentiometer_SMD
+  name: Potentiometer_Bourns_3224W
 datasheet:
   url: https://www.bourns.com/docs/Product-Datasheets/3224.pdf
   version: rev 2024

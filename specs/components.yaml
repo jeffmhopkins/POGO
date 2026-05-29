@@ -47,22 +47,34 @@ components:
   - { ref: C5,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "100nF",  fn: "U3 +12V decoupling" }
   - { ref: C6,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "100nF",  fn: "U3 -12V decoupling" }
 
-  # block-4: VCA
-  - { ref: U4,   board: audio,   block: block-4, part: THAT2180,   pkg: SOIC-8,   fn: "L-channel dB-law VCA" }
-  - { ref: U5,   board: audio,   block: block-4, part: THAT2180,   pkg: SOIC-8,   fn: "R-channel dB-law VCA" }
-  - { ref: U6,   board: audio,   block: block-4, part: TL072CDT,   pkg: SOIC-8,   fn: "VCA CV conditioning (OFS sum)" }
-  - { ref: RV1,  board: audio,   block: block-4, part: "Bourns 3224W", pkg: SMD,  val: "500Ω",   fn: "L unity-gain trim" }
-  - { ref: RV2,  board: audio,   block: block-4, part: "Bourns 3224W", pkg: SMD,  val: "500Ω",   fn: "R unity-gain trim" }
-  - { ref: R7,   board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "15kΩ",   fn: "R_gain L (V→I at THAT2180 GAIN pin; nominal)" }
-  - { ref: R8,   board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "15kΩ",   fn: "R_gain R" }
+  # block-4: VCA (THAT2180 current-in/current-out; topology corrected 2026-05-29
+  #   from datasheet — Input=1, Ec+=2, Ec-=3, Sym=4, V-=5, Gnd=6, V+=7, Output=8.
+  #   Needs R_in (V→I) at input and a transimpedance op-amp (I→V) at output.)
+  - { ref: U4,   board: audio,   block: block-4, part: THAT2180,   pkg: SOIC-8,   fn: "L-channel dB-law VCA (current-in/out)" }
+  - { ref: U5,   board: audio,   block: block-4, part: THAT2180,   pkg: SOIC-8,   fn: "R-channel dB-law VCA (current-in/out)" }
+  - { ref: U6,   board: audio,   block: block-4, part: TL072CDT,   pkg: SOIC-8,   fn: "I/V transimpedance converters (THAT2180 current outputs → V; L=A, R=B)" }
+  - { ref: U63,  board: audio,   block: block-4, part: TL072CDT,   pkg: SOIC-8,   fn: "VCA CV conditioning: AMT attenuverter inverter (A) + CV/OFS summer-scaler (B)" }
+  - { ref: RV1,  board: audio,   block: block-4, part: "Bourns 3224W", pkg: SMD,  val: "500Ω",   fn: "L unity-gain trim (Ec+ offset)" }
+  - { ref: RV2,  board: audio,   block: block-4, part: "Bourns 3224W", pkg: SMD,  val: "500Ω",   fn: "R unity-gain trim (Ec+ offset)" }
+  - { ref: R7,   board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "R_in L: audio V→I into THAT2180 Input (pin 1)" }
+  - { ref: R8,   board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "R_in R" }
+  - { ref: R40,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "R_f L: I/V transimpedance feedback (unity at 0 dB; inverting)" }
+  - { ref: R41,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "R_f R" }
+  - { ref: R42,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "R_amt_inv_in: AMT attenuverter inverter input" }
+  - { ref: R43,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "R_amt_inv_fb: AMT attenuverter inverter feedback" }
+  - { ref: R44,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "R_sum_cv: CV summer input (AMT-attenuverted CV)" }
+  - { ref: R45,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "R_sum_ofs: CV summer input (OFS floor)" }
+  - { ref: R46,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "2.4kΩ",  fn: "R_sum_fb: CV summer feedback; scales to ~6.1 mV/dB Ec+ range (Phase-3R trim)" }
   - { ref: R9,   board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100Ω",   fn: "VCA CV input series protection" }
   - { ref: D3,   board: audio,   block: block-4, part: BAT54S,     pkg: SOT-23,   fn: "VCA CV input clamp ±12V" }
-  - { ref: C7,   board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U4 +12V decoupling" }
-  - { ref: C8,   board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U4 -12V decoupling" }
-  - { ref: C9,   board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U5 +12V decoupling" }
-  - { ref: C10,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U5 -12V decoupling" }
-  - { ref: R_OUT_N_L, board: audio, block: block-4, part: ~, pkg: "0603", val: "10kΩ", fn: "U4 OUT− termination to AGND (single-ended operation; L channel)" }
-  - { ref: R_OUT_N_R, board: audio, block: block-4, part: ~, pkg: "0603", val: "10kΩ", fn: "U5 OUT− termination to AGND (single-ended operation; R channel)" }
+  - { ref: C7,   board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U4 +12V (V+) decoupling" }
+  - { ref: C8,   board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U4 -12V (V-) decoupling" }
+  - { ref: C9,   board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U5 +12V (V+) decoupling" }
+  - { ref: C10,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U5 -12V (V-) decoupling" }
+  - { ref: C41,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U6 +12V decoupling" }
+  - { ref: C42,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U6 -12V decoupling" }
+  - { ref: C43,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U63 +12V decoupling" }
+  - { ref: C44,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U63 -12V decoupling" }
 
   # block-5: LP Filter 1
   - { ref: U7,   board: audio,   block: block-5, part: LM13700M,   pkg: SOIC-16,  fn: "LP1 OTA integrators L" }
