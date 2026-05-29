@@ -95,7 +95,7 @@ components:
   - { ref: U24,  board: audio,   block: block-6, part: OPA1612,   pkg: SOIC-8,   fn: "BP2 SUM_AMP + buffer R" }
   - { ref: U25,  board: audio,   block: block-6, part: OPA1612,   pkg: SOIC-8,   fn: "BP3 SUM_AMP + buffer L" }
   - { ref: U26,  board: audio,   block: block-6, part: OPA1612,   pkg: SOIC-8,   fn: "BP3 SUM_AMP + buffer R" }
-  - { ref: U27,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "BP tilt inverter half A (−V_tilt for R); BP_POL G=−1 inverter half B" }
+  - { ref: U27,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "BP tilt inverter half A (−V_tilt for R); fixed BP output polarity-restore inverter (G=−1) half B" }
   - { ref: U28,  board: audio,   block: block-6, part: THAT340S14-U, pkg: SOIC-14,   fn: "BP1 expo converter" }
   - { ref: U29,  board: audio,   block: block-6, part: THAT340S14-U, pkg: SOIC-14,   fn: "BP2 expo converter" }
   - { ref: U30,  board: audio,   block: block-6, part: THAT340S14-U, pkg: SOIC-14,   fn: "BP3 expo converter" }
@@ -119,7 +119,7 @@ components:
   - { ref: U44,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "WF amps BP3_L (half A = pre-gain; half B = symmetric folder G=+2)" }
   - { ref: U45,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "WF amps BP3_R (half A = pre-gain; half B = symmetric folder G=+2)" }
 
-  # block-6: BP_MIX and BP_POL circuit ICs
+  # block-6: BP_MIX + output polarity-restore ICs
   - { ref: U46,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "BP wet summer half A = L (BP1+BP2+BP3 inv sum); half B = MIX crossfade L" }
   - { ref: U47,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "BP wet summer half A = R; half B = MIX crossfade R" }
   - { ref: U48,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "BP wet polarity restore: half A = V_wet_inv→V_wet_pos (L); half B = V_wet_inv→V_wet_pos (R)" }
@@ -156,7 +156,7 @@ components:
   - { ref: R14,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 6,  fn: "SVF SUM_AMP R_fb; 1 per group per channel" }
   - { ref: R15,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 6,  fn: "SVF SUM_AMP R_Q input; 1 per group per channel" }
   - { ref: R16,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "BP tilt inverter R_in + R_fb in U27 half A" }
-  - { ref: R17,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "BP_POL inverter R_in + R_fb in U27 half B" }
+  - { ref: R17,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "BP output polarity-restore inverter R_in + R_fb in U27 half B" }
 
   # block-6: Passives — SC distortion paths
   - { ref: R18,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 6,  fn: "R_SC_in; SC path input R; 1 per path × 6 paths" }
@@ -322,11 +322,10 @@ components:
   - { ref: RV28, board: control, block: block-5, part: "large knob", pkg: "9mm",  fn: "LP1_RES (0–1)" }
 
   # block-6 panel controls
-  - { ref: SW3,  board: control, block: block-6, part: "Dailywell DW3 (2M DPDT ON-ON)",    pkg: "sub-mini toggle 2M", fn: "BP_POL (Positive/Negative)" }
   - { ref: SW4,  board: control, block: block-6, part: "Dailywell DW5 (2M DPDT ON-ON-ON)", pkg: "sub-mini toggle 2M", fn: "BP1_DIST_MODE (Soft/Hard/Fold)" }
   - { ref: SW5,  board: control, block: block-6, part: "Dailywell DW5 (2M DPDT ON-ON-ON)", pkg: "sub-mini toggle 2M", fn: "BP2_DIST_MODE (Soft/Hard/Fold)" }
   - { ref: SW6,  board: control, block: block-6, part: "Dailywell DW5 (2M DPDT ON-ON-ON)", pkg: "sub-mini toggle 2M", fn: "BP3_DIST_MODE (Soft/Hard/Fold)" }
-  - { ref: SW7,  board: control, block: block-3, part: "Dailywell DW5 (2M DPDT ON-ON-ON)", pkg: "sub-mini toggle 2M", fn: "MOD_SRC (3-way mod source select)" }
+  - { ref: SW7,  board: control, block: block-3, part: "Dailywell DW5 (2M DPDT ON-ON-ON)", pkg: "sub-mini toggle 2M", fn: "MOD_SRC (3-way mod source select) — PLANNED; no plugin param yet" }
   - { ref: RV29, board: control, block: block-6, part: "xl knob",    pkg: "9mm",  fn: "BP_OFFSET master freq (±5V/oct)" }
   - { ref: RV30, board: control, block: block-6, part: "large knob", pkg: "9mm",  fn: "BP_MIX dry/wet (0–1)" }
   - { ref: RV31, board: control, block: block-6, part: "knob",       pkg: "9mm",  fn: "BP1_FREQ" }

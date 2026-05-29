@@ -34,8 +34,8 @@ Breakdown by type (from `tools/panel-data.yaml`):
 - Large knobs: ~12
 - Sliders (V45°): 2 (HP_FREQ, LP2_FREQ)
 - Trimpots: ~10
-- DW3 toggles (2-pos): 3 (GAIN_MAIN, GAIN_BP3, BP_POL)
-- DW5 toggles (3-pos): 4 (BP1/2/3_DIST_MODE, MOD_SRC)
+- DW3 toggles (2-pos): 2 (GAIN_MAIN, GAIN_BP3)
+- DW5 toggles (3-pos): 3 active (BP1/2/3_DIST_MODE) + MOD_SRC (planned, not yet in plugin)
 
 > **Panel hardware — toggles vs pots.** All toggles are Thonk-sourced Dailywell 2M
 > sub-mini units (DW3/DW5) with a **10-48 UNS bushing (Ø6.00mm) through a Ø4.95mm

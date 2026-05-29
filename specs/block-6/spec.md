@@ -389,8 +389,8 @@ DIST_BP2_out ──[R_sum = 33 kΩ]──┼──►(−) TL072 ──[R_f = 33
 DIST_BP3_out ──[R_sum = 33 kΩ]──┘         │
                                          (+) = GND
 ```
-V_wet_inv = −(BP1 + BP2 + BP3) / 3 (normalized). Signal inverted; corrected at BP_POL stage or
-BP_MIX output buffer.
+V_wet_inv = −(BP1 + BP2 + BP3) / 3 (normalized). Signal inverted; corrected at the fixed
+output polarity-restore stage (U27 half B).
 
 **BP_MIX summing amp:**
 
@@ -417,7 +417,7 @@ With V_wet_pos (corrected) feeding the MIX amp instead of V_wet_inv:
 At MIX=0: V_mix_inv = −V_dry
 At MIX=max: V_mix_inv = −V_dry − V_wet
 
-V_mix_inv then passes directly to the SW_POL stage (no separate output buffer needed).
+V_mix_inv then passes to the fixed output polarity-restore stage (U27 half B).
 
 **DESIGN NOTE — U48 reassigned:** U48 (previously "output polarity buffer") is used as
 the wet polarity restorer. This inserts one inversion in the wet path to correct the
@@ -426,42 +426,25 @@ rather than added at the BP output (V_dry − V_wet instead of V_dry + V_wet).
 
 **Note:** DSP matches hardware: dry is always present at unity, wet is added on top. At MIX=max: output = dry + wet (up to 6 dB louder than a crossfade at equal level). DSP clamps at ±12V; hardware limited by op-amp rails.
 
-### BP_POL Polarity Switch
+### BP output polarity restore (fixed)
 
-The DSP applies BP_POL ∈ {+1, −1} to the BP output before summing into the signal chain.
-
-Hardware: SW_POL (Dailywell DW3, 2M DPDT ON-ON toggle; one pole used) selects between an inverting buffer (default, produces
-positive polarity) and the direct MIX amp output (negative polarity). The MIX amp output
-V_mix_inv is inherently negative-polarity (−V_dry − V_wet); the G=−1 stage inverts it
-to the expected positive-polarity output (+V_dry + V_wet).
+The hardware MIX amp output V_mix_inv is inherently negative-polarity (−V_dry − V_wet).
+A fixed G=−1 inverter (U27 half B, in the BP_TILT_INV TL072CDT) restores the expected
+positive-polarity BP output (+V_dry + V_wet). There is no user polarity control (BP_POL
+was removed — the plugin has no polarity param; the inversion below is always in path).
 
 ```
                                R_pol_in (100 kΩ)    R_pol_fb (100 kΩ)
-V_mix_inv ──[R_pol_in = 100 kΩ]──►(−) U27-B ──[R_pol_fb]──► V_bp_out_pos (+V_dry+V_wet)
+V_mix_inv ──[R_pol_in = 100 kΩ]──►(−) U27-B ──[R_pol_fb]──► V_bp_out (+V_dry+V_wet)
                                         │
                                    (+) = GND
-
-V_mix_inv ─────────────────────────────────────────────────► V_bp_out_neg (−V_dry−V_wet)
-
-SW_POL:  position 1 (default, "+") → V_bp_out_pos → V_bp_out
-         position 2 (negative, "−") → V_bp_out_neg → V_bp_out
 ```
 
-U27 half B (G=−1, in BP_TILT_INV TL072CDT) is in the DEFAULT signal path:
-- Half A of U27: generates −V_tilt for R-channel expo converter (unchanged)
-- Half B of U27: G=−1 polarity inverter; corrects V_mix_inv polarity in default path
+U27 (BP_TILT_INV TL072CDT) halves:
+- Half A: generates −V_tilt for the R-channel expo converter (unchanged).
+- Half B: fixed G=−1 inverter; restores V_bp_out polarity (always in path; no switch).
 
-SW_POL selects:
-- Default ("+"): V_mix_inv → U27 half B → V_bp_out = +V_dry + V_wet ✓
-- Negative ("−"): V_mix_inv direct → V_bp_out = −V_dry − V_wet ✓
-
-**Note:** The G=−1 stage is in the default path (not the alternate path). This is required
-because V_mix_inv exits the MIX amp with negative polarity. The G=−1 converts to positive
-output as expected. No additional ICs are needed vs. the BP_POL design; only the routing
-of SW_POL positions changes from what was previously described.
-
-**Board assignment:** BP_MIX summing amp and BP_POL inverter on audio board. SW_POL panel
-wiring routes to control board via ribbon connector.
+**Board assignment:** BP_MIX summing amp + output polarity-restore inverter on the audio board.
 
 ### Trim Pots
 
@@ -515,7 +498,7 @@ Icc figures use ±12V operating point (~2.6 mA/pkg), not the ±15V datasheet spe
 | BP_SUM_G1_L, BP_SUM_G1_R | OPA1612 | SOIC-8 | — | 2 | audio | block-6 | BP1 SUM_AMP + output buffer (L and R); 1.1 nV/√Hz; pin-compatible with TL072CDT |
 | BP_SUM_G2_L, BP_SUM_G2_R | OPA1612 | SOIC-8 | — | 2 | audio | block-6 | BP2 SUM_AMP + output buffer (L and R); 1.1 nV/√Hz |
 | BP_SUM_G3_L, BP_SUM_G3_R | OPA1612 | SOIC-8 | — | 2 | audio | block-6 | BP3 SUM_AMP + output buffer (L and R); 1.1 nV/√Hz |
-| BP_TILT_INV | TL072CDT | SOIC-8 | — | 1 | audio | block-6 | Half A = −V_tilt inverter; half B = BP_POL G=−1 inverter |
+| BP_TILT_INV | TL072CDT | SOIC-8 | — | 1 | audio | block-6 | Half A = −V_tilt inverter; half B = fixed BP output polarity-restore inverter (G=−1) |
 | BP1_EXPO, BP2_EXPO, BP3_EXPO | THAT340S14-U | SOIC-14 | — | 3 | audio | block-6 | V/oct expo converter per group (L+R shared) |
 | BP_DIST_MUX_1, _2, _3 | CD4053BM96 | SOIC-16 | — | 3 | audio | block-6 | SC/HC/WF mode mux per group; S_A/S_B tied globally |
 | R_5V_REG | resistor | 0603 | 1 kΩ | 1 | audio | block-6 | Series R for +5V logic rail (from +12V → 78L05 or zener) |
@@ -545,8 +528,8 @@ Icc figures use ±12V operating point (~2.6 mA/pkg), not the ±15V datasheet spe
 | R_sum | resistor | 0603 | 33 kΩ | 8 | audio | block-6 | BP wet summer R (3 inputs + 1 feedback per channel × L+R = 8) |
 | R_dry | resistor | 0603 | 100 kΩ | 2 | audio | block-6 | MIX dry input R (L and R) |
 | R_mix_f | resistor | 0603 | 100 kΩ | 2 | audio | block-6 | MIX feedback R |
-| R_pol_in | resistor | 0603 | 100 kΩ | 2 | audio | block-6 | BP_POL G=−1 inverter input R (L and R); uses BP_TILT_INV half B |
-| R_pol_fb | resistor | 0603 | 100 kΩ | 2 | audio | block-6 | BP_POL inverter feedback R |
+| R_pol_in | resistor | 0603 | 100 kΩ | 2 | audio | block-6 | Fixed output polarity-restore inverter input R (L and R); uses BP_TILT_INV half B |
+| R_pol_fb | resistor | 0603 | 100 kΩ | 2 | audio | block-6 | Fixed output polarity-restore inverter feedback R |
 | *— SVF passives —* | | | | | | | |
 | C_int_BP1 | C0G/NP0 | 0805 | 150 nF | 4 | audio | block-6 | BP1 integrator caps (2 per channel × L+R); C0G mandatory |
 | C_int_BP2 | C0G/NP0 | 0603 | 22 nF | 4 | audio | block-6 | BP2 integrator caps; C0G mandatory |
@@ -562,7 +545,6 @@ Icc figures use ±12V operating point (~2.6 mA/pkg), not the ±15V datasheet spe
 | RV_BP1_QMAX, _2, _3 | trimpot, SMD | 3296W | — | 3 | audio | block-6 | Q maximum bias per group |
 | *— Panel controls —* | | | | | | | |
 | SW_DIST | Dailywell DW5 | sub-mini toggle 2M | DPDT ON-ON-ON | 1 | panel | block-6 | BP_DIST: Soft/Hard/Fold; two poles drive S_A + S_B to all CD4053 (per-band SW4–SW6 in components.yaml) |
-| SW_POL | Dailywell DW3 | sub-mini toggle 2M | DPDT ON-ON | 1 | panel | block-6 | BP_POL: +/− polarity select (one pole used) |
 | RV_BP_OFFSET | XL knob | 9 mm | — | 1 | control | block-6 | BP_OFFSET master freq offset (±5V/oct) |
 | RV_BP_MIX | large knob, linear | 100 kΩ | — | 1 | control | block-6 | BP_MIX dry/wet level |
 | RV_BP_FREQ_ATT | trimpot | 9 mm | — | 1 | control | block-6 | BP_FREQ_ATT master attenuverter |
