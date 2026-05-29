@@ -184,8 +184,10 @@ zones:
         type: toggle_dw3
         cx: 28.575
         cy: 17
-        label: "MAIN"
-        pos_labels: ["1×", "5×"]
+        rotate: 270
+        label: "BOOST"
+        label_dx: 3.3
+        label_dy: 7
         cpp_param: "GAIN_PARAM"
       - id: BP3_L
         type: jack_input
@@ -207,8 +209,10 @@ zones:
         type: toggle_dw3
         cx: 28.575
         cy: 31.5
-        label: "BP3"
-        pos_labels: ["1×", "5×"]
+        rotate: 270
+        label: "BOOST"
+        label_dx: 3.3
+        label_dy: 7
         cpp_param: "ALT_GAIN_PARAM"
 
   # ── Section 0b: LFO ───────────────────────────────────────────────────────
