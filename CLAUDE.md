@@ -329,9 +329,12 @@ the `.vcvplugin` from the GitHub Actions run for the branch).
 > `change/`. If on `dev` or `main`, create a `change/<slug>` branch first. (Legacy `claude/**`
 > branches still build, but new work uses `change/<slug>`.)
 
-Every non-trivial change is tracked by a persistent file `changes/NNNN-<slug>.md` (from
+**Every** change is tracked by a persistent file `changes/NNNN-<slug>.md` (from
 `changes/_TEMPLATE.md`), **committed and never deleted** — it is the per-change record of
 intent, gate approvals, and decisions. `NNNN` = highest existing on `dev` + 1 at branch time.
+The change file is **committed as the first commit on the branch, before the PR is opened**
+(Lane C may use the minimal one-liner form). **PR title:** `NNNN-slug: summary`
+(e.g. `0004-log-every-change: log every change + PR-title slug convention`).
 
 ### Pick a lane first
 
@@ -339,7 +342,7 @@ intent, gate approvals, and decisions. `NNNN` = highest existing on `dev` + 1 at
 |---|---|---|
 | **A — Behavioral** | changes audible DSP or panel-control behavior | full **Step 0–8**, gates **G1–G6** |
 | **B — Hardware-only** | plugin already LOCKED for the block; only spec §2–4 / nets / components / schematic change | enter at **Step 5**, gates **G4–G6** + `--check` (this is where per-block schematic transcription lives — see `kicad/SCHEMATIC-GEN-PLAN.md`) |
-| **C — Trivial** | docs / comments / tests / typos; touches no DSP math, no `panel-data.yaml` geometry, no `components.yaml`, no nets connectivity | no change file; a `change/<slug>` PR that passes CI |
+| **C — Trivial** | docs / comments / tests / typos; touches no DSP math, no `panel-data.yaml` geometry, no `components.yaml`, no nets connectivity | minimal `changes/NNNN-<slug>.md` (one-liner) + a `change/<slug>` PR that passes CI |
 
 Rule: **if unsure whether behavior changes, use Lane A.** A "refactor" that alters audio
 output is a Lane A change. If Lane-B/transcription work *discovers the plugin is wrong*, that

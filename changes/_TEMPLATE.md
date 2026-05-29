@@ -9,7 +9,9 @@
 
 > Lanes & gates are defined in `CLAUDE.md` → "Git Workflow & Change Process".
 > Lane A runs Steps 0–8 / G1–G6. Lane B enters at Step 5 (G4–G6 + `--check`).
-> Lane C needs no change file — just a `change/<slug>` PR that passes CI.
+> Lane C uses the minimal one-liner form (see the example at the bottom of this file).
+> Every change gets a file, committed as the first commit on the branch, before the PR.
+> PR title: `NNNN-slug: summary`.
 
 ## Intent  (G1)
 
