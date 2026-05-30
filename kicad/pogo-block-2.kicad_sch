@@ -476,7 +476,7 @@
     (effects (font (size 1.27 1.27)) (justify left)))
   (property "Value" "LFO1_RATE" (at 43.000 479.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
-  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles" (at 40.000 480.000 0)
+  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical" (at 40.000 480.000 0)
     (effects (font (size 1.016 1.016)) (hide yes)))
 )
 (symbol
@@ -490,7 +490,7 @@
     (effects (font (size 1.27 1.27)) (justify left)))
   (property "Value" "LFO2_RATE" (at 103.000 479.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
-  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles" (at 100.000 480.000 0)
+  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical" (at 100.000 480.000 0)
     (effects (font (size 1.016 1.016)) (hide yes)))
 )
 (symbol

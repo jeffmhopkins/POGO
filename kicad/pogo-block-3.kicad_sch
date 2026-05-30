@@ -709,7 +709,7 @@
     (effects (font (size 1.27 1.27)) (justify left)))
   (property "Value" "MOD_SCALE" (at 103.000 314.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
-  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles" (at 100.000 315.000 0)
+  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical" (at 100.000 315.000 0)
     (effects (font (size 1.016 1.016)) (hide yes)))
 )
 (symbol
@@ -723,7 +723,7 @@
     (effects (font (size 1.27 1.27)) (justify left)))
   (property "Value" "MOD_OFFSET" (at 163.000 314.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
-  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles" (at 160.000 315.000 0)
+  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical" (at 160.000 315.000 0)
     (effects (font (size 1.016 1.016)) (hide yes)))
 )
 (symbol
@@ -1045,7 +1045,7 @@
     (effects (font (size 1.27 1.27)) (justify left)))
   (property "Value" "LP1_FREQ_ATT" (at 103.000 809.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
-  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles" (at 100.000 810.000 0)
+  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical" (at 100.000 810.000 0)
     (effects (font (size 1.016 1.016)) (hide yes)))
 )
 (symbol
@@ -1135,7 +1135,7 @@
     (effects (font (size 1.27 1.27)) (justify left)))
   (property "Value" "LP1_TILT_ATT" (at 163.000 919.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
-  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles" (at 160.000 920.000 0)
+  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical" (at 160.000 920.000 0)
     (effects (font (size 1.016 1.016)) (hide yes)))
 )
 (symbol
@@ -1225,7 +1225,7 @@
     (effects (font (size 1.27 1.27)) (justify left)))
   (property "Value" "LP1_RES_ATT" (at 43.000 1084.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
-  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles" (at 40.000 1085.000 0)
+  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical" (at 40.000 1085.000 0)
     (effects (font (size 1.016 1.016)) (hide yes)))
 )
 (symbol
@@ -1315,7 +1315,7 @@
     (effects (font (size 1.27 1.27)) (justify left)))
   (property "Value" "BP_FREQ_ATT" (at 103.000 1194.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
-  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles" (at 100.000 1195.000 0)
+  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical" (at 100.000 1195.000 0)
     (effects (font (size 1.016 1.016)) (hide yes)))
 )
 (symbol
@@ -1405,7 +1405,7 @@
     (effects (font (size 1.27 1.27)) (justify left)))
   (property "Value" "BP_TILT_ATT" (at 163.000 1304.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
-  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles" (at 160.000 1305.000 0)
+  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical" (at 160.000 1305.000 0)
     (effects (font (size 1.016 1.016)) (hide yes)))
 )
 (symbol
@@ -1495,7 +1495,7 @@
     (effects (font (size 1.27 1.27)) (justify left)))
   (property "Value" "BP1_FREQ_ATT" (at 43.000 1469.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
-  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles" (at 40.000 1470.000 0)
+  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical" (at 40.000 1470.000 0)
     (effects (font (size 1.016 1.016)) (hide yes)))
 )
 (symbol
@@ -1585,7 +1585,7 @@
     (effects (font (size 1.27 1.27)) (justify left)))
   (property "Value" "BP1_FOCUS_ATT" (at 103.000 1579.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
-  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles" (at 100.000 1580.000 0)
+  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical" (at 100.000 1580.000 0)
     (effects (font (size 1.016 1.016)) (hide yes)))
 )
 (symbol
@@ -1675,7 +1675,7 @@
     (effects (font (size 1.27 1.27)) (justify left)))
   (property "Value" "BP1_DIST_ATT" (at 163.000 1689.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
-  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles" (at 160.000 1690.000 0)
+  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical" (at 160.000 1690.000 0)
     (effects (font (size 1.016 1.016)) (hide yes)))
 )
 (symbol
@@ -1765,7 +1765,7 @@
     (effects (font (size 1.27 1.27)) (justify left)))
   (property "Value" "BP2_FREQ_ATT" (at 43.000 1854.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
-  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles" (at 40.000 1855.000 0)
+  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical" (at 40.000 1855.000 0)
     (effects (font (size 1.016 1.016)) (hide yes)))
 )
 (symbol
@@ -1855,7 +1855,7 @@
     (effects (font (size 1.27 1.27)) (justify left)))
   (property "Value" "BP2_FOCUS_ATT" (at 103.000 1964.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
-  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles" (at 100.000 1965.000 0)
+  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical" (at 100.000 1965.000 0)
     (effects (font (size 1.016 1.016)) (hide yes)))
 )
 (symbol
@@ -1945,7 +1945,7 @@
     (effects (font (size 1.27 1.27)) (justify left)))
   (property "Value" "BP2_DIST_ATT" (at 163.000 2074.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
-  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles" (at 160.000 2075.000 0)
+  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical" (at 160.000 2075.000 0)
     (effects (font (size 1.016 1.016)) (hide yes)))
 )
 (symbol
@@ -2035,7 +2035,7 @@
     (effects (font (size 1.27 1.27)) (justify left)))
   (property "Value" "BP3_FREQ_ATT" (at 43.000 2239.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
-  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles" (at 40.000 2240.000 0)
+  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical" (at 40.000 2240.000 0)
     (effects (font (size 1.016 1.016)) (hide yes)))
 )
 (symbol
@@ -2125,7 +2125,7 @@
     (effects (font (size 1.27 1.27)) (justify left)))
   (property "Value" "BP3_FOCUS_ATT" (at 103.000 2349.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
-  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles" (at 100.000 2350.000 0)
+  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical" (at 100.000 2350.000 0)
     (effects (font (size 1.016 1.016)) (hide yes)))
 )
 (symbol
@@ -2215,7 +2215,7 @@
     (effects (font (size 1.27 1.27)) (justify left)))
   (property "Value" "BP3_DIST_ATT" (at 163.000 2459.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
-  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles" (at 160.000 2460.000 0)
+  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical" (at 160.000 2460.000 0)
     (effects (font (size 1.016 1.016)) (hide yes)))
 )
 (symbol
@@ -2305,7 +2305,7 @@
     (effects (font (size 1.27 1.27)) (justify left)))
   (property "Value" "HP_FREQ_ATT" (at 43.000 2624.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
-  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles" (at 40.000 2625.000 0)
+  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical" (at 40.000 2625.000 0)
     (effects (font (size 1.016 1.016)) (hide yes)))
 )
 (symbol
@@ -2395,7 +2395,7 @@
     (effects (font (size 1.27 1.27)) (justify left)))
   (property "Value" "HP_RES_ATT" (at 103.000 2734.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
-  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles" (at 100.000 2735.000 0)
+  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical" (at 100.000 2735.000 0)
     (effects (font (size 1.016 1.016)) (hide yes)))
 )
 (symbol
@@ -2485,7 +2485,7 @@
     (effects (font (size 1.27 1.27)) (justify left)))
   (property "Value" "LP2_FREQ_ATT" (at 163.000 2844.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
-  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles" (at 160.000 2845.000 0)
+  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical" (at 160.000 2845.000 0)
     (effects (font (size 1.016 1.016)) (hide yes)))
 )
 (symbol
@@ -2575,7 +2575,7 @@
     (effects (font (size 1.27 1.27)) (justify left)))
   (property "Value" "LP2_RES_ATT" (at 43.000 3009.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
-  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles" (at 40.000 3010.000 0)
+  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical" (at 40.000 3010.000 0)
     (effects (font (size 1.016 1.016)) (hide yes)))
 )
 (symbol
@@ -2665,7 +2665,7 @@
     (effects (font (size 1.27 1.27)) (justify left)))
   (property "Value" "VCA_AMT_ATT" (at 103.000 3119.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
-  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles" (at 100.000 3120.000 0)
+  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical" (at 100.000 3120.000 0)
     (effects (font (size 1.016 1.016)) (hide yes)))
 )
 (global_label "MOD_IN_TIP"
