@@ -5,7 +5,7 @@
 #   specs/aux/aux-unity-buffer.md (Variant A non-inverting follower, OPA1612)
 #   specs/aux/aux-cv-protection.md (100Ω + BAT54S clamp; CRITICAL pin orientation)
 #
-# Consumed by kicad/generate_schematic.py -> kicad/pogo-block-A.kicad_sch
+# Consumed by tools/generate_schematic.py -> kicad/pogo-block-A.kicad_sch
 # Connectivity is name-based: each net lists REF.PIN connection points; the
 # generator drops a global label at every listed pin. Validate with --check.
 

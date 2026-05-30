@@ -13,8 +13,8 @@ is authored source of truth. CI `--check` gates keep each row reproducible.
 | `docs/pogo-bom.csv` | `build_components.py --gen-bom` | (copy of kicad/pogo-bom.csv) | `build_components.py --check` |
 | `docs/footprints/*.svg` | `build_components.py --gen-fp` | components/footprints/*.pretty | `build_components.py --check` |
 | `docs/Pogo.svg` | `build_components.py --gen-panel` | plugin/res/Pogo.svg | `build_components.py --check` |
-| `kicad/pogo-*.kicad_sch` | `kicad/generate_schematic.py` | specs/block-*/*.nets.yaml | `generate_schematic.py --check` |
-| `specs/block-6/block-6.nets.yaml` | `kicad/gen_block6.py` | (authored generator script) | `generate_schematic.py --check` |
+| `kicad/pogo-*.kicad_sch` | `tools/generate_schematic.py` | specs/block-*/*.nets.yaml | `generate_schematic.py --check` |
+| `specs/block-6/block-6.nets.yaml` | `tools/gen_block6.py` | (authored generator script) | `generate_schematic.py --check` |
 | `plugin/res/Pogo.svg + Pogo-source.svg` | `build_panel.py --resource --mfr` | tools/panel-data.yaml | `build_panel.py --check (DRC)` |
-| `design/panel-debug.html` | `build_panel.py --design` | tools/panel-data.yaml | `build_panel.py --check (DRC)` |
+| `docs/panel-debug.html` | `build_panel.py --design` | tools/panel-data.yaml | `build_panel.py --check (DRC)` |
 

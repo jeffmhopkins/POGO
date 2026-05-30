@@ -64,7 +64,7 @@ is in progress.
 | Phase 5R | Board layout — 48HP, architecture under review | 🔄 In Progress |
 | Phase 6R | Code validation — CI green, signal-path smoke tests | ✅ Complete |
 
-See `specs/STATUS.md` for per-block detail, and `kicad/SCHEMATIC-GEN-PLAN.md` for the
+See `specs/STATUS.md` for per-block detail, and `tools/SCHEMATIC-GEN-PLAN.md` for the
 schematic rollout.
 
 ---
@@ -81,14 +81,18 @@ POGO/
 │   └── res/
 │       └── Pogo.svg               ← Panel SVG (generated — do not hand-edit)
 │
-├── tools/                         ← Panel build system
+├── tools/                         ← Build scripts (panel + components + schematic)
 │   ├── panel-data.yaml            ← SOURCE OF TRUTH for all panel positions
-│   ├── build_panel.py             ← CLI: --check --resource --design --cpp --list
-│   ├── panel_svg.py / panel_rules.py / panel_cpp.py
+│   ├── build_panel.py             ← panel CLI: --check/--resource/--design/--cpp/--mfr
+│   ├── panel_svg.py · panel_rules.py · panel_cpp.py · panel_editor.py · panel_kicad.py
+│   ├── components.py · build_components.py · footprint_svg.py · fetch_datasheets.py  ← components/BOM
+│   ├── generate_schematic.py · gen_block6.py · kicad_common.py  ← schematic generator
+│   ├── SCHEMATIC-GEN-PLAN.md      ← schematic rollout plan / gate doc
 │   └── panel-tool-guide.md
 │
-├── docs/
-│   └── plugin-topology.md         ← Authoritative 48HP plugin spec
+├── docs/                          ← GitHub Pages site + generated viewers
+│   ├── plugin-topology.md         ← Authoritative 48HP plugin spec
+│   └── panel-debug.html           ← Interactive panel layer viewer (generated)
 │
 ├── specs/                         ← Hardware design documentation
 │   ├── STATUS.md                  ← Phase completion checklist
@@ -130,20 +134,13 @@ POGO/
 │   ├── footprints.yaml            ← panel-type → footprint bindings
 │   └── README.md
 │
-├── kicad/                         ← KiCad generator + generated artifacts
-│   ├── generate_schematic.py      ← specs/block-*/*.nets.yaml → .kicad_sch (--check: coverage + structural + drift)
-│   ├── gen_block6.py              ← Block-6 netlist generator (3-group repetition)
-│   ├── kicad_common.py            ← Symbol library + pin helpers (datasheet-verified)
+├── kicad/                         ← Generated KiCad artifacts (output only; generators in tools/)
 │   ├── pogo-*.kicad_sch           ← Generated schematics (one per block)
 │   ├── pogo-bom.csv               ← Manufacturing BOM
 │   ├── fp-lib-table               ← Generated; maps POGO_* → components/footprints/
-│   ├── pogo.kicad_pro             ← KiCad project (placeholder root; real board = Phase 5R)
-│   └── SCHEMATIC-GEN-PLAN.md      ← Schematic rollout plan / per-block gate doc
+│   └── pogo.kicad_pro             ← KiCad project (placeholder root; real board = Phase 5R)
 │
 ├── changes/                       ← Per-change records (changes/NNNN-<slug>.md) + _TEMPLATE.md
-│
-├── design/
-│   └── panel-debug.html           ← Interactive panel layer viewer (keepouts, DRC)
 │
 └── .github/workflows/build.yml    ← CI: Linux/Win/macOS .vcvplugin builds + 5 --check gates
 ```
@@ -168,7 +165,7 @@ python3 tools/build_panel.py --check
 python3 tools/build_panel.py --cpp
 
 # Interactive layer viewer (keepouts, footprints, DRC overlays)
-open design/panel-debug.html
+open docs/panel-debug.html
 ```
 
 ---
@@ -177,26 +174,26 @@ open design/panel-debug.html
 
 Schematics are **data-driven and generated per block**. Each block's netlist source lives
 with its spec (`specs/<block>/<block>.nets.yaml`) listing parts and name-based nets;
-`kicad/generate_schematic.py` emits a byte-stable `kicad/pogo-<block>.kicad_sch`. All 10
+`tools/generate_schematic.py` emits a byte-stable `kicad/pogo-<block>.kicad_sch`. All 10
 blocks + the shared-Q sheet are transcribed and verified. (Authored netlist in `specs/`,
 generated schematic in `kicad/` — linked by `--check`, not by directory adjacency.)
 
 ```bash
 # Regenerate all block schematics
-python3 kicad/generate_schematic.py
+python3 tools/generate_schematic.py
 
 # CI gate: validate (pin coverage + structural re-parse + short detection + byte drift)
-python3 kicad/generate_schematic.py --check
+python3 tools/generate_schematic.py --check
 
 # Regenerate one block
-python3 kicad/generate_schematic.py --block block-6
+python3 tools/generate_schematic.py --block block-6
 ```
 
 Connectivity is by net name, so per-block sheets merge at board level by matching boundary
-nets. Symbols/pinouts in `kicad/kicad_common.py` are datasheet-verified. Vendored footprints
+nets. Symbols/pinouts in `tools/kicad_common.py` are datasheet-verified. Vendored footprints
 live in `components/footprints/*.pretty` (resolved via the generated `kicad/fp-lib-table`). The
 manufacturing BOM (`kicad/pogo-bom.csv`) is generated from `specs/components.yaml` + the
-`components/` registry. See `kicad/SCHEMATIC-GEN-PLAN.md` for the rollout and per-block notes.
+`components/` registry. See `tools/SCHEMATIC-GEN-PLAN.md` for the rollout and per-block notes.
 
 > The 40HP-era board generators and validators have been removed (the data-driven per-block
 > generator above supersedes them). A real board-level KiCad project is Phase 5R.

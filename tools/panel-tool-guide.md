@@ -3,7 +3,7 @@
 ## Overview
 
 The panel build tool turns `tools/panel-data.yaml` into the VCV Rack SVG (`res/Pogo-source.svg`)
-and an interactive design-review HTML file (`design/panel-debug.html`). All positions, colors,
+and an interactive design-review HTML file (`docs/panel-debug.html`). All positions, colors,
 and design rules live in the YAML. Nothing in `res/` is hand-edited after the tool exists.
 
 All commands run from the repo root.
@@ -30,9 +30,9 @@ python3 tools/build_panel.py --shift-select X1 Y1 X2 Y2 DX DY         # preview 
 python3 tools/build_panel.py --shift-select X1 Y1 X2 Y2 DX DY --apply # write bbox shift
 ```
 
-## Interactive Editor (`design/panel-editor.html`)
+## Interactive Editor (`docs/panel-editor.html`)
 
-`--editor` (included in the default build) generates `design/panel-editor.html` — a
+`--editor` (included in the default build) generates `docs/panel-editor.html` — a
 **single static HTML+JS file** for visually editing the panel. It needs no server: open it
 directly in a browser. It is built *from* `panel-data.yaml`; you edit visually, then copy the
 exported YAML back over `panel-data.yaml`.
@@ -91,7 +91,7 @@ in-browser DRC and footprint overlays match `build_panel.py` exactly (no drift).
 
 ```
 1. python3 tools/build_panel.py --editor   # (or default build)
-2. open design/panel-editor.html in a browser
+2. open docs/panel-editor.html in a browser
 3. drag / rotate / add / delete / change HP / add dividers
 4. Export YAML → Copy
 5. paste over tools/panel-data.yaml

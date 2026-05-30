@@ -75,7 +75,7 @@ Circuit diagrams in spec text must be self-sufficient.
 
 | File | Status |
 |---|---|
-| `kicad/generate_schematic.py` | ✅ 48HP data-driven generator — **all 10 blocks complete (10/10)**. Multi-unit op-amp placement + short-detection fixed 2026-05-29; CD4053 symbol pinout datasheet-corrected for block-6. Rollout plan: `kicad/SCHEMATIC-GEN-PLAN.md` |
+| `tools/generate_schematic.py` | ✅ 48HP data-driven generator — **all 10 blocks complete (10/10)**. Multi-unit op-amp placement + short-detection fixed 2026-05-29; CD4053 symbol pinout datasheet-corrected for block-6. Rollout plan: `tools/SCHEMATIC-GEN-PLAN.md` |
 | `specs/block-*/*.nets.yaml` | ✅ per-block netlist SOURCES (live with each block spec) — `block-A/B/1/2/3/4/5/6/7/8` all done (10/10); the shared Q-VCAs are hosted on block-5 |
 | `components/footprints/*.pretty` | ✅ vendored KiCad footprint libs (moved from kicad/; resolved via generated `kicad/fp-lib-table`) |
 | `.github/workflows/build.yml` schematic gate | ✅ `generate_schematic.py --check` (validate + structural verify + drift) in all jobs |
@@ -117,12 +117,12 @@ corrected; block-B output Z attenuation corrected; BP_MIX wet polarity circuit c
 
 **Remaining work before PCB layout:**
 1. **48HP KiCad schematic generator** — 🚧 in progress. Data-driven generator
-   (`kicad/generate_schematic.py`) built and proven on **block-A**; replaces the
+   (`tools/generate_schematic.py`) built and proven on **block-A**; replaces the
    40HP-era stale generators (now removed). Per-block netlists in `specs/block-*/*.nets.yaml`,
    footprints resolved from the `components/` registry, byte-stable output, pin-
    coverage + structural verification gated in CI. **All 10 blocks done (10/10).**
    **Order, symbol gaps, and per-block checklist:
-   `kicad/SCHEMATIC-GEN-PLAN.md`.**
+   `tools/SCHEMATIC-GEN-PLAN.md`.**
 2. **Phase 6R** — VCV Rack signal-path smoke tests (CI integration)
 
 **THAT 2180 I/O CORRECTED (2026-05-29):** The earlier "single-ended IN+/IN−/OUT+/OUT−,

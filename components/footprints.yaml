@@ -5,7 +5,7 @@
 #   rel path consumed by tools = "<lib>.pretty/<name>.kicad_mod"  (under components/footprints/)
 #
 # ORDER IS SIGNIFICANT: tools/panel_kicad.py builds _FOOTPRINT_MAP from this list and
-# panel_editor.py serialises it into the git-tracked design/*.html editor payload, so a
+# panel_editor.py serialises it into the git-tracked docs/panel-editor.html editor payload, so a
 # reordering would churn those files. Keep this order identical to the historical map.
 footprints:
   - { type: jack_input,  lib: Connector_Audio,   name: Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles, ox: 0.0, oy: 6.48 }

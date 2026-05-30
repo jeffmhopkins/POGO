@@ -1,6 +1,6 @@
 """panel_editor.py — builds the interactive panel editor HTML.
 
-The editor (`design/panel-editor.html`) is a single static HTML+JS file generated
+The editor (`docs/panel-editor.html`) is a single static HTML+JS file generated
 from `tools/panel-data.yaml`.  It lets you drag / rotate / add / delete components,
 change panel HP, add dividers, toggle layers, see live DRC, and export a
 comment-preserving YAML you can paste back over `tools/panel-data.yaml`.

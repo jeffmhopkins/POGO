@@ -1,7 +1,7 @@
 # 48HP Schematic Generator — Rollout Plan
 
 Status as of 2026-05-29. The data-driven schematic generator
-(`kicad/generate_schematic.py`) is built and proven on **block-A**. This document
+(`tools/generate_schematic.py`) is built and proven on **block-A**. This document
 is the plan for transcribing the remaining blocks. It is the gate doc for that work.
 
 This file is the *rollout
@@ -19,9 +19,9 @@ order, symbol gaps, and per-block transcription checklist*.
    - `no_connect:` — every pin not in a net (e.g. LM13700 pin 12, THAT2180 pin 7).
    - `boundary:` — nets that leave the sheet to other blocks (doc + label shape).
 2. If the block uses a symbol/pin-map not yet in `SYM_TABLE`, add it (see gaps below).
-3. `python3 kicad/generate_schematic.py --block <block>` → emits
+3. `python3 tools/generate_schematic.py --block <block>` → emits
    `kicad/pogo-<block>.kicad_sch`.
-4. `python3 kicad/generate_schematic.py --check` must pass (pin coverage +
+4. `python3 tools/generate_schematic.py --check` must pass (pin coverage +
    structural verify + byte drift). Commit the `.nets.yaml` **and** the `.kicad_sch`.
 
 **Transcription source of truth:** `specs/block-N/spec.md` §1 (panel-verified) +
@@ -58,7 +58,7 @@ Ordered by rising symbol/wiring risk so each step de-risks the next. ✅ = done.
 | 8 | **8** LP2 | audio | LM13700, OPA1612, TL072, THAT340 | — (reuse) | ✅ DONE. LP1 minus tilt (single expo); Q via the shared U9/U10 cell B (hosted on block-5); own IRES_AMP added. |
 | 9 | **7** HP | audio | 4× LM13700, OPA1612, TL072, THAT340 | — (reuse) | ✅ DONE. Mono SVF; HP inverting output buffer; own Q-VCAs (cell B spare/terminated); IRES_AMP added. |
 | 10 | **3** Mod bus | utility | 7× TL074, DW5 | tl074 multi-unit (✅), zener (✅) | ✅ DONE. MB proc + 3 lights + ±10V clamp + 19 destinations (generated); MOD_<DEST> outputs; MOD_SRC deferred. |
-| 11 | **6** Triple BP + Dist | audio | 6× LM13700 (int) + 3× LM13700 (Q) + 12× OPA1612/TL072 SVF/aux + 6× THAT340 + 6× CD4053 + 18× TL072 dist/mix | **cd4053 sym pinout FIXED** | ✅ DONE 2026-05-29 (`kicad/gen_block6.py`, 418 parts / 239 nets). Option-B DSP-faithful SVF (v1/BP tap); per-channel expo; per-group Q-VCAs (U67-69); SC/HC/WF cells; 2×CD4053/group stereo 1-of-3 mux. 3 Phase-3R flags (below). |
+| 11 | **6** Triple BP + Dist | audio | 6× LM13700 (int) + 3× LM13700 (Q) + 12× OPA1612/TL072 SVF/aux + 6× THAT340 + 6× CD4053 + 18× TL072 dist/mix | **cd4053 sym pinout FIXED** | ✅ DONE 2026-05-29 (`tools/gen_block6.py`, 418 parts / 239 nets). Option-B DSP-faithful SVF (v1/BP tap); per-channel expo; per-group Q-VCAs (U67-69); SC/HC/WF cells; 2×CD4053/group stereo 1-of-3 mux. 3 Phase-3R flags (below). |
 
 Remaining: **none** — all 10 blocks transcribed and `--check` clean (10/10). The shared U9/U10 Q-VCAs are hosted on block-5 (dual-owned, `shared: true`).
 
@@ -68,7 +68,7 @@ Remaining: **none** — all 10 blocks transcribed and `--check` clean (10/10). T
   4/5 were swapped) **and** overlapped VEE(7) with X1_C(12) at one coordinate. Both
   corrected against the TI CD4053B datasheet (selects A/B/C = 11/10/9; X com/0/1 =
   14/12/13; Y = 15/2/1; Z = 4/5/3). No other block uses CD4053, so no drift.
-- **Built by script** `kicad/gen_block6.py` (3-group repetition, like block-3). Only
+- **Built by script** `tools/gen_block6.py` (3-group repetition, like block-3). Only
   audio-board parts are placed; control-board pots (RV29-39) and DW5 mode switches
   (SW4-6) arrive as boundary CV, exactly like block-5/7/8 scope their panel controls.
 - **3 Phase-3R / prototype flags** (under-specified in the STALE specs; signal path wired
@@ -89,7 +89,7 @@ Remaining: **none** — all 10 blocks transcribed and `--check` clean (10/10). T
 
 ---
 
-## Symbol / pin-helper gaps to close (in `kicad/kicad_common.py`)
+## Symbol / pin-helper gaps to close (in `tools/kicad_common.py`)
 
 `SYM_TABLE` (in `generate_schematic.py`) maps `sym` → (lib_id, `sym_*()`,
 **all-pins fn**). The all-pins fn must return *every electrical pin* so the coverage

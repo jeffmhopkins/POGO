@@ -13,7 +13,7 @@ Tighten the layout: generated HTML under `docs/`, all build scripts under `tools
 ## Moves
 
 1. **`design/` → `docs/`.** `design/panel-debug.html` → `docs/panel-debug.html`
-   (`build_panel.py --design` output repointed). `design/panel-editor.html` was a
+   (`build_panel.py --design` output repointed). `docs/panel-editor.html` was a
    byte-identical **duplicate** of `docs/panel-editor.html` → dropped (build now writes
    only the `docs/` copy). `design/archive/` (15 stale 40HP HTML previews) **deleted**.
    `design/` removed.
