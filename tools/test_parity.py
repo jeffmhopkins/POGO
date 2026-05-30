@@ -23,13 +23,16 @@ sys.path.insert(0, _HERE)
 
 import panel_kicad as pk          # noqa: E402
 import build_panel                # noqa: E402
-from panel_rules import DesignRules  # noqa: E402
+from panel_rules import DesignRules, PCB_PAD_CLEARANCE_MM  # noqa: E402
 
 _DRC_CLI = os.path.join(_HERE, "editor", "drc_cli.js")
 _RULES = DesignRules()
-_SHAPES = {t: [list(r) for r in pk.footprint_shapes(t)] for t in pk._FOOTPRINT_MAP}
+_CLR = PCB_PAD_CLEARANCE_MM
+_SHAPES = {t: {k: [list(r) for r in v] for k, v in pk.footprint_shapes(t).items()}
+           for t in pk._FOOTPRINT_MAP}
 
-_OVL = re.compile(r"\[PCB OVERLAP\] '([^']+)'.*?'([^']+)'.*?penetration ([\d.]+)mm")
+_BODY = re.compile(r"\[PCB OVERLAP\] '([^']+)'.*?'([^']+)'.*?bodies overlap ([\d.]+)mm")
+_PAD = re.compile(r"\[PCB OVERLAP\] '([^']+)'.*?'([^']+)'.*?pad clearance (-?[\d.]+)mm")
 
 
 def _c(t, cx, cy, cid, rot=0):
@@ -37,22 +40,30 @@ def _c(t, cx, cy, cid, rot=0):
 
 
 def _py(comps):
-    """Python DRC → {frozenset{a,b}: penetration(2dp)}."""
+    """Python DRC → {frozenset{a,b}: (kind, value(2dp))} (kind = 'body'|'pad')."""
     out = {}
     for line in _RULES._check_pcb_overlaps(comps):
-        m = _OVL.search(line)
-        assert m, f"unparseable violation: {line}"
-        out[frozenset((m[1], m[2]))] = round(float(m[3]), 2)
+        mb, mp = _BODY.search(line), _PAD.search(line)
+        if mb:
+            out[frozenset((mb[1], mb[2]))] = ("body", round(float(mb[3]), 2))
+        elif mp:
+            out[frozenset((mp[1], mp[2]))] = ("pad", round(_CLR - float(mp[3]), 2))
+        else:
+            raise AssertionError(f"unparseable violation: {line}")
     return out
 
 
 def _js(comps):
-    """JS PogoDRC.pcbOverlaps (via Node) → {frozenset{a,b}: penetration(2dp)}."""
-    payload = json.dumps({"comps": comps, "shapes": _SHAPES})
+    """JS PogoDRC.pcbOverlaps (via Node) → {frozenset{a,b}: (kind, value(2dp))}."""
+    payload = json.dumps({"comps": comps, "shapes": _SHAPES, "clr": _CLR})
     res = subprocess.run(["node", _DRC_CLI], input=payload, capture_output=True, text=True)
     if res.returncode != 0:
         raise RuntimeError(f"node failed: {res.stderr}")
-    return {frozenset((o["a"], o["b"])): round(o["pen"], 2) for o in json.loads(res.stdout)}
+    out = {}
+    for o in json.loads(res.stdout):
+        kind, val = ("body", o["body"]) if o["body"] > 0 else ("pad", round(o["pad"], 2))
+        out[frozenset((o["a"], o["b"]))] = (kind, round(val, 2))
+    return out
 
 
 def _scenarios():

@@ -43,32 +43,50 @@
     });
   }
 
-  // Twin of panel_rules._check_pcb_overlaps. comps: [{id,type,cx,cy,rot}].
-  // shapesByType: { type: [[x1,y1,x2,y2], ...] }. Returns [{a,b,pen}] (pen = deepest
-  // penetration = max over colliding feature-pairs of min(dx,dy)), in i<j order.
-  function pcbOverlaps(comps, shapesByType) {
+  // Signed min gap (mirror panel_rules._rect_min_gap): + = edge gap, − = overlap depth.
+  function rectMinGap(a, b) {
+    const sx = Math.max(0, Math.max(a[0], b[0]) - Math.min(a[2], b[2]));
+    const sy = Math.max(0, Math.max(a[1], b[1]) - Math.min(a[3], b[3]));
+    if (sx > 0 && sy > 0) return Math.hypot(sx, sy);
+    if (sx > 0 || sy > 0) return Math.max(sx, sy);
+    const ox = Math.min(a[2], b[2]) - Math.max(a[0], b[0]);
+    const oy = Math.min(a[3], b[3]) - Math.max(a[1], b[1]);
+    return -Math.min(ox, oy);
+  }
+
+  // Twin of panel_rules._check_pcb_overlaps. comps: [{id,type,cx,cy,rot|rotate}].
+  // shapesByType: { type: {body:[...], pads:[...], legs:[...]} }. clr = pad clearance (mm).
+  // Returns [{a,b,bodyPen,padEnc}]: body OVERLAP and/or copper closer than clr (leg-vs-leg
+  // excluded). Penetration/encroachment are positive on violation.
+  function pcbOverlaps(comps, shapesByType, clr) {
+    clr = (clr == null) ? 0.2 : clr;
     const fp = [];
     for (const c of comps) {
-      // accept either field name: the editor builds `rot`, panel-data/Python use `rotate`.
       const deg = (c.rot != null ? c.rot : c.rotate) || 0;
-      const rects = footprintRects(shapesByType[c.type], c.cx, c.cy, deg);
-      if (rects.length) fp.push({ c, rects });
+      const sh = shapesByType[c.type];
+      if (!sh) continue;
+      const body = footprintRects(sh.body, c.cx, c.cy, deg);
+      const pads = footprintRects(sh.pads, c.cx, c.cy, deg);
+      const legs = footprintRects(sh.legs, c.cx, c.cy, deg);
+      if (body.length || pads.length || legs.length) fp.push({ c, body, pads, legs });
     }
     const out = [];
     for (let i = 0; i < fp.length; i++) {
       for (let j = i + 1; j < fp.length; j++) {
-        let pen = 0;
-        for (const ra of fp[i].rects) {
-          for (const rb of fp[j].rects) {
-            const [dx, dy] = rectOverlap(ra, rb);
-            if (dx > 0 && dy > 0) pen = Math.max(pen, Math.min(dx, dy));
-          }
+        const A = fp[i], B = fp[j];
+        let bodyPen = 0;
+        for (const x of A.body) for (const y of B.body) {
+          const [dx, dy] = rectOverlap(x, y);
+          if (dx > 0 && dy > 0) bodyPen = Math.max(bodyPen, Math.min(dx, dy));
         }
-        if (pen > 0) out.push({ a: fp[i].c, b: fp[j].c, pen });
+        let padEnc = 0;  // copper closer than clr; leg-vs-leg excluded
+        for (const x of A.pads) for (const y of B.pads.concat(B.legs)) padEnc = Math.max(padEnc, clr - rectMinGap(x, y));
+        for (const x of A.legs) for (const y of B.pads) padEnc = Math.max(padEnc, clr - rectMinGap(x, y));
+        if (bodyPen > 0 || padEnc > 0) out.push({ a: A.c, b: B.c, bodyPen, padEnc });
       }
     }
     return out;
   }
 
-  return { rotateRect, rectOverlap, footprintRects, pcbOverlaps };
+  return { rotateRect, rectOverlap, rectMinGap, footprintRects, pcbOverlaps };
 });

@@ -55,6 +55,11 @@ LED_TYPES         = {"led", "led_labeled"}
 # Minimum clearance from PCB courtyard edge to mounting hole centre (M3, r≈3.5mm)
 MOUNTING_HOLE_CLEARANCE_MM = 3.5
 
+# Copper-to-copper clearance between electrical pads of different components. 0.2mm is
+# the standard minimum pad-to-pad spacing across hobby fabs (JLCPCB, PCBWay; OSH Park
+# trace clearance 6mil/0.152mm). Two named pads closer than this fail the placement DRC.
+PCB_PAD_CLEARANCE_MM = 0.2
+
 JACK_TYPES = {"jack_input", "jack_output"}
 POT_TYPES  = {"trimpot", "knob"}
 
@@ -393,50 +398,62 @@ class DesignRules:
         return out
 
     def _check_pcb_overlaps(self, components: list[dict[str, Any]]) -> list[str]:
-        """Real PCB footprint features must not collide between components.
+        """Real PCB placement + copper-clearance check (the KiCad/fab split):
 
-        Tests each component's ACTUAL pads + body (panel_kicad.footprint_shapes) rather
-        than the single conservative courtyard bounding box, so densely interleaved parts
-        (e.g. 9mm pots whose offset side-pins sit in a neighbour's gap) are only flagged
-        on a genuine pad/body overlap. Real keepouts are a subset of the courtyard, so this
-        never regresses a layout that the courtyard check already passed.
-        Checks every footprinted type (jacks, pots, switches, LEDs).
+          • component BODIES (the F.Fab can) must not OVERLAP — placement rule.
+          • ELECTRICAL pads must keep PCB_PAD_CLEARANCE_MM (0.2mm) copper clearance.
+
+        Structural mounting tabs (unnamed pads, e.g. a 9mm pot's two case legs) are
+        excluded by footprint_shapes — they carry no signal, so we don't gate placement
+        on them. A pad sitting under a neighbour's (raised) body is NOT a collision; only
+        body-vs-body and pad-vs-pad are checked (no cross), matching real DRC.
         """
+        def _place(rs, cx, cy, rot):
+            return [_translate_rect(_rotate_rect(r, rot), cx, cy) for r in rs]
+
         out: list[str] = []
-        footprinted = []
+        placed = []
         for comp in components:
             ctype  = comp.get("type", "")
             cx     = float(comp.get("cx", 0))
             cy     = float(comp.get("cy", 0))
             rotate = int(comp.get("rotate", 0))
-            rects  = [_translate_rect(_rotate_rect(r, rotate), cx, cy)
-                      for r in _fp_shapes(ctype)]
-            if rects:
-                footprinted.append((comp, rects))
+            sh = _fp_shapes(ctype)
+            body = _place(sh["body"], cx, cy, rotate)
+            pads = _place(sh["pads"], cx, cy, rotate)
+            legs = _place(sh.get("legs", []), cx, cy, rotate)
+            if body or pads or legs:
+                placed.append((comp, body, pads, legs))
 
-        for i in range(len(footprinted)):
-            for j in range(i + 1, len(footprinted)):
-                ca, ras = footprinted[i]
-                cb, rbs = footprinted[j]
-                # Collision = ANY feature-rect of A overlaps ANY of B. Report the
-                # deepest penetration = max over colliding pairs of min(dx,dy) (the
-                # smallest shift that separates that pair) — a true geometric depth,
-                # not the lossy max-AREA pair.
-                pen = 0.0
-                for ra in ras:
-                    for rb in rbs:
-                        dx, dy = _rect_overlap(ra, rb)
+        clr = PCB_PAD_CLEARANCE_MM
+        for i in range(len(placed)):
+            for j in range(i + 1, len(placed)):
+                ca, ba, pa, la_ = placed[i]
+                cb, bb, pb, lb_ = placed[j]
+                body_pen = 0.0          # body-body overlap depth
+                for x in ba:
+                    for y in bb:
+                        dx, dy = _rect_overlap(x, y)
                         if dx > 0 and dy > 0:
-                            pen = max(pen, min(dx, dy))
-                if pen > 0:
-                    la  = _comp_label(ca)
-                    lb  = _comp_label(cb)
+                            body_pen = max(body_pen, min(dx, dy))
+                # copper clearance on every pad/leg pair EXCEPT leg-vs-leg (structural
+                # tabs may abut each other but not a neighbour's signal pad).
+                pad_enc = 0.0
+                for x in pa:                       # signal-A vs (signal-B ∪ leg-B)
+                    for y in pb + lb_:
+                        pad_enc = max(pad_enc, clr - _rect_min_gap(x, y))
+                for x in la_:                      # leg-A vs signal-B
+                    for y in pb:
+                        pad_enc = max(pad_enc, clr - _rect_min_gap(x, y))
+                if body_pen > 0 or pad_enc > 0:
+                    la  = _comp_label(ca); lb = _comp_label(cb)
                     cxa = float(ca.get("cx", 0)); cya = float(ca.get("cy", 0))
                     cxb = float(cb.get("cx", 0)); cyb = float(cb.get("cy", 0))
+                    why = (f"bodies overlap {body_pen:.2f}mm" if body_pen > 0
+                           else f"pad clearance {clr - pad_enc:.2f}mm < {clr:.2f}mm")
                     out.append(
                         f"[PCB OVERLAP] '{la}' ({ca['type']} @ cx={cxa:.2f},cy={cya:.2f})"
-                        f" ↔ '{lb}' ({cb['type']} @ cx={cxb:.2f},cy={cyb:.2f})"
-                        f" — footprint overlap (penetration {pen:.2f}mm)"
+                        f" ↔ '{lb}' ({cb['type']} @ cx={cxb:.2f},cy={cyb:.2f}) — {why}"
                     )
         return out
 

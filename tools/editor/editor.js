@@ -244,11 +244,14 @@
       }
     }
 
-    // 3 ── PCB footprint overlaps (real pads + body) via PogoDRC — the single source
-    // shared with the parity test, byte-faithful to panel_rules._check_pcb_overlaps.
-    for (const o of PogoDRC.pcbOverlaps(comps, SH)) {
+    // 3 ── PCB placement + copper clearance via PogoDRC — the single source shared with
+    // the parity test, byte-faithful to panel_rules._check_pcb_overlaps.
+    const CLR = C.pad_clearance_mm;
+    for (const o of PogoDRC.pcbOverlaps(comps, SH, CLR)) {
       const a = o.a, b = o.b;
-      rec(`[PCB OVERLAP] '${a.label}' (${a.type} @ cx=${f2(a.cx)},cy=${f2(a.cy)}) ↔ '${b.label}' (${b.type} @ cx=${f2(b.cx)},cy=${f2(b.cy)}) — footprint overlap (penetration ${f2(o.pen)}mm)`, a.c, b.c);
+      const why = o.bodyPen > 0 ? `bodies overlap ${f2(o.bodyPen)}mm`
+                                : `pad clearance ${f2(CLR - o.padEnc)}mm < ${f2(CLR)}mm`;
+      rec(`[PCB OVERLAP] '${a.label}' (${a.type} @ cx=${f2(a.cx)},cy=${f2(a.cy)}) ↔ '${b.label}' (${b.type} @ cx=${f2(b.cx)},cy=${f2(b.cy)}) — ${why}`, a.c, b.c);
     }
 
     // §4 (mounting-hole) and §5 (rail keepout) use the bounding courtyard, matching

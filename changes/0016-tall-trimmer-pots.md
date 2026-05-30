@@ -72,6 +72,21 @@ After an adversarial review of the test plan, implemented:
 - **CI:** `test_drc` (pytest) + `test_parity` (Node) wired into the Linux gate block,
   before the panel-layout DRC.
 
+
+## Collision model reworked to real fab rules (maintainer-directed)
+The DRC overlap check now mirrors real PCB DRC instead of a bounding keepout:
+- **Body = the centred ~9.7mm can** (F.Fab circle on the shaft), not the offset KiCad
+  outline — matches the round cap you see. Bodies must not OVERLAP (placement).
+- **Electrical (named) pads** drawn at REAL copper size; they keep **0.2mm clearance**
+  (industry pad-to-pad min — JLCPCB/PCBWay; OSH Park 6mil traces).
+- **Mounting legs (unnamed pads)** are structural (case/ground): leg-vs-leg is exempt,
+  but a leg intersecting a neighbour's SIGNAL pad still flags.
+- **No pad-vs-body cross** — a pad under a raised tall-trimmer body is fine.
+Effect: side-by-side and stacked pots clear at ~the body width (≈9.7mm) instead of being
+false-flagged by offset pins/legs; live panel 45→23 overlaps (the 23 are real leg↔signal).
+Mirrored in tools/editor/drc.js + parity (437 scenarios incl. the real panel); pads now
+drawn full-size in the editor (legs fainter). 45 unit tests / parity green.
+
 ## Pending (after the grid is settled)
 - **G2:** re-spaced `panel-data.yaml` (maintainer editor pass) → DRC clean → re-sync `--cpp` if positions move.
 - **G6a:** source the Song Huei tall trimmer in `specs/components.yaml` + `components/parts/` (+ datasheet).

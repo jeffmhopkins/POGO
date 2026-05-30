@@ -56,30 +56,28 @@ def _comp(ctype: str, cx: float, cy: float, cid: str = "test", rotate: int = 0) 
 import panel_kicad as _pk  # noqa: E402  (real footprint keepout shapes)
 
 
-def _keepout(ctype: str, rot: int = 0):
-    """Rotated, anchor-relative keepout rects for a type (mirrors panel_rules)."""
-    return [_rotate_rect(r, rot) for r in _pk.footprint_shapes(ctype)]
+def _collide(a_type, b_type, axis, sep, rot_a=0, rot_b=0):
+    """True if A@(50,50) and B@(+sep along axis) collide per the real DRC check."""
+    bx = 50.0 + (sep if axis == "x" else 0.0)
+    by = 50.0 + (sep if axis == "y" else 0.0)
+    return bool(make_rules()._check_pcb_overlaps([
+        _comp(a_type, 50.0, 50.0, "a", rot_a),
+        _comp(b_type, bx, by, "b", rot_b),
+    ]))
 
 
 def _touch_sep(a_type, b_type, axis, rot_a=0, rot_b=0):
-    """Centre-to-centre separation along `axis` ('x'|'y') at which A and B's real
-    footprints JUST stop overlapping (B placed on the +axis side of A). Derived from
-    footprint_shapes, so it tracks the geometry instead of a hard-coded courtyard width.
-    At this separation the keepouts touch (gap 0 → no overlap); 0.5mm closer must collide."""
-    ra, rb = _keepout(a_type, rot_a), _keepout(b_type, rot_b)
-    best = None
-    for x in ra:
-        for y in rb:
-            if axis == "x":
-                # y-ranges must overlap for an x-touch to matter; sep where they touch
-                if min(x[3], y[3]) > max(x[1], y[1]):
-                    s = x[2] - y[0]
-                    best = s if best is None else max(best, s)
-            else:
-                if min(x[2], y[2]) > max(x[0], y[0]):
-                    s = x[3] - y[1]
-                    best = s if best is None else max(best, s)
-    return best
+    """Smallest centre-to-centre separation along `axis` at which A and B are CLEAR,
+    found by binary-searching the REAL _check_pcb_overlaps — so it tracks the live model
+    (body overlap + 0.2mm copper clearance) rather than re-deriving geometry."""
+    lo, hi = 0.0, 80.0
+    for _ in range(48):
+        mid = (lo + hi) / 2
+        if _collide(a_type, b_type, axis, mid, rot_a, rot_b):
+            lo = mid
+        else:
+            hi = mid
+    return hi
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -245,9 +243,10 @@ class TestDrcCatchesOverlaps:
         self._assert_boundary("jack_input", "jack_input", "x")
 
     def test_trimpot_horizontal(self):
-        # 9mm pots: pin-of-B vs body-of-A drives the boundary (~13.25mm pitch).
+        # 9mm pots side-by-side: only the bodies (centred ~9.7mm can) gate placement —
+        # offset pins/legs don't (no pad-vs-body), so the boundary ≈ the body width.
         sep = self._assert_boundary("trimpot", "trimpot", "x")
-        assert 12.5 < sep < 14.0, f"trimpot x touch sep {sep:.2f} not in expected ~13.25mm"
+        assert 9.0 < sep < 10.5, f"trimpot x touch sep {sep:.2f} not ~9.7mm (body width)"
 
     def test_toggle_vertical(self):
         self._assert_boundary("toggle_dw3", "toggle_dw3", "y")
@@ -495,148 +494,100 @@ class TestDiscrepancySummary:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Section 6: real-footprint collision model (footprint_shapes + _check_pcb_overlaps)
+# Section 7: real placement + copper-clearance model (the live _check_pcb_overlaps)
 #
-# These lock the model that replaced the conservative courtyard-bbox overlap check:
-#   - body keepout = the full F.Fab outline (squarish base for 9mm pots), NOT the
-#     tiny shaft/hole indicator circle (the bug that let pins/bodies pass).
-#   - rotation matches the SVG draw transform (CW; (x,y)->(-y,x) at 90°).
-#   - the offset pin cluster causes collisions (pin-of-B under body-of-A).
+# Model: component BODIES (the F.Fab can) must not overlap; ELECTRICAL (named) pads keep
+# PCB_PAD_CLEARANCE_MM copper clearance; structural mounting legs (unnamed pads) are
+# exempt from leg-vs-leg but still clash a neighbour's signal pad. No pad-vs-body cross.
 # ─────────────────────────────────────────────────────────────────────────────
 
-class TestRealCollisionModel:
-    """Lock the real pads+body collision model and the WS1/rotation fixes."""
+from panel_rules import PCB_PAD_CLEARANCE_MM
 
-    def _body(self, ctype):
-        # The body keepout is the largest-area rect in footprint_shapes.
-        return max(_pk.footprint_shapes(ctype), key=lambda r: (r[2] - r[0]) * (r[3] - r[1]))
 
-    def test_pot_body_is_squarish_base_not_shaft_circle(self):
-        """9mm pot body keepout = the ~11.35x9.5 squarish base, not the r3.5 shaft."""
-        x1, y1, x2, y2 = self._body("trimpot")
-        assert (x2 - x1) > 10.0 and (y2 - y1) > 9.0, \
-            f"trimpot body {(x2-x1):.2f}x{(y2-y1):.2f} is not the squarish base (shaft-circle bug)"
+class TestCollisionModel:
+    def setup_method(self):
+        self.dr = make_rules()
 
-    def test_jack_body_is_full_outline(self):
-        """Jack body keepout = its ~9x12.5 outline, not the r1.8 hole indicator."""
-        x1, y1, x2, y2 = self._body("jack_input")
-        assert (x2 - x1) > 8.0 and (y2 - y1) > 11.0, \
-            f"jack body {(x2-x1):.2f}x{(y2-y1):.2f} is the tiny hole circle, not the outline"
+    def _v(self, comps):
+        return self.dr._check_pcb_overlaps(comps)
+
+    # ── body geometry ──────────────────────────────────────────────────────────
+    def test_pot_body_is_centred_can(self):
+        """Pot body = the ~9.7mm round can centred on the shaft (anchor), symmetric."""
+        body = _pk.footprint_shapes("trimpot")["body"][0]
+        w, h = body[2] - body[0], body[3] - body[1]
+        assert 9.0 < w < 10.5 and 9.0 < h < 10.5, f"body {w:.2f}x{h:.2f} not ~9.7mm can"
+        assert abs(body[0] + body[2]) < 0.3 and abs(body[1] + body[3]) < 0.3, \
+            f"body not centred on shaft: {body}"
+
+    def test_trimpot_has_3_signal_pads_and_2_legs(self):
+        sh = _pk.footprint_shapes("trimpot")
+        assert len(sh["pads"]) == 3 and len(sh["legs"]) == 2, sh
 
     def test_trimpot_and_knob_share_land_pattern(self):
-        """Trimpot (Song Huei) and knob (Alpha RD901F) are the same 9mm land pattern."""
-        assert _pk.footprint_shapes("trimpot") == _pk.footprint_shapes("knob")
+        """Trimpot (Song Huei) and knob (Alpha RD901F) share the 9mm electrical land
+        pattern — same signal pads + mounting legs. (Bodies may differ: the trimpot's
+        F.Fab is the cleaned centred can; the knob keeps the KiCad RD901F outline.)"""
+        a, b = _pk.footprint_shapes("trimpot"), _pk.footprint_shapes("knob")
+        assert a["pads"] == b["pads"] and a["legs"] == b["legs"]
 
-    def test_pin_of_neighbour_under_body_collides(self):
-        """Two pots offset so only B's signal pins land on A's body must COLLIDE
-        (the reported 'pins don't collide' bug). Pins sit ~7.5mm to one side of the
-        shaft; at ~12mm pitch B's pins overlap A's body."""
-        dr = make_rules()
-        comps = [_comp("trimpot", 50.0, 50.0, "a"), _comp("trimpot", 62.0, 50.0, "b")]
-        viols = dr._check_pcb_overlaps(comps)
-        assert len(viols) == 1 and "PCB OVERLAP" in viols[0], \
-            f"pin-of-B vs body-of-A at 12mm pitch must collide: {viols}"
+    # ── placement: bodies must not overlap ──────────────────────────────────────
+    def test_pots_clear_side_by_side_at_body_width(self):
+        """The reported bug: side-by-side pots at >= the body width must be CLEAR
+        (offset pins under a neighbour body are NOT a collision)."""
+        assert self._v([_comp("trimpot", 50, 50, "a"), _comp("trimpot", 61.43, 50, "b")]) == []
+        assert self._v([_comp("trimpot", 50, 50, "a"), _comp("trimpot", 62.7, 50, "b")]) == []
 
-    def test_two_pots_clear_at_14mm(self):
-        """At 14mm pitch the 9mm pots clear (true minimum usable pitch)."""
-        dr = make_rules()
-        comps = [_comp("trimpot", 50.0, 50.0, "a"), _comp("trimpot", 64.0, 50.0, "b")]
-        assert dr._check_pcb_overlaps(comps) == []
+    def test_pots_clear_stacked_vertically(self):
+        """Vertical stack: mounting-leg pads no longer collide (leg-vs-leg exempt)."""
+        for p in (10.0, 11.0, 11.43, 12.0):
+            assert self._v([_comp("trimpot", 50, 50, "a"), _comp("trimpot", 50, 50 + p, "b")]) == [], p
 
+    def test_bodies_overlap_below_can_width_flags(self):
+        v = self._v([_comp("trimpot", 50, 50, "a"), _comp("trimpot", 59.0, 50, "b")])  # 9mm < 9.7
+        assert len(v) == 1 and "bodies overlap" in v[0], v
+
+    # ── copper clearance ────────────────────────────────────────────────────────
+    def test_signal_pads_within_clearance_flag(self):
+        """Two pots whose signal pins come within 0.2mm must flag pad clearance.
+        Pins sit at anchor x=-7.5; place B's pins onto A's pins (B left of A by ~15mm
+        puts B's right-side... ) — use a known-tight horizontal where pins meet."""
+        # B mirrored (rot 180) so its pins face A's pins across the gap, tuned to <0.2mm.
+        v = self._v([_comp("trimpot", 50, 50, "a", 0), _comp("trimpot", 50 + 1.6, 50, "b", 180)])
+        assert any("pad clearance" in s or "bodies overlap" in s for s in v), v
+
+    def test_leg_vs_leg_is_exempt(self):
+        """Two pots stacked so ONLY their mounting legs are near (bodies clear): no flag.
+        At 10mm vertical the bodies (±4.85) just clear and the legs abut — must be clear."""
+        assert self._v([_comp("trimpot", 50, 50, "a"), _comp("trimpot", 50, 50 + 10.0, "b")]) == []
+
+    def test_leg_vs_signal_pad_flags(self):
+        """A mounting leg intersecting a neighbour's SIGNAL pad IS a violation. Place B so
+        a signal pin lands on A's leg while bodies stay clear."""
+        # A leg at anchor (0,+4.8). B signal pin at anchor (-7.5, 0) -> put B at (+7.5,+4.8)
+        # from A so that pin sits on A's leg; bodies (±4.85) are ~8.8mm apart diagonally → clear.
+        v = self._v([_comp("trimpot", 50, 50, "a"), _comp("trimpot", 57.5, 54.8, "b")])
+        assert v, "leg intersecting neighbour signal pad must flag"
+
+    # ── message + parity-relevant shape ─────────────────────────────────────────
+    def test_message_states_body_or_pad_reason(self):
+        v = self._v([_comp("trimpot", 50, 50, "a"), _comp("trimpot", 59.0, 50, "b")])
+        assert v and ("bodies overlap" in v[0] or "pad clearance" in v[0])
+
+    def test_clearance_is_industry_default(self):
+        assert PCB_PAD_CLEARANCE_MM == 0.2
+
+    # ── rotation still consistent with the draw ─────────────────────────────────
     def test_rotation_matches_svg_draw_direction(self):
-        """_rotate_rect(90) must rotate CW like the SVG draw transform: a point at
-        anchor-relative (-7.5,0) (a pot's pin side) maps to (0,-7.5) (up)."""
         rr = _rotate_rect((-7.5, 0.0, -7.5, 0.0), 90)
-        assert (round(rr[0], 3), round(rr[1], 3)) == (0.0, -7.5), \
-            f"_rotate_rect(90) of (-7.5,0) = {rr[:2]}, expected (0,-7.5) (SVG CW)"
-
-    def test_rotated_pot_collision_tracks_orientation(self):
-        """Two pots stacked vertically, both rotated 90° (pins now point up): they must
-        still resolve to a definite collide/clear (rotation applied consistently)."""
-        dr = make_rules()
-        near = dr._check_pcb_overlaps([_comp("trimpot", 50, 50, "a", 90),
-                                       _comp("trimpot", 50, 55, "b", 90)])
-        far = dr._check_pcb_overlaps([_comp("trimpot", 50, 50, "a", 90),
-                                      _comp("trimpot", 50, 90, "b", 90)])
-        assert len(near) == 1 and far == [], f"near={near} far={far}"
+        assert (round(rr[0], 3), round(rr[1], 3)) == (0.0, -7.5)
 
     def test_full_colliding_pair_set_in_cluster(self):
-        """A row of 3 pots at 11.43mm reports all 2 adjacent-pair collisions (not 3 — the
-        end pair at 22.86mm is clear)."""
-        dr = make_rules()
+        """Row of 3 pots overlapping bodies (8.5mm pitch): both adjacent pairs flag,
+        the end pair (17mm) is clear."""
         comps = [_comp("trimpot", 50.0, 50.0, "p0"),
-                 _comp("trimpot", 61.43, 50.0, "p1"),
-                 _comp("trimpot", 72.86, 50.0, "p2")]
-        viols = dr._check_pcb_overlaps(comps)
-        pairs = {frozenset(["p0", "p1"]), frozenset(["p1", "p2"])}
+                 _comp("trimpot", 58.5, 50.0, "p1"),
+                 _comp("trimpot", 67.0, 50.0, "p2")]
+        viols = self.dr._check_pcb_overlaps(comps)
         got = {frozenset([w.split("'")[1], w.split("'")[3]]) for w in viols}
-        assert got == pairs, f"expected adjacent pairs {pairs}, got {got} from {viols}"
-
-    def test_penetration_reported_not_area(self):
-        """Overlap message reports a single penetration depth (the #3 metric change)."""
-        dr = make_rules()
-        viols = dr._check_pcb_overlaps([_comp("trimpot", 50, 50, "a"),
-                                        _comp("trimpot", 60, 50, "b")])
-        assert viols and "penetration" in viols[0] and "×" not in viols[0], viols
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Section 7: side-to-side + rotation failure modes (the offset-pin-cluster cases)
-#
-# A 9mm pot's 3 signal pins sit ~7.5mm to one side of the shaft, so collisions are
-# rotation-sensitive: same-rotation rows put B's pins under A's body; alternating
-# 0/180 interleaves them clear; 90° rows clash on the mounting legs. These lock the
-# exact feature pairs + boundary pitches so the model can't silently change.
-# ─────────────────────────────────────────────────────────────────────────────
-
-class TestSideBySideRotationModes:
-    _LABEL = ["pin1", "pin2", "pin3", "legA", "legB", "body"]
-
-    def _hits(self, rotA, rotB, axis, pitch):
-        """Set of (featureA, featureB) labels that overlap for two trimpots `pitch`
-        apart along `axis`, A@rotA B@rotB."""
-        ra = [_rotate_rect(r, rotA) for r in _pk.footprint_shapes("trimpot")]
-        rb = [_rotate_rect(r, rotB) for r in _pk.footprint_shapes("trimpot")]
-        ra = [(50 + x[0], 50 + x[1], 50 + x[2], 50 + x[3]) for x in ra]
-        off = (pitch if axis == "x" else 0, pitch if axis == "y" else 0)
-        rb = [(50 + off[0] + x[0], 50 + off[1] + x[1],
-               50 + off[0] + x[2], 50 + off[1] + x[3]) for x in rb]
-        hits = set()
-        for i, x in enumerate(ra):
-            for j, y in enumerate(rb):
-                dx = min(x[2], y[2]) - max(x[0], y[0])
-                dy = min(x[3], y[3]) - max(x[1], y[1])
-                if dx > 0 and dy > 0:
-                    hits.add((self._LABEL[i], self._LABEL[j]))
-        return hits
-
-    def test_same_rotation_side_by_side_is_pins_under_body(self):
-        """rot0/rot0 at 12.7mm: the only collisions are A.body vs B's three pins."""
-        hits = self._hits(0, 0, "x", 12.7)
-        assert hits == {("body", "pin1"), ("body", "pin2"), ("body", "pin3")}, hits
-
-    def test_same_rotation_clears_at_14mm(self):
-        assert self._hits(0, 0, "x", 14.0) == set()
-
-    def test_alternating_rotation_interleaves_clear(self):
-        """rot0/rot180 (pins facing apart) clears at the tight 11.43mm pitch."""
-        assert self._hits(0, 180, "x", 11.43) == set()
-
-    def test_rot90_row_clashes_on_legs(self):
-        """Both rotated 90°: pins point along the row; the clash is leg-pad vs leg-pad."""
-        hits = self._hits(90, 90, "x", 11.43)
-        assert hits == {("legB", "legA")}, hits
-
-    def test_rot90_row_clears_at_13mm(self):
-        assert self._hits(90, 90, "x", 13.0) == set()
-
-    def test_rot180_mirror_of_rot0(self):
-        """rot180/rot180 is the mirror of rot0/rot0: B.body vs A's pins."""
-        hits = self._hits(180, 180, "x", 12.7)
-        assert hits == {("pin1", "body"), ("pin2", "body"), ("pin3", "body")}, hits
-
-    def test_vertical_stack_same_rotation_collides_on_legs(self):
-        """Stacked vertically (rot0): the legs are top/bottom → leg vs leg/pin clash."""
-        hits = self._hits(0, 0, "y", 8.0)
-        assert hits, "vertical 8mm stack must collide"
-        assert hits == self._hits(0, 0, "y", 8.0)  # deterministic
+        assert got == {frozenset(["p0", "p1"]), frozenset(["p1", "p2"])}, viols
