@@ -73,12 +73,47 @@ parts:
   C110_U81p: { sym: c, value: 100nF }
   C110_U81n: { sym: c, value: 100nF }
   R133: { sym: r, value: 100k }                        # ALT_L_DET pull-up to +12V (select HIGH when patched)
+  # ---- DRIVE VCA cell (mirrors block-4 THAT2180; see block-6-dist1 for prose) ----
+  U89: { sym: vca, part: THAT2180, value: THAT2180 }   # BP3 DRIVE VCA L
+  U90: { sym: vca, part: THAT2180, value: THAT2180 }   # BP3 DRIVE VCA R
+  U93: { sym: opamp4, part: TL074CDT, value: TL074 }    # A=L I/V, B=R I/V, C=drive summer, D=spare unity buf
+  R169: { sym: r, value: 20k }    # R_in L
+  R170: { sym: r, value: 20k }    # R_in R
+  R171: { sym: r, value: 20k }    # R_f L (I/V)
+  R172: { sym: r, value: 20k }    # R_f R (I/V)
+  R173: { sym: r, value: 100k }   # drive summer: DRIVE-knob input  (Phase-3R: knob->Ec+ dB scale)
+  R174: { sym: r, value: 100k }   # drive summer: DRIVE-CV input (MOD_BP3_DIST)
+  R175: { sym: r, value: 100k }   # drive summer: bias input (knob=0.20 ~ 0 dB unity; Phase-3R)
+  R176: { sym: r, value: 100k }   # drive summer: feedback
+  RV55: { sym: trimpot, part: "Bourns 3224W", value: BP3_DRIVE_UNITY_L }  # Ec+ L unity trim
+  RV56: { sym: trimpot, part: "Bourns 3224W", value: BP3_DRIVE_UNITY_R }  # Ec+ R unity trim
+  RV39: { sym: trimpot, part: "knob", value: BP3_DIST }   # DRIVE knob (control board; existing ref)
+  C110_U89p: { sym: c, value: 100nF }
+  C110_U89n: { sym: c, value: 100nF }
+  C110_U90p: { sym: c, value: 100nF }
+  C110_U90n: { sym: c, value: 100nF }
+  C110_U93p: { sym: c, value: 100nF }
+  C110_U93n: { sym: c, value: 100nF }
 
 nets:
-  V5LOGIC: [R128_3sc.1, R128_3wf.1]
-  # BP3 input = selector mux output (U81), feeding the distortion cells (was a boundary; now internal)
-  BP3IN_L: [U81.14, R18_3L.1, R20_3L.1, R22_3L.1, C_WF_3La.1, C_WF_3Lb.1]   # CD4053 X out
-  BP3IN_R: [U81.15, R18_3R.1, R20_3R.1, R22_3R.1, C_WF_3Ra.1, C_WF_3Rb.1]   # CD4053 Y out
+  V5LOGIC: [R128_3sc.1, R128_3wf.1, R175.1, RV39.3]
+  # BP3 input = selector mux output (U81); now feeds ONLY the DRIVE VCA R_in
+  BP3IN_L: [U81.14, R169.1]   # CD4053 X out -> DRIVE VCA L R_in
+  BP3IN_R: [U81.15, R170.1]   # CD4053 Y out -> DRIVE VCA R R_in
+  # DRIVE VCA L/R: V->I -> THAT2180 -> I/V (TL074 A/B). I/V out = the new BP3_DRIVEOUT band node.
+  BP3_DRIVEIN_L: [R169.2, U89.1]
+  BP3_DRIVEIN_R: [R170.2, U90.1]
+  BP3_DRIVEIV_L: [U89.8, U93.2, R171.1]
+  BP3_DRIVEIV_R: [U90.8, U93.6, R172.1]
+  BP3_DRIVEOUT_L: [U93.1, R171.2, R18_3L.1, R20_3L.1, R22_3L.1, C_WF_3La.1, C_WF_3Lb.1]   # -> SC/HC/WF
+  BP3_DRIVEOUT_R: [U93.7, R172.2, R18_3R.1, R20_3R.1, R22_3R.1, C_WF_3Ra.1, C_WF_3Rb.1]   # -> SC/HC/WF
+  EC_BP3_DRIVE_L: [U89.2, RV55.1, RV55.2]
+  EC_BP3_DRIVE_R: [U90.2, RV56.1, RV56.2]
+  MOD_BP3_DIST: [R174.1]
+  BP3_DRIVE_KNOB: [RV39.2, R173.1]
+  BP3_DRIVE_SUM: [U93.9, R173.2, R174.2, R175.2, R176.1]
+  V_DRIVE_CTRL_3: [U93.8, R176.2, RV55.3, RV56.3]
+  BP3_DRIVE_SPARE: [U93.14, U93.13]
   # selector inputs: X0/Y0 = LP1 band (ALT unpatched), X1/Y1 = ALT-VCA (ALT patched)
   LP1_OUT_L: [U81.12]                     # <- block-5 LP1 band L (boundary) -> mux X0
   LP1_OUT_R: [U81.2]                      # <- block-5 LP1 band R -> mux Y0
@@ -119,9 +154,13 @@ nets:
   BP3_SEL_SC: [U33.11, U33.10, R128_3sc.2]
   BP3_DISTOUT_L: [U33.14]
   BP3_DISTOUT_R: [U33.15]
-  "+12V": [U33.16, C110_U33p.1, U38.8, C110_U38p.1, U39.8, C110_U39p.1, U44.8, C110_U44p.1, U45.8, C110_U45p.1, U77.16, C110_U77p.1, U81.16, C110_U81p.1, R133.1]
-  "-12V": [U33.7, C110_U33n.1, U38.4, C110_U38n.1, U39.4, C110_U39n.1, U44.4, C110_U44n.1, U45.4, C110_U45n.1, U77.7, C110_U77n.1, U81.7, C110_U81n.1]
-  GND: [U33.8, U33.6, C110_U33p.2, C110_U33n.2, C110_U38p.2, C110_U38n.2, C110_U39p.2, C110_U39n.2, C110_U44p.2, C110_U44n.2, C110_U45p.2, C110_U45n.2, U77.8, U77.6, C110_U77p.2, C110_U77n.2, U38.3, D5_3Lb.3, U38.5, U44.3, D6_3Lb.K, D6_3Lc.A, C_WF_3La.2, C_WF_3Lb.2, U39.3, D5_3Rb.3, U39.5, U45.3, D6_3Rb.K, D6_3Rc.A, C_WF_3Ra.2, C_WF_3Rb.2, U81.8, U81.6, U81.5, U81.3, U81.4, U81.9, C110_U81p.2, C110_U81n.2]
+  "+12V": [U33.16, C110_U33p.1, U38.8, C110_U38p.1, U39.8, C110_U39p.1, U44.8, C110_U44p.1, U45.8, C110_U45p.1, U77.16, C110_U77p.1, U81.16, C110_U81p.1, R133.1,
+           U89.7, U90.7, U93.4, C110_U89p.1, C110_U90p.1, C110_U93p.1]
+  "-12V": [U33.7, C110_U33n.1, U38.4, C110_U38n.1, U39.4, C110_U39n.1, U44.4, C110_U44n.1, U45.4, C110_U45n.1, U77.7, C110_U77n.1, U81.7, C110_U81n.1,
+           U89.5, U90.5, U93.11, C110_U89n.1, C110_U90n.1, C110_U93n.1]
+  GND: [U33.8, U33.6, C110_U33p.2, C110_U33n.2, C110_U38p.2, C110_U38n.2, C110_U39p.2, C110_U39n.2, C110_U44p.2, C110_U44n.2, C110_U45p.2, C110_U45n.2, U77.8, U77.6, C110_U77p.2, C110_U77n.2, U38.3, D5_3Lb.3, U38.5, U44.3, D6_3Lb.K, D6_3Lc.A, C_WF_3La.2, C_WF_3Lb.2, U39.3, D5_3Rb.3, U39.5, U45.3, D6_3Rb.K, D6_3Rc.A, C_WF_3Ra.2, C_WF_3Rb.2, U81.8, U81.6, U81.5, U81.3, U81.4, U81.9, C110_U81p.2, C110_U81n.2,
+        U89.3, U89.4, U89.6, U90.3, U90.4, U90.6, U93.3, U93.5, U93.10, U93.12, RV39.1,
+        C110_U89p.2, C110_U89n.2, C110_U90p.2, C110_U90n.2, C110_U93p.2, C110_U93n.2]
 
 no_connect:
   - U33.3
@@ -140,6 +179,7 @@ boundary:
   - ALT_VCA_OUT_L    # <- block-4 ALT-VCA (mux X1)
   - ALT_VCA_OUT_R    # <- block-4 ALT-VCA (mux Y1)
   - ALT_L_DET        # <- block-1 ALT_BP_L insertion detect (select)
+  - MOD_BP3_DIST     # <- block-3 DRIVE CV (drive-control summer)
   - BP3_DISTOUT_L
   - BP3_DISTOUT_R
   - BP3_SEL_SC

@@ -68,11 +68,52 @@ parts:
   D5_1Rb: { sym: zener, part: BZX84C5V1, value: BZX84C5V1 }
   R128_1sc: { sym: r, value: 100k }
   R128_1wf: { sym: r, value: 100k }
+  # ---- DRIVE VCA cell (change: per-band variable-DRIVE gain, mirrors block-4 THAT2180) ----
+  # Inserted between the band input (LP1_OUT_L/R) and the SC/HC/WF cells. THAT2180 current-in
+  # (pin1) / current-out (pin8); R_in (V->I) at input + TL074 transimpedance I/V (R_f, unity at
+  # 0 dB, inverting). Gain via Ec+ (pin2) from the drive-control summer (half C). Mirrors block-4.
+  U85: { sym: vca, part: THAT2180, value: THAT2180 }   # BP1 DRIVE VCA L
+  U86: { sym: vca, part: THAT2180, value: THAT2180 }   # BP1 DRIVE VCA R
+  U91: { sym: opamp4, part: TL074CDT, value: TL074 }    # A=L I/V, B=R I/V, C=drive summer, D=spare unity buf
+  R153: { sym: r, value: 20k }    # R_in L (V->I into U85 Input)
+  R154: { sym: r, value: 20k }    # R_in R (V->I into U86 Input)
+  R155: { sym: r, value: 20k }    # R_f L (I/V feedback; unity at 0 dB, inverting)
+  R156: { sym: r, value: 20k }    # R_f R (I/V feedback)
+  R157: { sym: r, value: 100k }   # drive summer: DRIVE-knob input    (Phase-3R: knob->Ec+ dB scale)
+  R158: { sym: r, value: 100k }   # drive summer: DRIVE-CV input (MOD_BP1_DIST)
+  R159: { sym: r, value: 100k }   # drive summer: bias input (knob=0.20 ~ 0 dB unity; Phase-3R)
+  R160: { sym: r, value: 100k }   # drive summer: feedback
+  RV51: { sym: trimpot, part: "Bourns 3224W", value: BP1_DRIVE_UNITY_L }  # Ec+ L unity trim (rheostat)
+  RV52: { sym: trimpot, part: "Bourns 3224W", value: BP1_DRIVE_UNITY_R }  # Ec+ R unity trim
+  RV33: { sym: trimpot, part: "knob", value: BP1_DIST }   # DRIVE knob (control board; existing ref)
+  C110_U85p: { sym: c, value: 100nF }   # U85 V+
+  C110_U85n: { sym: c, value: 100nF }   # U85 V-
+  C110_U86p: { sym: c, value: 100nF }   # U86 V+
+  C110_U86n: { sym: c, value: 100nF }   # U86 V-
+  C110_U91p: { sym: c, value: 100nF }   # U91 +12V
+  C110_U91n: { sym: c, value: 100nF }   # U91 -12V
 
 nets:
-  V5LOGIC: [R128_1sc.1, R128_1wf.1]
-  LP1_OUT_L: [R18_1L.1, R20_1L.1, R22_1L.1, C_WF_1La.1, C_WF_1Lb.1]
-  LP1_OUT_R: [R18_1R.1, R20_1R.1, R22_1R.1, C_WF_1Ra.1, C_WF_1Rb.1]
+  V5LOGIC: [R128_1sc.1, R128_1wf.1, R159.1, RV33.3]
+  # band input now feeds ONLY the DRIVE VCA R_in (was: distortion-cell inputs)
+  LP1_OUT_L: [R153.1]
+  LP1_OUT_R: [R154.1]
+  # DRIVE VCA L/R: V->I -> THAT2180 -> I/V (TL074 A/B). I/V out = the new BP1_DRIVEOUT band node.
+  BP1_DRIVEIN_L: [R153.2, U85.1]                 # THAT2180 L current input
+  BP1_DRIVEIN_R: [R154.2, U86.1]
+  BP1_DRIVEIV_L: [U85.8, U91.2, R155.1]          # L current out -> I/V (-) + R_f
+  BP1_DRIVEIV_R: [U86.8, U91.6, R156.1]
+  BP1_DRIVEOUT_L: [U91.1, R155.2, R18_1L.1, R20_1L.1, R22_1L.1, C_WF_1La.1, C_WF_1Lb.1]  # I/V out L -> SC/HC/WF
+  BP1_DRIVEOUT_R: [U91.7, R156.2, R18_1R.1, R20_1R.1, R22_1R.1, C_WF_1Ra.1, C_WF_1Rb.1]  # I/V out R -> SC/HC/WF
+  EC_BP1_DRIVE_L: [U85.2, RV51.1, RV51.2]        # Ec+ L via unity trim (rheostat)
+  EC_BP1_DRIVE_R: [U86.2, RV52.1, RV52.2]
+  # drive control: TL074 half C inverting summer (DRIVE knob + DRIVE CV + bias) -> Ec+ trims
+  MOD_BP1_DIST: [R158.1]                          # <- block-3 DRIVE CV (boundary)
+  BP1_DRIVE_KNOB: [RV33.2, R157.1]                # DRIVE knob wiper -> summer input
+  BP1_DRIVE_SUM: [U91.9, R157.2, R158.2, R159.2, R160.1]   # half-C (-) summing node
+  V_DRIVE_CTRL_1: [U91.8, R160.2, RV51.3, RV52.3] # summer out -> both Ec+ unity trims
+  # half-D spare: unity buffer, output unused
+  BP1_DRIVE_SPARE: [U91.14, U91.13]               # out tied to in- (unity)
   BP1_SCVG_L: [U34.2, R18_1L.2, R19_1L.1, D4_1Lb.K, D4_1Lc.A]
   BP1_SCOUT_L: [U34.1, R19_1L.2, D4_1La.A, D4_1Ld.K, U31.13]
   BP1_SCM1_L: [D4_1La.K, D4_1Lb.A]
@@ -107,9 +148,13 @@ nets:
   BP1_SEL_SC: [U31.11, U31.10, R128_1sc.2]
   BP1_DISTOUT_L: [U31.14]
   BP1_DISTOUT_R: [U31.15]
-  "+12V": [U31.16, C110_U31p.1, U34.8, C110_U34p.1, U35.8, C110_U35p.1, U40.8, C110_U40p.1, U41.8, C110_U41p.1, U75.16, C110_U75p.1]
-  "-12V": [U31.7, C110_U31n.1, U34.4, C110_U34n.1, U35.4, C110_U35n.1, U40.4, C110_U40n.1, U41.4, C110_U41n.1, U75.7, C110_U75n.1]
-  GND: [U31.8, U31.6, C110_U31p.2, C110_U31n.2, C110_U34p.2, C110_U34n.2, C110_U35p.2, C110_U35n.2, C110_U40p.2, C110_U40n.2, C110_U41p.2, C110_U41n.2, U75.8, U75.6, C110_U75p.2, C110_U75n.2, U34.3, D5_1Lb.3, U34.5, U40.3, D6_1Lb.K, D6_1Lc.A, C_WF_1La.2, C_WF_1Lb.2, U35.3, D5_1Rb.3, U35.5, U41.3, D6_1Rb.K, D6_1Rc.A, C_WF_1Ra.2, C_WF_1Rb.2]
+  "+12V": [U31.16, C110_U31p.1, U34.8, C110_U34p.1, U35.8, C110_U35p.1, U40.8, C110_U40p.1, U41.8, C110_U41p.1, U75.16, C110_U75p.1,
+           U85.7, U86.7, U91.4, C110_U85p.1, C110_U86p.1, C110_U91p.1]
+  "-12V": [U31.7, C110_U31n.1, U34.4, C110_U34n.1, U35.4, C110_U35n.1, U40.4, C110_U40n.1, U41.4, C110_U41n.1, U75.7, C110_U75n.1,
+           U85.5, U86.5, U91.11, C110_U85n.1, C110_U86n.1, C110_U91n.1]
+  GND: [U31.8, U31.6, C110_U31p.2, C110_U31n.2, C110_U34p.2, C110_U34n.2, C110_U35p.2, C110_U35n.2, C110_U40p.2, C110_U40n.2, C110_U41p.2, C110_U41n.2, U75.8, U75.6, C110_U75p.2, C110_U75n.2, U34.3, D5_1Lb.3, U34.5, U40.3, D6_1Lb.K, D6_1Lc.A, C_WF_1La.2, C_WF_1Lb.2, U35.3, D5_1Rb.3, U35.5, U41.3, D6_1Rb.K, D6_1Rc.A, C_WF_1Ra.2, C_WF_1Rb.2,
+        U85.3, U85.4, U85.6, U86.3, U86.4, U86.6, U91.3, U91.5, U91.10, U91.12, RV33.1,
+        C110_U85p.2, C110_U85n.2, C110_U86p.2, C110_U86n.2, C110_U91p.2, C110_U91n.2]
 
 no_connect:
   - U31.3
@@ -125,6 +170,7 @@ boundary:
   - V5LOGIC
   - LP1_OUT_L
   - LP1_OUT_R
+  - MOD_BP1_DIST     # <- block-3 DRIVE CV (drive-control summer)
   - BP1_DISTOUT_L
   - BP1_DISTOUT_R
   - BP1_SEL_WF

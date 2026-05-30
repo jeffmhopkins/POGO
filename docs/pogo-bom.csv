@@ -170,6 +170,63 @@ audio,U42,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas I
 audio,U43,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-dist2,WF amps BP2_R (half A = pre-gain; half B = symmetric folder G=+2)
 audio,U44,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-dist3,WF amps BP3_L (half A = pre-gain; half B = symmetric folder G=+2)
 audio,U45,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-dist3,WF amps BP3_R (half A = pre-gain; half B = symmetric folder G=+2)
+audio,U85,IC,1,THAT2180AL08-U,,SIP-8,POGO_Package_SIP:SIP-8_2.54mm,THAT Corporation,,https://www.thatcorp.com/datashts/THAT_2180-Series_Datasheet.pdf,block-6-dist1,"BP1 DRIVE VCA L (dB-law, current-in/out); 8-pin SIP (THT)"
+audio,U86,IC,1,THAT2180AL08-U,,SIP-8,POGO_Package_SIP:SIP-8_2.54mm,THAT Corporation,,https://www.thatcorp.com/datashts/THAT_2180-Series_Datasheet.pdf,block-6-dist1,"BP1 DRIVE VCA R (dB-law, current-in/out); 8-pin SIP (THT)"
+audio,U87,IC,1,THAT2180AL08-U,,SIP-8,POGO_Package_SIP:SIP-8_2.54mm,THAT Corporation,,https://www.thatcorp.com/datashts/THAT_2180-Series_Datasheet.pdf,block-6-dist2,"BP2 DRIVE VCA L (dB-law, current-in/out); 8-pin SIP (THT)"
+audio,U88,IC,1,THAT2180AL08-U,,SIP-8,POGO_Package_SIP:SIP-8_2.54mm,THAT Corporation,,https://www.thatcorp.com/datashts/THAT_2180-Series_Datasheet.pdf,block-6-dist2,"BP2 DRIVE VCA R (dB-law, current-in/out); 8-pin SIP (THT)"
+audio,U89,IC,1,THAT2180AL08-U,,SIP-8,POGO_Package_SIP:SIP-8_2.54mm,THAT Corporation,,https://www.thatcorp.com/datashts/THAT_2180-Series_Datasheet.pdf,block-6-dist3,"BP3 DRIVE VCA L (dB-law, current-in/out); 8-pin SIP (THT)"
+audio,U90,IC,1,THAT2180AL08-U,,SIP-8,POGO_Package_SIP:SIP-8_2.54mm,THAT Corporation,,https://www.thatcorp.com/datashts/THAT_2180-Series_Datasheet.pdf,block-6-dist3,"BP3 DRIVE VCA R (dB-law, current-in/out); 8-pin SIP (THT)"
+audio,U91,IC,1,TL074CDT,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl074.pdf,block-6-dist1,"BP1 DRIVE support: A=L I/V, B=R I/V, C=drive-control summer, D=spare unity buffer"
+audio,U92,IC,1,TL074CDT,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl074.pdf,block-6-dist2,"BP2 DRIVE support: A=L I/V, B=R I/V, C=drive-control summer, D=spare unity buffer"
+audio,U93,IC,1,TL074CDT,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl074.pdf,block-6-dist3,"BP3 DRIVE support: A=L I/V, B=R I/V, C=drive-control summer, D=spare unity buffer"
+audio,RV51,Trimpot/Pot,1,3224W-1-xxx,500Ω,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-dist1,BP1 DRIVE VCA L unity-gain trim (Ec+ offset)
+audio,RV52,Trimpot/Pot,1,3224W-1-xxx,500Ω,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-dist1,BP1 DRIVE VCA R unity-gain trim (Ec+ offset)
+audio,RV53,Trimpot/Pot,1,3224W-1-xxx,500Ω,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-dist2,BP2 DRIVE VCA L unity-gain trim (Ec+ offset)
+audio,RV54,Trimpot/Pot,1,3224W-1-xxx,500Ω,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-dist2,BP2 DRIVE VCA R unity-gain trim (Ec+ offset)
+audio,RV55,Trimpot/Pot,1,3224W-1-xxx,500Ω,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-dist3,BP3 DRIVE VCA L unity-gain trim (Ec+ offset)
+audio,RV56,Trimpot/Pot,1,3224W-1-xxx,500Ω,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-dist3,BP3 DRIVE VCA R unity-gain trim (Ec+ offset)
+audio,R153,Resistor,1,,20kΩ,0603,,,,,block-6-dist1,BP1 DRIVE R_in L (V→I into U85 Input)
+audio,R154,Resistor,1,,20kΩ,0603,,,,,block-6-dist1,BP1 DRIVE R_in R (into U86 Input)
+audio,R155,Resistor,1,,20kΩ,0603,,,,,block-6-dist1,"BP1 DRIVE R_f L (I/V feedback; unity at 0 dB, inverting)"
+audio,R156,Resistor,1,,20kΩ,0603,,,,,block-6-dist1,BP1 DRIVE R_f R (I/V feedback)
+audio,R157,Resistor,1,,100kΩ,0603,,,,,block-6-dist1,BP1 drive summer: DRIVE-knob input (Phase-3R scaling)
+audio,R158,Resistor,1,,100kΩ,0603,,,,,block-6-dist1,BP1 drive summer: DRIVE-CV input (MOD_BP1_DIST)
+audio,R159,Resistor,1,,100kΩ,0603,,,,,block-6-dist1,BP1 drive summer: bias input (knob=0.20 ≈ 0 dB unity; Phase-3R)
+audio,R160,Resistor,1,,100kΩ,0603,,,,,block-6-dist1,BP1 drive summer: feedback
+audio,R161,Resistor,1,,20kΩ,0603,,,,,block-6-dist2,BP2 DRIVE R_in L (V→I into U87 Input)
+audio,R162,Resistor,1,,20kΩ,0603,,,,,block-6-dist2,BP2 DRIVE R_in R (into U88 Input)
+audio,R163,Resistor,1,,20kΩ,0603,,,,,block-6-dist2,BP2 DRIVE R_f L (I/V feedback)
+audio,R164,Resistor,1,,20kΩ,0603,,,,,block-6-dist2,BP2 DRIVE R_f R (I/V feedback)
+audio,R165,Resistor,1,,100kΩ,0603,,,,,block-6-dist2,BP2 drive summer: DRIVE-knob input (Phase-3R scaling)
+audio,R166,Resistor,1,,100kΩ,0603,,,,,block-6-dist2,BP2 drive summer: DRIVE-CV input (MOD_BP2_DIST)
+audio,R167,Resistor,1,,100kΩ,0603,,,,,block-6-dist2,BP2 drive summer: bias input (Phase-3R)
+audio,R168,Resistor,1,,100kΩ,0603,,,,,block-6-dist2,BP2 drive summer: feedback
+audio,R169,Resistor,1,,20kΩ,0603,,,,,block-6-dist3,BP3 DRIVE R_in L (V→I into U89 Input)
+audio,R170,Resistor,1,,20kΩ,0603,,,,,block-6-dist3,BP3 DRIVE R_in R (into U90 Input)
+audio,R171,Resistor,1,,20kΩ,0603,,,,,block-6-dist3,BP3 DRIVE R_f L (I/V feedback)
+audio,R172,Resistor,1,,20kΩ,0603,,,,,block-6-dist3,BP3 DRIVE R_f R (I/V feedback)
+audio,R173,Resistor,1,,100kΩ,0603,,,,,block-6-dist3,BP3 drive summer: DRIVE-knob input (Phase-3R scaling)
+audio,R174,Resistor,1,,100kΩ,0603,,,,,block-6-dist3,BP3 drive summer: DRIVE-CV input (MOD_BP3_DIST)
+audio,R175,Resistor,1,,100kΩ,0603,,,,,block-6-dist3,BP3 drive summer: bias input (Phase-3R)
+audio,R176,Resistor,1,,100kΩ,0603,,,,,block-6-dist3,BP3 drive summer: feedback
+audio,C110_U85p,Capacitor,1,,100nF,0603,,,,,block-6-dist1,U85 (BP1 DRIVE VCA L) V+ decoupling
+audio,C110_U85n,Capacitor,1,,100nF,0603,,,,,block-6-dist1,U85 V− decoupling
+audio,C110_U86p,Capacitor,1,,100nF,0603,,,,,block-6-dist1,U86 (BP1 DRIVE VCA R) V+ decoupling
+audio,C110_U86n,Capacitor,1,,100nF,0603,,,,,block-6-dist1,U86 V− decoupling
+audio,C110_U91p,Capacitor,1,,100nF,0603,,,,,block-6-dist1,U91 (BP1 DRIVE TL074) +12V decoupling
+audio,C110_U91n,Capacitor,1,,100nF,0603,,,,,block-6-dist1,U91 −12V decoupling
+audio,C110_U87p,Capacitor,1,,100nF,0603,,,,,block-6-dist2,U87 (BP2 DRIVE VCA L) V+ decoupling
+audio,C110_U87n,Capacitor,1,,100nF,0603,,,,,block-6-dist2,U87 V− decoupling
+audio,C110_U88p,Capacitor,1,,100nF,0603,,,,,block-6-dist2,U88 (BP2 DRIVE VCA R) V+ decoupling
+audio,C110_U88n,Capacitor,1,,100nF,0603,,,,,block-6-dist2,U88 V− decoupling
+audio,C110_U92p,Capacitor,1,,100nF,0603,,,,,block-6-dist2,U92 (BP2 DRIVE TL074) +12V decoupling
+audio,C110_U92n,Capacitor,1,,100nF,0603,,,,,block-6-dist2,U92 −12V decoupling
+audio,C110_U89p,Capacitor,1,,100nF,0603,,,,,block-6-dist3,U89 (BP3 DRIVE VCA L) V+ decoupling
+audio,C110_U89n,Capacitor,1,,100nF,0603,,,,,block-6-dist3,U89 V− decoupling
+audio,C110_U90p,Capacitor,1,,100nF,0603,,,,,block-6-dist3,U90 (BP3 DRIVE VCA R) V+ decoupling
+audio,C110_U90n,Capacitor,1,,100nF,0603,,,,,block-6-dist3,U90 V− decoupling
+audio,C110_U93p,Capacitor,1,,100nF,0603,,,,,block-6-dist3,U93 (BP3 DRIVE TL074) +12V decoupling
+audio,C110_U93n,Capacitor,1,,100nF,0603,,,,,block-6-dist3,U93 −12V decoupling
 audio,U46,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-mix,BP wet summer half A = L (BP1+BP2+BP3 inv sum); half B = MIX crossfade L
 audio,U47,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-mix,BP wet summer half A = R; half B = MIX crossfade R
 audio,U48,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-mix,BP wet polarity restore: half A = V_wet_inv→V_wet_pos (L); half B = V_wet_inv→V_wet_pos (R)

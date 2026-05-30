@@ -68,11 +68,45 @@ parts:
   D5_2Rb: { sym: zener, part: BZX84C5V1, value: BZX84C5V1 }
   R128_2sc: { sym: r, value: 100k }
   R128_2wf: { sym: r, value: 100k }
+  # ---- DRIVE VCA cell (mirrors block-4 THAT2180; see block-6-dist1 for prose) ----
+  U87: { sym: vca, part: THAT2180, value: THAT2180 }   # BP2 DRIVE VCA L
+  U88: { sym: vca, part: THAT2180, value: THAT2180 }   # BP2 DRIVE VCA R
+  U92: { sym: opamp4, part: TL074CDT, value: TL074 }    # A=L I/V, B=R I/V, C=drive summer, D=spare unity buf
+  R161: { sym: r, value: 20k }    # R_in L
+  R162: { sym: r, value: 20k }    # R_in R
+  R163: { sym: r, value: 20k }    # R_f L (I/V)
+  R164: { sym: r, value: 20k }    # R_f R (I/V)
+  R165: { sym: r, value: 100k }   # drive summer: DRIVE-knob input  (Phase-3R: knob->Ec+ dB scale)
+  R166: { sym: r, value: 100k }   # drive summer: DRIVE-CV input (MOD_BP2_DIST)
+  R167: { sym: r, value: 100k }   # drive summer: bias input (knob=0.20 ~ 0 dB unity; Phase-3R)
+  R168: { sym: r, value: 100k }   # drive summer: feedback
+  RV53: { sym: trimpot, part: "Bourns 3224W", value: BP2_DRIVE_UNITY_L }  # Ec+ L unity trim
+  RV54: { sym: trimpot, part: "Bourns 3224W", value: BP2_DRIVE_UNITY_R }  # Ec+ R unity trim
+  RV36: { sym: trimpot, part: "knob", value: BP2_DIST }   # DRIVE knob (control board; existing ref)
+  C110_U87p: { sym: c, value: 100nF }
+  C110_U87n: { sym: c, value: 100nF }
+  C110_U88p: { sym: c, value: 100nF }
+  C110_U88n: { sym: c, value: 100nF }
+  C110_U92p: { sym: c, value: 100nF }
+  C110_U92n: { sym: c, value: 100nF }
 
 nets:
-  V5LOGIC: [R128_2sc.1, R128_2wf.1]
-  LP1_OUT_L: [R18_2L.1, R20_2L.1, R22_2L.1, C_WF_2La.1, C_WF_2Lb.1]
-  LP1_OUT_R: [R18_2R.1, R20_2R.1, R22_2R.1, C_WF_2Ra.1, C_WF_2Rb.1]
+  V5LOGIC: [R128_2sc.1, R128_2wf.1, R167.1, RV36.3]
+  LP1_OUT_L: [R161.1]
+  LP1_OUT_R: [R162.1]
+  BP2_DRIVEIN_L: [R161.2, U87.1]
+  BP2_DRIVEIN_R: [R162.2, U88.1]
+  BP2_DRIVEIV_L: [U87.8, U92.2, R163.1]
+  BP2_DRIVEIV_R: [U88.8, U92.6, R164.1]
+  BP2_DRIVEOUT_L: [U92.1, R163.2, R18_2L.1, R20_2L.1, R22_2L.1, C_WF_2La.1, C_WF_2Lb.1]
+  BP2_DRIVEOUT_R: [U92.7, R164.2, R18_2R.1, R20_2R.1, R22_2R.1, C_WF_2Ra.1, C_WF_2Rb.1]
+  EC_BP2_DRIVE_L: [U87.2, RV53.1, RV53.2]
+  EC_BP2_DRIVE_R: [U88.2, RV54.1, RV54.2]
+  MOD_BP2_DIST: [R166.1]
+  BP2_DRIVE_KNOB: [RV36.2, R165.1]
+  BP2_DRIVE_SUM: [U92.9, R165.2, R166.2, R167.2, R168.1]
+  V_DRIVE_CTRL_2: [U92.8, R168.2, RV53.3, RV54.3]
+  BP2_DRIVE_SPARE: [U92.14, U92.13]
   BP2_SCVG_L: [U36.2, R18_2L.2, R19_2L.1, D4_2Lb.K, D4_2Lc.A]
   BP2_SCOUT_L: [U36.1, R19_2L.2, D4_2La.A, D4_2Ld.K, U32.13]
   BP2_SCM1_L: [D4_2La.K, D4_2Lb.A]
@@ -107,9 +141,13 @@ nets:
   BP2_SEL_SC: [U32.11, U32.10, R128_2sc.2]
   BP2_DISTOUT_L: [U32.14]
   BP2_DISTOUT_R: [U32.15]
-  "+12V": [U32.16, C110_U32p.1, U36.8, C110_U36p.1, U37.8, C110_U37p.1, U42.8, C110_U42p.1, U43.8, C110_U43p.1, U76.16, C110_U76p.1]
-  "-12V": [U32.7, C110_U32n.1, U36.4, C110_U36n.1, U37.4, C110_U37n.1, U42.4, C110_U42n.1, U43.4, C110_U43n.1, U76.7, C110_U76n.1]
-  GND: [U32.8, U32.6, C110_U32p.2, C110_U32n.2, C110_U36p.2, C110_U36n.2, C110_U37p.2, C110_U37n.2, C110_U42p.2, C110_U42n.2, C110_U43p.2, C110_U43n.2, U76.8, U76.6, C110_U76p.2, C110_U76n.2, U36.3, D5_2Lb.3, U36.5, U42.3, D6_2Lb.K, D6_2Lc.A, C_WF_2La.2, C_WF_2Lb.2, U37.3, D5_2Rb.3, U37.5, U43.3, D6_2Rb.K, D6_2Rc.A, C_WF_2Ra.2, C_WF_2Rb.2]
+  "+12V": [U32.16, C110_U32p.1, U36.8, C110_U36p.1, U37.8, C110_U37p.1, U42.8, C110_U42p.1, U43.8, C110_U43p.1, U76.16, C110_U76p.1,
+           U87.7, U88.7, U92.4, C110_U87p.1, C110_U88p.1, C110_U92p.1]
+  "-12V": [U32.7, C110_U32n.1, U36.4, C110_U36n.1, U37.4, C110_U37n.1, U42.4, C110_U42n.1, U43.4, C110_U43n.1, U76.7, C110_U76n.1,
+           U87.5, U88.5, U92.11, C110_U87n.1, C110_U88n.1, C110_U92n.1]
+  GND: [U32.8, U32.6, C110_U32p.2, C110_U32n.2, C110_U36p.2, C110_U36n.2, C110_U37p.2, C110_U37n.2, C110_U42p.2, C110_U42n.2, C110_U43p.2, C110_U43n.2, U76.8, U76.6, C110_U76p.2, C110_U76n.2, U36.3, D5_2Lb.3, U36.5, U42.3, D6_2Lb.K, D6_2Lc.A, C_WF_2La.2, C_WF_2Lb.2, U37.3, D5_2Rb.3, U37.5, U43.3, D6_2Rb.K, D6_2Rc.A, C_WF_2Ra.2, C_WF_2Rb.2,
+        U87.3, U87.4, U87.6, U88.3, U88.4, U88.6, U92.3, U92.5, U92.10, U92.12, RV36.1,
+        C110_U87p.2, C110_U87n.2, C110_U88p.2, C110_U88n.2, C110_U92p.2, C110_U92n.2]
 
 no_connect:
   - U32.3
@@ -125,6 +163,7 @@ boundary:
   - V5LOGIC
   - LP1_OUT_L
   - LP1_OUT_R
+  - MOD_BP2_DIST     # <- block-3 DRIVE CV (drive-control summer)
   - BP2_DISTOUT_L
   - BP2_DISTOUT_R
   - BP2_SEL_WF

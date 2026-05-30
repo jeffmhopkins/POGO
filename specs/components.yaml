@@ -220,6 +220,71 @@ components:
   - { ref: U44,  board: audio,   block: block-6-dist3, part: TL072CDT,   pkg: SOIC-8,   fn: "WF amps BP3_L (half A = pre-gain; half B = symmetric folder G=+2)" }
   - { ref: U45,  board: audio,   block: block-6-dist3, part: TL072CDT,   pkg: SOIC-8,   fn: "WF amps BP3_R (half A = pre-gain; half B = symmetric folder G=+2)" }
 
+  # block-6: per-band DRIVE VCA (mirrors block-4 THAT2180 cell; variable-gain before SC/HC/WF)
+  - { ref: U85,  board: audio,   block: block-6-dist1, part: THAT2180,   pkg: SIP-8,    fn: "BP1 DRIVE VCA L (dB-law, current-in/out); 8-pin SIP (THT)" }
+  - { ref: U86,  board: audio,   block: block-6-dist1, part: THAT2180,   pkg: SIP-8,    fn: "BP1 DRIVE VCA R (dB-law, current-in/out); 8-pin SIP (THT)" }
+  - { ref: U87,  board: audio,   block: block-6-dist2, part: THAT2180,   pkg: SIP-8,    fn: "BP2 DRIVE VCA L (dB-law, current-in/out); 8-pin SIP (THT)" }
+  - { ref: U88,  board: audio,   block: block-6-dist2, part: THAT2180,   pkg: SIP-8,    fn: "BP2 DRIVE VCA R (dB-law, current-in/out); 8-pin SIP (THT)" }
+  - { ref: U89,  board: audio,   block: block-6-dist3, part: THAT2180,   pkg: SIP-8,    fn: "BP3 DRIVE VCA L (dB-law, current-in/out); 8-pin SIP (THT)" }
+  - { ref: U90,  board: audio,   block: block-6-dist3, part: THAT2180,   pkg: SIP-8,    fn: "BP3 DRIVE VCA R (dB-law, current-in/out); 8-pin SIP (THT)" }
+  - { ref: U91,  board: audio,   block: block-6-dist1, part: TL074CDT,   pkg: SOIC-14,  fn: "BP1 DRIVE support: A=L I/V, B=R I/V, C=drive-control summer, D=spare unity buffer" }
+  - { ref: U92,  board: audio,   block: block-6-dist2, part: TL074CDT,   pkg: SOIC-14,  fn: "BP2 DRIVE support: A=L I/V, B=R I/V, C=drive-control summer, D=spare unity buffer" }
+  - { ref: U93,  board: audio,   block: block-6-dist3, part: TL074CDT,   pkg: SOIC-14,  fn: "BP3 DRIVE support: A=L I/V, B=R I/V, C=drive-control summer, D=spare unity buffer" }
+
+  # block-6: per-band DRIVE VCA Ec+ unity trims (rheostat; mirrors block-4 RV1/RV2)
+  - { ref: RV51, board: audio,   block: block-6-dist1, part: "Bourns 3224W", pkg: SMD,  val: "500Ω",   fn: "BP1 DRIVE VCA L unity-gain trim (Ec+ offset)" }
+  - { ref: RV52, board: audio,   block: block-6-dist1, part: "Bourns 3224W", pkg: SMD,  val: "500Ω",   fn: "BP1 DRIVE VCA R unity-gain trim (Ec+ offset)" }
+  - { ref: RV53, board: audio,   block: block-6-dist2, part: "Bourns 3224W", pkg: SMD,  val: "500Ω",   fn: "BP2 DRIVE VCA L unity-gain trim (Ec+ offset)" }
+  - { ref: RV54, board: audio,   block: block-6-dist2, part: "Bourns 3224W", pkg: SMD,  val: "500Ω",   fn: "BP2 DRIVE VCA R unity-gain trim (Ec+ offset)" }
+  - { ref: RV55, board: audio,   block: block-6-dist3, part: "Bourns 3224W", pkg: SMD,  val: "500Ω",   fn: "BP3 DRIVE VCA L unity-gain trim (Ec+ offset)" }
+  - { ref: RV56, board: audio,   block: block-6-dist3, part: "Bourns 3224W", pkg: SMD,  val: "500Ω",   fn: "BP3 DRIVE VCA R unity-gain trim (Ec+ offset)" }
+
+  # block-6: per-band DRIVE VCA passives (R_in/R_f 20k; drive-summer 100k; mirrors block-4)
+  - { ref: R153, board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "BP1 DRIVE R_in L (V→I into U85 Input)" }
+  - { ref: R154, board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "BP1 DRIVE R_in R (into U86 Input)" }
+  - { ref: R155, board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "BP1 DRIVE R_f L (I/V feedback; unity at 0 dB, inverting)" }
+  - { ref: R156, board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "BP1 DRIVE R_f R (I/V feedback)" }
+  - { ref: R157, board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "BP1 drive summer: DRIVE-knob input (Phase-3R scaling)" }
+  - { ref: R158, board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "BP1 drive summer: DRIVE-CV input (MOD_BP1_DIST)" }
+  - { ref: R159, board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "BP1 drive summer: bias input (knob=0.20 ≈ 0 dB unity; Phase-3R)" }
+  - { ref: R160, board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "BP1 drive summer: feedback" }
+  - { ref: R161, board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "BP2 DRIVE R_in L (V→I into U87 Input)" }
+  - { ref: R162, board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "BP2 DRIVE R_in R (into U88 Input)" }
+  - { ref: R163, board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "BP2 DRIVE R_f L (I/V feedback)" }
+  - { ref: R164, board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "BP2 DRIVE R_f R (I/V feedback)" }
+  - { ref: R165, board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "BP2 drive summer: DRIVE-knob input (Phase-3R scaling)" }
+  - { ref: R166, board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "BP2 drive summer: DRIVE-CV input (MOD_BP2_DIST)" }
+  - { ref: R167, board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "BP2 drive summer: bias input (Phase-3R)" }
+  - { ref: R168, board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "BP2 drive summer: feedback" }
+  - { ref: R169, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "BP3 DRIVE R_in L (V→I into U89 Input)" }
+  - { ref: R170, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "BP3 DRIVE R_in R (into U90 Input)" }
+  - { ref: R171, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "BP3 DRIVE R_f L (I/V feedback)" }
+  - { ref: R172, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "BP3 DRIVE R_f R (I/V feedback)" }
+  - { ref: R173, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "BP3 drive summer: DRIVE-knob input (Phase-3R scaling)" }
+  - { ref: R174, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "BP3 drive summer: DRIVE-CV input (MOD_BP3_DIST)" }
+  - { ref: R175, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "BP3 drive summer: bias input (Phase-3R)" }
+  - { ref: R176, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "BP3 drive summer: feedback" }
+
+  # block-6: per-band DRIVE VCA IC decoupling (2× per THAT2180 V+/V−, 2× per TL074)
+  - { ref: C110_U85p, board: audio, block: block-6-dist1, part: ~, pkg: "0603", val: "100nF", fn: "U85 (BP1 DRIVE VCA L) V+ decoupling" }
+  - { ref: C110_U85n, board: audio, block: block-6-dist1, part: ~, pkg: "0603", val: "100nF", fn: "U85 V− decoupling" }
+  - { ref: C110_U86p, board: audio, block: block-6-dist1, part: ~, pkg: "0603", val: "100nF", fn: "U86 (BP1 DRIVE VCA R) V+ decoupling" }
+  - { ref: C110_U86n, board: audio, block: block-6-dist1, part: ~, pkg: "0603", val: "100nF", fn: "U86 V− decoupling" }
+  - { ref: C110_U91p, board: audio, block: block-6-dist1, part: ~, pkg: "0603", val: "100nF", fn: "U91 (BP1 DRIVE TL074) +12V decoupling" }
+  - { ref: C110_U91n, board: audio, block: block-6-dist1, part: ~, pkg: "0603", val: "100nF", fn: "U91 −12V decoupling" }
+  - { ref: C110_U87p, board: audio, block: block-6-dist2, part: ~, pkg: "0603", val: "100nF", fn: "U87 (BP2 DRIVE VCA L) V+ decoupling" }
+  - { ref: C110_U87n, board: audio, block: block-6-dist2, part: ~, pkg: "0603", val: "100nF", fn: "U87 V− decoupling" }
+  - { ref: C110_U88p, board: audio, block: block-6-dist2, part: ~, pkg: "0603", val: "100nF", fn: "U88 (BP2 DRIVE VCA R) V+ decoupling" }
+  - { ref: C110_U88n, board: audio, block: block-6-dist2, part: ~, pkg: "0603", val: "100nF", fn: "U88 V− decoupling" }
+  - { ref: C110_U92p, board: audio, block: block-6-dist2, part: ~, pkg: "0603", val: "100nF", fn: "U92 (BP2 DRIVE TL074) +12V decoupling" }
+  - { ref: C110_U92n, board: audio, block: block-6-dist2, part: ~, pkg: "0603", val: "100nF", fn: "U92 −12V decoupling" }
+  - { ref: C110_U89p, board: audio, block: block-6-dist3, part: ~, pkg: "0603", val: "100nF", fn: "U89 (BP3 DRIVE VCA L) V+ decoupling" }
+  - { ref: C110_U89n, board: audio, block: block-6-dist3, part: ~, pkg: "0603", val: "100nF", fn: "U89 V− decoupling" }
+  - { ref: C110_U90p, board: audio, block: block-6-dist3, part: ~, pkg: "0603", val: "100nF", fn: "U90 (BP3 DRIVE VCA R) V+ decoupling" }
+  - { ref: C110_U90n, board: audio, block: block-6-dist3, part: ~, pkg: "0603", val: "100nF", fn: "U90 V− decoupling" }
+  - { ref: C110_U93p, board: audio, block: block-6-dist3, part: ~, pkg: "0603", val: "100nF", fn: "U93 (BP3 DRIVE TL074) +12V decoupling" }
+  - { ref: C110_U93n, board: audio, block: block-6-dist3, part: ~, pkg: "0603", val: "100nF", fn: "U93 −12V decoupling" }
+
   # block-6: BP_MIX + output polarity-restore ICs
   - { ref: U46,  board: audio,   block: block-6-mix, part: TL072CDT,   pkg: SOIC-8,   fn: "BP wet summer half A = L (BP1+BP2+BP3 inv sum); half B = MIX crossfade L" }
   - { ref: U47,  board: audio,   block: block-6-mix, part: TL072CDT,   pkg: SOIC-8,   fn: "BP wet summer half A = R; half B = MIX crossfade R" }

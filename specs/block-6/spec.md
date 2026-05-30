@@ -214,11 +214,20 @@ Standard SVF BP peak is 1× (constant unity, independent of Q). No normalization
 - Each band/channel has its own f_ref trim (RV_BP{1,2,3}_REF L/R), all targeting **400 Hz at 0 V**
 
 **Distortion hardware (see aux-distortion.md):**
-- Three sub-circuit chains per group: SC / HC / WF all running simultaneously
+- **Variable DRIVE (change 0018):** each band has a stereo VCA at its distortion input — a
+  THAT2180 current-in/I-V-out cell per channel (mirrors the block-4 VCA), gain set by the
+  per-band DRIVE knob (RV33/36/39) + DRIVE CV (`MOD_BPn_DIST`) summed into Ec+. This is the
+  hardware "DRIVE→gain" stage; a single dB-law VGA per band approximates the plugin's
+  per-mode drive (SC exp vs HC/WF linear) — an accepted, documented deviation, with the exact
+  knob→Ec+ dB law and the knob=0.20⇒unity bias set at **Phase-3R** bring-up (like block-4's Ec+).
+  *Polarity:* the I/V stage inverts (as in block-4); this adds one inversion to the BP wet path
+  — to be absorbed by the mix's wet polarity-restore (Stage 7 / Phase-3R), so wet sums (not
+  subtracts) with the dry LP1 band.
+- Three sub-circuit chains per group: SC / HC / WF all running simultaneously (after the DRIVE VCA)
 - CD4053 triple 2-channel analog mux per group selects which mode's output passes
 - All 3 CD4053 select pins tied together → BP_DIST switch controls all groups simultaneously
 - One Dailywell DW5 (2M DPDT ON-ON-ON) toggle → its two poles give the 2 select lines to all 3 CD4053 ICs
-- Distortion runs **pre-SVF** (DISTn → SVFn) at audio rate (no oversampling in analog hardware)
+- Distortion runs **pre-SVF** (band → DRIVE VCA → DISTn → SVFn) at audio rate (no oversampling)
 - BP3 output tap: taken at group 3's **post-bandpass** band output (`BP3_TAP`, after DIST3→SVF3), available at BP3_L/R_OUT jacks
 
 **BP3 input selector (change 0018):** BP3's distortion input is fed by a CD4053 mux (U81, in
