@@ -1,6 +1,6 @@
 # aux: Unity-Gain Buffer (Non-Inverting and Inverting)
 
-> ⚠️ **STALE** — Circuit library entry pending re-verification against current panel design (2026-05-28).
+> ✅ **Re-verified 2026-05-30** (change 0018). G=+1 unity follower; HP output is a unity follower (no G=−1 buffer).
 
 Design status: [ ] draft → [ ] reviewed → [ ] validated on prototype
 
@@ -108,17 +108,18 @@ This clamps the OPA1612 input to safe levels before any signal processing. The u
 buffer output does not need output clamping; the downstream signal stays within
 ±11V due to op-amp supply limiting.
 
-### Inverting Buffer for HP Polarity
+### HP Output Buffer — unity follower (NOT inverting)
 
-The OTA-C SVF SUM_AMP (see aux-ota-c-svf) produces an inverted HP output:
+The OTA-C SVF SUM_AMP (see aux-ota-c-svf) produces the HP tap already at its output node:
   HP_inv = −(x − k·v₁ − v₂)
 
-The Variant B inverting buffer corrects this:
-  HP_out = −HP_inv = x − k·v₁ − v₂ = HP (correct polarity)
-
-This matches the DSP: `hp = -(x - k*v1 - v2)` which is the standard SVF HP formula.
-The G=−1 buffer costs one op-amp half (already available in the dual TL072 used for
-SUM_AMP) with just two 10 kΩ resistors — no additional ICs required.
+The plugin `HPFilter::process` deliberately **returns this same negated value**
+(`return -(x - k*v1 - v2)`), so the SUM_AMP node *equals* the plugin output. The hardware
+therefore takes that node through a **unity non-inverting follower (G=+1)** for drive
+isolation only — `HP_out = HP_inv`, matching the plugin. Do **not** add a second inversion:
+an earlier G=−1 buffer here double-inverted and phase-flipped HP vs the plugin (bug fixed in
+change 0018; the inverting-buffer resistors were removed). See aux-ota-c-svf §SUM_AMP
+Inversion and HP Polarity.
 
 ### IC Pairing
 
@@ -182,7 +183,7 @@ This is well below thermal noise from source impedance (100 Ω source at 300K):
   inputs must stay above −11V to avoid phase reversal — this is fine for audio signals
   but note it if unity buffers appear near the rail for bias circuits
 - The 100 Ω series resistor and BAT54S at Block A form the CV input protection; this
-  same pattern is reused at all CV input jacks (see shared/cv-input-protection.md)
+  same pattern is reused at all CV input jacks (see aux-cv-protection.md)
 - R_out (1 kΩ) at output jacks: omit on internal signal nodes to avoid unnecessary
   insertion loss and HF roll-off with capacitive loads (e.g., cable capacitance
   30 pF: f_−3dB = 1/(2π × 1kΩ × 30pF) = 5.3 MHz — fine for audio)
@@ -193,8 +194,7 @@ This is well below thermal noise from source impedance (100 Ω source at 300K):
 |---|---|---|---|
 | block-A | BUF_L, BUF_R | audio | OPA1612; non-inverting G=+1 |
 | block-B | BUF_L, BUF_R | audio | TL072; non-inverting G=+1; 1kΩ output |
-| block-5 | LP_OUT_BUF | audio | TL072 half; G=+1 for LP output |
-| block-5 | HP_INV_BUF | audio | TL072 half; G=−1 for HP polarity correction |
-| block-7 | HP_OUT_BUF | audio | TL072 half; G=−1 for HP polarity correction |
+| block-5 | LP1_OUT buffer | audio | OPA1612 half; G=+1 unity follower on v2 (LP1 output) |
+| block-7 | HP output follower | audio | OPA1612 half; G=+1 unity follower on the SUM_AMP node (no inversion) |
 | block-8 | LP2_OUT_BUF | audio | TL072 half; G=+1 for LP2 output |
 | block-6 | BP_OUT_BUF × 3 | audio | TL072; G=+1 for each BP group output |

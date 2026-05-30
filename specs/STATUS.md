@@ -1,6 +1,6 @@
 # POGO — Hardware Spec Status
 
-Last updated: 2026-05-29 | Topology: 48HP | Source of truth: `tools/panel-data.yaml`
+Last updated: 2026-05-30 | Topology: 48HP | Source of truth: `tools/panel-data.yaml`
 
 > **Change process:** all changes follow the gated, plugin-first, one-change-per-branch
 > workflow in `CLAUDE.md` → "Git Workflow & Change Process" (Lanes A/B/C, Steps 0–8, gates
@@ -39,21 +39,22 @@ Last updated: 2026-05-29 | Topology: 48HP | Source of truth: `tools/panel-data.y
 
 ## aux/ Circuit Library (`specs/aux/aux-*.md`)
 
-> All aux files marked STALE (2026-05-28) — pending re-verification against updated §1 Intent.
+> Re-verified against the locked plugin during change 0018 (2026-05-30). Remaining ⚠️ items
+> are noted per-row.
 
 | File | Status | Notes |
 |---|---|---|
-| aux-ota-c-svf | ⚠️ STALE | ASCII schematic + full derivations |
-| aux-expo-converter | ⚠️ STALE | Component values + trim procedure |
-| aux-q-control | ⚠️ STALE | IRES_AMP driver + IC sharing plan |
-| aux-vca-cell | ✅ CORRECTED 2026-05-29 | THAT 2180 current-in/I-V-out; Ec+ control |
-| aux-unity-buffer | ⚠️ STALE | G=+1 and G=−1 variants |
-| aux-distortion | ⚠️ STALE | SC/HC/WF + CD4053 mux wiring |
-| aux-attenuverter | ⚠️ STALE | Bipolar pot + TL074 inverter |
-| aux-mod-bus-core | ✅ transcribed 2026-05-29 | MB_AMP + MB_INV; ±10V BZX84C10 clamp |
-| aux-lfo-core | ⚠️ STALE | Integrator + Schmitt; 0.05–20 Hz |
-| aux-cv-protection | ⚠️ STALE | Moved from shared/; content unchanged |
-| aux-power-filter | ⚠️ STALE | Moved from shared/; content unchanged |
+| aux-ota-c-svf | ✅ re-verified 2026-05-30 | OTA-C SVF; HP unity-follower (polarity fix); BP 2-pole |
+| aux-expo-converter | ✅ re-verified 2026-05-30 | THAT340S14-U (SOIC-14); per-channel vs shared expo |
+| aux-q-control | ✅ re-verified 2026-05-30 | IRES_AMP driver; LP1/LP2/HP IC sharing |
+| aux-vca-cell | ✅ re-verified 2026-05-30 | THAT 2180 current-in/I-V-out; 4 cells (main + ALT-BP) |
+| aux-unity-buffer | ✅ re-verified 2026-05-30 | G=+1 follower; HP is unity (no G=−1 buffer) |
+| aux-distortion | ✅ re-verified 2026-05-30 | dist BEFORE SVF; per-band mode + DRIVE VCA |
+| aux-attenuverter | ✅ re-verified 2026-05-30 | Bipolar pot + TL074 inverter; 18 destinations |
+| aux-mod-bus-core | ✅ re-verified 2026-05-30 | MB_AMP + MB_INV; ±10V clamp; 18 dest + VCA normal |
+| aux-lfo-core | ✅ re-verified 2026-05-30 | Integrator + Schmitt; breathing-LED driver |
+| aux-cv-protection | ✅ re-verified 2026-05-30 | 100Ω + BAT54S clamp |
+| aux-power-filter | ✅ re-verified 2026-05-30 | Board power filtering |
 
 No SVG files — ASCII schematics within each `.md` are the source of truth.
 Circuit diagrams in spec text must be self-sufficient.
@@ -62,7 +63,7 @@ Circuit diagrams in spec text must be self-sufficient.
 
 | File | Status |
 |---|---|
-| `specs/components.yaml` | ✅ Complete — 476 entries; all boards; all ICs, discretes, and key passives with values; qty field for repeated identical parts |
+| `specs/components.yaml` | ✅ Complete — 700+ ref rows; all boards; all ICs, discretes, and key passives with values; qty field for repeated identical parts |
 
 ## Panels & Layout
 

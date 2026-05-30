@@ -155,47 +155,21 @@ must use one canonical name on both sides. Registry (extend as blocks are added)
 
 When transcribing the consuming block, use these exact names on the matching pins.
 
-## block-6 readiness (next session — netlist only; all decisions locked, BOM complete)
+## block-6 — DONE (split into 7 sections + aligned to plugin, change 0018)
 
-block-6 is the last block. Its **BOM is 100% complete** (119 rows, committed) and every
-design decision is resolved — the netlist is now a pure transcription. Brief for the
-fresh pass:
+block-6 is complete. The original single-sheet plan in this section (Option-B SVF, distortion
+**after** the SVF, single BP_MIX crossfade, a `gen_block6.py` 3-group generation script) was
+**superseded by change 0018**: block-6 was split into 7 hand-authored section sheets
+(`block-6-{svf1,svf2,svf3,dist1,dist2,dist3,mix}`) and aligned to the locked plugin —
 
-**Locked decisions (with rationale in commit history):**
-- **BP resonator = Option B (DSP-faithful):** the plugin BP (`BandpassSVF.hpp`) is the
-  same 2-integrator Simper SVF as LP1/HP/LP2 (Q = damping term). So mirror block-5/8 but
-  tap **v1 (BP)** instead of v2, with **separate Q-VCA OTAs U67–U69** (one per group,
-  cell A = L, cell B = R) injecting damping at the SUM_AMP virtual ground (like the
-  block-5-hosted shared Q-VCAs).
-- **Per-channel expo (true BP_TILT):** U28–U30 = L expo, U70–U72 = R expo; each fed
-  `BP{g}_VCTRL ± V_tilt` (U27-A inverter makes −V_tilt; R127 tilt summers). Mirror block-5.
-- **Distortion mux = +3 CD4053 (stereo 1-of-3):** per group, 2 CD4053 (U31/U75, U32/U76,
-  U33/U77): muxA selects SC-vs-MID for L(X_A)/R(X_B); muxB selects HC-vs-WF. DW5 (SW4-6)
-  is the **mode encoder** → 2 control bits via R128 pull-ups to the 5V logic rail
-  (D7 zener + R29 + C27/C28). INH→GND, X_C unused.
-- **Q control:** per group, IRES_AMP (U73-A=BP1, U73-B=BP2, U74-A=BP3; U74-B spare) with
-  R117/R118/R119, RV9/12/15 V_bias, D13 V_ires clamp, R116 → Q-cell Iabc.
+- distortion now runs **before** the SVF (per band), with a per-band **DRIVE VCA** (THAT2180);
+- mode is **per-band** `BP{n}_DIST_MODE` (not a global switch);
+- the output uses **two independent scalers** `BP_BYPASS` + `BP_WET` (not a single MIX crossfade);
+- F_REF = 400 Hz on all three bands; per-band TILT (×0.22 CV); CLIP LED comparators added.
 
-**Distortion cells (per aux-distortion + block-6 spec §2; 6 paths):** SC = gain amp
-(U34–39 half A) + 1N4148 chain D4 across feedback; HC = gain amp (half B) + BZX84C5V1
-back-to-back zeners D5 (±5.8V); WF = pre-gain (U40–45 half A) + passive 1N4148 clamp
-(D6/R24) + folder (half B, R25/R_f_wf): `V_out = 2·V_clamp − V_in`.
-
-**Wet/mix:** U46/U47 half A = per-channel wet sum (R26); half B = MIX (R27 dry from
-`LP1_OUT`, R28 fb); U48 = polarity restore (A=L, B=R) → `BP_OUT_{L,R}`. BP3 distorted tap
-→ `BP3_TAP_{L,R}` (to block-B); J27/J28 ← `BP3_L_OUT`/`BP3_R_OUT` (from block-B).
-
-**Boundary nets:** in `LP1_OUT_{L,R}` (BP1/BP2 input + dry), `BP3IN_{L,R}` (BP3 input;
-ALT/LP1), `BP{g}_VCTRL`, `BP_TILT_CV`, `BP{g}_FOCUS_CV`, `BP{g}_DIST_CV`, `BP_MIX_CV`;
-out `BP_OUT_{L,R}`, `BP3_TAP_{L,R}`; `BP3_L_OUT`/`BP3_R_OUT` in.
-
-**Flag at prototype (under-specified in the STALE specs — interpret + document):** the
-DRIVE→variable-gain mechanism (one knob → stereo gain), the DW5 ON-ON-ON→2-bit make
-pattern, and the BP_MIX blend control element. Wire the signal path faithfully; treat
-these controls as boundary CV applied via a Phase-3R control element.
-
-Build with a generation script (3-group repetition, like block-3), iterate to `--check`
-clean, then commit → **10/10 blocks**.
+`gen_block6.py` is **superseded/orphaned** (the 7 `specs/block-6-*/*.nets.yaml` files are now the
+source of truth). See the rollout table above (row 11), the block-6 §1 + Stage notes, and the
+section nets for the current design.
 
 ## Shared / cross-block parts → dual ownership + a `shared` flag (decision 2026-05-29, revised again)
 
@@ -257,13 +231,14 @@ Fix any missing `qty` on grouped rows as you go (block-1 fixed R3–R6).
 - [x] block-5 transcribed + verified — hosts the shared U9/U10 Q-VCAs (dual-derivation; LM13700/THAT340 datasheet-corrected;
       per-channel expo; OTA buffer pulldowns added; SOD-123 already present)
 - [x] block-8 (LP2) transcribed + verified (mirrors LP1 minus tilt; Q via shared U9/U10 cell B on block-5; IRES_AMP added)
-- [x] block-7 (HP) transcribed + verified (mono SVF; HP inverting output buffer; local Q-VCAs cell B terminated; IRES_AMP added)
-- [x] block-3 (mod bus) transcribed + verified (TL074 quad multi-unit; BZX84C10 ±10V clamp; 19 destinations generated; MOD LEDs added; MOD_SRC deferred)
+- [x] block-7 (HP) transcribed + verified, then aligned (0018): mono SVF; HP **unity** output follower (polarity fix); Q collapsed to 1 LM13700; IRES_AMP
+- [x] block-3 (mod bus) transcribed + verified, then aligned (0018): TL074 quad multi-unit; BZX84C10 ±10V clamp; 18 attenuverter destinations + VCA normal; MOD-bus LEDs removed; MOD_SRC switch wired
 - [x] GENERATOR FIX: multi-unit op-amps now placed as separate gate instances (units A/B/power at
       distinct offsets) — previously overlapped → shorted halves; structural_check now unit-aware
       and detects coincident-distinct-net shorts. All blocks regenerated.
-- [x] block 6 transcribed + verified (gen_block6.py; CD4053 symbol datasheet-corrected;
-      Option-B SVF v1/BP tap; per-channel expo; per-group Q-VCAs; SC/HC/WF + 2×CD4053/group
-      stereo mux; 3 Phase-3R flags documented) — **10/10 blocks**
+- [x] block 6 transcribed + verified, then **split into 7 sections + aligned to plugin (0018)**:
+      CD4053 symbol datasheet-corrected; per-channel expo; per-group Q-VCAs; SC/HC/WF stereo mux;
+      distortion-before-SVF; per-band DIST_MODE + DRIVE VCA; two-scaler mix. (`gen_block6.py`
+      superseded.) — **10/10 blocks aligned**
 - [ ] (optional) board-level sheets combining per-block schematics by board
 - [ ] (gated separately) enable a KiCad CI job (kiutils) — currently disabled

@@ -11,36 +11,46 @@ and ground truth. Analog hardware design is reverse-engineered from it.
 POGO routes stereo audio through a deeply modulated filter bank: a pre-gain stage, a
 voltage-controlled VCA, a stereo LP filter with tilt (LP1), three independent bandpass
 resonators (BP1/BP2/BP3) with per-group distortion, a HP filter, and a final LP filter (LP2).
-A dual triangle LFO feeds a central mod bus with 19 CV destinations — every key parameter
-is voltage-controllable.
+A dual triangle LFO feeds a central mod bus with 18 attenuverter CV destinations (plus a raw
+VCA normal) — every key parameter is voltage-controllable.
 
 **Signal chain (48HP topology):**
 
 ```
-Stereo In → Input Buffer → Pre-Gain (1×/5×)
-                                  ↓
-                             Pre-LP1 VCA   ← mod bus, VCA_OFS floor
-                                  ↓
-                            LP Filter 1    ← FREQ, TILT (stereo spread), RES
-                                  ↓
-               ┌──────────────────────────────────────┐
-               │        Triple Bandpass Filter Bank    │
-               │  BP1 / BP2 / BP3 — 40 Hz – 4 kHz     │
-               │  per-group: FREQ / FOCUS / DIST       │
-               │  global: OFFSET / TILT / MIX          │
-               │  BP3_L/R ──────────────────────────► BP3 out jacks
-               └──────────────────────────────────────┘
-                                  ↓
-                             HP Filter     ← FREQ, RES
-                                  ↓
-                            LP Filter 2   ← FREQ, RES
-                                  ↓
-                           Output Buffer
-                                  ↓
-                             Stereo Out
+   IN  (L / R)
+    │
+    ▼
+   Input Buffer
+    │
+    ▼
+   Pre-Gain         ──  1× / 5× switch
+    │
+    ▼
+   Pre-LP1 VCA      ──  mod bus · VCA_OFS floor
+    │
+    ▼
+   LP Filter 1      ──  FREQ · TILT (stereo spread) · RES
+    │
+    ▼
+   Triple Bandpass  ──  BP1 · BP2 · BP3   (each ~50 Hz – 3.2 kHz, F_REF 400 Hz)
+    │                   per-group : FREQ · FOCUS (Q) · DIST (drive)
+    ├───────────────►   BP3_L / BP3_R out jacks   (pre-mix tap)
+    │                   global    : OFFSET · TILT · MIX
+    ▼
+   HP Filter        ──  FREQ · RES
+    │
+    ▼
+   LP Filter 2      ──  FREQ · RES
+    │
+    ▼
+   Output Buffer
+    │
+    ▼
+   OUT (L / R)
 
-LFO1 / LFO2  →  ±5V triangle, 0.05–20Hz
-Mod Bus      →  19 CV destinations (each: override jack + attenuverter)
+   ── modulation (parallel to the signal path) ──────────────────────────
+   LFO1 / LFO2   →   ±5 V triangle, 0.05–20 Hz   (LFO1 normals into the mod bus)
+   Mod Bus       →   18 attenuverter destinations (override jack + attenuverter) + VCA raw normal
 ```
 
 **Hardware target:** 48HP, ±12V Eurorack. Power budget ~190 mA per rail (estimate; under
@@ -86,19 +96,22 @@ POGO/
 │   ├── build_panel.py             ← panel CLI: --check/--resource/--design/--cpp/--mfr
 │   ├── panel_svg.py · panel_rules.py · panel_cpp.py · panel_editor.py · panel_kicad.py
 │   ├── components.py · build_components.py · footprint_svg.py · fetch_datasheets.py  ← components/BOM
-│   ├── generate_schematic.py · gen_block6.py  ← schematic generator (nets → .kicad_sch)
+│   ├── generate_schematic.py     ← schematic generator (nets → .kicad_sch)
 │   ├── symbols.py · kicad_common.py  ← symbol loader/emitter + generic s-expr primitives
 │   ├── SCHEMATIC-GEN-PLAN.md      ← schematic rollout plan / gate doc
 │   └── panel-tool-guide.md
 │
 ├── docs/                          ← GitHub Pages site + generated viewers
 │   ├── plugin-topology.md         ← Authoritative 48HP plugin spec
-│   └── panel-debug.html           ← Interactive panel layer viewer (generated)
+│   ├── index.html · panel.html · bom.html · ci.html · change-process.html  ← site pages
+│   ├── netlist.html               ← Interactive netlist viewer (generated; drift-gated)
+│   ├── panel-debug.html           ← Interactive panel layer viewer (generated)
+│   └── panel-editor.html          ← Interactive panel layout editor
 │
 ├── specs/                         ← Hardware design documentation
 │   ├── STATUS.md                  ← Phase completion checklist
 │   ├── module-overview.md         ← Signal chain, power budget
-│   ├── components.yaml            ← Per-ref design manifest (476 entries; block→ref→part)
+│   ├── components.yaml            ← Per-ref design manifest (700+ rows; block→ref→part)
 │   ├── analog-design-review.md    ← Trim pots, parts availability, noise analysis
 │   │
 │   ├── aux/                       ← Circuit design library (shared building blocks)
@@ -138,14 +151,14 @@ POGO/
 │   └── README.md
 │
 ├── kicad/                         ← Generated KiCad artifacts (output only; generators in tools/)
-│   ├── pogo-*.kicad_sch           ← Generated schematics (one per block)
+│   ├── pogo-block-*.kicad_sch     ← Generated schematics (per block; block-6 split into 7 sections)
 │   ├── pogo-bom.csv               ← Manufacturing BOM
 │   ├── fp-lib-table               ← Generated; maps POGO_* → components/footprints/
 │   └── pogo.kicad_pro             ← KiCad project (placeholder root; real board = Phase 5R)
 │
 ├── changes/                       ← Per-change records (changes/NNNN-<slug>.md) + _TEMPLATE.md
 │
-└── .github/workflows/build.yml    ← CI: Linux/Win/macOS .vcvplugin builds + 5 --check gates
+└── .github/workflows/build.yml    ← CI: Linux/Win/macOS .vcvplugin builds + 6 --check gates
 ```
 
 ---
@@ -178,9 +191,11 @@ open docs/panel-debug.html
 Schematics are **data-driven and generated per block**. Each block's netlist source lives
 with its spec (`specs/<block>/<block>.nets.yaml`) listing parts and name-based nets;
 `tools/generate_schematic.py` emits a byte-stable `kicad/pogo-<block>.kicad_sch`. All 10
-blocks (A, B, 1–8) are transcribed and verified; the shared Q-VCAs (U9/U10) are hosted on
-block-5's sheet (dual-owned by block-5/block-8, no separate sheet). (Authored netlist in
-`specs/`, generated schematic in `kicad/` — linked by `--check`, not by directory adjacency.)
+blocks (A, B, 1–8) are transcribed and verified; block-6 (triple BP + distortion) is split
+into 7 section sheets (`block-6-{svf1,svf2,svf3,dist1,dist2,dist3,mix}`), and the shared
+Q-VCAs (U9/U10) are hosted on block-5's sheet (dual-owned by block-5/block-8, no separate
+sheet). (Authored netlist in `specs/`, generated schematic in `kicad/` — linked by `--check`,
+not by directory adjacency.)
 
 ```bash
 # Regenerate all block schematics
@@ -189,8 +204,8 @@ python3 tools/generate_schematic.py
 # CI gate: validate (pin coverage + structural re-parse + short detection + byte drift)
 python3 tools/generate_schematic.py --check
 
-# Regenerate one block
-python3 tools/generate_schematic.py --block block-6
+# Regenerate one block (block-6 sections are addressed individually)
+python3 tools/generate_schematic.py --block block-6-mix
 ```
 
 Connectivity is by net name, so per-block sheets merge at board level by matching boundary
@@ -210,8 +225,9 @@ manufacturing BOM (`kicad/pogo-bom.csv`) is generated from `specs/components.yam
 ### Via GitHub Actions (recommended — no local setup)
 
 Every push to `main`, `dev`, or a `change/**` / `claude/**` branch (and every PR) triggers
-Linux x64 + Windows x64 + macOS builds plus the five `--check` gates (`components.py`,
-`fetch_datasheets.py`, `build_components.py`, `generate_schematic.py`, `build_panel.py`).
+Linux x64 + Windows x64 + macOS builds plus the six `--check` gates (`components.py`,
+`fetch_datasheets.py`, `build_components.py`, `generate_schematic.py`, `build_panel.py`,
+`build_netlist_viz.py`) and the Python↔JS DRC parity test.
 
 1. Go to **Actions → Build VCV Rack Plugin**
 2. Click the latest run → scroll to **Artifacts**

@@ -1,6 +1,6 @@
 # Standard CV / Audio Input Protection Circuit
 
-> ⚠️ **STALE** — Circuit library entry pending re-verification against current panel design (2026-05-28).
+> ✅ **Re-verified 2026-05-30** (change 0018). 100Ω + BAT54S clamp; tip-switch normalling pattern.
 
 Applied to **every** jack input on POGO (audio in, CV in, override jacks, mod source jack).
 
@@ -65,7 +65,7 @@ IN ──┬──(+)──[TL072 half]──(out)──── to internal signa
 
 ## Normalling
 
-For jacks that normalize to another signal (e.g., mod source jack normalizes to ENV OUT):
+For jacks that normalize to another signal (e.g., the BP3_R output jack normals to BP3_L):
 - Use tip-switching (TS) Thonkiconn PJ301M-12 jack socket
 - Normalled signal connects to the sleeve switching lug
 - When a cable is inserted, the tip disconnects from the sleeve lug, breaking the normalling

@@ -172,9 +172,9 @@ Calibration procedure:
 | block-5 LP1 | 632 Hz  | 47 nF  | 9.69 µA  |
 | block-8 LP2 | 632 Hz  | 47 nF  | 9.69 µA  |
 | block-7 HP  | 632 Hz  | 47 nF  | 9.69 µA  |
-| block-6 BP1 | 200 Hz  | 150 nF | 9.80 µA  |
-| block-6 BP2 | 1500 Hz | 22 nF  | 10.78 µA |
-| block-6 BP3 | 6000 Hz | 4.7 nF | 9.21 µA  |
+| block-6 BP1 | 400 Hz | 68 nF | 8.89 µA |
+| block-6 BP2 | 400 Hz | 68 nF | 8.89 µA |
+| block-6 BP3 | 400 Hz | 68 nF | 8.89 µA |
 
 I_abc_ref = f_ref × 2π × C_int × 52mV  (C_int varies per block; see block spec)
 All blocks target I_abc_ref ≈ 9–11 µA — C_int is chosen to achieve this consistent operating range.
@@ -204,9 +204,9 @@ For BP blocks the same expo architecture applies; only RV_REF trim setpoint diff
   the panel pot wiper directly (use a TL072 voltage follower)
 - Iabc output traces to OTA Iabc pins should be short; Iabc is a current, so some
   length is tolerable, but keep trace capacitance <10 pF to avoid HF on bias
-- One THAT340 per filter block means 5 THAT340 ICs total (LP1, LP2, HP, BP1, BP2/BP3
-  could share if f_ref is similar — but BP1/BP2/BP3 have different f_ref values,
-  so each needs its own converter; total = 5 expo converters for 5 filter blocks)
+- All three BP bands share f_ref = 400 Hz (change 0018); per-band tilt is realized with a
+  **per-channel** L/R expo (2 THAT340/band) rather than one shared converter, so the THAT340
+  count is higher than one-per-block — see the generated BOM for the exact count.
 - Tilt CV (LP1_TILT, BP_TILT) requires per-channel frequency offset; if using a
   single shared expo, tilt must be implemented as a summing offset at the expo
   input before the Q1 base — document this as an open item in Phase 3R
@@ -218,6 +218,6 @@ For BP blocks the same expo architecture applies; only RV_REF trim setpoint diff
 | block-5 | EXPO_LP1 | Control | f_ref = 632 Hz; drives LP1_L and LP1_R OTA Iabc |
 | block-8 | EXPO_LP2 | Control | f_ref = 632 Hz; drives LP2_L and LP2_R OTA Iabc |
 | block-7 | EXPO_HP | Control | f_ref = 632 Hz; drives HP_L and HP_R OTA Iabc |
-| block-6 | EXPO_BP1 | Control | f_ref = 200 Hz; drives BP1_L and BP1_R OTA Iabc |
-| block-6 | EXPO_BP2 | Control | f_ref = 1500 Hz; drives BP2_L and BP2_R OTA Iabc |
-| block-6 | EXPO_BP3 | Control | f_ref = 6000 Hz; drives BP3_L and BP3_R OTA Iabc |
+| block-6 | EXPO_BP1 | Control | f_ref = 400 Hz; per-channel L/R expo (true BP tilt) → BP1 OTA Iabc |
+| block-6 | EXPO_BP2 | Control | f_ref = 400 Hz; per-channel L/R expo (true BP tilt) → BP2 OTA Iabc |
+| block-6 | EXPO_BP3 | Control | f_ref = 400 Hz; per-channel L/R expo (true BP tilt) → BP3 OTA Iabc |

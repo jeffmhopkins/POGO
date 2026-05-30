@@ -73,7 +73,7 @@ ASCII fallback (one LFO, component labels for LFO1):
  │   → slower pot CW rotation → smaller R_INT → faster rate           │
  │                                                                     │
  │   LED:                                                              │
- │   V_tri ──[R_LED_LFO]──► LED_LFO (brightness tracks V_tri level)  │
+ │   "breathing" LED: MMBT3904 current source driven by ½(V_tri+1)   │
  │                                                                     │
  └─────────────────────────────────────────────────────────────────────┘
 
