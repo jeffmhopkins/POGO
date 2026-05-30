@@ -1149,15 +1149,15 @@
   (effects (font (size 1.016 1.016)) (justify left))
   (uuid "5159c82e-7b53-51a8-88e9-62a843e38408")
 )
-(global_label "BP3_L_OUT"
-  (shape output)
-  (at 100.000 804.920 0)
-  (effects (font (size 1.016 1.016)) (justify left))
-  (uuid "af56c02d-84f0-5ea4-b2cf-34459071bc5f")
-)
 (global_label "BP3_R_OUT"
   (shape output)
   (at 94.920 810.000 0)
+  (effects (font (size 1.016 1.016)) (justify left))
+  (uuid "af56c02d-84f0-5ea4-b2cf-34459071bc5f")
+)
+(global_label "BP3_L_BUF"
+  (shape output)
+  (at 100.000 804.920 0)
   (effects (font (size 1.016 1.016)) (justify left))
   (uuid "2bfd7efb-41d2-5985-8d0b-449dcdade325")
 )

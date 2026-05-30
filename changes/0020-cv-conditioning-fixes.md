@@ -162,9 +162,13 @@ Confidence tags: **[HC]** high (math/datasheet solid, verified) · **[NV]** need
 - **Fix:** add one unity inversion in each WF path so all 3 modes share sign into the mux. Need a free
   op-amp half in each dist section — **else +1 dual op-amp/section** (G6). Verifying U38/39/44/45 usage.
 
-### G. BP3 R→L output normal — fixes M1 — block-6-mix [HC, wiring]
+### G. BP3 R→L output normal — fixes M1 — block-6-mix + block-B [HC, wiring] — ✅ IMPLEMENTED
 - Re-route so J28's switch lug taps the **L source ahead of R's buffer/series-R** (true "R normals to L"),
   instead of tying two driven 1k outputs together (which gives (L+R)/2 and back-feeds the L jack).
+- **DONE (2026-05-30):** added boundary net `BP3_L_BUF` = block-B U62A stiff output (pre-R36);
+  `block-6-mix` J28.3 (switch lug) now taps `BP3_L_BUF` instead of `BP3_L_OUT` (post-1k). block-B
+  exports `BP3_L_BUF` as boundary. SPICE `bp3_normal.cir`: buggy = J27/J28 both (L+R)/2 = 2.0V;
+  fixed = J28 tip clean 3.0V, J27 undisturbed. Gates: schematic --check OK, netlist-viz OK.
 
 ### H. Mod-bus depth + buffer — fixes C2 + H2 — block-3 [topology decision]
 - C2: 100k `R_SRC_NORM` into a ~3.3k destination node → ~3% depth. H2: spec'd distribution buffer is
