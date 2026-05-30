@@ -476,21 +476,16 @@ audio,R151,Resistor,1,,100kΩ,0603,,,,,block-6-svf3,BP3 TILT inverter R_invin
 audio,R152,Resistor,1,,100kΩ,0603,,,,,block-6-svf3,BP3 TILT inverter R_invfb
 audio,U49,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-7,HP OTA integrators L
 audio,U50,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-7,HP OTA integrators R
-audio,U51,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-7,HP Q VCA L (cell A; cell B spare)
-audio,U52,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-7,HP Q VCA R (cell A; cell B spare)
-audio,U53,IC,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/opa1612.pdf,block-7,HP SUM_AMP + inverting output buffer L
-audio,U54,IC,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/opa1612.pdf,block-7,HP SUM_AMP + inverting output buffer R
+audio,U51,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-7,"HP Q VCA: cell A = L, cell B = R (mono Q; collapsed from 2 ICs, change 0018)"
+audio,U53,IC,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/opa1612.pdf,block-7,HP SUM_AMP (A) + HP output unity follower (B) L
+audio,U54,IC,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/opa1612.pdf,block-7,HP SUM_AMP (A) + HP output unity follower (B) R
 audio,U55,IC,1,THAT340S14-U,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,THAT Corporation,,https://thatcorp.com/datashts/THAT_300-Series_Datasheet.pdf,block-7,HP expo converter (L+R shared)
 audio,C29,Capacitor,4,,47nF,0603,,,,,block-7,HP integrator caps (C0G; C1L/C2L/C1R/C2R)
 audio,R30,Resistor,1,,100kΩ,0603,,,,,block-7,HP SUM_AMP R_in L
 audio,R31,Resistor,1,,100kΩ,0603,,,,,block-7,HP SUM_AMP R_in R
 audio,RV16,Trimpot/Pot,1,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-7,HP f_ref trim rheostat; in series with R_IREF_A 1MΩ; ±25% range
 audio,RV17,Trimpot/Pot,1,3224W-1-xxx,20kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-7,HP 1V/oct tracking trim; ±10% range
-audio,RV18,Trimpot/Pot,1,,,SMD,,,,,block-7,HP Q_max trim
-audio,R_QB_IABC_L,Resistor,1,,100kΩ,0603,,,,,block-7,U51 cell B Iabc termination resistor to GND (prevents floating)
-audio,R_QB_IABC_R,Resistor,1,,100kΩ,0603,,,,,block-7,U52 cell B Iabc termination resistor to GND
-audio,R_QB_OUT_L,Resistor,1,,1kΩ,0603,,,,,block-7,U51 cell B OTA output termination resistor to GND
-audio,R_QB_OUT_R,Resistor,1,,1kΩ,0603,,,,,block-7,U52 cell B OTA output termination resistor to GND
+audio,RV18,Trimpot/Pot,1,3224W-1-xxx,100kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-7,HP Q_max trim (IRES_AMP V_bias; self-osc onset)
 audio,U66,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-7,"HP IRES_AMP (Q driver, half A; half B spare)"
 audio,R92,Resistor,1,,100kΩ,0603,,,,,block-7,HP SUM_AMP v2 feedback input R L (R_FB_L)
 audio,R93,Resistor,1,,100kΩ,0603,,,,,block-7,HP SUM_AMP v2 feedback input R R (R_FB_R)
@@ -500,10 +495,6 @@ audio,R96,Resistor,1,,1kΩ,0603,,,,,block-7,HP OTA1 linearizing R L (R_LIN_A_L)
 audio,R97,Resistor,1,,1kΩ,0603,,,,,block-7,HP OTA2 linearizing R L (R_LIN_B_L)
 audio,R98,Resistor,1,,1kΩ,0603,,,,,block-7,HP OTA1 linearizing R R (R_LIN_A_R)
 audio,R99,Resistor,1,,1kΩ,0603,,,,,block-7,HP OTA2 linearizing R R (R_LIN_B_R)
-audio,R100,Resistor,1,,100kΩ,0603,,,,,block-7,HP output inverting buffer R_in L (R_HP_IN_L)
-audio,R101,Resistor,1,,100kΩ,0603,,,,,block-7,HP output inverting buffer R_in R (R_HP_IN_R)
-audio,R102,Resistor,1,,100kΩ,0603,,,,,block-7,HP output inverting buffer R_f L (R_HP_FB_L)
-audio,R103,Resistor,1,,100kΩ,0603,,,,,block-7,HP output inverting buffer R_f R (R_HP_FB_R)
 audio,R104,Resistor,1,,1MΩ,0603,,,,,block-7,HP Q V→I: V_ires_L → U51 cellA Iabc (R_Iabc_L)
 audio,R105,Resistor,1,,1MΩ,0603,,,,,block-7,HP Q V→I: V_ires_R → U52 cellA Iabc (R_Iabc_R)
 audio,R106,Resistor,1,,100kΩ,0603,,,,,block-7,HP IRES_AMP V_bias input R (R_QBIAS)
@@ -521,15 +512,13 @@ audio,C86,Capacitor,1,,100nF,0603,,,,,block-7,HP expo I_ref node bypass (C0G)
 audio,C87,Capacitor,1,,10nF,0402,,,,,block-7,HP OTA Iabc bypass L (C_IABC_L)
 audio,C88,Capacitor,1,,10nF,0402,,,,,block-7,HP OTA Iabc bypass R (C_IABC_R)
 audio,C89,Capacitor,1,,10nF,0402,,,,,block-7,HP Q-cell A Iabc bypass L (U51)
-audio,C90,Capacitor,1,,10nF,0402,,,,,block-7,HP Q-cell A Iabc bypass R (U52)
+audio,C90,Capacitor,1,,10nF,0402,,,,,block-7,HP Q-cell B Iabc bypass R (U51 cell B)
 audio,C91,Capacitor,1,,100nF,0603,,,,,block-7,U49 V+ decoupling
 audio,C92,Capacitor,1,,100nF,0603,,,,,block-7,U49 V- decoupling
 audio,C93,Capacitor,1,,100nF,0603,,,,,block-7,U50 V+ decoupling
 audio,C94,Capacitor,1,,100nF,0603,,,,,block-7,U50 V- decoupling
 audio,C95,Capacitor,1,,100nF,0603,,,,,block-7,U51 V+ decoupling
 audio,C96,Capacitor,1,,100nF,0603,,,,,block-7,U51 V- decoupling
-audio,C97,Capacitor,1,,100nF,0603,,,,,block-7,U52 V+ decoupling
-audio,C98,Capacitor,1,,100nF,0603,,,,,block-7,U52 V- decoupling
 audio,C99,Capacitor,1,,100nF,0603,,,,,block-7,U53 V+ decoupling
 audio,C100,Capacitor,1,,100nF,0603,,,,,block-7,U53 V- decoupling
 audio,C101,Capacitor,1,,100nF,0603,,,,,block-7,U54 V+ decoupling

@@ -33,7 +33,7 @@ ASCII fallback:
                                                            ▼
                                                ┌──────────────────────┐
   RV_1VOCT ──[R_VOCT]──────────────────────►  │   THAT340 (U_EXPO)   │
-                                               │   SOIC-8             │
+                                               │   SOIC-14             │
   RV_REF ──[R_REF]──[I_ref source]──────────► │                      │
                                                │  Q1: expo transistor │
                                                │  Q2: tempco sensor   │
@@ -117,7 +117,7 @@ achieves comparable accuracy but requires:
 - More board area
 - Additional trimming for initial matching
 
-THAT340 solves all three issues on-chip. SOIC-8 footprint is compact.
+THAT340 solves all three issues on-chip. SOIC-14 footprint is compact.
 
 ### One Expo Converter per Filter Block (Shared L/R)
 
@@ -156,7 +156,7 @@ Calibration procedure:
 
 | Ref (generic) | Part | Package | Value | Notes |
 |---|---|---|---|---|
-| U_EXPO | THAT340S14-U | SOIC-8 | — | Matched NPN quad; use Q1+Q2 for expo pair |
+| U_EXPO | THAT340S14-U | SOIC-14 | — | Matched NPN quad; use Q1+Q2 for expo pair |
 | R_IREF_A | Resistor | 0603 | 1 MΩ | Fixed lower bound of I_ref network; R_total at midpoint = 1250 kΩ → ~9.6 µA |
 | RV_REF | Bourns 3224W | SMD | 500 kΩ | f_ref trim rheostat; R_total range 1000 kΩ–1500 kΩ; all block targets within 20–80% travel |
 | R_VOCT | Resistor | 0603 | 47 kΩ | V/oct scaling R; with R_E=1kΩ and RV_1VOCT=7.5kΩ: ratio=18.0 mV/V = V_T×ln(2) exactly |

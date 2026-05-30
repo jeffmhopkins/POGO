@@ -44,11 +44,11 @@ ASCII fallback (one channel shown):
 
            SUM_AMP (TL072 half A):
                          ┌───[R_f 100kΩ]───┐
- X_in ──[100kΩ]──┬──(−)──┤                 ├──── HP_inv ──[100kΩ/100kΩ G=-1 buf]──► HP_out
+ X_in ──[100kΩ]──┬──(−)──┤                 ├──── HP_inv ──[unity follower G=+1]──► HP_out
                  │       │   TL072-A       │
  Q_fb ──[100kΩ]─┘   (+)─┴─GND             │
                                            │
-                     (output = HP_inv, then corrected by inverting buffer)
+                     (output = HP_inv = the HP tap; unity follower for drive isolation)
 
  V2 (LP) ──[unity buf TL072-B]──► LP_out
 
@@ -57,7 +57,8 @@ ASCII fallback (one channel shown):
 
 Note: The summing amplifier SUM_AMP computes:
   HP_inv = -(X_in/R_IN_SUM + Q_fb/R_FB) × R_f
-which, after sign inversion in the HP output buffer, yields the correct HP polarity.
+which is the HP tap; the plugin pre-negates to match it, so the unity follower passes it
+through unchanged (no second inversion — see §SUM_AMP Inversion and HP Polarity).
 
 ## Transfer Function
 
@@ -128,14 +129,16 @@ C0G (NP0) ceramic, 47 nF, 0603:
 
 ### SUM_AMP Inversion and HP Polarity
 
-The standard OTA-C SVF computes:
-  HP = x − (1/Q)·v₁ − v₂
+The standard OTA-C SVF computes `HP = x − (1/Q)·v₁ − v₂`, but the SUM_AMP (inverting summing
+configuration) produces its negative at its output node:
+  HP_inv = −(x − (1/Q)·v₁ − v₂)
 
-The SUM_AMP (inverting summing configuration) produces:
-  HP_inv = −(x − (1/Q)·v₁ − v₂) = −HP
-
-A G=−1 inverting unity-gain buffer on the HP output node restores polarity, yielding
-HP_out = HP = −(x − k·v₁ − v₂) which matches the DSP formula exactly.
+The POGO HP plugin (`HPFilter::process`) deliberately **returns this negated value**
+(`return -(x - k*v1 - v2)`), so the plugin output *equals the SUM_AMP node directly*. The
+hardware therefore takes the SUM_AMP node through a **unity non-inverting follower** (drive
+isolation only, G=+1) — `HP_out = HP_inv`, matching the plugin. Do **not** add a second
+inverting stage: a G=−1 buffer here double-inverts and phase-flips HP vs the plugin (the bug
+fixed in change 0018). This mirrors the LP buffer below (un-negated `+v₂` ↔ unity follower).
 
 ### LP Output Buffer
 
@@ -165,7 +168,7 @@ For LP1, LP2, HP, and the BP groups alike: DSP is 2-pole, hardware is 2-pole —
 | R_FB | Resistor | 0603 | 100 kΩ | Q feedback resistor into SUM_AMP |
 | R_LIN_A, R_LIN_B | Resistor | 0603 | 1 kΩ | OTA linearizing resistors (one per OTA cell) |
 | R_f | Resistor | 0603 | 100 kΩ | SUM_AMP feedback resistor |
-| R_HP_IN, R_HP_FB | Resistor | 0603 | 100 kΩ | HP inverting unity buffer R_in = R_f |
+| (HP output buffer) | — | — | — | Unity non-inverting follower on the SUM_AMP node — no resistors (change 0018; not an inverting buffer) |
 | C_VCC, C_VEE | Ceramic bypass | 0603 | 100 nF | Per IC supply pin; place within 1 mm of pin |
 
 ### Frequency Derivation (nominal)

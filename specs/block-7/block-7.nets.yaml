@@ -6,11 +6,15 @@
 #   datasheet-corrected pinouts: kicad_common.py sym_lm13700 / sym_that340 / sym_opa1612
 #
 # Structure = LP2 (block-8) topology with two HP differences:
-#   1. OUTPUT IS HP: the SUM_AMP output (HP_inv) is taken through a G=-1 inverting
-#      buffer (OPA1612 half B) to restore polarity -> HP_OUT. (LP2 used half B as a
-#      unity LP buffer on v2; here v2 only feeds back.)
-#   2. OWN Q VCAs: U51 (L) / U52 (R), cell A = HP Q; cell B spare, terminated
-#      (In± -> GND, Out -> R_QB_OUT -> GND, Iabc -> R_QB_IABC -> GND, buffers/diode NC).
+#   1. OUTPUT IS HP: the SUM_AMP output node (HP_inv = -(x-k*v1-v2)) IS the HP tap —
+#      it already equals the plugin's return (HPFilter pre-negates to match this node).
+#      It is taken through a UNITY NON-INVERTING buffer (OPA1612 half B, follower) for
+#      drive isolation -> HP_OUT, matching LP1's LP buffer. (change 0018: an earlier
+#      G=-1 inverting buffer was a DOUBLE-INVERSION bug — HP_OUT came out phase-flipped
+#      vs the plugin; R100-R103 removed, half B re-wired as a follower.)
+#   2. Q VCA: ONE LM13700 (U51) — cell A = HP Q L, cell B = HP Q R (mono Q, same Iabc
+#      both channels). (change 0018: was 2 ICs U51/U52 each cell-A; collapsed to 1,
+#      matching the aux + LP1/LP2 shared-Q precedent. U52 freed.)
 # Single shared expo (U55) drives both integrator channels (HP has no tilt).
 # Own IRES_AMP (U66). Integrator Darlington buffers (v1/v2) get pulldowns to V-.
 # Input = BP block output; output -> LP2 (block-8).
@@ -22,10 +26,9 @@ title: POGO Block 7 - HP Filter (OTA-C SVF, mono)
 parts:
   U49: { sym: ota, part: LM13700M, value: LM13700 }   # HP integrators L
   U50: { sym: ota, part: LM13700M, value: LM13700 }   # HP integrators R
-  U51: { sym: ota, part: LM13700M, value: LM13700 }   # HP Q VCA L (cell A; cell B spare)
-  U52: { sym: ota, part: LM13700M, value: LM13700 }   # HP Q VCA R (cell A; cell B spare)
-  U53: { sym: opamp2, part: OPA1612, value: OPA1612 } # L: A=SUM_AMP, B=HP inv buffer
-  U54: { sym: opamp2, part: OPA1612, value: OPA1612 } # R: A=SUM_AMP, B=HP inv buffer
+  U51: { sym: ota, part: LM13700M, value: LM13700 }   # HP Q VCA: cell A = L, cell B = R (mono Q)
+  U53: { sym: opamp2, part: OPA1612, value: OPA1612 } # L: A=SUM_AMP, B=HP output follower
+  U54: { sym: opamp2, part: OPA1612, value: OPA1612 } # R: A=SUM_AMP, B=HP output follower
   U66: { sym: opamp2, part: TL072CDT, value: TL072 }  # A=IRES_AMP, B=spare
   U55: { sym: expo, part: THAT340S14-U, value: THAT340 }  # shared L+R expo (no tilt)
 
@@ -44,12 +47,9 @@ parts:
   R97: { sym: r, value: 1k }      # R_LIN OTA2 L
   R98: { sym: r, value: 1k }      # R_LIN OTA1 R
   R99: { sym: r, value: 1k }      # R_LIN OTA2 R
-  R100: { sym: r, value: 100k }   # HP inv buffer R_in L
-  R101: { sym: r, value: 100k }   # HP inv buffer R_in R
-  R102: { sym: r, value: 100k }   # HP inv buffer R_f L
-  R103: { sym: r, value: 100k }   # HP inv buffer R_f R
-  R104: { sym: r, value: 1M }     # R_Iabc L (V_ires -> U51 cellA Iabc)
-  R105: { sym: r, value: 1M }     # R_Iabc R (V_ires -> U52 cellA Iabc)
+  # (HP output buffer is now a unity follower — R100-R103 inverting-buffer resistors removed, change 0018)
+  R104: { sym: r, value: 1M }     # R_Iabc L (V_ires -> U51 cell A Iabc)
+  R105: { sym: r, value: 1M }     # R_Iabc R (V_ires -> U51 cell B Iabc)
   R106: { sym: r, value: 100k }   # R_QBIAS
   R107: { sym: r, value: 100k }   # R_QINV
   R108: { sym: r, value: 100k }   # R_f_q
@@ -60,10 +60,7 @@ parts:
   R113: { sym: r, value: 10k }    # v2 L buffer pulldown
   R114: { sym: r, value: 10k }    # v1 R buffer pulldown
   R115: { sym: r, value: 10k }    # v2 R buffer pulldown
-  R_QB_IABC_L: { sym: r, value: 100k }  # U51 cell B Iabc termination to GND
-  R_QB_IABC_R: { sym: r, value: 100k }  # U52 cell B Iabc termination
-  R_QB_OUT_L:  { sym: r, value: 1k }    # U51 cell B Out termination to GND
-  R_QB_OUT_R:  { sym: r, value: 1k }    # U52 cell B Out termination
+  # (no spare Q cells now — U51 cell A = L Q, cell B = R Q; cell-B termination resistors removed)
 
   RV16: { sym: trimpot, part: "Bourns 3224W", value: HP_FREF }
   RV17: { sym: trimpot, part: "Bourns 3224W", value: HP_1VOCT }
@@ -74,16 +71,15 @@ parts:
   C86: { sym: c, value: 100nF }   # C_IREF
   C87: { sym: c, value: 10nF }    # C_IABC L
   C88: { sym: c, value: 10nF }    # C_IABC R
-  C89: { sym: c, value: 10nF }    # C_IABC_Q L (U51 cellA)
-  C90: { sym: c, value: 10nF }    # C_IABC_Q R (U52 cellA)
+  C89: { sym: c, value: 10nF }    # C_IABC_Q L (U51 cell A)
+  C90: { sym: c, value: 10nF }    # C_IABC_Q R (U51 cell B)
   C91: { sym: c, value: 100nF }   # U49 V+
   C92: { sym: c, value: 100nF }   # U49 V-
   C93: { sym: c, value: 100nF }   # U50 V+
   C94: { sym: c, value: 100nF }   # U50 V-
   C95: { sym: c, value: 100nF }   # U51 V+
   C96: { sym: c, value: 100nF }   # U51 V-
-  C97: { sym: c, value: 100nF }   # U52 V+
-  C98: { sym: c, value: 100nF }   # U52 V-
+  # (C97/C98 removed — U52 eliminated)
   C99: { sym: c, value: 100nF }   # U53 V+
   C100: { sym: c, value: 100nF }  # U53 V-
   C101: { sym: c, value: 100nF }  # U54 V+
@@ -95,46 +91,42 @@ parts:
 
 nets:
   "+12V":
-    [U49.11, U50.11, U51.11, U52.11, U53.8, U54.8, U66.8,
+    [U49.11, U50.11, U51.11, U53.8, U54.8, U66.8,
      R109.1, RV18.3,
-     C91.1, C93.1, C95.1, C97.1, C99.1, C101.1, C103.1, C105.1]
+     C91.1, C93.1, C95.1, C99.1, C101.1, C103.1, C105.1]
   "-12V":
-    [U49.6, U50.6, U51.6, U52.6, U53.4, U54.4, U66.4,
+    [U49.6, U50.6, U51.6, U53.4, U54.4, U66.4,
      U55.4, U55.11, R111.2,
      R112.2, R113.2, R114.2, R115.2,
-     C92.1, C94.1, C96.1, C98.1, C100.1, C102.1, C104.1, C106.1]
+     C92.1, C94.1, C96.1, C100.1, C102.1, C104.1, C106.1]
   GND:
-    [U53.3, U53.5, U54.3, U54.5, U66.3, RV18.1,
+    [U53.3, U54.3, U66.3, RV18.1,
      R96.2, R97.2, R98.2, R99.2,
      C29A.2, C29B.2, C29C.2, C29D.2,
      D12.A,
-     R_QB_IABC_L.2, R_QB_IABC_R.2, R_QB_OUT_L.2, R_QB_OUT_R.2,
-     U51.13, U51.14, U52.13, U52.14,
      C86.2, C87.2, C88.2, C89.2, C90.2,
-     C91.2, C92.2, C93.2, C94.2, C95.2, C96.2, C97.2, C98.2,
+     C91.2, C92.2, C93.2, C94.2, C95.2, C96.2,
      C99.2, C100.2, C101.2, C102.2, C103.2, C104.2, C105.2, C106.2]
 
   # ---- L channel SVF ----
   BP_OUT_L:     [R30.1]                       # <- block-6 BP out L (boundary)
   HP_SUMINV_L:  [U53.2, R30.2, R92.2, R94.1, U51.4, U51.5]  # SUM_AMP virtual ground (+ Q-cell A In-/Out)
-  HP_HPINV_L:   [U53.1, R94.2, U49.3, R100.1] # SUM_AMP out (HP_inv) -> OTA1 In+ + inv-buffer in
+  HP_HPINV_L:   [U53.1, R94.2, U49.3, U53.5]  # SUM_AMP out (HP_inv = HP tap) -> OTA1 In+ + follower In+
   HP_V1CAP_L:   [U49.5, U49.7, C29A.1]
-  HP_V1_L:      [U49.8, U49.14, R112.1, U51.3]  # v1 -> OTA2 In+ + pulldown + Q-cell In+
+  HP_V1_L:      [U49.8, U49.14, R112.1, U51.3]  # v1 -> OTA2 In+ + pulldown + Q-cell A In+
   HP_V2CAP_L:   [U49.12, U49.10, C29B.1]
   HP_V2_L:      [U49.9, R92.1, R113.1]        # v2 (LP) -> R_FB feedback + pulldown (not output)
-  HP_INVBUF_L:  [U53.6, R100.2, R102.1]       # HP inverting buffer virtual ground
-  HP_OUT_L:     [U53.7, R102.2]               # HP out (polarity-restored) -> block-8 (boundary)
+  HP_OUT_L:     [U53.7, U53.6]                # HP unity follower out (= HP_inv tap) -> block-8 (boundary)
 
   # ---- R channel SVF ----
   BP_OUT_R:     [R31.1]                        # <- block-6 BP out R (boundary)
-  HP_SUMINV_R:  [U54.2, R31.2, R93.2, R95.1, U52.4, U52.5]
-  HP_HPINV_R:   [U54.1, R95.2, U50.3, R101.1]
+  HP_SUMINV_R:  [U54.2, R31.2, R93.2, R95.1, U51.13, U51.12]  # SUM_AMP v-ground + Q-cell B In-/Out
+  HP_HPINV_R:   [U54.1, R95.2, U50.3, U54.5]  # SUM_AMP out (HP tap) -> OTA1 In+ + follower In+
   HP_V1CAP_R:   [U50.5, U50.7, C29C.1]
-  HP_V1_R:      [U50.8, U50.14, R114.1, U52.3]
+  HP_V1_R:      [U50.8, U50.14, R114.1, U51.14]  # v1 -> OTA2 In+ + pulldown + Q-cell B In+
   HP_V2CAP_R:   [U50.12, U50.10, C29D.1]
   HP_V2_R:      [U50.9, R93.1, R115.1]
-  HP_INVBUF_R:  [U54.6, R101.2, R103.1]
-  HP_OUT_R:     [U54.7, R103.2]
+  HP_OUT_R:     [U54.7, U54.6]                # HP unity follower out -> block-8 (boundary)
 
   # ---- OTA linearizing R (integrator In- pins) ----
   HP_LIN_A_L:   [U49.4, R96.1]
@@ -142,13 +134,9 @@ nets:
   HP_LIN_A_R:   [U50.4, R98.1]
   HP_LIN_B_R:   [U50.13, R99.1]
 
-  # ---- Q cell A Iabc + cell B spare termination ----
-  HP_QIABC_L:   [U51.1, R104.2, C89.1]        # U51 cellA Iabc (HP Q L)
-  HP_QIABC_R:   [U52.1, R105.2, C90.1]        # U52 cellA Iabc (HP Q R)
-  HP_QB_IABC_L: [U51.16, R_QB_IABC_L.1]       # cell B spare Iabc -> R -> GND
-  HP_QB_IABC_R: [U52.16, R_QB_IABC_R.1]
-  HP_QB_OUT_L:  [U51.12, R_QB_OUT_L.1]        # cell B spare Out -> R -> GND
-  HP_QB_OUT_R:  [U52.12, R_QB_OUT_R.1]
+  # ---- Q Iabc: U51 cell A = L, cell B = R (mono Q, both from V_ires) ----
+  HP_QIABC_L:   [U51.1, R104.2, C89.1]        # U51 cell A Iabc (HP Q L)
+  HP_QIABC_R:   [U51.16, R105.2, C90.1]       # U51 cell B Iabc (HP Q R)
 
   # ---- expo converter (single shared L+R; no tilt) ----
   HP_VCTRL:     [R110.1]                       # <- control: HP V/oct CV (boundary)
@@ -171,19 +159,13 @@ no_connect:
   - U49.15
   - U50.2
   - U50.15
-  # Q-cell LM13700s: Darlington buffers + diode-bias unused (both cells, both ICs).
+  # Q-cell LM13700 (U51, both cells active): Darlington buffers + diode-bias pins unused.
   - U51.2
   - U51.7
   - U51.8
   - U51.9
   - U51.10
   - U51.15
-  - U52.2
-  - U52.7
-  - U52.8
-  - U52.9
-  - U52.10
-  - U52.15
   # THAT340 PNP transistors Q3 (5,6,7) and Q4 (8,9,10) unused.
   - U55.5
   - U55.6

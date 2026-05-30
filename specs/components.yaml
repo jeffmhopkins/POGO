@@ -566,21 +566,17 @@ components:
   # block-7: HP Filter (refs shifted from old U34–U40 to U49–U55)
   - { ref: U49,  board: audio,   block: block-7, part: LM13700M,   pkg: SOIC-16,  fn: "HP OTA integrators L" }
   - { ref: U50,  board: audio,   block: block-7, part: LM13700M,   pkg: SOIC-16,  fn: "HP OTA integrators R" }
-  - { ref: U51,  board: audio,   block: block-7, part: LM13700M,   pkg: SOIC-16,  fn: "HP Q VCA L (cell A; cell B spare)" }
-  - { ref: U52,  board: audio,   block: block-7, part: LM13700M,   pkg: SOIC-16,  fn: "HP Q VCA R (cell A; cell B spare)" }
-  - { ref: U53,  board: audio,   block: block-7, part: OPA1612,   pkg: SOIC-8,   fn: "HP SUM_AMP + inverting output buffer L" }
-  - { ref: U54,  board: audio,   block: block-7, part: OPA1612,   pkg: SOIC-8,   fn: "HP SUM_AMP + inverting output buffer R" }
+  - { ref: U51,  board: audio,   block: block-7, part: LM13700M,   pkg: SOIC-16,  fn: "HP Q VCA: cell A = L, cell B = R (mono Q; collapsed from 2 ICs, change 0018)" }
+  - { ref: U53,  board: audio,   block: block-7, part: OPA1612,   pkg: SOIC-8,   fn: "HP SUM_AMP (A) + HP output unity follower (B) L" }
+  - { ref: U54,  board: audio,   block: block-7, part: OPA1612,   pkg: SOIC-8,   fn: "HP SUM_AMP (A) + HP output unity follower (B) R" }
   - { ref: U55,  board: audio,   block: block-7, part: THAT340S14-U, pkg: SOIC-14,   fn: "HP expo converter (L+R shared)" }
   - { ref: C29,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "47nF",   qty: 4, fn: "HP integrator caps (C0G; C1L/C2L/C1R/C2R)" }
   - { ref: R30,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "HP SUM_AMP R_in L" }
   - { ref: R31,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "HP SUM_AMP R_in R" }
   - { ref: RV16, board: audio,   block: block-7, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "HP f_ref trim rheostat; in series with R_IREF_A 1MΩ; ±25% range" }
   - { ref: RV17, board: audio,   block: block-7, part: "Bourns 3224W", pkg: SMD,   val: "20kΩ",  fn: "HP 1V/oct tracking trim; ±10% range" }
-  - { ref: RV18, board: audio,   block: block-7, part: ~,          pkg: SMD,      fn: "HP Q_max trim" }
-  - { ref: R_QB_IABC_L, board: audio, block: block-7, part: ~,   pkg: "0603",   val: "100kΩ",  fn: "U51 cell B Iabc termination resistor to GND (prevents floating)" }
-  - { ref: R_QB_IABC_R, board: audio, block: block-7, part: ~,   pkg: "0603",   val: "100kΩ",  fn: "U52 cell B Iabc termination resistor to GND" }
-  - { ref: R_QB_OUT_L,  board: audio, block: block-7, part: ~,   pkg: "0603",   val: "1kΩ",    fn: "U51 cell B OTA output termination resistor to GND" }
-  - { ref: R_QB_OUT_R,  board: audio, block: block-7, part: ~,   pkg: "0603",   val: "1kΩ",    fn: "U52 cell B OTA output termination resistor to GND" }
+  - { ref: RV18, board: audio,   block: block-7, part: "Bourns 3224W", pkg: SMD,  val: "100kΩ", fn: "HP Q_max trim (IRES_AMP V_bias; self-osc onset)" }
+  # R_QB_* spare-cell termination resistors removed (change 0018): U51 cell B is now active (R Q).
   # block-7 full circuit (expanded from spec §4, 2026-05-29): mirrors LP2 + HP inverting
   # output buffer (polarity restore) + own Q VCAs (U51/U52 cell A). Adds the HP IRES_AMP
   # (was missing), SUM_AMP fb, OTA R_LIN, HP buffer Rs, Q V→I, expo network, Iabc bypass,
@@ -594,10 +590,7 @@ components:
   - { ref: R97,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "HP OTA2 linearizing R L (R_LIN_B_L)" }
   - { ref: R98,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "HP OTA1 linearizing R R (R_LIN_A_R)" }
   - { ref: R99,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "HP OTA2 linearizing R R (R_LIN_B_R)" }
-  - { ref: R100, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "HP output inverting buffer R_in L (R_HP_IN_L)" }
-  - { ref: R101, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "HP output inverting buffer R_in R (R_HP_IN_R)" }
-  - { ref: R102, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "HP output inverting buffer R_f L (R_HP_FB_L)" }
-  - { ref: R103, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "HP output inverting buffer R_f R (R_HP_FB_R)" }
+  # R100-R103 removed (change 0018): HP output is a unity non-inverting follower, no inv-buffer resistors.
   - { ref: R104, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "1MΩ",    fn: "HP Q V→I: V_ires_L → U51 cellA Iabc (R_Iabc_L)" }
   - { ref: R105, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "1MΩ",    fn: "HP Q V→I: V_ires_R → U52 cellA Iabc (R_Iabc_R)" }
   - { ref: R106, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "HP IRES_AMP V_bias input R (R_QBIAS)" }
@@ -615,15 +608,14 @@ components:
   - { ref: C87,  board: audio,   block: block-7, part: ~,          pkg: "0402",   val: "10nF",   fn: "HP OTA Iabc bypass L (C_IABC_L)" }
   - { ref: C88,  board: audio,   block: block-7, part: ~,          pkg: "0402",   val: "10nF",   fn: "HP OTA Iabc bypass R (C_IABC_R)" }
   - { ref: C89,  board: audio,   block: block-7, part: ~,          pkg: "0402",   val: "10nF",   fn: "HP Q-cell A Iabc bypass L (U51)" }
-  - { ref: C90,  board: audio,   block: block-7, part: ~,          pkg: "0402",   val: "10nF",   fn: "HP Q-cell A Iabc bypass R (U52)" }
+  - { ref: C90,  board: audio,   block: block-7, part: ~,          pkg: "0402",   val: "10nF",   fn: "HP Q-cell B Iabc bypass R (U51 cell B)" }
   - { ref: C91,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100nF",  fn: "U49 V+ decoupling" }
   - { ref: C92,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100nF",  fn: "U49 V- decoupling" }
   - { ref: C93,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100nF",  fn: "U50 V+ decoupling" }
   - { ref: C94,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100nF",  fn: "U50 V- decoupling" }
   - { ref: C95,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100nF",  fn: "U51 V+ decoupling" }
   - { ref: C96,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100nF",  fn: "U51 V- decoupling" }
-  - { ref: C97,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100nF",  fn: "U52 V+ decoupling" }
-  - { ref: C98,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100nF",  fn: "U52 V- decoupling" }
+  # C97/C98 removed (change 0018): U52 eliminated (Q collapsed to one IC).
   - { ref: C99,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100nF",  fn: "U53 V+ decoupling" }
   - { ref: C100, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100nF",  fn: "U53 V- decoupling" }
   - { ref: C101, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100nF",  fn: "U54 V+ decoupling" }
