@@ -97,14 +97,22 @@ Datasheet-grounded values from a focused analog-design pass (LM13700 SNOSBW2F, T
 Confidence tags: **[HC]** high (math/datasheet solid, verified) · **[NV]** needs datasheet re-verify
 (PDF text-extraction unavailable in this env — structural argument sound, exact value to confirm).
 
-### A. Expo V/oct divider — fixes C1 (+C3 base) — blocks 5,7,8 + propagate to 6-svf1/2/3 [HC]
+### A. Expo V/oct divider — fixes C1 (+C3 base) — blocks 5,7,8 + propagate to 6-svf1/2/3 [HC, SPICE-validated]
 - **Root cause:** V/oct CV lands on the THAT340 base through series R only (no shunt) → ratio≈1 → rails.
-- **Fix:** add a base divider. ΔV_BE/oct = V_T·ln2 = **17.92 mV/oct** → need 1 V/oct ÷ 55.8.
-  - `R_VOCT` 47k → **43.2k (E96)**; add **R_SHUNT = 866Ω (E96)** base→GND; `RV_1VOCT` → **10k**
-    (gives ±10% slope-trim authority centered; keeps 20k 3224W usable at ~21% travel if we keep the part).
-  - Shunt to **GND**, not the I_ref node (loading I_ref shifts f_ref). f_ref trim (RV_REF) stays —
-    it's orthogonal (multiplicative/offset vs this slope). R_E (1k) and I_ref net unchanged.
-  - **No new part type** (866Ω is a new 0603 value). Counts: LP1 = 2 (L+R), HP = 1, LP2 = 1, BP×3 = 2 each.
+- **Fix:** add a base divider. ΔV_BE/oct = V_T·ln2 = **17.92 mV/oct** → 1 V ÷ ~55.8.
+- ⚠️ **SPICE caught a 2.1× error in the first-pass values (2026-05-30).** The analysis gave R_SHUNT
+  866Ω *and* a 1k tempco in series → real shunt leg 1866Ω → 37.8 mV/V (2.1× too high). Corrected
+  topology (`specs/sim/expo_voct.cir`): **the +4110ppm tempco (Vishay TFPT 1k) IS the shunt leg to GND**
+  (whole shunt tracks temp), and the **series leg sets the ratio**.
+  - Validated: `R_VOCT ≈ 51.1k (E96)` + `RV_1VOCT 10k` (series wiper) + `R_TEMPCO = TFPT 1k` shunt→GND
+    gives **19.19 → 16.10 mV/V across full trim, 17.92 at ~38% rotation** — target centered with
+    authority both sides. (Final series R tuned to E96 to center 17.92 at mid-rotation; SPICE picks it.)
+  - Shunt (the tempco) to **GND**, not the I_ref node (loading I_ref shifts f_ref). f_ref trim (RV_REF)
+    stays — orthogonal. R_E (1k) + I_ref net unchanged.
+  - Tempco SLOPE: TFPT +4110 ppm/K vs ideal ~+3413 ppm/K over-compensates ~20% — RV_1VOCT sets the
+    room-temp setpoint; residual tempco-slope error is a documented limit (bench-trimmable, not a value bug).
+  - **New part = tempco (G6a, Vishay TFPT, decided).** R_VOCT/RV unchanged types. Counts: LP1=2 (L+R),
+    HP=1, LP2=1, BP×3=2 each → ~8 tempco + 8 series-R changes.
 
 ### B. LP1 tilt summing node — fixes C3 — block-5 (and the BP per-band tilt summers already OK) [HC]
 - **Plugin:** `lp1TiltV = LP1_TILT×5` → full tilt **±5 V/oct**; L=base+tilt, R=base−tilt; sums 1:1 with V_freq.
