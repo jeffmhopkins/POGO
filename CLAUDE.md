@@ -394,7 +394,10 @@ spawns a **separate Lane A change** — the plugin leads; the schematic never si
 > self-consistency* (yaml↔sch, DRC, registry), **not** cross-layer plugin↔panel↔netlist drift
 > or lock state. Tracked follow-ups (a future change): `tools/check_locked.py` (locked blob
 > hashes unchanged), `tools/check_drift.py` (plugin enum surface ↔ panel control count ↔
-> nets/components), and a boundary-net cross-sheet consistency check.
+> nets/components), and a boundary-net cross-sheet consistency check. **Also planned: a SPICE
+> behavioral gate** (`tools/build_spice.py --check` over per-block `sim/` decks + `.expect.yaml`
+> assertions) to verify analog *behavior* vs the plugin DSP, not just artifact self-consistency —
+> designed in `changes/0021-spice-block-unit-tests.md` (see `tools/SPICE-PLAN.md`).
 
 ```bash
 git checkout -b change/<slug> dev
