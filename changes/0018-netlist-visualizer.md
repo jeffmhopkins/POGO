@@ -2,7 +2,7 @@
 
 - **Slug:** netlist-visualizer    **Branch:** `change/netlist-visualizer` (fresh off `dev`)
 - **Lane:** C (tooling / docs — reads nets, changes no connectivity)
-- **Status:** BUILT (awaiting your in-browser review of `docs/netlist.html`)
+- **Status:** PR OPEN (change/netlist-visualizer → dev)
 - **Blocks:** none (read-only over all blocks)   **Boards:** audio, utility
 - **Opened:** 2026-05-30       **Closed:** —
 - **PR:** —              **CI run:** —
