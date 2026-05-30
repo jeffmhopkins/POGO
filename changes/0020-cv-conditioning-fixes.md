@@ -177,13 +177,65 @@ Confidence tags: **[HC]** high (math/datasheet solid, verified) · **[NV]** need
   This affects ALL expo converters (5,7,8,6×3). Recommend a **separate change 0021** (it's a new
   component type + every expo), not folded into 0020. Flagging now so it isn't lost.
 
-### Decisions I need from you (G5)
-1. **Mod-bus (H):** approve **H-a** (low-Z normal + re-enable U3 C/D buffer)?
-2. **BP3 selector (E):** **E1+E2** (full parity, +1 part on block-1) or **E3** (document limitation)?
-3. **Q-cell (D):** approve the soft-limit approach for H6, and OK to proceed on the [NV] bias values
-   (R_Iabc→100k, negative V_ires) flagged for datasheet re-verify at prototype — or hold D until the
-   LM13700 Iabc-pin voltage is confirmed on real hardware/a fetchable datasheet?
-4. **THAT340 tempco:** spin off as **0021** (recommended), or fold into 0020?
+### G5 DECISIONS (user, 2026-05-30) — APPROVED, proceed
+1. **Mod-bus (H):** ✅ **H-a** — low-Z normal via jack tip-switch (drop R_SRC_NORM) + re-enable U3 C/D
+   distribution buffer to drive the 18 loads.
+2. **BP3 selector (E):** ✅ **E1+E2** — add ALT_R detect (+1 part on block-1) + OR with ALT_L_DET into
+   the R-channel select. Full plugin parity.
+3. **Q-cell (D):** ✅ **Proceed, flag [NV]** — implement R_Iabc 1M→100k, negative V_ires drive, fix
+   clamp polarity, soft-limit diodes for self-osc; mark the LM13700 Iabc-pin-voltage-dependent values
+   as needing datasheet/bench re-verify at prototype.
+4. **THAT340 tempco (out-of-scope finding):** ✅ **Fold into 0020** — add external +3300 ppm/°C tempco
+   resistor to every expo converter (blocks 5,7,8 + 6-svf1/2/3). NEW PART TYPE → G6a/G6b required.
+
+## G6 — new components (gate before any net references them)
+| Item | Part | New type? | Gate |
+|---|---|---|---|
+| Expo base shunt (§A) | R_SHUNT 866Ω 0603 | no (generic R, new value) | — |
+| Expo tempco (§4 fold-in) | **tempco resistor +3500 ppm/°C** (e.g. Vishay TFPT/PTF series or KRL) | **YES** | **G6a+G6b** |
+| Tilt summer op-amp (§B) | TL072/OPA1612 half | no (existing type, new ref) | — |
+| WF invert op-amp (§F) | TL072 half | no (existing type, new ref) | — |
+| ALT_R detect (§E1) | MMBT3904 + R (existing) or comparator | no (MMBT3904 in BOM) | — |
+| E2 OR gate | 2× 1N4148W + pullup (existing) | no | — |
+| Q soft-limit (§D/H6) | 2× BAT54S antiparallel (in BOM) | no | — |
+| I/V comp cap (§M4) | C_f ~10pF 0603 (existing type) | no | — |
+- **Only the tempco resistor needs G6a/G6b.** Candidate to confirm: a discrete PTC/tempco resistor with
+  ~+3300–3500 ppm/°C to compensate the expo's −1/T base-emitter tempco. Need a real MPN + footprint +
+  datasheet. **G6a STOP: confirm the tempco-resistor MPN before it enters any netlist.**
+
+## Implementation plan (cluster-by-cluster, commit per cluster, gates per CLAUDE.md Step 5-7)
+1. **G6a** tempco resistor part selection (STOP for confirm) → registry + datasheet + footprint.
+2. **Cluster expo+tilt** (A,B,§4): block-5/7/8 + 6-svf1/2/3 nets + aux-expo-converter §2-3 + aux-ota-c-svf.
+3. **Cluster OTA-tap** (C): block-5/7/8 nets (reroute) + aux-ota-c-svf.
+4. **Cluster Q-cell** (D): block-5/7/8 nets + aux-q-control.
+5. **Cluster block-6** (E,F,G): dist1/2/3 (WF invert), dist3 (ALT_R sel), mix (BP3 normal) + block-1 (ALT_R det).
+6. **Cluster mod-bus** (H,M2): block-3 nets + aux-mod-bus-core; **block-4** M4 comp cap + (carry HIGH-3
+   VCA Ec+ trim rework — NOTE: not yet in the A-H proposal above; see below).
+7. Regenerate schematics + BOM + netlist-viz; all gates; update specs §2-4 + STATUS; PR.
+
+### ⚠️ Gap to close before G6: VCA Ec+ trim (HIGH-3, block-4 + block-6 DRIVE)
+The §A-H proposal does NOT yet cover **HIGH-3** (VCA "unity trims" wired as series rheostats into the
+high-Z Ec+ port — can't set offset; shared unbuffered V_CTRL couples 4 cells; copied to block-6 DRIVE
+RV51-56). This is in scope (a confirmed HIGH). **Mechanism verified 2026-05-30:** `EC_L:[U4.2,RV1.1,RV1.2]`
++ `V_CTRL:[RV44.2,RV1.3,...]` → RV1 wiper+end to Ec+, other end to V_CTRL = series rheostat into the
+high-Z Ec+ port; and V_CTRL (RV44 wiper) is unbuffered into 4 cells.
+- **Proposed fix [NV — THAT2180 datasheet]:** (a) buffer V_CTRL with a unity op-amp half (TL072,
+  existing type) before the 4-way fan-out → `V_CTRL_BUF`; (b) drive each Ec+ from V_CTRL_BUF through a
+  fixed series R, and convert each unity trim to a **voltage-injection divider** (trimmer across a small
+  ±ref, wiper → series R → Ec+ node) so it adds an adjustable mV offset (the real unity-null), not a
+  series resistance. Exact Ec+ R / ref values depend on the THAT2180 +6.1 mV/dB control-port spec →
+  flag [NV] like the Q-cell, confirm at prototype. Same fix applies to block-6 DRIVE RV51-56 + their
+  shared V_DRIVE_CTRL fan-out.
+
+## G6a — tempco resistor (NEW PART TYPE) — STOP, needs MPN confirmation
+The expo tempco (fold-in, decision 4) needs a real **+3300–3500 ppm/°C tempco resistor** (one per expo:
+blocks 5,7,8 + 6-svf1/2/3 L+R = ~8 parts). This is a new component type → **G6a (registry + datasheet)
++ G6b (footprint)** must close before any net references it. I will not fabricate an MPN. Candidate
+families to confirm: Vishay TFPT (PTC thermistor, +3000–6000 ppm/°C, 0603/0805) or a synth-standard
++3300 ppm/°C tempco resistor. **Next action options:** (i) deep-research a real sourceable MPN +
+datasheet, or (ii) user specifies a preferred part. Until then the expo-divider fix (§A) can be wired
+*without* the tempco (tempco R sits in series with R_SHUNT and can be added when the MPN lands), so §A
+is not blocked — but the tempco itself is.
 
 ## Gate checklist
 - [x] **G1 — intent** confirmed (fix all CRIT+HIGH; full H5/H6/M5). 
