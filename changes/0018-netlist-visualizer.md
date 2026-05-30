@@ -99,6 +99,9 @@ schematics don't show.
    The "system interconnect" view.
 5. **Real footprints / symbol glyphs** — 272 footprints at true mm; 608 passives per the chosen
    passive-rendering option; wires terminate at true pad/pin when mappable.
+8b. **Filter by component type** — per-type checkboxes (the nets `sym:` token, friendly-labeled
+   with counts: Resistor 362, Capacitor 246, Diode, Trimpot, Op-amp, OTA, Jack, …) + All/None;
+   folds into `partVisible` so hidden types drop from nets/wires/flags/readout too.
 6. **Drag + re-anneal** — drag a part or collapsed block; release reheats the local sim.
 7. **Hover/inspect** — hover pin → highlight whole net; hover part → ref/value/part/block
    tooltip; click net in side list → highlight.

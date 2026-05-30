@@ -208,7 +208,7 @@ def extract() -> dict:
             ref_geom[ref] = gid
             parts.append({"ref": ref, "block": bid, "board": board,
                           "value": str(spec.get("value", "")), "part": partstr or "",
-                          "geom": gid})
+                          "sym": symtok or "?", "geom": gid})
             block_refs.append(ref)
 
         for name, pins in (doc.get("nets") or {}).items():
@@ -349,6 +349,13 @@ _TEMPLATE = r"""<!DOCTYPE html>
     <h2>Blocks</h2>
     <div id="blocks"></div>
 
+    <h2>Component types</h2>
+    <div style="display:flex;gap:6px;margin-bottom:4px">
+      <button class="toolbtn" id="typeAll" style="margin-top:0">All</button>
+      <button class="toolbtn" id="typeNone" style="margin-top:0">None</button>
+    </div>
+    <div id="types"></div>
+
     <h2>Readout</h2>
     <div class="readout" id="readout"></div>
 
@@ -382,6 +389,14 @@ const partByRef = {}; MODEL.parts.forEach(p => partByRef[p.ref] = p);
 const blockById = {}; MODEL.blocks.forEach(b => blockById[b.id] = b);
 const boardOf = {}; MODEL.blocks.forEach(b => boardOf[b.id] = b.board);
 
+// component types (the nets `sym:` token) — friendly labels + visibility filter
+const TYPE_LABEL = { r:"Resistor", c:"Capacitor", diode:"Diode", bat54s:"Schottky clamp",
+  zener:"Zener", led:"LED", opamp2:"Op-amp (dual)", opamp4:"Op-amp (quad)", ota:"OTA (LM13700)",
+  vca:"VCA (THAT2180)", expo:"Expo (THAT340)", cd4053:"Mux (CD4053)", trimpot:"Trimpot",
+  jack:"Jack", dw3:"Switch (DW3)", dw5:"Switch (DW5)" };
+const typeCount = {}; MODEL.parts.forEach(p => typeCount[p.sym] = (typeCount[p.sym]||0)+1);
+const typeVisible = {}; Object.keys(typeCount).forEach(t => typeVisible[t] = true);
+
 // per-part runtime node
 const nodes = {};        // ref -> {x,y,vx,vy,fixed}
 const blockState = {};   // id -> {visible, collapsed, x,y,vx,vy}  (collapsed super-node uses x,y)
@@ -405,7 +420,8 @@ netNodes.forEach(nn => { const v=visiblePins(nn.net); if(v.length){ const c=cent
 function geomOf(ref){ return MODEL.geom[partByRef[ref].geom]; }
 function padLocal(ref,pin){ const g=geomOf(ref); return (g&&g.pads[pin]) || [0,0]; }
 function pinAbs(ref,pin){ const n=nodes[ref], l=padLocal(ref,pin); return [n.x+l[0], n.y+l[1]]; }
-function partVisible(ref){ const b=blockState[partByRef[ref].block]; return b.visible && !b.collapsed; }
+function partVisible(ref){ const p=partByRef[ref], b=blockState[p.block];
+  return b.visible && !b.collapsed && typeVisible[p.sym]; }
 function netVisible(net){
   if (POWER.has(net.name) && hidePower.checked) return false;
   return visiblePins(net).length >= 2;
@@ -693,7 +709,21 @@ function buildSide(){
     });
   });
   syncBlockList();
+  buildTypes();
 }
+function buildTypes(){
+  const host=document.getElementById('types'); host.innerHTML='';
+  Object.keys(typeCount).sort((a,b)=>typeCount[b]-typeCount[a]).forEach(t=>{
+    const row=document.createElement('label'); row.className='row';
+    const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=typeVisible[t];
+    cb.onchange=()=>{ typeVisible[t]=cb.checked; reheat(); };
+    const nm=document.createElement('span'); nm.textContent=TYPE_LABEL[t]||t;
+    const ct=document.createElement('span'); ct.className='bd'; ct.textContent=typeCount[t];
+    row.append(cb,nm,ct); row.dataset.type=t; host.appendChild(row);
+  });
+}
+function syncTypeList(){ document.querySelectorAll('#types .row').forEach(r=>{
+  r.querySelector('input').checked=typeVisible[r.dataset.type]; }); }
 function syncBlockList(){
   document.querySelectorAll('.blk').forEach(row=>{ const b=row.dataset.bid; if(!b) return;
     const bs=blockState[b]; row.querySelector('.nm').style.color = selBlocks.has(b)?'#ff8800':
@@ -711,6 +741,10 @@ document.getElementById('expandAll').onclick=()=>{ MODEL.blocks.forEach(b=>{
 document.getElementById('collapseAll').onclick=()=>{ MODEL.blocks.forEach(b=>blockState[b.id].collapsed=true);
   reheat(); syncBlockList(); };
 document.getElementById('fit').onclick=fitView;
+document.getElementById('typeAll').onclick=()=>{ Object.keys(typeVisible).forEach(t=>typeVisible[t]=true);
+  syncTypeList(); reheat(); };
+document.getElementById('typeNone').onclick=()=>{ Object.keys(typeVisible).forEach(t=>typeVisible[t]=false);
+  syncTypeList(); reheat(); };
 hidePower.onchange=()=>reheat(); showLabels.onchange=()=>{};
 
 function fitView(){ let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
@@ -729,10 +763,13 @@ function updateReadout(){
   MODEL.nets.forEach((n,i)=>{ if(!netVisible(n)) return; vis++; const nn=netNodes[i];
     visiblePins(n).forEach(e=>{const a=pinAbs(e.ref,e.pin); len+=Math.hypot(nn.x-a[0],nn.y-a[1]);}); });
   const expanded=MODEL.blocks.filter(b=>blockState[b.id].visible&&!blockState[b.id].collapsed).length;
+  const vparts=MODEL.parts.reduce((a,p)=>a+(partVisible(p.ref)?1:0),0);
+  const types=Object.values(typeVisible).filter(v=>v).length, ntypes=Object.keys(typeVisible).length;
   document.getElementById('readout').innerHTML =
-    `visible nets <b>${vis}</b><br>ratsnest length <b>${len.toFixed(0)}</b> mm<br>`+
+    `visible parts <b>${vparts}</b><br>visible nets <b>${vis}</b><br>`+
+    `ratsnest length <b>${len.toFixed(0)}</b> mm<br>`+
     `expanded blocks <b>${expanded}</b>/${MODEL.blocks.length}<br>`+
-    `selected <b>${selBlocks.size}</b>`;
+    `types <b>${types}</b>/${ntypes} · selected <b>${selBlocks.size}</b>`;
 }
 
 // ---- main loop -------------------------------------------------------------
