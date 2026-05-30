@@ -64,7 +64,7 @@ nets:
   V_TRI1:  [U1.1, C1.1, U1.6, D1.A, R11.1] # triangle: out, C_INT fb, Schmitt(-), LED, R_OUT
   DLEDK1:  [D1.K, R9.1]
   LEDA1:   [R9.2, LED1.A]
-  LFO1_OUT: [R11.2, J5.1]                 # -> LFO1 jack + MOD_IN normalling (boundary)
+  LFO1_OUT: [R11.2, J5.1]                 # -> LFO1 jack + block-3 MOD_SRC switch pos 0 (boundary)
 
   # ---- LFO2 (U2) — standalone ----
   V_SQ2:   [U2.7, R6.1, RV2.3]
@@ -75,7 +75,7 @@ nets:
   V_TRI2:  [U2.1, C2.1, U2.6, D2.A, R12.1]
   DLEDK2:  [D2.K, R10.1]
   LEDA2:   [R10.2, LED2.A]
-  LFO2_OUT: [R12.2, J6.1]                 # -> LFO2 jack (terminates here; no normalling)
+  LFO2_OUT: [R12.2, J6.1]                 # -> LFO2 jack + block-3 MOD_SRC switch pos 1 (boundary)
 
 # Output jacks do not normal here (MOD_IN's switch lug is in block-3); lugs unused.
 no_connect:
@@ -83,4 +83,5 @@ no_connect:
   - J6.3
 
 boundary:
-  - LFO1_OUT   # -> block-3 MOD_IN tip-switch normalling ring
+  - LFO1_OUT   # -> block-3 MOD_SRC switch position 0 (LFO 1); LFO1 jack stays live
+  - LFO2_OUT   # -> block-3 MOD_SRC switch position 1 (LFO 2); LFO2 jack stays live

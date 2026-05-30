@@ -38,7 +38,7 @@ spec authors + group adversarial review → netlist + design-intent review → u
 |---|---|---|---|---|
 | A — Input Buffers | ✅ | ✅ | Lane C (doc-only) | No behavioral divergence; spec/nets match plugin. Fixed: DSP line cite, LM4562→OPA1612 part note, STALE banners lifted, aux cross-refs, 100Ω clamp-current math, aux board-name table. **100Ω kept** (user). |
 | 1 — Pre-Gain | ✅ | ✅ | G4 text-only | No B1-local HW change (gain-stage netlist correct). Fixed: ALT destination (through VCA → **BP3 only**, bypasses LP1 not VCA), per-channel selector + asymmetric edge case documented, STALE banners lifted, aux refs, DSP cite, switch=path-select, aux OPA1612 note softened. **Substantive HW deferred → block-4 (ALT VCA cell) + block-6 (BP3 selector, distortion order).** |
-| 2 — Dual LFO | 🔲 | 🔲 | — | Mod-source (0017) touch point. |
+| 2 — Dual LFO | ✅ | 🚧 | G4+G5 (reroute done); LED G5/G6a pending | LFO core faithful. Done: both LFOs now tap MOD_SRC switch (LFO1_OUT pos0 + new LFO2_OUT pos1 boundary), old passive MOD_IN normal removed; aux-lfo-core refreshed (log pot, breathing LED, dropped orphans); topology-doc MOD_SRC + ALT lines fixed. **PENDING:** full-cycle breathing LED driver (user chose match-plugin) — G5 topology + G6a component proposal. Switch wiring deferred to block-3. |
 | 3 — Mod Bus | 🔲 | 🔲 | — | Mod-source (0017): new MOD_SRC 3-way LFO1/LFO2/EXT. |
 | 4 — VCA | 🔲 | 🔲 | — | **DEFERRED-IN (from B1):** add 2nd THAT2180 ALT VCA cell on shared `V_CTRL` (G5/G6 new component) — plugin runs ALT through the VCA before BP3 (user: follow plugin). |
 | 5 — LP Filter 1 | 🔲 | 🔲 | — | |

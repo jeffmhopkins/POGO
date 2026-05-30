@@ -930,13 +930,13 @@
   (uuid "96c60f75-7cda-5a8f-9ab6-97cc810343c6")
 )
 (global_label "LFO2_OUT"
-  (shape input)
+  (shape output)
   (at 100.000 366.190 0)
   (effects (font (size 1.016 1.016)) (justify left))
   (uuid "224e85af-3e1f-5813-b30b-0b815d6419aa")
 )
 (global_label "LFO2_OUT"
-  (shape input)
+  (shape output)
   (at 34.920 535.000 0)
   (effects (font (size 1.016 1.016)) (justify left))
   (uuid "79219572-a3c6-54c6-95cb-2923ea63aa6a")
