@@ -148,13 +148,12 @@ This maps the ±1 LFO output **linearly to [0, 1] across the whole cycle**: brig
 the negative peak, 0.5 at the zero-crossing, full at the positive peak — a continuous
 "breathing" indicator that is lit throughout the cycle and dark only at the trough.
 
-> ⚠️ **CORRECTION (change 0018):** the previous half-wave-rectified LED (1N4148 + resistor,
-> §3 below) is **not** a match for this law — a half-wave LED is fully OFF for the entire
-> negative half-cycle (a "pulsing" lamp), whereas the plugin LED breathes across the full
-> cycle. Per the locked plugin (ground truth), the LED is being re-specified as a
-> **full-cycle transconductance driver** so brightness ∝ `(V_tri + 5)/10` (0 at −5 V, full
-> at +5 V). Topology + components are a G5/G6a proposal under change 0018 (a per-LED op-amp
-> current sink with an input level-shift); §3 is updated once approved.
+The hardware matches this with a **full-cycle NPN current-source driver** (change 0018,
+G5/G6a approved): the bipolar triangle is level-shifted onto a transistor base so the LED
+current rises with `(V_tri + 5)`, breathing across the whole cycle rather than the old
+half-wave "pulsing" lamp (which was OFF for the entire negative half — not a match for the
+plugin law). See §3 for the circuit. *(A small exponential toe near the dark end from the
+V_be knee, and ~2 mV/°C dark-point drift, are accepted as cosmetically invisible.)*
 
 ### MOD_SRC feed (both LFOs → block-3 switch)
 
@@ -242,20 +241,32 @@ V_H  = 11 × 0.451 = 4.96 V ≈ 5 V  ✓
 ```
 Use R_fb_sq = 100 kΩ, R_HYS = 82 kΩ.
 
-**LED driver — full-cycle "breathing" (re-specified, change 0018; topology pending G5/G6a):**
+**LED driver — full-cycle "breathing" NPN current source (change 0018, G5/G6a approved):**
 
-> ⚠️ The half-wave scheme below (1N4148 + 1.2 kΩ) is **SUPERSEDED**. It only lit the LED on
-> the positive half-cycle, which does not match the plugin's full-cycle `(V_tri+5)/10`
-> brightness law (`Pogo.cpp:504`). The replacement is a per-LED transconductance current
-> sink whose LED current is proportional to `(V_tri + 5)`, so the LED breathes across the
-> whole cycle (dark only at −5 V, full at +5 V). The concrete component set (op-amp current
-> sink + input level-shift + shared ~+5 V reference) is a G5/G6a proposal under change 0018
-> and will replace D1/D2 + R9/R10 once approved. The §4 BOM updates with it.
+A single NPN (MMBT3904, SOT-23) per LED acts as a voltage-controlled current source. The
+bipolar triangle `V_tri` (±5 V) is level-shifted onto the transistor base by a 3-resistor
+network so the base sits below the conduction threshold at −5 V and rises through the active
+region toward +5 V; the LED is fed from +12 V through the transistor, with the emitter
+resistor `R_E` setting the full-scale current. The result is `I_LED ≈ (V_base − V_be)/R_E`
+with `V_base ≈ 0.14·V_tri + 1.3 V`, i.e. ~0 at −5 V (Q cut off → LED dark) rising to ~3 mA
+at +5 V — a full-cycle breathing indicator matching the plugin law.
 
-Superseded half-wave design (for reference until the breathing driver is approved):
 ```
-V_tri_pos (>0) → D_LED (1N4148W) → R_LED (1.2 kΩ) → LED → GND   [pulsing, positive-half only]
+   +12V ──► LED_anode ──► LED_cathode ──► Q collector
+                                          Q emitter ──[R_E 470 Ω]──► GND
+   base level-shift:
+     V_tri ──[R_BTRI 51 kΩ]──┐
+     +12V  ──[R_BBIAS 68 kΩ]─┼──► Q base
+     GND   ──[R_BGND 10 kΩ]──┘
+
+   V_tri  −5 V / 0 V / +5 V  →  V_base 0.585 / 1.31 / 2.04 V  →  I_LED ≈ 0 / 1.4 / 3.0 mA
 ```
+
+Component values (per LED): R_BTRI 51 kΩ, R_BBIAS 68 kΩ, R_BGND 10 kΩ, R_E 470 Ω, Q =
+MMBT3904. The +12 V bias leg sets the dark-point (LED off near `V_tri = −5 V`); a few-percent
+rail tolerance only nudges that point and is cosmetically invisible. Transistor dissipation
+≈ 26 mW (well within SOT-23). This **replaces** the former D1/D2 (1N4148) + R9/R10 half-wave
+limiter; R9/R10 are repurposed as the emitter resistors `R_E1/R_E2`.
 
 ### Signal routing
 
@@ -264,7 +275,7 @@ LFO1 (U1 = TL072): integrator (A) + Schmitt (B)
   Schmitt out V_sq → RV1 top; RV1 bottom → R3 (R_FLOOR) → GND; RV1 wiper → R1 (R_INT) → U1A(−)
   U1A: (+) = GND, (−) = R1/C1 summing node, out = V_tri; C1 (C_INT) feedback (−)↔out
   Schmitt U1B: (−) = V_tri, (+) = R5(R_FB_SQ to V_sq)/R7(R_HYS to GND) node, out = V_sq
-  V_tri → [full-cycle breathing LED driver — see §2 LED note, G5/G6a proposal] → LED1
+  V_tri → R19 (R_BTRI) → Q1 base (level-shift w/ R20 from +12V, R21 to GND); LED1 ← +12V → Q1 collector; Q1 emitter → R9 (R_E) → GND
   V_tri → R11 (R_OUT 1 kΩ) → J5 (LFO1 jack)  and  → LFO1_OUT boundary → block-3 MOD_SRC switch pos 0
 
 LFO2 (U2): identical — V_tri → R12 → J6 (LFO2 jack) and → LFO2_OUT boundary → block-3 MOD_SRC switch pos 1.

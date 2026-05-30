@@ -451,12 +451,20 @@ components:
   - { ref: R6,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "R_FB_SQ2: LFO2 Schmitt feedback R" }
   - { ref: R7,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "82kΩ",   fn: "R_HYS1: LFO1 Schmitt lower R ((+) input → GND); sets V_H = 5V" }
   - { ref: R8,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "82kΩ",   fn: "R_HYS2: LFO2 Schmitt lower R" }
-  - { ref: R9,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "1.2kΩ",  fn: "R_LED1: LFO1 LED current limit (≈2 mA at V_tri = +5V)" }
-  - { ref: R10,  board: utility, block: block-2, part: ~,          pkg: "0603",   val: "1.2kΩ",  fn: "R_LED2: LFO2 LED current limit" }
+  - { ref: R9,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "470Ω",   fn: "R_E1: LFO1 LED breathing-driver emitter R (sets ≈3 mA full-scale at V_tri=+5V)" }
+  - { ref: R10,  board: utility, block: block-2, part: ~,          pkg: "0603",   val: "470Ω",   fn: "R_E2: LFO2 LED breathing-driver emitter R" }
   - { ref: R11,  board: utility, block: block-2, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "R_OUT1: LFO1 output series protection to jack" }
   - { ref: R12,  board: utility, block: block-2, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "R_OUT2: LFO2 output series protection to jack" }
-  - { ref: D1,   board: utility, block: block-2, part: 1N4148W,    pkg: SOD-123,  fn: "D_LED1: LFO1 LED half-wave rectifier (positive half-cycle pulsing)" }
-  - { ref: D2,   board: utility, block: block-2, part: 1N4148W,    pkg: SOD-123,  fn: "D_LED2: LFO2 LED half-wave rectifier" }
+  # LFO LED breathing drivers (change 0018): full-cycle NPN current source per LED, matching
+  # the plugin brightness law (V_tri+5)/10. Replaces the old 1N4148 half-wave (D1/D2 removed).
+  - { ref: Q1,   board: utility, block: block-2, part: MMBT3904,   pkg: SOT-23,   fn: "LFO1 LED breathing current source (NPN; LED ← +12V → collector, emitter → R_E1)" }
+  - { ref: Q2,   board: utility, block: block-2, part: MMBT3904,   pkg: SOT-23,   fn: "LFO2 LED breathing current source (NPN)" }
+  - { ref: R19,  board: utility, block: block-2, part: ~,          pkg: "0603",   val: "51kΩ",   fn: "R_BTRI1: LFO1 LED driver base — V_tri injection (level-shift)" }
+  - { ref: R20,  board: utility, block: block-2, part: ~,          pkg: "0603",   val: "68kΩ",   fn: "R_BBIAS1: LFO1 LED driver base — +12V bias (sets quiescent base)" }
+  - { ref: R21,  board: utility, block: block-2, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "R_BGND1: LFO1 LED driver base — GND leg of level-shift divider" }
+  - { ref: R22,  board: utility, block: block-2, part: ~,          pkg: "0603",   val: "51kΩ",   fn: "R_BTRI2: LFO2 LED driver base — V_tri injection" }
+  - { ref: R23,  board: utility, block: block-2, part: ~,          pkg: "0603",   val: "68kΩ",   fn: "R_BBIAS2: LFO2 LED driver base — +12V bias" }
+  - { ref: R24,  board: utility, block: block-2, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "R_BGND2: LFO2 LED driver base — GND leg" }
   - { ref: LED1, board: panel,   block: block-2, part: "LED 3mm",  pkg: "3mm",    fn: "LFO1 rate/phase indicator" }
   - { ref: LED2, board: panel,   block: block-2, part: "LED 3mm",  pkg: "3mm",    fn: "LFO2 rate/phase indicator" }
 

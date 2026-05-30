@@ -38,7 +38,7 @@ spec authors + group adversarial review → netlist + design-intent review → u
 |---|---|---|---|---|
 | A — Input Buffers | ✅ | ✅ | Lane C (doc-only) | No behavioral divergence; spec/nets match plugin. Fixed: DSP line cite, LM4562→OPA1612 part note, STALE banners lifted, aux cross-refs, 100Ω clamp-current math, aux board-name table. **100Ω kept** (user). |
 | 1 — Pre-Gain | ✅ | ✅ | G4 text-only | No B1-local HW change (gain-stage netlist correct). Fixed: ALT destination (through VCA → **BP3 only**, bypasses LP1 not VCA), per-channel selector + asymmetric edge case documented, STALE banners lifted, aux refs, DSP cite, switch=path-select, aux OPA1612 note softened. **Substantive HW deferred → block-4 (ALT VCA cell) + block-6 (BP3 selector, distortion order).** |
-| 2 — Dual LFO | ✅ | 🚧 | G4+G5 (reroute done); LED G5/G6a pending | LFO core faithful. Done: both LFOs now tap MOD_SRC switch (LFO1_OUT pos0 + new LFO2_OUT pos1 boundary), old passive MOD_IN normal removed; aux-lfo-core refreshed (log pot, breathing LED, dropped orphans); topology-doc MOD_SRC + ALT lines fixed. **PENDING:** full-cycle breathing LED driver (user chose match-plugin) — G5 topology + G6a component proposal. Switch wiring deferred to block-3. |
+| 2 — Dual LFO | ✅ | ✅ | G4+G5+G6a/b | LFO core faithful. Both LFOs tap MOD_SRC switch (LFO1_OUT pos0 + new LFO2_OUT pos1); aux-lfo-core refreshed; topology-doc MOD_SRC + ALT fixed. **LED: full-cycle breathing NPN current-source driver** (MMBT3904 ×2 + base level-shift; D1/D2 removed, R9/R10→R_E) — matches plugin `(V_tri+5)/10`. New part **MMBT3904** registered (npn symbol, SOT-23). Switch wiring deferred to block-3. |
 | 3 — Mod Bus | 🔲 | 🔲 | — | Mod-source (0017): new MOD_SRC 3-way LFO1/LFO2/EXT. |
 | 4 — VCA | 🔲 | 🔲 | — | **DEFERRED-IN (from B1):** add 2nd THAT2180 ALT VCA cell on shared `V_CTRL` (G5/G6 new component) — plugin runs ALT through the VCA before BP3 (user: follow plugin). |
 | 5 — LP Filter 1 | 🔲 | 🔲 | — | |
@@ -68,12 +68,20 @@ spec authors + group adversarial review → netlist + design-intent review → u
   on ALT-through-VCA → block-4 gains a 2nd THAT2180 cell. (user)
 - 2026-05-30: Carried-forward block-6 finding: netlist distortion order (SVF→DIST) is the
   pre-0017 order; plugin is DIST→SVF — the core 0017 reorder is not yet built in hardware.
+- 2026-05-30: **Block 2 LED** — divergence found: plugin LED breathes full-cycle
+  `(raw+1)×0.5`, hardware was half-wave "pulsing" (and the spec falsely claimed a match).
+  User chose **match plugin**, then **simpler/cheaper driver**: single-transistor NPN current
+  source (MMBT3904) per LED, accepting a small V_be toe near the dark end. G5 topology + G6a
+  component approved. New `npn` symbol primitive authored; MMBT3904 SOT-23 footprint exists. (user)
 
 ## Component additions
 
 | ref | board | block | part | pkg | val | datasheet? | fn |
 |-----|-------|-------|------|-----|-----|-----------|----|
-| —   | —     | —     | —    | —   | —   | —         | none yet |
+| Q1, Q2 | utility | block-2 | MMBT3904 | SOT-23 | — | onsemi product page (G6b: SOT-23 fp exists; new `npn` symbol) | LFO LED breathing current sources |
+| R19–R24 | utility | block-2 | ~ (0603) | 0603 | 51k/68k/10k ×2 | n/a (passives) | LED-driver base level-shift networks |
+
+(R9/R10 repurposed 1.2k→470Ω as emitter R; D1/D2 1N4148 removed.)
 
 ## Artifacts  (paths / links, not copies)
 

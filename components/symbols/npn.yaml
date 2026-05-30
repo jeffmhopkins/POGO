@@ -1,0 +1,89 @@
+# components/symbols/npn.yaml — AUTHORED symbol primitive (the nets `sym:` token = filename).
+# Pin `at` is the connection point; one source drives both the emitted symbol and the pin map.
+# Loaded dynamically by tools/symbols.py (globs components/symbols/*.yaml).
+#
+# Generic NPN BJT in SOT-23. MMBT3904 / BC847 pinout (SOT-23):
+#   pin 1 = Base · pin 2 = Emitter · pin 3 = Collector.
+# (KiCad Device:Q_NPN_BEC pin order B=1, E=2, C=3 matches this part.)
+lib_id: Device:Q_NPN_BEC
+properties:
+- key: Reference
+  val: Q
+  at: [5.08, 1.27, 0.0]
+  font: [1.27, 1.27]
+- key: Value
+  val: Q_NPN_BEC
+  at: [5.08, -1.27, 0.0]
+  font: [1.27, 1.27]
+units:
+- unit: 0
+  style: 1
+  graphics:
+  - kind: polyline      # base lead-in (pin1 -> base bar)
+    width: 0.254
+    fill: none
+    pts:
+    - [-2.54, 0.0]
+    - [0.0, 0.0]
+  - kind: polyline      # base bar (vertical)
+    width: 0.254
+    fill: none
+    pts:
+    - [0.0, 1.524]
+    - [0.0, -1.524]
+  - kind: polyline      # collector line up to pin3
+    width: 0.254
+    fill: none
+    pts:
+    - [0.0, 0.889]
+    - [2.54, 2.54]
+  - kind: polyline      # emitter line down to pin2
+    width: 0.254
+    fill: none
+    pts:
+    - [0.0, -0.889]
+    - [2.54, -2.54]
+  - kind: polyline      # NPN emitter arrow (points outward, away from base)
+    width: 0.254
+    fill: outline
+    pts:
+    - [1.778, -1.27]
+    - [2.54, -2.54]
+    - [1.27, -2.032]
+    - [1.778, -1.27]
+  pins: []
+- unit: 1
+  style: 1
+  graphics: []
+  pins:
+  - type: input
+    style: line
+    at: [-5.08, 0.0]
+    angle: 0.0
+    len: 2.54
+    name: B
+    number: '1'
+    name_font: [1.27, 1.27]
+    num_font: [1.27, 1.27]
+  - type: passive
+    style: line
+    at: [2.54, -5.08]
+    angle: 90.0
+    len: 2.54
+    name: E
+    number: '2'
+    name_font: [1.27, 1.27]
+    num_font: [1.27, 1.27]
+  - type: passive
+    style: line
+    at: [2.54, 5.08]
+    angle: 270.0
+    len: 2.54
+    name: C
+    number: '3'
+    name_font: [1.27, 1.27]
+    num_font: [1.27, 1.27]
+pin_names: {offset: 0.254, hide: true}
+pin_numbers_hide: true
+name: Q_NPN_BEC
+pinout_datasheet: MMBT3904 (onsemi) SOT-23 — 1=Base, 2=Emitter, 3=Collector
