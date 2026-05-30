@@ -77,7 +77,7 @@ nets:
   U3B_INV:   [U3.6, R5R.1, R6R.1]
   ALT5X_L:   [U3.1, R6L.2, SW2.1]
   ALT5X_R:   [U3.7, R6R.2, SW2.4]
-  ALT_OUT_L: [SW2.2]                       # -> BP block (boundary)
+  ALT_OUT_L: [SW2.2]                       # -> block-4 ALT VCA cell -> block-6 BP3 selector (boundary)
   ALT_OUT_R: [SW2.5]
 
 # J3 is the primary ALT input (no normalling source); its switch lug is unused.
@@ -89,5 +89,5 @@ boundary:
   - R_OUT      # from block-A
   - PG_OUT_L   # to block-VCA (main pre-gain out)
   - PG_OUT_R   # to block-VCA
-  - ALT_OUT_L  # to block-6 (ALT direct into BP)
-  - ALT_OUT_R  # to block-6
+  - ALT_OUT_L  # -> block-4 ALT VCA cell (shared control) -> block-6 BP3 per-channel selector; bypasses LP1 not VCA
+  - ALT_OUT_R  # -> block-4 / block-6 (see ALT_OUT_L); BP3 voice only

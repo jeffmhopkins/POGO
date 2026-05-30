@@ -76,15 +76,18 @@ must drive R_in without significant loading).
 
 ## Design Choices & Rationale
 
-### OPA1612 at Input Only
+### OPA1612 at Input and Gain Stages; TL072 for Unity Buffers
 
-The OPA1612 (input noise 1.1 nV/√Hz) is used only at Block A (input buffers) where
-the module input noise floor is established. The TL072CDT (18 nV/√Hz) is adequate
-for all downstream buffers because audio signals are already at signal-path levels
-(±5V) where additional noise is insignificant.
+The OPA1612 (input noise 1.1 nV/√Hz) is used where noise is established or amplified:
+the Block A input buffers and any **gain stage** that lifts the noise floor (e.g. Block 1
+pre-gain U2/U3 at 5×, and the Block 6 stages that use OPA1612). At those points the lower
+noise is audible after downstream gain.
 
-Using OPA1612 throughout would increase cost and power without audible benefit at
-downstream buffer positions.
+For plain **unity buffers** further down the chain — where audio is already at signal-path
+levels (±5 V) and gain = +1 adds no further amplification — the TL072CDT (18 nV/√Hz) is
+adequate, and using OPA1612 there would add cost/power without audible benefit. The choice
+is therefore per-role (gain/input → OPA1612; unity buffer → TL072), not a blanket
+"OPA1612 only at Block A." (See `components.yaml` for the locked per-ref part choices.)
 
 ### 1 kΩ Series Output Resistor
 
