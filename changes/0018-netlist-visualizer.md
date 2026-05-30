@@ -102,6 +102,12 @@ schematics don't show.
 8b. **Filter by component type** — per-type checkboxes (the nets `sym:` token, friendly-labeled
    with counts: Resistor 362, Capacitor 246, Diode, Trimpot, Op-amp, OTA, Jack, …) + All/None;
    folds into `partVisible` so hidden types drop from nets/wires/flags/readout too.
+8c. **Bridged connectivity through hidden parts** — when a hidden part is a 2-terminal series
+   element on two non-power nets (R/C/diode in the signal path), its nets are contracted
+   (union-find, handles chains) and the surviving endpoints drawn with a **dashed** star — so
+   IC–R–IC with resistors hidden still shows IC···IC. Shunt/decoupling parts (one pin on a rail)
+   are excluded, so signal never falsely merges into GND. Sim + render both run on these merged
+   "groups"; with nothing filtered, each group == its raw net (solid, unchanged).
 6. **Drag + re-anneal** — drag a part or collapsed block; release reheats the local sim.
 7. **Hover/inspect** — hover pin → highlight whole net; hover part → ref/value/part/block
    tooltip; click net in side list → highlight.
@@ -188,6 +194,10 @@ regenerated on Linux and staged into the hardware artifact bundle. Docs index ca
   branch was stale (~63 commits behind, pre-reorg); left untouched rather than force-pushed.
 - 2026-05-30: Use the **authored `boundary:` field**, not derived name-collision (review finding).
 - 2026-05-30: **Passive rendering = symbol glyph (A)** — 608 R/C as schematic glyphs; stays Lane C.
+- 2026-05-30: Added **component-type filter** + **bridged (dashed) connectivity** through hidden
+  series parts. Fixed a real bug found while building it: refs collide across blocks (49 dupes,
+  e.g. R1 in block-A & block-2) — part identity is now block-qualified (`block::ref`), so the
+  ~98 colliding parts no longer share nodes/wires. `label` keeps the short ref for display.
 
 ## Artifacts (paths / links)
 

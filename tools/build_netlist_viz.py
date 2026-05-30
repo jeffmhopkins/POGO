@@ -172,7 +172,6 @@ def extract() -> dict:
     nets: list[dict] = []
     blocks: list[dict] = []
     warnings: list[str] = []
-    ref_geom: dict[str, str] = {}      # ref -> geom_id (for pin resolution)
     n_fp = n_sym = 0
 
     for path in _NETS_GLOB:
@@ -181,6 +180,9 @@ def extract() -> dict:
         board = doc.get("board", "?")
         boundary = list(doc.get("boundary") or [])
         block_refs = []
+        # refs are unique only *within* a block (R1 exists in several blocks), so the
+        # part identity = block-qualified uid; `label` keeps the short ref for display.
+        local_gid: dict[str, str] = {}     # bare ref -> geom_id (this block only)
 
         for ref, spec in (doc.get("parts") or {}).items():
             symtok = spec.get("sym")
@@ -205,11 +207,12 @@ def extract() -> dict:
                 n_fp += 1
             else:
                 n_sym += 1
-            ref_geom[ref] = gid
-            parts.append({"ref": ref, "block": bid, "board": board,
+            local_gid[ref] = gid
+            uid = f"{bid}::{ref}"
+            parts.append({"ref": uid, "label": ref, "block": bid, "board": board,
                           "value": str(spec.get("value", "")), "part": partstr or "",
                           "sym": symtok or "?", "geom": gid})
-            block_refs.append(ref)
+            block_refs.append(uid)
 
         for name, pins in (doc.get("nets") or {}).items():
             kind = "power" if name in POWER_NETS else ("boundary" if name in boundary else "signal")
@@ -218,12 +221,12 @@ def extract() -> dict:
                 ref, _, pin = str(tok).rpartition(".")
                 if not ref:
                     continue
-                g = geom.get(ref_geom.get(ref))
+                g = geom.get(local_gid.get(ref))
                 mapped = bool(g and pin in g["pads"])
                 if not mapped and g is not None and g["pads"]:
                     warnings.append(f"{bid}/{name}: pin {tok} not a pad/pin of its geom "
                                     f"(centroid fallback)")
-                ep.append({"ref": ref, "pin": pin, "m": 1 if mapped else 0})
+                ep.append({"ref": f"{bid}::{ref}", "pin": pin, "m": 1 if mapped else 0})
             nets.append({"name": name, "kind": kind, "block": bid, "pins": ep})
 
         blocks.append({"id": bid, "board": board, "title": doc.get("title", bid),
@@ -364,6 +367,7 @@ _TEMPLATE = r"""<!DOCTYPE html>
       <span class="sw" style="border-color:#00d4ff"></span>signal net<br>
       <span class="sw" style="border-color:#ff8800"></span>boundary net<br>
       <span class="sw" style="border-color:#c9892f"></span>copper pad / pin<br>
+      <span class="sw" style="border-color:#00d4ff;border-top-style:dashed"></span>bridged (via hidden part)<br>
       <span style="color:#e05050">⚑</span> power flag (+12V/−12V/GND)
     </div>
     <div class="legend" style="margin-top:10px">
@@ -411,10 +415,50 @@ let _seed = 1337; function rnd(){ _seed=(_seed*1103515245+12345)&0x7fffffff; ret
 MODEL.parts.forEach(p => { const bs=blockState[p.block];
   nodes[p.ref].x = bs.x + (rnd()-0.5)*120; nodes[p.ref].y = bs.y + (rnd()-0.5)*120; });
 
-// net-node (star centre) per net
-const netNodes = MODEL.nets.map(n => ({ net:n, x:0, y:0, vx:0, vy:0 }));
-netNodes.forEach(nn => { const v=visiblePins(nn.net); if(v.length){ const c=centroidOf(v);
-  nn.x=c[0]; nn.y=c[1]; } });
+// ---- component incidence + bridging through hidden pass-through parts --------
+const partNets = {};       // ref -> [netIdx,...] distinct nets touching the part
+const partPinCount = {};   // ref -> number of pin endpoints
+MODEL.parts.forEach(p => { partNets[p.ref]=[]; partPinCount[p.ref]=0; });
+MODEL.nets.forEach((n,i) => n.pins.forEach(e => { partPinCount[e.ref]++;
+  if(!partNets[e.ref].includes(i)) partNets[e.ref].push(i); }));
+// A part may "bridge" (dashed pass-through) when hidden iff it is a 2-terminal series
+// element on two non-power nets — so removing it joins those nets (IC—R—IC ⇒ IC···IC),
+// while a shunt/decoupling part (one pin on a rail) is excluded and never merges signal↔GND.
+const bridgeable = {};
+MODEL.parts.forEach(p => { const ns=partNets[p.ref];
+  bridgeable[p.ref] = partPinCount[p.ref]===2 && ns.length===2
+    && !POWER.has(MODEL.nets[ns[0]].name) && !POWER.has(MODEL.nets[ns[1]].name); });
+
+// Merged-net "groups" (a group = one or more raw nets joined through hidden bridge parts).
+// Rebuilt only when the visibility topology changes (bumpTopo); the force sim + renderer
+// both consume groups, so with nothing filtered each group == its raw net (solid, unchanged).
+let topoVersion=0, _groups=null, _groupsV=-1;
+function bumpTopo(){ topoVersion++; }
+function topology(){ if(_groupsV===topoVersion && _groups) return _groups;
+  _groups=buildGroups(); _groupsV=topoVersion; return _groups; }
+function buildGroups(){
+  const N=MODEL.nets.length, par=new Array(N); for(let i=0;i<N;i++) par[i]=i;
+  const find=a=>{ while(par[a]!==a){ par[a]=par[par[a]]; a=par[a]; } return a; };
+  const uni=(a,b)=>{ a=find(a); b=find(b); if(a!==b) par[a]=b; };
+  MODEL.parts.forEach(p => { const bs=blockState[p.block];
+    if(bs.visible && !bs.collapsed && !typeVisible[p.sym] && bridgeable[p.ref]){
+      const ns=partNets[p.ref]; uni(ns[0],ns[1]); } });
+  const byRoot={};
+  for(let i=0;i<N;i++){ const r=find(i); (byRoot[r]=byRoot[r]||[]).push(i); }
+  return Object.values(byRoot).map(members => {
+    let boundary=false, power=false;
+    members.forEach(i=>{ const k=MODEL.nets[i].kind;
+      if(k==='boundary')boundary=true; if(k==='power')power=true; });
+    return { members, bridged: members.length>1, cx:0, cy:0,
+      kind: power?'power':(boundary?'boundary':'signal') };
+  });
+}
+function groupVisiblePins(g){ const out=[];
+  g.members.forEach(i => MODEL.nets[i].pins.forEach(e => { if(partVisible(e.ref)) out.push(e); }));
+  return out; }
+function groupActive(g){            // draws iff ≥2 visible pins and not a hidden power net
+  if(g.kind==='power' && hidePower.checked) return false;
+  return groupVisiblePins(g).length>=2; }
 
 // ---- geometry helpers ------------------------------------------------------
 function geomOf(ref){ return MODEL.geom[partByRef[ref].geom]; }
@@ -422,13 +466,6 @@ function padLocal(ref,pin){ const g=geomOf(ref); return (g&&g.pads[pin]) || [0,0
 function pinAbs(ref,pin){ const n=nodes[ref], l=padLocal(ref,pin); return [n.x+l[0], n.y+l[1]]; }
 function partVisible(ref){ const p=partByRef[ref], b=blockState[p.block];
   return b.visible && !b.collapsed && typeVisible[p.sym]; }
-function netVisible(net){
-  if (POWER.has(net.name) && hidePower.checked) return false;
-  return visiblePins(net).length >= 2;
-}
-function visiblePins(net){       // endpoints whose part is in an expanded, visible block
-  return net.pins.filter(e => partVisible(e.ref));
-}
 function centroidOf(pins){ let x=0,y=0; pins.forEach(e=>{const a=pinAbs(e.ref,e.pin);x+=a[0];y+=a[1];});
   return [x/pins.length, y/pins.length]; }
 
@@ -455,14 +492,13 @@ function step(){
   // collapsed/visible block super-nodes
   const sblocks = MODEL.blocks.filter(b=>blockState[b.id].visible && blockState[b.id].collapsed).map(b=>b.id);
 
-  // spring: pin -> net-node
-  netNodes.forEach(nn => {
-    if (!netVisible(nn.net)) return;
-    const vp=visiblePins(nn.net); if(!vp.length) return;
-    const c=centroidOf(vp); nn.x=c[0]; nn.y=c[1];   // net-node tracks its pins' centroid
+  // spring: each group's visible pins -> the group's (merged) centroid
+  topology().forEach(g => {
+    if(!groupActive(g)) return;
+    const vp=groupVisiblePins(g); if(vp.length<2) return;
+    const c=centroidOf(vp); g.cx=c[0]; g.cy=c[1];
     vp.forEach(e => { const n=nodes[e.ref], a=pinAbs(e.ref,e.pin);
-      const fx=(nn.x-a[0])*SPRING, fy=(nn.y-a[1])*SPRING;
-      if(!n.fixed){ n.vx+=fx; n.vy+=fy; } });
+      if(!n.fixed){ n.vx+=(g.cx-a[0])*SPRING; n.vy+=(g.cy-a[1])*SPRING; } });
   });
   // boundary springs between collapsed block super-nodes
   blockBoundaryLinks().forEach(l => {
@@ -512,7 +548,7 @@ function toWorld(sx,sy){ return [ ((sx*devicePixelRatio - cv.width/2)/devicePixe
                                   ((sy*devicePixelRatio - cv.height/2)/devicePixelRatio - view.y)/view.k ]; }
 
 // ---- drawing ---------------------------------------------------------------
-let hoverNet=null, hoverRef=null, selBlocks=new Set();
+let hoverNetIdx=-1, hoverRef=null, selBlocks=new Set();
 function draw(){
   ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,cv.width,cv.height);
   ctx.save(); ctx.translate(cv.width/2, cv.height/2);
@@ -522,17 +558,19 @@ function draw(){
   // selection rectangles around selected (collapsed) blocks group
   if(selBlocks.size){ drawSelectionGroup(); }
 
-  // wires (net-node star) for expanded blocks
-  ctx.lineWidth = 0.6/k;
-  MODEL.nets.forEach((net,i) => {
-    if(!netVisible(net)) return;
-    const nn=netNodes[i], vp=visiblePins(net), hi=(hoverNet===net);
-    ctx.strokeStyle = hi ? (net.kind==='boundary'?COL.boundaryHi:COL.signalHi)
-                         : (net.kind==='boundary'?COL.boundary:COL.signal);
+  // wires (merged-group star) for expanded blocks; dashed = bridged through hidden parts
+  topology().forEach(g => {
+    if(!groupActive(g)) return;
+    const vp=groupVisiblePins(g); if(vp.length<2) return;
+    const hi = hoverNetIdx>=0 && g.members.includes(hoverNetIdx);
+    ctx.strokeStyle = hi ? (g.kind==='boundary'?COL.boundaryHi:COL.signalHi)
+                         : (g.kind==='boundary'?COL.boundary:COL.signal);
     ctx.lineWidth=(hi?1.4:0.6)/k;
+    ctx.setLineDash(g.bridged ? [1.5/k,1.1/k] : []);
     vp.forEach(e => { const a=pinAbs(e.ref,e.pin);
-      ctx.beginPath(); ctx.moveTo(nn.x,nn.y); ctx.lineTo(a[0],a[1]); ctx.stroke(); });
+      ctx.beginPath(); ctx.moveTo(g.cx,g.cy); ctx.lineTo(a[0],a[1]); ctx.stroke(); });
   });
+  ctx.setLineDash([]);
   // boundary links between collapsed blocks
   ctx.lineWidth=1.0/k;
   blockBoundaryLinks().forEach(l => {
@@ -576,7 +614,7 @@ function drawPart(ref,k){
   ctx.restore();
   if(showLabels.checked && k>2.2){ const bb=g.bbox; ctx.fillStyle=COL.label;
     ctx.font=`${1.4}px ui-monospace`; ctx.textAlign='center';
-    ctx.fillText(ref, n.x, n.y+bb[3]+1.6); }
+    ctx.fillText(partByRef[ref].label, n.x, n.y+bb[3]+1.6); }
 }
 function stroke(s){ ctx.beginPath();
   if(s.t==='line'){ ctx.moveTo(s.x1,s.y1); ctx.lineTo(s.x2,s.y2); }
@@ -642,12 +680,12 @@ window.addEventListener('mousemove', ev => {
   if(marquee){ marquee.x1=wx; marquee.y1=wy; updateMarquee(); return; }
   // hover
   const hit=pick(wx,wy); const tip=document.getElementById('tip');
-  hoverRef=hit&&hit.ref?hit.ref:null; hoverNet=null;
+  hoverRef=hit&&hit.ref?hit.ref:null; hoverNetIdx=-1;
   if(hit&&hit.ref){ const p=partByRef[hit.ref];
-    tip.innerHTML=`<span class="r">${hit.ref}</span> ${p.value||''}<br>${p.part||p.geom}<br><span class="n">${p.block}</span>`;
+    tip.innerHTML=`<span class="r">${p.label}</span> ${p.value||''}<br>${p.part||p.geom}<br><span class="n">${p.block}</span>`;
     tip.style.display='block'; tip.style.left=(ox+14)+'px'; tip.style.top=(oy+12)+'px';
-    // highlight first net touching this ref
-    hoverNet=MODEL.nets.find(n=>netVisible(n)&&n.pins.some(e=>e.ref===hit.ref))||null;
+    // highlight the group of the first net touching this ref
+    hoverNetIdx=MODEL.nets.findIndex(n=>n.pins.some(e=>e.ref===hit.ref));
   } else if(hit&&hit.block){ const b=blockById[hit.block];
     tip.innerHTML=`<span class="r">${b.id}</span><br>${b.refs.length} parts · ${b.board}<br>${b.boundary.length} boundary nets`;
     tip.style.display='block'; tip.style.left=(ox+14)+'px'; tip.style.top=(oy+12)+'px';
@@ -700,7 +738,7 @@ function buildSide(){
     boards[board].forEach(b=>{
       const row=document.createElement('div'); row.className='blk';
       const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=true;
-      cb.onchange=()=>{ blockState[b.id].visible=cb.checked; reheat(); syncBlockList(); };
+      cb.onchange=()=>{ blockState[b.id].visible=cb.checked; bumpTopo(); reheat(); syncBlockList(); };
       const nm=document.createElement('span'); nm.className='nm'; nm.textContent=b.id;
       nm.title=b.title; nm.onclick=()=>{ selBlocks=new Set([b.id]); syncBlockList(); };
       const bt=document.createElement('button'); bt.textContent='▣';
@@ -716,7 +754,7 @@ function buildTypes(){
   Object.keys(typeCount).sort((a,b)=>typeCount[b]-typeCount[a]).forEach(t=>{
     const row=document.createElement('label'); row.className='row';
     const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=typeVisible[t];
-    cb.onchange=()=>{ typeVisible[t]=cb.checked; reheat(); };
+    cb.onchange=()=>{ typeVisible[t]=cb.checked; bumpTopo(); reheat(); };
     const nm=document.createElement('span'); nm.textContent=TYPE_LABEL[t]||t;
     const ct=document.createElement('span'); ct.className='bd'; ct.textContent=typeCount[t];
     row.append(cb,nm,ct); row.dataset.type=t; host.appendChild(row);
@@ -730,7 +768,7 @@ function syncBlockList(){
       (bs.collapsed?'#9ab':'#cfe'); row.querySelector('input').checked=bs.visible;
     row.querySelector('button').style.color = bs.collapsed?'#9ab':'#00d4ff'; });
 }
-function toggleCollapse(id){ const bs=blockState[id]; bs.collapsed=!bs.collapsed;
+function toggleCollapse(id){ const bs=blockState[id]; bs.collapsed=!bs.collapsed; bumpTopo();
   if(!bs.collapsed){ // expanding: seed parts around the (former) super-node
     blockById[id].refs.forEach(r=>{ nodes[r].x=bs.x+(rnd()-0.5)*blockSize(blockById[id]);
       nodes[r].y=bs.y+(rnd()-0.5)*blockSize(blockById[id]); }); }
@@ -739,12 +777,12 @@ function toggleCollapse(id){ const bs=blockState[id]; bs.collapsed=!bs.collapsed
 document.getElementById('expandAll').onclick=()=>{ MODEL.blocks.forEach(b=>{
   if(blockState[b.id].collapsed) toggleCollapse(b.id); }); };
 document.getElementById('collapseAll').onclick=()=>{ MODEL.blocks.forEach(b=>blockState[b.id].collapsed=true);
-  reheat(); syncBlockList(); };
+  bumpTopo(); reheat(); syncBlockList(); };
 document.getElementById('fit').onclick=fitView;
 document.getElementById('typeAll').onclick=()=>{ Object.keys(typeVisible).forEach(t=>typeVisible[t]=true);
-  syncTypeList(); reheat(); };
+  syncTypeList(); bumpTopo(); reheat(); };
 document.getElementById('typeNone').onclick=()=>{ Object.keys(typeVisible).forEach(t=>typeVisible[t]=false);
-  syncTypeList(); reheat(); };
+  syncTypeList(); bumpTopo(); reheat(); };
 hidePower.onchange=()=>reheat(); showLabels.onchange=()=>{};
 
 function fitView(){ let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
@@ -759,14 +797,16 @@ function fitView(){ let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
 
 // ---- readout ---------------------------------------------------------------
 function updateReadout(){
-  let vis=0, len=0;
-  MODEL.nets.forEach((n,i)=>{ if(!netVisible(n)) return; vis++; const nn=netNodes[i];
-    visiblePins(n).forEach(e=>{const a=pinAbs(e.ref,e.pin); len+=Math.hypot(nn.x-a[0],nn.y-a[1]);}); });
+  let vis=0, len=0, brid=0;
+  topology().forEach(g=>{ if(!groupActive(g)) return; const vp=groupVisiblePins(g);
+    if(vp.length<2) return; vis++; if(g.bridged) brid++;
+    vp.forEach(e=>{const a=pinAbs(e.ref,e.pin); len+=Math.hypot(g.cx-a[0],g.cy-a[1]);}); });
   const expanded=MODEL.blocks.filter(b=>blockState[b.id].visible&&!blockState[b.id].collapsed).length;
   const vparts=MODEL.parts.reduce((a,p)=>a+(partVisible(p.ref)?1:0),0);
   const types=Object.values(typeVisible).filter(v=>v).length, ntypes=Object.keys(typeVisible).length;
   document.getElementById('readout').innerHTML =
-    `visible parts <b>${vparts}</b><br>visible nets <b>${vis}</b><br>`+
+    `visible parts <b>${vparts}</b><br>visible nets <b>${vis}</b>`+
+    (brid?` <span style="color:#7a8a96">(${brid} bridged)</span>`:'')+`<br>`+
     `ratsnest length <b>${len.toFixed(0)}</b> mm<br>`+
     `expanded blocks <b>${expanded}</b>/${MODEL.blocks.length}<br>`+
     `types <b>${types}</b>/${ntypes} · selected <b>${selBlocks.size}</b>`;
