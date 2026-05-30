@@ -1,8 +1,11 @@
 # aux: OTA-C State Variable Filter (2-Pole)
 
-> ⚠️ **STALE** — Circuit library entry pending re-verification against current panel design (2026-05-28).
+> ✅ **Re-verified 2026-05-30** (content rewritten 2026-05-29) against the locked plugin via
+> block-5 (LP1). The 2-pole OTA-C SVF core matches the plugin's Simper 2-pole SVF. NOTE: the
+> BP-bank 4-pole-vs-2-pole question (below) is a **block-6** item and remains open until that
+> block is verified. Shared by LP1/LP2/HP/BP.
 
-Design status: [ ] draft → [ ] reviewed → [ ] validated on prototype
+Design status: [x] draft → [ ] reviewed → [ ] validated on prototype
 
 ## Overview
 

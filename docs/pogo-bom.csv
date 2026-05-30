@@ -78,8 +78,8 @@ audio,R_TILT_INV_IN,Resistor,1,,100kΩ,0603,,,,,block-5,LP1 tilt inverter input 
 audio,R_TILT_INV_FB,Resistor,1,,100kΩ,0603,,,,,block-5,LP1 tilt inverter feedback R (matched pair; G=−1 gives −V_tilt for R channel)
 audio,RV3,Trimpot/Pot,1,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-5,LP1 f_ref trim rheostat L; in series with R_IREF_A 1MΩ; ±25% range
 audio,RV4,Trimpot/Pot,1,3224W-1-xxx,20kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-5,LP1 1V/oct tracking trim L; ±10% range
-audio,RV5,Trimpot/Pot,1,,,SMD,,,,,block-5,LP1 Q_max trim (IRES_AMP V_bias)
-audio,RV6,Trimpot/Pot,1,,,SMD,,,,,block-5,LP1 tilt null trim
+audio,RV5,Trimpot/Pot,1,3224W-1-xxx,100kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-5,LP1 Q_max trim (IRES_AMP V_bias; sets self-oscillation onset at full-CW RES)
+audio,RV6,Trimpot/Pot,1,3224W-1-xxx,10kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-5,LP1 tilt center-null trim (L/R cutoff match at tilt detent)
 audio,R47,Resistor,1,,100kΩ,0603,,,,,block-5,LP1 SUM_AMP v2 feedback input R L (R_FB_L)
 audio,R48,Resistor,1,,100kΩ,0603,,,,,block-5,LP1 SUM_AMP v2 feedback input R R (R_FB_R)
 audio,R49,Resistor,1,,1kΩ,0603,,,,,block-5,LP1 OTA1 linearizing R L (R_LIN_A_L)

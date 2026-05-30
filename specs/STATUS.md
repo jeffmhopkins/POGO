@@ -31,7 +31,7 @@ Last updated: 2026-05-29 | Topology: 48HP | Source of truth: `tools/panel-data.y
 | 2 | Dual LFO | ✅ panel-verified | ✅ rate net FINALIZED 2026-05-29 | Integrator+Schmitt; drive-attenuator rate control (fixed R_INT + trimpot attenuator) |
 | 3 | Mod Bus | ✅ panel-verified | ✅ re-verified 2026-05-30 | MOD_SRC 3-way (SW7 DW5) wired; 18 attenuverters + raw VCA normal; 6× TL074; ±10V zener; MOD LEDs removed; FOCUS→TILT (0018) |
 | 4 | VCA | ✅ panel-verified | ✅ re-verified 2026-05-30 | THAT 2180 current-in/I-V-out; +ALT-BP VCA cell (4 cells total, shared V_ctrl → BP3); VCA_OFS placement fixed; RV24/25→RV44/45 (0018) |
-| 5 | LP Filter 1 | ✅ panel-verified | ✅ transcribed 2026-05-29 | OTA-C SVF; per-channel expo (true tilt); hosts the shared U9/U10 Q-VCAs (co-owned by block-8); buffer pulldowns added |
+| 5 | LP Filter 1 | ✅ panel-verified | ✅ re-verified 2026-05-30 | OTA-C SVF; per-channel expo (true tilt); reaches self-oscillation (matches plugin); hosts shared U9/U10 Q-VCAs (co-owned block-8); doc/banner cleanup (0018) |
 | 6 | Triple BP + Dist | ✅ **rewritten 2026-05-28** | ✅ transcribed 2026-05-29 | OTA-C SVF (v1/BP tap) ×3; per-channel expo; per-group Q-VCAs; SC/HC/WF cells + 2×CD4053/group stereo mux. **CD4053 symbol pinout corrected vs datasheet** (was scrambled + overlapping). 3 Phase-3R flags: DRIVE→gain, DW5 2-bit encoding, BP_MIX blend (see spec §2 note) |
 | 7 | HP Filter | ✅ panel-verified | ✅ transcribed 2026-05-29 | OTA-C SVF; HP inverting output buffer; own Q-VCAs; IRES_AMP + buffer pulldowns added |
 | 8 | LP Filter 2 | ✅ panel-verified | ✅ transcribed 2026-05-29 | OTA-C SVF; mono (single expo); Q via the shared U9/U10 cell B (hosted on block-5); IRES_AMP + buffer pulldowns added |

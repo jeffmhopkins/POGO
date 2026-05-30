@@ -112,8 +112,8 @@ components:
   - { ref: R_TILT_INV_FB, board: audio, block: block-5, part: ~,  pkg: "0603",   val: "100kΩ",  tol: "1%", fn: "LP1 tilt inverter feedback R (matched pair; G=−1 gives −V_tilt for R channel)" }
   - { ref: RV3,  board: audio,   block: block-5, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "LP1 f_ref trim rheostat L; in series with R_IREF_A 1MΩ; ±25% range" }
   - { ref: RV4,  board: audio,   block: block-5, part: "Bourns 3224W", pkg: SMD,   val: "20kΩ",  fn: "LP1 1V/oct tracking trim L; ±10% range" }
-  - { ref: RV5,  board: audio,   block: block-5, part: ~,          pkg: SMD,      fn: "LP1 Q_max trim (IRES_AMP V_bias)" }
-  - { ref: RV6,  board: audio,   block: block-5, part: ~,          pkg: SMD,      fn: "LP1 tilt null trim" }
+  - { ref: RV5,  board: audio,   block: block-5, part: "Bourns 3224W", pkg: SMD,  val: "100kΩ", fn: "LP1 Q_max trim (IRES_AMP V_bias; sets self-oscillation onset at full-CW RES)" }
+  - { ref: RV6,  board: audio,   block: block-5, part: "Bourns 3224W", pkg: SMD,  val: "10kΩ",  fn: "LP1 tilt center-null trim (L/R cutoff match at tilt detent)" }
   # block-5 full circuit (expanded from spec §4, 2026-05-29): SUM_AMP fb, OTA R_LIN,
   # tilt summers, Q control (IRES_AMP + V→I), expo network, Iabc bypass, decoupling.
   - { ref: R47,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "LP1 SUM_AMP v2 feedback input R L (R_FB_L)" }

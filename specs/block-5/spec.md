@@ -26,9 +26,10 @@ bypasses VCA and LP1 entirely and enters BP directly.
 
 ## 2. Theoretical Design and Topology
 
-> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
-> It has not been verified against the current panel control set. Do not use for circuit
-> construction until re-verified. See `specs/STATUS.md` for current phase status.
+> ✅ **Re-verified 2026-05-30** against the locked plugin (change 0018; body rewritten
+> 2026-05-29). Topology matches plugin ground truth: 2-pole Simper SVF, `f0 = 632·2^cutoffV`
+> V/oct, per-channel THAT340 expo for true stereo tilt (L = +tilt, R = −tilt), and the
+> resonance reaches **self-oscillation** (no Q cap) — matching the plugin. No behavioral edits.
 
 ### DSP-to-analog mapping
 
@@ -87,9 +88,22 @@ I_abc_q → 0       → Q → ∞   (self-oscillation)
 - Q_min: DSP Q_min = 0.5 at resParam = 0; hardware Q_min = 0.70 (Butterworth) because
   Iabc_q cannot fall below ~0.74 µA without LM13700 low-current nonlinearity. Hardware
   has no slightly-overdamped region; CCW-stop position yields maximally flat response.
-- Q_max: DSP Q reaches 2000; hardware Q intentionally limited to ~50 for stability.
-Both are accepted deviations. Musical behavior (sweep, peak, self-oscillation) is
-preserved; exact Q floor and ceiling are calibration targets, not tonal defects.
+- Q_max: the plugin self-oscillates (Q → 2000, a playable 1 V/oct-tracking sine — see §1).
+  Hardware **must reach self-oscillation to match the plugin**: as V_res rises, Iabc_q → 0
+  and Q → ∞. The "~50" figure is the Q at the *onset* of sustained oscillation (Iabc_q
+  < 0.01 µA, aux-q-control.md), **not** a ceiling. `RV5` (RV_QMAX) trims V_bias so that
+  full-CW RES lands just past the self-oscillation onset (clean, stable sine). There is
+  **no intentional Q cap** — an earlier "Q limited to ~50 for stability" note was wrong
+  and is superseded; capping at Q≈50 would be a real behavioral divergence from the plugin.
+The Q_min deviation is accepted; the self-oscillation ceiling is matched. Musical behavior
+(sweep, peak, self-oscillation) is preserved; the exact Q floor and self-osc onset are
+calibration targets (RV5), not tonal defects.
+
+The *mid-sweep* Q curve also differs in shape: the plugin uses `Q = 0.5·4000^resParam`
+(exponential in the knob), while the hardware Q ≈ `0.52 / Iabc_q(µA)` is hyperbolic in the
+control current (approximately exponential at high Q). Only the endpoints (Q_min and the
+self-oscillation onset) are matched by calibration; the intermediate resonance-vs-rotation
+curve is an approximation, not bit-exact — an accepted DSP↔analog deviation.
 
 ### Stereo tilt
 
@@ -139,9 +153,10 @@ but its output is ignored in the signal chain until the ALT jacks are unpatched.
 
 ## 3. Physical Design
 
-> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
-> It has not been verified against the current panel control set. Do not use for circuit
-> construction until re-verified. See `specs/STATUS.md` for current phase status.
+> ✅ **Re-verified 2026-05-30** against the locked plugin (change 0018). Component values,
+> per-channel expo (U14/U64), shared U9/U10 Q-VCAs (co-owned by block-8), and the SVF netlist
+> verified consistent with §2 and the plugin. Doc corrections only (banner, Q-curve note,
+> RV5/RV6 values).
 
 ### Component derivations
 
@@ -217,8 +232,8 @@ I_abc routing. U9/U10 (the shared LP1/LP2 Q-VCAs) placed between the LP1 and LP2
 - 2× LM13700M U9/U10 (shared LP1+LP2 Q-VCAs, counted here): ~4 mA × 2 = 8 mA
 - 2× OPA1612 (SUM_AMP L/R, dual SOIC-8): 5.5 mA × 2 = 11 mA  (Iq = 2.75 mA/channel × 2 ch/IC)
 - 1× TL072CDT (IRES_AMP + tilt inverter): ~3 mA  (TI: 1.4 mA/ch × 2 = 2.8 mA)
-- 1× THAT340S14-U (EXPO_LP1): ~1 mA
-- **+12V: ~31 mA | −12V: ~31 mA**
+- 2× THAT340S14-U (EXPO_LP1 L = U14, R = U64; per-channel for true tilt): ~1 mA × 2 = 2 mA
+- **+12V: ~32 mA | −12V: ~32 mA**  (8+8+11+3+2; the 2nd expo adds ~1 mA vs the prior 1-expo tally)
 
 Note: U9/U10 are shared with block-8 (they provide LP2 Q on cell B). They are counted once
 here (block-5); block-8's power estimate excludes them accordingly.

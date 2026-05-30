@@ -280,7 +280,7 @@ G        = 10^(2×(control−1))   // dB-law: 0 dB at control=1, −40 dB at con
 
 lp1FreqCv = lp1FreqBase + att(LP1_FREQ_ATT, LP1_FREQ_INPUT)   // V/oct
 lp1TiltCv = LP1_TILT_PARAM × 5 + att(LP1_TILT_ATT, LP1_TILT_INPUT)  // ±5 V
-lp1ResCv  = LP1_RES_PARAM + att(LP1_RES_ATT, LP1_RES_INPUT)
+lp1ResCv  = clamp(LP1_RES_PARAM + att(LP1_RES_ATT, LP1_RES_INPUT) / 10, 0, 1)   // CV ÷10 onto 0–1
 
 lp1L = LPFilter::process(vcaOutL, lp1FreqCv + lp1TiltCv, lp1ResCv, sampleRate)
 lp1R = LPFilter::process(vcaOutR, lp1FreqCv − lp1TiltCv, lp1ResCv, sampleRate)
