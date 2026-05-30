@@ -1,0 +1,49 @@
+* POGO VCA Ec+ injection trim + V_CTRL buffer — HIGH-3 full network (change 0020)
+* Goal: a buildable per-cell Ec+ network giving ±~2dB unity-trim authority, fed from a
+* BUFFERED V_CTRL, with a SHARED small reference so the trim pot injects a few-mV offset.
+*
+* Topology per cell:
+*   V_CTRL_BUF --[R_ec 10k]--+--> Ec+ (THAT2180 control port, modeled 10M to GND + 50nA bias)
+*                            |
+*           trim wiper --[R_inj 1M]--+   (trim pot across a shared ±VREF; wiper = ±VREF..0)
+*
+* Shared reference: ±12V --[Rref 1M]--[pot 10k]--[Rref 1M]-- ; pot wiper spans ~±12V*(5k/2M)=±30mV.
+* Through R_inj 1M into the Ec+ node (~ R_ec 10k to V_CTRL_BUF + 10M port): injection at Ec+ ~
+* Vw * (10k||10M)/(1M+10k||10M) ~ Vw*0.0099. Want ±2dB = ±12.2mV at Ec+ -> Vw ~ ±1.23V. Hmm.
+* Let's just sweep and read the Ec+ authority + confirm V_CTRL passes through at unity.
+
+.param VCTRL=0
+.param TRIMW=0      ; trim wiper voltage (set by the shared ref divider + pot position)
+
+* --- buffered V_CTRL drives Ec+ through R_ec ---
+Vctrl vc 0 DC {VCTRL}
+Ebuf vcbuf 0 vc 0 1      ; ideal unity buffer (the new op-amp half)
+Rec vcbuf ecp 10k
+
+* --- injection trim: wiper -> R_inj -> Ec+ ---
+Vw tw 0 DC {TRIMW}
+Rinj tw ecp 1meg
+
+* --- THAT2180 Ec+ port model: high-Z + small bias current ---
+Rport ecp 0 10meg
+Ibias ecp 0 DC 50n
+
+.control
+  * (1) does V_CTRL pass to Ec+ at ~unity (trim centered, Vw=0)?
+  alter Vctrl dc=0.1
+  alter Vw dc=0
+  op
+  let g_ctrl = v(ecp)/0.1
+  * (2) trim authority at V_CTRL=0: sweep Vw over the reference range
+  alter Vctrl dc=0
+  alter Vw dc=1.23
+  op
+  let ec_hi = v(ecp)*1000
+  alter Vw dc=-1.23
+  op
+  let ec_lo = v(ecp)*1000
+  print g_ctrl ec_hi ec_lo
+  echo "g_ctrl = Ec+/V_CTRL (want ~1, R_ec<<R_port). ec_hi/lo in mV at Vw=±1.23V"
+  echo "want ec ~ ±12mV (= ±2dB at 6.1mV/dB). R_inj/ref sets it."
+.endc
+.end

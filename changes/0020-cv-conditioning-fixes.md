@@ -382,13 +382,24 @@ high-Z Ec+ port — can't set offset; shared unbuffered V_CTRL couples 4 cells; 
 RV51-56). This is in scope (a confirmed HIGH). **Mechanism verified 2026-05-30:** `EC_L:[U4.2,RV1.1,RV1.2]`
 + `V_CTRL:[RV44.2,RV1.3,...]` → RV1 wiper+end to Ec+, other end to V_CTRL = series rheostat into the
 high-Z Ec+ port; and V_CTRL (RV44 wiper) is unbuffered into 4 cells.
-- **Proposed fix [NV — THAT2180 datasheet]:** (a) buffer V_CTRL with a unity op-amp half (TL072,
-  existing type) before the 4-way fan-out → `V_CTRL_BUF`; (b) drive each Ec+ from V_CTRL_BUF through a
-  fixed series R, and convert each unity trim to a **voltage-injection divider** (trimmer across a small
-  ±ref, wiper → series R → Ec+ node) so it adds an adjustable mV offset (the real unity-null), not a
-  series resistance. Exact Ec+ R / ref values depend on the THAT2180 +6.1 mV/dB control-port spec →
-  flag [NV] like the Q-cell, confirm at prototype. Same fix applies to block-6 DRIVE RV51-56 + their
-  shared V_DRIVE_CTRL fan-out.
+- **✅ VALIDATED DESIGN (SPICE `vca_ecplus_full.cir` + `vca_ecplus.cir`, 2026-05-30):** per cell,
+  `V_CTRL_BUF —[R_ec 10k]→ Ec+` and `trim wiper —[R_inj 1M]→ Ec+`, trim pot across a shared ±~1.2V
+  reference. Results: g_ctrl = **0.984** (V_CTRL passes to Ec+ at ~unity through R_ec into the high-Z
+  port); trim authority **−2.1 .. +1.9 dB** (Ec+ −12.7..+11.7 mV at 6.1 mV/dB), crossing 0 dB and
+  nulling the ~−0.5 mV bias-current offset. The old series rheostat moved Ec+ only ~25 µV (0.004 dB) —
+  useless; this replaces it with a real offset injector.
+- **Parts/scope (G6 — all existing types, new refs):**
+  - **+1 op-amp for the V_CTRL buffer:** all 3 block-4 TL072 (U6/U63/U80) are fully used → add **U97
+    (TL072)**; half A = V_CTRL unity buffer → `V_CTRL_BUF`, half B = the block-6 `V_DRIVE_CTRL` buffer
+    (or a 2nd buffer there). (block-6 DRIVE has its own V_DRIVE_CTRL_n fan-outs — check budget per section.)
+  - **Shared ±ref divider** (one per board region): ±12V → 1M / 10k pot / 1M → wiper ≈ ±30mV… actually
+    the SPICE uses Vw ≈ ±1.2V into R_inj 1M, so the ref divider gives ±~1.2V: ±12V —[Rref ~91k]—[trim
+    pot]—[Rref ~91k]. Finalize the divider Rs when wiring (the trim pot is the existing RV1/2/46/47 etc.).
+  - **Per cell: R_ec 10k (new) + R_inj 1M (new)**, ×4 block-4 + ×6 block-6 DRIVE = 10 cells.
+- **SCOPE NOTE:** this is the broadest remaining rewrite (10 VCA cells across block-4 + block-6-dist1/2/3,
+  +1 op-amp, +ref divider, ~20 new Rs). The Ec+ R/ref values are SPICE-validated but the absolute
+  THAT2180 +6.1 mV/dB control-port figure is [NV] — the ±2dB trim authority is sized to absorb it.
+  Wiring next: block-4 (4 cells) first, then block-6 DRIVE (6 cells, mirror).
 
 ## Implementation finding (2026-05-30): cluster C is a topology refinement, not a reroute
 Tracing block-5/7/8 during implementation, the "tap v1/v2 from pins 5/12" fix splits into:
