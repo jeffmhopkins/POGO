@@ -250,6 +250,14 @@ Tracing block-5/7/8 during implementation, the "tap v1/v2 from pins 5/12" fix sp
   pulldowns**. That's a real topology refinement (changes feedback source + removes parts) and its
   **loop DC/stability cannot be validated in this env** (no SPICE; datasheet PDFs won't text-extract).
 
+### SPICE validation results (specs/sim/, ngspice-42)
+- **expo_voct.cir [DONE]:** caught the 2.1× value error; corrected divider sweeps 19.2→16.1 mV/V with
+  17.92 mV/oct (V_T·ln2) centered at ~38% trim. §A values validated.
+- **ota_svf_loop.cir [DONE]:** (1) H5 confirmed — Darlington tap injects **1.26 V** into the next OTA
+  input vs ±30 mV linear range (**42× over**); unbuffered tap (§C fix) = **0 V**. (2) gm-C integrator
+  corner = **634.6 Hz** at Iabc 9.69 µA (target 632, 0.4%) — re-tap doesn't change f_ref.
+- **q_cell.cir [TODO]** · **vca_ecplus.cir [TODO]**.
+
 ### Proposed split (recommended)
 - **Do now (no resonant-loop risk, no validation needed):** clusters **E** (BP3 ALT_R selector),
   **F** (WF phase invert), **G** (BP3 output normal), and **H** (mod-bus low-Z normal + U3 buffer +

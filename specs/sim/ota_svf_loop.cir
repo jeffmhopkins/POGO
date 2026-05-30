@@ -1,0 +1,39 @@
+* POGO OTA-C SVF — H5 tap DC-offset + f_ref validation (change 0020 §C)
+* Two independent checks:
+*   (1) DC offset injected by tapping the state variable from the LM13700 Darlington
+*       buffer (the bug) vs the unbuffered OTA/cap node (the fix).
+*   (2) gm-C integrator corner frequency = f_ref (re-tap does not change it).
+* No LM13700 model in-env; idealized parts capture the load-bearing physics.
+
+.param VT=0.02585
+.param Iabc=9.69u
+.param gm={Iabc/(2*VT)}    ; ~187 uS at the LP1/HP/LP2 trim target
+.param C=47n               ; C0G integrator cap
+.param Vbe=0.63            ; Darlington = 2*Vbe offset
+
+* ---- (1) DC offset: drive the cap node to a representative state-variable level ----
+Vcap ncap 0 DC 1.0
+Bdar nbuf 0 V = V(ncap) - 2*Vbe   ; buggy Darlington tap
+Bfix nfix 0 V = V(ncap)           ; fixed unbuffered tap
+
+* ---- (2) gm-C integrator as a 1st-order LP to read its corner = gm/(2*pi*C) ----
+* I = gm*(Vin - Vout) into C  => Vout/Vin = 1/(1 + s*C/gm), f0 = gm/(2*pi*C)
+Vac ain 0 AC 1 DC 0
+Gint 0 ointg ain ointg {gm}
+Cint ointg 0 {C}
+
+.control
+  op
+  let off = v(ncap) - v(nbuf)
+  echo "=== (1) state-variable tap DC ==="
+  echo "cap node            = " $&v(ncap)
+  echo "buggy Darlington tap= " $&v(nbuf) "  (cap - 2*Vbe)"
+  echo "fixed unbuffered tap= " $&v(nfix) "  (= cap)"
+  echo "INJECTED OFFSET     = " $&off " V into next OTA input (linear range ~+-0.030 V)"
+
+  ac dec 50 10 100k
+  * find -3dB (0.707) crossing of the integrator LP
+  meas ac f0 when vdb(ointg)=-3.01
+  echo "=== (2) integrator corner f0 (target ~632 Hz) ==="
+.endc
+.end
