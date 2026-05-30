@@ -148,7 +148,7 @@ audio,U23,IC,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas
 audio,U24,IC,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/opa1612.pdf,block-6-svf2,BP2 SUM_AMP + buffer R
 audio,U25,IC,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/opa1612.pdf,block-6-svf3,BP3 SUM_AMP + buffer L
 audio,U26,IC,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/opa1612.pdf,block-6-svf3,BP3 SUM_AMP + buffer R
-audio,U27,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-mix,half A = unused (per-band tilt moved to svf U82-84); fixed BP output polarity-restore inverter (G=−1) half B
+audio,U27,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-mix,"BP output polarity-restore inverters (G=−1): half B = L (R17), half A = R (R222/R223) — reused after per-band tilt moved to svf U82-84"
 audio,U28,IC,1,THAT340S14-U,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,THAT Corporation,,https://thatcorp.com/datashts/THAT_300-Series_Datasheet.pdf,block-6-svf1,BP1 expo converter
 audio,U29,IC,1,THAT340S14-U,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,THAT Corporation,,https://thatcorp.com/datashts/THAT_300-Series_Datasheet.pdf,block-6-svf2,BP2 expo converter
 audio,U30,IC,1,THAT340S14-U,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,THAT Corporation,,https://thatcorp.com/datashts/THAT_300-Series_Datasheet.pdf,block-6-svf3,BP3 expo converter
@@ -227,9 +227,9 @@ audio,C110_U90p,Capacitor,1,,100nF,0603,,,,,block-6-dist3,U90 (BP3 DRIVE VCA R) 
 audio,C110_U90n,Capacitor,1,,100nF,0603,,,,,block-6-dist3,U90 V− decoupling
 audio,C110_U93p,Capacitor,1,,100nF,0603,,,,,block-6-dist3,U93 (BP3 DRIVE TL074) +12V decoupling
 audio,C110_U93n,Capacitor,1,,100nF,0603,,,,,block-6-dist3,U93 −12V decoupling
-audio,U46,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-mix,BP wet summer half A = L (BP1+BP2+BP3 inv sum); half B = MIX crossfade L
-audio,U47,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-mix,BP wet summer half A = R; half B = MIX crossfade R
-audio,U48,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-mix,BP wet polarity restore: half A = V_wet_inv→V_wet_pos (L); half B = V_wet_inv→V_wet_pos (R)
+audio,U46,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-mix,half A = L wet summer (BP1+BP2+BP3 inv sum); half B = L final dry+wet summer (BYPASS+WET)
+audio,U47,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-mix,half A = R wet summer; half B = R final dry+wet summer
+audio,U48,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-mix,"wet re-inverter (G=−1): half A = L, half B = R (restores +bands from the inv wet sum)"
 audio,RV7,Trimpot/Pot,1,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-svf1,BP1 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 200 Hz at 0V; ±25% range
 audio,RV8,Trimpot/Pot,1,3224W-1-xxx,20kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-svf1,BP1 1V/oct tracking trim; ±10% range
 audio,RV9,Trimpot/Pot,1,,,SMD,,,,,block-6-svf1,BP1 Q_max trim (Iabc V_bias)
@@ -298,8 +298,17 @@ audio,C_WF,Capacitor,4,,47pF,0603,,,,,block-6-dist1,"RV_DRIVE wiper bypass cap (
 audio,C_WF,Capacitor,4,,47pF,0603,,,,,block-6-dist2,"RV_DRIVE wiper bypass cap (anti-RF, anti-scratchiness); 1 per path × 6 paths"
 audio,C_WF,Capacitor,4,,47pF,0603,,,,,block-6-dist3,"RV_DRIVE wiper bypass cap (anti-RF, anti-scratchiness); 1 per path × 6 paths"
 audio,R26,Resistor,8,,33kΩ,0603,,,,,block-6-mix,R_sum; BP wet summer input R; 3 inputs + 1 fb per channel × 2 ch (U46/U47 half A)
-audio,R27,Resistor,2,,100kΩ,0603,,,,,block-6-mix,R_dry; MIX dry path input R (L and R; in U46/U47 half B)
-audio,R28,Resistor,2,,100kΩ,0603,,,,,block-6-mix,R_mix_f; MIX crossfade feedback R (L and R)
+audio,R28,Resistor,2,,100kΩ,0603,,,,,block-6-mix,"R_mix_f; final dry+wet summer feedback R (L and R, U46/U47 half B)"
+audio,R214,Resistor,1,,100kΩ,0603,,,,,block-6-mix,U48-A wet re-inverter in (L)
+audio,R215,Resistor,1,,100kΩ,0603,,,,,block-6-mix,U48-A wet re-inverter fb (L)
+audio,R216,Resistor,1,,100kΩ,0603,,,,,block-6-mix,U48-B wet re-inverter in (R)
+audio,R217,Resistor,1,,100kΩ,0603,,,,,block-6-mix,U48-B wet re-inverter fb (R)
+audio,R218,Resistor,1,,100kΩ,0603,,,,,block-6-mix,final summer L: scaled-dry (BYPASS wiper) input
+audio,R219,Resistor,1,,100kΩ,0603,,,,,block-6-mix,final summer L: scaled-wet (WET wiper) input
+audio,R220,Resistor,1,,100kΩ,0603,,,,,block-6-mix,final summer R: scaled-dry input
+audio,R221,Resistor,1,,100kΩ,0603,,,,,block-6-mix,final summer R: scaled-wet input
+audio,R222,Resistor,1,,100kΩ,0603,,,,,block-6-mix,U27-A R output polarity-restore in
+audio,R223,Resistor,1,,100kΩ,0603,,,,,block-6-mix,U27-A R output polarity-restore fb
 audio,R29,Resistor,1,,1kΩ,0603,,,,,block-6-mix,R_5V_logic; series R from +12V to D7 zener shunt (5.1V logic rail for CD4053)
 audio,U67,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-6-svf1,"BP1 Q VCA (cell A = L Q, cell B = R Q)"
 audio,U68,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-6-svf2,"BP2 Q VCA (cell A = L Q, cell B = R Q)"
@@ -669,7 +678,10 @@ control,SW5,Switch,1,DW5 (2M DPDT ON-ON-ON),,sub-mini toggle 2M,POGO_Button_Swit
 control,SW6,Switch,1,DW5 (2M DPDT ON-ON-ON),,sub-mini toggle 2M,POGO_Button_Switch_THT:SW_Dailywell_DW5_DPDT,Dailywell,Thonk,https://www.thonk.co.uk/shop/sub-mini-toggle-switches/,block-6-dist3,BP3_DIST_MODE (Soft/Hard/Fold)
 control,SW7,Switch,1,DW5 (2M DPDT ON-ON-ON),,sub-mini toggle 2M,POGO_Button_Switch_THT:SW_Dailywell_DW5_DPDT,Dailywell,Thonk,https://www.thonk.co.uk/shop/sub-mini-toggle-switches/,block-3,MOD_SRC (3-way mod source select: LFO1 / LFO2 / External); bound to MOD_SRC_PARAM
 control,RV29,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6-mix,BP_OFFSET master freq (±5V/oct)
-control,RV30,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6-mix,BP_MIX dry/wet (0–1)
+control,RV30,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6-mix,BP_BYPASS dry level (0–1); dual-gang (RV30 L gang + RV58 R gang). Panel 'BYPASS'
+control,RV58,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6-mix,BP_BYPASS R gang (same physical dual-gang knob as RV30)
+control,RV57,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6-mix,"BP_WET wet level (0–1); dual-gang (RV57 L gang + RV59 R gang). Panel 'WET' (NEW, change 0018)"
+control,RV59,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6-mix,BP_WET R gang (same physical dual-gang knob as RV57)
 control,RV31,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6-svf1,BP1_FREQ
 control,RV32,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6-svf1,BP1_FOCUS
 control,RV33,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6-dist1,BP1_DIST (drive)

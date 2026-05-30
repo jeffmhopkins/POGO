@@ -192,7 +192,7 @@ components:
   - { ref: U24,  board: audio,   block: block-6-svf2, part: OPA1612,   pkg: SOIC-8,   fn: "BP2 SUM_AMP + buffer R" }
   - { ref: U25,  board: audio,   block: block-6-svf3, part: OPA1612,   pkg: SOIC-8,   fn: "BP3 SUM_AMP + buffer L" }
   - { ref: U26,  board: audio,   block: block-6-svf3, part: OPA1612,   pkg: SOIC-8,   fn: "BP3 SUM_AMP + buffer R" }
-  - { ref: U27,  board: audio,   block: block-6-mix, part: TL072CDT,   pkg: SOIC-8,   fn: "half A = unused (per-band tilt moved to svf U82-84); fixed BP output polarity-restore inverter (G=−1) half B" }
+  - { ref: U27,  board: audio,   block: block-6-mix, part: TL072CDT,   pkg: SOIC-8,   fn: "BP output polarity-restore inverters (G=−1): half B = L (R17), half A = R (R222/R223) — reused after per-band tilt moved to svf U82-84" }
   - { ref: U28,  board: audio,   block: block-6-svf1, part: THAT340S14-U, pkg: SOIC-14,   fn: "BP1 expo converter" }
   - { ref: U29,  board: audio,   block: block-6-svf2, part: THAT340S14-U, pkg: SOIC-14,   fn: "BP2 expo converter" }
   - { ref: U30,  board: audio,   block: block-6-svf3, part: THAT340S14-U, pkg: SOIC-14,   fn: "BP3 expo converter" }
@@ -286,9 +286,9 @@ components:
   - { ref: C110_U93n, board: audio, block: block-6-dist3, part: ~, pkg: "0603", val: "100nF", fn: "U93 −12V decoupling" }
 
   # block-6: BP_MIX + output polarity-restore ICs
-  - { ref: U46,  board: audio,   block: block-6-mix, part: TL072CDT,   pkg: SOIC-8,   fn: "BP wet summer half A = L (BP1+BP2+BP3 inv sum); half B = MIX crossfade L" }
-  - { ref: U47,  board: audio,   block: block-6-mix, part: TL072CDT,   pkg: SOIC-8,   fn: "BP wet summer half A = R; half B = MIX crossfade R" }
-  - { ref: U48,  board: audio,   block: block-6-mix, part: TL072CDT,   pkg: SOIC-8,   fn: "BP wet polarity restore: half A = V_wet_inv→V_wet_pos (L); half B = V_wet_inv→V_wet_pos (R)" }
+  - { ref: U46,  board: audio,   block: block-6-mix, part: TL072CDT,   pkg: SOIC-8,   fn: "half A = L wet summer (BP1+BP2+BP3 inv sum); half B = L final dry+wet summer (BYPASS+WET)" }
+  - { ref: U47,  board: audio,   block: block-6-mix, part: TL072CDT,   pkg: SOIC-8,   fn: "half A = R wet summer; half B = R final dry+wet summer" }
+  - { ref: U48,  board: audio,   block: block-6-mix, part: TL072CDT,   pkg: SOIC-8,   fn: "wet re-inverter (G=−1): half A = L, half B = R (restores +bands from the inv wet sum)" }
 
   # block-6: Calibration trim pots
   - { ref: RV7,  board: audio,   block: block-6-svf1, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "BP1 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 200 Hz at 0V; ±25% range" }
@@ -375,8 +375,18 @@ components:
 
   # block-6: Passives — BP_MIX circuit
   - { ref: R26,  board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "33kΩ",   qty: 8,  fn: "R_sum; BP wet summer input R; 3 inputs + 1 fb per channel × 2 ch (U46/U47 half A)" }
-  - { ref: R27,  board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "R_dry; MIX dry path input R (L and R; in U46/U47 half B)" }
-  - { ref: R28,  board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "R_mix_f; MIX crossfade feedback R (L and R)" }
+  - { ref: R28,  board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "R_mix_f; final dry+wet summer feedback R (L and R, U46/U47 half B)" }
+  # Stage 7 (change 0018): two-scaler dry/wet — wet re-inverter, final summer inputs, R-ch polarity restore
+  - { ref: R214, board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "U48-A wet re-inverter in (L)" }
+  - { ref: R215, board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "U48-A wet re-inverter fb (L)" }
+  - { ref: R216, board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "U48-B wet re-inverter in (R)" }
+  - { ref: R217, board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "U48-B wet re-inverter fb (R)" }
+  - { ref: R218, board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "final summer L: scaled-dry (BYPASS wiper) input" }
+  - { ref: R219, board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "final summer L: scaled-wet (WET wiper) input" }
+  - { ref: R220, board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "final summer R: scaled-dry input" }
+  - { ref: R221, board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "final summer R: scaled-wet input" }
+  - { ref: R222, board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "U27-A R output polarity-restore in" }
+  - { ref: R223, board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "U27-A R output polarity-restore fb" }
 
   # block-6: Passives — CD4053 logic supply
   - { ref: R29,  board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "R_5V_logic; series R from +12V to D7 zener shunt (5.1V logic rail for CD4053)" }
@@ -808,7 +818,10 @@ components:
   - { ref: SW6,  board: control, block: block-6-dist3, part: "Dailywell DW5 (2M DPDT ON-ON-ON)", pkg: "sub-mini toggle 2M", fn: "BP3_DIST_MODE (Soft/Hard/Fold)" }
   - { ref: SW7,  board: control, block: block-3, part: "Dailywell DW5 (2M DPDT ON-ON-ON)", pkg: "sub-mini toggle 2M", fn: "MOD_SRC (3-way mod source select: LFO1 / LFO2 / External); bound to MOD_SRC_PARAM" }
   - { ref: RV29, board: control, block: block-6-mix, part: "xl knob",    pkg: "9mm",  fn: "BP_OFFSET master freq (±5V/oct)" }
-  - { ref: RV30, board: control, block: block-6-mix, part: "large knob", pkg: "9mm",  fn: "BP_MIX dry/wet (0–1)" }
+  - { ref: RV30, board: control, block: block-6-mix, part: "large knob", pkg: "9mm",  fn: "BP_BYPASS dry level (0–1); dual-gang (RV30 L gang + RV58 R gang). Panel 'BYPASS'" }
+  - { ref: RV58, board: control, block: block-6-mix, part: "large knob", pkg: "9mm",  fn: "BP_BYPASS R gang (same physical dual-gang knob as RV30)" }
+  - { ref: RV57, board: control, block: block-6-mix, part: "large knob", pkg: "9mm",  fn: "BP_WET wet level (0–1); dual-gang (RV57 L gang + RV59 R gang). Panel 'WET' (NEW, change 0018)" }
+  - { ref: RV59, board: control, block: block-6-mix, part: "large knob", pkg: "9mm",  fn: "BP_WET R gang (same physical dual-gang knob as RV57)" }
   - { ref: RV31, board: control, block: block-6-svf1, part: "knob",       pkg: "9mm",  fn: "BP1_FREQ" }
   - { ref: RV32, board: control, block: block-6-svf1, part: "knob",       pkg: "9mm",  fn: "BP1_FOCUS" }
   - { ref: RV33, board: control, block: block-6-dist1, part: "knob",       pkg: "9mm",  fn: "BP1_DIST (drive)" }

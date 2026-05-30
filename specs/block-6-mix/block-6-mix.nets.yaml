@@ -28,40 +28,63 @@ parts:
   R26_L2: { sym: r, value: 33k }
   R26_L3: { sym: r, value: 33k }
   R26_Lf: { sym: r, value: 33k }
-  R27_L: { sym: r, value: 100k }
   R28_L: { sym: r, value: 100k }
   R26_R1: { sym: r, value: 33k }
   R26_R2: { sym: r, value: 33k }
   R26_R3: { sym: r, value: 33k }
   R26_Rf: { sym: r, value: 33k }
-  R27_R: { sym: r, value: 100k }
   R28_R: { sym: r, value: 100k }
+  # Stage 7 (change 0018): two independent dry/wet scalers (BP_BYPASS dry + BP_WET wet),
+  # matching the plugin bpOut = bandL*BP_BYPASS + wetSum*BP_WET (two 0..1 scalers, not a crossfade).
+  RV30:  { sym: trimpot, part: "large knob", value: BP_BYPASS_L }   # BYPASS dry pot, L gang (dual-gang knob)
+  RV58:  { sym: trimpot, part: "large knob", value: BP_BYPASS_R }   # BYPASS dry pot, R gang (same knob as RV30)
+  RV57:  { sym: trimpot, part: "large knob", value: BP_WET_L }      # WET pot, L gang (dual-gang knob, NEW)
+  RV59:  { sym: trimpot, part: "large knob", value: BP_WET_R }      # WET pot, R gang (same knob as RV57)
+  R214:  { sym: r, value: 100k }   # U48-A wet-invert in (L): BP_WETSUM_L -> +bands
+  R215:  { sym: r, value: 100k }   # U48-A wet-invert fb (L)
+  R216:  { sym: r, value: 100k }   # U48-B wet-invert in (R)
+  R217:  { sym: r, value: 100k }   # U48-B wet-invert fb (R)
+  R218:  { sym: r, value: 100k }   # final summer L: scaled-dry input (BYPASS wiper)
+  R219:  { sym: r, value: 100k }   # final summer L: scaled-wet input (WET wiper)
+  R220:  { sym: r, value: 100k }   # final summer R: scaled-dry input
+  R221:  { sym: r, value: 100k }   # final summer R: scaled-wet input
+  R222:  { sym: r, value: 100k }   # U27-A R output polarity-restore in
+  R223:  { sym: r, value: 100k }   # U27-A R output polarity-restore fb
   J27: { sym: jack, part: PJ301M-12, value: BP3_L_OUT }
   J28: { sym: jack, part: PJ301M-12, value: BP3_R_OUT }
 
 nets:
-  # BP_TILT_CV stays a boundary output; it is now consumed by the per-band TILT
-  # summers in block-6-svf1/2/3 (R135.1 / R141.1 / R147.1). Master tilt inversion
-  # (former U27-A master tilt-inverter output) is GONE: per-band L/R split now
-  # happens inside each SVF's own TILT summer+inverter.
-  # U27-A is now an unused half: wired as a harmless unity buffer (in− tied to out,
-  # in+ already to GND) with its output left unconnected (output net U27A_UNUSED).
-  U27A_UNUSED: [U27.1, U27.2]
+  # BP_TILT_CV stays a boundary output, consumed by the per-band TILT summers in
+  # block-6-svf1/2/3. The former U27-A master tilt-inverter is gone (per-band L/R split
+  # now happens inside each SVF). Stage 7 (change 0018) REUSES U27-A as the R-channel
+  # output polarity-restore inverter (U27-B is the L-channel restore).
   V5LOGIC: [R29.2, D7.3, C27.1, C28.1]
+  # ── Wet path: 3-band inverting summer (U46/47-A) → re-invert (U48) = +bands ──
   BP_WETVG_L: [U46.2, R26_L1.2, R26_L2.2, R26_L3.2, R26_Lf.1]
-  BP_WETSUM_L: [U46.1, R26_Lf.2, U48.3]
-  BP_WETPOS_L: [U48.1, U48.2]
-  BP_MIX_CV_L: [U46.6, R27_L.2, R28_L.1]
-  BP_OUT_L: [U46.7, R28_L.2, R17_in.1]
+  BP_WETSUM_L: [U46.1, R26_Lf.2, R214.1]          # −(BP1+BP2+BP3) L
+  BP_WETINV_L: [U48.2, R214.2, R215.1]            # U48-A wet re-inverter (−) node
+  BP_WETPOS_L: [U48.1, R215.2, RV57.3]            # +bands L → WET pot top
   BP_WETVG_R: [U47.2, R26_R1.2, R26_R2.2, R26_R3.2, R26_Rf.1]
-  BP_WETSUM_R: [U47.1, R26_Rf.2, U48.5]
-  BP_WETPOS_R: [U48.7, U48.6]
-  BP_MIX_CV_R: [U47.6, R27_R.2, R28_R.1]
-  BP_OUT_R: [U47.7, R28_R.2]
+  BP_WETSUM_R: [U47.1, R26_Rf.2, R216.1]          # −(bands) R
+  BP_WETINV_R: [U48.6, R216.2, R217.1]            # U48-B wet re-inverter (−) node
+  BP_WETPOS_R: [U48.7, R217.2, RV59.3]            # +bands R → WET pot top
+  # ── Dry path: LP1 band → BYPASS pot ──
+  LP1_OUT_L: [RV30.3]                             # dry L → BYPASS pot top
+  LP1_OUT_R: [RV58.3]                             # dry R → BYPASS pot top
+  # ── Two independent scalers: BYPASS (dry) + WET, summed per channel ──
+  BP_BYPASS_W_L: [RV30.2, R218.1]                 # BYPASS wiper L → final summer
+  BP_WET_W_L:    [RV57.2, R219.1]                 # WET wiper L → final summer
+  BP_MIX_VG_L: [U46.6, R218.2, R219.2, R28_L.1]   # final inverting summer (−) node L
+  BP_MIXOUT_L: [U46.7, R28_L.2, R17_in.1]         # −(dry+wet) L → polarity restore
+  BP_BYPASS_W_R: [RV58.2, R220.1]
+  BP_WET_W_R:    [RV59.2, R221.1]
+  BP_MIX_VG_R: [U47.6, R220.2, R221.2, R28_R.1]
+  BP_MIXOUT_R: [U47.7, R28_R.2, R222.1]           # −(dry+wet) R → polarity restore
+  # ── Output polarity restore (G=−1): U27-B = L (existing), U27-A = R (reused freed half) ──
   BP_POLVG_L: [U27.6, R17_in.2, R17_fb.1]
-  BP_POLRESTORE_L: [U27.7, R17_fb.2]
-  LP1_OUT_L: [R27_L.1]
-  LP1_OUT_R: [R27_R.1]
+  BP_OUT_L:   [U27.7, R17_fb.2]                    # +(dry+wet) L → block-7 (boundary)
+  BP_POLVG_R: [U27.2, R222.2, R223.1]
+  BP_OUT_R:   [U27.1, R223.2]                      # +(dry+wet) R → block-7 (boundary)
   BP3_L_OUT: [J27.1]
   BP3_R_OUT: [J28.1]
   BP1_BANDOUT_L: [R26_L1.1]
@@ -72,7 +95,7 @@ nets:
   BP3_TAP_R: [R26_R3.1]
   "+12V": [U27.8, C110_U27p.1, U46.8, C110_U46p.1, U47.8, C110_U47p.1, U48.8, C110_U48p.1, R29.1]
   "-12V": [U27.4, C110_U27n.1, U46.4, C110_U46n.1, U47.4, C110_U47n.1, U48.4, C110_U48n.1]
-  GND: [C110_U27p.2, C110_U27n.2, C110_U46p.2, C110_U46n.2, C110_U47p.2, C110_U47n.2, C110_U48p.2, C110_U48n.2, U27.3, D7.1, C27.2, C28.2, U46.3, U46.5, U47.3, U47.5, U27.5, J27.2, J28.2]
+  GND: [C110_U27p.2, C110_U27n.2, C110_U46p.2, C110_U46n.2, C110_U47p.2, C110_U47n.2, C110_U48p.2, C110_U48n.2, U27.3, U27.5, U48.3, U48.5, D7.1, C27.2, C28.2, U46.3, U46.5, U47.3, U47.5, J27.2, J28.2, RV30.1, RV57.1, RV58.1, RV59.1]
 
 no_connect:
   - J27.3
@@ -90,11 +113,7 @@ boundary:
   - BP3_TAP_L
   - BP3_TAP_R
   - BP3_L_OUT
-  - BP_OUT_L
-  - BP_WETPOS_R
-  - BP_WETPOS_L
-  - BP_OUT_R
-  - BP_MIX_CV_R
-  - BP_MIX_CV_L
   - BP3_R_OUT
+  - BP_OUT_L
+  - BP_OUT_R
 

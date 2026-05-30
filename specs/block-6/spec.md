@@ -89,14 +89,17 @@ processing or sidechain routing. R normals to L when the R jack is unpatched.
 >    logic-high against VDD = +12 V is marginal per the CD4053B datasheet** (V_IH ≈ 0.7·VDD):
 >    a level shift or VDD = +5 V may be required — prototype-verify. Analog rails are kept at
 >    ±12 V for full ±5 V audio headroom.
-> 3. **BP_MIX blend.** The plugin uses **two independent scalers** (BP_BYPASS and BP_WET,
->    additive), while the BOM/§3 model one MIX pot. Wired faithfully as: wet summer (U46/47-A)
->    → U48 buffer → off-board MIX pot (`BP_WETPOS`) → wiper returns as `BP_MIX_CV` into the
->    MIX-amp virtual ground (the pot is R_wet) + dry via R27. The MIX amps invert, so `BP_OUT`
->    is taken directly from them (L/R symmetric; the downstream HP SUM_AMP re-inverts). The
->    BOM provisions only one output-restore inverter (U27-B + R17); it is redundant in this
->    path and is wired as a **reserved** Phase-3R inverter off the L MIX output. A dedicated
->    BYPASS scaler and an explicit non-inverting output stage are Phase-3R adds.
+> 3. **BP_MIX blend — RESOLVED (change 0018, Stage 7).** The plugin uses **two independent
+>    0–1 scalers** (`bpOut = bandL·BP_BYPASS + wetSum·BP_WET`), now built as such: the wet
+>    3-band sum (U46/47-A, inverting) is re-inverted by U48 (G=−1) to `BP_WETPOS` (+bands);
+>    a **BYPASS** dual-gang pot (RV30 L / RV58 R) attenuates the dry LP1 band and a **WET**
+>    dual-gang pot (RV57 L / RV59 R, new) attenuates `BP_WETPOS`; both wipers sum in the final
+>    inverting summer (U46/47-B), then an output polarity-restore inverter per channel (U27-B
+>    = L, U27-A = R, reused) yields `BP_OUT`. Both pots default 1.0 = LP1 + full BP, matching
+>    the plugin. *Polarity:* dry and the wet bus are arranged to **add** at `BP_OUT` (the wet
+>    chain's net inversions, including the Stage-5 DRIVE-VCA I/V, are accounted so wet sums
+>    with — not against — dry). The exact wet-vs-dry absolute phase across frequency/mode and
+>    the pot tapers are Phase-3R bring-up items.
 
 ### SVF Groups (3 independent resonators)
 
