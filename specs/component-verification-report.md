@@ -15,7 +15,7 @@
 
 ## 2. Reference uniqueness
 
-- **No true cross-board collision.** Refs are unique per board (the invariant). The 37 audio-board
+- **No true cross-board collision.** Refs are unique per board (the invariant). The 35 audio-board
   refs that appear more than once are all **block-6 split-section repeats** — the same ref declared
   identically across `block-6-svf1/2/3` (or `-dist1/2/3`), one per identical bandpass group (the
   deliberate per-group scheme). A ref like `RV9`/`RV12`/`RV15`/`RV21` also appears on the *control*
@@ -26,7 +26,7 @@
 ## 3. Registry / footprints / datasheets
 
 - **21 sourced parts** in `components/parts/*` — every one declares symbol + footprint + mpn +
-  datasheet; all 9 referenced footprint libraries resolve to vendored `.pretty` dirs; all
+  datasheet; all 9 footprint bindings (across 4 unique libraries) resolve to vendored `.pretty` dirs; all
   `matches[]` tokens cover every non-null `part:` in components.yaml. No missing registry entry,
   footprint, or datasheet.
 - **MMBT3904** (the newest part, block-2 LED driver) is fully registered: symbol `npn`, footprint

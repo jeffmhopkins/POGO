@@ -37,16 +37,18 @@ Per-rail symmetric except the 2 LED-driver NPNs (collector from +12V only).
 | 3 — Mod bus | ~16 mA | ~16 mA | 6× TL074 |
 | 4 — VCA | ~20 mA | ~20 mA | 4× THAT2180 (main + ALT-BP) + 3× TL072 |
 | 5 — LP1 | ~37 mA | ~37 mA | 4× LM13700 + 2× OPA1612 + 2× THAT340 |
-| 6 — BP + Dist | ~180 mA | ~179 mA | 9× LM13700 + 6× OPA1612 + 6× THAT340 + 6× THAT2180 (DRIVE) + dist/CLIP TL072/TL074 + 7× CD4053 |
+| 6 — BP + Dist | ~161 mA | ~161 mA | 9× LM13700 + 6× OPA1612 + 6× THAT340 + 6× THAT2180 (DRIVE) + dist/CLIP TL072/TL074 + 7× CD4053 |
 | 7 — HP | ~33 mA | ~33 mA | 3× LM13700 + 2× OPA1612 + 1× THAT340 |
 | 8 — LP2 | ~28 mA | ~28 mA | 2× LM13700 + 2× OPA1612 + 1× THAT340 |
 | B — Output buf | ~3 mA | ~3 mA | 2× TL072 |
-| **Total** | **~326 mA** | **~321 mA** | |
+| **Total** | **~329 mA** | **~323 mA** | |
+
+(The +12V/−12V difference of ~6 mA is the two block-2 LED-driver NPNs, which draw from +12V only.)
 
 **Findings:**
-- **Use a ≥400 mA/rail bus.** Typical draw (~326 mA) exceeds the previous "≥300 mA" recommendation;
+- **Use a ≥400 mA/rail bus.** Typical draw (~329 mA) exceeds the previous "≥300 mA" recommendation;
   allow headroom for LM13700 / THAT2180 peaks and LED transients.
-- **Block 6 is ~180 mA — over half the module.** The per-band DRIVE engine (6× THAT2180 + 3× TL074
+- **Block 6 is ~161 mA — about half the module.** The per-band DRIVE engine (6× THAT2180 + 3× TL074
   I/V) and CLIP comparators (3× TL074) add ~48 mA/rail that the 2026-05-27 budget did not have.
 - Dominant uncertainty is the LM13700 figure (18 units): at 4 mA/pkg total ≈ 308 mA, at 6 mA/pkg ≈
   344 mA — either way > 300 mA.

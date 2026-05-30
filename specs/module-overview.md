@@ -194,14 +194,15 @@ LEDs). See `specs/analog-design-review.md` for the full device census + arithmet
 | 3 (Mod Bus) | ~16 mA | ~16 mA | 6× TL074 |
 | 4 (VCA) | ~20 mA | ~20 mA | 4× THAT 2180 (main + ALT-BP) + 3× TL072 |
 | 5 (LP1) | ~37 mA | ~37 mA | 4× LM13700 + 2× OPA1612 + 2× THAT340 |
-| 6 (BP + Dist) | ~180 mA | ~179 mA | 9× LM13700 + 6× OPA1612 + 6× THAT340 + 6× THAT2180 (DRIVE) + dist/CLIP TL072/TL074 |
+| 6 (BP + Dist) | ~161 mA | ~161 mA | 9× LM13700 + 6× OPA1612 + 6× THAT340 + 6× THAT2180 (DRIVE) + dist/CLIP TL072/TL074 |
 | 7 (HP) | ~33 mA | ~33 mA | 3× LM13700 + 2× OPA1612 + 1× THAT340 |
 | 8 (LP2) | ~28 mA | ~28 mA | 2× LM13700 + 2× OPA1612 + 1× THAT340 |
 | B (Output Buffer) | ~3 mA | ~3 mA | 2× TL072 |
-| **Total** | **~326 mA** | **~321 mA** | |
+| **Total** | **~329 mA** | **~323 mA** | |
 
-Use a powered bus with **≥400 mA capacity per rail** (typical draw ~326 mA; allow headroom for
-LM13700/THAT2180 peak and LED transients). Block 6 alone is ~180 mA (>half the module).
+Use a powered bus with **≥400 mA capacity per rail** (typical draw ~329 mA; allow headroom for
+LM13700/THAT2180 peak and LED transients). Block 6 alone is ~161 mA (~half the module). The
++12V/−12V difference (~6 mA) is the two block-2 LED-driver NPNs (+12V only).
 Per-block details in each block spec's Power Draw Estimate section.
 
 Note: this supersedes the 2026-05-27 ~237 mA figure, which predated the per-band DRIVE engine

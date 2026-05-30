@@ -67,6 +67,10 @@ All 6 `--check` gates + Python↔JS parity green. No plugin/panel/net-connectivi
 
 ## Gate checklist
 
-- [ ] Adversarial fact-check of the regenerated/refreshed docs (in progress)
-- [ ] CI green on the branch
+- [x] Adversarial fact-check of the regenerated/refreshed docs — plugin-topology.md fully clean;
+      fixed power-total arithmetic (per-block column → 329/323 mA, block-6 161 not 180) in
+      analog-design-review.md + module-overview.md; fixed verification-report nits (35 repeated
+      refs not 37; "9 bindings / 4 libraries" wording).
+- [x] All 6 `--check` gates + parity green on the branch (local).
+- [ ] CI green on the branch (Actions)
 - [ ] PR `change/0019-doc-staleness-refresh` → `dev`
