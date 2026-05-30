@@ -2,10 +2,10 @@
 
 - **Slug:** netlist-visualizer    **Branch:** `change/netlist-visualizer` (fresh off `dev`)
 - **Lane:** C (tooling / docs — reads nets, changes no connectivity)
-- **Status:** PR OPEN (change/netlist-visualizer → dev)
+- **Status:** CLOSED
 - **Blocks:** none (read-only over all blocks)   **Boards:** audio, utility
-- **Opened:** 2026-05-30       **Closed:** —
-- **PR:** —              **CI run:** —
+- **Opened:** 2026-05-30       **Closed:** 2026-05-30
+- **PR:** #44 (merged → dev)              **CI run:** green
 
 > Lane C rationale: adds a generator (`tools/build_netlist_viz.py`) + a generated artifact
 > (`docs/netlist.html`) wired into CI. It **reads** `specs/<block>/<block>.nets.yaml`, the
