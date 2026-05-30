@@ -261,7 +261,14 @@ Tracing block-5/7/8 during implementation, the "tap v1/v2 from pins 5/12" fix sp
   V_ires≈−10.73V. **Design consequence:** useful Q lives in a ~0.8V window just above the −10.8V pin
   and is very steep (~10mV ≈ 5× Q) → V_bias trim needs fine/multi-turn resolution near the rail; H6
   self-osc via soft-limit diodes (Iabc can't precisely set Q>~10–50). Sized when wiring §D.
-- **vca_ecplus.cir [TODO]**.
+- **vca_ecplus.cir [DONE]:** HIGH-3 confirmed — series rheostat moves Ec+ only **~25 µV (0.004 dB)**
+  across full 0–500Ω travel (Ec+ is high-Z; can't set offset). Voltage-injection trim (±12 mV wiper
+  via 100k → Ec+) gives **−2.8 → +1.2 dB**, crossing **0 dB mid-range**, and nulls the real ~−0.8 dB
+  bias-current offset → that's *why* the trim is needed. Design: bound the injection wiper to ~±12 mV
+  (≈100:1 pre-divider from ±12V into the trim) for ±2 dB authority. Also need the **V_CTRL wiper
+  buffer** before the 4-way fan-out (HIGH-3 part b). Values set when wiring block-4/block-6 DRIVE.
+
+**All four SPICE decks pass.** The Tier-2 fixes (A,B,C,D,HIGH-3) are now behavior-validated, not blind.
 
 ### Proposed split (recommended)
 - **Do now (no resonant-loop risk, no validation needed):** clusters **E** (BP3 ALT_R selector),
