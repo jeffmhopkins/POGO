@@ -276,9 +276,10 @@
     if (!deg) return rect.slice();
     const [x1, y1, x2, y2] = rect;
     let pts = [[x1, y1], [x2, y1], [x1, y2], [x2, y2]];
-    if (deg === 90) pts = pts.map(([x, y]) => [y, -x]);
+    // CW to match the SVG draw transform (rotate(+deg) = (x,y)->(-y,x) in y-down).
+    if (deg === 90) pts = pts.map(([x, y]) => [-y, x]);
     else if (deg === 180) pts = pts.map(([x, y]) => [-x, -y]);
-    else if (deg === 270) pts = pts.map(([x, y]) => [-y, x]);
+    else if (deg === 270) pts = pts.map(([x, y]) => [y, -x]);
     else return rect.slice();
     const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]);
     return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)];

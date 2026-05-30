@@ -73,12 +73,13 @@ def _rotate_rect(
         return rect
     x1, y1, x2, y2 = rect
     corners = [(x1, y1), (x2, y1), (x1, y2), (x2, y2)]
+    # CW to match the SVG draw transform (rotate(+deg) = (x,y)->(-y,x) in y-down).
     if degrees == 90:
-        rotated = [(y, -x) for x, y in corners]
+        rotated = [(-y, x) for x, y in corners]
     elif degrees == 180:
         rotated = [(-x, -y) for x, y in corners]
     elif degrees == 270:
-        rotated = [(-y, x) for x, y in corners]
+        rotated = [(y, -x) for x, y in corners]
     else:
         return rect
     xs = [p[0] for p in rotated]
