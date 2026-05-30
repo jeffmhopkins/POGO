@@ -119,12 +119,23 @@ Confidence tags: **[HC]** high (math/datasheet solid, verified) · **[NV]** need
   - **New part = tempco (G6a, Vishay TFPT, decided).** R_VOCT/RV unchanged types. Counts: LP1=2 (L+R),
     HP=1, LP2=1, BP×3=2 each → ~8 tempco + 8 series-R changes.
 
-### B. LP1 tilt summing node — fixes C3 — block-5 (and the BP per-band tilt summers already OK) [HC]
+### B. LP1 tilt summing node — fixes C3 — block-5 [HC] — DESIGN REFINED 2026-05-30
 - **Plugin:** `lp1TiltV = LP1_TILT×5` → full tilt **±5 V/oct**; L=base+tilt, R=base−tilt; sums 1:1 with V_freq.
-- **Fix:** replace the direct R55/R56→base resistive mixing with a real **inverting summer** (V_freq +
-  ±V_tilt, 3× **100k** + op-amp half/channel) whose output feeds the §A divider. The existing tilt
-  inverter (U13-A) already makes −V_tilt for R. **+1 op-amp half per channel** (promote a dual→quad or
-  add a TL072 — G6 item). RV6 tilt-null stays as a center offset into the summer.
+- **Why it's mandatory once §A lands (SPICE `lp1_tilt_sum.cir`):** §A adds the tempco shunt (~1k base→GND).
+  The current tilt injection (R55/R56 100k → raw base) then divides ~99% away. So tilt MUST be summed
+  with V_freq **before** the §A divider, not at the base.
+- **Polarity finding (SPICE):** a plain inverting summer flips sign (out = −(Vf+Vt)). The expo needs
+  +mV/+octave at the base. **Cleanest topology (proposed):** sum V_freq + (±V_tilt) at the **top of the
+  R_VOCT divider** (the divider input node `a`, not the base), so the existing divider+tempco scales the
+  *summed* octave command. Per channel: a summing junction feeding R_VOCT. L sums +V_freq + (+V_tilt);
+  R sums +V_freq + (−V_tilt) (U13-A already makes −V_tilt). Sign handled by driving the summer from the
+  already-correct-polarity freq/tilt sources (no extra inversion) OR one shared inverter.
+- **Op-amp budget:** needs up to **2 summer halves** (L+R). U13 both halves are used (tilt-inv + IRES_AMP),
+  so this is **+1 dual op-amp** (TL072) on block-5 — a G6 item (existing type, new ref).
+- ⚠️ **block-5 is the convergence of §A + §B + §C(OTA tap) + §D(Q-cell) + the shared U9/U10 Q-VCAs.**
+  These interact (same expo nodes, same SUM_AMP, same V_ires). **Plan: do block-5 as ONE combined
+  edit** (A+B+C+D together) rather than piecemeal, to avoid regenerating an inconsistent intermediate.
+  Pending: finalize the summer node topology + the +1 TL072 ref, SPICE the combined base response, then wire.
 
 ### C. OTA state-variable tap — fixes H5 — blocks 5,7,8 [HC, pure reroute]
 - **Root cause:** v1/v2 tapped from LM13700 **Darlington buffer** outputs (pins 8/9), ~1.2–1.4 V
