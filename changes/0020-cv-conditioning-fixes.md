@@ -484,14 +484,18 @@ Registered **Vishay TFPT0805L1001FM** (1kΩ, 0805, +4110 ppm/K) as `components/p
   divider). **§A is now unblocked.**
 
 ## Gate checklist
-- [x] **G1 — intent** confirmed (fix all CRIT+HIGH; full H5/H6/M5). 
-- [ ] **G5 — topology proposal** (assemble after analog-values agent returns) ← CURRENT STOP
-- [ ] G4 — spec parity vs locked plugin (per block) [folded with G5 per-block]
-- [ ] G4 — spec parity vs locked plugin (per block)
-- [ ] G5 — topology approval (per block; mod-bus + expo strategy decisions)
-- [ ] G6a/b — new components + footprints
-- [ ] `--check` gates + parity green
+- [x] **G1 — intent** confirmed (fix all CRIT+HIGH; full H5/H6/M5).
+- [x] **G3 — VCV Rack verify** (§E Lane-A plugin change): user "plugin was good in branch"; plugin LOCKED @ v2.1.0.
+- [x] **G5 — topology** approved per cluster (user decisions logged: mod-bus H-a→hi-Z, BP3 ALT independence, tempco, HIGH-3 injection).
+- [x] **G6a/b** — Vishay TFPT tempco registered (symbol+footprint+datasheet); all other new parts are existing types/new refs.
+- [x] **All netlist clusters wired + gate-green** (§A/§B/§C/§D filter core; §E; §G; §H; HIGH-3; §F withdrawn). 0 schematic FAIL; 6 `--check` gates + JS/Py parity pass.
+- [x] **G4 — spec §2–4 parity** vs locked plugin (this pass).
+- [ ] STATUS.md + close-out
 - [ ] PR `change/0020-cv-conditioning-fixes` → `dev`
+
+### Remaining [NV] / Phase-3R items (documented, not blocking — need bench measurement)
+- §D deep IRES_AMP negative-V_ires drive + clamp-polarity (R_Iabc 1M→100k done; the bias-network drive that swings V_ires into the −10.8V window is a trim-backed bring-up item, shared block-5/7/8).
+- Absolute THAT2180 Ec+ mV/dB and LM13700 Q-cell bias absolutes — sized so trim authority (±2dB Ec+; multi-turn V_bias) absorbs the [NV] uncertainty.
 
 ## Decisions log
 - 2026-05-30: opened off the 0019 tip (stacked) to inherit corrected docs and avoid re-touching

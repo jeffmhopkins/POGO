@@ -169,6 +169,15 @@ two unused sections remain spare.
 > (MOD_SRC SW7) added; per-band BP CV corrected FOCUS→TILT; MOD LEDs + driver removed; VCA
 > attenuverter removed (raw bus normal handled in block 4). 6× TL074 (was 7×).
 
+> 🔧 **Change 0020 §H (mod-bus depth + distribution buffer + offset):** the bus delivered only ~3%
+> mod depth at unpatched destinations — a 100k `R_SRC_NORM` (R18×18) fed each ~3.3k destination node.
+> **Fix (SPICE `modbus_depth.cir`/`modbus_load.cir`):** (1) removed the 18× R18; each jack switch lug
+> normals **low-Z directly** to the bus (override plug breaks it) → ~98% depth. (2) the 18 attenuverters
+> raised **×5** (R_INV_IN/FB 10k→**47k**, pots →**50k**) so the bus load drops to ~11 mA; the previously
+> "spare" U3 C/D are **re-enabled as a paralleled unity distribution buffer** (R227/R228 47Ω share).
+> (3) **§M2:** OFFSET range — `R15` **100k→240k** so RV4's ±12 V wiper maps to ±5 V at the summer
+> (matches the plugin's ±5 V offset).
+
 **Board assignment:** Utility board (no audio-frequency signal path); MOD_SRC switch + pots on the control board.
 
 **Panel controls / jacks:**

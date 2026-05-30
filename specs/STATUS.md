@@ -27,14 +27,14 @@ Last updated: 2026-05-30 | Topology: 48HP | Source of truth: `tools/panel-data.y
 | Block | Name | §1 Intent | §2/§3/§4 | Notes |
 |---|---|---|---|---|
 | A | Input Buffer | ✅ panel-verified | ✅ re-verified 2026-05-30 | OPA1612 follower, BAT54S clamp; no behavioral divergence vs locked plugin (change 0018) |
-| 1 | Pre-Gain | ✅ panel-verified | ✅ re-verified 2026-05-30 | OPA1612, 1×/5× switch; ALT_BP path → VCA → BP3-only (corrected, 0018); ALT VCA cell/BP3 selector tracked in block-4/6 |
+| 1 | Pre-Gain | ✅ panel-verified | ✅ re-verified 2026-05-30 | OPA1612, 1×/5× switch; ALT_BP path → VCA → BP3-only (0018); **0020: ALT_R now self-detects (ALT_R_DET, J4) — L/R independent (plugin Lane-A, G3✓)** |
 | 2 | Dual LFO | ✅ panel-verified | ✅ rate net FINALIZED 2026-05-29 | Integrator+Schmitt; drive-attenuator rate control (fixed R_INT + trimpot attenuator) |
-| 3 | Mod Bus | ✅ panel-verified | ✅ re-verified 2026-05-30 | MOD_SRC 3-way (SW7 DW5) wired; 18 attenuverters + raw VCA normal; 6× TL074; ±10V zener; MOD LEDs removed; FOCUS→TILT (0018) |
-| 4 | VCA | ✅ panel-verified | ✅ re-verified 2026-05-30 | THAT 2180 current-in/I-V-out; +ALT-BP VCA cell (4 cells total, shared V_ctrl → BP3); VCA_OFS placement fixed; RV24/25→RV44/45 (0018) |
-| 5 | LP Filter 1 | ✅ panel-verified | ✅ re-verified 2026-05-30 | OTA-C SVF; per-channel expo (true tilt); reaches self-oscillation (matches plugin); hosts shared U9/U10 Q-VCAs (co-owned block-8); doc/banner cleanup (0018) |
-| 6 | Triple BP + Dist | ✅ panel-verified | ✅ aligned 2026-05-30 (0018) | Split into 7 sections + aligned to plugin: DIST→SVF reorder, F_REF 400Hz, BP3 ALT-VCA selector, per-band TILT ×0.22, variable DRIVE (THAT2180 VCA/band), CLIP drivers, two-scaler dry/wet. Exact drive/clip/mix scaling = Phase-3R. U73 shared svf1/svf2. |
-| 7 | HP Filter | ✅ panel-verified | ✅ aligned 2026-05-30 (0018) | OTA-C SVF; HP output unity follower (polarity bug fixed); Q collapsed to 1 LM13700 (cell A=L/B=R); mono cutoff/self-osc = LP1 |
-| 8 | LP Filter 2 | ✅ panel-verified | ✅ re-verified 2026-05-30 (0018) | OTA-C SVF, mono (single expo); non-inverting LP output (matches plugin); Q via shared U9/U10 cell B (block-5); no behavioral divergence |
+| 3 | Mod Bus | ✅ panel-verified | ✅ re-verified 2026-05-30 | MOD_SRC 3-way; 18 attenuverters + raw VCA normal; 6× TL074; ±10V zener (0018). **0020 §H: low-Z normal (R_SRC_NORM removed; ~3%→~98% depth) + U3 C/D distribution buffer + ×5 hi-Z attenuverters + OFFSET ±5V** |
+| 4 | VCA | ✅ panel-verified | ✅ re-verified 2026-05-30 | THAT 2180 current-in/I-V-out; 4 cells shared V_ctrl → BP3 (0018). **0020 HIGH-3: Ec+ series-rheostat trims → voltage-injection (+U97 V_CTRL buffer; ±2dB)** |
+| 5 | LP Filter 1 | ✅ panel-verified | ✅ re-verified 2026-05-30 | OTA-C SVF; per-channel expo (true tilt); shared U9/U10 Q-VCAs (0018). **0020 §A/§B/§C/§D: expo V/oct divider+tempco, passive tilt sum, unbuffered OTA tap, R_Iabc 1M→100k** |
+| 6 | Triple BP + Dist | ✅ panel-verified | ✅ aligned 2026-05-30 (0018) | Split into 7 sections + aligned to plugin (DIST→SVF, F_REF 400Hz, ALT-VCA selector, ×0.22 tilt, DRIVE VCAs, CLIP, two-scaler). **0020: BP expo divider+tempco (svf), DRIVE Ec+ injection trims (dist), BP3 ALT_R selector**. Exact drive/clip/mix = Phase-3R |
+| 7 | HP Filter | ✅ panel-verified | ✅ aligned 2026-05-30 (0018) | OTA-C SVF; HP unity follower (polarity fixed); Q→1 LM13700. **0020 §A/§C/§D: expo divider+tempco, unbuffered OTA tap, R_Iabc 1M→100k** |
+| 8 | LP Filter 2 | ✅ panel-verified | ✅ re-verified 2026-05-30 (0018) | OTA-C SVF, mono; non-inverting LP output; shared Q cell B. **0020 §A/§C/§D: expo divider+tempco, unbuffered OTA tap, R_Iabc 1M→100k** |
 | B | Output Buffer | ✅ panel-verified | ✅ aligned 2026-05-30 (0018) | TL072 non-inverting followers; MAIN_L/R from LP2 + BP3 tap; BP3_R→L output normal added; ±11V via swing |
 
 ## aux/ Circuit Library (`specs/aux/aux-*.md`)

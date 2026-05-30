@@ -196,6 +196,16 @@ DSP and hardware are aligned on all BP signal-processing behaviors:
 > It has not been verified against the current panel control set. Do not use for circuit
 > construction until re-verified. See `specs/STATUS.md` for current phase status.
 
+> 🔧 **Change 0020 (the per-section nets ARE current; this §3 prose is not):** two fixes landed in
+> the block-6 section netlists (`block-6-svf1/2/3`, `block-6-dist1/2/3`):
+> - **§A BP expo V/oct divider:** each per-band expo base got the same divider fix as the filters —
+>   `R_VOCT`→**49.9k** + a **Vishay TFPT 1k tempco** shunt to GND (centers 17.92 mV/oct). (svf1/2/3.)
+> - **HIGH-3 DRIVE-VCA Ec+ trims:** the 6 per-band DRIVE unity trims (RV51–56) were useless series
+>   rheostats into the high-Z Ec+ port → replaced with **voltage-injection trims** (RV→10k divider
+>   across a local ±1.2 V ref; wiper→R_inj 1M→Ec+; V_DRIVE_CTRL→R_ec 10k→Ec+). ±~2 dB authority
+>   (SPICE `vca_ecplus_full.cir`). V_DRIVE_CTRL is already an op-amp output (low-Z) so no extra buffer.
+>   Mirrors block-4 HIGH-3. (dist1/2/3: R243–260, REF_P/N 1/2/3.)
+
 ### OTA-C SVF instances
 
 Three groups × two channels (L + R) = **6 OTA-C SVF instances**. Each instance requires:

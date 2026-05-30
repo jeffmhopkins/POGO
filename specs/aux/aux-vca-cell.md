@@ -3,6 +3,7 @@
 > ✅ **CORRECTED 2026-05-29** — Topology fixed to the real THAT2180 current-in/current-out
 > device (was wrongly modelled as a differential voltage VCA with no output op-amp).
 > Pinout from datasheet Doc 600029 Rev 02 Table 1. Verified in `specs/block-4/block-4.nets.yaml`.
+> 🔧 **Change 0020 HIGH-3:** the Ec+ unity trim must be a **voltage-injection** trim (trim pot as a divider across a small ±ref, wiper→R_inj→Ec+, with V_ctrl→R_ec→Ec+), NOT a series rheostat into the high-Z Ec+ port (a series R there sets ~0.004dB — useless). Buffer the shared V_ctrl before fanning out to multiple cells. ±~2dB unity authority. SPICE: specs/sim/vca_ecplus.cir, vca_ecplus_full.cir.
 
 Design status: [ ] draft → [ ] reviewed → [ ] validated on prototype
 
@@ -101,7 +102,9 @@ control (DSP index) → Ec+ = 244 mV × (control − 1):
 ```
 
 The RV_VCA_UNITY trim adjusts the per-channel Ec+ offset so Ec+ = 0 ⇒ exactly 0 dB.
-Nominal small trim range → 500 Ω trimpot adequate.
+**Change 0020 (HIGH-3):** this is realized as a **voltage-injection** trim, not a series rheostat —
+RV_VCA_UNITY is a **10 kΩ** divider across a shared ±1.2 V reference, wiper → R_inj (1 MΩ) → Ec+,
+with V_ctrl → R_ec (10 kΩ) → Ec+; ±~2 dB authority (see the §3 / block-4 note).
 
 ## Design Choices & Rationale
 
@@ -119,7 +122,7 @@ VCA behavior from hardware synthesizers.
 THAT2180 Input (pin 1) is a current input; R_in sets V→I (I_in = AUDIO_IN / R_in).
 Output (pin 8) is a current output into an I/V op-amp; AUDIO_OUT = −I_out · R_f.
 R_f = R_in = 20 kΩ → unity (−1) at 0 dB; ~20 kΩ input impedance.
-RV_VCA_UNITY (500 Ω SMD trimpot) provides ±3.3% trim range around nominal.
+RV_VCA_UNITY (change 0020: **10 kΩ** SMD trimpot, voltage-injection divider — not a series rheostat).
 ```
 
 ### Input Protection (VCA_IN jack)
@@ -152,7 +155,7 @@ is confirmed in the datasheet, with slightly reduced headroom. Audio headroom wi
 | U_CV | TL072CDT | SOIC-8 | — | CV conditioning: CV+OFS summer (A) + effCV inverter (B) |
 | R_in | Resistor | 0603 | 20 kΩ | Audio V→I into Input (pin 1); 1% |
 | R_f | Resistor | 0603 | 20 kΩ | I/V transimpedance feedback (unity @0 dB); 1% |
-| RV_VCA_UNITY | Bourns 3224W | SMD | 500 Ω | Per-channel unity-gain trim at Ec+ |
+| RV_VCA_UNITY | Bourns 3224W | SMD | 10 kΩ | Per-channel unity trim (change 0020: voltage-injection divider across ±1.2V ref, not series rheostat) |
 | R_cv_in | Resistor | 0603 | 100 Ω | CV input protection series resistor |
 | D_cv_in | BAT54S | SOT-23 | — | Dual Schottky clamp at CV input |
 | C_VCC, C_VEE | Ceramic bypass | 0603 | 100 nF | Per supply pin (THAT2180 ×2 + each TL072) |

@@ -3,6 +3,7 @@
 > ✅ **Re-verified 2026-05-30** (content rewritten 2026-05-29) against the locked plugin via
 > block-5. THAT340 V/oct→Iabc converter; `f0 = f_ref·2^V` (1 V/oct). The per-channel-expo
 > decision (one THAT340 per channel for true stereo tilt) is current. Shared by LP1/LP2/HP/BP.
+> 🔧 **Change 0020:** added the missing **V/oct base divider** — series R_VOCT (≈49.9k) + a **Vishay TFPT 1k +4110ppm/K tempco** shunt to GND (the THAT340 has NO internal tempco). Without it the base saw full V/oct and railed. Tilt (LP1/BP) sums passively at this node via an equal series R. SPICE: specs/sim/expo_voct.cir, lp1_tilt_passive.cir.
 
 Design status: [x] draft → [ ] reviewed → [ ] validated on prototype
 
@@ -102,10 +103,12 @@ Since V_ctrl steps 1V per octave, the scaling network divides V_ctrl by:
 
 ### Temperature Compensation
 
-THAT340 integrates a PTAT bias network. As temperature rises, V_T increases, which
-would reduce g_m and flatten tracking. The PTAT current increases proportionally with
-temperature, maintaining constant V_be_diff / V_T across temperature. No external
-tempco resistor is needed.
+⚠️ **Corrected (change 0020):** the THAT340 is a plain matched-NPN/PNP array — it does **NOT** have an
+internal PTAT/tempco network (the claim above is wrong). The −1/T drift of V_BE/V_T in the V/oct
+divider must be compensated by an **external +3300–3500 ppm/°C tempco resistor**; POGO uses a **Vishay
+TFPT (+4110 ppm/K)** as the divider's shunt leg (the trimmable V/oct slope absorbs the ~20% TCR excess).
+The THAT340's value is its tight **V_BE matching** (low offset between the expo and reference
+transistors), not temperature compensation.
 
 ## Design Choices & Rationale
 

@@ -158,6 +158,15 @@ VCA I/V outputs (op-amp, <100 Ω) drive LP1 / BP3 input resistors — negligible
 > control. 0018 added the ALT-BP VCA cell (2 more THAT2180 + I/V) and corrected the VCA_OFS
 > placement. Verified in `specs/block-4/block-4.nets.yaml`. CV→Ec+ scaling is Phase-3R bring-up.
 
+> 🔧 **Change 0020 HIGH-3 (Ec+ unity-trim topology fix):** the 4 unity trims (RV1/2/46/47) were wired
+> as **series rheostats into the high-Z Ec+ port** — which can't set a DC offset (SPICE `vca_ecplus.cir`:
+> ~0.004 dB authority). Replaced with a **voltage-injection trim**: the AMT wiper is now buffered
+> (**new U97-A** TL072 unity buffer → `V_CTRL_BUF`, decoupling the 4 cells, which the old unbuffered
+> wiper coupled) and drives each Ec+ via `R_ec` (10k, R235–R238); each trim (now **10k**) is a divider
+> across a shared **±1.2 V reference** (R233/R234), wiper → `R_inj` (1M, R239–R242) → Ec+. Gives ±~2 dB
+> unity authority and nulls the port's bias-current offset (SPICE `vca_ecplus_full.cir`: g_ctrl 0.984).
+> The same fix is applied to the block-6 per-band DRIVE VCAs (RV51–56).
+
 **Board assignment:** Audio board (carries audio-frequency signal; THAT 2180 and CV
 conditioning are co-located with the signal path). The VCA_AMT/OFS pots are on the control board.
 

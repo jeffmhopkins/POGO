@@ -125,6 +125,14 @@ See `aux/aux-ota-c-svf.md`, `aux/aux-expo-converter.md`, `aux/aux-q-control.md`.
 > the §2 model; HP output buffer corrected to a unity follower (R100–R103 removed); HP Q
 > collapsed to one LM13700 (U51 cell A=L, cell B=R; U52 removed); RV18 (Q_max) = 100 kΩ.
 
+> 🔧 **Change 0020 (CV-conditioning fixes):**
+> - **§A Expo V/oct divider (C1):** `R110` R_VOCT **47k→49.9k** + **Vishay TFPT 1k tempco** shunt
+>   (R229) HP_EXPO_BASE→GND. Centers 17.92 mV/oct at mid-trim (was railed — no shunt).
+> - **§C OTA tap (H5):** v1/v2 tap the **unbuffered** OTA outputs (pins 5/12), not the Darlington
+>   buffers; pulldowns R112–R115 removed.
+> - **§D Q-cell R_Iabc (M5):** `R104/R105` **1M→100k** (Iabc pin ≈ −10.8 V, not GND). IRES_AMP
+>   negative-V_ires drive + clamp is a Phase-3R trim item.
+
 ### Component derivations
 
 **Integrator capacitors C1, C2 (per channel, ×2 channels = 4 total): 47 nF C0G/NP0 0603**
