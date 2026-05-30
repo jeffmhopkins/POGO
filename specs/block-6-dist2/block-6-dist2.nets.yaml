@@ -80,8 +80,15 @@ parts:
   R166: { sym: r, value: 100k }   # drive summer: DRIVE-CV input (MOD_BP2_DIST)
   R167: { sym: r, value: 100k }   # drive summer: bias input (knob=0.20 ~ 0 dB unity; Phase-3R)
   R168: { sym: r, value: 100k }   # drive summer: feedback
-  RV53: { sym: trimpot, part: "Bourns 3224W", value: BP2_DRIVE_UNITY_L }  # Ec+ L unity trim
+  RV53: { sym: trimpot, part: "Bourns 3224W", value: BP2_DRIVE_UNITY_L }  # Ec+ L unity trim (HIGH-3 injection divider)
   RV54: { sym: trimpot, part: "Bourns 3224W", value: BP2_DRIVE_UNITY_R }  # Ec+ R unity trim
+  # HIGH-3 (change 0020): Ec+ voltage-injection trim (mirrors dist1). See dist1 for prose.
+  R249: { sym: r, value: 45k3 }   # ±ref divider +12V→REF_P2
+  R250: { sym: r, value: 45k3 }   # ±ref divider -12V→REF_N2
+  R251: { sym: r, value: 10k }    # R_ec L (V_DRIVE_CTRL_2→EC_BP2_DRIVE_L)
+  R252: { sym: r, value: 10k }    # R_ec R
+  R253: { sym: r, value: 1M }     # R_inj L (RV53 wiper→EC_BP2_DRIVE_L)
+  R254: { sym: r, value: 1M }     # R_inj R (RV54 wiper→EC_BP2_DRIVE_R)
   RV36: { sym: trimpot, part: "knob", value: BP2_DIST }   # DRIVE knob (control board; existing ref)
   C110_U87p: { sym: c, value: 100nF }
   C110_U87n: { sym: c, value: 100nF }
@@ -120,12 +127,16 @@ nets:
   BP2_DRIVEIV_R: [U88.8, U92.6, R164.1]
   BP2_DRIVEOUT_L: [U92.1, R163.2, R18_2L.1, R20_2L.1, R22_2L.1, C_WF_2La.1, C_WF_2Lb.1]
   BP2_DRIVEOUT_R: [U92.7, R164.2, R18_2R.1, R20_2R.1, R22_2R.1, C_WF_2Ra.1, C_WF_2Rb.1]
-  EC_BP2_DRIVE_L: [U87.2, RV53.1, RV53.2]
-  EC_BP2_DRIVE_R: [U88.2, RV54.1, RV54.2]
+  EC_BP2_DRIVE_L: [U87.2, R251.2, R253.2]        # Ec+ L: R_ec from V_DRIVE_CTRL_2 + R_inj from RV53 wiper (HIGH-3)
+  EC_BP2_DRIVE_R: [U88.2, R252.2, R254.2]
+  REF_P2: [R249.2, RV53.1, RV54.1]
+  REF_N2: [R250.2, RV53.3, RV54.3]
+  TRIMW_BP2_L: [RV53.2, R253.1]
+  TRIMW_BP2_R: [RV54.2, R254.1]
   MOD_BP2_DIST: [R166.1]
   BP2_DRIVE_KNOB: [RV36.2, R165.1]
   BP2_DRIVE_SUM: [U92.9, R165.2, R166.2, R167.2, R168.1]
-  V_DRIVE_CTRL_2: [U92.8, R168.2, RV53.3, RV54.3]
+  V_DRIVE_CTRL_2: [U92.8, R168.2, R251.1, R252.1] # summer out (low-Z) -> both R_ec (HIGH-3)
   BP2_DRIVE_SPARE: [U92.14, U92.13]
   BP2_SCVG_L: [U36.2, R18_2L.2, R19_2L.1, D4_2Lb.K, D4_2Lc.A]
   BP2_SCOUT_L: [U36.1, R19_2L.2, D4_2La.A, D4_2Ld.K, U32.13]
@@ -178,10 +189,10 @@ nets:
   VREF_N4: [R201.1, R202.1]            # <- dist1 shared -4V (boundary)
   "+12V": [U32.16, C110_U32p.1, U36.8, C110_U36p.1, U37.8, C110_U37p.1, U42.8, C110_U42p.1, U43.8, C110_U43p.1, U76.16, C110_U76p.1,
            U87.7, U88.7, U92.4, C110_U87p.1, C110_U88p.1, C110_U92p.1,
-           U95.4, C110_U95p.1]
+           U95.4, C110_U95p.1, R249.1]
   "-12V": [U32.7, C110_U32n.1, U36.4, C110_U36n.1, U37.4, C110_U37n.1, U42.4, C110_U42n.1, U43.4, C110_U43n.1, U76.7, C110_U76n.1,
            U87.5, U88.5, U92.11, C110_U87n.1, C110_U88n.1, C110_U92n.1,
-           U95.11, C110_U95n.1]
+           U95.11, C110_U95n.1, R250.1]
   GND: [U32.8, U32.6, C110_U32p.2, C110_U32n.2, C110_U36p.2, C110_U36n.2, C110_U37p.2, C110_U37n.2, C110_U42p.2, C110_U42n.2, C110_U43p.2, C110_U43n.2, U76.8, U76.6, C110_U76p.2, C110_U76n.2, U36.3, D5_2Lb.3, U36.5, U42.3, D6_2Lb.K, D6_2Lc.A, C_WF_2La.2, C_WF_2Lb.2, U37.3, D5_2Rb.3, U37.5, U43.3, D6_2Rb.K, D6_2Rc.A, C_WF_2Ra.2, C_WF_2Rb.2,
         U87.3, U87.4, U87.6, U88.3, U88.4, U88.6, U92.3, U92.5, U92.10, U92.12, RV36.1,
         C110_U87p.2, C110_U87n.2, C110_U88p.2, C110_U88n.2, C110_U92p.2, C110_U92n.2,

@@ -83,8 +83,17 @@ parts:
   R158: { sym: r, value: 100k }   # drive summer: DRIVE-CV input (MOD_BP1_DIST)
   R159: { sym: r, value: 100k }   # drive summer: bias input (knob=0.20 ~ 0 dB unity; Phase-3R)
   R160: { sym: r, value: 100k }   # drive summer: feedback
-  RV51: { sym: trimpot, part: "Bourns 3224W", value: BP1_DRIVE_UNITY_L }  # Ec+ L unity trim (rheostat)
+  RV51: { sym: trimpot, part: "Bourns 3224W", value: BP1_DRIVE_UNITY_L }  # Ec+ L unity trim (HIGH-3 injection divider)
   RV52: { sym: trimpot, part: "Bourns 3224W", value: BP1_DRIVE_UNITY_R }  # Ec+ R unity trim
+  # HIGH-3 (change 0020): Ec+ voltage-injection trim (mirrors block-4). V_DRIVE_CTRL_1 (U91-C summer
+  # out, already low-Z → no extra buffer) drives Ec+ via R_ec; trim wiper injects via R_inj across a
+  # local ±1.2V ref. Replaces the useless series-rheostat-into-high-Z-Ec+ (SPICE vca_ecplus*.cir).
+  R243: { sym: r, value: 45k3 }   # ±ref divider +12V→REF_P1
+  R244: { sym: r, value: 45k3 }   # ±ref divider -12V→REF_N1
+  R245: { sym: r, value: 10k }    # R_ec L (V_DRIVE_CTRL_1→EC_BP1_DRIVE_L)
+  R246: { sym: r, value: 10k }    # R_ec R
+  R247: { sym: r, value: 1M }     # R_inj L (RV51 wiper→EC_BP1_DRIVE_L)
+  R248: { sym: r, value: 1M }     # R_inj R (RV52 wiper→EC_BP1_DRIVE_R)
   RV33: { sym: trimpot, part: "knob", value: BP1_DIST }   # DRIVE knob (control board; existing ref)
   C110_U85p: { sym: c, value: 100nF }   # U85 V+
   C110_U85n: { sym: c, value: 100nF }   # U85 V-
@@ -142,13 +151,17 @@ nets:
   BP1_DRIVEIV_R: [U86.8, U91.6, R156.1]
   BP1_DRIVEOUT_L: [U91.1, R155.2, R18_1L.1, R20_1L.1, R22_1L.1, C_WF_1La.1, C_WF_1Lb.1]  # I/V out L -> SC/HC/WF
   BP1_DRIVEOUT_R: [U91.7, R156.2, R18_1R.1, R20_1R.1, R22_1R.1, C_WF_1Ra.1, C_WF_1Rb.1]  # I/V out R -> SC/HC/WF
-  EC_BP1_DRIVE_L: [U85.2, RV51.1, RV51.2]        # Ec+ L via unity trim (rheostat)
-  EC_BP1_DRIVE_R: [U86.2, RV52.1, RV52.2]
+  EC_BP1_DRIVE_L: [U85.2, R245.2, R247.2]        # Ec+ L: R_ec from V_DRIVE_CTRL_1 + R_inj from RV51 wiper (HIGH-3)
+  EC_BP1_DRIVE_R: [U86.2, R246.2, R248.2]
+  REF_P1: [R243.2, RV51.1, RV52.1]               # local +1.2V ref -> trim tops
+  REF_N1: [R244.2, RV51.3, RV52.3]               # local -1.2V ref -> trim bottoms
+  TRIMW_BP1_L: [RV51.2, R247.1]                  # trim wiper -> R_inj L
+  TRIMW_BP1_R: [RV52.2, R248.1]
   # drive control: TL074 half C inverting summer (DRIVE knob + DRIVE CV + bias) -> Ec+ trims
   MOD_BP1_DIST: [R158.1]                          # <- block-3 DRIVE CV (boundary)
   BP1_DRIVE_KNOB: [RV33.2, R157.1]                # DRIVE knob wiper -> summer input
   BP1_DRIVE_SUM: [U91.9, R157.2, R158.2, R159.2, R160.1]   # half-C (-) summing node
-  V_DRIVE_CTRL_1: [U91.8, R160.2, RV51.3, RV52.3] # summer out -> both Ec+ unity trims
+  V_DRIVE_CTRL_1: [U91.8, R160.2, R245.1, R246.1] # summer out (low-Z) -> both R_ec (HIGH-3; was -> trim pin3)
   # half-D spare: unity buffer, output unused
   BP1_DRIVE_SPARE: [U91.14, U91.13]               # out tied to in- (unity)
   BP1_SCVG_L: [U34.2, R18_1L.2, R19_1L.1, D4_1Lb.K, D4_1Lc.A]
@@ -212,10 +225,10 @@ nets:
   VREF_N4: [R188.2, R189.1, C111_N4.1, R190.1, R191.1]
   "+12V": [U31.16, C110_U31p.1, U34.8, C110_U34p.1, U35.8, C110_U35p.1, U40.8, C110_U40p.1, U41.8, C110_U41p.1, U75.16, C110_U75p.1,
            U85.7, U86.7, U91.4, C110_U85p.1, C110_U86p.1, C110_U91p.1,
-           U94.4, C110_U94p.1, R186.1]
+           U94.4, C110_U94p.1, R186.1, R243.1]
   "-12V": [U31.7, C110_U31n.1, U34.4, C110_U34n.1, U35.4, C110_U35n.1, U40.4, C110_U40n.1, U41.4, C110_U41n.1, U75.7, C110_U75n.1,
            U85.5, U86.5, U91.11, C110_U85n.1, C110_U86n.1, C110_U91n.1,
-           U94.11, C110_U94n.1, R188.1]
+           U94.11, C110_U94n.1, R188.1, R244.1]
   GND: [U31.8, U31.6, C110_U31p.2, C110_U31n.2, C110_U34p.2, C110_U34n.2, C110_U35p.2, C110_U35n.2, C110_U40p.2, C110_U40n.2, C110_U41p.2, C110_U41n.2, U75.8, U75.6, C110_U75p.2, C110_U75n.2, U34.3, D5_1Lb.3, U34.5, U40.3, D6_1Lb.K, D6_1Lc.A, C_WF_1La.2, C_WF_1Lb.2, U35.3, D5_1Rb.3, U35.5, U41.3, D6_1Rb.K, D6_1Rc.A, C_WF_1Ra.2, C_WF_1Rb.2,
         U85.3, U85.4, U85.6, U86.3, U86.4, U86.6, U91.3, U91.5, U91.10, U91.12, RV33.1,
         C110_U85p.2, C110_U85n.2, C110_U86p.2, C110_U86n.2, C110_U91p.2, C110_U91n.2,
