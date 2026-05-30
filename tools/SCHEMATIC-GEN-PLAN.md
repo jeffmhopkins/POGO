@@ -67,8 +67,8 @@ Ordered by rising symbol/wiring risk so each step de-risks the next. ✅ = done.
 Remaining: **none** — all 10 blocks transcribed and `--check` clean (10/10). The shared U9/U10 Q-VCAs are hosted on block-5 (dual-owned, `shared: true`).
 
 ### block-6 transcription notes (2026-05-29)
-- **CD4053 symbol bug fixed:** the registered `sym_cd4053`/`cd4053_pins` had scrambled
-  channel pin numbers (e.g. pin 15 is the Y-channel common, not X1_A; pins 1/2/3 and
+- **CD4053 symbol bug fixed:** the CD4053 symbol (now `components/symbols/cd4053.yaml`) had
+  scrambled channel pin numbers (e.g. pin 15 is the Y-channel common, not X1_A; pins 1/2/3 and
   4/5 were swapped) **and** overlapped VEE(7) with X1_C(12) at one coordinate. Both
   corrected against the TI CD4053B datasheet (selects A/B/C = 11/10/9; X com/0/1 =
   14/12/13; Y = 15/2/1; Z = 4/5/3). No other block uses CD4053, so no drift.
@@ -161,7 +161,8 @@ fresh pass:
 - **BP resonator = Option B (DSP-faithful):** the plugin BP (`BandpassSVF.hpp`) is the
   same 2-integrator Simper SVF as LP1/HP/LP2 (Q = damping term). So mirror block-5/8 but
   tap **v1 (BP)** instead of v2, with **separate Q-VCA OTAs U67–U69** (one per group,
-  cell A = L, cell B = R) injecting damping at the SUM_AMP virtual ground (like shared-q).
+  cell A = L, cell B = R) injecting damping at the SUM_AMP virtual ground (like the
+  block-5-hosted shared Q-VCAs).
 - **Per-channel expo (true BP_TILT):** U28–U30 = L expo, U70–U72 = R expo; each fed
   `BP{g}_VCTRL ± V_tilt` (U27-A inverter makes −V_tilt; R127 tilt summers). Mirror block-5.
 - **Distortion mux = +3 CD4053 (stereo 1-of-3):** per group, 2 CD4053 (U31/U75, U32/U76,
@@ -225,9 +226,10 @@ Fix any missing `qty` on grouped rows as you go (block-1 fixed R3–R6).
 ## Conventions / open decisions
 
 - **Power rails:** currently global labels (`+12V`/`-12V`/`GND`) — uniform with
-  signal nets, so the coverage validator treats them identically. Alternative:
-  `power_sym()` symbols. Keep global labels unless a board-level sheet needs the
-  power-symbol convention; revisit at board assembly.
+  signal nets, so the coverage validator treats them identically. Alternative: dedicated
+  power-port symbols (a `power:` archetype + emitter would need to be (re)added — the old
+  `power_sym()` helper was removed with the rest of the hand-coded symbols). Keep global
+  labels unless a board-level sheet needs the power-symbol convention; revisit at board assembly.
 - **No-connect policy:** prefer listing real NC pins (datasheet NC, spare half of a
   dual, unused switch lug) in `no_connect` over inventing tie nets. The validator
   requires every pin be wired or NC, so this is enforced.

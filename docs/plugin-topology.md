@@ -52,8 +52,8 @@ feeding the BP wet computation.
 ```cpp
 enum ParamId {
     // ── Input / Pre-Gain ───────────────────────────────────────
-    GAIN_MAIN_PARAM,        // switch 0/1 → 1× / 5×
-    GAIN_BP3_PARAM,         // switch 0/1 → 1× / 5× (ALT BP3 input)
+    GAIN_PARAM,        // switch 0/1 → 1× / 5×
+    ALT_GAIN_PARAM,         // switch 0/1 → 1× / 5× (ALT BP3 input)
 
     // ── LFO ────────────────────────────────────────────────────
     LFO1_RATE_PARAM,        // 0–1, exp 0.05–20 Hz
@@ -213,14 +213,14 @@ inR = R_IN connected ? clamp(R_IN, −11, +11) : inL
 
 ### Block 1 — Pre-Gain
 ```
-gainMain = GAIN_MAIN_PARAM >= 0.5
+gainMain = GAIN_PARAM >= 0.5
 pgL = gainMain ? clamp(inL × 5, −10.5, +10.5) : inL
 pgR = gainMain ? clamp(inR × 5, −10.5, +10.5) : inR
 ```
 
 ALT path (runs in parallel; bypasses VCA+LP1 for BP input):
 ```
-gainBP3 = GAIN_BP3_PARAM >= 0.5
+gainBP3 = ALT_GAIN_PARAM >= 0.5
 altL = ALT_BP_L connected ? (gainBP3 ? clamp(ALT_BP_L × 5, −10.5, +10.5) : ALT_BP_L) : pgL
 altR = ALT_BP_R connected ? (gainBP3 ? clamp(ALT_BP_R × 5, −10.5, +10.5) : ALT_BP_R) : altL
 ```
@@ -417,7 +417,7 @@ scale the result (−1 to +1, bipolar). This is unchanged from the old architect
 - Remove: `BP_POL_PARAM` / polarity entirely (cut — hardware uses a fixed output-polarity inverter; no user polarity control). DIST mode is per-band (`BP{1,2,3}_DIST_MODE_PARAM`), not a global `BP_DIST_PARAM`.
 - Remove: `BAND_L_OUTPUT`, `BAND_R_OUTPUT` → replaced by `BP3_L_OUTPUT`, `BP3_R_OUTPUT`
 - Remove: old `MOD_AMOUNT_PARAM` (knob) → replaced by `MOD_SCALE_PARAM` (trimpot, same math)
-- Add: `GAIN_BP3_PARAM`, `VCA_OFS_PARAM`, `LP1_TILT_PARAM`, `BP_MIX_PARAM`, `BP_TILT_ATT_PARAM`
+- Add: `ALT_GAIN_PARAM`, `VCA_OFS_PARAM`, `LP1_TILT_PARAM`, `BP_MIX_PARAM`, `BP_TILT_ATT_PARAM`
 - VCA_AMT: was panel knob `RoundSmallBlackKnob` → now trimpot `PogoTrimPot` (position from build tool)
 
 ---
@@ -426,8 +426,8 @@ scale the result (−1 to +1, bipolar). This is unchanged from the old architect
 
 | Parameter | Default | Rationale |
 |---|---|---|
-| GAIN_MAIN_PARAM | 0 (1×) | Unity gain at patch start |
-| GAIN_BP3_PARAM | 0 (1×) | Unity gain |
+| GAIN_PARAM | 0 (1×) | Unity gain at patch start |
+| ALT_GAIN_PARAM | 0 (1×) | Unity gain |
 | LFO1/2_RATE_PARAM | 0.3 | ~0.27 Hz (gentle default) |
 | MOD_SCALE_PARAM | 0.5 | ~1× (middle of scale range) |
 | MOD_OFFSET_PARAM | 0.0 | No DC offset |
