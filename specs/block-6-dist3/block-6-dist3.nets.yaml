@@ -1,0 +1,132 @@
+# POGO block-6-dist3 — split from block-6.nets.yaml (behavior-preserving 7-way partition)
+# Auto-split: parts/nets identical to the block-6 monolith; cross-section wires are boundary nets.
+
+block: block-6-dist3
+board: audio
+title: POGO Block 6 DIST3 - BP3 SC/HC/WF + CD4053 mux
+
+parts:
+  U33: { sym: cd4053, part: CD4053, value: CD4053 }
+  C110_U33p: { sym: c, value: 100nF }
+  C110_U33n: { sym: c, value: 100nF }
+  U38: { sym: opamp2, part: TL072CDT, value: TL072 }
+  C110_U38p: { sym: c, value: 100nF }
+  C110_U38n: { sym: c, value: 100nF }
+  U39: { sym: opamp2, part: TL072CDT, value: TL072 }
+  C110_U39p: { sym: c, value: 100nF }
+  C110_U39n: { sym: c, value: 100nF }
+  U44: { sym: opamp2, part: TL072CDT, value: TL072 }
+  C110_U44p: { sym: c, value: 100nF }
+  C110_U44n: { sym: c, value: 100nF }
+  U45: { sym: opamp2, part: TL072CDT, value: TL072 }
+  C110_U45p: { sym: c, value: 100nF }
+  C110_U45n: { sym: c, value: 100nF }
+  U77: { sym: cd4053, part: CD4053, value: CD4053 }
+  C110_U77p: { sym: c, value: 100nF }
+  C110_U77n: { sym: c, value: 100nF }
+  R18_3L: { sym: r, value: 10k }
+  R19_3L: { sym: r, value: 10k }
+  R20_3L: { sym: r, value: 10k }
+  R21_3L: { sym: r, value: 10k }
+  R22_3L: { sym: r, value: 10k }
+  R23_3L: { sym: r, value: 10k }
+  R24_3L: { sym: r, value: 10k }
+  R25_3L: { sym: r, value: 10k }
+  R_f_wf_3L: { sym: r, value: 10k }
+  C_WF_3La: { sym: c, value: 47pF }
+  C_WF_3Lb: { sym: c, value: 47pF }
+  D4_3La: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D6_3La: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D4_3Lb: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D6_3Lb: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D4_3Lc: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D6_3Lc: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D4_3Ld: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D6_3Ld: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D5_3La: { sym: zener, part: BZX84C5V1, value: BZX84C5V1 }
+  D5_3Lb: { sym: zener, part: BZX84C5V1, value: BZX84C5V1 }
+  R18_3R: { sym: r, value: 10k }
+  R19_3R: { sym: r, value: 10k }
+  R20_3R: { sym: r, value: 10k }
+  R21_3R: { sym: r, value: 10k }
+  R22_3R: { sym: r, value: 10k }
+  R23_3R: { sym: r, value: 10k }
+  R24_3R: { sym: r, value: 10k }
+  R25_3R: { sym: r, value: 10k }
+  R_f_wf_3R: { sym: r, value: 10k }
+  C_WF_3Ra: { sym: c, value: 47pF }
+  C_WF_3Rb: { sym: c, value: 47pF }
+  D4_3Ra: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D6_3Ra: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D4_3Rb: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D6_3Rb: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D4_3Rc: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D6_3Rc: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D4_3Rd: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D6_3Rd: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D5_3Ra: { sym: zener, part: BZX84C5V1, value: BZX84C5V1 }
+  D5_3Rb: { sym: zener, part: BZX84C5V1, value: BZX84C5V1 }
+  R128_3sc: { sym: r, value: 100k }
+  R128_3wf: { sym: r, value: 100k }
+
+nets:
+  V5LOGIC: [R128_3sc.1, R128_3wf.1]
+  BP3_BPBUF_L: [R18_3L.1, R20_3L.1, R22_3L.1, C_WF_3La.1, C_WF_3Lb.1]
+  BP3_BPBUF_R: [R18_3R.1, R20_3R.1, R22_3R.1, C_WF_3Ra.1, C_WF_3Rb.1]
+  BP3_SCVG_L: [U38.2, R18_3L.2, R19_3L.1, D4_3Lb.K, D4_3Lc.A]
+  BP3_SCOUT_L: [U38.1, R19_3L.2, D4_3La.A, D4_3Ld.K, U33.13]
+  BP3_SCM1_L: [D4_3La.K, D4_3Lb.A]
+  BP3_SCM2_L: [D4_3Lc.K, D4_3Ld.A]
+  BP3_HCVG_L: [U38.6, R20_3L.2, R21_3L.1]
+  BP3_HCOUT_L: [U38.7, R21_3L.2, D5_3La.3, U77.12]
+  BP3_HCZMID_L: [D5_3La.1, D5_3Lb.1]
+  BP3_WFVG_L: [U44.2, R22_3L.2, R23_3L.1]
+  BP3_VFOLDIN_L: [U44.1, R23_3L.2, R24_3L.1, R25_3L.1]
+  BP3_WFCLAMP_L: [R24_3L.2, D6_3La.A, D6_3Ld.K, U44.5]
+  BP3_WFCM1_L: [D6_3La.K, D6_3Lb.A]
+  BP3_WFCM2_L: [D6_3Lc.K, D6_3Ld.A]
+  BP3_WFFVG_L: [U44.6, R25_3L.2, R_f_wf_3L.1]
+  BP3_WFOUT_L: [U44.7, R_f_wf_3L.2, U77.13]
+  BP3_SCVG_R: [U39.2, R18_3R.2, R19_3R.1, D4_3Rb.K, D4_3Rc.A]
+  BP3_SCOUT_R: [U39.1, R19_3R.2, D4_3Ra.A, D4_3Rd.K, U33.1]
+  BP3_SCM1_R: [D4_3Ra.K, D4_3Rb.A]
+  BP3_SCM2_R: [D4_3Rc.K, D4_3Rd.A]
+  BP3_HCVG_R: [U39.6, R20_3R.2, R21_3R.1]
+  BP3_HCOUT_R: [U39.7, R21_3R.2, D5_3Ra.3, U77.2]
+  BP3_HCZMID_R: [D5_3Ra.1, D5_3Rb.1]
+  BP3_WFVG_R: [U45.2, R22_3R.2, R23_3R.1]
+  BP3_VFOLDIN_R: [U45.1, R23_3R.2, R24_3R.1, R25_3R.1]
+  BP3_WFCLAMP_R: [R24_3R.2, D6_3Ra.A, D6_3Rd.K, U45.5]
+  BP3_WFCM1_R: [D6_3Ra.K, D6_3Rb.A]
+  BP3_WFCM2_R: [D6_3Rc.K, D6_3Rd.A]
+  BP3_WFFVG_R: [U45.6, R25_3R.2, R_f_wf_3R.1]
+  BP3_WFOUT_R: [U45.7, R_f_wf_3R.2, U77.1]
+  BP3_SEL_WF: [U77.11, U77.10, R128_3wf.2]
+  BP3_MID_L: [U77.14, U33.12]
+  BP3_MID_R: [U77.15, U33.2]
+  BP3_SEL_SC: [U33.11, U33.10, R128_3sc.2]
+  BP3_TAP_L: [U33.14]
+  BP3_TAP_R: [U33.15]
+  "+12V": [U33.16, C110_U33p.1, U38.8, C110_U38p.1, U39.8, C110_U39p.1, U44.8, C110_U44p.1, U45.8, C110_U45p.1, U77.16, C110_U77p.1]
+  "-12V": [U33.7, C110_U33n.1, U38.4, C110_U38n.1, U39.4, C110_U39n.1, U44.4, C110_U44n.1, U45.4, C110_U45n.1, U77.7, C110_U77n.1]
+  GND: [U33.8, U33.6, C110_U33p.2, C110_U33n.2, C110_U38p.2, C110_U38n.2, C110_U39p.2, C110_U39n.2, C110_U44p.2, C110_U44n.2, C110_U45p.2, C110_U45n.2, U77.8, U77.6, C110_U77p.2, C110_U77n.2, U38.3, D5_3Lb.3, U38.5, U44.3, D6_3Lb.K, D6_3Lc.A, C_WF_3La.2, C_WF_3Lb.2, U39.3, D5_3Rb.3, U39.5, U45.3, D6_3Rb.K, D6_3Rc.A, C_WF_3Ra.2, C_WF_3Rb.2]
+
+no_connect:
+  - U33.3
+  - U33.4
+  - U33.5
+  - U33.9
+  - U77.3
+  - U77.4
+  - U77.5
+  - U77.9
+
+boundary:
+  - V5LOGIC
+  - BP3_BPBUF_L
+  - BP3_BPBUF_R
+  - BP3_TAP_L
+  - BP3_TAP_R
+  - BP3_SEL_SC
+  - BP3_SEL_WF
+

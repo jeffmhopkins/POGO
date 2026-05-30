@@ -42,7 +42,7 @@ spec authors + group adversarial review → netlist + design-intent review → u
 | 3 — Mod Bus | ✅ | ✅ | G4+G5+G6(delete) | **Big block.** Wired MOD_SRC SW7 (DW5) 3-way LFO1/LFO2/EXT (COMs bridged), MOD_IN→EXT-only, accept LFO1+LFO2 boundary inputs. **Removed** 3 MOD LEDs + driver U4 + R56-60 (no plugin/panel backing; 7→6 TL074). **Removed** VCA_AMT attenuverter RV5+inverter (VCA = raw bus normal, depth pot → block-4). Renamed per-band `BP*_FOCUS`→`TILT` (plugin/panel have no FOCUS CV). Refreshed aux-mod-bus-core + aux-attenuverter; dropped phantom distribution buffer (load is light). 18 attenuverters + 1 raw VCA normal. |
 | 4 — VCA | ✅ | ✅ | G4+G5+G6a | **ALT-VCA built** (B1 deferral): +2 THAT2180 (U78/U79) + I/V (U80) + R/trims/caps, sharing V_ctrl → BP3 (boundary `ALT_VCA_OUT_L/R`). **OFS placement fixed** (D-3): OFS summed into CV before the symmetric AMT pot → unity at AMT=0 regardless of OFS. **RV24/RV25→RV44/RV45** (cleared block-6 base-ref collision). B3 deferral (raw bus normal + VCA_AMT pot) confirmed already-satisfied. aux-vca-cell refreshed (4 cells, SIP-8, power, board name). |
 | 5 — LP Filter 1 | ✅ | ✅ | G4 (doc) | No behavioral divergence — topology already matches plugin (2-pole SVF, V/oct, per-channel THAT340 true tilt L=+/R=−, self-oscillation). Fixed: self-osc contradiction (§2 "Q capped ~50" was wrong → reaches self-osc, RV5 sets onset), power tally (1→2 THAT340), lifted STALE banners (§2/§3 + 3 aux), Q-curve approximation note, RV5/RV6 values, topology-doc RES `/10`. RV3-6 cross-board ref reuse noted (legal, future renumber). |
-| 6 — Triple BP + Dist | 🔲 | 🔲 | — | **0017 core:** netlist still wires **SVF→DIST**; plugin is **DIST→SVF** (`Pogo.cpp:443`) — core reorder UNBUILT. **DEFERRED-IN (from B1/B4):** add per-channel BP3 input selector choosing block-4 `ALT_VCA_OUT_L/R` vs main `bandL/R` (main normal when ALT unpatched). CLIP LED on dist output; BP3 tap post-BP pre-mix. |
+| 6 — Triple BP + Dist | 🚧 split done | 🔲 | — | **Split into 7 sections** (Scheme B): `block-6-{svf1,svf2,svf3,dist1,dist2,dist3,mix}`, behavior-preserving, all gates green, boundary-net symmetry verified. **Alignment still pending per-section:** DIST→SVF reorder (0017 core — now a re-point of the 6 `BPn_BPBUF` boundary nets), BP3 input selector (← block-4 `ALT_VCA_OUT`), CLIP-LED repoint, per-band TILT ×0.22 CV. U73 shared `[svf1,svf2]`. |
 | 7 — HP Filter | 🔲 | 🔲 | — | |
 | 8 — LP Filter 2 | 🔲 | 🔲 | — | |
 | B — Output Buffers | 🔲 | 🔲 | — | §2–4 STALE. |
@@ -75,6 +75,12 @@ spec authors + group adversarial review → netlist + design-intent review → u
   3-way (COMs bridged); Phase-3R to verify ON-ON-ON contact sequence vs datasheet.
 - 2026-05-30: Also corrected a phantom block-3 "distribution buffer" (halves C+D paralleled):
   the bus actually drives 18×100k R_SRC_NORM (~5.6k, ~1.8mA), so no buffer is needed.
+- 2026-05-30: **Block 6** — user chose to split the monolithic block-6 into 7 sections
+  (Scheme B: per-band svf1/2/3 + dist1/2/3 + mix), folded into 0018. Split executed
+  behavior-preserving (418 parts → 7 files, all gates green, 19 split-boundary nets verified
+  symmetric). Makes the pending DIST→SVF reorder a clean boundary re-point of the 6
+  `BPn_BPBUF` nets instead of surgery on an 831-line file. U73 (BP1+BP2 IRES_AMP) = shared
+  row `[block-6-svf1, block-6-svf2]` (U9/U10 precedent). (user: Scheme B)
 - 2026-05-30: **Block 4** — user approved 2× THAT2180 for the ALT-VCA (mirrors main cell;
   shares V_ctrl; THAT2180 count 2→4). Also fixed VCA_OFS placement (OFS before the symmetric
   AMT pot) so AMT=0 ⇒ unity for any OFS, matching the plugin; and renumbered the VCA pots

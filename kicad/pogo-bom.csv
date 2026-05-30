@@ -135,109 +135,187 @@ audio,R68,Resistor,1,,10kΩ,0603,,,,,block-5,LP1 L OTA1 buffer (v1) emitter pull
 audio,R69,Resistor,1,,10kΩ,0603,,,,,block-5,LP1 L OTA2 buffer (v2) emitter pulldown to V-
 audio,R70,Resistor,1,,10kΩ,0603,,,,,block-5,LP1 R OTA1 buffer (v1) emitter pulldown to V-
 audio,R71,Resistor,1,,10kΩ,0603,,,,,block-5,LP1 R OTA2 buffer (v2) emitter pulldown to V-
-audio,U15,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-6,BP1 OTA integrators + Q L
-audio,U16,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-6,BP1 OTA integrators + Q R
-audio,U17,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-6,BP2 OTA integrators + Q L
-audio,U18,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-6,BP2 OTA integrators + Q R
-audio,U19,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-6,BP3 OTA integrators + Q L
-audio,U20,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-6,BP3 OTA integrators + Q R
-audio,U21,IC,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/opa1612.pdf,block-6,BP1 SUM_AMP + buffer L
-audio,U22,IC,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/opa1612.pdf,block-6,BP1 SUM_AMP + buffer R
-audio,U23,IC,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/opa1612.pdf,block-6,BP2 SUM_AMP + buffer L
-audio,U24,IC,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/opa1612.pdf,block-6,BP2 SUM_AMP + buffer R
-audio,U25,IC,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/opa1612.pdf,block-6,BP3 SUM_AMP + buffer L
-audio,U26,IC,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/opa1612.pdf,block-6,BP3 SUM_AMP + buffer R
-audio,U27,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6,BP tilt inverter half A (−V_tilt for R); fixed BP output polarity-restore inverter (G=−1) half B
-audio,U28,IC,1,THAT340S14-U,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,THAT Corporation,,https://thatcorp.com/datashts/THAT_300-Series_Datasheet.pdf,block-6,BP1 expo converter
-audio,U29,IC,1,THAT340S14-U,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,THAT Corporation,,https://thatcorp.com/datashts/THAT_300-Series_Datasheet.pdf,block-6,BP2 expo converter
-audio,U30,IC,1,THAT340S14-U,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,THAT Corporation,,https://thatcorp.com/datashts/THAT_300-Series_Datasheet.pdf,block-6,BP3 expo converter
-audio,U31,IC,1,CD4053BM,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/cd4053b.pdf,block-6,BP1 distortion mux (SC/HC/WF select)
-audio,U32,IC,1,CD4053BM,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/cd4053b.pdf,block-6,BP2 distortion mux
-audio,U33,IC,1,CD4053BM,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/cd4053b.pdf,block-6,BP3 distortion mux
-audio,U34,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6,SC gain amp BP1_L (half A = SC amp; half B = HC amp)
-audio,U35,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6,SC gain amp BP1_R (half A = SC amp; half B = HC amp)
-audio,U36,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6,SC gain amp BP2_L (half A = SC amp; half B = HC amp)
-audio,U37,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6,SC gain amp BP2_R (half A = SC amp; half B = HC amp)
-audio,U38,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6,SC gain amp BP3_L (half A = SC amp; half B = HC amp)
-audio,U39,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6,SC gain amp BP3_R (half A = SC amp; half B = HC amp)
-audio,U40,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6,WF amps BP1_L (half A = pre-gain; half B = symmetric folder G=+2)
-audio,U41,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6,WF amps BP1_R (half A = pre-gain; half B = symmetric folder G=+2)
-audio,U42,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6,WF amps BP2_L (half A = pre-gain; half B = symmetric folder G=+2)
-audio,U43,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6,WF amps BP2_R (half A = pre-gain; half B = symmetric folder G=+2)
-audio,U44,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6,WF amps BP3_L (half A = pre-gain; half B = symmetric folder G=+2)
-audio,U45,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6,WF amps BP3_R (half A = pre-gain; half B = symmetric folder G=+2)
-audio,U46,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6,BP wet summer half A = L (BP1+BP2+BP3 inv sum); half B = MIX crossfade L
-audio,U47,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6,BP wet summer half A = R; half B = MIX crossfade R
-audio,U48,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6,BP wet polarity restore: half A = V_wet_inv→V_wet_pos (L); half B = V_wet_inv→V_wet_pos (R)
-audio,RV7,Trimpot/Pot,1,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6,BP1 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 200 Hz at 0V; ±25% range
-audio,RV8,Trimpot/Pot,1,3224W-1-xxx,20kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6,BP1 1V/oct tracking trim; ±10% range
-audio,RV9,Trimpot/Pot,1,,,SMD,,,,,block-6,BP1 Q_max trim (Iabc V_bias)
-audio,RV10,Trimpot/Pot,1,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6,BP2 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 1500 Hz at 0V; ±25% range
-audio,RV11,Trimpot/Pot,1,3224W-1-xxx,20kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6,BP2 1V/oct tracking trim; ±10% range
-audio,RV12,Trimpot/Pot,1,,,SMD,,,,,block-6,BP2 Q_max trim
-audio,RV13,Trimpot/Pot,1,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6,BP3 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 6000 Hz at 0V; ±25% range
-audio,RV14,Trimpot/Pot,1,3224W-1-xxx,20kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6,BP3 1V/oct tracking trim; ±10% range
-audio,RV15,Trimpot/Pot,1,,,SMD,,,,,block-6,BP3 Q_max trim
-audio,D4,Diode,24,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6,SC soft-clip diodes; 4 per path (2 antiparallel pairs) × 6 paths
-audio,D5,Diode,12,BZX84C5V1,,SOT-23,POGO_Package_TO_SOT_SMD:SOT-23,Nexperia,,https://assets.nexperia.com/documents/data-sheet/BZX84_SER.pdf,block-6,HC back-to-back zener clamps (±5.8V clip); 2 per path × 6 paths
-audio,D6,Diode,24,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6,"WF passive clamp diodes; 4 per path (2 per polarity, Vth=±1.4V) × 6 paths; true symmetric fold"
-audio,D7,Diode,1,BZX84C5V1,,SOT-23,POGO_Package_TO_SOT_SMD:SOT-23,Nexperia,,https://assets.nexperia.com/documents/data-sheet/BZX84_SER.pdf,block-6,CD4053 logic supply 5.1V zener shunt (from +12V with R_5V_logic)
-audio,C15,Capacitor,4,,150nF,0805,,,,,block-6,BP1 integrator caps (C0G; 2 per channel × L+R)
-audio,C19,Capacitor,4,,22nF,0603,,,,,block-6,BP2 integrator caps (C0G; 2 per channel × L+R)
-audio,C23,Capacitor,4,,4.7nF,0603,,,,,block-6,BP3 integrator caps (C0G; 2 per channel × L+R)
-audio,C27,Capacitor,1,,10µF,0603,,,,,block-6,CD4053 logic supply bulk bypass (electrolytic or ceramic)
-audio,C28,Capacitor,1,,100nF,0603,,,,,block-6,CD4053 logic supply HF bypass
-audio,R12,Resistor,12,,1kΩ,0603,,,,,block-6,OTA linearizing R; 1 per OTA cell × 2 cells × 6 LM13700 ICs (U15–U20)
-audio,R13,Resistor,6,,100kΩ,0603,,,,,block-6,SVF SUM_AMP R_in; 1 per group per channel (U21–U26 half A)
-audio,R14,Resistor,6,,100kΩ,0603,,,,,block-6,SVF SUM_AMP R_fb; 1 per group per channel
-audio,R15,Resistor,6,,100kΩ,0603,,,,,block-6,SVF SUM_AMP R_Q input; 1 per group per channel
-audio,R16,Resistor,2,,100kΩ,0603,,,,,block-6,BP tilt inverter R_in + R_fb in U27 half A
-audio,R17,Resistor,2,,100kΩ,0603,,,,,block-6,BP output polarity-restore inverter R_in + R_fb in U27 half B
-audio,R18,Resistor,6,,10kΩ,0603,,,,,block-6,R_SC_in; SC path input R; 1 per path × 6 paths
-audio,R19,Resistor,6,,10kΩ,0603,,,,,block-6,R_SC_fb_fixed; SC minimum feedback R (G≥1× at zero drive)
-audio,R20,Resistor,6,,10kΩ,0603,,,,,block-6,R_HC_in; HC path input R; 1 per path × 6 paths
-audio,R21,Resistor,6,,10kΩ,0603,,,,,block-6,R_HC_fb_fixed; HC minimum feedback R
-audio,R22,Resistor,6,,10kΩ,0603,,,,,block-6,R_WF_in; WF pre-gain input R; 1 per path × 6 paths
-audio,R23,Resistor,6,,10kΩ,0603,,,,,block-6,R_WF_fb_fixed; WF pre-gain minimum feedback R
-audio,R24,Resistor,6,,10kΩ,0603,,,,,block-6,R_clamp; WF passive clamp series R (limits diode current at threshold)
-audio,R25,Resistor,6,,10kΩ,0603,,,,,block-6,R_g; WF folder (−) input R (was R_fold 10kΩ; value unchanged)
-audio,R_f_wf,Resistor,6,,10kΩ,0603,,,,,block-6,R_f; WF folder feedback R; R_g=R_f → gain +2 at (+) input
-audio,C_WF,Capacitor,12,,47pF,0603,,,,,block-6,"RV_DRIVE wiper bypass cap (anti-RF, anti-scratchiness); 1 per path × 6 paths"
-audio,R26,Resistor,8,,33kΩ,0603,,,,,block-6,R_sum; BP wet summer input R; 3 inputs + 1 fb per channel × 2 ch (U46/U47 half A)
-audio,R27,Resistor,2,,100kΩ,0603,,,,,block-6,R_dry; MIX dry path input R (L and R; in U46/U47 half B)
-audio,R28,Resistor,2,,100kΩ,0603,,,,,block-6,R_mix_f; MIX crossfade feedback R (L and R)
-audio,R29,Resistor,1,,1kΩ,0603,,,,,block-6,R_5V_logic; series R from +12V to D7 zener shunt (5.1V logic rail for CD4053)
-audio,U67,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-6,"BP1 Q VCA (cell A = L Q, cell B = R Q)"
-audio,U68,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-6,"BP2 Q VCA (cell A = L Q, cell B = R Q)"
-audio,U69,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-6,"BP3 Q VCA (cell A = L Q, cell B = R Q)"
-audio,U70,IC,1,THAT340S14-U,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,THAT Corporation,,https://thatcorp.com/datashts/THAT_300-Series_Datasheet.pdf,block-6,BP1 expo converter R channel (per-channel tilt; U28 = L)
-audio,U71,IC,1,THAT340S14-U,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,THAT Corporation,,https://thatcorp.com/datashts/THAT_300-Series_Datasheet.pdf,block-6,BP2 expo converter R channel (U29 = L)
-audio,U72,IC,1,THAT340S14-U,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,THAT Corporation,,https://thatcorp.com/datashts/THAT_300-Series_Datasheet.pdf,block-6,BP3 expo converter R channel (U30 = L)
-audio,U73,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6,BP Q IRES_AMP: BP1 (half A) + BP2 (half B)
-audio,U74,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6,BP Q IRES_AMP: BP3 (half A); half B spare
-audio,R116,Resistor,6,,1MΩ,0603,,,,,block-6,R_Iabc_Q: V_ires → BP Q OTA Iabc; 1 per group per channel
-audio,R117,Resistor,3,,100kΩ,0603,,,,,block-6,R_QBIAS: BP Q IRES_AMP V_bias input; 1 per group
-audio,R118,Resistor,3,,100kΩ,0603,,,,,block-6,R_QINV: BP Q IRES_AMP FOCUS CV input; 1 per group
-audio,R119,Resistor,3,,100kΩ,0603,,,,,block-6,R_f_q: BP Q IRES_AMP feedback; 1 per group
-audio,R120,Resistor,3,,1MΩ,0603,,,,,block-6,R_IREF_A_R: R-channel expo I_ref fixed R; 1 per group
-audio,R121,Resistor,3,,47kΩ,0603,,,,,block-6,R_VOCT_R: R-channel expo V/oct scaling; 1 per group
-audio,R122,Resistor,3,,1kΩ,0603,,,,,block-6,R_E_R: R-channel expo emitter degeneration; 1 per group
-audio,R123,Resistor,12,,10kΩ,0603,,,,,block-6,R_BUF_PD: BP integrator Darlington buffer emitter pulldown to V-; 2 per group-channel
-audio,D13,Diode,3,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6,D_IRES: BP Q V_ires ≥0 clamp; 1 per group
-audio,C107,Capacitor,6,,10nF,0402,,,,,block-6,C_IABC_Q: BP Q-cell Iabc bypass; 1 per group per channel
-audio,C108,Capacitor,6,,10nF,0402,,,,,block-6,C_IABC_INT: BP integrator OTA Iabc bypass; 1 per group per channel
-audio,C109,Capacitor,6,,100nF,0603,,,,,block-6,C_IREF: expo I_ref node bypass; 1 per expo (6 expo: U28-30 L + U70-72 R)
-audio,RV24,Trimpot/Pot,3,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6,BP R-channel expo f_ref trim; 1 per group
-audio,RV25,Trimpot/Pot,3,3224W-1-xxx,20kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6,BP R-channel expo 1V/oct trim; 1 per group
-audio,C110,Capacitor,90,,100nF,0603,,,,,block-6,"C_BYP: per-IC supply decoupling; 2 per IC × 45 block-6 ICs (U15-U48, U67-U77)"
-audio,U75,IC,1,CD4053BM,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/cd4053b.pdf,block-6,"BP1 distortion mux 2 (stereo 1-of-3: U31=ch select stage 1, U75=stage 2)"
-audio,U76,IC,1,CD4053BM,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/cd4053b.pdf,block-6,BP2 distortion mux 2
-audio,U77,IC,1,CD4053BM,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/cd4053b.pdf,block-6,BP3 distortion mux 2
-audio,R128,Resistor,6,,100kΩ,0603,,,,,block-6,R_MODE_PU: DW5 mode-encoder pull-ups to 5V logic rail; 2 per group (SC/HC/WF → 2 control bits)
-audio,R124,Resistor,3,,1MΩ,0603,,,,,block-6,R_IREF_A_L: L-channel expo I_ref fixed R (U28-30); 1 per group
-audio,R125,Resistor,3,,47kΩ,0603,,,,,block-6,R_VOCT_L: L-channel expo V/oct scaling (U28-30); 1 per group
-audio,R126,Resistor,3,,1kΩ,0603,,,,,block-6,R_E_L: L-channel expo emitter degeneration (U28-30); 1 per group
-audio,R127,Resistor,6,,100kΩ,0603,,,,,block-6,R_TILT_SUM: ±V_tilt summing R into each expo base (+L / −R); 1 per expo (6)
+audio,U15,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-6-svf1,BP1 OTA integrators + Q L
+audio,U16,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-6-svf1,BP1 OTA integrators + Q R
+audio,U17,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-6-svf2,BP2 OTA integrators + Q L
+audio,U18,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-6-svf2,BP2 OTA integrators + Q R
+audio,U19,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-6-svf3,BP3 OTA integrators + Q L
+audio,U20,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-6-svf3,BP3 OTA integrators + Q R
+audio,U21,IC,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/opa1612.pdf,block-6-svf1,BP1 SUM_AMP + buffer L
+audio,U22,IC,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/opa1612.pdf,block-6-svf1,BP1 SUM_AMP + buffer R
+audio,U23,IC,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/opa1612.pdf,block-6-svf2,BP2 SUM_AMP + buffer L
+audio,U24,IC,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/opa1612.pdf,block-6-svf2,BP2 SUM_AMP + buffer R
+audio,U25,IC,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/opa1612.pdf,block-6-svf3,BP3 SUM_AMP + buffer L
+audio,U26,IC,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/opa1612.pdf,block-6-svf3,BP3 SUM_AMP + buffer R
+audio,U27,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-mix,BP tilt inverter half A (−V_tilt for R); fixed BP output polarity-restore inverter (G=−1) half B
+audio,U28,IC,1,THAT340S14-U,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,THAT Corporation,,https://thatcorp.com/datashts/THAT_300-Series_Datasheet.pdf,block-6-svf1,BP1 expo converter
+audio,U29,IC,1,THAT340S14-U,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,THAT Corporation,,https://thatcorp.com/datashts/THAT_300-Series_Datasheet.pdf,block-6-svf2,BP2 expo converter
+audio,U30,IC,1,THAT340S14-U,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,THAT Corporation,,https://thatcorp.com/datashts/THAT_300-Series_Datasheet.pdf,block-6-svf3,BP3 expo converter
+audio,U31,IC,1,CD4053BM,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/cd4053b.pdf,block-6-dist1,BP1 distortion mux (SC/HC/WF select)
+audio,U32,IC,1,CD4053BM,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/cd4053b.pdf,block-6-dist2,BP2 distortion mux
+audio,U33,IC,1,CD4053BM,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/cd4053b.pdf,block-6-dist3,BP3 distortion mux
+audio,U34,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-dist1,SC gain amp BP1_L (half A = SC amp; half B = HC amp)
+audio,U35,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-dist1,SC gain amp BP1_R (half A = SC amp; half B = HC amp)
+audio,U36,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-dist2,SC gain amp BP2_L (half A = SC amp; half B = HC amp)
+audio,U37,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-dist2,SC gain amp BP2_R (half A = SC amp; half B = HC amp)
+audio,U38,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-dist3,SC gain amp BP3_L (half A = SC amp; half B = HC amp)
+audio,U39,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-dist3,SC gain amp BP3_R (half A = SC amp; half B = HC amp)
+audio,U40,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-dist1,WF amps BP1_L (half A = pre-gain; half B = symmetric folder G=+2)
+audio,U41,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-dist1,WF amps BP1_R (half A = pre-gain; half B = symmetric folder G=+2)
+audio,U42,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-dist2,WF amps BP2_L (half A = pre-gain; half B = symmetric folder G=+2)
+audio,U43,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-dist2,WF amps BP2_R (half A = pre-gain; half B = symmetric folder G=+2)
+audio,U44,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-dist3,WF amps BP3_L (half A = pre-gain; half B = symmetric folder G=+2)
+audio,U45,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-dist3,WF amps BP3_R (half A = pre-gain; half B = symmetric folder G=+2)
+audio,U46,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-mix,BP wet summer half A = L (BP1+BP2+BP3 inv sum); half B = MIX crossfade L
+audio,U47,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-mix,BP wet summer half A = R; half B = MIX crossfade R
+audio,U48,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-mix,BP wet polarity restore: half A = V_wet_inv→V_wet_pos (L); half B = V_wet_inv→V_wet_pos (R)
+audio,RV7,Trimpot/Pot,1,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-svf1,BP1 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 200 Hz at 0V; ±25% range
+audio,RV8,Trimpot/Pot,1,3224W-1-xxx,20kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-svf1,BP1 1V/oct tracking trim; ±10% range
+audio,RV9,Trimpot/Pot,1,,,SMD,,,,,block-6-svf1,BP1 Q_max trim (Iabc V_bias)
+audio,RV10,Trimpot/Pot,1,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-svf2,BP2 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 1500 Hz at 0V; ±25% range
+audio,RV11,Trimpot/Pot,1,3224W-1-xxx,20kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-svf2,BP2 1V/oct tracking trim; ±10% range
+audio,RV12,Trimpot/Pot,1,,,SMD,,,,,block-6-svf2,BP2 Q_max trim
+audio,RV13,Trimpot/Pot,1,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-svf3,BP3 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 6000 Hz at 0V; ±25% range
+audio,RV14,Trimpot/Pot,1,3224W-1-xxx,20kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-svf3,BP3 1V/oct tracking trim; ±10% range
+audio,RV15,Trimpot/Pot,1,,,SMD,,,,,block-6-svf3,BP3 Q_max trim
+audio,D4,Diode,8,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6-dist1,SC soft-clip diodes; 4 per path (2 antiparallel pairs) × 6 paths
+audio,D4,Diode,8,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6-dist2,SC soft-clip diodes; 4 per path (2 antiparallel pairs) × 6 paths
+audio,D4,Diode,8,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6-dist3,SC soft-clip diodes; 4 per path (2 antiparallel pairs) × 6 paths
+audio,D5,Diode,4,BZX84C5V1,,SOT-23,POGO_Package_TO_SOT_SMD:SOT-23,Nexperia,,https://assets.nexperia.com/documents/data-sheet/BZX84_SER.pdf,block-6-dist1,HC back-to-back zener clamps (±5.8V clip); 2 per path × 6 paths
+audio,D5,Diode,4,BZX84C5V1,,SOT-23,POGO_Package_TO_SOT_SMD:SOT-23,Nexperia,,https://assets.nexperia.com/documents/data-sheet/BZX84_SER.pdf,block-6-dist2,HC back-to-back zener clamps (±5.8V clip); 2 per path × 6 paths
+audio,D5,Diode,4,BZX84C5V1,,SOT-23,POGO_Package_TO_SOT_SMD:SOT-23,Nexperia,,https://assets.nexperia.com/documents/data-sheet/BZX84_SER.pdf,block-6-dist3,HC back-to-back zener clamps (±5.8V clip); 2 per path × 6 paths
+audio,D6,Diode,8,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6-dist1,"WF passive clamp diodes; 4 per path (2 per polarity, Vth=±1.4V) × 6 paths; true symmetric fold"
+audio,D6,Diode,8,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6-dist2,"WF passive clamp diodes; 4 per path (2 per polarity, Vth=±1.4V) × 6 paths; true symmetric fold"
+audio,D6,Diode,8,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6-dist3,"WF passive clamp diodes; 4 per path (2 per polarity, Vth=±1.4V) × 6 paths; true symmetric fold"
+audio,D7,Diode,1,BZX84C5V1,,SOT-23,POGO_Package_TO_SOT_SMD:SOT-23,Nexperia,,https://assets.nexperia.com/documents/data-sheet/BZX84_SER.pdf,block-6-mix,CD4053 logic supply 5.1V zener shunt (from +12V with R_5V_logic)
+audio,C15,Capacitor,4,,150nF,0805,,,,,block-6-svf1,BP1 integrator caps (C0G; 2 per channel × L+R)
+audio,C19,Capacitor,4,,22nF,0603,,,,,block-6-svf2,BP2 integrator caps (C0G; 2 per channel × L+R)
+audio,C23,Capacitor,4,,4.7nF,0603,,,,,block-6-svf3,BP3 integrator caps (C0G; 2 per channel × L+R)
+audio,C27,Capacitor,1,,10µF,0603,,,,,block-6-mix,CD4053 logic supply bulk bypass (electrolytic or ceramic)
+audio,C28,Capacitor,1,,100nF,0603,,,,,block-6-mix,CD4053 logic supply HF bypass
+audio,R12,Resistor,4,,1kΩ,0603,,,,,block-6-svf1,OTA linearizing R; 1 per OTA cell × 2 cells × 6 LM13700 ICs (U15–U20)
+audio,R12,Resistor,4,,1kΩ,0603,,,,,block-6-svf2,OTA linearizing R; 1 per OTA cell × 2 cells × 6 LM13700 ICs (U15–U20)
+audio,R12,Resistor,4,,1kΩ,0603,,,,,block-6-svf3,OTA linearizing R; 1 per OTA cell × 2 cells × 6 LM13700 ICs (U15–U20)
+audio,R13,Resistor,2,,100kΩ,0603,,,,,block-6-svf1,SVF SUM_AMP R_in; 1 per group per channel (U21–U26 half A)
+audio,R13,Resistor,2,,100kΩ,0603,,,,,block-6-svf2,SVF SUM_AMP R_in; 1 per group per channel (U21–U26 half A)
+audio,R13,Resistor,2,,100kΩ,0603,,,,,block-6-svf3,SVF SUM_AMP R_in; 1 per group per channel (U21–U26 half A)
+audio,R14,Resistor,2,,100kΩ,0603,,,,,block-6-svf1,SVF SUM_AMP R_fb; 1 per group per channel
+audio,R14,Resistor,2,,100kΩ,0603,,,,,block-6-svf2,SVF SUM_AMP R_fb; 1 per group per channel
+audio,R14,Resistor,2,,100kΩ,0603,,,,,block-6-svf3,SVF SUM_AMP R_fb; 1 per group per channel
+audio,R15,Resistor,2,,100kΩ,0603,,,,,block-6-svf1,SVF SUM_AMP R_Q input; 1 per group per channel
+audio,R15,Resistor,2,,100kΩ,0603,,,,,block-6-svf2,SVF SUM_AMP R_Q input; 1 per group per channel
+audio,R15,Resistor,2,,100kΩ,0603,,,,,block-6-svf3,SVF SUM_AMP R_Q input; 1 per group per channel
+audio,R16,Resistor,2,,100kΩ,0603,,,,,block-6-mix,BP tilt inverter R_in + R_fb in U27 half A
+audio,R17,Resistor,2,,100kΩ,0603,,,,,block-6-mix,BP output polarity-restore inverter R_in + R_fb in U27 half B
+audio,R18,Resistor,2,,10kΩ,0603,,,,,block-6-dist1,R_SC_in; SC path input R; 1 per path × 6 paths
+audio,R18,Resistor,2,,10kΩ,0603,,,,,block-6-dist2,R_SC_in; SC path input R; 1 per path × 6 paths
+audio,R18,Resistor,2,,10kΩ,0603,,,,,block-6-dist3,R_SC_in; SC path input R; 1 per path × 6 paths
+audio,R19,Resistor,2,,10kΩ,0603,,,,,block-6-dist1,R_SC_fb_fixed; SC minimum feedback R (G≥1× at zero drive)
+audio,R19,Resistor,2,,10kΩ,0603,,,,,block-6-dist2,R_SC_fb_fixed; SC minimum feedback R (G≥1× at zero drive)
+audio,R19,Resistor,2,,10kΩ,0603,,,,,block-6-dist3,R_SC_fb_fixed; SC minimum feedback R (G≥1× at zero drive)
+audio,R20,Resistor,2,,10kΩ,0603,,,,,block-6-dist1,R_HC_in; HC path input R; 1 per path × 6 paths
+audio,R20,Resistor,2,,10kΩ,0603,,,,,block-6-dist2,R_HC_in; HC path input R; 1 per path × 6 paths
+audio,R20,Resistor,2,,10kΩ,0603,,,,,block-6-dist3,R_HC_in; HC path input R; 1 per path × 6 paths
+audio,R21,Resistor,2,,10kΩ,0603,,,,,block-6-dist1,R_HC_fb_fixed; HC minimum feedback R
+audio,R21,Resistor,2,,10kΩ,0603,,,,,block-6-dist2,R_HC_fb_fixed; HC minimum feedback R
+audio,R21,Resistor,2,,10kΩ,0603,,,,,block-6-dist3,R_HC_fb_fixed; HC minimum feedback R
+audio,R22,Resistor,2,,10kΩ,0603,,,,,block-6-dist1,R_WF_in; WF pre-gain input R; 1 per path × 6 paths
+audio,R22,Resistor,2,,10kΩ,0603,,,,,block-6-dist2,R_WF_in; WF pre-gain input R; 1 per path × 6 paths
+audio,R22,Resistor,2,,10kΩ,0603,,,,,block-6-dist3,R_WF_in; WF pre-gain input R; 1 per path × 6 paths
+audio,R23,Resistor,2,,10kΩ,0603,,,,,block-6-dist1,R_WF_fb_fixed; WF pre-gain minimum feedback R
+audio,R23,Resistor,2,,10kΩ,0603,,,,,block-6-dist2,R_WF_fb_fixed; WF pre-gain minimum feedback R
+audio,R23,Resistor,2,,10kΩ,0603,,,,,block-6-dist3,R_WF_fb_fixed; WF pre-gain minimum feedback R
+audio,R24,Resistor,2,,10kΩ,0603,,,,,block-6-dist1,R_clamp; WF passive clamp series R (limits diode current at threshold)
+audio,R24,Resistor,2,,10kΩ,0603,,,,,block-6-dist2,R_clamp; WF passive clamp series R (limits diode current at threshold)
+audio,R24,Resistor,2,,10kΩ,0603,,,,,block-6-dist3,R_clamp; WF passive clamp series R (limits diode current at threshold)
+audio,R25,Resistor,2,,10kΩ,0603,,,,,block-6-dist1,R_g; WF folder (−) input R (was R_fold 10kΩ; value unchanged)
+audio,R25,Resistor,2,,10kΩ,0603,,,,,block-6-dist2,R_g; WF folder (−) input R (was R_fold 10kΩ; value unchanged)
+audio,R25,Resistor,2,,10kΩ,0603,,,,,block-6-dist3,R_g; WF folder (−) input R (was R_fold 10kΩ; value unchanged)
+audio,R_f_wf,Resistor,2,,10kΩ,0603,,,,,block-6-dist1,R_f; WF folder feedback R; R_g=R_f → gain +2 at (+) input
+audio,R_f_wf,Resistor,2,,10kΩ,0603,,,,,block-6-dist2,R_f; WF folder feedback R; R_g=R_f → gain +2 at (+) input
+audio,R_f_wf,Resistor,2,,10kΩ,0603,,,,,block-6-dist3,R_f; WF folder feedback R; R_g=R_f → gain +2 at (+) input
+audio,C_WF,Capacitor,4,,47pF,0603,,,,,block-6-dist1,"RV_DRIVE wiper bypass cap (anti-RF, anti-scratchiness); 1 per path × 6 paths"
+audio,C_WF,Capacitor,4,,47pF,0603,,,,,block-6-dist2,"RV_DRIVE wiper bypass cap (anti-RF, anti-scratchiness); 1 per path × 6 paths"
+audio,C_WF,Capacitor,4,,47pF,0603,,,,,block-6-dist3,"RV_DRIVE wiper bypass cap (anti-RF, anti-scratchiness); 1 per path × 6 paths"
+audio,R26,Resistor,8,,33kΩ,0603,,,,,block-6-mix,R_sum; BP wet summer input R; 3 inputs + 1 fb per channel × 2 ch (U46/U47 half A)
+audio,R27,Resistor,2,,100kΩ,0603,,,,,block-6-mix,R_dry; MIX dry path input R (L and R; in U46/U47 half B)
+audio,R28,Resistor,2,,100kΩ,0603,,,,,block-6-mix,R_mix_f; MIX crossfade feedback R (L and R)
+audio,R29,Resistor,1,,1kΩ,0603,,,,,block-6-mix,R_5V_logic; series R from +12V to D7 zener shunt (5.1V logic rail for CD4053)
+audio,U67,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-6-svf1,"BP1 Q VCA (cell A = L Q, cell B = R Q)"
+audio,U68,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-6-svf2,"BP2 Q VCA (cell A = L Q, cell B = R Q)"
+audio,U69,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-6-svf3,"BP3 Q VCA (cell A = L Q, cell B = R Q)"
+audio,U70,IC,1,THAT340S14-U,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,THAT Corporation,,https://thatcorp.com/datashts/THAT_300-Series_Datasheet.pdf,block-6-svf1,BP1 expo converter R channel (per-channel tilt; U28 = L)
+audio,U71,IC,1,THAT340S14-U,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,THAT Corporation,,https://thatcorp.com/datashts/THAT_300-Series_Datasheet.pdf,block-6-svf2,BP2 expo converter R channel (U29 = L)
+audio,U72,IC,1,THAT340S14-U,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,THAT Corporation,,https://thatcorp.com/datashts/THAT_300-Series_Datasheet.pdf,block-6-svf3,BP3 expo converter R channel (U30 = L)
+audio,U73,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,"block-6-svf1, block-6-svf2",BP Q IRES_AMP: BP1 (half A) + BP2 (half B)
+audio,U74,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-svf3,BP Q IRES_AMP: BP3 (half A); half B spare
+audio,R116,Resistor,2,,1MΩ,0603,,,,,block-6-svf1,R_Iabc_Q: V_ires → BP Q OTA Iabc; 1 per group per channel
+audio,R116,Resistor,2,,1MΩ,0603,,,,,block-6-svf2,R_Iabc_Q: V_ires → BP Q OTA Iabc; 1 per group per channel
+audio,R116,Resistor,2,,1MΩ,0603,,,,,block-6-svf3,R_Iabc_Q: V_ires → BP Q OTA Iabc; 1 per group per channel
+audio,R117,Resistor,1,,100kΩ,0603,,,,,block-6-svf1,R_QBIAS: BP Q IRES_AMP V_bias input; 1 per group
+audio,R117,Resistor,1,,100kΩ,0603,,,,,block-6-svf2,R_QBIAS: BP Q IRES_AMP V_bias input; 1 per group
+audio,R117,Resistor,1,,100kΩ,0603,,,,,block-6-svf3,R_QBIAS: BP Q IRES_AMP V_bias input; 1 per group
+audio,R118,Resistor,1,,100kΩ,0603,,,,,block-6-svf1,R_QINV: BP Q IRES_AMP FOCUS CV input; 1 per group
+audio,R118,Resistor,1,,100kΩ,0603,,,,,block-6-svf2,R_QINV: BP Q IRES_AMP FOCUS CV input; 1 per group
+audio,R118,Resistor,1,,100kΩ,0603,,,,,block-6-svf3,R_QINV: BP Q IRES_AMP FOCUS CV input; 1 per group
+audio,R119,Resistor,1,,100kΩ,0603,,,,,block-6-svf1,R_f_q: BP Q IRES_AMP feedback; 1 per group
+audio,R119,Resistor,1,,100kΩ,0603,,,,,block-6-svf2,R_f_q: BP Q IRES_AMP feedback; 1 per group
+audio,R119,Resistor,1,,100kΩ,0603,,,,,block-6-svf3,R_f_q: BP Q IRES_AMP feedback; 1 per group
+audio,R120,Resistor,1,,1MΩ,0603,,,,,block-6-svf1,R_IREF_A_R: R-channel expo I_ref fixed R; 1 per group
+audio,R120,Resistor,1,,1MΩ,0603,,,,,block-6-svf2,R_IREF_A_R: R-channel expo I_ref fixed R; 1 per group
+audio,R120,Resistor,1,,1MΩ,0603,,,,,block-6-svf3,R_IREF_A_R: R-channel expo I_ref fixed R; 1 per group
+audio,R121,Resistor,1,,47kΩ,0603,,,,,block-6-svf1,R_VOCT_R: R-channel expo V/oct scaling; 1 per group
+audio,R121,Resistor,1,,47kΩ,0603,,,,,block-6-svf2,R_VOCT_R: R-channel expo V/oct scaling; 1 per group
+audio,R121,Resistor,1,,47kΩ,0603,,,,,block-6-svf3,R_VOCT_R: R-channel expo V/oct scaling; 1 per group
+audio,R122,Resistor,1,,1kΩ,0603,,,,,block-6-svf1,R_E_R: R-channel expo emitter degeneration; 1 per group
+audio,R122,Resistor,1,,1kΩ,0603,,,,,block-6-svf2,R_E_R: R-channel expo emitter degeneration; 1 per group
+audio,R122,Resistor,1,,1kΩ,0603,,,,,block-6-svf3,R_E_R: R-channel expo emitter degeneration; 1 per group
+audio,R123,Resistor,4,,10kΩ,0603,,,,,block-6-svf1,R_BUF_PD: BP integrator Darlington buffer emitter pulldown to V-; 2 per group-channel
+audio,R123,Resistor,4,,10kΩ,0603,,,,,block-6-svf2,R_BUF_PD: BP integrator Darlington buffer emitter pulldown to V-; 2 per group-channel
+audio,R123,Resistor,4,,10kΩ,0603,,,,,block-6-svf3,R_BUF_PD: BP integrator Darlington buffer emitter pulldown to V-; 2 per group-channel
+audio,D13,Diode,1,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6-svf1,D_IRES: BP Q V_ires ≥0 clamp; 1 per group
+audio,D13,Diode,1,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6-svf2,D_IRES: BP Q V_ires ≥0 clamp; 1 per group
+audio,D13,Diode,1,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6-svf3,D_IRES: BP Q V_ires ≥0 clamp; 1 per group
+audio,C107,Capacitor,2,,10nF,0402,,,,,block-6-svf1,C_IABC_Q: BP Q-cell Iabc bypass; 1 per group per channel
+audio,C107,Capacitor,2,,10nF,0402,,,,,block-6-svf2,C_IABC_Q: BP Q-cell Iabc bypass; 1 per group per channel
+audio,C107,Capacitor,2,,10nF,0402,,,,,block-6-svf3,C_IABC_Q: BP Q-cell Iabc bypass; 1 per group per channel
+audio,C108,Capacitor,2,,10nF,0402,,,,,block-6-svf1,C_IABC_INT: BP integrator OTA Iabc bypass; 1 per group per channel
+audio,C108,Capacitor,2,,10nF,0402,,,,,block-6-svf2,C_IABC_INT: BP integrator OTA Iabc bypass; 1 per group per channel
+audio,C108,Capacitor,2,,10nF,0402,,,,,block-6-svf3,C_IABC_INT: BP integrator OTA Iabc bypass; 1 per group per channel
+audio,C109,Capacitor,2,,100nF,0603,,,,,block-6-svf1,C_IREF: expo I_ref node bypass; 1 per expo (6 expo: U28-30 L + U70-72 R)
+audio,C109,Capacitor,2,,100nF,0603,,,,,block-6-svf2,C_IREF: expo I_ref node bypass; 1 per expo (6 expo: U28-30 L + U70-72 R)
+audio,C109,Capacitor,2,,100nF,0603,,,,,block-6-svf3,C_IREF: expo I_ref node bypass; 1 per expo (6 expo: U28-30 L + U70-72 R)
+audio,RV24,Trimpot/Pot,1,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-svf1,BP R-channel expo f_ref trim; 1 per group
+audio,RV24,Trimpot/Pot,1,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-svf2,BP R-channel expo f_ref trim; 1 per group
+audio,RV24,Trimpot/Pot,1,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-svf3,BP R-channel expo f_ref trim; 1 per group
+audio,RV25,Trimpot/Pot,1,3224W-1-xxx,20kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-svf1,BP R-channel expo 1V/oct trim; 1 per group
+audio,RV25,Trimpot/Pot,1,3224W-1-xxx,20kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-svf2,BP R-channel expo 1V/oct trim; 1 per group
+audio,RV25,Trimpot/Pot,1,3224W-1-xxx,20kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-svf3,BP R-channel expo 1V/oct trim; 1 per group
+audio,C110,Capacitor,16,,100nF,0603,,,,,block-6-svf1,"C_BYP: per-IC supply decoupling; 2 per IC × 45 block-6 ICs (U15-U48, U67-U77)"
+audio,C110,Capacitor,14,,100nF,0603,,,,,block-6-svf2,"C_BYP: per-IC supply decoupling; 2 per IC × 45 block-6 ICs (U15-U48, U67-U77)"
+audio,C110,Capacitor,16,,100nF,0603,,,,,block-6-svf3,"C_BYP: per-IC supply decoupling; 2 per IC × 45 block-6 ICs (U15-U48, U67-U77)"
+audio,C110,Capacitor,12,,100nF,0603,,,,,block-6-dist1,"C_BYP: per-IC supply decoupling; 2 per IC × 45 block-6 ICs (U15-U48, U67-U77)"
+audio,C110,Capacitor,12,,100nF,0603,,,,,block-6-dist2,"C_BYP: per-IC supply decoupling; 2 per IC × 45 block-6 ICs (U15-U48, U67-U77)"
+audio,C110,Capacitor,12,,100nF,0603,,,,,block-6-dist3,"C_BYP: per-IC supply decoupling; 2 per IC × 45 block-6 ICs (U15-U48, U67-U77)"
+audio,C110,Capacitor,8,,100nF,0603,,,,,block-6-mix,"C_BYP: per-IC supply decoupling; 2 per IC × 45 block-6 ICs (U15-U48, U67-U77)"
+audio,U75,IC,1,CD4053BM,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/cd4053b.pdf,block-6-dist1,"BP1 distortion mux 2 (stereo 1-of-3: U31=ch select stage 1, U75=stage 2)"
+audio,U76,IC,1,CD4053BM,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/cd4053b.pdf,block-6-dist2,BP2 distortion mux 2
+audio,U77,IC,1,CD4053BM,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/cd4053b.pdf,block-6-dist3,BP3 distortion mux 2
+audio,R128,Resistor,2,,100kΩ,0603,,,,,block-6-dist1,R_MODE_PU: DW5 mode-encoder pull-ups to 5V logic rail; 2 per group (SC/HC/WF → 2 control bits)
+audio,R128,Resistor,2,,100kΩ,0603,,,,,block-6-dist2,R_MODE_PU: DW5 mode-encoder pull-ups to 5V logic rail; 2 per group (SC/HC/WF → 2 control bits)
+audio,R128,Resistor,2,,100kΩ,0603,,,,,block-6-dist3,R_MODE_PU: DW5 mode-encoder pull-ups to 5V logic rail; 2 per group (SC/HC/WF → 2 control bits)
+audio,R124,Resistor,1,,1MΩ,0603,,,,,block-6-svf1,R_IREF_A_L: L-channel expo I_ref fixed R (U28-30); 1 per group
+audio,R124,Resistor,1,,1MΩ,0603,,,,,block-6-svf2,R_IREF_A_L: L-channel expo I_ref fixed R (U28-30); 1 per group
+audio,R124,Resistor,1,,1MΩ,0603,,,,,block-6-svf3,R_IREF_A_L: L-channel expo I_ref fixed R (U28-30); 1 per group
+audio,R125,Resistor,1,,47kΩ,0603,,,,,block-6-svf1,R_VOCT_L: L-channel expo V/oct scaling (U28-30); 1 per group
+audio,R125,Resistor,1,,47kΩ,0603,,,,,block-6-svf2,R_VOCT_L: L-channel expo V/oct scaling (U28-30); 1 per group
+audio,R125,Resistor,1,,47kΩ,0603,,,,,block-6-svf3,R_VOCT_L: L-channel expo V/oct scaling (U28-30); 1 per group
+audio,R126,Resistor,1,,1kΩ,0603,,,,,block-6-svf1,R_E_L: L-channel expo emitter degeneration (U28-30); 1 per group
+audio,R126,Resistor,1,,1kΩ,0603,,,,,block-6-svf2,R_E_L: L-channel expo emitter degeneration (U28-30); 1 per group
+audio,R126,Resistor,1,,1kΩ,0603,,,,,block-6-svf3,R_E_L: L-channel expo emitter degeneration (U28-30); 1 per group
+audio,R127,Resistor,2,,100kΩ,0603,,,,,block-6-svf1,R_TILT_SUM: ±V_tilt summing R into each expo base (+L / −R); 1 per expo (6)
+audio,R127,Resistor,2,,100kΩ,0603,,,,,block-6-svf2,R_TILT_SUM: ±V_tilt summing R into each expo base (+L / −R); 1 per expo (6)
+audio,R127,Resistor,2,,100kΩ,0603,,,,,block-6-svf3,R_TILT_SUM: ±V_tilt summing R into each expo base (+L / −R); 1 per expo (6)
 audio,U49,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-7,HP OTA integrators L
 audio,U50,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-7,HP OTA integrators R
 audio,U51,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-7,HP Q VCA L (cell A; cell B spare)
@@ -437,21 +515,21 @@ control,RV45,Trimpot/Pot,1,R0904N,,9mm,POGO_Potentiometer_THT:Potentiometer_Song
 control,RV26,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-5,LP1_FREQ (±5V/oct)
 control,RV27,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-5,LP1_TILT (±1)
 control,RV28,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-5,LP1_RES (0–1)
-control,SW4,Switch,1,DW5 (2M DPDT ON-ON-ON),,sub-mini toggle 2M,POGO_Button_Switch_THT:SW_Dailywell_DW5_DPDT,Dailywell,Thonk,https://www.thonk.co.uk/shop/sub-mini-toggle-switches/,block-6,BP1_DIST_MODE (Soft/Hard/Fold)
-control,SW5,Switch,1,DW5 (2M DPDT ON-ON-ON),,sub-mini toggle 2M,POGO_Button_Switch_THT:SW_Dailywell_DW5_DPDT,Dailywell,Thonk,https://www.thonk.co.uk/shop/sub-mini-toggle-switches/,block-6,BP2_DIST_MODE (Soft/Hard/Fold)
-control,SW6,Switch,1,DW5 (2M DPDT ON-ON-ON),,sub-mini toggle 2M,POGO_Button_Switch_THT:SW_Dailywell_DW5_DPDT,Dailywell,Thonk,https://www.thonk.co.uk/shop/sub-mini-toggle-switches/,block-6,BP3_DIST_MODE (Soft/Hard/Fold)
+control,SW4,Switch,1,DW5 (2M DPDT ON-ON-ON),,sub-mini toggle 2M,POGO_Button_Switch_THT:SW_Dailywell_DW5_DPDT,Dailywell,Thonk,https://www.thonk.co.uk/shop/sub-mini-toggle-switches/,block-6-dist1,BP1_DIST_MODE (Soft/Hard/Fold)
+control,SW5,Switch,1,DW5 (2M DPDT ON-ON-ON),,sub-mini toggle 2M,POGO_Button_Switch_THT:SW_Dailywell_DW5_DPDT,Dailywell,Thonk,https://www.thonk.co.uk/shop/sub-mini-toggle-switches/,block-6-dist2,BP2_DIST_MODE (Soft/Hard/Fold)
+control,SW6,Switch,1,DW5 (2M DPDT ON-ON-ON),,sub-mini toggle 2M,POGO_Button_Switch_THT:SW_Dailywell_DW5_DPDT,Dailywell,Thonk,https://www.thonk.co.uk/shop/sub-mini-toggle-switches/,block-6-dist3,BP3_DIST_MODE (Soft/Hard/Fold)
 control,SW7,Switch,1,DW5 (2M DPDT ON-ON-ON),,sub-mini toggle 2M,POGO_Button_Switch_THT:SW_Dailywell_DW5_DPDT,Dailywell,Thonk,https://www.thonk.co.uk/shop/sub-mini-toggle-switches/,block-3,MOD_SRC (3-way mod source select: LFO1 / LFO2 / External); bound to MOD_SRC_PARAM
-control,RV29,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6,BP_OFFSET master freq (±5V/oct)
-control,RV30,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6,BP_MIX dry/wet (0–1)
-control,RV31,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6,BP1_FREQ
-control,RV32,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6,BP1_FOCUS
-control,RV33,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6,BP1_DIST (drive)
-control,RV34,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6,BP2_FREQ
-control,RV35,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6,BP2_FOCUS
-control,RV36,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6,BP2_DIST (drive)
-control,RV37,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6,BP3_FREQ
-control,RV38,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6,BP3_FOCUS
-control,RV39,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6,BP3_DIST (drive)
+control,RV29,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6-mix,BP_OFFSET master freq (±5V/oct)
+control,RV30,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6-mix,BP_MIX dry/wet (0–1)
+control,RV31,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6-svf1,BP1_FREQ
+control,RV32,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6-svf1,BP1_FOCUS
+control,RV33,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6-dist1,BP1_DIST (drive)
+control,RV34,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6-svf2,BP2_FREQ
+control,RV35,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6-svf2,BP2_FOCUS
+control,RV36,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6-dist2,BP2_DIST (drive)
+control,RV37,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6-svf3,BP3_FREQ
+control,RV38,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6-svf3,BP3_FOCUS
+control,RV39,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6-dist3,BP3_DIST (drive)
 control,RV40,Trimpot/Pot,1,RA4522F-20-15F1,,panel,POGO_Potentiometer_THT:Potentiometer_Slider_45mm_Vertical,Alpha (Taiwan),Rapid / Banzai,https://www.rapidonline.com/taiwan-alpha-ra4522f-202-10c1-b10k-10k-45mm-slide-potentiometer-66-0142,block-7,"HP_FREQ slider (±5V/oct, default -3V)"
 control,RV41,Trimpot/Pot,1,R0904N,,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-7,HP_RES panel trimpot (R0904N finger pot; 0–1)
 control,RV42,Trimpot/Pot,1,RA4522F-20-15F1,,panel,POGO_Potentiometer_THT:Potentiometer_Slider_45mm_Vertical,Alpha (Taiwan),Rapid / Banzai,https://www.rapidonline.com/taiwan-alpha-ra4522f-202-10c1-b10k-10k-45mm-slide-potentiometer-66-0142,block-8,"LP2_FREQ slider (±5V/oct, default +2V)"
@@ -482,7 +560,7 @@ panel,J23,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-P
 panel,J24,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-3,LP2_FREQ_INPUT override
 panel,J25,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-3,LP2_RES_INPUT override
 panel,J26,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-4,VCA_INPUT (normalles to mod bus)
-panel,J27,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-6,BP3_L_OUTPUT
-panel,J28,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-6,BP3_R_OUTPUT
+panel,J27,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-6-mix,BP3_L_OUTPUT
+panel,J28,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-6-mix,BP3_R_OUTPUT
 panel,J29,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-B,MAIN_L_OUTPUT
 panel,J30,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-B,MAIN_R_OUTPUT

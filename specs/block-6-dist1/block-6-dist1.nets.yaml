@@ -1,0 +1,132 @@
+# POGO block-6-dist1 — split from block-6.nets.yaml (behavior-preserving 7-way partition)
+# Auto-split: parts/nets identical to the block-6 monolith; cross-section wires are boundary nets.
+
+block: block-6-dist1
+board: audio
+title: POGO Block 6 DIST1 - BP1 SC/HC/WF + CD4053 mux
+
+parts:
+  U31: { sym: cd4053, part: CD4053, value: CD4053 }
+  C110_U31p: { sym: c, value: 100nF }
+  C110_U31n: { sym: c, value: 100nF }
+  U34: { sym: opamp2, part: TL072CDT, value: TL072 }
+  C110_U34p: { sym: c, value: 100nF }
+  C110_U34n: { sym: c, value: 100nF }
+  U35: { sym: opamp2, part: TL072CDT, value: TL072 }
+  C110_U35p: { sym: c, value: 100nF }
+  C110_U35n: { sym: c, value: 100nF }
+  U40: { sym: opamp2, part: TL072CDT, value: TL072 }
+  C110_U40p: { sym: c, value: 100nF }
+  C110_U40n: { sym: c, value: 100nF }
+  U41: { sym: opamp2, part: TL072CDT, value: TL072 }
+  C110_U41p: { sym: c, value: 100nF }
+  C110_U41n: { sym: c, value: 100nF }
+  U75: { sym: cd4053, part: CD4053, value: CD4053 }
+  C110_U75p: { sym: c, value: 100nF }
+  C110_U75n: { sym: c, value: 100nF }
+  R18_1L: { sym: r, value: 10k }
+  R19_1L: { sym: r, value: 10k }
+  R20_1L: { sym: r, value: 10k }
+  R21_1L: { sym: r, value: 10k }
+  R22_1L: { sym: r, value: 10k }
+  R23_1L: { sym: r, value: 10k }
+  R24_1L: { sym: r, value: 10k }
+  R25_1L: { sym: r, value: 10k }
+  R_f_wf_1L: { sym: r, value: 10k }
+  C_WF_1La: { sym: c, value: 47pF }
+  C_WF_1Lb: { sym: c, value: 47pF }
+  D4_1La: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D6_1La: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D4_1Lb: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D6_1Lb: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D4_1Lc: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D6_1Lc: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D4_1Ld: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D6_1Ld: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D5_1La: { sym: zener, part: BZX84C5V1, value: BZX84C5V1 }
+  D5_1Lb: { sym: zener, part: BZX84C5V1, value: BZX84C5V1 }
+  R18_1R: { sym: r, value: 10k }
+  R19_1R: { sym: r, value: 10k }
+  R20_1R: { sym: r, value: 10k }
+  R21_1R: { sym: r, value: 10k }
+  R22_1R: { sym: r, value: 10k }
+  R23_1R: { sym: r, value: 10k }
+  R24_1R: { sym: r, value: 10k }
+  R25_1R: { sym: r, value: 10k }
+  R_f_wf_1R: { sym: r, value: 10k }
+  C_WF_1Ra: { sym: c, value: 47pF }
+  C_WF_1Rb: { sym: c, value: 47pF }
+  D4_1Ra: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D6_1Ra: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D4_1Rb: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D6_1Rb: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D4_1Rc: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D6_1Rc: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D4_1Rd: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D6_1Rd: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D5_1Ra: { sym: zener, part: BZX84C5V1, value: BZX84C5V1 }
+  D5_1Rb: { sym: zener, part: BZX84C5V1, value: BZX84C5V1 }
+  R128_1sc: { sym: r, value: 100k }
+  R128_1wf: { sym: r, value: 100k }
+
+nets:
+  V5LOGIC: [R128_1sc.1, R128_1wf.1]
+  BP1_BPBUF_L: [R18_1L.1, R20_1L.1, R22_1L.1, C_WF_1La.1, C_WF_1Lb.1]
+  BP1_BPBUF_R: [R18_1R.1, R20_1R.1, R22_1R.1, C_WF_1Ra.1, C_WF_1Rb.1]
+  BP1_SCVG_L: [U34.2, R18_1L.2, R19_1L.1, D4_1Lb.K, D4_1Lc.A]
+  BP1_SCOUT_L: [U34.1, R19_1L.2, D4_1La.A, D4_1Ld.K, U31.13]
+  BP1_SCM1_L: [D4_1La.K, D4_1Lb.A]
+  BP1_SCM2_L: [D4_1Lc.K, D4_1Ld.A]
+  BP1_HCVG_L: [U34.6, R20_1L.2, R21_1L.1]
+  BP1_HCOUT_L: [U34.7, R21_1L.2, D5_1La.3, U75.12]
+  BP1_HCZMID_L: [D5_1La.1, D5_1Lb.1]
+  BP1_WFVG_L: [U40.2, R22_1L.2, R23_1L.1]
+  BP1_VFOLDIN_L: [U40.1, R23_1L.2, R24_1L.1, R25_1L.1]
+  BP1_WFCLAMP_L: [R24_1L.2, D6_1La.A, D6_1Ld.K, U40.5]
+  BP1_WFCM1_L: [D6_1La.K, D6_1Lb.A]
+  BP1_WFCM2_L: [D6_1Lc.K, D6_1Ld.A]
+  BP1_WFFVG_L: [U40.6, R25_1L.2, R_f_wf_1L.1]
+  BP1_WFOUT_L: [U40.7, R_f_wf_1L.2, U75.13]
+  BP1_SCVG_R: [U35.2, R18_1R.2, R19_1R.1, D4_1Rb.K, D4_1Rc.A]
+  BP1_SCOUT_R: [U35.1, R19_1R.2, D4_1Ra.A, D4_1Rd.K, U31.1]
+  BP1_SCM1_R: [D4_1Ra.K, D4_1Rb.A]
+  BP1_SCM2_R: [D4_1Rc.K, D4_1Rd.A]
+  BP1_HCVG_R: [U35.6, R20_1R.2, R21_1R.1]
+  BP1_HCOUT_R: [U35.7, R21_1R.2, D5_1Ra.3, U75.2]
+  BP1_HCZMID_R: [D5_1Ra.1, D5_1Rb.1]
+  BP1_WFVG_R: [U41.2, R22_1R.2, R23_1R.1]
+  BP1_VFOLDIN_R: [U41.1, R23_1R.2, R24_1R.1, R25_1R.1]
+  BP1_WFCLAMP_R: [R24_1R.2, D6_1Ra.A, D6_1Rd.K, U41.5]
+  BP1_WFCM1_R: [D6_1Ra.K, D6_1Rb.A]
+  BP1_WFCM2_R: [D6_1Rc.K, D6_1Rd.A]
+  BP1_WFFVG_R: [U41.6, R25_1R.2, R_f_wf_1R.1]
+  BP1_WFOUT_R: [U41.7, R_f_wf_1R.2, U75.1]
+  BP1_SEL_WF: [U75.11, U75.10, R128_1wf.2]
+  BP1_MID_L: [U75.14, U31.12]
+  BP1_MID_R: [U75.15, U31.2]
+  BP1_SEL_SC: [U31.11, U31.10, R128_1sc.2]
+  BP1_DIST_L: [U31.14]
+  BP1_DIST_R: [U31.15]
+  "+12V": [U31.16, C110_U31p.1, U34.8, C110_U34p.1, U35.8, C110_U35p.1, U40.8, C110_U40p.1, U41.8, C110_U41p.1, U75.16, C110_U75p.1]
+  "-12V": [U31.7, C110_U31n.1, U34.4, C110_U34n.1, U35.4, C110_U35n.1, U40.4, C110_U40n.1, U41.4, C110_U41n.1, U75.7, C110_U75n.1]
+  GND: [U31.8, U31.6, C110_U31p.2, C110_U31n.2, C110_U34p.2, C110_U34n.2, C110_U35p.2, C110_U35n.2, C110_U40p.2, C110_U40n.2, C110_U41p.2, C110_U41n.2, U75.8, U75.6, C110_U75p.2, C110_U75n.2, U34.3, D5_1Lb.3, U34.5, U40.3, D6_1Lb.K, D6_1Lc.A, C_WF_1La.2, C_WF_1Lb.2, U35.3, D5_1Rb.3, U35.5, U41.3, D6_1Rb.K, D6_1Rc.A, C_WF_1Ra.2, C_WF_1Rb.2]
+
+no_connect:
+  - U31.3
+  - U31.4
+  - U31.5
+  - U31.9
+  - U75.3
+  - U75.4
+  - U75.5
+  - U75.9
+
+boundary:
+  - V5LOGIC
+  - BP1_BPBUF_L
+  - BP1_BPBUF_R
+  - BP1_DIST_L
+  - BP1_DIST_R
+  - BP1_SEL_WF
+  - BP1_SEL_SC
+

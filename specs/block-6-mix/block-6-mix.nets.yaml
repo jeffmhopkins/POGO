@@ -1,0 +1,99 @@
+# POGO block-6-mix — split from block-6.nets.yaml (behavior-preserving 7-way partition)
+# Auto-split: parts/nets identical to the block-6 monolith; cross-section wires are boundary nets.
+
+block: block-6-mix
+board: audio
+title: POGO Block 6 MIX - wet summer, MIX amp, tilt inverter, 5V logic, BP3 jacks
+
+parts:
+  U27: { sym: opamp2, part: TL072CDT, value: TL072 }
+  C110_U27p: { sym: c, value: 100nF }
+  C110_U27n: { sym: c, value: 100nF }
+  U46: { sym: opamp2, part: TL072CDT, value: TL072 }
+  C110_U46p: { sym: c, value: 100nF }
+  C110_U46n: { sym: c, value: 100nF }
+  U47: { sym: opamp2, part: TL072CDT, value: TL072 }
+  C110_U47p: { sym: c, value: 100nF }
+  C110_U47n: { sym: c, value: 100nF }
+  U48: { sym: opamp2, part: TL072CDT, value: TL072 }
+  C110_U48p: { sym: c, value: 100nF }
+  C110_U48n: { sym: c, value: 100nF }
+  R16_in: { sym: r, value: 100k }
+  R16_fb: { sym: r, value: 100k }
+  R17_in: { sym: r, value: 100k }
+  R17_fb: { sym: r, value: 100k }
+  R29: { sym: r, value: 1k }
+  D7: { sym: zener, part: BZX84C5V1, value: BZX84C5V1 }
+  C27: { sym: c, value: 10uF }
+  C28: { sym: c, value: 100nF }
+  R26_L1: { sym: r, value: 33k }
+  R26_L2: { sym: r, value: 33k }
+  R26_L3: { sym: r, value: 33k }
+  R26_Lf: { sym: r, value: 33k }
+  R27_L: { sym: r, value: 100k }
+  R28_L: { sym: r, value: 100k }
+  R26_R1: { sym: r, value: 33k }
+  R26_R2: { sym: r, value: 33k }
+  R26_R3: { sym: r, value: 33k }
+  R26_Rf: { sym: r, value: 33k }
+  R27_R: { sym: r, value: 100k }
+  R28_R: { sym: r, value: 100k }
+  J27: { sym: jack, part: PJ301M-12, value: BP3_L_OUT }
+  J28: { sym: jack, part: PJ301M-12, value: BP3_R_OUT }
+
+nets:
+  BP_TILT_CV: [R16_in.1]
+  BP_TILT_INVN: [U27.2, R16_in.2, R16_fb.1]
+  BP_NTILT: [U27.1, R16_fb.2]
+  V5LOGIC: [R29.2, D7.3, C27.1, C28.1]
+  BP_WETVG_L: [U46.2, R26_L1.2, R26_L2.2, R26_L3.2, R26_Lf.1]
+  BP_WETSUM_L: [U46.1, R26_Lf.2, U48.3]
+  BP_WETPOS_L: [U48.1, U48.2]
+  BP_MIX_CV_L: [U46.6, R27_L.2, R28_L.1]
+  BP_OUT_L: [U46.7, R28_L.2, R17_in.1]
+  BP_WETVG_R: [U47.2, R26_R1.2, R26_R2.2, R26_R3.2, R26_Rf.1]
+  BP_WETSUM_R: [U47.1, R26_Rf.2, U48.5]
+  BP_WETPOS_R: [U48.7, U48.6]
+  BP_MIX_CV_R: [U47.6, R27_R.2, R28_R.1]
+  BP_OUT_R: [U47.7, R28_R.2]
+  BP_POLVG_L: [U27.6, R17_in.2, R17_fb.1]
+  BP_POLRESTORE_L: [U27.7, R17_fb.2]
+  LP1_OUT_L: [R27_L.1]
+  LP1_OUT_R: [R27_R.1]
+  BP3_L_OUT: [J27.1]
+  BP3_R_OUT: [J28.1]
+  BP1_DIST_L: [R26_L1.1]
+  BP1_DIST_R: [R26_R1.1]
+  BP2_DIST_L: [R26_L2.1]
+  BP2_DIST_R: [R26_R2.1]
+  BP3_TAP_L: [R26_L3.1]
+  BP3_TAP_R: [R26_R3.1]
+  "+12V": [U27.8, C110_U27p.1, U46.8, C110_U46p.1, U47.8, C110_U47p.1, U48.8, C110_U48p.1, R29.1]
+  "-12V": [U27.4, C110_U27n.1, U46.4, C110_U46n.1, U47.4, C110_U47n.1, U48.4, C110_U48n.1]
+  GND: [C110_U27p.2, C110_U27n.2, C110_U46p.2, C110_U46n.2, C110_U47p.2, C110_U47n.2, C110_U48p.2, C110_U48n.2, U27.3, D7.1, C27.2, C28.2, U46.3, U46.5, U47.3, U47.5, U27.5, J27.2, J28.2]
+
+no_connect:
+  - J27.3
+  - J28.3
+
+boundary:
+  - BP_TILT_CV
+  - BP_NTILT
+  - V5LOGIC
+  - LP1_OUT_L
+  - LP1_OUT_R
+  - BP1_DIST_L
+  - BP1_DIST_R
+  - BP2_DIST_L
+  - BP2_DIST_R
+  - BP3_TAP_L
+  - BP3_TAP_R
+  - BP3_L_OUT
+  - BP_OUT_L
+  - BP_WETPOS_R
+  - BP_WETPOS_L
+  - BP_OUT_R
+  - BP_MIX_CV_R
+  - BP_MIX_CV_L
+  - BP3_R_OUT
+
