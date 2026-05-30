@@ -401,8 +401,14 @@
       }
     }
 
-    // 3 ── PCB footprint overlaps (real pads + body, not the bounding courtyard)
-    const fp = comps.map((o) => ({ ...o, rects: footprintRects(o.cx, o.cy, o.type, o.rot) })).filter((o) => o.rects.length);
+    // 3 ── PCB footprint overlaps (real pads + body, not the bounding courtyard).
+    // fp carries both: `rects` (real per-feature, for overlaps here) and `rect`
+    // (bounding courtyard, used by §4 mounting-hole clearance — matches the CLI).
+    const fp = comps.map((o) => ({
+      ...o,
+      rect:  courtyard(o.cx, o.cy, o.type, o.rot),
+      rects: footprintRects(o.cx, o.cy, o.type, o.rot),
+    })).filter((o) => o.rect);
     for (let i = 0; i < fp.length; i++) {
       for (let j = i + 1; j < fp.length; j++) {
         const a = fp[i], b = fp[j];
