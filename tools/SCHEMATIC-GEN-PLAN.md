@@ -53,18 +53,18 @@ Ordered by rising symbol/wiring risk so each step de-risks the next. ✅ = done.
 
 | # | Block | Board | Key actives | New symbols/helpers needed | Notes |
 |---|---|---|---|---|---|
-| 1 | **A** Input buffers | audio | OPA1612, BAT54S | — (✅ all added) | ✅ DONE |
-| 2 | **B** Output buffers | audio | 2× TL072 | — (jack/opamp exist) | ✅ DONE. MAIN (U61) + BP3 tap (U62); BP3/LFO jacks live in other blocks (boundary nets). |
-| 3 | **1** Pre-gain | audio | 2× OPA1612, 2× DW3 | DW3 toggle sym + pins (✅ added; DW5 too) | ✅ DONE. DPDT path-select 1×/5×; ALT path protected (R38/R39+D8/D9). |
-| 4 | **2** Dual LFO | utility | 2× TL072 | diode/led syms + trimpot (✅ added) | ✅ DONE. Rate network FINALIZED (drive-attenuator); SOD-123 footprint vendored; LFO LEDs added to BOM. |
-| 5 | **4** VCA | audio | 2× THAT2180, 2× TL072, BAT54S | that2180_pins (✅) | ✅ DONE. THAT2180 pinout/topology CORRECTED from datasheet (current-in/I-V-out); 3224W SMD footprint vendored. |
-| 6 | **5** LP1 | audio | LM13700, OPA1612, TL072, 2× THAT340 | lm13700/that340 (✅) | ✅ DONE (dual-derivation). Per-channel expo (true tilt); hosts the shared U9/U10 Q-VCAs (co-owned by block-8); buffer pulldowns added. |
-| 8 | **8** LP2 | audio | LM13700, OPA1612, TL072, THAT340 | — (reuse) | ✅ DONE. LP1 minus tilt (single expo); Q via the shared U9/U10 cell B (hosted on block-5); own IRES_AMP added. |
-| 9 | **7** HP | audio | 4× LM13700, OPA1612, TL072, THAT340 | — (reuse) | ✅ DONE. Mono SVF; HP inverting output buffer; own Q-VCAs (cell B spare/terminated); IRES_AMP added. |
-| 10 | **3** Mod bus | utility | 7× TL074, DW5 | tl074 multi-unit (✅), zener (✅) | ✅ DONE. MB proc + 3 lights + ±10V clamp + 19 destinations (generated); MOD_<DEST> outputs; MOD_SRC deferred. |
-| 11 | **6** Triple BP + Dist | audio | 6× LM13700 (int) + 3× LM13700 (Q) + 12× OPA1612/TL072 SVF/aux + 6× THAT340 + 6× CD4053 + 18× TL072 dist/mix | **cd4053 sym pinout FIXED** | ✅ DONE 2026-05-29 (`tools/gen_block6.py`, 418 parts / 239 nets). Option-B DSP-faithful SVF (v1/BP tap); per-channel expo; per-group Q-VCAs (U67-69); SC/HC/WF cells; 2×CD4053/group stereo 1-of-3 mux. 3 Phase-3R flags (below). |
+| 1 | **A** Input buffers | audio | OPA1612, BAT54S | — | ✅ DONE + ✅ re-verified 0018 (no behavioral divergence vs plugin). |
+| 2 | **B** Output buffers | audio | 2× TL072 | — | ✅ DONE + **aligned 0018**: MAIN (U61) + BP3 tap (U62), non-inverting; **BP3_R→BP3_L output normal added** (J28.3 in block-6-mix); R37→R224. |
+| 3 | **1** Pre-gain | audio | 2× OPA1612, 2× DW3 | — | ✅ DONE + **aligned 0018**: ALT path corrected (→ VCA → BP3-only); ALT_L_DET added for the BP3 selector. |
+| 4 | **2** Dual LFO | utility | 2× TL072 + 2× MMBT3904 | npn sym (✅), MMBT3904 (✅) | ✅ DONE + **aligned 0018**: both LFOs → MOD_SRC switch; **breathing LED driver** (MMBT3904 current source) replaces half-wave. |
+| 5 | **4** VCA | audio | 4× THAT2180, 3× TL072, BAT54S | — | ✅ DONE + **aligned 0018**: +ALT-BP VCA cell (THAT2180 2→4, shared V_ctrl → BP3); VCA_OFS placement fixed; RV24/25→RV44/45. |
+| 6 | **5** LP1 | audio | LM13700, OPA1612, TL072, 2× THAT340 | — | ✅ DONE + ✅ re-verified 0018: per-channel expo (true tilt); reaches self-oscillation (matches plugin); hosts shared U9/U10 Q-VCAs (co-owned block-8). |
+| 8 | **8** LP2 | audio | LM13700, OPA1612, TL072, THAT340 | — | ✅ DONE + ✅ re-verified 0018: LP1 minus tilt; non-inverting LP output (matches plugin); Q via shared U9/U10 cell B (block-5). |
+| 9 | **7** HP | audio | 3× LM13700, OPA1612, TL072, THAT340 | — (reuse) | ✅ DONE + **aligned 0018**: HP output is a unity NON-inverting follower (was a double-inversion bug); Q collapsed to one LM13700 (cell A=L/B=R; U52 removed). |
+| 10 | **3** Mod bus | utility | 6× TL074, DW5 | tl074 multi-unit (✅), zener (✅) | ✅ DONE + **aligned 0018**: MOD_SRC switch (SW7/DW5) wired (LFO1/LFO2/EXT); MOD-bus LEDs removed; VCA→raw normal; FOCUS→TILT; 6× TL074 (was 7). |
+| 11 | **6** Triple BP + Dist | audio | **split into 7 sections** (svf1-3 / dist1-3 / mix) | cd4053 sym (✅); npn sym (✅) | ✅ DONE + **aligned 0018**: monolith split into `block-6-{svf1,svf2,svf3,dist1,dist2,dist3,mix}` (7 schematics). DIST→SVF reorder; F_REF 400Hz all bands; BP3 ALT-VCA selector (CD4053 U81); per-band TILT ×0.22; variable DRIVE (THAT2180 VCA/band, U85-90); CLIP drivers (U94-96); two-scaler dry/wet mix. Exact drive/clip/mix scaling = Phase-3R. |
 
-Remaining: **none** — all 10 blocks transcribed and `--check` clean (10/10). The shared U9/U10 Q-VCAs are hosted on block-5 (dual-owned, `shared: true`).
+Remaining: **none** — all 10 blocks transcribed, `--check` clean, and **aligned to the locked plugin (change 0018)**. Block 6 is now 7 schematics (svf1-3/dist1-3/mix). The shared U9/U10 Q-VCAs are hosted on block-5 (dual-owned, `shared: true`).
 
 ### block-6 transcription notes (2026-05-29)
 - **CD4053 symbol bug fixed:** the CD4053 symbol (now `components/symbols/cd4053.yaml`) had
@@ -72,24 +72,28 @@ Remaining: **none** — all 10 blocks transcribed and `--check` clean (10/10). T
   4/5 were swapped) **and** overlapped VEE(7) with X1_C(12) at one coordinate. Both
   corrected against the TI CD4053B datasheet (selects A/B/C = 11/10/9; X com/0/1 =
   14/12/13; Y = 15/2/1; Z = 4/5/3). No other block uses CD4053, so no drift.
-- **Built by script** `tools/gen_block6.py` (3-group repetition, like block-3). Only
-  audio-board parts are placed; control-board pots (RV29-39) and DW5 mode switches
-  (SW4-6) arrive as boundary CV, exactly like block-5/7/8 scope their panel controls.
-- **3 Phase-3R / prototype flags** (under-specified in the STALE specs; signal path wired
-  faithfully, control treated as boundary CV — see the YAML header for detail):
-  1. **DRIVE→variable gain** — no in-block variable-gain element exists; the 6 distortion
-     cells run at fixed minimum gain (still clip at their diode/zener thresholds). DRIVE
-     depth is a Phase-3R element fed by BP{g}_DIST CV. The C_WF 47pF caps were relocated
-     from the (off-board) drive-pot wiper to the distortion-input nodes as anti-RF caps.
-  2. **DW5 ON-ON-ON → 2-bit encoding** — BP{g}_SEL_SC/SEL_WF leave as boundary nets to
-     SW4-6; pull-ups (R128) to a 5V logic rail (D7/R29/C27/C28). 5V-high vs VDD=+12V is
-     marginal per the CD4053B datasheet → prototype-verify (level shift or VDD=+5V).
-  3. **BP_MIX blend** — plugin uses two scalers (BYPASS+WET); BOM models one MIX pot.
-     Wired: wet summer → U48 buffer → off-board MIX pot (BP_WETPOS) → wiper returns as
-     BP_MIX_CV into the MIX-amp virtual ground (pot = R_wet) + dry via R27. BP_OUT taken
-     directly from the (inverting) MIX amps, L/R symmetric (HP re-inverts downstream);
-     U27-B + R17 (the BOM's lone output-restore inverter) is redundant here and wired as
-     a reserved Phase-3R inverter off the L MIX output.
+- **NOTE (change 0018):** the original monolith was generated by `tools/gen_block6.py`
+  (3-group repetition). That monolith (`block-6.nets.yaml`) was **split into 7 hand-authored
+  section nets files** (`block-6-{svf1,svf2,svf3,dist1,dist2,dist3,mix}`), which are now the
+  source of truth — `gen_block6.py` is **superseded/orphaned** (its single-file output is no
+  longer used). Control-board pots and DW5 mode switches still arrive as boundary CV.
+- **The 3 original Phase-3R flags — status after change 0018:**
+  1. **DRIVE→variable gain — BUILT (0018, Stage 5).** A stereo THAT2180 VCA per band
+     (U85-90 + I/V U91-93) now sits at each distortion input, gain set by the DRIVE knob
+     (RV33/36/39) + DRIVE CV (MOD_BPn_DIST) into Ec+. A single dB-law VGA per band
+     approximates the plugin's per-mode gain — accepted deviation; the **exact knob→Ec+ dB
+     law and the knob=0.20⇒unity bias remain Phase-3R bring-up** (like block-4's Ec+).
+  2. **DW5 ON-ON-ON → 2-bit encoding — still Phase-3R.** BP{g}_SEL_SC/SEL_WF leave as
+     boundary nets to SW4-6; pull-ups (R128) to a 5V logic rail (D7/R29/C27/C28). 5V-high vs
+     VDD=+12V is marginal per the CD4053B datasheet → prototype-verify (level shift or
+     VDD=+5V). (Same logic-level caveat now also applies to the new BP3 selector ALT_L_DET
+     and the CLIP comparator refs.)
+  3. **BP_MIX blend — BUILT (0018, Stage 7).** Reworked to the plugin's two independent
+     scalers: wet sum (U46/47-A) re-inverted by U48 (G=−1) → BP_WETPOS; a BYPASS dual-gang
+     pot (RV30/58) scales dry LP1, a new WET dual-gang pot (RV57/59) scales wet; both sum in
+     the final summer (U46/47-B) → per-channel output polarity restore (U27-B=L, U27-A=R) →
+     BP_OUT. Wet arranged to **add** with dry; the **exact wet-vs-dry phase across freq/mode
+     and the pot tapers remain Phase-3R**.
 
 ---
 

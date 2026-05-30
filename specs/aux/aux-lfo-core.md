@@ -1,23 +1,30 @@
 # aux: LFO Core (Triangle Oscillator)
 
-> ⚠️ **STALE** — Circuit library entry pending re-verification against current panel design (2026-05-28).
+> ✅ **Re-verified 2026-05-30** against the locked plugin (change 0018). Updated for: both
+> LFOs feed the MOD_SRC switch (no MOD_IN auto-normal); rate pot is a **log panel pot**
+> (player control), not a linear preset; LED driver is **full-cycle breathing** (matches
+> `(raw+1)×0.5`), not half-wave.
 
-Design status: [ ] draft → [ ] reviewed → [ ] validated on prototype
+Design status: [x] draft → [ ] reviewed → [ ] validated on prototype
 
 ## Overview
 
 Analog triangle wave oscillator using an integrator + Schmitt trigger (comparator)
 feedback loop. Produces a ±5V triangle wave over the range 0.05–20 Hz. Two independent
-instances (LFO1, LFO2) are present on the control board. LFO1 has a normalled
-connection to MOD_IN; LFO2 outputs to its own panel jack only.
+instances (LFO1, LFO2). Each LFO output is always live at its own panel jack **and** is
+tapped to the block-3 MOD_SRC selector switch (positions 0 = LFO1, 1 = LFO2; position 2 =
+External MOD_IN). There is no passive MOD_IN auto-normalling — selection is the explicit
+3-way switch (per the locked plugin, `Pogo.cpp:363–366`).
 
-Rate control (FINALIZED 2026-05-29): R_INT is **fixed** and the preset trimpot
-attenuates the Schmitt square-wave drive into the integrator (wiper → R_INT), so
-f ∝ wiper fraction k. A single 1 MΩ linear trimpot covers the full 0.05–20 Hz (400:1)
-range this way — a plain rheostat cannot (a 1 MΩ pot only adds ~1 MΩ of series swing,
-far short of the ≈590 kΩ→234 MΩ needed). The earlier "log-pot / THAT340-expo, Phase-3R
-TBD" note is superseded: these are set-once presets, so taper law across rotation is
-irrelevant and no expo converter is needed. See `specs/block-2/spec.md` §2/§3.
+Rate control (FINALIZED 2026-05-29; pot type updated 2026-05-30): R_INT is **fixed** and
+the rate pot attenuates the Schmitt square-wave drive into the integrator (wiper → R_INT),
+so f ∝ wiper fraction k. A 1 MΩ **log-taper 9 mm panel pot** (RD901F family — a hand-swept
+player control, *not* a preset) covers the full 0.05–20 Hz (400:1) range this way; a plain
+rheostat cannot (a 1 MΩ pot only adds ~1 MΩ of series swing, far short of the ≈590 kΩ→234 MΩ
+needed). The log taper makes k rise ~exponentially across rotation, approximating the
+plugin's `0.05 × 400^param` law over the throw. The earlier "log-pot / THAT340-expo,
+Phase-3R TBD" note is superseded: no expo converter is needed — the pot taper does it. See
+`specs/block-2/spec.md` §2/§3.
 
 Chosen because:
 - Integrator + comparator is the minimal, most reliable triangle oscillator topology
@@ -165,28 +172,31 @@ Integrator + comparator is well-understood, reproducible, and easily tunable.
 
 LFO1 and LFO2 are separate oscillator circuits on the same board, sharing only the
 power supply. This allows:
-- Independent RATE pots and CV inputs
+- Independent RATE pots (no LFO rate CV input in the current design)
 - Phase independence (they free-run at separate rates)
-- LFO1 normalized to MOD_IN without disturbing LFO2
+- Either LFO selectable as the mod-bus source via the block-3 MOD_SRC switch, independently
 
 Two TL072CDT ICs (one per LFO) plus passive networks. Total area budget: two
 standard LFO footprints ~10 × 15 mm each on the control board.
 
-### LED Brightness Tracking
+### LED Brightness Tracking — full-cycle "breathing" (matches plugin)
 
-The LFO LED uses the triangle wave to modulate brightness:
+The plugin LED law is `brightness = (V_tri/5 + 1) × 0.5 = (V_tri + 5)/10` over the **whole
+cycle** (`Pogo.cpp:504`): dark only at −5 V, half at the zero-crossing, full at +5 V. The
+hardware therefore uses a **full-cycle transconductance driver** whose LED current is
+proportional to `(V_tri + 5)`:
 ```
-LED current ∝ (V_tri + 5V) / 2   (shifted and scaled to 0–5V range)
-R_LED = (V_LED − V_f) / I_LED_nominal
-  at V_LED = 5V: R_LED = (5 − 2) / 2mA = 1.5 kΩ → use 1.5 kΩ
+I_LED ∝ (V_tri + 5V)      (0 at −5 V, max at +5 V — breathing, lit across the whole cycle)
 ```
-The LED glows brightest at the positive peak and goes dark at the negative peak,
-giving a breathing-lamp effect that shows LFO rate and phase visually.
+This is realized as a per-LED op-amp current sink with an input level-shift (sum V_tri with a
++5 V reference) so the LED conducts proportionally from zero — **not** a passive
+diode+resistor off V_tri. The concrete component set is specced in `block-2/spec.md` §3 as a
+G5/G6a proposal under change 0018.
 
-A half-wave rectifier (1N4148W diode) is placed between V_tri and LED anode so the
-LED only drives on the positive half-cycle, producing a pulsing rather than
-breathing effect. Phase 3R to choose: breathing (no diode, DC bias resistor) or
-pulsing (half-wave rectified). Document as open item.
+> **Superseded:** an earlier half-wave scheme (1N4148 between V_tri and the LED, lit only on
+> the positive half-cycle) produced a *pulsing* lamp that does **not** match the plugin's
+> full-cycle law. It is dropped in favor of the breathing driver above. The "breathing vs
+> pulsing — Phase 3R open item" is therefore **closed: breathing.**
 
 ### Rate taper — RESOLVED (drive-attenuator + 9mm log panel pot)
 
@@ -211,9 +221,9 @@ CV-over-rate is deferred to a future revision.
 | R_FLOOR | Resistor | 0603 | 2.4 kΩ | Divider floor (pot bottom → GND); sets f_min ≈ 0.05 Hz |
 | R_HYS | Resistor | 0603 | 82 kΩ | Schmitt trigger hysteresis; sets ±5V threshold |
 | R_fb_sq | Resistor | 0603 | 100 kΩ | Schmitt trigger feedback resistor |
-| R_LED_LFO | Resistor | 0603 | 1.5 kΩ | LFO LED current limit |
+| R_LED_LFO | Resistor | 0603 | — | LFO LED current-set R in the breathing driver (value per block-2 §3 G6a) |
 | LED_LFO | LED | 0603 | warm white | LFO indicator; brightness tracks triangle |
-| D_LED | 1N4148W | SOD-123 | — | Optional half-wave rectifier for pulsing LED mode |
+| LED driver | (op-amp current sink) | — | — | Full-cycle breathing driver; per-LED. See block-2 §3 (G6a) — replaces the old 1N4148 half-wave |
 | R_out_LFO | Resistor | 0603 | 1 kΩ | Output series protection to LFO jack |
 | C_VCC, C_VEE | Ceramic bypass | 0603 | 100 nF | Per TL072 supply pin |
 
@@ -257,17 +267,18 @@ Schmitt trigger thresholds:
 - Power-on: the Schmitt trigger may power up in either state; the integrator will
   immediately start ramping in whichever direction. This is normal — no startup
   circuit is needed
-- LFO1 normalling to MOD_IN: use a PJ301M-12 tip-switching jack at MOD_INPUT;
-  LFO1_OUT connects to the NC contact. LFO1 output jack is a separate connection
-  on the same TL072 output buffer (a unity-gain buffer may be needed to drive both
-  the normalling path and the panel jack simultaneously without loading the oscillator)
+- MOD_SRC taps (both LFOs): each LFO's V_tri drives its own panel jack (1 kΩ series) and
+  is also tapped to the block-3 MOD_SRC 3-way switch (pos 0 = LFO1, 1 = LFO2). Both loads
+  are light, so a passive mult off V_tri is adequate; add a unity-gain buffer only if the
+  prototype shows the two paths interacting. (There is no MOD_IN auto-normalling — selection
+  is the explicit switch; MOD_IN is the External position only.)
 - At minimum rate (0.05 Hz), the period is 20 seconds. Any TL072 input bias current
   will cause DC drift on C_INT over this timescale:
   TL072 I_bias ≈ 50 pA; drift = I_bias / C_INT × T = 50pA / 47nF × 20s = 21 mV
   → acceptable (triangle swings ±5V = 10V total; 21 mV < 0.2% error)
-- R_CCW_END (10 MΩ): a 10 MΩ 0603 resistor is available but tolerance is typically
-  ±5%; this controls the minimum LFO rate accuracy. The minimum rate is not
-  critical to calibrate precisely.
+- Minimum rate accuracy is set by R_FLOOR (2.4 kΩ) in the drive-attenuator divider, not by
+  any series rheostat. (The old "R_CCW_END 10 MΩ" rheostat note is obsolete — that scheme was
+  superseded by the drive-attenuator; minimum rate need not be calibrated precisely.)
 - Two LFO oscillators on the same board: layout them far from each other and from
   the LP filter frequency CV inputs to prevent LFO rate injection via stray coupling
 
@@ -275,6 +286,6 @@ Schmitt trigger thresholds:
 
 | Block | Instance | Board | Notes |
 |---|---|---|---|
-| block-2 | LFO1_OSC | Control | LFO1; normalled to MOD_IN NC contact |
-| block-2 | LFO2_OSC | Control | LFO2; output to LFO2_OUTPUT jack only |
-| block-3 | LFO1 source | Control | When MOD_IN unpatched, LFO1 feeds mod bus |
+| block-2 | LFO1_OSC | utility | LFO1; output jack + tap to MOD_SRC switch pos 0 |
+| block-2 | LFO2_OSC | utility | LFO2; output jack + tap to MOD_SRC switch pos 1 |
+| block-3 | MOD_SRC select | control | 3-way switch picks LFO1 / LFO2 / External(MOD_IN) as mod-bus source |

@@ -9,6 +9,8 @@ DSP source: `plugin/src/dsp/BandpassSVF.hpp`, `plugin/src/dsp/Distortion.hpp`, `
 
 Three bandpass resonators — each freely tunable over ~50 Hz–3.2 kHz (F_REF = 400 Hz at param = 0). Together they act as a resonator bank, vowel sculptor, or harmonic comb filter. All three bands default to the same center frequency; the user positions them independently via the per-band FREQ knobs.
 
+**Per-band signal order (change 0018, matching the locked plugin `Pogo.cpp:443–451`): DISTORTION *before* the bandpass.** Each band is `input → DISTn (drive + SC/HC/WF) → SVFn (2-pole bandpass) → band output`; the three band outputs are then summed and dry/wet-mixed. (BP1/BP2 input = LP1 band; BP3 input = the ALT-VCA-or-LP1 selector — see ALT path.) The hardware nets carry this as `LP1_OUT/BP3IN → distN → BPn_DISTOUT → svfN → BPn_BANDOUT/BP3_TAP → mix`.
+
 ### Global BP master controls
 
 **BP_OFFSET** shifts all three bands simultaneously (master V/oct offset). **BP_TILT** creates global stereo spread — L channel gets +tiltV, R gets −tiltV — separating the band positions across the stereo field.
@@ -30,17 +32,23 @@ Each band has:
 - **FREQ knob** (xl): per-band frequency offset in V/oct; F_REF = 400 Hz → range ~50 Hz–3.2 kHz
 - **FOCUS knob** (large): resonance (Q); `Q = 0.5 × 400^focus` → Q range 0.5–200; does not self-oscillate
 - **TILT knob** (large): per-band stereo spread, additive with global BP_TILT
-- **DIST knob** (large): per-band drive depth (0–1), applied post-SVF before distortion cell
-- **CLIP LED**: illuminates when the per-band distortion output exceeds ±4 V
+- **DIST knob** (large): per-band drive depth (0–1) into the distortion cell, which sits **before** the bandpass (0.20 = unity/threshold)
+- **CLIP LED**: illuminates when the per-band distortion output (pre-bandpass) exceeds ±4 V
 - CV inputs per band: FREQ, TILT, DIST jacks (each with attenuverter trimpot)
 
 ### ALT path
 
-`ALT_BP_L/R` jacks feed the BP input directly (bypassing VCA + LP1); the `ALT_GAIN` switch selects 1× or 5× pre-gain. When patched, BP processes the ALT signal instead of LP1 output.
+`ALT_BP_L/R` jacks (with the `ALT_GAIN` 1×/5× switch) feed **BP3 only**, and the ALT signal still
+passes **through the VCA** (same control as the main path) — it bypasses **LP1**, not the VCA (see
+block-1/block-4). A per-channel selector (block-6, BP3) routes the ALT-VCA signal (block-4
+`ALT_VCA_OUT_L/R`) into BP3's input when the ALT jacks are patched, else BP3 takes the LP1 band.
+BP1 and BP2 always take the LP1 band.
 
 ### BP3 output tap
 
-`BP3_L_OUT` and `BP3_R_OUT` jacks provide the BP3 per-band distortion output before the final mix — useful for parallel processing or sidechain routing.
+`BP3_L_OUT` and `BP3_R_OUT` jacks provide BP3's **post-bandpass band output** (the filtered BP3
+voice, after its distortion+SVF, before the 3-band sum and dry/wet mix) — useful for parallel
+processing or sidechain routing. R normals to L when the R jack is unpatched.
 
 
 ---
@@ -81,14 +89,17 @@ Each band has:
 >    logic-high against VDD = +12 V is marginal per the CD4053B datasheet** (V_IH ≈ 0.7·VDD):
 >    a level shift or VDD = +5 V may be required — prototype-verify. Analog rails are kept at
 >    ±12 V for full ±5 V audio headroom.
-> 3. **BP_MIX blend.** The plugin uses **two independent scalers** (BP_BYPASS and BP_WET,
->    additive), while the BOM/§3 model one MIX pot. Wired faithfully as: wet summer (U46/47-A)
->    → U48 buffer → off-board MIX pot (`BP_WETPOS`) → wiper returns as `BP_MIX_CV` into the
->    MIX-amp virtual ground (the pot is R_wet) + dry via R27. The MIX amps invert, so `BP_OUT`
->    is taken directly from them (L/R symmetric; the downstream HP SUM_AMP re-inverts). The
->    BOM provisions only one output-restore inverter (U27-B + R17); it is redundant in this
->    path and is wired as a **reserved** Phase-3R inverter off the L MIX output. A dedicated
->    BYPASS scaler and an explicit non-inverting output stage are Phase-3R adds.
+> 3. **BP_MIX blend — RESOLVED (change 0018, Stage 7).** The plugin uses **two independent
+>    0–1 scalers** (`bpOut = bandL·BP_BYPASS + wetSum·BP_WET`), now built as such: the wet
+>    3-band sum (U46/47-A, inverting) is re-inverted by U48 (G=−1) to `BP_WETPOS` (+bands);
+>    a **BYPASS** dual-gang pot (RV30 L / RV58 R) attenuates the dry LP1 band and a **WET**
+>    dual-gang pot (RV57 L / RV59 R, new) attenuates `BP_WETPOS`; both wipers sum in the final
+>    inverting summer (U46/47-B), then an output polarity-restore inverter per channel (U27-B
+>    = L, U27-A = R, reused) yields `BP_OUT`. Both pots default 1.0 = LP1 + full BP, matching
+>    the plugin. *Polarity:* dry and the wet bus are arranged to **add** at `BP_OUT` (the wet
+>    chain's net inversions, including the Stage-5 DRIVE-VCA I/V, are accounted so wet sums
+>    with — not against — dry). The exact wet-vs-dry absolute phase across frequency/mode and
+>    the pot tapers are Phase-3R bring-up items.
 
 ### SVF Groups (3 independent resonators)
 
@@ -100,12 +111,17 @@ H_BP(s) = (ω₀/Q · s) / (s² + ω₀/Q · s + ω₀²)
 
 Peak at s = jω₀: |H_BP(jω₀)| = 1 (constant unity, regardless of Q). Q controls bandwidth only, not peak amplitude.
 
-**f_ref per group** (at 0V CV):
-| Group | f_ref | Formant |
+**f_ref per group** (at 0V CV): **all three bands = 400 Hz** (matches the locked plugin
+`BandpassSVF.hpp:42` `F_REF = {400, 400, 400}`). The bands default to the same center and the
+player spreads them via the per-band FREQ knobs — they are not fixed-formant. (The earlier
+`{200, 1500, 6000}` per-group formant assignment matched a stale code comment, not the plugin
+code, and is superseded — change 0018. Integrator caps are now a uniform 68 nF C0G, trimmed to
+400 Hz by each band's f_ref trim.)
+| Group | f_ref | Cap |
 |---|---|---|
-| BP1 | 200 Hz | Low vowel body (F1) |
-| BP2 | 1500 Hz | Mid vowel / consonant (F2) |
-| BP3 | 6000 Hz | High formant / sibilance (F3) |
+| BP1 | 400 Hz | 68 nF (C15) |
+| BP2 | 400 Hz | 68 nF (C19) |
+| BP3 | 400 Hz | 68 nF (C23) |
 
 **Frequency control:**
 ```
@@ -197,16 +213,36 @@ Standard SVF BP peak is 1× (constant unity, independent of Q). No normalization
 - One TL072 half used as tilt inverter (shared across all 3 groups, same tilt offset applied to all)
 
 **Expo converters:**
-- One THAT340 per group (BP1, BP2, BP3) — 3× THAT340 total — each shared between L and R channels
-- Different f_ref per group requires separate expo trims (RV_BP1_REF, RV_BP2_REF, RV_BP3_REF)
+- **Per-channel** THAT340: one per L and one per R, per group — 6× THAT340 total (U28-U30 L, U70-U72 R)
+- Each band/channel has its own f_ref trim (RV_BP{1,2,3}_REF L/R), all targeting **400 Hz at 0 V**
 
 **Distortion hardware (see aux-distortion.md):**
-- Three sub-circuit chains per group: SC / HC / WF all running simultaneously
+- **Variable DRIVE (change 0018):** each band has a stereo VCA at its distortion input — a
+  THAT2180 current-in/I-V-out cell per channel (mirrors the block-4 VCA), gain set by the
+  per-band DRIVE knob (RV33/36/39) + DRIVE CV (`MOD_BPn_DIST`) summed into Ec+. This is the
+  hardware "DRIVE→gain" stage; a single dB-law VGA per band approximates the plugin's
+  per-mode drive (SC exp vs HC/WF linear) — an accepted, documented deviation, with the exact
+  knob→Ec+ dB law and the knob=0.20⇒unity bias set at **Phase-3R** bring-up (like block-4's Ec+).
+  *Polarity:* the I/V stage inverts (as in block-4); this adds one inversion to the BP wet path
+  — to be absorbed by the mix's wet polarity-restore (Stage 7 / Phase-3R), so wet sums (not
+  subtracts) with the dry LP1 band.
+- Three sub-circuit chains per group: SC / HC / WF all running simultaneously (after the DRIVE VCA)
 - CD4053 triple 2-channel analog mux per group selects which mode's output passes
 - All 3 CD4053 select pins tied together → BP_DIST switch controls all groups simultaneously
 - One Dailywell DW5 (2M DPDT ON-ON-ON) toggle → its two poles give the 2 select lines to all 3 CD4053 ICs
-- Distortion runs post-SVF at audio rate (no oversampling in analog hardware)
-- BP3 output tap: taken after distortion stage on group 3, available at BP3_L/R_OUT jacks
+- Distortion runs **pre-SVF** (band → DRIVE VCA → DISTn → SVFn) at audio rate (no oversampling)
+- BP3 output tap: taken at group 3's **post-bandpass** band output (`BP3_TAP`, after DIST3→SVF3), available at BP3_L/R_OUT jacks
+
+**BP3 input selector (change 0018):** BP3's distortion input is fed by a CD4053 mux (U81, in
+block-6-dist3) that picks, per channel, between the **LP1 band** (`LP1_OUT`, mux X0/Y0) and the
+**ALT-VCA voice** (`ALT_VCA_OUT` from block-4, mux X1/Y1). The select is `ALT_L_DET` — the
+ALT_BP_L jack insertion detect: J3's tip-switch lug (block-1) feeds `ALT_L_DET`, pulled to +12 V
+(R133) with a 22 kΩ pulldown on the ALT_L tip (R134); patched ⇒ HIGH ⇒ ALT-VCA, unpatched ⇒ LOW
+⇒ LP1. Both channels share `ALT_L_DET` (the plugin's asymmetric `bp3InR = L‖R` is not realized —
+the locked single-switch jacks have no free contact for an ALT_R detect; diverges only in the
+rare R-patched-but-not-L case). *(Phase-3R: like the other CD4053 selects, a +5 V/+12 V logic
+threshold margin should be verified on the prototype; ALT_L_DET uses a +12 V pull-up to stay
+clean against VDD=+12.)*
 
 **Oversampling:**
 - None. Hardware and DSP both run at base sample rate. Analog hardware is inherently alias-free; no oversampling required.
@@ -397,7 +433,7 @@ Channel X (control S_A):
 Channel Y (control S_B):
   Y0 input ← Channel X output
   Y1 input ← WF_out
-  Y output → DIST_out (→ BP_MIX input)
+  Y output → DIST_out (→ BPn_DISTOUT → SVF input; the SVF band output then goes to the mix)
 
 Channel Z: spare (inputs tied to GND; output unused)
 ```
@@ -489,9 +525,9 @@ U27 (BP_TILT_INV TL072CDT) halves:
 
 | Ref | Range | Purpose |
 |---|---|---|
-| RV_BP1_REF | 500 kΩ; ±25% f_ref | BP1 cutoff reference (target: 200 Hz at 0V); in series with R_IREF_A 1 MΩ |
-| RV_BP2_REF | 500 kΩ; ±25% f_ref | BP2 cutoff reference (target: 1500 Hz at 0V); in series with R_IREF_A 1 MΩ |
-| RV_BP3_REF | 500 kΩ; ±25% f_ref | BP3 cutoff reference (target: 6000 Hz at 0V); in series with R_IREF_A 1 MΩ |
+| RV_BP1_REF | 500 kΩ; ±25% f_ref | BP1 cutoff reference (target: **400 Hz** at 0V); in series with R_IREF_A 1 MΩ |
+| RV_BP2_REF | 500 kΩ; ±25% f_ref | BP2 cutoff reference (target: **400 Hz** at 0V); in series with R_IREF_A 1 MΩ |
+| RV_BP3_REF | 500 kΩ; ±25% f_ref | BP3 cutoff reference (target: **400 Hz** at 0V); in series with R_IREF_A 1 MΩ |
 | RV_BP1_1VOCT | 20 kΩ; ±10% tracking | BP1 expo 1V/oct calibration |
 | RV_BP2_1VOCT | 20 kΩ; ±10% tracking | BP2 expo 1V/oct calibration |
 | RV_BP3_1VOCT | 20 kΩ; ±10% tracking | BP3 expo 1V/oct calibration |
@@ -501,9 +537,11 @@ U27 (BP_TILT_INV TL072CDT) halves:
 
 ### Integrator Cap Derivation
 
-BP1 (f_ref = 200 Hz): C = 192µS/(2π×200) = 153 nF → use 150 nF (C0G, 0805)
-BP2 (f_ref = 1500 Hz): C = 192µS/(2π×1500) = 20.4 nF → use 22 nF (C0G, 0603)
-BP3 (f_ref = 6000 Hz): C = 192µS/(2π×6000) = 5.1 nF → use 4.7 nF (C0G, 0603)
+All three bands target f_ref = **400 Hz** (plugin `F_REF = {400,400,400}`):
+C = g_m_ref / (2π × 400) ≈ 192 µS / (2π × 400) = 76 nF → use **68 nF (C0G, 0805)** for all three
+bands (C15/C19/C23), with the per-band f_ref trim (RV_BP{n}_REF, ±25%) calibrating to exactly
+400 Hz. (Superseded: the earlier per-band 150/22/4.7 nF caps implemented a stale {200,1500,6000}
+formant spread that does not match the plugin code — change 0018.)
 
 (Exact values adjusted via RV_BPx_REF trim; derive from nominal at I_abc = 10µA.)
 

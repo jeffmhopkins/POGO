@@ -1,48 +1,62 @@
 # POGO Block 4 — VCA (THAT2180 dB-law, stereo) — schematic netlist
 #
 # Source of truth, transcribed from:
-#   specs/components.yaml  (block-4 rows; BOM authoritative, corrected 2026-05-29)
+#   specs/components.yaml  (block-4 rows; BOM authoritative)
 #   components/parts/that2180/datasheet.pdf (Doc 600029 Rev 02, Table 1 pinout)
-#   specs/aux/aux-vca-cell.md, specs/block-4/spec.md (reworked 2026-05-29)
+#   specs/aux/aux-vca-cell.md, specs/block-4/spec.md
 #   plugin/src/dsp/VcaBlock.hpp  (G = 10^(2*(control-1)); control from AMT + CV + OFS)
+#   plugin/src/Pogo.cpp:387-389 (main VCA), :439-441 (ALT VCA -> BP3)
 #
-# CORRECTED TOPOLOGY: the THAT2180 is current-in (pin1 Input) / current-out (pin8
-# Output) — NOT the differential IN+/IN-/OUT+/OUT- voltage part the old symbol/spec
-# assumed. So each channel needs R_in (V->I) at the input and a transimpedance
-# op-amp (I->V) at the output. Gain via Ec+ (pin2, +6.1 mV/dB); Ec- (pin3), Sym
-# (pin4, factory pre-trimmed) and Gnd (pin6) to AGND. The I/V stage inverts (R_f=R_in,
-# unity at 0 dB); the inversion is compensated by LP1's inverting SUM_AMP downstream.
+# Aligned to the locked plugin by change 0018 (0017 follow-up):
+#  - ADDED the ALT-BP VCA cell: per the plugin the ALT signal (block-1 ALT_OUT_L/R) passes
+#    through a VCA on the SAME control (vcaAmt/vcaCV) as the main path, feeding BP3 (block-6).
+#    Two more THAT2180 (U78=ALT-L, U79=ALT-R) + I/V (U80), sharing V_CTRL via RV46/RV47 trims.
+#  - FIXED VCA_OFS placement: the plugin adds OFS to the CV *before* the AMT gain law
+#    (vcaCV = clamp(raw + OFS*5,0,10), then control = 1-AMT*(1-normCV)). So OFS is summed into
+#    the CV ahead of the AMT attenuverter (U63A CV+OFS summer -> ±effCV -> RV44 pot). Because
+#    the AMT pot is symmetric about ±effCV, AMT=0 (center) gives V_CTRL=0 => unity regardless of
+#    OFS — matching the plugin. (The old netlist summed OFS in parallel AFTER AMT, which shifted
+#    gain at the AMT detent — wrong.)
 #
-# Control: VCA_IN (protected) -> AMT attenuverter (RV24 bipolar pot + U63A inverter for
-# -CV) -> CV/OFS summer (U63B, scaled toward the ~6.1 mV/dB Ec range) -> Ec+ of both
-# THAT2180 via per-channel unity trims (RV1/RV2). Exact summer/Ec scaling values are
-# nominal — set at Phase-3R bring-up against the gain law (Ec+ = 244 mV*(control-1)).
-# VCA_IN normals to the mod bus (J26 tip-switch -> MOD_BUS, block-3).
+# THAT2180: current-in (pin1 Input) / current-out (pin8 Output). Each channel: R_in (V->I)
+# at input + transimpedance op-amp (I->V) at output (R_f=R_in, unity at 0 dB, inverting;
+# compensated by LP1's inverting SUM_AMP downstream). Gain via Ec+ (pin2, +6.1 mV/dB);
+# Ec-(3), Sym(4), Gnd(6) to AGND. Exact CV->Ec+ scaling + the effCV-5V unity pivot (and any
+# V_CTRL wiper buffer) are nominal — set at Phase-3R bring-up. VCA_IN normals to the mod bus.
 
 block: block-4
 board: audio
-title: POGO Block 4 - VCA (THAT2180 stereo)
+title: POGO Block 4 - VCA (THAT2180 stereo + ALT-BP VCA)
 
 parts:
-  U4:  { sym: vca, part: THAT2180, value: THAT2180 }   # L VCA
-  U5:  { sym: vca, part: THAT2180, value: THAT2180 }   # R VCA
-  U6:  { sym: opamp2, part: TL072CDT, value: TL072 }   # I/V: A=L, B=R
-  U63: { sym: opamp2, part: TL072CDT, value: TL072 }   # ctrl: A=AMT inv, B=summer
+  U4:  { sym: vca, part: THAT2180, value: THAT2180 }   # L VCA (main)
+  U5:  { sym: vca, part: THAT2180, value: THAT2180 }   # R VCA (main)
+  U6:  { sym: opamp2, part: TL072CDT, value: TL072 }   # main I/V: A=L, B=R
+  U63: { sym: opamp2, part: TL072CDT, value: TL072 }   # ctrl: A=CV+OFS summer, B=inverter
+  U78: { sym: vca, part: THAT2180, value: THAT2180 }   # ALT-L VCA (-> BP3)
+  U79: { sym: vca, part: THAT2180, value: THAT2180 }   # ALT-R VCA (-> BP3)
+  U80: { sym: opamp2, part: TL072CDT, value: TL072 }   # ALT I/V: A=ALT-L, B=ALT-R
   R7:  { sym: r, value: 20k }     # R_in L
   R8:  { sym: r, value: 20k }     # R_in R
   R40: { sym: r, value: 20k }     # R_f L (I/V)
   R41: { sym: r, value: 20k }     # R_f R (I/V)
-  R42: { sym: r, value: 10k }     # AMT inverter in
-  R43: { sym: r, value: 10k }     # AMT inverter fb
-  R44: { sym: r, value: 100k }    # summer CV in
-  R45: { sym: r, value: 100k }    # summer OFS in
-  R46: { sym: r, value: 2k4 }     # summer fb (Ec scaling; Phase-3R trim)
+  R42: { sym: r, value: 100k }    # CV+OFS summer: CV input
+  R43: { sym: r, value: 100k }    # CV+OFS summer: feedback
+  R44: { sym: r, value: 100k }    # effCV inverter: input
+  R45: { sym: r, value: 100k }    # CV+OFS summer: OFS input
+  R46: { sym: r, value: 100k }    # effCV inverter: feedback
   R9:  { sym: r, value: 100R }    # CV input series protection
+  R129: { sym: r, value: 20k }    # R_in ALT-L
+  R130: { sym: r, value: 20k }    # R_in ALT-R
+  R131: { sym: r, value: 20k }    # R_f ALT-L (I/V)
+  R132: { sym: r, value: 20k }    # R_f ALT-R (I/V)
   D3:  { sym: bat54s, part: BAT54S, value: BAT54S }
   RV1: { sym: trimpot, part: "Bourns 3224W", value: VCA_UNITY_L }
   RV2: { sym: trimpot, part: "Bourns 3224W", value: VCA_UNITY_R }
-  RV24: { sym: trimpot, part: "bipolar pot", value: VCA_AMT }
-  RV25: { sym: trimpot, part: "lin pot", value: VCA_OFS }
+  RV44: { sym: trimpot, part: "bipolar pot", value: VCA_AMT }   # VCA_AMT depth pot (was RV24)
+  RV45: { sym: trimpot, part: "lin pot", value: VCA_OFS }       # VCA_OFS floor pot (was RV25)
+  RV46: { sym: trimpot, part: "Bourns 3224W", value: VCA_UNITY_ALT_L }   # ALT-L Ec+ unity trim
+  RV47: { sym: trimpot, part: "Bourns 3224W", value: VCA_UNITY_ALT_R }   # ALT-R Ec+ unity trim
   C7:  { sym: c, value: 100nF }   # U4 V+
   C8:  { sym: c, value: 100nF }   # U4 V-
   C9:  { sym: c, value: 100nF }   # U5 V+
@@ -51,15 +65,25 @@ parts:
   C42: { sym: c, value: 100nF }   # U6 -12
   C43: { sym: c, value: 100nF }   # U63 +12
   C44: { sym: c, value: 100nF }   # U63 -12
+  C111: { sym: c, value: 100nF }  # U78 V+
+  C112: { sym: c, value: 100nF }  # U78 V-
+  C113: { sym: c, value: 100nF }  # U79 V+
+  C114: { sym: c, value: 100nF }  # U79 V-
+  C115: { sym: c, value: 100nF }  # U80 +12
+  C116: { sym: c, value: 100nF }  # U80 -12
   J26: { sym: jack, part: PJ301M-12, value: VCA_IN }
 
 nets:
-  "+12V":  [U4.7, U5.7, U6.8, U63.8, D3.2, RV25.3, C7.1, C9.1, C41.1, C43.1]
-  "-12V":  [U4.5, U5.5, U6.4, U63.4, D3.1, C8.1, C10.1, C42.1, C44.1]
+  "+12V":  [U4.7, U5.7, U6.8, U63.8, U78.7, U79.7, U80.8, D3.2, RV45.3,
+            C7.1, C9.1, C41.1, C43.1, C111.1, C113.1, C115.1]
+  "-12V":  [U4.5, U5.5, U6.4, U63.4, U78.5, U79.5, U80.4, D3.1,
+            C8.1, C10.1, C42.1, C44.1, C112.1, C114.1, C116.1]
   GND:     [U4.3, U4.4, U4.6, U5.3, U5.4, U5.6, U6.3, U6.5, U63.3, U63.5,
-            RV25.1, J26.2, C7.2, C8.2, C9.2, C10.2, C41.2, C42.2, C43.2, C44.2]
+            U78.3, U78.4, U78.6, U79.3, U79.4, U79.6, U80.3, U80.5,
+            RV45.1, J26.2, C7.2, C8.2, C9.2, C10.2, C41.2, C42.2, C43.2, C44.2,
+            C111.2, C112.2, C113.2, C114.2, C115.2, C116.2]
 
-  # ---- audio path (V->I  ->  THAT2180  ->  I/V) ----
+  # ---- main audio path (V->I  ->  THAT2180  ->  I/V) ----
   PG_OUT_L:  [R7.1]                       # <- block-1 pre-gain out L (boundary)
   PG_OUT_R:  [R8.1]                       # <- block-1 pre-gain out R (boundary)
   VCA_IN_L:  [R7.2, U4.1]                 # THAT2180 L current input
@@ -71,21 +95,37 @@ nets:
   EC_L:      [U4.2, RV1.1, RV1.2]         # Ec+ L via unity trim (rheostat)
   EC_R:      [U5.2, RV2.1, RV2.2]
 
-  # ---- control path ----
+  # ---- ALT-BP VCA (mirrors main; shared V_CTRL) -> BP3 (block-6) ----
+  ALT_OUT_L:    [R129.1]                  # <- block-1 ALT gain-stage out L (boundary)
+  ALT_OUT_R:    [R130.1]                  # <- block-1 ALT gain-stage out R (boundary)
+  ALT_VCA_IN_L: [R129.2, U78.1]           # THAT2180 ALT-L current input
+  ALT_VCA_IN_R: [R130.2, U79.1]
+  ALT_IV_L_IN:  [U78.8, U80.2, R131.1]    # ALT-L current out -> I/V (-) + R_f
+  ALT_IV_R_IN:  [U79.8, U80.6, R132.1]
+  ALT_VCA_OUT_L: [U80.1, R131.2]          # ALT-L I/V out -> block-6 BP3 selector (boundary)
+  ALT_VCA_OUT_R: [U80.7, R132.2]
+  EC_ALT_L:     [U78.2, RV46.1, RV46.2]   # Ec+ ALT-L via unity trim
+  EC_ALT_R:     [U79.2, RV47.1, RV47.2]
+
+  # ---- control path (CV+OFS summed BEFORE the symmetric AMT attenuverter) ----
   VCA_CV_TIP: [J26.1, R9.1]               # VCA_IN jack tip -> 100Ω
-  CVP:       [R9.2, D3.3, R42.1, RV24.3]  # protected CV: clamp, AMT inverter in, pot CW(+)
-  NCVP:      [U63.1, R43.2, RV24.1]       # -CV: inverter out -> pot CCW(-)
-  U63A_INV:  [U63.2, R42.2, R43.1]        # AMT inverter (-) node
-  AMT_W:     [RV24.2, R44.1]              # attenuverter wiper = AMT*CV -> summer
-  OFS_W:     [RV25.2, R45.1]              # OFS floor wiper -> summer
-  U63B_SUM:  [U63.6, R44.2, R45.2, R46.1] # CV summer (-) node
-  V_CTRL:    [U63.7, R46.2, RV1.3, RV2.3] # summed control -> both unity trims
+  CVP:       [R9.2, D3.3, R42.1]          # protected CV -> CV+OFS summer input
+  OFS_W:     [RV45.2, R45.1]              # OFS floor wiper (pivot-referenced) -> summer input
+  U63A_SUM:  [U63.2, R42.2, R45.2, R43.1] # U63A: CV+OFS inverting summer (-) node
+  NEFFCV:    [U63.1, R43.2, R44.1, RV44.1] # -effCV: summer out -> inverter in + AMT pot CCW(-)
+  U63B_INV:  [U63.6, R44.2, R46.1]        # U63B: effCV inverter (-) node
+  PEFFCV:    [U63.7, R46.2, RV44.3]       # +effCV: inverter out -> AMT pot CW(+)
+  V_CTRL:    [RV44.2, RV1.3, RV2.3, RV46.3, RV47.3]  # AMT wiper -> 4 Ec+ unity trims (main L/R + ALT L/R)
 
   MOD_BUS:   [J26.3]                      # <- block-3 mod bus (VCA_IN normalling, boundary)
 
 boundary:
-  - PG_OUT_L    # from block-1
-  - PG_OUT_R    # from block-1
-  - VCA_OUT_L   # to block-5 (LP1)
-  - VCA_OUT_R   # to block-5 (LP1)
-  - MOD_BUS     # from block-3 (VCA_IN tip-switch normalling)
+  - PG_OUT_L      # from block-1
+  - PG_OUT_R      # from block-1
+  - VCA_OUT_L     # to block-5 (LP1)
+  - VCA_OUT_R     # to block-5 (LP1)
+  - ALT_OUT_L     # from block-1 (ALT gain-stage out L)
+  - ALT_OUT_R     # from block-1 (ALT gain-stage out R)
+  - ALT_VCA_OUT_L # to block-6 (BP3 input selector)
+  - ALT_VCA_OUT_R # to block-6 (BP3 input selector)
+  - MOD_BUS       # from block-3 (VCA_IN tip-switch normalling)

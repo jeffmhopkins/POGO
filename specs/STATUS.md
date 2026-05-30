@@ -26,16 +26,16 @@ Last updated: 2026-05-29 | Topology: 48HP | Source of truth: `tools/panel-data.y
 
 | Block | Name | §1 Intent | §2/§3/§4 | Notes |
 |---|---|---|---|---|
-| A | Input Buffer | ✅ panel-verified | ⚠️ STALE | OPA1612 follower, BAT54S clamp |
-| 1 | Pre-Gain | ✅ panel-verified | ⚠️ STALE | OPA1612, 1×/5× switch; ALT_BP path |
+| A | Input Buffer | ✅ panel-verified | ✅ re-verified 2026-05-30 | OPA1612 follower, BAT54S clamp; no behavioral divergence vs locked plugin (change 0018) |
+| 1 | Pre-Gain | ✅ panel-verified | ✅ re-verified 2026-05-30 | OPA1612, 1×/5× switch; ALT_BP path → VCA → BP3-only (corrected, 0018); ALT VCA cell/BP3 selector tracked in block-4/6 |
 | 2 | Dual LFO | ✅ panel-verified | ✅ rate net FINALIZED 2026-05-29 | Integrator+Schmitt; drive-attenuator rate control (fixed R_INT + trimpot attenuator) |
-| 3 | Mod Bus | ✅ panel-verified | ✅ transcribed 2026-05-29 | 19 destinations; 7× TL074; ±10V zener clamp; MOD LEDs added; MOD_SRC deferred |
-| 4 | VCA | ✅ panel-verified | ✅ CORRECTED 2026-05-29 | THAT 2180 current-in/I-V-out (datasheet pinout); Ec+ control; I/V op-amps added |
-| 5 | LP Filter 1 | ✅ panel-verified | ✅ transcribed 2026-05-29 | OTA-C SVF; per-channel expo (true tilt); hosts the shared U9/U10 Q-VCAs (co-owned by block-8); buffer pulldowns added |
-| 6 | Triple BP + Dist | ✅ **rewritten 2026-05-28** | ✅ transcribed 2026-05-29 | OTA-C SVF (v1/BP tap) ×3; per-channel expo; per-group Q-VCAs; SC/HC/WF cells + 2×CD4053/group stereo mux. **CD4053 symbol pinout corrected vs datasheet** (was scrambled + overlapping). 3 Phase-3R flags: DRIVE→gain, DW5 2-bit encoding, BP_MIX blend (see spec §2 note) |
-| 7 | HP Filter | ✅ panel-verified | ✅ transcribed 2026-05-29 | OTA-C SVF; HP inverting output buffer; own Q-VCAs; IRES_AMP + buffer pulldowns added |
-| 8 | LP Filter 2 | ✅ panel-verified | ✅ transcribed 2026-05-29 | OTA-C SVF; mono (single expo); Q via the shared U9/U10 cell B (hosted on block-5); IRES_AMP + buffer pulldowns added |
-| B | Output Buffer | ✅ panel-verified | ⚠️ STALE | TL072; MAIN_L/R from LP2 + BP3_L/R tap |
+| 3 | Mod Bus | ✅ panel-verified | ✅ re-verified 2026-05-30 | MOD_SRC 3-way (SW7 DW5) wired; 18 attenuverters + raw VCA normal; 6× TL074; ±10V zener; MOD LEDs removed; FOCUS→TILT (0018) |
+| 4 | VCA | ✅ panel-verified | ✅ re-verified 2026-05-30 | THAT 2180 current-in/I-V-out; +ALT-BP VCA cell (4 cells total, shared V_ctrl → BP3); VCA_OFS placement fixed; RV24/25→RV44/45 (0018) |
+| 5 | LP Filter 1 | ✅ panel-verified | ✅ re-verified 2026-05-30 | OTA-C SVF; per-channel expo (true tilt); reaches self-oscillation (matches plugin); hosts shared U9/U10 Q-VCAs (co-owned block-8); doc/banner cleanup (0018) |
+| 6 | Triple BP + Dist | ✅ panel-verified | ✅ aligned 2026-05-30 (0018) | Split into 7 sections + aligned to plugin: DIST→SVF reorder, F_REF 400Hz, BP3 ALT-VCA selector, per-band TILT ×0.22, variable DRIVE (THAT2180 VCA/band), CLIP drivers, two-scaler dry/wet. Exact drive/clip/mix scaling = Phase-3R. U73 shared svf1/svf2. |
+| 7 | HP Filter | ✅ panel-verified | ✅ aligned 2026-05-30 (0018) | OTA-C SVF; HP output unity follower (polarity bug fixed); Q collapsed to 1 LM13700 (cell A=L/B=R); mono cutoff/self-osc = LP1 |
+| 8 | LP Filter 2 | ✅ panel-verified | ✅ re-verified 2026-05-30 (0018) | OTA-C SVF, mono (single expo); non-inverting LP output (matches plugin); Q via shared U9/U10 cell B (block-5); no behavioral divergence |
+| B | Output Buffer | ✅ panel-verified | ✅ aligned 2026-05-30 (0018) | TL072 non-inverting followers; MAIN_L/R from LP2 + BP3 tap; BP3_R→L output normal added; ±11V via swing |
 
 ## aux/ Circuit Library (`specs/aux/aux-*.md`)
 

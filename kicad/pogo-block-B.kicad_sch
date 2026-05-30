@@ -189,7 +189,7 @@
   (in_bom yes)
   (on_board yes)
   (uuid "3bf531f4-1ca1-50fa-baca-a95053ea169c")
-  (property "Reference" "R37" (at 163.000 98.000 0)
+  (property "Reference" "R224" (at 163.000 98.000 0)
     (effects (font (size 1.27 1.27)) (justify left)))
   (property "Value" "1k" (at 163.000 94.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))

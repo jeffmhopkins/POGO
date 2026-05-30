@@ -1,8 +1,11 @@
 # aux: OTA-C State Variable Filter (2-Pole)
 
-> ⚠️ **STALE** — Circuit library entry pending re-verification against current panel design (2026-05-28).
+> ✅ **Re-verified 2026-05-30** (content rewritten 2026-05-29) against the locked plugin via
+> block-5 (LP1) and block-6 (BP). The 2-pole OTA-C SVF core matches the plugin's Simper 2-pole
+> SVF. The BP-bank "4-pole-vs-2-pole" question is **RESOLVED: 2-pole** (the plugin BP is a single
+> 2-pole SVFGroup; the old 4-pole claim was wrong — see below). Shared by LP1/LP2/HP/BP.
 
-Design status: [ ] draft → [ ] reviewed → [ ] validated on prototype
+Design status: [x] draft → [ ] reviewed → [ ] validated on prototype
 
 ## Overview
 
@@ -41,11 +44,11 @@ ASCII fallback (one channel shown):
 
            SUM_AMP (TL072 half A):
                          ┌───[R_f 100kΩ]───┐
- X_in ──[100kΩ]──┬──(−)──┤                 ├──── HP_inv ──[100kΩ/100kΩ G=-1 buf]──► HP_out
+ X_in ──[100kΩ]──┬──(−)──┤                 ├──── HP_inv ──[unity follower G=+1]──► HP_out
                  │       │   TL072-A       │
  Q_fb ──[100kΩ]─┘   (+)─┴─GND             │
                                            │
-                     (output = HP_inv, then corrected by inverting buffer)
+                     (output = HP_inv = the HP tap; unity follower for drive isolation)
 
  V2 (LP) ──[unity buf TL072-B]──► LP_out
 
@@ -54,7 +57,8 @@ ASCII fallback (one channel shown):
 
 Note: The summing amplifier SUM_AMP computes:
   HP_inv = -(X_in/R_IN_SUM + Q_fb/R_FB) × R_f
-which, after sign inversion in the HP output buffer, yields the correct HP polarity.
+which is the HP tap; the plugin pre-negates to match it, so the unity follower passes it
+through unchanged (no second inversion — see §SUM_AMP Inversion and HP Polarity).
 
 ## Transfer Function
 
@@ -125,14 +129,16 @@ C0G (NP0) ceramic, 47 nF, 0603:
 
 ### SUM_AMP Inversion and HP Polarity
 
-The standard OTA-C SVF computes:
-  HP = x − (1/Q)·v₁ − v₂
+The standard OTA-C SVF computes `HP = x − (1/Q)·v₁ − v₂`, but the SUM_AMP (inverting summing
+configuration) produces its negative at its output node:
+  HP_inv = −(x − (1/Q)·v₁ − v₂)
 
-The SUM_AMP (inverting summing configuration) produces:
-  HP_inv = −(x − (1/Q)·v₁ − v₂) = −HP
-
-A G=−1 inverting unity-gain buffer on the HP output node restores polarity, yielding
-HP_out = HP = −(x − k·v₁ − v₂) which matches the DSP formula exactly.
+The POGO HP plugin (`HPFilter::process`) deliberately **returns this negated value**
+(`return -(x - k*v1 - v2)`), so the plugin output *equals the SUM_AMP node directly*. The
+hardware therefore takes the SUM_AMP node through a **unity non-inverting follower** (drive
+isolation only, G=+1) — `HP_out = HP_inv`, matching the plugin. Do **not** add a second
+inverting stage: a G=−1 buffer here double-inverts and phase-flips HP vs the plugin (the bug
+fixed in change 0018). This mirrors the LP buffer below (un-negated `+v₂` ↔ unity follower).
 
 ### LP Output Buffer
 
@@ -140,19 +146,16 @@ The LP output (v₂, integrator 2 output node) is loaded by the second OTA diffe
 input. A unity-gain non-inverting buffer (TL072 half) drives the LP output jack at
 low impedance without disturbing the integrator node.
 
-### DSP 4-Pole vs Hardware 2-Pole
+### BP pole count — RESOLVED: 2-pole (matches plugin)
 
-The DSP BandpassSVF.hpp processes each BP group through a cascade of two 2-pole SVF
-stages, producing a 4-pole (24 dB/oct) response per group. The hardware specification
-is 2-pole (12 dB/oct) per group. This is an intentional hardware simplification:
-- The 4-pole DSP cascade requires 4× integrator cells per channel per group
-- 2-pole per group is musically useful and reduces IC count significantly
-- Board layout for 2-pole is substantially simpler
-- Phase 3R should confirm whether 2-pole vs 4-pole is an acceptable deviation or
-  whether cascading two aux-ota-c-svf instances per group is required
+**Resolved 2026-05-30 (change 0018):** the plugin's `BandpassSVF.hpp` processes each BP group
+through a **single 2-pole `SVFGroup`** returning the `v1` (bandpass) tap — **2-pole, 12 dB/oct**,
+one stage per group, no cascade (`SVFGroup::process` returns v1; `TripleBandpass::process` calls
+each group once). The earlier "DSP is 4-pole (cascade of two stages)" claim was **wrong**. The
+hardware is 2-pole per group, so **it matches the plugin exactly** — no cascade, no extra
+integrator cells, no deviation.
 
-For LP1, LP2, HP: DSP is 2-pole, hardware is 2-pole — exact match.
-For BP groups: DSP is 4-pole, hardware is 2-pole — requires Phase 3R decision.
+For LP1, LP2, HP, and the BP groups alike: DSP is 2-pole, hardware is 2-pole — exact match.
 
 ## Component Values (POGO-specific)
 
@@ -165,7 +168,7 @@ For BP groups: DSP is 4-pole, hardware is 2-pole — requires Phase 3R decision.
 | R_FB | Resistor | 0603 | 100 kΩ | Q feedback resistor into SUM_AMP |
 | R_LIN_A, R_LIN_B | Resistor | 0603 | 1 kΩ | OTA linearizing resistors (one per OTA cell) |
 | R_f | Resistor | 0603 | 100 kΩ | SUM_AMP feedback resistor |
-| R_HP_IN, R_HP_FB | Resistor | 0603 | 100 kΩ | HP inverting unity buffer R_in = R_f |
+| (HP output buffer) | — | — | — | Unity non-inverting follower on the SUM_AMP node — no resistors (change 0018; not an inverting buffer) |
 | C_VCC, C_VEE | Ceramic bypass | 0603 | 100 nF | Per IC supply pin; place within 1 mm of pin |
 
 ### Frequency Derivation (nominal)
@@ -213,7 +216,9 @@ Required Iabc range:
   parasitic capacitance that could cause HF oscillation
 - C0G capacitors only — X7R will cause audible pitch drift with temperature
 - SUM_AMP inverting input is a virtual ground; do not add stray capacitance here
-- HP output polarity requires the inverting G=−1 buffer — do not omit it
+- HP output is a **unity G=+1 follower** on the (already-negated) SUM_AMP node — do NOT add a
+  second inversion (a G=−1 buffer here double-inverts vs the plugin; see §SUM_AMP Inversion and
+  HP Polarity, change 0018)
 - At high Q settings (Iabc_q → 0), the filter will self-oscillate; this is expected
   and intentional. Layout must be clean to avoid parasitic oscillation at low Q
 - Decoupling caps on every IC supply pin: 100 nF ceramic, within 1 mm of the pin

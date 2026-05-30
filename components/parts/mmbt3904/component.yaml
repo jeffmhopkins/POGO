@@ -1,0 +1,17 @@
+# mmbt3904 — POGO sourced component (hand-maintained)
+slug: mmbt3904
+mpn: MMBT3904
+manufacturer: onsemi
+supplier: '~'
+package: SOT-23
+symbol: npn
+matches:
+- MMBT3904
+footprint:
+  lib: Package_TO_SOT_SMD
+  name: SOT-23
+datasheet:
+  url: https://www.onsemi.com/products/discrete-power-modules/general-purpose-small-signal-transistors/mmbt3904
+  version: product page (onsemi MMBT3904, Rev. 11)
+notes: General-purpose NPN BJT (SOT-23, 1=B 2=E 3=C). LFO LED breathing-driver current
+  source (block-2). Standard jellybean; Ic 200mA, Vceo 40V, beta ~100-300.

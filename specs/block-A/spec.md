@@ -1,7 +1,7 @@
 # Block A: Input Buffers
 Unity-gain stereo input stage that clamps, protects, and normalizes R to L when unpatched.
 
-DSP source: `plugin/src/dsp/InputBuffer.hpp`, `plugin/src/Pogo.cpp` (lines 344–348)
+DSP source: `plugin/src/dsp/InputBuffer.hpp`, `plugin/src/Pogo.cpp` (lines 335–338)
 
 ---
 
@@ -21,9 +21,10 @@ transparent mono-to-stereo normalling.
 
 ## 2. Theoretical Design and Topology
 
-> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
-> It has not been verified against the current panel control set. Do not use for circuit
-> construction until re-verified. See `specs/STATUS.md` for current phase status.
+> ✅ **Re-verified 2026-05-30** against the locked plugin (change 0017 follow-up).
+> Block A is unchanged by 0017; the clamp / R-normalling / unity-follower model below
+> matches the plugin ground truth (`InputBuffer.hpp:8–10`, `Pogo.cpp:335–338`) under
+> adversarial review. No behavioral edits required — this pass corrected documentation only.
 
 ### DSP-to-analog mapping
 
@@ -38,6 +39,12 @@ hardware the clamp is not a software limit but a consequence of op-amp output sa
 combined with upstream Schottky diode protection. The analog realization therefore maps
 directly: the clamp is the op-amp's natural output ceiling, and the series resistor plus
 BAT54S diodes protect the op-amp input before the rail is ever reached.
+
+> **Part-identity note:** the plugin source comment (`InputBuffer.hpp:5–6`) still names an
+> *LM4562* follower — that comment predates the hardware part selection and is stale. The
+> hardware part is **OPA1612** (see §3 / `components.yaml`), chosen for its lower noise floor;
+> the behavior (unity gain, ±11 V saturation) is identical, so this is a part upgrade, not a
+> behavioral deviation. The plugin comment is documentation-only and does not affect DSP.
 
 ### Transfer function
 
@@ -90,23 +97,28 @@ a function of load current and rail accuracy; it typically saturates at ±10.8 V
 ±11.2 V. This is consistent with the DSP spec and requires no correction. There is no
 intentional nonlinearity in this block.
 
-→ References `aux/unity-buffer.md`, `aux/cv-input-protection.md`
+→ References `aux/aux-unity-buffer.md` (Variant A, non-inverting follower), `aux/aux-cv-protection.md`
 
 ---
 
 ## 3. Physical Design
 
-> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
-> It has not been verified against the current panel control set. Do not use for circuit
-> construction until re-verified. See `specs/STATUS.md` for current phase status.
+> ✅ **Re-verified 2026-05-30** against the locked plugin (change 0017 follow-up).
+> Block A is unchanged by 0017. Component values, netlist (`block-A.nets.yaml`) and BOM
+> verified consistent with the §2 model and the plugin ground truth. Documentation-only
+> corrections applied (clamp-current derivation, series-R value rationale, aux references).
 
 ### Component values and derivations
 
 **Series protection resistors (R1, R2): 100 Ω**
-- Chosen to limit diode clamp current to < 50 mA at ±17 V worst-case (e.g., +5 V bench
-  supply mis-patch): I = (17 − 0.3) / 100 = 167 mA → borderline; use 150 Ω if desired.
-  100 Ω is the community standard for Eurorack and keeps insertion loss negligible:
-  voltage divider with a 1 MΩ op-amp input = 0.00001 dB attenuation.
+- The clamp current is set by the BAT54S holding the signal node at the rail + a Schottky
+  drop (≈ ±12.3 V), *not* near ground — so the series resistor only drops the overshoot
+  above the clamp voltage: I = (V_in − 12.3) / R. Worst realistic mis-patch (±17 V from a
+  ±15 V system at rail): I = (17 − 12.3) / 100 = **47 mA**, comfortably within the BAT54S
+  200 mA continuous rating. (An earlier note quoting 167 mA used I = (17 − 0.3)/100, which
+  wrongly assumes the diode clamps to ground rather than to the 12 V rail — 100 Ω is safe.)
+- 100 Ω is the Eurorack community standard, keeps source impedance / noise low, and makes
+  insertion loss negligible: divider with a ~1 MΩ op-amp input ≈ 0.00001 dB attenuation.
 
 **Clamp diodes (D1, D2): BAT54S (dual *series* Schottky, SOT-23)**
 - BAT54S is a **series** dual: D1 (A1=pin1 → K1) in series with D2 (A2 → K2=pin2), the two
@@ -152,7 +164,8 @@ jacks are located to keep input traces short and shielded from digital noise.
 - 1× OPA1612 (U1, dual SOIC-8): ~6 mA  (Iq = 2.75 mA/channel × 2 channels = 5.5 mA)
 - **+12V: ~6 mA | −12V: ~6 mA**
 
-→ References `aux/unity-buffer.svg` for op-amp follower schematic primitive.
+→ References `aux/aux-unity-buffer.md` (Variant A) for the op-amp follower ASCII schematic
+primitive. (The aux/ library is ASCII-only — there are no SVG schematic files.)
 
 ---
 

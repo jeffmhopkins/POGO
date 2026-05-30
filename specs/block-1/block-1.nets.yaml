@@ -40,6 +40,7 @@ parts:
   # ALT input protection (mirrors block-A)
   R38: { sym: r,      value: 100R }
   R39: { sym: r,      value: 100R }
+  R134: { sym: r,     value: 22k }     # ALT_BP_L insertion-detect pulldown (change 0018)
   D8:  { sym: bat54s, part: BAT54S, value: BAT54S }
   D9:  { sym: bat54s, part: BAT54S, value: BAT54S }
   # decoupling
@@ -56,7 +57,7 @@ parts:
 nets:
   "+12V":   [U2.8, U3.8, D8.2, D9.2, C3.1, C5.1]
   "-12V":   [U2.4, U3.4, D8.1, D9.1, C4.1, C6.1]
-  GND:      [R3L.2, R3R.2, R5L.2, R5R.2, J3.2, J4.2, C3.2, C4.2, C5.2, C6.2]
+  GND:      [R3L.2, R3R.2, R5L.2, R5R.2, J3.2, J4.2, C3.2, C4.2, C5.2, C6.2, R134.2]
 
   # ---- main path (U2 / SW1) ----
   L_OUT:    [U2.3, SW1.3]                 # <- block-A out L (boundary); also 1x bypass throw
@@ -69,7 +70,8 @@ nets:
   PG_OUT_R: [SW1.5]
 
   # ---- ALT path (U3 / SW2, protected inputs) ----
-  ALT_L_TIP: [J3.1, R38.1]                # J3 tip -> 100Ω series
+  ALT_L_TIP: [J3.1, R38.1, R134.1]        # J3 tip -> 100Ω series; + insertion-detect pulldown
+  ALT_L_DET: [J3.3]                        # J3 tip-switch lug -> BP3 selector (boundary, change 0018)
   ALT_R_TIP: [J4.1, R39.1]                # J4 tip -> 100Ω series
   ALT_L_IN:  [R38.2, D8.3, U3.3, SW2.3, J4.3]  # protected L node: U3A(+), 1x throw, J4 normalling lug
   ALT_R_IN:  [R39.2, D9.3, U3.5, SW2.6]   # protected R node: U3B(+), 1x throw
@@ -77,17 +79,17 @@ nets:
   U3B_INV:   [U3.6, R5R.1, R6R.1]
   ALT5X_L:   [U3.1, R6L.2, SW2.1]
   ALT5X_R:   [U3.7, R6R.2, SW2.4]
-  ALT_OUT_L: [SW2.2]                       # -> BP block (boundary)
+  ALT_OUT_L: [SW2.2]                       # -> block-4 ALT VCA cell -> block-6 BP3 selector (boundary)
   ALT_OUT_R: [SW2.5]
 
-# J3 is the primary ALT input (no normalling source); its switch lug is unused.
-no_connect:
-  - J3.3
+# J3's tip-switch lug now drives the BP3 selector's ALT_L_DET (no longer unused).
+no_connect: []
 
 boundary:
   - L_OUT      # from block-A
   - R_OUT      # from block-A
   - PG_OUT_L   # to block-VCA (main pre-gain out)
   - PG_OUT_R   # to block-VCA
-  - ALT_OUT_L  # to block-6 (ALT direct into BP)
-  - ALT_OUT_R  # to block-6
+  - ALT_OUT_L  # -> block-4 ALT VCA cell (shared control) -> block-6 BP3 per-channel selector; bypasses LP1 not VCA
+  - ALT_OUT_R  # -> block-4 / block-6 (see ALT_OUT_L); BP3 voice only
+  - ALT_L_DET  # -> block-6-dist3 BP3 selector (ALT_BP_L insertion detect)

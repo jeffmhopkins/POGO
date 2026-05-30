@@ -1,0 +1,211 @@
+# POGO block-6-dist2 — split from block-6.nets.yaml (behavior-preserving 7-way partition)
+# Auto-split: parts/nets identical to the block-6 monolith; cross-section wires are boundary nets.
+
+block: block-6-dist2
+board: audio
+title: POGO Block 6 DIST2 - BP2 SC/HC/WF + CD4053 mux
+
+parts:
+  U32: { sym: cd4053, part: CD4053, value: CD4053 }
+  C110_U32p: { sym: c, value: 100nF }
+  C110_U32n: { sym: c, value: 100nF }
+  U36: { sym: opamp2, part: TL072CDT, value: TL072 }
+  C110_U36p: { sym: c, value: 100nF }
+  C110_U36n: { sym: c, value: 100nF }
+  U37: { sym: opamp2, part: TL072CDT, value: TL072 }
+  C110_U37p: { sym: c, value: 100nF }
+  C110_U37n: { sym: c, value: 100nF }
+  U42: { sym: opamp2, part: TL072CDT, value: TL072 }
+  C110_U42p: { sym: c, value: 100nF }
+  C110_U42n: { sym: c, value: 100nF }
+  U43: { sym: opamp2, part: TL072CDT, value: TL072 }
+  C110_U43p: { sym: c, value: 100nF }
+  C110_U43n: { sym: c, value: 100nF }
+  U76: { sym: cd4053, part: CD4053, value: CD4053 }
+  C110_U76p: { sym: c, value: 100nF }
+  C110_U76n: { sym: c, value: 100nF }
+  R18_2L: { sym: r, value: 10k }
+  R19_2L: { sym: r, value: 10k }
+  R20_2L: { sym: r, value: 10k }
+  R21_2L: { sym: r, value: 10k }
+  R22_2L: { sym: r, value: 10k }
+  R23_2L: { sym: r, value: 10k }
+  R24_2L: { sym: r, value: 10k }
+  R25_2L: { sym: r, value: 10k }
+  R_f_wf_2L: { sym: r, value: 10k }
+  C_WF_2La: { sym: c, value: 47pF }
+  C_WF_2Lb: { sym: c, value: 47pF }
+  D4_2La: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D6_2La: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D4_2Lb: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D6_2Lb: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D4_2Lc: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D6_2Lc: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D4_2Ld: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D6_2Ld: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D5_2La: { sym: zener, part: BZX84C5V1, value: BZX84C5V1 }
+  D5_2Lb: { sym: zener, part: BZX84C5V1, value: BZX84C5V1 }
+  R18_2R: { sym: r, value: 10k }
+  R19_2R: { sym: r, value: 10k }
+  R20_2R: { sym: r, value: 10k }
+  R21_2R: { sym: r, value: 10k }
+  R22_2R: { sym: r, value: 10k }
+  R23_2R: { sym: r, value: 10k }
+  R24_2R: { sym: r, value: 10k }
+  R25_2R: { sym: r, value: 10k }
+  R_f_wf_2R: { sym: r, value: 10k }
+  C_WF_2Ra: { sym: c, value: 47pF }
+  C_WF_2Rb: { sym: c, value: 47pF }
+  D4_2Ra: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D6_2Ra: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D4_2Rb: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D6_2Rb: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D4_2Rc: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D6_2Rc: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D4_2Rd: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D6_2Rd: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D5_2Ra: { sym: zener, part: BZX84C5V1, value: BZX84C5V1 }
+  D5_2Rb: { sym: zener, part: BZX84C5V1, value: BZX84C5V1 }
+  R128_2sc: { sym: r, value: 100k }
+  R128_2wf: { sym: r, value: 100k }
+  # ---- DRIVE VCA cell (mirrors block-4 THAT2180; see block-6-dist1 for prose) ----
+  U87: { sym: vca, part: THAT2180, value: THAT2180 }   # BP2 DRIVE VCA L
+  U88: { sym: vca, part: THAT2180, value: THAT2180 }   # BP2 DRIVE VCA R
+  U92: { sym: opamp4, part: TL074CDT, value: TL074 }    # A=L I/V, B=R I/V, C=drive summer, D=spare unity buf
+  R161: { sym: r, value: 20k }    # R_in L
+  R162: { sym: r, value: 20k }    # R_in R
+  R163: { sym: r, value: 20k }    # R_f L (I/V)
+  R164: { sym: r, value: 20k }    # R_f R (I/V)
+  R165: { sym: r, value: 100k }   # drive summer: DRIVE-knob input  (Phase-3R: knob->Ec+ dB scale)
+  R166: { sym: r, value: 100k }   # drive summer: DRIVE-CV input (MOD_BP2_DIST)
+  R167: { sym: r, value: 100k }   # drive summer: bias input (knob=0.20 ~ 0 dB unity; Phase-3R)
+  R168: { sym: r, value: 100k }   # drive summer: feedback
+  RV53: { sym: trimpot, part: "Bourns 3224W", value: BP2_DRIVE_UNITY_L }  # Ec+ L unity trim
+  RV54: { sym: trimpot, part: "Bourns 3224W", value: BP2_DRIVE_UNITY_R }  # Ec+ R unity trim
+  RV36: { sym: trimpot, part: "knob", value: BP2_DIST }   # DRIVE knob (control board; existing ref)
+  C110_U87p: { sym: c, value: 100nF }
+  C110_U87n: { sym: c, value: 100nF }
+  C110_U88p: { sym: c, value: 100nF }
+  C110_U88n: { sym: c, value: 100nF }
+  C110_U92p: { sym: c, value: 100nF }
+  C110_U92n: { sym: c, value: 100nF }
+  # ---- CLIP detector (change 0018, Stage 6): same cell as dist1, shared VREF_P4/N4 (boundary in) ----
+  U95: { sym: opamp4, part: TL074CDT, value: TL074 }    # BP2 CLIP comparators
+  C110_U95p: { sym: c, value: 100nF }
+  C110_U95n: { sym: c, value: 100nF }
+  R192: { sym: r, value: 100k }   # comp A in (DISTOUT_L -> in+)
+  R193: { sym: r, value: 100k }   # comp B in (DISTOUT_L -> in-)
+  R194: { sym: r, value: 100k }   # comp C in (DISTOUT_R -> in+)
+  R195: { sym: r, value: 100k }   # comp D in (DISTOUT_R -> in-)
+  R196: { sym: r, value: 2.2M }   # comp A hysteresis fb
+  R197: { sym: r, value: 2.2M }   # comp B hysteresis fb
+  R198: { sym: r, value: 2.2M }   # comp C hysteresis fb
+  R199: { sym: r, value: 2.2M }   # comp D hysteresis fb
+  R200: { sym: r, value: 1k }     # CLIP LED current-limit
+  R201: { sym: r, value: 100k }   # comp B VREF_N4 series into in+
+  R202: { sym: r, value: 100k }   # comp D VREF_N4 series into in+
+  D15_2a: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D15_2b: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D15_2c: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D15_2d: { sym: diode, part: 1N4148W, value: 1N4148W }
+  BP2_CLIP_LED: { sym: led, part: "LED 3mm", value: BP2_CLIP }
+
+nets:
+  V5LOGIC: [R128_2sc.1, R128_2wf.1, R167.1, RV36.3]
+  LP1_OUT_L: [R161.1]
+  LP1_OUT_R: [R162.1]
+  BP2_DRIVEIN_L: [R161.2, U87.1]
+  BP2_DRIVEIN_R: [R162.2, U88.1]
+  BP2_DRIVEIV_L: [U87.8, U92.2, R163.1]
+  BP2_DRIVEIV_R: [U88.8, U92.6, R164.1]
+  BP2_DRIVEOUT_L: [U92.1, R163.2, R18_2L.1, R20_2L.1, R22_2L.1, C_WF_2La.1, C_WF_2Lb.1]
+  BP2_DRIVEOUT_R: [U92.7, R164.2, R18_2R.1, R20_2R.1, R22_2R.1, C_WF_2Ra.1, C_WF_2Rb.1]
+  EC_BP2_DRIVE_L: [U87.2, RV53.1, RV53.2]
+  EC_BP2_DRIVE_R: [U88.2, RV54.1, RV54.2]
+  MOD_BP2_DIST: [R166.1]
+  BP2_DRIVE_KNOB: [RV36.2, R165.1]
+  BP2_DRIVE_SUM: [U92.9, R165.2, R166.2, R167.2, R168.1]
+  V_DRIVE_CTRL_2: [U92.8, R168.2, RV53.3, RV54.3]
+  BP2_DRIVE_SPARE: [U92.14, U92.13]
+  BP2_SCVG_L: [U36.2, R18_2L.2, R19_2L.1, D4_2Lb.K, D4_2Lc.A]
+  BP2_SCOUT_L: [U36.1, R19_2L.2, D4_2La.A, D4_2Ld.K, U32.13]
+  BP2_SCM1_L: [D4_2La.K, D4_2Lb.A]
+  BP2_SCM2_L: [D4_2Lc.K, D4_2Ld.A]
+  BP2_HCVG_L: [U36.6, R20_2L.2, R21_2L.1]
+  BP2_HCOUT_L: [U36.7, R21_2L.2, D5_2La.3, U76.12]
+  BP2_HCZMID_L: [D5_2La.1, D5_2Lb.1]
+  BP2_WFVG_L: [U42.2, R22_2L.2, R23_2L.1]
+  BP2_VFOLDIN_L: [U42.1, R23_2L.2, R24_2L.1, R25_2L.1]
+  BP2_WFCLAMP_L: [R24_2L.2, D6_2La.A, D6_2Ld.K, U42.5]
+  BP2_WFCM1_L: [D6_2La.K, D6_2Lb.A]
+  BP2_WFCM2_L: [D6_2Lc.K, D6_2Ld.A]
+  BP2_WFFVG_L: [U42.6, R25_2L.2, R_f_wf_2L.1]
+  BP2_WFOUT_L: [U42.7, R_f_wf_2L.2, U76.13]
+  BP2_SCVG_R: [U37.2, R18_2R.2, R19_2R.1, D4_2Rb.K, D4_2Rc.A]
+  BP2_SCOUT_R: [U37.1, R19_2R.2, D4_2Ra.A, D4_2Rd.K, U32.1]
+  BP2_SCM1_R: [D4_2Ra.K, D4_2Rb.A]
+  BP2_SCM2_R: [D4_2Rc.K, D4_2Rd.A]
+  BP2_HCVG_R: [U37.6, R20_2R.2, R21_2R.1]
+  BP2_HCOUT_R: [U37.7, R21_2R.2, D5_2Ra.3, U76.2]
+  BP2_HCZMID_R: [D5_2Ra.1, D5_2Rb.1]
+  BP2_WFVG_R: [U43.2, R22_2R.2, R23_2R.1]
+  BP2_VFOLDIN_R: [U43.1, R23_2R.2, R24_2R.1, R25_2R.1]
+  BP2_WFCLAMP_R: [R24_2R.2, D6_2Ra.A, D6_2Rd.K, U43.5]
+  BP2_WFCM1_R: [D6_2Ra.K, D6_2Rb.A]
+  BP2_WFCM2_R: [D6_2Rc.K, D6_2Rd.A]
+  BP2_WFFVG_R: [U43.6, R25_2R.2, R_f_wf_2R.1]
+  BP2_WFOUT_R: [U43.7, R_f_wf_2R.2, U76.1]
+  BP2_SEL_WF: [U76.11, U76.10, R128_2wf.2]
+  BP2_MID_L: [U76.14, U32.12]
+  BP2_MID_R: [U76.15, U32.2]
+  BP2_SEL_SC: [U32.11, U32.10, R128_2sc.2]
+  BP2_DISTOUT_L: [U32.14, R192.1, R193.1]
+  BP2_DISTOUT_R: [U32.15, R194.1, R195.1]
+  # ---- CLIP detector nets (change 0018, Stage 6); VREF_P4/N4 are boundary inputs from dist1 ----
+  BP2_CLIP_A_INP: [U95.3, R192.2, R196.2]
+  BP2_CLIP_C_INP: [U95.10, R194.2, R198.2]
+  BP2_CLIP_B_INN: [U95.6, R193.2]
+  BP2_CLIP_B_INP: [U95.5, R201.2, R197.2]
+  BP2_CLIP_D_INN: [U95.13, R195.2]
+  BP2_CLIP_D_INP: [U95.12, R202.2, R199.2]
+  BP2_CLIP_A_OUT: [U95.1, R196.1, D15_2a.A]
+  BP2_CLIP_B_OUT: [U95.7, R197.1, D15_2b.A]
+  BP2_CLIP_C_OUT: [U95.8, R198.1, D15_2c.A]
+  BP2_CLIP_D_OUT: [U95.14, R199.1, D15_2d.A]
+  BP2_CLIP_OR: [D15_2a.K, D15_2b.K, D15_2c.K, D15_2d.K, R200.1]
+  BP2_CLIP_LEDA: [R200.2, BP2_CLIP_LED.A]
+  VREF_P4: [U95.2, U95.9]              # <- dist1 shared +4V (boundary)
+  VREF_N4: [R201.1, R202.1]            # <- dist1 shared -4V (boundary)
+  "+12V": [U32.16, C110_U32p.1, U36.8, C110_U36p.1, U37.8, C110_U37p.1, U42.8, C110_U42p.1, U43.8, C110_U43p.1, U76.16, C110_U76p.1,
+           U87.7, U88.7, U92.4, C110_U87p.1, C110_U88p.1, C110_U92p.1,
+           U95.4, C110_U95p.1]
+  "-12V": [U32.7, C110_U32n.1, U36.4, C110_U36n.1, U37.4, C110_U37n.1, U42.4, C110_U42n.1, U43.4, C110_U43n.1, U76.7, C110_U76n.1,
+           U87.5, U88.5, U92.11, C110_U87n.1, C110_U88n.1, C110_U92n.1,
+           U95.11, C110_U95n.1]
+  GND: [U32.8, U32.6, C110_U32p.2, C110_U32n.2, C110_U36p.2, C110_U36n.2, C110_U37p.2, C110_U37n.2, C110_U42p.2, C110_U42n.2, C110_U43p.2, C110_U43n.2, U76.8, U76.6, C110_U76p.2, C110_U76n.2, U36.3, D5_2Lb.3, U36.5, U42.3, D6_2Lb.K, D6_2Lc.A, C_WF_2La.2, C_WF_2Lb.2, U37.3, D5_2Rb.3, U37.5, U43.3, D6_2Rb.K, D6_2Rc.A, C_WF_2Ra.2, C_WF_2Rb.2,
+        U87.3, U87.4, U87.6, U88.3, U88.4, U88.6, U92.3, U92.5, U92.10, U92.12, RV36.1,
+        C110_U87p.2, C110_U87n.2, C110_U88p.2, C110_U88n.2, C110_U92p.2, C110_U92n.2,
+        C110_U95p.2, C110_U95n.2, BP2_CLIP_LED.K]
+
+no_connect:
+  - U32.3
+  - U32.4
+  - U32.5
+  - U32.9
+  - U76.3
+  - U76.4
+  - U76.5
+  - U76.9
+
+boundary:
+  - VREF_P4          # <- dist1 shared +4V CLIP threshold
+  - VREF_N4          # <- dist1 shared -4V CLIP threshold
+  - V5LOGIC
+  - LP1_OUT_L
+  - LP1_OUT_R
+  - MOD_BP2_DIST     # <- block-3 DRIVE CV (drive-control summer)
+  - BP2_DISTOUT_L
+  - BP2_DISTOUT_R
+  - BP2_SEL_WF
+  - BP2_SEL_SC
+

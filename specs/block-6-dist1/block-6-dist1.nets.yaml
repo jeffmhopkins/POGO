@@ -1,0 +1,245 @@
+# POGO block-6-dist1 — split from block-6.nets.yaml (behavior-preserving 7-way partition)
+# Auto-split: parts/nets identical to the block-6 monolith; cross-section wires are boundary nets.
+
+block: block-6-dist1
+board: audio
+title: POGO Block 6 DIST1 - BP1 SC/HC/WF + CD4053 mux
+
+parts:
+  U31: { sym: cd4053, part: CD4053, value: CD4053 }
+  C110_U31p: { sym: c, value: 100nF }
+  C110_U31n: { sym: c, value: 100nF }
+  U34: { sym: opamp2, part: TL072CDT, value: TL072 }
+  C110_U34p: { sym: c, value: 100nF }
+  C110_U34n: { sym: c, value: 100nF }
+  U35: { sym: opamp2, part: TL072CDT, value: TL072 }
+  C110_U35p: { sym: c, value: 100nF }
+  C110_U35n: { sym: c, value: 100nF }
+  U40: { sym: opamp2, part: TL072CDT, value: TL072 }
+  C110_U40p: { sym: c, value: 100nF }
+  C110_U40n: { sym: c, value: 100nF }
+  U41: { sym: opamp2, part: TL072CDT, value: TL072 }
+  C110_U41p: { sym: c, value: 100nF }
+  C110_U41n: { sym: c, value: 100nF }
+  U75: { sym: cd4053, part: CD4053, value: CD4053 }
+  C110_U75p: { sym: c, value: 100nF }
+  C110_U75n: { sym: c, value: 100nF }
+  R18_1L: { sym: r, value: 10k }
+  R19_1L: { sym: r, value: 10k }
+  R20_1L: { sym: r, value: 10k }
+  R21_1L: { sym: r, value: 10k }
+  R22_1L: { sym: r, value: 10k }
+  R23_1L: { sym: r, value: 10k }
+  R24_1L: { sym: r, value: 10k }
+  R25_1L: { sym: r, value: 10k }
+  R_f_wf_1L: { sym: r, value: 10k }
+  C_WF_1La: { sym: c, value: 47pF }
+  C_WF_1Lb: { sym: c, value: 47pF }
+  D4_1La: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D6_1La: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D4_1Lb: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D6_1Lb: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D4_1Lc: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D6_1Lc: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D4_1Ld: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D6_1Ld: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D5_1La: { sym: zener, part: BZX84C5V1, value: BZX84C5V1 }
+  D5_1Lb: { sym: zener, part: BZX84C5V1, value: BZX84C5V1 }
+  R18_1R: { sym: r, value: 10k }
+  R19_1R: { sym: r, value: 10k }
+  R20_1R: { sym: r, value: 10k }
+  R21_1R: { sym: r, value: 10k }
+  R22_1R: { sym: r, value: 10k }
+  R23_1R: { sym: r, value: 10k }
+  R24_1R: { sym: r, value: 10k }
+  R25_1R: { sym: r, value: 10k }
+  R_f_wf_1R: { sym: r, value: 10k }
+  C_WF_1Ra: { sym: c, value: 47pF }
+  C_WF_1Rb: { sym: c, value: 47pF }
+  D4_1Ra: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D6_1Ra: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D4_1Rb: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D6_1Rb: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D4_1Rc: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D6_1Rc: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D4_1Rd: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D6_1Rd: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D5_1Ra: { sym: zener, part: BZX84C5V1, value: BZX84C5V1 }
+  D5_1Rb: { sym: zener, part: BZX84C5V1, value: BZX84C5V1 }
+  R128_1sc: { sym: r, value: 100k }
+  R128_1wf: { sym: r, value: 100k }
+  # ---- DRIVE VCA cell (change: per-band variable-DRIVE gain, mirrors block-4 THAT2180) ----
+  # Inserted between the band input (LP1_OUT_L/R) and the SC/HC/WF cells. THAT2180 current-in
+  # (pin1) / current-out (pin8); R_in (V->I) at input + TL074 transimpedance I/V (R_f, unity at
+  # 0 dB, inverting). Gain via Ec+ (pin2) from the drive-control summer (half C). Mirrors block-4.
+  U85: { sym: vca, part: THAT2180, value: THAT2180 }   # BP1 DRIVE VCA L
+  U86: { sym: vca, part: THAT2180, value: THAT2180 }   # BP1 DRIVE VCA R
+  U91: { sym: opamp4, part: TL074CDT, value: TL074 }    # A=L I/V, B=R I/V, C=drive summer, D=spare unity buf
+  R153: { sym: r, value: 20k }    # R_in L (V->I into U85 Input)
+  R154: { sym: r, value: 20k }    # R_in R (V->I into U86 Input)
+  R155: { sym: r, value: 20k }    # R_f L (I/V feedback; unity at 0 dB, inverting)
+  R156: { sym: r, value: 20k }    # R_f R (I/V feedback)
+  R157: { sym: r, value: 100k }   # drive summer: DRIVE-knob input    (Phase-3R: knob->Ec+ dB scale)
+  R158: { sym: r, value: 100k }   # drive summer: DRIVE-CV input (MOD_BP1_DIST)
+  R159: { sym: r, value: 100k }   # drive summer: bias input (knob=0.20 ~ 0 dB unity; Phase-3R)
+  R160: { sym: r, value: 100k }   # drive summer: feedback
+  RV51: { sym: trimpot, part: "Bourns 3224W", value: BP1_DRIVE_UNITY_L }  # Ec+ L unity trim (rheostat)
+  RV52: { sym: trimpot, part: "Bourns 3224W", value: BP1_DRIVE_UNITY_R }  # Ec+ R unity trim
+  RV33: { sym: trimpot, part: "knob", value: BP1_DIST }   # DRIVE knob (control board; existing ref)
+  C110_U85p: { sym: c, value: 100nF }   # U85 V+
+  C110_U85n: { sym: c, value: 100nF }   # U85 V-
+  C110_U86p: { sym: c, value: 100nF }   # U86 V+
+  C110_U86n: { sym: c, value: 100nF }   # U86 V-
+  C110_U91p: { sym: c, value: 100nF }   # U91 +12V
+  C110_U91n: { sym: c, value: 100nF }   # U91 -12V
+  # ---- CLIP detector (change 0018, Stage 6): per-band ±4V window on the distortion output ----
+  # Plugin: BP1_CLIP_LIGHT = (max(|distOutL|,|distOutR|) > 4.0V) ? 1 : 0, monitoring the
+  # post-distortion / pre-SVF node (here the CD4053 mux output BP1_DISTOUT_L/_R). TL074 U94 =
+  # four open-loop comparators (>+4 L, <-4 L, >+4 R, <-4 R) with light positive-feedback
+  # hysteresis (R_hys_fb >> R_hys_in) to avoid chatter. Comparator outs are diode-OR'd
+  # (1N4148W steering) into the CLIP LED anode; LED sinks through a current-limit R to GND.
+  # ±4V thresholds come from the SHARED reference divider (below) -> VREF_P4 / VREF_N4
+  # (boundary out to dist2/dist3).
+  U94: { sym: opamp4, part: TL074CDT, value: TL074 }    # BP1 CLIP comparators (A:>+4L B:<-4L C:>+4R D:<-4R)
+  C110_U94p: { sym: c, value: 100nF }   # U94 +12V decoupling
+  C110_U94n: { sym: c, value: 100nF }   # U94 -12V decoupling
+  R177: { sym: r, value: 100k }   # CLIP comp A in (DISTOUT_L -> in+, >+4 detect)
+  R178: { sym: r, value: 100k }   # CLIP comp B in (DISTOUT_L -> in-, <-4 detect)
+  R179: { sym: r, value: 100k }   # CLIP comp C in (DISTOUT_R -> in+, >+4 detect)
+  R180: { sym: r, value: 100k }   # CLIP comp D in (DISTOUT_R -> in-, <-4 detect)
+  R181: { sym: r, value: 2.2M }   # CLIP comp A hysteresis fb (out -> in+; ~50mV @ ±12 swing)
+  R182: { sym: r, value: 2.2M }   # CLIP comp B hysteresis fb (out -> in+)
+  R183: { sym: r, value: 2.2M }   # CLIP comp C hysteresis fb (out -> in+)
+  R184: { sym: r, value: 2.2M }   # CLIP comp D hysteresis fb (out -> in+)
+  R185: { sym: r, value: 1k }     # CLIP LED current-limit (OR node -> LED anode -> GND)
+  R190: { sym: r, value: 100k }   # CLIP comp B VREF_N4 series into in+ (hys-sum node)
+  R191: { sym: r, value: 100k }   # CLIP comp D VREF_N4 series into in+ (hys-sum node)
+  D14_1a: { sym: diode, part: 1N4148W, value: 1N4148W }   # OR steer comp A
+  D14_1b: { sym: diode, part: 1N4148W, value: 1N4148W }   # OR steer comp B
+  D14_1c: { sym: diode, part: 1N4148W, value: 1N4148W }   # OR steer comp C
+  D14_1d: { sym: diode, part: 1N4148W, value: 1N4148W }   # OR steer comp D
+  BP1_CLIP_LED: { sym: led, part: "LED 3mm", value: BP1_CLIP }   # panel CLIP LED (BP1_CLIP_LIGHT)
+  # ---- SHARED ±4V threshold reference divider (change 0018, Stage 6) ----
+  # One +4V and one -4V node, shared by all 3 CLIP detectors (dist1/2/3) via boundary nets.
+  # +4V = +12 * 10k/(20k+10k); -4V = -12 * 10k/(20k+10k). Phase-3R: trim ratio to ±4.00V if
+  # the 1% divider error (~±40mV) matters; bypass caps tame comparator-input noise.
+  R186: { sym: r, value: 20k }    # VREF_P4 top (+12V -> node)
+  R187: { sym: r, value: 10k }    # VREF_P4 bottom (node -> GND)
+  R188: { sym: r, value: 20k }    # VREF_N4 top (-12V -> node)
+  R189: { sym: r, value: 10k }    # VREF_N4 bottom (node -> GND)
+  C111_P4: { sym: c, value: 100nF }   # VREF_P4 bypass
+  C111_N4: { sym: c, value: 100nF }   # VREF_N4 bypass
+
+nets:
+  V5LOGIC: [R128_1sc.1, R128_1wf.1, R159.1, RV33.3]
+  # band input now feeds ONLY the DRIVE VCA R_in (was: distortion-cell inputs)
+  LP1_OUT_L: [R153.1]
+  LP1_OUT_R: [R154.1]
+  # DRIVE VCA L/R: V->I -> THAT2180 -> I/V (TL074 A/B). I/V out = the new BP1_DRIVEOUT band node.
+  BP1_DRIVEIN_L: [R153.2, U85.1]                 # THAT2180 L current input
+  BP1_DRIVEIN_R: [R154.2, U86.1]
+  BP1_DRIVEIV_L: [U85.8, U91.2, R155.1]          # L current out -> I/V (-) + R_f
+  BP1_DRIVEIV_R: [U86.8, U91.6, R156.1]
+  BP1_DRIVEOUT_L: [U91.1, R155.2, R18_1L.1, R20_1L.1, R22_1L.1, C_WF_1La.1, C_WF_1Lb.1]  # I/V out L -> SC/HC/WF
+  BP1_DRIVEOUT_R: [U91.7, R156.2, R18_1R.1, R20_1R.1, R22_1R.1, C_WF_1Ra.1, C_WF_1Rb.1]  # I/V out R -> SC/HC/WF
+  EC_BP1_DRIVE_L: [U85.2, RV51.1, RV51.2]        # Ec+ L via unity trim (rheostat)
+  EC_BP1_DRIVE_R: [U86.2, RV52.1, RV52.2]
+  # drive control: TL074 half C inverting summer (DRIVE knob + DRIVE CV + bias) -> Ec+ trims
+  MOD_BP1_DIST: [R158.1]                          # <- block-3 DRIVE CV (boundary)
+  BP1_DRIVE_KNOB: [RV33.2, R157.1]                # DRIVE knob wiper -> summer input
+  BP1_DRIVE_SUM: [U91.9, R157.2, R158.2, R159.2, R160.1]   # half-C (-) summing node
+  V_DRIVE_CTRL_1: [U91.8, R160.2, RV51.3, RV52.3] # summer out -> both Ec+ unity trims
+  # half-D spare: unity buffer, output unused
+  BP1_DRIVE_SPARE: [U91.14, U91.13]               # out tied to in- (unity)
+  BP1_SCVG_L: [U34.2, R18_1L.2, R19_1L.1, D4_1Lb.K, D4_1Lc.A]
+  BP1_SCOUT_L: [U34.1, R19_1L.2, D4_1La.A, D4_1Ld.K, U31.13]
+  BP1_SCM1_L: [D4_1La.K, D4_1Lb.A]
+  BP1_SCM2_L: [D4_1Lc.K, D4_1Ld.A]
+  BP1_HCVG_L: [U34.6, R20_1L.2, R21_1L.1]
+  BP1_HCOUT_L: [U34.7, R21_1L.2, D5_1La.3, U75.12]
+  BP1_HCZMID_L: [D5_1La.1, D5_1Lb.1]
+  BP1_WFVG_L: [U40.2, R22_1L.2, R23_1L.1]
+  BP1_VFOLDIN_L: [U40.1, R23_1L.2, R24_1L.1, R25_1L.1]
+  BP1_WFCLAMP_L: [R24_1L.2, D6_1La.A, D6_1Ld.K, U40.5]
+  BP1_WFCM1_L: [D6_1La.K, D6_1Lb.A]
+  BP1_WFCM2_L: [D6_1Lc.K, D6_1Ld.A]
+  BP1_WFFVG_L: [U40.6, R25_1L.2, R_f_wf_1L.1]
+  BP1_WFOUT_L: [U40.7, R_f_wf_1L.2, U75.13]
+  BP1_SCVG_R: [U35.2, R18_1R.2, R19_1R.1, D4_1Rb.K, D4_1Rc.A]
+  BP1_SCOUT_R: [U35.1, R19_1R.2, D4_1Ra.A, D4_1Rd.K, U31.1]
+  BP1_SCM1_R: [D4_1Ra.K, D4_1Rb.A]
+  BP1_SCM2_R: [D4_1Rc.K, D4_1Rd.A]
+  BP1_HCVG_R: [U35.6, R20_1R.2, R21_1R.1]
+  BP1_HCOUT_R: [U35.7, R21_1R.2, D5_1Ra.3, U75.2]
+  BP1_HCZMID_R: [D5_1Ra.1, D5_1Rb.1]
+  BP1_WFVG_R: [U41.2, R22_1R.2, R23_1R.1]
+  BP1_VFOLDIN_R: [U41.1, R23_1R.2, R24_1R.1, R25_1R.1]
+  BP1_WFCLAMP_R: [R24_1R.2, D6_1Ra.A, D6_1Rd.K, U41.5]
+  BP1_WFCM1_R: [D6_1Ra.K, D6_1Rb.A]
+  BP1_WFCM2_R: [D6_1Rc.K, D6_1Rd.A]
+  BP1_WFFVG_R: [U41.6, R25_1R.2, R_f_wf_1R.1]
+  BP1_WFOUT_R: [U41.7, R_f_wf_1R.2, U75.1]
+  BP1_SEL_WF: [U75.11, U75.10, R128_1wf.2]
+  BP1_MID_L: [U75.14, U31.12]
+  BP1_MID_R: [U75.15, U31.2]
+  BP1_SEL_SC: [U31.11, U31.10, R128_1sc.2]
+  BP1_DISTOUT_L: [U31.14, R177.1, R178.1]
+  BP1_DISTOUT_R: [U31.15, R179.1, R180.1]
+  # ---- CLIP detector nets (change 0018, Stage 6) ----
+  # Comp A (U94-A): >+4 L. in+ (pin3) = DISTOUT_L via R177, hysteresis fb R181; in- (pin2) = VREF_P4.
+  #   out (pin1) HIGH when DISTOUT_L > +4. (DC: R177 to a slow node; signal swing dominates the decision.)
+  BP1_CLIP_A_INP: [U94.3, R177.2, R181.2]
+  # Comp C (U94-C): >+4 R. in+ (pin10) = DISTOUT_R via R179, hysteresis fb R183; in- (pin9) = VREF_P4.
+  BP1_CLIP_C_INP: [U94.10, R179.2, R183.2]
+  # Comp B (U94-B): <-4 L. in- (pin6) = DISTOUT_L via R178; in+ (pin5) = VREF_N4 via R190, hys fb R182.
+  #   out (pin7) HIGH when VREF_N4 > DISTOUT_L, i.e. DISTOUT_L < -4.
+  BP1_CLIP_B_INN: [U94.6, R178.2]
+  BP1_CLIP_B_INP: [U94.5, R190.2, R182.2]
+  # Comp D (U94-D): <-4 R. in- (pin13) = DISTOUT_R via R180; in+ (pin12) = VREF_N4 via R191, hys fb R184.
+  BP1_CLIP_D_INN: [U94.13, R180.2]
+  BP1_CLIP_D_INP: [U94.12, R191.2, R184.2]
+  # Comparator outputs -> hysteresis fb + OR steering diode anodes.
+  BP1_CLIP_A_OUT: [U94.1, R181.1, D14_1a.A]
+  BP1_CLIP_B_OUT: [U94.7, R182.1, D14_1b.A]
+  BP1_CLIP_C_OUT: [U94.8, R183.1, D14_1c.A]
+  BP1_CLIP_D_OUT: [U94.14, R184.1, D14_1d.A]
+  # Diode-OR node -> current-limit R -> LED anode; LED cathode -> GND.
+  BP1_CLIP_OR: [D14_1a.K, D14_1b.K, D14_1c.K, D14_1d.K, R185.1]
+  BP1_CLIP_LEDA: [R185.2, BP1_CLIP_LED.A]
+  # ---- shared ±4V reference divider; node = boundary out to dist2/dist3 ----
+  # P4 -> A/C in- directly (high-Z comparator inputs); N4 -> B/D in+ via R190/R191 (so hys fb sums).
+  VREF_P4: [R186.2, R187.1, C111_P4.1, U94.2, U94.9]
+  VREF_N4: [R188.2, R189.1, C111_N4.1, R190.1, R191.1]
+  "+12V": [U31.16, C110_U31p.1, U34.8, C110_U34p.1, U35.8, C110_U35p.1, U40.8, C110_U40p.1, U41.8, C110_U41p.1, U75.16, C110_U75p.1,
+           U85.7, U86.7, U91.4, C110_U85p.1, C110_U86p.1, C110_U91p.1,
+           U94.4, C110_U94p.1, R186.1]
+  "-12V": [U31.7, C110_U31n.1, U34.4, C110_U34n.1, U35.4, C110_U35n.1, U40.4, C110_U40n.1, U41.4, C110_U41n.1, U75.7, C110_U75n.1,
+           U85.5, U86.5, U91.11, C110_U85n.1, C110_U86n.1, C110_U91n.1,
+           U94.11, C110_U94n.1, R188.1]
+  GND: [U31.8, U31.6, C110_U31p.2, C110_U31n.2, C110_U34p.2, C110_U34n.2, C110_U35p.2, C110_U35n.2, C110_U40p.2, C110_U40n.2, C110_U41p.2, C110_U41n.2, U75.8, U75.6, C110_U75p.2, C110_U75n.2, U34.3, D5_1Lb.3, U34.5, U40.3, D6_1Lb.K, D6_1Lc.A, C_WF_1La.2, C_WF_1Lb.2, U35.3, D5_1Rb.3, U35.5, U41.3, D6_1Rb.K, D6_1Rc.A, C_WF_1Ra.2, C_WF_1Rb.2,
+        U85.3, U85.4, U85.6, U86.3, U86.4, U86.6, U91.3, U91.5, U91.10, U91.12, RV33.1,
+        C110_U85p.2, C110_U85n.2, C110_U86p.2, C110_U86n.2, C110_U91p.2, C110_U91n.2,
+        C110_U94p.2, C110_U94n.2, BP1_CLIP_LED.K, R187.2, R189.2, C111_P4.2, C111_N4.2]
+
+no_connect:
+  - U31.3
+  - U31.4
+  - U31.5
+  - U31.9
+  - U75.3
+  - U75.4
+  - U75.5
+  - U75.9
+
+boundary:
+  - V5LOGIC
+  - LP1_OUT_L
+  - LP1_OUT_R
+  - MOD_BP1_DIST     # <- block-3 DRIVE CV (drive-control summer)
+  - BP1_DISTOUT_L
+  - BP1_DISTOUT_R
+  - BP1_SEL_WF
+  - BP1_SEL_SC
+  - VREF_P4          # -> dist2/dist3 CLIP detectors (shared +4V threshold; divider lives here)
+  - VREF_N4          # -> dist2/dist3 CLIP detectors (shared -4V threshold; divider lives here)
+

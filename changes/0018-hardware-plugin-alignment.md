@@ -1,0 +1,139 @@
+# Change 0018: hardware spec/netlist alignment to plugin (0017 follow-up)
+
+- **Slug:** hardware-plugin-alignment   **Branch:** `claude/hardware-plugin-alignment-KSBDQ`
+- **Lane:** B (hardware-only) — per-block; some blocks reduce to Lane C (doc-only)
+- **Status:** SPEC-DONE — all 10 blocks aligned to the locked plugin (pending CI + your review)
+- **Blocks:** all (A, 1, 2, 3, 4, 5, 6, 7, 8, B)   **Boards:** audio, utility, control, panel
+- **Opened:** 2026-05-30       **Closed:** —
+- **PR:** —              **CI run:** —
+
+> Lanes & gates are defined in `CLAUDE.md` → "Git Workflow & Change Process".
+
+## Intent  (follow-up context)
+
+This change is the **hardware follow-up to change 0017** (`dist-before-bandpass` +
+`MOD_SRC` switch), which was merged into `dev` before its deferred hardware-side gates
+(G4 spec / G5 topology / G6 components) were completed. The plugin and front panel are the
+locked ground truth; this pass walks the hardware layer (`specs/block-*/spec.md` §2–4,
+`specs/*/block-*.nets.yaml`, generated `.kicad_sch`, `components.yaml`/BOM) **block by block**
+to bring it into parity with the locked plugin — both the genuine 0017 topology change
+(block-6 dist-before-BP, block-2/3 mod source) and the pre-existing §2–4 STALE debt on the
+other blocks.
+
+**Per-block method (heavy):** 2 independent comprehension agents (plugin-truth card + spec
+card) → adversarial diff/challenge → validated divergence list → user checkpoint → competing
+spec authors + group adversarial review → netlist + design-intent review → user checkpoint.
+
+## Scope / Out of scope
+
+- **In:** `specs/block-*/spec.md` (§1–4), `specs/*/block-*.nets.yaml`, generated
+  `kicad/pogo-block-*.kicad_sch`, `specs/components.yaml` + registry/BOM (only if a block
+  genuinely needs a new/changed part — gated G6), `specs/aux/*` consistency, `specs/STATUS.md`.
+- **Out:** No plugin DSP edits (plugin is locked ground truth). No panel geometry changes
+  (panel already carries 0017). Plugin source comment fixes are noted in spec, not edited.
+
+## Per-block progress
+
+| Block | Analysis (cp1) | Edits (cp2) | Result | Notes |
+|---|---|---|---|---|
+| A — Input Buffers | ✅ | ✅ | Lane C (doc-only) | No behavioral divergence; spec/nets match plugin. Fixed: DSP line cite, LM4562→OPA1612 part note, STALE banners lifted, aux cross-refs, 100Ω clamp-current math, aux board-name table. **100Ω kept** (user). |
+| 1 — Pre-Gain | ✅ | ✅ | G4 text-only | No B1-local HW change (gain-stage netlist correct). Fixed: ALT destination (through VCA → **BP3 only**, bypasses LP1 not VCA), per-channel selector + asymmetric edge case documented, STALE banners lifted, aux refs, DSP cite, switch=path-select, aux OPA1612 note softened. **Substantive HW deferred → block-4 (ALT VCA cell) + block-6 (BP3 selector, distortion order).** |
+| 2 — Dual LFO | ✅ | ✅ | G4+G5+G6a/b | LFO core faithful. Both LFOs tap MOD_SRC switch (LFO1_OUT pos0 + new LFO2_OUT pos1); aux-lfo-core refreshed; topology-doc MOD_SRC + ALT fixed. **LED: full-cycle breathing NPN current-source driver** (MMBT3904 ×2 + base level-shift; D1/D2 removed, R9/R10→R_E) — matches plugin `(V_tri+5)/10`. New part **MMBT3904** registered (npn symbol, SOT-23). Switch wiring deferred to block-3. |
+| 3 — Mod Bus | ✅ | ✅ | G4+G5+G6(delete) | **Big block.** Wired MOD_SRC SW7 (DW5) 3-way LFO1/LFO2/EXT (COMs bridged), MOD_IN→EXT-only, accept LFO1+LFO2 boundary inputs. **Removed** 3 MOD LEDs + driver U4 + R56-60 (no plugin/panel backing; 7→6 TL074). **Removed** VCA_AMT attenuverter RV5+inverter (VCA = raw bus normal, depth pot → block-4). Renamed per-band `BP*_FOCUS`→`TILT` (plugin/panel have no FOCUS CV). Refreshed aux-mod-bus-core + aux-attenuverter; dropped phantom distribution buffer (load is light). 18 attenuverters + 1 raw VCA normal. |
+| 4 — VCA | ✅ | ✅ | G4+G5+G6a | **ALT-VCA built** (B1 deferral): +2 THAT2180 (U78/U79) + I/V (U80) + R/trims/caps, sharing V_ctrl → BP3 (boundary `ALT_VCA_OUT_L/R`). **OFS placement fixed** (D-3): OFS summed into CV before the symmetric AMT pot → unity at AMT=0 regardless of OFS. **RV24/RV25→RV44/RV45** (cleared block-6 base-ref collision). B3 deferral (raw bus normal + VCA_AMT pot) confirmed already-satisfied. aux-vca-cell refreshed (4 cells, SIP-8, power, board name). |
+| 5 — LP Filter 1 | ✅ | ✅ | G4 (doc) | No behavioral divergence — topology already matches plugin (2-pole SVF, V/oct, per-channel THAT340 true tilt L=+/R=−, self-oscillation). Fixed: self-osc contradiction (§2 "Q capped ~50" was wrong → reaches self-osc, RV5 sets onset), power tally (1→2 THAT340), lifted STALE banners (§2/§3 + 3 aux), Q-curve approximation note, RV5/RV6 values, topology-doc RES `/10`. RV3-6 cross-board ref reuse noted (legal, future renumber). |
+| 6 — Triple BP + Dist | ✅ split + 7 stages | ✅ | G5+G6a | Split into 7 sections + 7 alignment stages, all gates green. **S1:** F_REF→400Hz, 2-pole. **S2:** DIST→SVF reorder. **S3:** BP3 selector (CD4053 U81). **S4:** per-band TILT (TL072 U82-84 + knobs RV48-50 + ×0.22 CV). **S5:** variable DRIVE (THAT2180 VCA/band U85-90 + I/V U91-93, mirrors block-4; shared dB-law approximates per-mode gain — deviation). **S6:** CLIP drivers (TL074 U94-96 ±4V window + diode-OR → panel LEDs; shared VREF). **S7:** two-scaler dry/wet (U48→re-inverter; BYPASS RV30/58 + new WET RV57/59 pots; final summer + L/R polarity restore U27). Polarity arranged so wet adds with dry; exact phase/tapers Phase-3R. |
+| 7 — HP Filter | ✅ | ✅ | G4+G5 | **Polarity bug fixed:** HP output was a spurious G=−1 inverting buffer → phase-flipped vs plugin; converted to unity follower on the SUM_AMP node (R100-103 removed). **Q collapsed** 2 LM13700→1 (U51 cell A=L/B=R; U52+C97/98+R_QB removed). RV18=100k. Lifted STALE banners; fixed aux-ota-c-svf HP-polarity algebra, THAT340 SOIC-8→14, aux-q-control HP IC note. RES÷10 / mono-cutoff / self-osc confirmed faithful (= LP1). |
+| 8 — LP Filter 2 | ✅ | ✅ | G4 (doc) | No behavioral divergence — LP2 = LP1-minus-tilt, faithful. Output buffer correctly **non-inverting** (matches un-negated v2; HP→LP2→MAIN = 3× G+1 followers, no net inversion). Shared U9/U10 cell-B Q boundary (hosted block-5) pin-verified on both sides; own IRES_AMP U65. Lifted §2/§3 STALE banners; fixed the cross-cutting `aux-ota-c-svf` stale gotcha ("HP requires G=−1 buffer" → unity follower) left by the block-7 fix; cleaned §3 HP-buffer wording + DSP cite. |
+| B — Output Buffers | ✅ | ✅ | G4+G5 | MAIN non-inverting unity follower + 1kΩ + ±11V swing = plugin clamp (faithful, like block-A). BP3 tap = svf3 v1 (post-bandpass, pre-mix) faithful. **Added BP3_R→BP3_L output normalling** (J28.3→BP3_L_OUT in block-6-mix; plugin `Pogo.cpp:498-499`). Renumbered block-B R37→R224 (cleared block-3 R37 collision). Lifted STALE banners; fixed aux refs + LFO-resistor scoping note. |
+
+## Gate checklist (rolling, per block)
+
+All gates were taken interactively per block at the two checkpoints (after analysis, after
+edits) via AskUserQuestion approvals. Summary for final sign-off:
+
+- [x] G4 spec §1 + functional — approved per block (all 10) at checkpoint 2.
+- [x] G5 topology — approved for the blocks with topology changes: 1 (ALT path), 2 (LED
+      driver), 3 (MOD_SRC/LED removal/VCA), 4 (ALT-VCA, OFS), 6 (split + S2/S3/S5/S6/S7),
+      7 (HP follower + Q collapse), B (BP3_R normal).
+- [x] G6a/b components — only new part = **MMBT3904** (block-2 LED driver): registry +
+      `matches[]` + datasheet (onsemi product page) + SOT-23 footprint resolved. No other
+      new part types (THAT2180/TL072/TL074/CD4053/LM13700 already registered).
+- [x] CI `--check` ×5 + parity — green after every block's edits (verified locally each commit).
+- [ ] **CI run on the branch** (GitHub Actions: cross-compile + the 5 `--check` gates) — pending.
+- [ ] **Your final G4–G6 sign-off** on this consolidated record — pending.
+
+### Per-block gate summary (for review)
+
+| Block | Result | Gates exercised | New parts |
+|---|---|---|---|
+| A | doc-only (no divergence) | G4 | — |
+| 1 | ALT-path text fix | G4 | — |
+| 2 | LFO→MOD_SRC + breathing LED | G4·G5·**G6a** | MMBT3904 |
+| 3 | MOD_SRC wired; LEDs removed; VCA→raw; FOCUS→TILT | G4·G5 | — (net components removed) |
+| 4 | ALT-VCA cell; OFS fix; ref renumber | G4·G5·G6 | — (THAT2180 reused) |
+| 5 | re-verify + self-osc/doc | G4 | — |
+| 6 | split→7 + 7 alignment stages | G4·G5·G6 | — (parts reused; npn sym reused) |
+| 7 | HP polarity bug fix; Q collapse | G4·G5 | — (IC removed) |
+| 8 | re-verify (faithful) + doc | G4 | — |
+| B | BP3_R output normal; R37→R224 | G4·G5 | — |
+
+## Decisions log
+
+- 2026-05-30: Scope = all 10 blocks, signal-chain order; heavy agent fan-out; per-block
+  checkpoints (after analysis + after edits). (user)
+- 2026-05-30: Run as one umbrella follow-up change on `claude/hardware-plugin-alignment-KSBDQ`
+  with a per-block checklist, explicitly framed as completing 0017's deferred hardware gates. (user)
+- 2026-05-30: **Block A** — no behavioral divergence; series-protection resistor kept at
+  **100 Ω** (the "167 mA borderline" caveat was wrong math; true worst-case ≈ 47 mA). (user)
+- 2026-05-30: **Block 1** — local fixes are G4 text-only; the gain-stage netlist is correct.
+  ALT path corrected to match plugin: through VCA (shared control) → BP3 only, bypasses LP1
+  not VCA; BP3 selector must be per-channel (asymmetric L/R ALT case). **Follow the plugin**
+  on ALT-through-VCA → block-4 gains a 2nd THAT2180 cell. (user)
+- 2026-05-30: Carried-forward block-6 finding: netlist distortion order (SVF→DIST) is the
+  pre-0017 order; plugin is DIST→SVF — the core 0017 reorder is not yet built in hardware.
+- 2026-05-30: **Block 3** decisions (user): (a) REMOVE the 3 MOD-bus LEDs + driver — plugin
+  drives none, locked panel has no footprints; (b) FOLLOW plugin on VCA — raw bus normal into
+  VCA_INPUT, no attenuverter, VCA_AMT depth pot moves to block-4. FOCUS→TILT and MOD_SRC switch
+  wiring are settled by the locked panel+plugin (G4/G5, no toss-up). SW7 wired as passive DW5
+  3-way (COMs bridged); Phase-3R to verify ON-ON-ON contact sequence vs datasheet.
+- 2026-05-30: Also corrected a phantom block-3 "distribution buffer" (halves C+D paralleled):
+  the bus actually drives 18×100k R_SRC_NORM (~5.6k, ~1.8mA), so no buffer is needed.
+- 2026-05-30: **Block 6** — user chose to split the monolithic block-6 into 7 sections
+  (Scheme B: per-band svf1/2/3 + dist1/2/3 + mix), folded into 0018. Split executed
+  behavior-preserving (418 parts → 7 files, all gates green, 19 split-boundary nets verified
+  symmetric). Makes the pending DIST→SVF reorder a clean boundary re-point of the 6
+  `BPn_BPBUF` nets instead of surgery on an 831-line file. U73 (BP1+BP2 IRES_AMP) = shared
+  row `[block-6-svf1, block-6-svf2]` (U9/U10 precedent). (user: Scheme B)
+- 2026-05-30: **Block 4** — user approved 2× THAT2180 for the ALT-VCA (mirrors main cell;
+  shares V_ctrl; THAT2180 count 2→4). Also fixed VCA_OFS placement (OFS before the symmetric
+  AMT pot) so AMT=0 ⇒ unity for any OFS, matching the plugin; and renumbered the VCA pots
+  RV24/RV25→RV44/RV45 to clear a base-ref collision with block-6's RV24_x/RV25_x expo trims.
+  Exact CV→Ec+ scaling, the effCV−5V pivot, and any V_ctrl wiper buffer remain Phase-3R.
+- 2026-05-30: **Block 2 LED** — divergence found: plugin LED breathes full-cycle
+  `(raw+1)×0.5`, hardware was half-wave "pulsing" (and the spec falsely claimed a match).
+  User chose **match plugin**, then **simpler/cheaper driver**: single-transistor NPN current
+  source (MMBT3904) per LED, accepting a small V_be toe near the dark end. G5 topology + G6a
+  component approved. New `npn` symbol primitive authored; MMBT3904 SOT-23 footprint exists. (user)
+
+## Component additions
+
+| ref | board | block | part | pkg | val | datasheet? | fn |
+|-----|-------|-------|------|-----|-----|-----------|----|
+| Q1, Q2 | utility | block-2 | MMBT3904 | SOT-23 | — | onsemi product page (G6b: SOT-23 fp exists; new `npn` symbol) | LFO LED breathing current sources |
+| R19–R24 | utility | block-2 | ~ (0603) | 0603 | 51k/68k/10k ×2 | n/a (passives) | LED-driver base level-shift networks |
+
+(R9/R10 repurposed 1.2k→470Ω as emitter R; D1/D2 1N4148 removed.)
+
+## Artifacts  (paths / links, not copies)
+
+- Plugin (locked ground truth): `dev` @ change 0017 (CI run on dev)
+- Specs:   `specs/block-*/spec.md`, `specs/aux/*`
+- Netlist: `specs/*/block-*.nets.yaml` → `kicad/pogo-block-*.kicad_sch`
+- STATUS.md rows updated per block as completed.
+
+## Notes / carried-forward findings
+
+- **block-1 / ALT path:** `docs/plugin-topology.md:224–225` says ALT_BP_L unpatched falls
+  back to `pgL`; plugin (`Pogo.cpp:347–349`) falls back to `0.f` (silence). Doc↔plugin bug
+  to resolve when Block 1 is processed.

@@ -40,6 +40,7 @@ components:
   - { ref: R6,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "18kΩ",   tol: "1%", qty: 2, fn: "R_f alt gain stage (×2 ch: R6L/R6R)" }
   - { ref: R38,  board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "100Ω",   fn: "ALT_BP_L series input protection" }
   - { ref: R39,  board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "100Ω",   fn: "ALT_BP_R series input protection" }
+  - { ref: R134, board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "22kΩ",   fn: "ALT_BP_L insertion-detect pulldown (ALT_L_TIP→GND; feeds BP3 selector ALT_L_DET)" }
   - { ref: D8,   board: audio,   block: block-1, part: BAT54S,     pkg: SOT-23,   fn: "ALT_BP_L input clamp ±12V" }
   - { ref: D9,   board: audio,   block: block-1, part: BAT54S,     pkg: SOT-23,   fn: "ALT_BP_R input clamp ±12V" }
   - { ref: C3,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "100nF",  fn: "U2 +12V decoupling" }
@@ -52,21 +53,32 @@ components:
   #   Needs R_in (V→I) at input and a transimpedance op-amp (I→V) at output.)
   - { ref: U4,   board: audio,   block: block-4, part: THAT2180,   pkg: SIP-8,    fn: "L-channel dB-law VCA (current-in/out); 8-pin SIP (THT, no SMD variant)" }
   - { ref: U5,   board: audio,   block: block-4, part: THAT2180,   pkg: SIP-8,    fn: "R-channel dB-law VCA (current-in/out); 8-pin SIP (THT, no SMD variant)" }
-  - { ref: U6,   board: audio,   block: block-4, part: TL072CDT,   pkg: SOIC-8,   fn: "I/V transimpedance converters (THAT2180 current outputs → V; L=A, R=B)" }
-  - { ref: U63,  board: audio,   block: block-4, part: TL072CDT,   pkg: SOIC-8,   fn: "VCA CV conditioning: AMT attenuverter inverter (A) + CV/OFS summer-scaler (B)" }
+  - { ref: U6,   board: audio,   block: block-4, part: TL072CDT,   pkg: SOIC-8,   fn: "main I/V transimpedance converters (THAT2180 current outputs → V; L=A, R=B)" }
+  - { ref: U63,  board: audio,   block: block-4, part: TL072CDT,   pkg: SOIC-8,   fn: "VCA CV conditioning: CV+OFS summer (A) + effCV inverter (B); OFS summed before the AMT pot (0018)" }
+  # ALT-BP VCA cell (change 0018): the plugin runs the ALT signal through a VCA (shared control)
+  # into BP3 (Pogo.cpp:439-441). Mirrors the main cell; shares V_CTRL via RV46/RV47 trims.
+  - { ref: U78,  board: audio,   block: block-4, part: THAT2180,   pkg: SIP-8,    fn: "ALT-L dB-law VCA (current-in/out) → BP3; 8-pin SIP (THT)" }
+  - { ref: U79,  board: audio,   block: block-4, part: THAT2180,   pkg: SIP-8,    fn: "ALT-R dB-law VCA (current-in/out) → BP3; 8-pin SIP (THT)" }
+  - { ref: U80,  board: audio,   block: block-4, part: TL072CDT,   pkg: SOIC-8,   fn: "ALT I/V transimpedance converters (ALT-L=A, ALT-R=B)" }
   - { ref: RV1,  board: audio,   block: block-4, part: "Bourns 3224W", pkg: SMD,  val: "500Ω",   fn: "L unity-gain trim (Ec+ offset)" }
   - { ref: RV2,  board: audio,   block: block-4, part: "Bourns 3224W", pkg: SMD,  val: "500Ω",   fn: "R unity-gain trim (Ec+ offset)" }
   - { ref: R7,   board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "R_in L: audio V→I into THAT2180 Input (pin 1)" }
   - { ref: R8,   board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "R_in R" }
   - { ref: R40,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "R_f L: I/V transimpedance feedback (unity at 0 dB; inverting)" }
   - { ref: R41,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "R_f R" }
-  - { ref: R42,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "R_amt_inv_in: AMT attenuverter inverter input" }
-  - { ref: R43,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "R_amt_inv_fb: AMT attenuverter inverter feedback" }
-  - { ref: R44,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "R_sum_cv: CV summer input (AMT-attenuverted CV)" }
-  - { ref: R45,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "R_sum_ofs: CV summer input (OFS floor)" }
-  - { ref: R46,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "2.4kΩ",  fn: "R_sum_fb: CV summer feedback; scales to ~6.1 mV/dB Ec+ range (Phase-3R trim)" }
+  - { ref: R42,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "R_sum_cv: CV+OFS summer — CV input (U63A)" }
+  - { ref: R43,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "R_sum_fb: CV+OFS summer feedback (U63A)" }
+  - { ref: R44,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "R_inv_in: effCV inverter input (U63B; generates +effCV)" }
+  - { ref: R45,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "R_sum_ofs: CV+OFS summer — OFS floor input (U63A; pivot-referenced, Phase-3R)" }
+  - { ref: R46,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "R_inv_fb: effCV inverter feedback (U63B)" }
+  - { ref: R129, board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "R_in ALT-L: audio V→I into U78 Input (pin 1)" }
+  - { ref: R130, board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "R_in ALT-R: into U79 Input" }
+  - { ref: R131, board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "R_f ALT-L: I/V feedback (unity at 0 dB; inverting)" }
+  - { ref: R132, board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "R_f ALT-R: I/V feedback" }
   - { ref: R9,   board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100Ω",   fn: "VCA CV input series protection" }
   - { ref: D3,   board: audio,   block: block-4, part: BAT54S,     pkg: SOT-23,   fn: "VCA CV input clamp ±12V" }
+  - { ref: RV46, board: audio,   block: block-4, part: "Bourns 3224W", pkg: SMD,  val: "500Ω",   fn: "ALT-L unity-gain trim (Ec+ offset)" }
+  - { ref: RV47, board: audio,   block: block-4, part: "Bourns 3224W", pkg: SMD,  val: "500Ω",   fn: "ALT-R unity-gain trim (Ec+ offset)" }
   - { ref: C7,   board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U4 +12V (V+) decoupling" }
   - { ref: C8,   board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U4 -12V (V-) decoupling" }
   - { ref: C9,   board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U5 +12V (V+) decoupling" }
@@ -75,6 +87,12 @@ components:
   - { ref: C42,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U6 -12V decoupling" }
   - { ref: C43,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U63 +12V decoupling" }
   - { ref: C44,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U63 -12V decoupling" }
+  - { ref: C111, board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U78 (ALT-L VCA) V+ decoupling" }
+  - { ref: C112, board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U78 V- decoupling" }
+  - { ref: C113, board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U79 (ALT-R VCA) V+ decoupling" }
+  - { ref: C114, board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U79 V- decoupling" }
+  - { ref: C115, board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U80 (ALT I/V) +12V decoupling" }
+  - { ref: C116, board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U80 -12V decoupling" }
 
   # block-5: LP Filter 1
   - { ref: U7,   board: audio,   block: block-5, part: LM13700M,   pkg: SOIC-16,  fn: "LP1 OTA integrators L" }
@@ -95,8 +113,8 @@ components:
   - { ref: R_TILT_INV_FB, board: audio, block: block-5, part: ~,  pkg: "0603",   val: "100kΩ",  tol: "1%", fn: "LP1 tilt inverter feedback R (matched pair; G=−1 gives −V_tilt for R channel)" }
   - { ref: RV3,  board: audio,   block: block-5, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "LP1 f_ref trim rheostat L; in series with R_IREF_A 1MΩ; ±25% range" }
   - { ref: RV4,  board: audio,   block: block-5, part: "Bourns 3224W", pkg: SMD,   val: "20kΩ",  fn: "LP1 1V/oct tracking trim L; ±10% range" }
-  - { ref: RV5,  board: audio,   block: block-5, part: ~,          pkg: SMD,      fn: "LP1 Q_max trim (IRES_AMP V_bias)" }
-  - { ref: RV6,  board: audio,   block: block-5, part: ~,          pkg: SMD,      fn: "LP1 tilt null trim" }
+  - { ref: RV5,  board: audio,   block: block-5, part: "Bourns 3224W", pkg: SMD,  val: "100kΩ", fn: "LP1 Q_max trim (IRES_AMP V_bias; sets self-oscillation onset at full-CW RES)" }
+  - { ref: RV6,  board: audio,   block: block-5, part: "Bourns 3224W", pkg: SMD,  val: "10kΩ",  fn: "LP1 tilt center-null trim (L/R cutoff match at tilt detent)" }
   # block-5 full circuit (expanded from spec §4, 2026-05-29): SUM_AMP fb, OTA R_LIN,
   # tilt summers, Q control (IRES_AMP + V→I), expo network, Iabc bypass, decoupling.
   - { ref: R47,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "LP1 SUM_AMP v2 feedback input R L (R_FB_L)" }
@@ -162,157 +180,403 @@ components:
   - { ref: R71,  board: audio,   block: block-5, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "LP1 R OTA2 buffer (v2) emitter pulldown to V-" }
 
   # block-6: Triple BP + Distortion — SVF ICs
-  - { ref: U15,  board: audio,   block: block-6, part: LM13700M,   pkg: SOIC-16,  fn: "BP1 OTA integrators + Q L" }
-  - { ref: U16,  board: audio,   block: block-6, part: LM13700M,   pkg: SOIC-16,  fn: "BP1 OTA integrators + Q R" }
-  - { ref: U17,  board: audio,   block: block-6, part: LM13700M,   pkg: SOIC-16,  fn: "BP2 OTA integrators + Q L" }
-  - { ref: U18,  board: audio,   block: block-6, part: LM13700M,   pkg: SOIC-16,  fn: "BP2 OTA integrators + Q R" }
-  - { ref: U19,  board: audio,   block: block-6, part: LM13700M,   pkg: SOIC-16,  fn: "BP3 OTA integrators + Q L" }
-  - { ref: U20,  board: audio,   block: block-6, part: LM13700M,   pkg: SOIC-16,  fn: "BP3 OTA integrators + Q R" }
-  - { ref: U21,  board: audio,   block: block-6, part: OPA1612,   pkg: SOIC-8,   fn: "BP1 SUM_AMP + buffer L" }
-  - { ref: U22,  board: audio,   block: block-6, part: OPA1612,   pkg: SOIC-8,   fn: "BP1 SUM_AMP + buffer R" }
-  - { ref: U23,  board: audio,   block: block-6, part: OPA1612,   pkg: SOIC-8,   fn: "BP2 SUM_AMP + buffer L" }
-  - { ref: U24,  board: audio,   block: block-6, part: OPA1612,   pkg: SOIC-8,   fn: "BP2 SUM_AMP + buffer R" }
-  - { ref: U25,  board: audio,   block: block-6, part: OPA1612,   pkg: SOIC-8,   fn: "BP3 SUM_AMP + buffer L" }
-  - { ref: U26,  board: audio,   block: block-6, part: OPA1612,   pkg: SOIC-8,   fn: "BP3 SUM_AMP + buffer R" }
-  - { ref: U27,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "BP tilt inverter half A (−V_tilt for R); fixed BP output polarity-restore inverter (G=−1) half B" }
-  - { ref: U28,  board: audio,   block: block-6, part: THAT340S14-U, pkg: SOIC-14,   fn: "BP1 expo converter" }
-  - { ref: U29,  board: audio,   block: block-6, part: THAT340S14-U, pkg: SOIC-14,   fn: "BP2 expo converter" }
-  - { ref: U30,  board: audio,   block: block-6, part: THAT340S14-U, pkg: SOIC-14,   fn: "BP3 expo converter" }
-  - { ref: U31,  board: audio,   block: block-6, part: CD4053,     pkg: SOIC-16,  fn: "BP1 distortion mux (SC/HC/WF select)" }
-  - { ref: U32,  board: audio,   block: block-6, part: CD4053,     pkg: SOIC-16,  fn: "BP2 distortion mux" }
-  - { ref: U33,  board: audio,   block: block-6, part: CD4053,     pkg: SOIC-16,  fn: "BP3 distortion mux" }
+  - { ref: U15,  board: audio,   block: block-6-svf1, part: LM13700M,   pkg: SOIC-16,  fn: "BP1 OTA integrators + Q L" }
+  - { ref: U16,  board: audio,   block: block-6-svf1, part: LM13700M,   pkg: SOIC-16,  fn: "BP1 OTA integrators + Q R" }
+  - { ref: U17,  board: audio,   block: block-6-svf2, part: LM13700M,   pkg: SOIC-16,  fn: "BP2 OTA integrators + Q L" }
+  - { ref: U18,  board: audio,   block: block-6-svf2, part: LM13700M,   pkg: SOIC-16,  fn: "BP2 OTA integrators + Q R" }
+  - { ref: U19,  board: audio,   block: block-6-svf3, part: LM13700M,   pkg: SOIC-16,  fn: "BP3 OTA integrators + Q L" }
+  - { ref: U20,  board: audio,   block: block-6-svf3, part: LM13700M,   pkg: SOIC-16,  fn: "BP3 OTA integrators + Q R" }
+  - { ref: U21,  board: audio,   block: block-6-svf1, part: OPA1612,   pkg: SOIC-8,   fn: "BP1 SUM_AMP + buffer L" }
+  - { ref: U22,  board: audio,   block: block-6-svf1, part: OPA1612,   pkg: SOIC-8,   fn: "BP1 SUM_AMP + buffer R" }
+  - { ref: U23,  board: audio,   block: block-6-svf2, part: OPA1612,   pkg: SOIC-8,   fn: "BP2 SUM_AMP + buffer L" }
+  - { ref: U24,  board: audio,   block: block-6-svf2, part: OPA1612,   pkg: SOIC-8,   fn: "BP2 SUM_AMP + buffer R" }
+  - { ref: U25,  board: audio,   block: block-6-svf3, part: OPA1612,   pkg: SOIC-8,   fn: "BP3 SUM_AMP + buffer L" }
+  - { ref: U26,  board: audio,   block: block-6-svf3, part: OPA1612,   pkg: SOIC-8,   fn: "BP3 SUM_AMP + buffer R" }
+  - { ref: U27,  board: audio,   block: block-6-mix, part: TL072CDT,   pkg: SOIC-8,   fn: "BP output polarity-restore inverters (G=−1): half B = L (R17), half A = R (R222/R223) — reused after per-band tilt moved to svf U82-84" }
+  - { ref: U28,  board: audio,   block: block-6-svf1, part: THAT340S14-U, pkg: SOIC-14,   fn: "BP1 expo converter" }
+  - { ref: U29,  board: audio,   block: block-6-svf2, part: THAT340S14-U, pkg: SOIC-14,   fn: "BP2 expo converter" }
+  - { ref: U30,  board: audio,   block: block-6-svf3, part: THAT340S14-U, pkg: SOIC-14,   fn: "BP3 expo converter" }
+  # block-6: per-band BP TILT summer + inverter (master tilt + TILT knob + per-band TILT CV)
+  - { ref: U82,  board: audio,   block: block-6-svf1, part: TL072CDT,   pkg: SOIC-8,   fn: "per-band TILT summer+inverter" }
+  - { ref: U83,  board: audio,   block: block-6-svf2, part: TL072CDT,   pkg: SOIC-8,   fn: "per-band TILT summer+inverter" }
+  - { ref: U84,  board: audio,   block: block-6-svf3, part: TL072CDT,   pkg: SOIC-8,   fn: "per-band TILT summer+inverter" }
+  - { ref: U31,  board: audio,   block: block-6-dist1, part: CD4053,     pkg: SOIC-16,  fn: "BP1 distortion mux (SC/HC/WF select)" }
+  - { ref: U32,  board: audio,   block: block-6-dist2, part: CD4053,     pkg: SOIC-16,  fn: "BP2 distortion mux" }
+  - { ref: U33,  board: audio,   block: block-6-dist3, part: CD4053,     pkg: SOIC-16,  fn: "BP3 distortion mux" }
 
   # block-6: Distortion sub-circuit ICs — SC paths (one TL072CDT per group per channel)
-  - { ref: U34,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "SC gain amp BP1_L (half A = SC amp; half B = HC amp)" }
-  - { ref: U35,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "SC gain amp BP1_R (half A = SC amp; half B = HC amp)" }
-  - { ref: U36,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "SC gain amp BP2_L (half A = SC amp; half B = HC amp)" }
-  - { ref: U37,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "SC gain amp BP2_R (half A = SC amp; half B = HC amp)" }
-  - { ref: U38,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "SC gain amp BP3_L (half A = SC amp; half B = HC amp)" }
-  - { ref: U39,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "SC gain amp BP3_R (half A = SC amp; half B = HC amp)" }
+  - { ref: U34,  board: audio,   block: block-6-dist1, part: TL072CDT,   pkg: SOIC-8,   fn: "SC gain amp BP1_L (half A = SC amp; half B = HC amp)" }
+  - { ref: U35,  board: audio,   block: block-6-dist1, part: TL072CDT,   pkg: SOIC-8,   fn: "SC gain amp BP1_R (half A = SC amp; half B = HC amp)" }
+  - { ref: U36,  board: audio,   block: block-6-dist2, part: TL072CDT,   pkg: SOIC-8,   fn: "SC gain amp BP2_L (half A = SC amp; half B = HC amp)" }
+  - { ref: U37,  board: audio,   block: block-6-dist2, part: TL072CDT,   pkg: SOIC-8,   fn: "SC gain amp BP2_R (half A = SC amp; half B = HC amp)" }
+  - { ref: U38,  board: audio,   block: block-6-dist3, part: TL072CDT,   pkg: SOIC-8,   fn: "SC gain amp BP3_L (half A = SC amp; half B = HC amp)" }
+  - { ref: U39,  board: audio,   block: block-6-dist3, part: TL072CDT,   pkg: SOIC-8,   fn: "SC gain amp BP3_R (half A = SC amp; half B = HC amp)" }
 
   # block-6: Distortion sub-circuit ICs — WF paths (one TL072CDT per group per channel)
-  - { ref: U40,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "WF amps BP1_L (half A = pre-gain; half B = symmetric folder G=+2)" }
-  - { ref: U41,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "WF amps BP1_R (half A = pre-gain; half B = symmetric folder G=+2)" }
-  - { ref: U42,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "WF amps BP2_L (half A = pre-gain; half B = symmetric folder G=+2)" }
-  - { ref: U43,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "WF amps BP2_R (half A = pre-gain; half B = symmetric folder G=+2)" }
-  - { ref: U44,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "WF amps BP3_L (half A = pre-gain; half B = symmetric folder G=+2)" }
-  - { ref: U45,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "WF amps BP3_R (half A = pre-gain; half B = symmetric folder G=+2)" }
+  - { ref: U40,  board: audio,   block: block-6-dist1, part: TL072CDT,   pkg: SOIC-8,   fn: "WF amps BP1_L (half A = pre-gain; half B = symmetric folder G=+2)" }
+  - { ref: U41,  board: audio,   block: block-6-dist1, part: TL072CDT,   pkg: SOIC-8,   fn: "WF amps BP1_R (half A = pre-gain; half B = symmetric folder G=+2)" }
+  - { ref: U42,  board: audio,   block: block-6-dist2, part: TL072CDT,   pkg: SOIC-8,   fn: "WF amps BP2_L (half A = pre-gain; half B = symmetric folder G=+2)" }
+  - { ref: U43,  board: audio,   block: block-6-dist2, part: TL072CDT,   pkg: SOIC-8,   fn: "WF amps BP2_R (half A = pre-gain; half B = symmetric folder G=+2)" }
+  - { ref: U44,  board: audio,   block: block-6-dist3, part: TL072CDT,   pkg: SOIC-8,   fn: "WF amps BP3_L (half A = pre-gain; half B = symmetric folder G=+2)" }
+  - { ref: U45,  board: audio,   block: block-6-dist3, part: TL072CDT,   pkg: SOIC-8,   fn: "WF amps BP3_R (half A = pre-gain; half B = symmetric folder G=+2)" }
+
+  # block-6: per-band DRIVE VCA (mirrors block-4 THAT2180 cell; variable-gain before SC/HC/WF)
+  - { ref: U85,  board: audio,   block: block-6-dist1, part: THAT2180,   pkg: SIP-8,    fn: "BP1 DRIVE VCA L (dB-law, current-in/out); 8-pin SIP (THT)" }
+  - { ref: U86,  board: audio,   block: block-6-dist1, part: THAT2180,   pkg: SIP-8,    fn: "BP1 DRIVE VCA R (dB-law, current-in/out); 8-pin SIP (THT)" }
+  - { ref: U87,  board: audio,   block: block-6-dist2, part: THAT2180,   pkg: SIP-8,    fn: "BP2 DRIVE VCA L (dB-law, current-in/out); 8-pin SIP (THT)" }
+  - { ref: U88,  board: audio,   block: block-6-dist2, part: THAT2180,   pkg: SIP-8,    fn: "BP2 DRIVE VCA R (dB-law, current-in/out); 8-pin SIP (THT)" }
+  - { ref: U89,  board: audio,   block: block-6-dist3, part: THAT2180,   pkg: SIP-8,    fn: "BP3 DRIVE VCA L (dB-law, current-in/out); 8-pin SIP (THT)" }
+  - { ref: U90,  board: audio,   block: block-6-dist3, part: THAT2180,   pkg: SIP-8,    fn: "BP3 DRIVE VCA R (dB-law, current-in/out); 8-pin SIP (THT)" }
+  - { ref: U91,  board: audio,   block: block-6-dist1, part: TL074CDT,   pkg: SOIC-14,  fn: "BP1 DRIVE support: A=L I/V, B=R I/V, C=drive-control summer, D=spare unity buffer" }
+  - { ref: U92,  board: audio,   block: block-6-dist2, part: TL074CDT,   pkg: SOIC-14,  fn: "BP2 DRIVE support: A=L I/V, B=R I/V, C=drive-control summer, D=spare unity buffer" }
+  - { ref: U93,  board: audio,   block: block-6-dist3, part: TL074CDT,   pkg: SOIC-14,  fn: "BP3 DRIVE support: A=L I/V, B=R I/V, C=drive-control summer, D=spare unity buffer" }
+
+  # block-6: per-band DRIVE VCA Ec+ unity trims (rheostat; mirrors block-4 RV1/RV2)
+  - { ref: RV51, board: audio,   block: block-6-dist1, part: "Bourns 3224W", pkg: SMD,  val: "500Ω",   fn: "BP1 DRIVE VCA L unity-gain trim (Ec+ offset)" }
+  - { ref: RV52, board: audio,   block: block-6-dist1, part: "Bourns 3224W", pkg: SMD,  val: "500Ω",   fn: "BP1 DRIVE VCA R unity-gain trim (Ec+ offset)" }
+  - { ref: RV53, board: audio,   block: block-6-dist2, part: "Bourns 3224W", pkg: SMD,  val: "500Ω",   fn: "BP2 DRIVE VCA L unity-gain trim (Ec+ offset)" }
+  - { ref: RV54, board: audio,   block: block-6-dist2, part: "Bourns 3224W", pkg: SMD,  val: "500Ω",   fn: "BP2 DRIVE VCA R unity-gain trim (Ec+ offset)" }
+  - { ref: RV55, board: audio,   block: block-6-dist3, part: "Bourns 3224W", pkg: SMD,  val: "500Ω",   fn: "BP3 DRIVE VCA L unity-gain trim (Ec+ offset)" }
+  - { ref: RV56, board: audio,   block: block-6-dist3, part: "Bourns 3224W", pkg: SMD,  val: "500Ω",   fn: "BP3 DRIVE VCA R unity-gain trim (Ec+ offset)" }
+
+  # block-6: per-band DRIVE VCA passives (R_in/R_f 20k; drive-summer 100k; mirrors block-4)
+  - { ref: R153, board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "BP1 DRIVE R_in L (V→I into U85 Input)" }
+  - { ref: R154, board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "BP1 DRIVE R_in R (into U86 Input)" }
+  - { ref: R155, board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "BP1 DRIVE R_f L (I/V feedback; unity at 0 dB, inverting)" }
+  - { ref: R156, board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "BP1 DRIVE R_f R (I/V feedback)" }
+  - { ref: R157, board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "BP1 drive summer: DRIVE-knob input (Phase-3R scaling)" }
+  - { ref: R158, board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "BP1 drive summer: DRIVE-CV input (MOD_BP1_DIST)" }
+  - { ref: R159, board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "BP1 drive summer: bias input (knob=0.20 ≈ 0 dB unity; Phase-3R)" }
+  - { ref: R160, board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "BP1 drive summer: feedback" }
+  - { ref: R161, board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "BP2 DRIVE R_in L (V→I into U87 Input)" }
+  - { ref: R162, board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "BP2 DRIVE R_in R (into U88 Input)" }
+  - { ref: R163, board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "BP2 DRIVE R_f L (I/V feedback)" }
+  - { ref: R164, board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "BP2 DRIVE R_f R (I/V feedback)" }
+  - { ref: R165, board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "BP2 drive summer: DRIVE-knob input (Phase-3R scaling)" }
+  - { ref: R166, board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "BP2 drive summer: DRIVE-CV input (MOD_BP2_DIST)" }
+  - { ref: R167, board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "BP2 drive summer: bias input (Phase-3R)" }
+  - { ref: R168, board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "BP2 drive summer: feedback" }
+  - { ref: R169, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "BP3 DRIVE R_in L (V→I into U89 Input)" }
+  - { ref: R170, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "BP3 DRIVE R_in R (into U90 Input)" }
+  - { ref: R171, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "BP3 DRIVE R_f L (I/V feedback)" }
+  - { ref: R172, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "BP3 DRIVE R_f R (I/V feedback)" }
+  - { ref: R173, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "BP3 drive summer: DRIVE-knob input (Phase-3R scaling)" }
+  - { ref: R174, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "BP3 drive summer: DRIVE-CV input (MOD_BP3_DIST)" }
+  - { ref: R175, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "BP3 drive summer: bias input (Phase-3R)" }
+  - { ref: R176, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "BP3 drive summer: feedback" }
+
+  # block-6: per-band DRIVE VCA IC decoupling (2× per THAT2180 V+/V−, 2× per TL074)
+  - { ref: C110_U85p, board: audio, block: block-6-dist1, part: ~, pkg: "0603", val: "100nF", fn: "U85 (BP1 DRIVE VCA L) V+ decoupling" }
+  - { ref: C110_U85n, board: audio, block: block-6-dist1, part: ~, pkg: "0603", val: "100nF", fn: "U85 V− decoupling" }
+  - { ref: C110_U86p, board: audio, block: block-6-dist1, part: ~, pkg: "0603", val: "100nF", fn: "U86 (BP1 DRIVE VCA R) V+ decoupling" }
+  - { ref: C110_U86n, board: audio, block: block-6-dist1, part: ~, pkg: "0603", val: "100nF", fn: "U86 V− decoupling" }
+  - { ref: C110_U91p, board: audio, block: block-6-dist1, part: ~, pkg: "0603", val: "100nF", fn: "U91 (BP1 DRIVE TL074) +12V decoupling" }
+  - { ref: C110_U91n, board: audio, block: block-6-dist1, part: ~, pkg: "0603", val: "100nF", fn: "U91 −12V decoupling" }
+  - { ref: C110_U87p, board: audio, block: block-6-dist2, part: ~, pkg: "0603", val: "100nF", fn: "U87 (BP2 DRIVE VCA L) V+ decoupling" }
+  - { ref: C110_U87n, board: audio, block: block-6-dist2, part: ~, pkg: "0603", val: "100nF", fn: "U87 V− decoupling" }
+  - { ref: C110_U88p, board: audio, block: block-6-dist2, part: ~, pkg: "0603", val: "100nF", fn: "U88 (BP2 DRIVE VCA R) V+ decoupling" }
+  - { ref: C110_U88n, board: audio, block: block-6-dist2, part: ~, pkg: "0603", val: "100nF", fn: "U88 V− decoupling" }
+  - { ref: C110_U92p, board: audio, block: block-6-dist2, part: ~, pkg: "0603", val: "100nF", fn: "U92 (BP2 DRIVE TL074) +12V decoupling" }
+  - { ref: C110_U92n, board: audio, block: block-6-dist2, part: ~, pkg: "0603", val: "100nF", fn: "U92 −12V decoupling" }
+  - { ref: C110_U89p, board: audio, block: block-6-dist3, part: ~, pkg: "0603", val: "100nF", fn: "U89 (BP3 DRIVE VCA L) V+ decoupling" }
+  - { ref: C110_U89n, board: audio, block: block-6-dist3, part: ~, pkg: "0603", val: "100nF", fn: "U89 V− decoupling" }
+  - { ref: C110_U90p, board: audio, block: block-6-dist3, part: ~, pkg: "0603", val: "100nF", fn: "U90 (BP3 DRIVE VCA R) V+ decoupling" }
+  - { ref: C110_U90n, board: audio, block: block-6-dist3, part: ~, pkg: "0603", val: "100nF", fn: "U90 V− decoupling" }
+  - { ref: C110_U93p, board: audio, block: block-6-dist3, part: ~, pkg: "0603", val: "100nF", fn: "U93 (BP3 DRIVE TL074) +12V decoupling" }
+  - { ref: C110_U93n, board: audio, block: block-6-dist3, part: ~, pkg: "0603", val: "100nF", fn: "U93 −12V decoupling" }
 
   # block-6: BP_MIX + output polarity-restore ICs
-  - { ref: U46,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "BP wet summer half A = L (BP1+BP2+BP3 inv sum); half B = MIX crossfade L" }
-  - { ref: U47,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "BP wet summer half A = R; half B = MIX crossfade R" }
-  - { ref: U48,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "BP wet polarity restore: half A = V_wet_inv→V_wet_pos (L); half B = V_wet_inv→V_wet_pos (R)" }
+  - { ref: U46,  board: audio,   block: block-6-mix, part: TL072CDT,   pkg: SOIC-8,   fn: "half A = L wet summer (BP1+BP2+BP3 inv sum); half B = L final dry+wet summer (BYPASS+WET)" }
+  - { ref: U47,  board: audio,   block: block-6-mix, part: TL072CDT,   pkg: SOIC-8,   fn: "half A = R wet summer; half B = R final dry+wet summer" }
+  - { ref: U48,  board: audio,   block: block-6-mix, part: TL072CDT,   pkg: SOIC-8,   fn: "wet re-inverter (G=−1): half A = L, half B = R (restores +bands from the inv wet sum)" }
 
   # block-6: Calibration trim pots
-  - { ref: RV7,  board: audio,   block: block-6, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "BP1 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 200 Hz at 0V; ±25% range" }
-  - { ref: RV8,  board: audio,   block: block-6, part: "Bourns 3224W", pkg: SMD,   val: "20kΩ",  fn: "BP1 1V/oct tracking trim; ±10% range" }
-  - { ref: RV9,  board: audio,   block: block-6, part: ~,          pkg: SMD,      fn: "BP1 Q_max trim (Iabc V_bias)" }
-  - { ref: RV10, board: audio,   block: block-6, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "BP2 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 1500 Hz at 0V; ±25% range" }
-  - { ref: RV11, board: audio,   block: block-6, part: "Bourns 3224W", pkg: SMD,   val: "20kΩ",  fn: "BP2 1V/oct tracking trim; ±10% range" }
-  - { ref: RV12, board: audio,   block: block-6, part: ~,          pkg: SMD,      fn: "BP2 Q_max trim" }
-  - { ref: RV13, board: audio,   block: block-6, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "BP3 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 6000 Hz at 0V; ±25% range" }
-  - { ref: RV14, board: audio,   block: block-6, part: "Bourns 3224W", pkg: SMD,   val: "20kΩ",  fn: "BP3 1V/oct tracking trim; ±10% range" }
-  - { ref: RV15, board: audio,   block: block-6, part: ~,          pkg: SMD,      fn: "BP3 Q_max trim" }
+  - { ref: RV7,  board: audio,   block: block-6-svf1, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "BP1 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 200 Hz at 0V; ±25% range" }
+  - { ref: RV8,  board: audio,   block: block-6-svf1, part: "Bourns 3224W", pkg: SMD,   val: "20kΩ",  fn: "BP1 1V/oct tracking trim; ±10% range" }
+  - { ref: RV9,  board: audio,   block: block-6-svf1, part: ~,          pkg: SMD,      fn: "BP1 Q_max trim (Iabc V_bias)" }
+  - { ref: RV10, board: audio,   block: block-6-svf2, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "BP2 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 1500 Hz at 0V; ±25% range" }
+  - { ref: RV11, board: audio,   block: block-6-svf2, part: "Bourns 3224W", pkg: SMD,   val: "20kΩ",  fn: "BP2 1V/oct tracking trim; ±10% range" }
+  - { ref: RV12, board: audio,   block: block-6-svf2, part: ~,          pkg: SMD,      fn: "BP2 Q_max trim" }
+  - { ref: RV13, board: audio,   block: block-6-svf3, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "BP3 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 6000 Hz at 0V; ±25% range" }
+  - { ref: RV14, board: audio,   block: block-6-svf3, part: "Bourns 3224W", pkg: SMD,   val: "20kΩ",  fn: "BP3 1V/oct tracking trim; ±10% range" }
+  - { ref: RV15, board: audio,   block: block-6-svf3, part: ~,          pkg: SMD,      fn: "BP3 Q_max trim" }
 
   # block-6: Discrete semiconductors
-  - { ref: D4,   board: audio,   block: block-6, part: 1N4148W,    pkg: SOD-123,  qty: 24, fn: "SC soft-clip diodes; 4 per path (2 antiparallel pairs) × 6 paths" }
-  - { ref: D5,   board: audio,   block: block-6, part: BZX84C5V1,  pkg: SOT-23,   qty: 12, fn: "HC back-to-back zener clamps (±5.8V clip); 2 per path × 6 paths" }
-  - { ref: D6,   board: audio,   block: block-6, part: 1N4148W,    pkg: SOD-123,  qty: 24, fn: "WF passive clamp diodes; 4 per path (2 per polarity, Vth=±1.4V) × 6 paths; true symmetric fold" }
-  - { ref: D7,   board: audio,   block: block-6, part: BZX84C5V1,  pkg: SOT-23,   fn: "CD4053 logic supply 5.1V zener shunt (from +12V with R_5V_logic)" }
+  - { ref: D4,   board: audio,   block: block-6-dist1, part: 1N4148W,    pkg: SOD-123,  qty: 8, fn: "SC soft-clip diodes; 4 per path (2 antiparallel pairs) × 6 paths" }
+  - { ref: D4,   board: audio,   block: block-6-dist2, part: 1N4148W,    pkg: SOD-123,  qty: 8, fn: "SC soft-clip diodes; 4 per path (2 antiparallel pairs) × 6 paths" }
+  - { ref: D4,   board: audio,   block: block-6-dist3, part: 1N4148W,    pkg: SOD-123,  qty: 8, fn: "SC soft-clip diodes; 4 per path (2 antiparallel pairs) × 6 paths" }
+  - { ref: D5,   board: audio,   block: block-6-dist1, part: BZX84C5V1,  pkg: SOT-23,   qty: 4, fn: "HC back-to-back zener clamps (±5.8V clip); 2 per path × 6 paths" }
+  - { ref: D5,   board: audio,   block: block-6-dist2, part: BZX84C5V1,  pkg: SOT-23,   qty: 4, fn: "HC back-to-back zener clamps (±5.8V clip); 2 per path × 6 paths" }
+  - { ref: D5,   board: audio,   block: block-6-dist3, part: BZX84C5V1,  pkg: SOT-23,   qty: 4, fn: "HC back-to-back zener clamps (±5.8V clip); 2 per path × 6 paths" }
+  - { ref: D6,   board: audio,   block: block-6-dist1, part: 1N4148W,    pkg: SOD-123,  qty: 8, fn: "WF passive clamp diodes; 4 per path (2 per polarity, Vth=±1.4V) × 6 paths; true symmetric fold" }
+  - { ref: D6,   board: audio,   block: block-6-dist2, part: 1N4148W,    pkg: SOD-123,  qty: 8, fn: "WF passive clamp diodes; 4 per path (2 per polarity, Vth=±1.4V) × 6 paths; true symmetric fold" }
+  - { ref: D6,   board: audio,   block: block-6-dist3, part: 1N4148W,    pkg: SOD-123,  qty: 8, fn: "WF passive clamp diodes; 4 per path (2 per polarity, Vth=±1.4V) × 6 paths; true symmetric fold" }
+  - { ref: D7,   board: audio,   block: block-6-mix, part: BZX84C5V1,  pkg: SOT-23,   fn: "CD4053 logic supply 5.1V zener shunt (from +12V with R_5V_logic)" }
 
   # block-6: Passives — SVF integrator caps
-  - { ref: C15,  board: audio,   block: block-6, part: ~,          pkg: "0805",   val: "150nF",  qty: 4, fn: "BP1 integrator caps (C0G; 2 per channel × L+R)" }
-  - { ref: C19,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "22nF",   qty: 4, fn: "BP2 integrator caps (C0G; 2 per channel × L+R)" }
-  - { ref: C23,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "4.7nF",  qty: 4, fn: "BP3 integrator caps (C0G; 2 per channel × L+R)" }
+  - { ref: C15,  board: audio,   block: block-6-svf1, part: ~,          pkg: "0805",   val: "68nF",   qty: 4, fn: "BP1 integrator caps (C0G; f_ref=400Hz via trim; 2 per channel × L+R)" }
+  - { ref: C19,  board: audio,   block: block-6-svf2, part: ~,          pkg: "0805",   val: "68nF",   qty: 4, fn: "BP2 integrator caps (C0G; f_ref=400Hz; 2 per channel × L+R)" }
+  - { ref: C23,  board: audio,   block: block-6-svf3, part: ~,          pkg: "0805",   val: "68nF",   qty: 4, fn: "BP3 integrator caps (C0G; f_ref=400Hz; 2 per channel × L+R)" }
 
   # block-6: Passives — CD4053 logic supply
-  - { ref: C27,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "10µF",   fn: "CD4053 logic supply bulk bypass (electrolytic or ceramic)" }
-  - { ref: C28,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "100nF",  fn: "CD4053 logic supply HF bypass" }
+  - { ref: C27,  board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "10µF",   fn: "CD4053 logic supply bulk bypass (electrolytic or ceramic)" }
+  - { ref: C28,  board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "100nF",  fn: "CD4053 logic supply HF bypass" }
 
   # block-6: Passives — SVF signal path resistors
-  - { ref: R12,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "1kΩ",    qty: 12, fn: "OTA linearizing R; 1 per OTA cell × 2 cells × 6 LM13700 ICs (U15–U20)" }
-  - { ref: R13,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 6,  fn: "SVF SUM_AMP R_in; 1 per group per channel (U21–U26 half A)" }
-  - { ref: R14,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 6,  fn: "SVF SUM_AMP R_fb; 1 per group per channel" }
-  - { ref: R15,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 6,  fn: "SVF SUM_AMP R_Q input; 1 per group per channel" }
-  - { ref: R16,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "BP tilt inverter R_in + R_fb in U27 half A" }
-  - { ref: R17,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "BP output polarity-restore inverter R_in + R_fb in U27 half B" }
+  - { ref: R12,  board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "1kΩ",    qty: 4, fn: "OTA linearizing R; 1 per OTA cell × 2 cells × 6 LM13700 ICs (U15–U20)" }
+  - { ref: R12,  board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "1kΩ",    qty: 4, fn: "OTA linearizing R; 1 per OTA cell × 2 cells × 6 LM13700 ICs (U15–U20)" }
+  - { ref: R12,  board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "1kΩ",    qty: 4, fn: "OTA linearizing R; 1 per OTA cell × 2 cells × 6 LM13700 ICs (U15–U20)" }
+  - { ref: R13,  board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "SVF SUM_AMP R_in; 1 per group per channel (U21–U26 half A)" }
+  - { ref: R13,  board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "SVF SUM_AMP R_in; 1 per group per channel (U21–U26 half A)" }
+  - { ref: R13,  board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "SVF SUM_AMP R_in; 1 per group per channel (U21–U26 half A)" }
+  - { ref: R14,  board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "SVF SUM_AMP R_fb; 1 per group per channel" }
+  - { ref: R14,  board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "SVF SUM_AMP R_fb; 1 per group per channel" }
+  - { ref: R14,  board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "SVF SUM_AMP R_fb; 1 per group per channel" }
+  - { ref: R15,  board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "SVF SUM_AMP R_Q input; 1 per group per channel" }
+  - { ref: R15,  board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "SVF SUM_AMP R_Q input; 1 per group per channel" }
+  - { ref: R15,  board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "SVF SUM_AMP R_Q input; 1 per group per channel" }
+  - { ref: R17,  board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "BP output polarity-restore inverter R_in + R_fb in U27 half B" }
 
   # block-6: Passives — SC distortion paths
-  - { ref: R18,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 6,  fn: "R_SC_in; SC path input R; 1 per path × 6 paths" }
-  - { ref: R19,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 6,  fn: "R_SC_fb_fixed; SC minimum feedback R (G≥1× at zero drive)" }
+  - { ref: R18,  board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 2,  fn: "R_SC_in; SC path input R; 1 per path × 6 paths" }
+  - { ref: R18,  board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 2,  fn: "R_SC_in; SC path input R; 1 per path × 6 paths" }
+  - { ref: R18,  board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 2,  fn: "R_SC_in; SC path input R; 1 per path × 6 paths" }
+  - { ref: R19,  board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 2,  fn: "R_SC_fb_fixed; SC minimum feedback R (G≥1× at zero drive)" }
+  - { ref: R19,  board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 2,  fn: "R_SC_fb_fixed; SC minimum feedback R (G≥1× at zero drive)" }
+  - { ref: R19,  board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 2,  fn: "R_SC_fb_fixed; SC minimum feedback R (G≥1× at zero drive)" }
 
   # block-6: Passives — HC distortion paths
-  - { ref: R20,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 6,  fn: "R_HC_in; HC path input R; 1 per path × 6 paths" }
-  - { ref: R21,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 6,  fn: "R_HC_fb_fixed; HC minimum feedback R" }
+  - { ref: R20,  board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 2,  fn: "R_HC_in; HC path input R; 1 per path × 6 paths" }
+  - { ref: R20,  board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 2,  fn: "R_HC_in; HC path input R; 1 per path × 6 paths" }
+  - { ref: R20,  board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 2,  fn: "R_HC_in; HC path input R; 1 per path × 6 paths" }
+  - { ref: R21,  board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 2,  fn: "R_HC_fb_fixed; HC minimum feedback R" }
+  - { ref: R21,  board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 2,  fn: "R_HC_fb_fixed; HC minimum feedback R" }
+  - { ref: R21,  board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 2,  fn: "R_HC_fb_fixed; HC minimum feedback R" }
 
   # block-6: Passives — WF distortion paths
-  - { ref: R22,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 6,  fn: "R_WF_in; WF pre-gain input R; 1 per path × 6 paths" }
-  - { ref: R23,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 6,  fn: "R_WF_fb_fixed; WF pre-gain minimum feedback R" }
-  - { ref: R24,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 6,  fn: "R_clamp; WF passive clamp series R (limits diode current at threshold)" }
-  - { ref: R25,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 6,  fn: "R_g; WF folder (−) input R (was R_fold 10kΩ; value unchanged)" }
-  - { ref: R_f_wf, board: audio, block: block-6, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 6,  fn: "R_f; WF folder feedback R; R_g=R_f → gain +2 at (+) input" }
-  - { ref: C_WF, board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "47pF",   qty: 12, fn: "RV_DRIVE wiper bypass cap (anti-RF, anti-scratchiness); 1 per path × 6 paths" }
+  - { ref: R22,  board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 2,  fn: "R_WF_in; WF pre-gain input R; 1 per path × 6 paths" }
+  - { ref: R22,  board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 2,  fn: "R_WF_in; WF pre-gain input R; 1 per path × 6 paths" }
+  - { ref: R22,  board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 2,  fn: "R_WF_in; WF pre-gain input R; 1 per path × 6 paths" }
+  - { ref: R23,  board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 2,  fn: "R_WF_fb_fixed; WF pre-gain minimum feedback R" }
+  - { ref: R23,  board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 2,  fn: "R_WF_fb_fixed; WF pre-gain minimum feedback R" }
+  - { ref: R23,  board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 2,  fn: "R_WF_fb_fixed; WF pre-gain minimum feedback R" }
+  - { ref: R24,  board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 2,  fn: "R_clamp; WF passive clamp series R (limits diode current at threshold)" }
+  - { ref: R24,  board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 2,  fn: "R_clamp; WF passive clamp series R (limits diode current at threshold)" }
+  - { ref: R24,  board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 2,  fn: "R_clamp; WF passive clamp series R (limits diode current at threshold)" }
+  - { ref: R25,  board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 2,  fn: "R_g; WF folder (−) input R (was R_fold 10kΩ; value unchanged)" }
+  - { ref: R25,  board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 2,  fn: "R_g; WF folder (−) input R (was R_fold 10kΩ; value unchanged)" }
+  - { ref: R25,  board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 2,  fn: "R_g; WF folder (−) input R (was R_fold 10kΩ; value unchanged)" }
+  - { ref: R_f_wf, board: audio, block: block-6-dist1, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 2,  fn: "R_f; WF folder feedback R; R_g=R_f → gain +2 at (+) input" }
+  - { ref: R_f_wf, board: audio, block: block-6-dist2, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 2,  fn: "R_f; WF folder feedback R; R_g=R_f → gain +2 at (+) input" }
+  - { ref: R_f_wf, board: audio, block: block-6-dist3, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 2,  fn: "R_f; WF folder feedback R; R_g=R_f → gain +2 at (+) input" }
+  - { ref: C_WF, board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "47pF",   qty: 4, fn: "RV_DRIVE wiper bypass cap (anti-RF, anti-scratchiness); 1 per path × 6 paths" }
+  - { ref: C_WF, board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "47pF",   qty: 4, fn: "RV_DRIVE wiper bypass cap (anti-RF, anti-scratchiness); 1 per path × 6 paths" }
+  - { ref: C_WF, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "47pF",   qty: 4, fn: "RV_DRIVE wiper bypass cap (anti-RF, anti-scratchiness); 1 per path × 6 paths" }
 
   # block-6: Passives — BP_MIX circuit
-  - { ref: R26,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "33kΩ",   qty: 8,  fn: "R_sum; BP wet summer input R; 3 inputs + 1 fb per channel × 2 ch (U46/U47 half A)" }
-  - { ref: R27,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "R_dry; MIX dry path input R (L and R; in U46/U47 half B)" }
-  - { ref: R28,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "R_mix_f; MIX crossfade feedback R (L and R)" }
+  - { ref: R26,  board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "33kΩ",   qty: 8,  fn: "R_sum; BP wet summer input R; 3 inputs + 1 fb per channel × 2 ch (U46/U47 half A)" }
+  - { ref: R28,  board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "R_mix_f; final dry+wet summer feedback R (L and R, U46/U47 half B)" }
+  # Stage 7 (change 0018): two-scaler dry/wet — wet re-inverter, final summer inputs, R-ch polarity restore
+  - { ref: R214, board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "U48-A wet re-inverter in (L)" }
+  - { ref: R215, board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "U48-A wet re-inverter fb (L)" }
+  - { ref: R216, board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "U48-B wet re-inverter in (R)" }
+  - { ref: R217, board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "U48-B wet re-inverter fb (R)" }
+  - { ref: R218, board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "final summer L: scaled-dry (BYPASS wiper) input" }
+  - { ref: R219, board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "final summer L: scaled-wet (WET wiper) input" }
+  - { ref: R220, board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "final summer R: scaled-dry input" }
+  - { ref: R221, board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "final summer R: scaled-wet input" }
+  - { ref: R222, board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "U27-A R output polarity-restore in" }
+  - { ref: R223, board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "U27-A R output polarity-restore fb" }
 
   # block-6: Passives — CD4053 logic supply
-  - { ref: R29,  board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "R_5V_logic; series R from +12V to D7 zener shunt (5.1V logic rail for CD4053)" }
+  - { ref: R29,  board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "R_5V_logic; series R from +12V to D7 zener shunt (5.1V logic rail for CD4053)" }
   # block-6 additions (2026-05-29): Option B BP Q-VCAs (DSP-faithful 2-integrator SVF
   # + separate Q OTAs per aux-q-control), per-channel expo (true BP_TILT), and the
   # integrator support + decoupling the rewrite omitted.
-  - { ref: U67,  board: audio,   block: block-6, part: LM13700M,   pkg: SOIC-16,  fn: "BP1 Q VCA (cell A = L Q, cell B = R Q)" }
-  - { ref: U68,  board: audio,   block: block-6, part: LM13700M,   pkg: SOIC-16,  fn: "BP2 Q VCA (cell A = L Q, cell B = R Q)" }
-  - { ref: U69,  board: audio,   block: block-6, part: LM13700M,   pkg: SOIC-16,  fn: "BP3 Q VCA (cell A = L Q, cell B = R Q)" }
-  - { ref: U70,  board: audio,   block: block-6, part: THAT340S14-U, pkg: SOIC-14, fn: "BP1 expo converter R channel (per-channel tilt; U28 = L)" }
-  - { ref: U71,  board: audio,   block: block-6, part: THAT340S14-U, pkg: SOIC-14, fn: "BP2 expo converter R channel (U29 = L)" }
-  - { ref: U72,  board: audio,   block: block-6, part: THAT340S14-U, pkg: SOIC-14, fn: "BP3 expo converter R channel (U30 = L)" }
-  - { ref: U73,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "BP Q IRES_AMP: BP1 (half A) + BP2 (half B)" }
-  - { ref: U74,  board: audio,   block: block-6, part: TL072CDT,   pkg: SOIC-8,   fn: "BP Q IRES_AMP: BP3 (half A); half B spare" }
-  - { ref: R116, board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "1MΩ",    qty: 6,  fn: "R_Iabc_Q: V_ires → BP Q OTA Iabc; 1 per group per channel" }
-  - { ref: R117, board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 3,  fn: "R_QBIAS: BP Q IRES_AMP V_bias input; 1 per group" }
-  - { ref: R118, board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 3,  fn: "R_QINV: BP Q IRES_AMP FOCUS CV input; 1 per group" }
-  - { ref: R119, board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 3,  fn: "R_f_q: BP Q IRES_AMP feedback; 1 per group" }
-  - { ref: R120, board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "1MΩ",    qty: 3,  fn: "R_IREF_A_R: R-channel expo I_ref fixed R; 1 per group" }
-  - { ref: R121, board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "47kΩ",   qty: 3, tol: "1%", fn: "R_VOCT_R: R-channel expo V/oct scaling; 1 per group" }
-  - { ref: R122, board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "1kΩ",    qty: 3,  fn: "R_E_R: R-channel expo emitter degeneration; 1 per group" }
-  - { ref: R123, board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 12, fn: "R_BUF_PD: BP integrator Darlington buffer emitter pulldown to V-; 2 per group-channel" }
-  - { ref: D13,  board: audio,   block: block-6, part: 1N4148W,    pkg: SOD-123,  qty: 3,  fn: "D_IRES: BP Q V_ires ≥0 clamp; 1 per group" }
-  - { ref: C107, board: audio,   block: block-6, part: ~,          pkg: "0402",   val: "10nF",   qty: 6,  fn: "C_IABC_Q: BP Q-cell Iabc bypass; 1 per group per channel" }
-  - { ref: C108, board: audio,   block: block-6, part: ~,          pkg: "0402",   val: "10nF",   qty: 6,  fn: "C_IABC_INT: BP integrator OTA Iabc bypass; 1 per group per channel" }
-  - { ref: C109, board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "100nF",  qty: 6,  fn: "C_IREF: expo I_ref node bypass; 1 per expo (6 expo: U28-30 L + U70-72 R)" }
-  - { ref: RV24, board: audio,   block: block-6, part: "Bourns 3224W", pkg: SMD, val: "500kΩ", qty: 3, fn: "BP R-channel expo f_ref trim; 1 per group" }
-  - { ref: RV25, board: audio,   block: block-6, part: "Bourns 3224W", pkg: SMD, val: "20kΩ",  qty: 3, fn: "BP R-channel expo 1V/oct trim; 1 per group" }
-  - { ref: C110, board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "100nF",  qty: 90, fn: "C_BYP: per-IC supply decoupling; 2 per IC × 45 block-6 ICs (U15-U48, U67-U77)" }
-  - { ref: U75,  board: audio,   block: block-6, part: CD4053,     pkg: SOIC-16,  fn: "BP1 distortion mux 2 (stereo 1-of-3: U31=ch select stage 1, U75=stage 2)" }
-  - { ref: U76,  board: audio,   block: block-6, part: CD4053,     pkg: SOIC-16,  fn: "BP2 distortion mux 2" }
-  - { ref: U77,  board: audio,   block: block-6, part: CD4053,     pkg: SOIC-16,  fn: "BP3 distortion mux 2" }
-  - { ref: R128, board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 6,  fn: "R_MODE_PU: DW5 mode-encoder pull-ups to 5V logic rail; 2 per group (SC/HC/WF → 2 control bits)" }
-  - { ref: R124, board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "1MΩ",    qty: 3,  fn: "R_IREF_A_L: L-channel expo I_ref fixed R (U28-30); 1 per group" }
-  - { ref: R125, board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "47kΩ",   qty: 3, tol: "1%", fn: "R_VOCT_L: L-channel expo V/oct scaling (U28-30); 1 per group" }
-  - { ref: R126, board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "1kΩ",    qty: 3,  fn: "R_E_L: L-channel expo emitter degeneration (U28-30); 1 per group" }
-  - { ref: R127, board: audio,   block: block-6, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 6,  fn: "R_TILT_SUM: ±V_tilt summing R into each expo base (+L / −R); 1 per expo (6)" }
+  - { ref: U67,  board: audio,   block: block-6-svf1, part: LM13700M,   pkg: SOIC-16,  fn: "BP1 Q VCA (cell A = L Q, cell B = R Q)" }
+  - { ref: U68,  board: audio,   block: block-6-svf2, part: LM13700M,   pkg: SOIC-16,  fn: "BP2 Q VCA (cell A = L Q, cell B = R Q)" }
+  - { ref: U69,  board: audio,   block: block-6-svf3, part: LM13700M,   pkg: SOIC-16,  fn: "BP3 Q VCA (cell A = L Q, cell B = R Q)" }
+  - { ref: U70,  board: audio,   block: block-6-svf1, part: THAT340S14-U, pkg: SOIC-14, fn: "BP1 expo converter R channel (per-channel tilt; U28 = L)" }
+  - { ref: U71,  board: audio,   block: block-6-svf2, part: THAT340S14-U, pkg: SOIC-14, fn: "BP2 expo converter R channel (U29 = L)" }
+  - { ref: U72,  board: audio,   block: block-6-svf3, part: THAT340S14-U, pkg: SOIC-14, fn: "BP3 expo converter R channel (U30 = L)" }
+  - { ref: U73,  board: audio,   block: [block-6-svf1, block-6-svf2], shared: true, part: TL072CDT,   pkg: SOIC-8,   fn: "BP Q IRES_AMP: BP1 (half A) + BP2 (half B)" }
+  - { ref: U74,  board: audio,   block: block-6-svf3, part: TL072CDT,   pkg: SOIC-8,   fn: "BP Q IRES_AMP: BP3 (half A); half B spare" }
+  - { ref: R116, board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "1MΩ",    qty: 2,  fn: "R_Iabc_Q: V_ires → BP Q OTA Iabc; 1 per group per channel" }
+  - { ref: R116, board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "1MΩ",    qty: 2,  fn: "R_Iabc_Q: V_ires → BP Q OTA Iabc; 1 per group per channel" }
+  - { ref: R116, board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "1MΩ",    qty: 2,  fn: "R_Iabc_Q: V_ires → BP Q OTA Iabc; 1 per group per channel" }
+  - { ref: R117, board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "R_QBIAS: BP Q IRES_AMP V_bias input; 1 per group" }
+  - { ref: R117, board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "R_QBIAS: BP Q IRES_AMP V_bias input; 1 per group" }
+  - { ref: R117, board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "R_QBIAS: BP Q IRES_AMP V_bias input; 1 per group" }
+  - { ref: R118, board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "R_QINV: BP Q IRES_AMP FOCUS CV input; 1 per group" }
+  - { ref: R118, board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "R_QINV: BP Q IRES_AMP FOCUS CV input; 1 per group" }
+  - { ref: R118, board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "R_QINV: BP Q IRES_AMP FOCUS CV input; 1 per group" }
+  - { ref: R119, board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "R_f_q: BP Q IRES_AMP feedback; 1 per group" }
+  - { ref: R119, board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "R_f_q: BP Q IRES_AMP feedback; 1 per group" }
+  - { ref: R119, board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "R_f_q: BP Q IRES_AMP feedback; 1 per group" }
+  - { ref: R120, board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "1MΩ",    qty: 1,  fn: "R_IREF_A_R: R-channel expo I_ref fixed R; 1 per group" }
+  - { ref: R120, board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "1MΩ",    qty: 1,  fn: "R_IREF_A_R: R-channel expo I_ref fixed R; 1 per group" }
+  - { ref: R120, board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "1MΩ",    qty: 1,  fn: "R_IREF_A_R: R-channel expo I_ref fixed R; 1 per group" }
+  - { ref: R121, board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "47kΩ",   qty: 1, tol: "1%", fn: "R_VOCT_R: R-channel expo V/oct scaling; 1 per group" }
+  - { ref: R121, board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "47kΩ",   qty: 1, tol: "1%", fn: "R_VOCT_R: R-channel expo V/oct scaling; 1 per group" }
+  - { ref: R121, board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "47kΩ",   qty: 1, tol: "1%", fn: "R_VOCT_R: R-channel expo V/oct scaling; 1 per group" }
+  - { ref: R122, board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "1kΩ",    qty: 1,  fn: "R_E_R: R-channel expo emitter degeneration; 1 per group" }
+  - { ref: R122, board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "1kΩ",    qty: 1,  fn: "R_E_R: R-channel expo emitter degeneration; 1 per group" }
+  - { ref: R122, board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "1kΩ",    qty: 1,  fn: "R_E_R: R-channel expo emitter degeneration; 1 per group" }
+  - { ref: R123, board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 4, fn: "R_BUF_PD: BP integrator Darlington buffer emitter pulldown to V-; 2 per group-channel" }
+  - { ref: R123, board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 4, fn: "R_BUF_PD: BP integrator Darlington buffer emitter pulldown to V-; 2 per group-channel" }
+  - { ref: R123, board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "10kΩ",   qty: 4, fn: "R_BUF_PD: BP integrator Darlington buffer emitter pulldown to V-; 2 per group-channel" }
+  - { ref: D13,  board: audio,   block: block-6-svf1, part: 1N4148W,    pkg: SOD-123,  qty: 1,  fn: "D_IRES: BP Q V_ires ≥0 clamp; 1 per group" }
+  - { ref: D13,  board: audio,   block: block-6-svf2, part: 1N4148W,    pkg: SOD-123,  qty: 1,  fn: "D_IRES: BP Q V_ires ≥0 clamp; 1 per group" }
+  - { ref: D13,  board: audio,   block: block-6-svf3, part: 1N4148W,    pkg: SOD-123,  qty: 1,  fn: "D_IRES: BP Q V_ires ≥0 clamp; 1 per group" }
+  - { ref: C107, board: audio,   block: block-6-svf1, part: ~,          pkg: "0402",   val: "10nF",   qty: 2,  fn: "C_IABC_Q: BP Q-cell Iabc bypass; 1 per group per channel" }
+  - { ref: C107, board: audio,   block: block-6-svf2, part: ~,          pkg: "0402",   val: "10nF",   qty: 2,  fn: "C_IABC_Q: BP Q-cell Iabc bypass; 1 per group per channel" }
+  - { ref: C107, board: audio,   block: block-6-svf3, part: ~,          pkg: "0402",   val: "10nF",   qty: 2,  fn: "C_IABC_Q: BP Q-cell Iabc bypass; 1 per group per channel" }
+  - { ref: C108, board: audio,   block: block-6-svf1, part: ~,          pkg: "0402",   val: "10nF",   qty: 2,  fn: "C_IABC_INT: BP integrator OTA Iabc bypass; 1 per group per channel" }
+  - { ref: C108, board: audio,   block: block-6-svf2, part: ~,          pkg: "0402",   val: "10nF",   qty: 2,  fn: "C_IABC_INT: BP integrator OTA Iabc bypass; 1 per group per channel" }
+  - { ref: C108, board: audio,   block: block-6-svf3, part: ~,          pkg: "0402",   val: "10nF",   qty: 2,  fn: "C_IABC_INT: BP integrator OTA Iabc bypass; 1 per group per channel" }
+  - { ref: C109, board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "100nF",  qty: 2,  fn: "C_IREF: expo I_ref node bypass; 1 per expo (6 expo: U28-30 L + U70-72 R)" }
+  - { ref: C109, board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "100nF",  qty: 2,  fn: "C_IREF: expo I_ref node bypass; 1 per expo (6 expo: U28-30 L + U70-72 R)" }
+  - { ref: C109, board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "100nF",  qty: 2,  fn: "C_IREF: expo I_ref node bypass; 1 per expo (6 expo: U28-30 L + U70-72 R)" }
+  - { ref: RV24, board: audio,   block: block-6-svf1, part: "Bourns 3224W", pkg: SMD, val: "500kΩ", qty: 1, fn: "BP R-channel expo f_ref trim; 1 per group" }
+  - { ref: RV24, board: audio,   block: block-6-svf2, part: "Bourns 3224W", pkg: SMD, val: "500kΩ", qty: 1, fn: "BP R-channel expo f_ref trim; 1 per group" }
+  - { ref: RV24, board: audio,   block: block-6-svf3, part: "Bourns 3224W", pkg: SMD, val: "500kΩ", qty: 1, fn: "BP R-channel expo f_ref trim; 1 per group" }
+  - { ref: RV25, board: audio,   block: block-6-svf1, part: "Bourns 3224W", pkg: SMD, val: "20kΩ",  qty: 1, fn: "BP R-channel expo 1V/oct trim; 1 per group" }
+  - { ref: RV25, board: audio,   block: block-6-svf2, part: "Bourns 3224W", pkg: SMD, val: "20kΩ",  qty: 1, fn: "BP R-channel expo 1V/oct trim; 1 per group" }
+  - { ref: RV25, board: audio,   block: block-6-svf3, part: "Bourns 3224W", pkg: SMD, val: "20kΩ",  qty: 1, fn: "BP R-channel expo 1V/oct trim; 1 per group" }
+  - { ref: C110, board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "100nF",  qty: 16, fn: "C_BYP: per-IC supply decoupling; 2 per IC × 45 block-6 ICs (U15-U48, U67-U77)" }
+  - { ref: C110, board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "100nF",  qty: 14, fn: "C_BYP: per-IC supply decoupling; 2 per IC × 45 block-6 ICs (U15-U48, U67-U77)" }
+  - { ref: C110, board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "100nF",  qty: 16, fn: "C_BYP: per-IC supply decoupling; 2 per IC × 45 block-6 ICs (U15-U48, U67-U77)" }
+  - { ref: C110, board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "100nF",  qty: 12, fn: "C_BYP: per-IC supply decoupling; 2 per IC × 45 block-6 ICs (U15-U48, U67-U77)" }
+  - { ref: C110, board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "100nF",  qty: 12, fn: "C_BYP: per-IC supply decoupling; 2 per IC × 45 block-6 ICs (U15-U48, U67-U77)" }
+  - { ref: C110, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "100nF",  qty: 14, fn: "C_BYP: per-IC supply decoupling; 2 per IC (incl. U81 BP3 selector)" }
+  - { ref: C110, board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "100nF",  qty: 8, fn: "C_BYP: per-IC supply decoupling; 2 per IC × 45 block-6 ICs (U15-U48, U67-U77)" }
+  # block-6: per-band TILT summer/inverter (U82-84) supply decoupling, 2 per IC
+  - { ref: C119, board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "100nF",  qty: 1,  fn: "C_BYP: U82 V+ decoupling (BP1 TILT summer+inverter)" }
+  - { ref: C120, board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "100nF",  qty: 1,  fn: "C_BYP: U82 V− decoupling (BP1 TILT summer+inverter)" }
+  - { ref: C121, board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "100nF",  qty: 1,  fn: "C_BYP: U83 V+ decoupling (BP2 TILT summer+inverter)" }
+  - { ref: C122, board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "100nF",  qty: 1,  fn: "C_BYP: U83 V− decoupling (BP2 TILT summer+inverter)" }
+  - { ref: C123, board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "100nF",  qty: 1,  fn: "C_BYP: U84 V+ decoupling (BP3 TILT summer+inverter)" }
+  - { ref: C124, board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "100nF",  qty: 1,  fn: "C_BYP: U84 V− decoupling (BP3 TILT summer+inverter)" }
+  - { ref: U75,  board: audio,   block: block-6-dist1, part: CD4053,     pkg: SOIC-16,  fn: "BP1 distortion mux 2 (stereo 1-of-3: U31=ch select stage 1, U75=stage 2)" }
+  - { ref: U76,  board: audio,   block: block-6-dist2, part: CD4053,     pkg: SOIC-16,  fn: "BP2 distortion mux 2" }
+  - { ref: U77,  board: audio,   block: block-6-dist3, part: CD4053,     pkg: SOIC-16,  fn: "BP3 distortion mux 2" }
+  - { ref: U81,  board: audio,   block: block-6-dist3, part: CD4053,     pkg: SOIC-16,  fn: "BP3 INPUT selector: ALT-VCA vs LP1 per channel (X=L, Y=R), gated by ALT_L_DET (change 0018)" }
+  - { ref: R133, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "ALT_L_DET pull-up to +12V (BP3 selector; HIGH=ALT patched)" }
+  - { ref: R128, board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "R_MODE_PU: DW5 mode-encoder pull-ups to 5V logic rail; 2 per group (SC/HC/WF → 2 control bits)" }
+  - { ref: R128, board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "R_MODE_PU: DW5 mode-encoder pull-ups to 5V logic rail; 2 per group (SC/HC/WF → 2 control bits)" }
+  - { ref: R128, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "R_MODE_PU: DW5 mode-encoder pull-ups to 5V logic rail; 2 per group (SC/HC/WF → 2 control bits)" }
+  # block-6 CLIP detectors (change 0018, Stage 6): per-band ±4V window comparator -> panel CLIP LED
+  - { ref: U94,  board: audio,   block: block-6-dist1, part: TL074CDT,   pkg: SOIC-14,  fn: "BP1 CLIP comparators (A:>+4L B:<-4L C:>+4R D:<-4R)" }
+  - { ref: U95,  board: audio,   block: block-6-dist2, part: TL074CDT,   pkg: SOIC-14,  fn: "BP2 CLIP comparators" }
+  - { ref: U96,  board: audio,   block: block-6-dist3, part: TL074CDT,   pkg: SOIC-14,  fn: "BP3 CLIP comparators" }
+  - { ref: R177, board: audio,   block: block-6-dist1, part: ~, pkg: "0603", val: "100kΩ", fn: "BP1 CLIP comp A in (DISTOUT_L)" }
+  - { ref: R178, board: audio,   block: block-6-dist1, part: ~, pkg: "0603", val: "100kΩ", fn: "BP1 CLIP comp B in (DISTOUT_L)" }
+  - { ref: R179, board: audio,   block: block-6-dist1, part: ~, pkg: "0603", val: "100kΩ", fn: "BP1 CLIP comp C in (DISTOUT_R)" }
+  - { ref: R180, board: audio,   block: block-6-dist1, part: ~, pkg: "0603", val: "100kΩ", fn: "BP1 CLIP comp D in (DISTOUT_R)" }
+  - { ref: R181, board: audio,   block: block-6-dist1, part: ~, pkg: "0603", val: "2.2MΩ", fn: "BP1 CLIP comp A hysteresis" }
+  - { ref: R182, board: audio,   block: block-6-dist1, part: ~, pkg: "0603", val: "2.2MΩ", fn: "BP1 CLIP comp B hysteresis" }
+  - { ref: R183, board: audio,   block: block-6-dist1, part: ~, pkg: "0603", val: "2.2MΩ", fn: "BP1 CLIP comp C hysteresis" }
+  - { ref: R184, board: audio,   block: block-6-dist1, part: ~, pkg: "0603", val: "2.2MΩ", fn: "BP1 CLIP comp D hysteresis" }
+  - { ref: R185, board: audio,   block: block-6-dist1, part: ~, pkg: "0603", val: "1kΩ",   fn: "BP1 CLIP LED current-limit" }
+  - { ref: R186, board: audio,   block: block-6-dist1, part: ~, pkg: "0603", val: "20kΩ",  fn: "VREF_P4 divider top (+12V); shared +4V CLIP threshold" }
+  - { ref: R187, board: audio,   block: block-6-dist1, part: ~, pkg: "0603", val: "10kΩ",  fn: "VREF_P4 divider bottom" }
+  - { ref: R188, board: audio,   block: block-6-dist1, part: ~, pkg: "0603", val: "20kΩ",  fn: "VREF_N4 divider top (−12V); shared −4V CLIP threshold" }
+  - { ref: R189, board: audio,   block: block-6-dist1, part: ~, pkg: "0603", val: "10kΩ",  fn: "VREF_N4 divider bottom" }
+  - { ref: R190, board: audio,   block: block-6-dist1, part: ~, pkg: "0603", val: "100kΩ", fn: "BP1 CLIP comp B VREF_N4 series" }
+  - { ref: R191, board: audio,   block: block-6-dist1, part: ~, pkg: "0603", val: "100kΩ", fn: "BP1 CLIP comp D VREF_N4 series" }
+  - { ref: R192, board: audio,   block: block-6-dist2, part: ~, pkg: "0603", val: "100kΩ", fn: "BP2 CLIP comp A in" }
+  - { ref: R193, board: audio,   block: block-6-dist2, part: ~, pkg: "0603", val: "100kΩ", fn: "BP2 CLIP comp B in" }
+  - { ref: R194, board: audio,   block: block-6-dist2, part: ~, pkg: "0603", val: "100kΩ", fn: "BP2 CLIP comp C in" }
+  - { ref: R195, board: audio,   block: block-6-dist2, part: ~, pkg: "0603", val: "100kΩ", fn: "BP2 CLIP comp D in" }
+  - { ref: R196, board: audio,   block: block-6-dist2, part: ~, pkg: "0603", val: "2.2MΩ", fn: "BP2 CLIP comp A hysteresis" }
+  - { ref: R197, board: audio,   block: block-6-dist2, part: ~, pkg: "0603", val: "2.2MΩ", fn: "BP2 CLIP comp B hysteresis" }
+  - { ref: R198, board: audio,   block: block-6-dist2, part: ~, pkg: "0603", val: "2.2MΩ", fn: "BP2 CLIP comp C hysteresis" }
+  - { ref: R199, board: audio,   block: block-6-dist2, part: ~, pkg: "0603", val: "2.2MΩ", fn: "BP2 CLIP comp D hysteresis" }
+  - { ref: R200, board: audio,   block: block-6-dist2, part: ~, pkg: "0603", val: "1kΩ",   fn: "BP2 CLIP LED current-limit" }
+  - { ref: R201, board: audio,   block: block-6-dist2, part: ~, pkg: "0603", val: "100kΩ", fn: "BP2 CLIP comp B VREF_N4 series" }
+  - { ref: R202, board: audio,   block: block-6-dist2, part: ~, pkg: "0603", val: "100kΩ", fn: "BP2 CLIP comp D VREF_N4 series" }
+  - { ref: R203, board: audio,   block: block-6-dist3, part: ~, pkg: "0603", val: "100kΩ", fn: "BP3 CLIP comp A in" }
+  - { ref: R204, board: audio,   block: block-6-dist3, part: ~, pkg: "0603", val: "100kΩ", fn: "BP3 CLIP comp B in" }
+  - { ref: R205, board: audio,   block: block-6-dist3, part: ~, pkg: "0603", val: "100kΩ", fn: "BP3 CLIP comp C in" }
+  - { ref: R206, board: audio,   block: block-6-dist3, part: ~, pkg: "0603", val: "100kΩ", fn: "BP3 CLIP comp D in" }
+  - { ref: R207, board: audio,   block: block-6-dist3, part: ~, pkg: "0603", val: "2.2MΩ", fn: "BP3 CLIP comp A hysteresis" }
+  - { ref: R208, board: audio,   block: block-6-dist3, part: ~, pkg: "0603", val: "2.2MΩ", fn: "BP3 CLIP comp B hysteresis" }
+  - { ref: R209, board: audio,   block: block-6-dist3, part: ~, pkg: "0603", val: "2.2MΩ", fn: "BP3 CLIP comp C hysteresis" }
+  - { ref: R210, board: audio,   block: block-6-dist3, part: ~, pkg: "0603", val: "2.2MΩ", fn: "BP3 CLIP comp D hysteresis" }
+  - { ref: R211, board: audio,   block: block-6-dist3, part: ~, pkg: "0603", val: "1kΩ",   fn: "BP3 CLIP LED current-limit" }
+  - { ref: R212, board: audio,   block: block-6-dist3, part: ~, pkg: "0603", val: "100kΩ", fn: "BP3 CLIP comp B VREF_N4 series" }
+  - { ref: R213, board: audio,   block: block-6-dist3, part: ~, pkg: "0603", val: "100kΩ", fn: "BP3 CLIP comp D VREF_N4 series" }
+  - { ref: D14_1a, board: audio, block: block-6-dist1, part: 1N4148W, pkg: SOD-123, fn: "BP1 CLIP OR-steer comp A" }
+  - { ref: D14_1b, board: audio, block: block-6-dist1, part: 1N4148W, pkg: SOD-123, fn: "BP1 CLIP OR-steer comp B" }
+  - { ref: D14_1c, board: audio, block: block-6-dist1, part: 1N4148W, pkg: SOD-123, fn: "BP1 CLIP OR-steer comp C" }
+  - { ref: D14_1d, board: audio, block: block-6-dist1, part: 1N4148W, pkg: SOD-123, fn: "BP1 CLIP OR-steer comp D" }
+  - { ref: D15_2a, board: audio, block: block-6-dist2, part: 1N4148W, pkg: SOD-123, fn: "BP2 CLIP OR-steer comp A" }
+  - { ref: D15_2b, board: audio, block: block-6-dist2, part: 1N4148W, pkg: SOD-123, fn: "BP2 CLIP OR-steer comp B" }
+  - { ref: D15_2c, board: audio, block: block-6-dist2, part: 1N4148W, pkg: SOD-123, fn: "BP2 CLIP OR-steer comp C" }
+  - { ref: D15_2d, board: audio, block: block-6-dist2, part: 1N4148W, pkg: SOD-123, fn: "BP2 CLIP OR-steer comp D" }
+  - { ref: D16_3a, board: audio, block: block-6-dist3, part: 1N4148W, pkg: SOD-123, fn: "BP3 CLIP OR-steer comp A" }
+  - { ref: D16_3b, board: audio, block: block-6-dist3, part: 1N4148W, pkg: SOD-123, fn: "BP3 CLIP OR-steer comp B" }
+  - { ref: D16_3c, board: audio, block: block-6-dist3, part: 1N4148W, pkg: SOD-123, fn: "BP3 CLIP OR-steer comp C" }
+  - { ref: D16_3d, board: audio, block: block-6-dist3, part: 1N4148W, pkg: SOD-123, fn: "BP3 CLIP OR-steer comp D" }
+  - { ref: C110_U94p, board: audio, block: block-6-dist1, part: ~, pkg: "0603", val: "100nF", fn: "U94 +12V decoupling" }
+  - { ref: C110_U94n, board: audio, block: block-6-dist1, part: ~, pkg: "0603", val: "100nF", fn: "U94 −12V decoupling" }
+  - { ref: C110_U95p, board: audio, block: block-6-dist2, part: ~, pkg: "0603", val: "100nF", fn: "U95 +12V decoupling" }
+  - { ref: C110_U95n, board: audio, block: block-6-dist2, part: ~, pkg: "0603", val: "100nF", fn: "U95 −12V decoupling" }
+  - { ref: C110_U96p, board: audio, block: block-6-dist3, part: ~, pkg: "0603", val: "100nF", fn: "U96 +12V decoupling" }
+  - { ref: C110_U96n, board: audio, block: block-6-dist3, part: ~, pkg: "0603", val: "100nF", fn: "U96 −12V decoupling" }
+  - { ref: C111_P4, board: audio, block: block-6-dist1, part: ~, pkg: "0603", val: "100nF", fn: "VREF_P4 bypass" }
+  - { ref: C111_N4, board: audio, block: block-6-dist1, part: ~, pkg: "0603", val: "100nF", fn: "VREF_N4 bypass" }
+  - { ref: BP1_CLIP_LED, board: panel, block: block-6-dist1, part: "LED 3mm", pkg: "3mm", fn: "BP1 CLIP indicator (BP1_CLIP_LIGHT)" }
+  - { ref: BP2_CLIP_LED, board: panel, block: block-6-dist2, part: "LED 3mm", pkg: "3mm", fn: "BP2 CLIP indicator (BP2_CLIP_LIGHT)" }
+  - { ref: BP3_CLIP_LED, board: panel, block: block-6-dist3, part: "LED 3mm", pkg: "3mm", fn: "BP3 CLIP indicator (BP3_CLIP_LIGHT)" }
+  - { ref: R124, board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "1MΩ",    qty: 1,  fn: "R_IREF_A_L: L-channel expo I_ref fixed R (U28-30); 1 per group" }
+  - { ref: R124, board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "1MΩ",    qty: 1,  fn: "R_IREF_A_L: L-channel expo I_ref fixed R (U28-30); 1 per group" }
+  - { ref: R124, board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "1MΩ",    qty: 1,  fn: "R_IREF_A_L: L-channel expo I_ref fixed R (U28-30); 1 per group" }
+  - { ref: R125, board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "47kΩ",   qty: 1, tol: "1%", fn: "R_VOCT_L: L-channel expo V/oct scaling (U28-30); 1 per group" }
+  - { ref: R125, board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "47kΩ",   qty: 1, tol: "1%", fn: "R_VOCT_L: L-channel expo V/oct scaling (U28-30); 1 per group" }
+  - { ref: R125, board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "47kΩ",   qty: 1, tol: "1%", fn: "R_VOCT_L: L-channel expo V/oct scaling (U28-30); 1 per group" }
+  - { ref: R126, board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "1kΩ",    qty: 1,  fn: "R_E_L: L-channel expo emitter degeneration (U28-30); 1 per group" }
+  - { ref: R126, board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "1kΩ",    qty: 1,  fn: "R_E_L: L-channel expo emitter degeneration (U28-30); 1 per group" }
+  - { ref: R126, board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "1kΩ",    qty: 1,  fn: "R_E_L: L-channel expo emitter degeneration (U28-30); 1 per group" }
+  - { ref: R127, board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "R_TILT_SUM: ±V_tilt summing R into each expo base (+L / −R); 1 per expo (6)" }
+  - { ref: R127, board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "R_TILT_SUM: ±V_tilt summing R into each expo base (+L / −R); 1 per expo (6)" }
+  - { ref: R127, board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "R_TILT_SUM: ±V_tilt summing R into each expo base (+L / −R); 1 per expo (6)" }
+
+  # block-6: per-band BP TILT summer+inverter passives (U82-84). Per band: R_master, R_knob,
+  # R_cv (470k≈×0.213 of plugin's ×0.22), R_sumfb, R_invin, R_invfb. svf1 R135-140 / svf2 R141-146 / svf3 R147-152.
+  - { ref: R135, board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "BP1 TILT summer R_master: master tilt (BP_TILT_CV) → summer" }
+  - { ref: R136, board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "BP1 TILT summer R_knob: TILT knob (RV48) wiper → summer" }
+  - { ref: R137, board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "470kΩ",  qty: 1,  fn: "BP1 TILT summer R_cv: per-band TILT CV (MOD_BP1_TILT) → summer (×0.213)" }
+  - { ref: R138, board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "BP1 TILT summer R_sumfb: summer feedback" }
+  - { ref: R139, board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "BP1 TILT inverter R_invin" }
+  - { ref: R140, board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "BP1 TILT inverter R_invfb" }
+  - { ref: R141, board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "BP2 TILT summer R_master: master tilt (BP_TILT_CV) → summer" }
+  - { ref: R142, board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "BP2 TILT summer R_knob: TILT knob (RV49) wiper → summer" }
+  - { ref: R143, board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "470kΩ",  qty: 1,  fn: "BP2 TILT summer R_cv: per-band TILT CV (MOD_BP2_TILT) → summer (×0.213)" }
+  - { ref: R144, board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "BP2 TILT summer R_sumfb: summer feedback" }
+  - { ref: R145, board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "BP2 TILT inverter R_invin" }
+  - { ref: R146, board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "BP2 TILT inverter R_invfb" }
+  - { ref: R147, board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "BP3 TILT summer R_master: master tilt (BP_TILT_CV) → summer" }
+  - { ref: R148, board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "BP3 TILT summer R_knob: TILT knob (RV50) wiper → summer" }
+  - { ref: R149, board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "470kΩ",  qty: 1,  fn: "BP3 TILT summer R_cv: per-band TILT CV (MOD_BP3_TILT) → summer (×0.213)" }
+  - { ref: R150, board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "BP3 TILT summer R_sumfb: summer feedback" }
+  - { ref: R151, board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "BP3 TILT inverter R_invin" }
+  - { ref: R152, board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "BP3 TILT inverter R_invfb" }
 
   # block-7: HP Filter (refs shifted from old U34–U40 to U49–U55)
   - { ref: U49,  board: audio,   block: block-7, part: LM13700M,   pkg: SOIC-16,  fn: "HP OTA integrators L" }
   - { ref: U50,  board: audio,   block: block-7, part: LM13700M,   pkg: SOIC-16,  fn: "HP OTA integrators R" }
-  - { ref: U51,  board: audio,   block: block-7, part: LM13700M,   pkg: SOIC-16,  fn: "HP Q VCA L (cell A; cell B spare)" }
-  - { ref: U52,  board: audio,   block: block-7, part: LM13700M,   pkg: SOIC-16,  fn: "HP Q VCA R (cell A; cell B spare)" }
-  - { ref: U53,  board: audio,   block: block-7, part: OPA1612,   pkg: SOIC-8,   fn: "HP SUM_AMP + inverting output buffer L" }
-  - { ref: U54,  board: audio,   block: block-7, part: OPA1612,   pkg: SOIC-8,   fn: "HP SUM_AMP + inverting output buffer R" }
+  - { ref: U51,  board: audio,   block: block-7, part: LM13700M,   pkg: SOIC-16,  fn: "HP Q VCA: cell A = L, cell B = R (mono Q; collapsed from 2 ICs, change 0018)" }
+  - { ref: U53,  board: audio,   block: block-7, part: OPA1612,   pkg: SOIC-8,   fn: "HP SUM_AMP (A) + HP output unity follower (B) L" }
+  - { ref: U54,  board: audio,   block: block-7, part: OPA1612,   pkg: SOIC-8,   fn: "HP SUM_AMP (A) + HP output unity follower (B) R" }
   - { ref: U55,  board: audio,   block: block-7, part: THAT340S14-U, pkg: SOIC-14,   fn: "HP expo converter (L+R shared)" }
   - { ref: C29,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "47nF",   qty: 4, fn: "HP integrator caps (C0G; C1L/C2L/C1R/C2R)" }
   - { ref: R30,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "HP SUM_AMP R_in L" }
   - { ref: R31,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "HP SUM_AMP R_in R" }
   - { ref: RV16, board: audio,   block: block-7, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "HP f_ref trim rheostat; in series with R_IREF_A 1MΩ; ±25% range" }
   - { ref: RV17, board: audio,   block: block-7, part: "Bourns 3224W", pkg: SMD,   val: "20kΩ",  fn: "HP 1V/oct tracking trim; ±10% range" }
-  - { ref: RV18, board: audio,   block: block-7, part: ~,          pkg: SMD,      fn: "HP Q_max trim" }
-  - { ref: R_QB_IABC_L, board: audio, block: block-7, part: ~,   pkg: "0603",   val: "100kΩ",  fn: "U51 cell B Iabc termination resistor to GND (prevents floating)" }
-  - { ref: R_QB_IABC_R, board: audio, block: block-7, part: ~,   pkg: "0603",   val: "100kΩ",  fn: "U52 cell B Iabc termination resistor to GND" }
-  - { ref: R_QB_OUT_L,  board: audio, block: block-7, part: ~,   pkg: "0603",   val: "1kΩ",    fn: "U51 cell B OTA output termination resistor to GND" }
-  - { ref: R_QB_OUT_R,  board: audio, block: block-7, part: ~,   pkg: "0603",   val: "1kΩ",    fn: "U52 cell B OTA output termination resistor to GND" }
+  - { ref: RV18, board: audio,   block: block-7, part: "Bourns 3224W", pkg: SMD,  val: "100kΩ", fn: "HP Q_max trim (IRES_AMP V_bias; self-osc onset)" }
+  # R_QB_* spare-cell termination resistors removed (change 0018): U51 cell B is now active (R Q).
   # block-7 full circuit (expanded from spec §4, 2026-05-29): mirrors LP2 + HP inverting
   # output buffer (polarity restore) + own Q VCAs (U51/U52 cell A). Adds the HP IRES_AMP
   # (was missing), SUM_AMP fb, OTA R_LIN, HP buffer Rs, Q V→I, expo network, Iabc bypass,
@@ -326,10 +590,7 @@ components:
   - { ref: R97,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "HP OTA2 linearizing R L (R_LIN_B_L)" }
   - { ref: R98,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "HP OTA1 linearizing R R (R_LIN_A_R)" }
   - { ref: R99,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "HP OTA2 linearizing R R (R_LIN_B_R)" }
-  - { ref: R100, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "HP output inverting buffer R_in L (R_HP_IN_L)" }
-  - { ref: R101, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "HP output inverting buffer R_in R (R_HP_IN_R)" }
-  - { ref: R102, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "HP output inverting buffer R_f L (R_HP_FB_L)" }
-  - { ref: R103, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "HP output inverting buffer R_f R (R_HP_FB_R)" }
+  # R100-R103 removed (change 0018): HP output is a unity non-inverting follower, no inv-buffer resistors.
   - { ref: R104, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "1MΩ",    fn: "HP Q V→I: V_ires_L → U51 cellA Iabc (R_Iabc_L)" }
   - { ref: R105, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "1MΩ",    fn: "HP Q V→I: V_ires_R → U52 cellA Iabc (R_Iabc_R)" }
   - { ref: R106, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "HP IRES_AMP V_bias input R (R_QBIAS)" }
@@ -347,15 +608,14 @@ components:
   - { ref: C87,  board: audio,   block: block-7, part: ~,          pkg: "0402",   val: "10nF",   fn: "HP OTA Iabc bypass L (C_IABC_L)" }
   - { ref: C88,  board: audio,   block: block-7, part: ~,          pkg: "0402",   val: "10nF",   fn: "HP OTA Iabc bypass R (C_IABC_R)" }
   - { ref: C89,  board: audio,   block: block-7, part: ~,          pkg: "0402",   val: "10nF",   fn: "HP Q-cell A Iabc bypass L (U51)" }
-  - { ref: C90,  board: audio,   block: block-7, part: ~,          pkg: "0402",   val: "10nF",   fn: "HP Q-cell A Iabc bypass R (U52)" }
+  - { ref: C90,  board: audio,   block: block-7, part: ~,          pkg: "0402",   val: "10nF",   fn: "HP Q-cell B Iabc bypass R (U51 cell B)" }
   - { ref: C91,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100nF",  fn: "U49 V+ decoupling" }
   - { ref: C92,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100nF",  fn: "U49 V- decoupling" }
   - { ref: C93,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100nF",  fn: "U50 V+ decoupling" }
   - { ref: C94,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100nF",  fn: "U50 V- decoupling" }
   - { ref: C95,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100nF",  fn: "U51 V+ decoupling" }
   - { ref: C96,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100nF",  fn: "U51 V- decoupling" }
-  - { ref: C97,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100nF",  fn: "U52 V+ decoupling" }
-  - { ref: C98,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100nF",  fn: "U52 V- decoupling" }
+  # C97/C98 removed (change 0018): U52 eliminated (Q collapsed to one IC).
   - { ref: C99,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100nF",  fn: "U53 V+ decoupling" }
   - { ref: C100, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100nF",  fn: "U53 V- decoupling" }
   - { ref: C101, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100nF",  fn: "U54 V+ decoupling" }
@@ -426,7 +686,7 @@ components:
   - { ref: R34,  board: audio,   block: block-B, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "MAIN_L output protection" }
   - { ref: R35,  board: audio,   block: block-B, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "MAIN_R output protection" }
   - { ref: R36,  board: audio,   block: block-B, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "BP3_L output protection" }
-  - { ref: R37,  board: audio,   block: block-B, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "BP3_R output protection" }
+  - { ref: R224, board: audio,   block: block-B, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "BP3_R output protection (renumbered from R37 to clear block-3 R37 collision, change 0018)" }
   - { ref: C37,  board: audio,   block: block-B, part: ~,          pkg: "0603",   val: "100nF",  fn: "U61 +12V decoupling" }
   - { ref: C38,  board: audio,   block: block-B, part: ~,          pkg: "0603",   val: "100nF",  fn: "U61 -12V decoupling" }
   - { ref: C39,  board: audio,   block: block-B, part: ~,          pkg: "0603",   val: "100nF",  fn: "U62 +12V decoupling" }
@@ -451,23 +711,30 @@ components:
   - { ref: R6,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "R_FB_SQ2: LFO2 Schmitt feedback R" }
   - { ref: R7,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "82kΩ",   fn: "R_HYS1: LFO1 Schmitt lower R ((+) input → GND); sets V_H = 5V" }
   - { ref: R8,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "82kΩ",   fn: "R_HYS2: LFO2 Schmitt lower R" }
-  - { ref: R9,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "1.2kΩ",  fn: "R_LED1: LFO1 LED current limit (≈2 mA at V_tri = +5V)" }
-  - { ref: R10,  board: utility, block: block-2, part: ~,          pkg: "0603",   val: "1.2kΩ",  fn: "R_LED2: LFO2 LED current limit" }
+  - { ref: R9,   board: utility, block: block-2, part: ~,          pkg: "0603",   val: "470Ω",   fn: "R_E1: LFO1 LED breathing-driver emitter R (sets ≈3 mA full-scale at V_tri=+5V)" }
+  - { ref: R10,  board: utility, block: block-2, part: ~,          pkg: "0603",   val: "470Ω",   fn: "R_E2: LFO2 LED breathing-driver emitter R" }
   - { ref: R11,  board: utility, block: block-2, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "R_OUT1: LFO1 output series protection to jack" }
   - { ref: R12,  board: utility, block: block-2, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "R_OUT2: LFO2 output series protection to jack" }
-  - { ref: D1,   board: utility, block: block-2, part: 1N4148W,    pkg: SOD-123,  fn: "D_LED1: LFO1 LED half-wave rectifier (positive half-cycle pulsing)" }
-  - { ref: D2,   board: utility, block: block-2, part: 1N4148W,    pkg: SOD-123,  fn: "D_LED2: LFO2 LED half-wave rectifier" }
+  # LFO LED breathing drivers (change 0018): full-cycle NPN current source per LED, matching
+  # the plugin brightness law (V_tri+5)/10. Replaces the old 1N4148 half-wave (D1/D2 removed).
+  - { ref: Q1,   board: utility, block: block-2, part: MMBT3904,   pkg: SOT-23,   fn: "LFO1 LED breathing current source (NPN; LED ← +12V → collector, emitter → R_E1)" }
+  - { ref: Q2,   board: utility, block: block-2, part: MMBT3904,   pkg: SOT-23,   fn: "LFO2 LED breathing current source (NPN)" }
+  - { ref: R19,  board: utility, block: block-2, part: ~,          pkg: "0603",   val: "51kΩ",   fn: "R_BTRI1: LFO1 LED driver base — V_tri injection (level-shift)" }
+  - { ref: R20,  board: utility, block: block-2, part: ~,          pkg: "0603",   val: "68kΩ",   fn: "R_BBIAS1: LFO1 LED driver base — +12V bias (sets quiescent base)" }
+  - { ref: R21,  board: utility, block: block-2, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "R_BGND1: LFO1 LED driver base — GND leg of level-shift divider" }
+  - { ref: R22,  board: utility, block: block-2, part: ~,          pkg: "0603",   val: "51kΩ",   fn: "R_BTRI2: LFO2 LED driver base — V_tri injection" }
+  - { ref: R23,  board: utility, block: block-2, part: ~,          pkg: "0603",   val: "68kΩ",   fn: "R_BBIAS2: LFO2 LED driver base — +12V bias" }
+  - { ref: R24,  board: utility, block: block-2, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "R_BGND2: LFO2 LED driver base — GND leg" }
   - { ref: LED1, board: panel,   block: block-2, part: "LED 3mm",  pkg: "3mm",    fn: "LFO1 rate/phase indicator" }
   - { ref: LED2, board: panel,   block: block-2, part: "LED 3mm",  pkg: "3mm",    fn: "LFO2 rate/phase indicator" }
 
-  # block-3: Mod Bus Processor ICs (7× TL074CDT total)
+  # block-3: Mod Bus Processor ICs (6× TL074CDT total; U4 MOD-LED driver removed — change 0018)
   - { ref: U3,   board: utility, block: block-3, part: TL074CDT,   pkg: SOIC-14,  fn: "MB_PROC_A: MB summer (half A) + MB inverter (half B); 2 sections spare" }
-  - { ref: U4,   board: utility, block: block-3, part: TL074CDT,   pkg: SOIC-14,  fn: "MB_PROC_B: MOD_POS LED driver (half A) + MOD_NEG LED driver (half B) + MOD_CLIP (half C); 1 section spare" }
   - { ref: U5,   board: utility, block: block-3, part: TL074CDT,   pkg: SOIC-14,  fn: "MB_INV_1: −V_src inverters for destinations 1–4" }
   - { ref: U6,   board: utility, block: block-3, part: TL074CDT,   pkg: SOIC-14,  fn: "MB_INV_2: −V_src inverters for destinations 5–8" }
   - { ref: U7,   board: utility, block: block-3, part: TL074CDT,   pkg: SOIC-14,  fn: "MB_INV_3: −V_src inverters for destinations 9–12" }
   - { ref: U8,   board: utility, block: block-3, part: TL074CDT,   pkg: SOIC-14,  fn: "MB_INV_4: −V_src inverters for destinations 13–16" }
-  - { ref: U9,   board: utility, block: block-3, part: TL074CDT,   pkg: SOIC-14,  fn: "MB_INV_5: −V_src inverters for destinations 17–19 (1 section spare)" }
+  - { ref: U9,   board: utility, block: block-3, part: TL074CDT,   pkg: SOIC-14,  fn: "MB_INV_5: −V_src inverters for destinations 17–18 (2 sections spare; VCA is not an attenuverter dest)" }
 
   # block-3: Mod Bus passives — processor stage
   - { ref: R13,  board: utility, block: block-3, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "R_MB_F: feedback R, MB summer stage" }
@@ -478,28 +745,20 @@ components:
   # block-3: Mod Bus passives — per-destination normalling and protection
   - { ref: R18,  board: utility, block: block-3, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 19, fn: "R_SRC_NORM: bus normalling R per destination jack (19 destinations)" }
   - { ref: R37,  board: utility, block: block-3, part: ~,          pkg: "0603",   val: "100Ω",   qty: 19, fn: "R_CLAMP: series CV protection per destination" }
-  - { ref: D3,   board: utility, block: block-3, part: BAT54S,     pkg: SOT-23,   qty: 19, fn: "D_CLAMP: dual Schottky clamp per destination CV input (19 total)" }
-
-  # block-3: Mod Bus passives — LED drivers
-  - { ref: R56,  board: utility, block: block-3, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "R_LED_POS: current limit, MOD_POS LED" }
-  - { ref: R57,  board: utility, block: block-3, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "R_LED_NEG: current limit, MOD_NEG LED" }
-  - { ref: R58,  board: utility, block: block-3, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "R_LED_CLIP: current limit, MOD_CLIP LED" }
-  - { ref: R59,  board: utility, block: block-3, part: ~,          pkg: "0603",   val: "9.9kΩ",  fn: "R_CLIP_DIV_H: upper leg of MOD_CLIP 9.9V threshold divider" }
-  - { ref: R60,  board: utility, block: block-3, part: ~,          pkg: "0603",   val: "100Ω",   fn: "R_CLIP_DIV_L: lower leg of MOD_CLIP threshold divider" }
+  - { ref: D3,   board: utility, block: block-3, part: BAT54S,     pkg: SOT-23,   qty: 18, fn: "D_CLAMP: dual Schottky clamp per attenuverter destination CV input (18 total)" }
 
   # block-3: Mod Bus passives — supply bypass
-  - { ref: C7,   board: utility, block: block-3, part: ~,          pkg: "0603",   val: "100nF",  qty: 14, fn: "C_BYPASS_MB: supply bypass; one per op-amp supply pin (7 ICs × 2 rails)" }
+  # (MOD-LED driver passives R56-R60 removed with the LEDs — change 0018)
+  - { ref: C7,   board: utility, block: block-3, part: ~,          pkg: "0603",   val: "100nF",  qty: 12, fn: "C_BYPASS_MB: supply bypass; one per op-amp supply pin (6 ICs × 2 rails)" }
   # block-3 additions (2026-05-29): per-destination attenuverter inverter resistors
   # (missing from BOM), MOD_IN protection, ±10V mod-bus clamp zeners, MOD LEDs.
-  - { ref: R_INV_IN, board: utility, block: block-3, part: ~,      pkg: "0603",   val: "10kΩ",   tol: "1%", qty: 19, fn: "R_inv_in: attenuverter −V_src inverter input R; 1 per destination; 1% for >60 dB center null" }
-  - { ref: R_INV_FB, board: utility, block: block-3, part: ~,      pkg: "0603",   val: "10kΩ",   tol: "1%", qty: 19, fn: "R_inv_fb: attenuverter −V_src inverter feedback R; 1 per destination; 1% for >60 dB center null" }
+  - { ref: R_INV_IN, board: utility, block: block-3, part: ~,      pkg: "0603",   val: "10kΩ",   tol: "1%", qty: 18, fn: "R_inv_in: attenuverter −V_src inverter input R; 1 per attenuverter destination (18); 1% for >60 dB center null" }
+  - { ref: R_INV_FB, board: utility, block: block-3, part: ~,      pkg: "0603",   val: "10kΩ",   tol: "1%", qty: 18, fn: "R_inv_fb: attenuverter −V_src inverter feedback R; 1 per attenuverter destination (18); 1% for >60 dB center null" }
   - { ref: R99,  board: utility, block: block-3, part: ~,          pkg: "0603",   val: "100Ω",   fn: "R_MODIN: MOD_IN series input protection" }
   - { ref: D4,   board: utility, block: block-3, part: BAT54S,     pkg: SOT-23,   fn: "D_MODIN: MOD_IN input clamp ±12V" }
   - { ref: D5,   board: utility, block: block-3, part: BZX84C10,   pkg: SOT-23,   fn: "D_ZCLAMP_P: mod-bus +10V clamp zener (back-to-back with D6)" }
   - { ref: D6,   board: utility, block: block-3, part: BZX84C10,   pkg: SOT-23,   fn: "D_ZCLAMP_N: mod-bus -10V clamp zener (cathode-to-cathode with D5)" }
-  - { ref: LED3, board: panel,   block: block-3, part: "LED 3mm",  pkg: "3mm",    fn: "MOD_POS indicator (green)" }
-  - { ref: LED4, board: panel,   block: block-3, part: "LED 3mm",  pkg: "3mm",    fn: "MOD_NEG indicator (red)" }
-  - { ref: LED5, board: panel,   block: block-3, part: "LED 3mm",  pkg: "3mm",    fn: "MOD_CLIP indicator (amber)" }
+  # MOD_POS/NEG/CLIP LEDs removed (change 0018): plugin has no such lights; locked panel has no footprints.
 
   # ── CONTROL BOARD ────────────────────────────────────────────────────────────
 
@@ -514,29 +773,31 @@ components:
   # block-3 panel controls
   - { ref: RV3,  board: control, block: block-3, part: "log pot",    pkg: "9mm",  val: "470kΩ",  fn: "MOD_SCALE (0.2×–5×; log taper; in series with 22kΩ R_MB_SRC on utility board)" }
   - { ref: RV4,  board: control, block: block-3, part: "lin pot",    pkg: "9mm",  fn: "MOD_OFFSET (±5V)" }
-  - { ref: RV5,  board: control, block: block-3, part: "bipolar pot", pkg: "9mm", fn: "VCA_AMT dest attenuverter" }
+  # RV5 (VCA_AMT attenuverter) removed — change 0018: VCA gets the raw mod bus (no attenuverter);
+  # VCA_AMT depth pot lives in block-4.
   - { ref: RV6,  board: control, block: block-3, part: "lin pot",    pkg: "9mm",  fn: "LP1_FREQ_ATT" }
   - { ref: RV7,  board: control, block: block-3, part: "lin pot",    pkg: "9mm",  fn: "LP1_TILT_ATT" }
   - { ref: RV8,  board: control, block: block-3, part: "lin pot",    pkg: "9mm",  fn: "LP1_RES_ATT" }
   - { ref: RV9,  board: control, block: block-3, part: "lin pot",    pkg: "9mm",  fn: "BP_FREQ_ATT" }
   - { ref: RV10, board: control, block: block-3, part: "lin pot",    pkg: "9mm",  fn: "BP_TILT_ATT" }
   - { ref: RV11, board: control, block: block-3, part: "lin pot",    pkg: "9mm",  fn: "BP1_FREQ_ATT" }
-  - { ref: RV12, board: control, block: block-3, part: "lin pot",    pkg: "9mm",  fn: "BP1_FOCUS_ATT" }
+  - { ref: RV12, board: control, block: block-3, part: "lin pot",    pkg: "9mm",  fn: "BP1_TILT_ATT" }
   - { ref: RV13, board: control, block: block-3, part: "lin pot",    pkg: "9mm",  fn: "BP1_DIST_ATT" }
   - { ref: RV14, board: control, block: block-3, part: "lin pot",    pkg: "9mm",  fn: "BP2_FREQ_ATT" }
-  - { ref: RV15, board: control, block: block-3, part: "lin pot",    pkg: "9mm",  fn: "BP2_FOCUS_ATT" }
+  - { ref: RV15, board: control, block: block-3, part: "lin pot",    pkg: "9mm",  fn: "BP2_TILT_ATT" }
   - { ref: RV16, board: control, block: block-3, part: "lin pot",    pkg: "9mm",  fn: "BP2_DIST_ATT" }
   - { ref: RV17, board: control, block: block-3, part: "lin pot",    pkg: "9mm",  fn: "BP3_FREQ_ATT" }
-  - { ref: RV18, board: control, block: block-3, part: "lin pot",    pkg: "9mm",  fn: "BP3_FOCUS_ATT" }
+  - { ref: RV18, board: control, block: block-3, part: "lin pot",    pkg: "9mm",  fn: "BP3_TILT_ATT" }
   - { ref: RV19, board: control, block: block-3, part: "lin pot",    pkg: "9mm",  fn: "BP3_DIST_ATT" }
   - { ref: RV20, board: control, block: block-3, part: "lin pot",    pkg: "9mm",  fn: "HP_FREQ_ATT" }
   - { ref: RV21, board: control, block: block-3, part: "lin pot",    pkg: "9mm",  fn: "HP_RES_ATT" }
   - { ref: RV22, board: control, block: block-3, part: "lin pot",    pkg: "9mm",  fn: "LP2_FREQ_ATT" }
   - { ref: RV23, board: control, block: block-3, part: "lin pot",    pkg: "9mm",  fn: "LP2_RES_ATT" }
 
-  # block-4 panel controls
-  - { ref: RV24, board: control, block: block-4, part: "bipolar pot", pkg: "9mm", val: "1kΩ",   fn: "VCA_AMT (-1 to +1); 1kΩ chosen to limit wiper impedance <250Ω (avoids 14% THAT2180 gain error at center travel)" }
-  - { ref: RV25, board: control, block: block-4, part: "lin pot",    pkg: "9mm",  fn: "VCA_OFS (0 to 1)" }
+  # block-4 panel controls (renumbered RV24/RV25 -> RV44/RV45, change 0018: clears base-ref
+  # reuse with block-6's RV24_x/RV25_x expo trims)
+  - { ref: RV44, board: control, block: block-4, part: "bipolar pot", pkg: "9mm", val: "1kΩ",   fn: "VCA_AMT (-1 to +1); 1kΩ limits wiper impedance <250Ω (avoids THAT2180 gain error at center)" }
+  - { ref: RV45, board: control, block: block-4, part: "lin pot",    pkg: "9mm",  fn: "VCA_OFS (0 to 1)" }
 
   # block-5 panel controls
   - { ref: RV26, board: control, block: block-5, part: "xl knob",    pkg: "9mm",  fn: "LP1_FREQ (±5V/oct)" }
@@ -544,21 +805,27 @@ components:
   - { ref: RV28, board: control, block: block-5, part: "large knob", pkg: "9mm",  fn: "LP1_RES (0–1)" }
 
   # block-6 panel controls
-  - { ref: SW4,  board: control, block: block-6, part: "Dailywell DW5 (2M DPDT ON-ON-ON)", pkg: "sub-mini toggle 2M", fn: "BP1_DIST_MODE (Soft/Hard/Fold)" }
-  - { ref: SW5,  board: control, block: block-6, part: "Dailywell DW5 (2M DPDT ON-ON-ON)", pkg: "sub-mini toggle 2M", fn: "BP2_DIST_MODE (Soft/Hard/Fold)" }
-  - { ref: SW6,  board: control, block: block-6, part: "Dailywell DW5 (2M DPDT ON-ON-ON)", pkg: "sub-mini toggle 2M", fn: "BP3_DIST_MODE (Soft/Hard/Fold)" }
-  - { ref: SW7,  board: control, block: block-3, part: "Dailywell DW5 (2M DPDT ON-ON-ON)", pkg: "sub-mini toggle 2M", fn: "MOD_SRC (3-way mod source select) — PLANNED; no plugin param yet" }
-  - { ref: RV29, board: control, block: block-6, part: "xl knob",    pkg: "9mm",  fn: "BP_OFFSET master freq (±5V/oct)" }
-  - { ref: RV30, board: control, block: block-6, part: "large knob", pkg: "9mm",  fn: "BP_MIX dry/wet (0–1)" }
-  - { ref: RV31, board: control, block: block-6, part: "knob",       pkg: "9mm",  fn: "BP1_FREQ" }
-  - { ref: RV32, board: control, block: block-6, part: "knob",       pkg: "9mm",  fn: "BP1_FOCUS" }
-  - { ref: RV33, board: control, block: block-6, part: "knob",       pkg: "9mm",  fn: "BP1_DIST (drive)" }
-  - { ref: RV34, board: control, block: block-6, part: "knob",       pkg: "9mm",  fn: "BP2_FREQ" }
-  - { ref: RV35, board: control, block: block-6, part: "knob",       pkg: "9mm",  fn: "BP2_FOCUS" }
-  - { ref: RV36, board: control, block: block-6, part: "knob",       pkg: "9mm",  fn: "BP2_DIST (drive)" }
-  - { ref: RV37, board: control, block: block-6, part: "knob",       pkg: "9mm",  fn: "BP3_FREQ" }
-  - { ref: RV38, board: control, block: block-6, part: "knob",       pkg: "9mm",  fn: "BP3_FOCUS" }
-  - { ref: RV39, board: control, block: block-6, part: "knob",       pkg: "9mm",  fn: "BP3_DIST (drive)" }
+  - { ref: SW4,  board: control, block: block-6-dist1, part: "Dailywell DW5 (2M DPDT ON-ON-ON)", pkg: "sub-mini toggle 2M", fn: "BP1_DIST_MODE (Soft/Hard/Fold)" }
+  - { ref: SW5,  board: control, block: block-6-dist2, part: "Dailywell DW5 (2M DPDT ON-ON-ON)", pkg: "sub-mini toggle 2M", fn: "BP2_DIST_MODE (Soft/Hard/Fold)" }
+  - { ref: SW6,  board: control, block: block-6-dist3, part: "Dailywell DW5 (2M DPDT ON-ON-ON)", pkg: "sub-mini toggle 2M", fn: "BP3_DIST_MODE (Soft/Hard/Fold)" }
+  - { ref: SW7,  board: control, block: block-3, part: "Dailywell DW5 (2M DPDT ON-ON-ON)", pkg: "sub-mini toggle 2M", fn: "MOD_SRC (3-way mod source select: LFO1 / LFO2 / External); bound to MOD_SRC_PARAM" }
+  - { ref: RV29, board: control, block: block-6-mix, part: "xl knob",    pkg: "9mm",  fn: "BP_OFFSET master freq (±5V/oct)" }
+  - { ref: RV30, board: control, block: block-6-mix, part: "large knob", pkg: "9mm",  fn: "BP_BYPASS dry level (0–1); dual-gang (RV30 L gang + RV58 R gang). Panel 'BYPASS'" }
+  - { ref: RV58, board: control, block: block-6-mix, part: "large knob", pkg: "9mm",  fn: "BP_BYPASS R gang (same physical dual-gang knob as RV30)" }
+  - { ref: RV57, board: control, block: block-6-mix, part: "large knob", pkg: "9mm",  fn: "BP_WET wet level (0–1); dual-gang (RV57 L gang + RV59 R gang). Panel 'WET' (NEW, change 0018)" }
+  - { ref: RV59, board: control, block: block-6-mix, part: "large knob", pkg: "9mm",  fn: "BP_WET R gang (same physical dual-gang knob as RV57)" }
+  - { ref: RV31, board: control, block: block-6-svf1, part: "knob",       pkg: "9mm",  fn: "BP1_FREQ" }
+  - { ref: RV32, board: control, block: block-6-svf1, part: "knob",       pkg: "9mm",  fn: "BP1_FOCUS" }
+  - { ref: RV33, board: control, block: block-6-dist1, part: "knob",       pkg: "9mm",  fn: "BP1_DIST (drive)" }
+  - { ref: RV34, board: control, block: block-6-svf2, part: "knob",       pkg: "9mm",  fn: "BP2_FREQ" }
+  - { ref: RV35, board: control, block: block-6-svf2, part: "knob",       pkg: "9mm",  fn: "BP2_FOCUS" }
+  - { ref: RV36, board: control, block: block-6-dist2, part: "knob",       pkg: "9mm",  fn: "BP2_DIST (drive)" }
+  - { ref: RV37, board: control, block: block-6-svf3, part: "knob",       pkg: "9mm",  fn: "BP3_FREQ" }
+  - { ref: RV38, board: control, block: block-6-svf3, part: "knob",       pkg: "9mm",  fn: "BP3_FOCUS" }
+  - { ref: RV39, board: control, block: block-6-dist3, part: "knob",       pkg: "9mm",  fn: "BP3_DIST (drive)" }
+  - { ref: RV48, board: control, block: block-6-svf1, part: "bipolar pot", pkg: "9mm",  fn: "BP1_TILT knob (per-band tilt, bipolar; wiper → svf1 TILT summer)" }
+  - { ref: RV49, board: control, block: block-6-svf2, part: "bipolar pot", pkg: "9mm",  fn: "BP2_TILT knob (per-band tilt, bipolar; wiper → svf2 TILT summer)" }
+  - { ref: RV50, board: control, block: block-6-svf3, part: "bipolar pot", pkg: "9mm",  fn: "BP3_TILT knob (per-band tilt, bipolar; wiper → svf3 TILT summer)" }
 
   # block-7 panel controls
   - { ref: RV40, board: control, block: block-7, part: "PogoSlider", pkg: panel,  fn: "HP_FREQ slider (±5V/oct, default -3V)" }
@@ -583,20 +850,20 @@ components:
   - { ref: J6,   board: panel,   block: block-2, part: PJ301M-12,  pkg: panel,    fn: "LFO2_OUTPUT" }
 
   # block-3 mod jacks
-  - { ref: J7,   board: panel,   block: block-3, part: PJ301M-12,  pkg: panel,    fn: "MOD_INPUT (normalles to LFO1)" }
+  - { ref: J7,   board: panel,   block: block-3, part: PJ301M-12,  pkg: panel,    fn: "MOD_INPUT — External mod source (MOD_SRC pos 2); no LFO normal" }
   - { ref: J8,   board: panel,   block: block-3, part: PJ301M-12,  pkg: panel,    fn: "LP1_FREQ_INPUT override" }
   - { ref: J9,   board: panel,   block: block-3, part: PJ301M-12,  pkg: panel,    fn: "LP1_TILT_INPUT override" }
   - { ref: J10,  board: panel,   block: block-3, part: PJ301M-12,  pkg: panel,    fn: "LP1_RES_INPUT override" }
   - { ref: J11,  board: panel,   block: block-3, part: PJ301M-12,  pkg: panel,    fn: "BP_FREQ_INPUT override" }
   - { ref: J12,  board: panel,   block: block-3, part: PJ301M-12,  pkg: panel,    fn: "BP_TILT_INPUT override" }
   - { ref: J13,  board: panel,   block: block-3, part: PJ301M-12,  pkg: panel,    fn: "BP1_FREQ_INPUT override" }
-  - { ref: J14,  board: panel,   block: block-3, part: PJ301M-12,  pkg: panel,    fn: "BP1_FOCUS_INPUT override" }
+  - { ref: J14,  board: panel,   block: block-3, part: PJ301M-12,  pkg: panel,    fn: "BP1_TILT_INPUT override" }
   - { ref: J15,  board: panel,   block: block-3, part: PJ301M-12,  pkg: panel,    fn: "BP1_DIST_INPUT override" }
   - { ref: J16,  board: panel,   block: block-3, part: PJ301M-12,  pkg: panel,    fn: "BP2_FREQ_INPUT override" }
-  - { ref: J17,  board: panel,   block: block-3, part: PJ301M-12,  pkg: panel,    fn: "BP2_FOCUS_INPUT override" }
+  - { ref: J17,  board: panel,   block: block-3, part: PJ301M-12,  pkg: panel,    fn: "BP2_TILT_INPUT override" }
   - { ref: J18,  board: panel,   block: block-3, part: PJ301M-12,  pkg: panel,    fn: "BP2_DIST_INPUT override" }
   - { ref: J19,  board: panel,   block: block-3, part: PJ301M-12,  pkg: panel,    fn: "BP3_FREQ_INPUT override" }
-  - { ref: J20,  board: panel,   block: block-3, part: PJ301M-12,  pkg: panel,    fn: "BP3_FOCUS_INPUT override" }
+  - { ref: J20,  board: panel,   block: block-3, part: PJ301M-12,  pkg: panel,    fn: "BP3_TILT_INPUT override" }
   - { ref: J21,  board: panel,   block: block-3, part: PJ301M-12,  pkg: panel,    fn: "BP3_DIST_INPUT override" }
   - { ref: J22,  board: panel,   block: block-3, part: PJ301M-12,  pkg: panel,    fn: "HP_FREQ_INPUT override" }
   - { ref: J23,  board: panel,   block: block-3, part: PJ301M-12,  pkg: panel,    fn: "HP_RES_INPUT override" }
@@ -607,8 +874,8 @@ components:
   - { ref: J26,  board: panel,   block: block-4, part: PJ301M-12,  pkg: panel,    fn: "VCA_INPUT (normalles to mod bus)" }
 
   # block-6 BP output jacks
-  - { ref: J27,  board: panel,   block: block-6, part: PJ301M-12,  pkg: panel,    fn: "BP3_L_OUTPUT" }
-  - { ref: J28,  board: panel,   block: block-6, part: PJ301M-12,  pkg: panel,    fn: "BP3_R_OUTPUT" }
+  - { ref: J27,  board: panel,   block: block-6-mix, part: PJ301M-12,  pkg: panel,    fn: "BP3_L_OUTPUT" }
+  - { ref: J28,  board: panel,   block: block-6-mix, part: PJ301M-12,  pkg: panel,    fn: "BP3_R_OUTPUT" }
 
   # block-B main output jacks
   - { ref: J29,  board: panel,   block: block-B, part: PJ301M-12,  pkg: panel,    fn: "MAIN_L_OUTPUT" }

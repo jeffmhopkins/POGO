@@ -1,8 +1,10 @@
 # aux: Q (Resonance) Control for OTA-C SVF
 
-> ⚠️ **STALE** — Circuit library entry pending re-verification against current panel design (2026-05-28).
+> ✅ **Re-verified 2026-05-30** (content rewritten 2026-05-29) against the locked plugin via
+> block-5. LM13700 Q-cell reaches self-oscillation (Q → ∞ as Iabc_q → 0), matching the plugin's
+> `Q = 0.5·4000^res`; Q_min ≈ 0.70 (Butterworth) is an accepted analog floor. Shared by LP1/LP2/HP.
 
-Design status: [ ] draft → [ ] reviewed → [ ] validated on prototype
+Design status: [x] draft → [ ] reviewed → [ ] validated on prototype
 
 ## Overview
 
@@ -163,7 +165,7 @@ node, adding a resonant peak at ω₀.
 
 Each LM13700 SOIC-16 contains two independent OTA cells. For Q control:
 - IC_Q_AB: cell A = LP1 Q, cell B = LP2 Q (one IC handles both LP stages)
-- IC_Q_C: cell A = HP Q, cell B = spare (or used for utility functions)
+- IC_Q_C: cell A = HP Q L, cell B = HP Q R (mono Q; change 0018 — was cell B spare)
 - BP groups: each group needs a Q cell per channel (6 Q cells for 3 groups × 2 channels)
   → 3 LM13700 ICs for BP Q control (one per group, both channels share an IC)
 
@@ -178,7 +180,7 @@ Bourns 3224W 100 kΩ SMD trimpot. Adjusts V_bias to set:
 | Ref (generic) | Part | Package | Value | Notes |
 |---|---|---|---|---|
 | U_Q_AB | LM13700M | SOIC-16 | — | Cell A = LP1 Q-cell; Cell B = LP2 Q-cell |
-| U_Q_C | LM13700M | SOIC-16 | — | Cell A = HP Q-cell; Cell B = spare (IN+/IN− → AGND; Iabc via 100 kΩ to GND; OUT via 1 kΩ to GND) |
+| U_Q_C | LM13700M | SOIC-16 | — | Cell A = HP Q L; Cell B = HP Q R (both active, mono Q) |
 | U_Q_BP1..3 | LM13700M | SOIC-16 | — | One per BP group; cell A = L channel, cell B = R channel |
 | U_IRES | TL072CDT | SOIC-8 | — | Half A = IRES_AMP per filter; can share TL072 with SUM_AMP |
 | R_Iabc | Resistor | 0603 | 1 MΩ | V_ires → Iabc conversion; 0.74V / 1MΩ = 0.74 µA at flat Q |
@@ -220,9 +222,9 @@ Bourns 3224W 100 kΩ SMD trimpot. Adjusts V_bias to set:
 
 | Block | Instance | Board | Notes |
 |---|---|---|---|
-| block-5 | IC_Q_AB cell A | Control | LP1 Q cell (L and R Iabc_q driven in parallel) |
-| block-8 | IC_Q_AB cell B | Control | LP2 Q cell (L and R driven in parallel) |
-| block-7 | IC_Q_C cell A | Control | HP Q cell (L and R driven in parallel) |
+| block-5 | IC_Q_AB | audio | LP1 Q (cell A=L, cell B=R Iabc, shared U9/U10) |
+| block-8 | IC_Q_AB | audio | LP2 Q (shared U9/U10 with block-5) |
+| block-7 | IC_Q_C (U51) | audio | HP Q (cell A=L, cell B=R; one IC) |
 | block-6 | BP1_Q (per channel) | Control | BP1 Q cell; one LM13700 for L+R |
 | block-6 | BP2_Q (per channel) | Control | BP2 Q cell; one LM13700 for L+R |
 | block-6 | BP3_Q (per channel) | Control | BP3 Q cell; one LM13700 for L+R |

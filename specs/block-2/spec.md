@@ -1,7 +1,7 @@
 # Block 2: Dual LFO
-Dual independent triangle-wave LFOs (0.05–20 Hz, ±5 V) with LED indicators; LFO1 normalizes into the mod bus.
+Dual independent triangle-wave LFOs (0.05–20 Hz, ±5 V) with LED indicators; both feed the MOD_SRC switch.
 
-DSP source: `plugin/src/dsp/LFO.hpp`, `plugin/src/Pogo.cpp` (lines 364–368)
+DSP source: `plugin/src/dsp/LFO.hpp`, `plugin/src/Pogo.cpp` (LFO process; MOD_SRC selector 363–366; output jacks + LED lights 500–505)
 
 ---
 
@@ -11,12 +11,19 @@ Block 2 provides two continuously running triangle-wave low-frequency oscillator
 has a front-panel rate pot (9mm, log taper — the same panel-pot family as the
 attenuverters) spanning 0.05 Hz (a 20-second period, useful for slow filter
 sweeps) to 20 Hz (at the boundary of audio, approaching ring-modulation territory). Each
-LFO drives a front-panel LED that brightens on positive half-cycles and dims on negative
-half-cycles, giving a visual indication of rate and phase. Both LFOs have output jacks
-so they can modulate other modules in the patch. LFO1 is the primary internal modulation
-source: when the MOD_IN jack is unpatched, LFO1 automatically feeds the mod bus
-processor, making the module self-animating out of the box. LFO2 is standalone — output
-jack only, no automatic normalling.
+LFO drives a front-panel LED that follows the LFO voltage over the **whole cycle**
+(brightest at the positive peak, fully dark only at the negative peak — a "breathing"
+indicator), giving a visual indication of rate and phase. Both LFOs have output jacks so
+they can modulate other modules in the patch.
+
+Internally, both LFOs feed the **MOD_SRC** selector (a 3-position panel switch: LFO 1 /
+LFO 2 / External), whose output drives the mod bus processor. In the LFO 1 / LFO 2
+positions the chosen LFO animates the module; in the External position the mod bus is
+driven by the MOD_IN jack only (0 V if unpatched). This replaces the older "LFO1
+auto-normals into MOD_IN" scheme — selection is now an explicit switch, and **both** LFO
+outputs are always live at their jacks regardless of switch position. (The MOD_SRC switch
+itself and the MOD_IN-as-External wiring live in block-3; block 2 only provides the two
+LFO feeds to it.)
 
 ---
 
@@ -135,22 +142,31 @@ One TL072CDT (dual, SOIC-8) per LFO. Two packages total: U_LFO1, U_LFO2.
 
 ### LED brightness law
 
-DSP: `brightness = (lfoRaw + 1) × 0.5`
+DSP: `brightness = (lfoRaw + 1) × 0.5` (`Pogo.cpp:504–505`)
 
-This maps the ±1 LFO output linearly to [0, 1], meaning the LED is off at the negative
-peak and full brightness at the positive peak. In hardware, the LED is driven directly
-from the triangle output via a current-limiting resistor. The LED forward voltage drop
-(~2 V for green) and resistor value determine the drive current. The LED naturally dims
-at negative half-cycles (reverse-biased) and brightens at positive half-cycles —
-matching the DSP model without any additional driver circuit.
+This maps the ±1 LFO output **linearly to [0, 1] across the whole cycle**: brightness 0 at
+the negative peak, 0.5 at the zero-crossing, full at the positive peak — a continuous
+"breathing" indicator that is lit throughout the cycle and dark only at the trough.
 
-### LFO1 normalling into MOD_IN
+The hardware matches this with a **full-cycle NPN current-source driver** (change 0018,
+G5/G6a approved): the bipolar triangle is level-shifted onto a transistor base so the LED
+current rises with `(V_tri + 5)`, breathing across the whole cycle rather than the old
+half-wave "pulsing" lamp (which was OFF for the entire negative half — not a match for the
+plugin law). See §3 for the circuit. *(A small exponential toe near the dark end from the
+V_be knee, and ~2 mV/°C dark-point drift, are accepted as cosmetically invisible.)*
 
-The LFO1 output connects to the tip-switching normalling ring of the MOD_IN jack.
-When MOD_IN is unpatched, the tip-switch routes LFO1's output to the mod bus processor
-input. When a cable is inserted into MOD_IN, the tip-switch disconnects LFO1 and the
-external signal takes over. This is a passive mechanical normalling, requiring only a
-physical PCB/panel trace connection.
+### MOD_SRC feed (both LFOs → block-3 switch)
+
+Per the locked plugin (`Pogo.cpp:363–366`), the mod-bus source is an explicit 3-way
+switch — `modSrcV = (pos 0) lfo1V : (pos 1) lfo2V : (pos 2) MOD_IN (0 V if unpatched)`.
+There is **no** passive jack-normalling. Each LFO's triangle output therefore needs a tap
+that drives **both** its own output jack (always live, `Pogo.cpp:500–501`) and the MOD_SRC
+switch input. Since the jack (1 kΩ series) and the switch input (into the SCALE pot, light
+load) are both light loads on the TL072 integrator output, a **passive mult off V_tri is
+adequate** — no dedicated buffer is required (re-verify on the prototype if both paths
+interact). The MOD_SRC switch (DW5, block-3) selects between the two LFO taps and the
+MOD_IN jack (External). Block 2 exposes `LFO1_OUT` and `LFO2_OUT` as boundary nets to
+block-3's switch (positions 0 and 1 respectively).
 
 ### Hardware behavior notes
 
@@ -175,7 +191,7 @@ Items 1 and 3 below are intentional DSP advantages kept by design. Item 2 is now
    pot position. No calibration trimmer is specified in Phase 3R for LFO rate — this is
    to be confirmed in Phase 3R design review.
 
-→ References `aux/lfo-core.md`
+→ References `aux/aux-lfo-core.md`
 
 ---
 
@@ -225,21 +241,32 @@ V_H  = 11 × 0.451 = 4.96 V ≈ 5 V  ✓
 ```
 Use R_fb_sq = 100 kΩ, R_HYS = 82 kΩ.
 
-**LED brightness and half-wave rectification:**
+**LED driver — full-cycle "breathing" NPN current source (change 0018, G5/G6a approved):**
 
-A 1N4148W diode (SOD-123) in series with the LED anode ensures the LED only
-illuminates on positive half-cycles (pulsing lamp effect, easier to read rate by eye):
+A single NPN (MMBT3904, SOT-23) per LED acts as a voltage-controlled current source. The
+bipolar triangle `V_tri` (±5 V) is level-shifted onto the transistor base by a 3-resistor
+network so the base sits below the conduction threshold at −5 V and rises through the active
+region toward +5 V; the LED is fed from +12 V through the transistor, with the emitter
+resistor `R_E` setting the full-scale current. The result is `I_LED ≈ (V_base − V_be)/R_E`
+with `V_base ≈ 0.14·V_tri + 1.3 V`, i.e. ~0 at −5 V (Q cut off → LED dark) rising to ~3 mA
+at +5 V — a full-cycle breathing indicator matching the plugin law.
+
 ```
-V_tri_pos (>0) → D_LED (1N4148W, V_f ≈ 0.7V) → R_LED → LED → GND
-LED only drives when V_tri > V_f_LED + V_f_diode ≈ 2.7 V
+   +12V ──► LED_anode ──► LED_cathode ──► Q collector
+                                          Q emitter ──[R_E 470 Ω]──► GND
+   base level-shift:
+     V_tri ──[R_BTRI 51 kΩ]──┐
+     +12V  ──[R_BBIAS 68 kΩ]─┼──► Q base
+     GND   ──[R_BGND 10 kΩ]──┘
+
+   V_tri  −5 V / 0 V / +5 V  →  V_base 0.585 / 1.31 / 2.04 V  →  I_LED ≈ 0 / 1.4 / 3.0 mA
 ```
 
-LED current-limiting resistor:
-```
-I_LED_target = 2 mA
-V_source = 5 V (peak), V_f_LED ≈ 2.0 V (green), V_f_diode ≈ 0.7 V
-R_LED = (5 − 2.0 − 0.7) / 0.002 = 1.15 kΩ  → use 1.2 kΩ standard
-```
+Component values (per LED): R_BTRI 51 kΩ, R_BBIAS 68 kΩ, R_BGND 10 kΩ, R_E 470 Ω, Q =
+MMBT3904. The +12 V bias leg sets the dark-point (LED off near `V_tri = −5 V`); a few-percent
+rail tolerance only nudges that point and is cosmetically invisible. Transistor dissipation
+≈ 26 mW (well within SOT-23). This **replaces** the former D1/D2 (1N4148) + R9/R10 half-wave
+limiter; R9/R10 are repurposed as the emitter resistors `R_E1/R_E2`.
 
 ### Signal routing
 
@@ -248,10 +275,10 @@ LFO1 (U1 = TL072): integrator (A) + Schmitt (B)
   Schmitt out V_sq → RV1 top; RV1 bottom → R3 (R_FLOOR) → GND; RV1 wiper → R1 (R_INT) → U1A(−)
   U1A: (+) = GND, (−) = R1/C1 summing node, out = V_tri; C1 (C_INT) feedback (−)↔out
   Schmitt U1B: (−) = V_tri, (+) = R5(R_FB_SQ to V_sq)/R7(R_HYS to GND) node, out = V_sq
-  V_tri → D1 (1N4148W) → R9 (R_LED 1.2 kΩ) → LED1 → GND   (half-wave pulsing indicator)
-  V_tri → R11 (R_OUT 1 kΩ) → J5 (LFO1 jack)  and  → MOD_IN normalling ring (block-3)
+  V_tri → R19 (R_BTRI) → Q1 base (level-shift w/ R20 from +12V, R21 to GND); LED1 ← +12V → Q1 collector; Q1 emitter → R9 (R_E) → GND
+  V_tri → R11 (R_OUT 1 kΩ) → J5 (LFO1 jack)  and  → LFO1_OUT boundary → block-3 MOD_SRC switch pos 0
 
-LFO2 (U2): identical, standalone — V_tri → R12 → J6 (LFO2 jack); no normalling.
+LFO2 (U2): identical — V_tri → R12 → J6 (LFO2 jack) and → LFO2_OUT boundary → block-3 MOD_SRC switch pos 1.
 ```
 
 ### Calibration points
@@ -275,7 +302,7 @@ low-noise audio board ground plane. Rate pots and LEDs are on the control/panel 
 LFO output series resistors (R_LFO1, R_LFO2, 1 kΩ) logically belong to Block B's
 output protection but are physically placed on the utility board near the LFO outputs.
 
-→ References `aux/lfo-core.md` for detailed integrator + Schmitt trigger schematic.
+→ References `aux/aux-lfo-core.md` for detailed integrator + Schmitt trigger schematic.
 
 ---
 

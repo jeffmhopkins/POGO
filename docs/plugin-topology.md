@@ -34,8 +34,8 @@ ALT_BP_L/R → GAIN_BP3 → ────────────┐
        │  [B: Output Buffer]  clamp ±11 V → MAIN_L_OUT / MAIN_R_OUT                 │
        └──────────────────────────────────────────────────────────────────────────────┘
 
-LFO1 / LFO2 ── triangle ±5 V; LFO1 normalises → MOD_IN
-Mod Bus      ── MOD_IN → SCALE (×0.2–5) → OFFSET (±5 V) → clamp ±10 V
+LFO1 / LFO2 ── triangle ±5 V; both feed MOD_SRC switch (LFO1 / LFO2 / External)
+Mod Bus      ── MOD_SRC → SCALE (×0.2–5) → OFFSET (±5 V) → clamp ±10 V
                mod bus normalises → VCA_IN when VCA_IN unpatched
 ```
 
@@ -137,7 +137,7 @@ enum InputId {
     ALT_BP_R_INPUT,         // normalises to ALT_BP_L when unpatched
 
     // ── Mod Bus / VCA ──────────────────────────────────────────
-    MOD_INPUT,              // mod source; LFO1 normalises in when unpatched
+    MOD_INPUT,              // External mod source (MOD_SRC pos 2); 0 V if unpatched
     VCA_INPUT,              // VCA CV; mod bus normalises in when unpatched
 
     // ── LP1 CV ─────────────────────────────────────────────────
@@ -218,14 +218,17 @@ pgL = gainMain ? clamp(inL × 5, −10.5, +10.5) : inL
 pgR = gainMain ? clamp(inR × 5, −10.5, +10.5) : inR
 ```
 
-ALT path (runs in parallel; bypasses VCA+LP1 for BP input):
+ALT path (runs in parallel; goes through the VCA, bypasses LP1; feeds **BP3 only**):
 ```
 gainBP3 = ALT_GAIN_PARAM >= 0.5
-altL = ALT_BP_L connected ? (gainBP3 ? clamp(ALT_BP_L × 5, −10.5, +10.5) : ALT_BP_L) : pgL
-altR = ALT_BP_R connected ? (gainBP3 ? clamp(ALT_BP_R × 5, −10.5, +10.5) : ALT_BP_R) : altL
+altL = ALT_BP_L connected ? (gainBP3 ? clamp(ALT_BP_L × 5, −10.5, +10.5) : ALT_BP_L) : 0
+altR = ALT_BP_R connected ? (gainBP3 ? clamp(ALT_BP_R × 5, −10.5, +10.5) : ALT_BP_R)
+                          : (ALT_BP_L connected ? altL : 0)
 ```
-Note: if neither ALT jack is patched `altL/R = pgL/R` (falls through to normal path).
-If only `ALT_BP_L` is patched, `altR = altL`.
+Note: the ALT signal is then passed through the VCA (same VCA_AMT/CV as the main path) and
+becomes the **BP3 band input only** — BP1/BP2 always use the main post-VCA/LP1 band. If
+ALT_BP_L is unpatched, BP3's left input stays on the main band (`altL` = 0 is not injected);
+if only `ALT_BP_L` is patched, `altR = altL`. (See `Pogo.cpp:344–352, 439–441`.)
 
 ### LFOs
 ```
@@ -240,7 +243,10 @@ One-pole LP at 10× the LFO rate is applied to model hardware integrator slew an
 
 ### Mod Bus
 ```
-srcV = MOD_INPUT connected ? MOD_INPUT : lfo1V
+// MOD_SRC_PARAM is a 3-way switch: 0 = LFO 1, 1 = LFO 2, 2 = External (MOD_IN)
+srcV = (MOD_SRC == 0) ? lfo1V
+     : (MOD_SRC == 1) ? lfo2V
+     : (MOD_INPUT connected ? MOD_INPUT : 0)      // External: MOD_IN jack only, 0 V if unpatched
 busV = ModBusProcessor::process(srcV, MOD_SCALE_PARAM, MOD_OFFSET_PARAM)
      = clamp(srcV × (0.2 × 25^scale) + offset × 5, −10, +10)
 
@@ -274,7 +280,7 @@ G        = 10^(2×(control−1))   // dB-law: 0 dB at control=1, −40 dB at con
 
 lp1FreqCv = lp1FreqBase + att(LP1_FREQ_ATT, LP1_FREQ_INPUT)   // V/oct
 lp1TiltCv = LP1_TILT_PARAM × 5 + att(LP1_TILT_ATT, LP1_TILT_INPUT)  // ±5 V
-lp1ResCv  = LP1_RES_PARAM + att(LP1_RES_ATT, LP1_RES_INPUT)
+lp1ResCv  = clamp(LP1_RES_PARAM + att(LP1_RES_ATT, LP1_RES_INPUT) / 10, 0, 1)   // CV ÷10 onto 0–1
 
 lp1L = LPFilter::process(vcaOutL, lp1FreqCv + lp1TiltCv, lp1ResCv, sampleRate)
 lp1R = LPFilter::process(vcaOutR, lp1FreqCv − lp1TiltCv, lp1ResCv, sampleRate)

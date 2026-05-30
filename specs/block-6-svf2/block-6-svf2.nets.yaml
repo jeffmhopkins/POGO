@@ -1,0 +1,180 @@
+# POGO block-6-svf2 — split from block-6.nets.yaml (behavior-preserving 7-way partition)
+# Auto-split: parts/nets identical to the block-6 monolith; cross-section wires are boundary nets.
+
+block: block-6-svf2
+board: audio
+title: POGO Block 6 SVF2 - BP2 OTA-C Bandpass SVF
+
+parts:
+  U17: { sym: ota, part: LM13700M, value: LM13700 }
+  C110_U17p: { sym: c, value: 100nF }
+  C110_U17n: { sym: c, value: 100nF }
+  U18: { sym: ota, part: LM13700M, value: LM13700 }
+  C110_U18p: { sym: c, value: 100nF }
+  C110_U18n: { sym: c, value: 100nF }
+  U23: { sym: opamp2, part: OPA1612, value: OPA1612 }
+  C110_U23p: { sym: c, value: 100nF }
+  C110_U23n: { sym: c, value: 100nF }
+  U24: { sym: opamp2, part: OPA1612, value: OPA1612 }
+  C110_U24p: { sym: c, value: 100nF }
+  C110_U24n: { sym: c, value: 100nF }
+  U29: { sym: expo, part: THAT340S14-U, value: THAT340 }
+  C110_U29p: { sym: c, value: 100nF }
+  C110_U29n: { sym: c, value: 100nF }
+  U68: { sym: ota, part: LM13700M, value: LM13700 }
+  C110_U68p: { sym: c, value: 100nF }
+  C110_U68n: { sym: c, value: 100nF }
+  U71: { sym: expo, part: THAT340S14-U, value: THAT340 }
+  C110_U71p: { sym: c, value: 100nF }
+  C110_U71n: { sym: c, value: 100nF }
+  R13_2L: { sym: r, value: 100k }
+  R14_2L: { sym: r, value: 100k }
+  R15_2L: { sym: r, value: 100k }
+  R12_2La: { sym: r, value: 1k }
+  R12_2Lb: { sym: r, value: 1k }
+  R123_2Lv1: { sym: r, value: 10k }
+  R123_2Lv2: { sym: r, value: 10k }
+  C19_Lv1: { sym: c, value: 68nF }
+  C19_Lv2: { sym: c, value: 68nF }
+  C108_2L: { sym: c, value: 10nF }
+  C107_2L: { sym: c, value: 10nF }
+  R116_2L: { sym: r, value: 1M }
+  R13_2R: { sym: r, value: 100k }
+  R14_2R: { sym: r, value: 100k }
+  R15_2R: { sym: r, value: 100k }
+  R12_2Ra: { sym: r, value: 1k }
+  R12_2Rb: { sym: r, value: 1k }
+  R123_2Rv1: { sym: r, value: 10k }
+  R123_2Rv2: { sym: r, value: 10k }
+  C19_Rv1: { sym: c, value: 68nF }
+  C19_Rv2: { sym: c, value: 68nF }
+  C108_2R: { sym: c, value: 10nF }
+  C107_2R: { sym: c, value: 10nF }
+  R116_2R: { sym: r, value: 1M }
+  R124_2: { sym: r, value: 1M }
+  R125_2: { sym: r, value: 47k }
+  R126_2: { sym: r, value: 1k }
+  R120_2: { sym: r, value: 1M }
+  R121_2: { sym: r, value: 47k }
+  R122_2: { sym: r, value: 1k }
+  R127_2L: { sym: r, value: 100k }
+  R127_2R: { sym: r, value: 100k }
+  C109_2L: { sym: c, value: 100nF }
+  C109_2R: { sym: c, value: 100nF }
+  RV10: { sym: trimpot, part: "Bourns 3224W", value: BP2_FREF_L }
+  RV11: { sym: trimpot, part: "Bourns 3224W", value: BP2_1VOCT_L }
+  RV24_2: { sym: trimpot, part: "Bourns 3224W", value: BP2_FREF_R }
+  RV25_2: { sym: trimpot, part: "Bourns 3224W", value: BP2_1VOCT_R }
+  R117_2: { sym: r, value: 100k }
+  R118_2: { sym: r, value: 100k }
+  R119_2: { sym: r, value: 100k }
+  RV12: { sym: trimpot, part: "Bourns 3224W", value: BP2_QMAX }
+  D13_2: { sym: diode, part: 1N4148W, value: 1N4148W }
+  # Per-band BP2 TILT summer + inverter (master tilt + TILT knob + per-band TILT CV)
+  U83: { sym: opamp2, part: TL072CDT, value: TL072 }
+  C121: { sym: c, value: 100nF }
+  C122: { sym: c, value: 100nF }
+  RV49: { sym: trimpot, part: "bipolar pot", value: BP2_TILT }
+  R141: { sym: r, value: 100k }   # R_master: master tilt → summer
+  R142: { sym: r, value: 100k }   # R_knob:   TILT knob wiper → summer
+  R143: { sym: r, value: 470k }   # R_cv:     per-band TILT CV → summer (×0.213 ≈ plugin ×0.22)
+  R144: { sym: r, value: 100k }   # R_sumfb:  summer feedback
+  R145: { sym: r, value: 100k }   # R_invin:  inverter input
+  R146: { sym: r, value: 100k }   # R_invfb:  inverter feedback
+
+nets:
+  # BP_TILT_CV (master tilt) now feeds ONLY the per-band summer R_master input.
+  BP_TILT_CV: [R141.1]
+  # Per-band TILT CV from block-3 (MOD_BP2_TILT) → summer R_cv input.
+  MOD_BP2_TILT: [R143.1]
+  # Per-band TILT summer (−): master + knob + per-band CV.
+  BP2_TILTSUM: [U83.2, R141.2, R142.2, R143.2, R144.1]
+  # Summer output = −total tilt → feeds R expo base (re-pointed R127_2R) + inverter input.
+  BP2_TILT_NEG: [U83.1, R144.2, R145.1, R127_2R.1]
+  # Inverter (−) node.
+  BP2_TILT_INVN: [U83.6, R145.2, R146.1]
+  # Inverter output = +total tilt → feeds L expo base (re-pointed R127_2L).
+  BP2_TILT_POS: [U83.7, R146.2, R127_2L.1]
+  # TILT knob wiper → summer R_knob input.
+  BP2_TILT_KNOB: [RV49.2, R142.1]
+  # RV49 ends to bipolar tilt reference.
+  # Phase-3R: tilt range scaling — exact reference/scaling TBD (nominal ±12V rails here).
+  BP2_DISTOUT_L: [R13_2L.1]
+  BP2_DISTOUT_R: [R13_2R.1]
+  BP2_SUMINV_L: [U23.2, R13_2L.2, R14_2L.2, R15_2L.1, U68.4, U68.5]
+  BP2_HP_L: [U23.1, R15_2L.2, U17.3]
+  BP2_V1CAP_L: [U17.5, U17.7, C19_Lv1.1]
+  BP2_V1_L: [U17.8, U17.14, R123_2Lv1.1, U68.3, U23.5]
+  BP2_V2CAP_L: [U17.12, U17.10, C19_Lv2.1]
+  BP2_V2_L: [U17.9, R14_2L.1, R123_2Lv2.1]
+  BP2_BANDOUT_L: [U23.7, U23.6]
+  BP2_LINA_L: [U17.4, R12_2La.1]
+  BP2_LINB_L: [U17.13, R12_2Lb.1]
+  BP2_QIABC_L: [U68.1, C107_2L.1, R116_2L.2]
+  BP2_SUMINV_R: [U24.2, R13_2R.2, R14_2R.2, R15_2R.1, U68.13, U68.12]
+  BP2_HP_R: [U24.1, R15_2R.2, U18.3]
+  BP2_V1CAP_R: [U18.5, U18.7, C19_Rv1.1]
+  BP2_V1_R: [U18.8, U18.14, R123_2Rv1.1, U68.14, U24.5]
+  BP2_V2CAP_R: [U18.12, U18.10, C19_Rv2.1]
+  BP2_V2_R: [U18.9, R14_2R.1, R123_2Rv2.1]
+  BP2_BANDOUT_R: [U24.7, U24.6]
+  BP2_LINA_R: [U18.4, R12_2Ra.1]
+  BP2_LINB_R: [U18.13, R12_2Rb.1]
+  BP2_QIABC_R: [U68.16, C107_2R.1, R116_2R.2]
+  BP2_VCTRL: [R125_2.1, R121_2.1]
+  BP2_IREF_TR_L: [R124_2.2, RV10.1, RV10.2]
+  BP2_IREF_L: [U29.14, U29.13, RV10.3, C109_2L.1]
+  BP2_VOCT_TR_L: [R125_2.2, RV11.1, RV11.2]
+  BP2_EXPO_BASE_L: [U29.2, RV11.3, R127_2L.2]
+  BP2_IABC_L: [U29.1, U17.1, U17.16, C108_2L.1]
+  BP2_EXPO_EMIT_L: [U29.3, U29.12, R126_2.1]
+  BP2_IREF_TR_R: [R120_2.2, RV24_2.1, RV24_2.2]
+  BP2_IREF_R: [U71.14, U71.13, RV24_2.3, C109_2R.1]
+  BP2_VOCT_TR_R: [R121_2.2, RV25_2.1, RV25_2.2]
+  BP2_EXPO_BASE_R: [U71.2, RV25_2.3, R127_2R.2]
+  BP2_IABC_R: [U71.1, U18.1, U18.16, C108_2R.1]
+  BP2_EXPO_EMIT_R: [U71.3, U71.12, R122_2.1]
+  BP2_VBIAS: [RV12.2, R117_2.1]
+  BP2_FOCUS_CV: [R118_2.1]
+  BP2_IRES_SUM: [R117_2.2, R118_2.2, R119_2.1]
+  BP2_VIRES: [R119_2.2, D13_2.K, R116_2L.1, R116_2R.1]
+  "+12V": [U17.11, C110_U17p.1, U18.11, C110_U18p.1, U23.8, C110_U23p.1, U24.8, C110_U24p.1, C110_U29p.1, U68.11, C110_U68p.1, C110_U71p.1, R124_2.1, R120_2.1, RV12.3, U83.8, C121.1, RV49.3]
+  "-12V": [U17.6, C110_U17n.1, U18.6, C110_U18n.1, U23.4, C110_U23n.1, U24.4, C110_U24n.1, U29.4, U29.11, C110_U29n.1, U68.6, C110_U68n.1, U71.4, U71.11, C110_U71n.1, R123_2Lv1.2, R123_2Lv2.2, R123_2Rv1.2, R123_2Rv2.2, R126_2.2, R122_2.2, U83.4, C122.1, RV49.1]
+  GND: [C110_U17p.2, C110_U17n.2, C110_U18p.2, C110_U18n.2, C110_U23p.2, C110_U23n.2, C110_U24p.2, C110_U24n.2, C110_U29p.2, C110_U29n.2, C110_U68p.2, C110_U68n.2, C110_U71p.2, C110_U71n.2, U23.3, C19_Lv1.2, C19_Lv2.2, R12_2La.2, R12_2Lb.2, C107_2L.2, U24.3, C19_Rv1.2, C19_Rv2.2, R12_2Ra.2, R12_2Rb.2, C107_2R.2, C109_2L.2, C108_2L.2, C109_2R.2, C108_2R.2, RV12.1, D13_2.A, U83.3, U83.5, C121.2, C122.2]
+
+no_connect:
+  - U68.2
+  - U68.7
+  - U68.8
+  - U68.9
+  - U68.10
+  - U68.15
+  - U29.5
+  - U29.6
+  - U29.7
+  - U29.8
+  - U29.9
+  - U29.10
+  - U71.5
+  - U71.6
+  - U71.7
+  - U71.8
+  - U71.9
+  - U71.10
+  - U17.2
+  - U17.15
+  - U18.2
+  - U18.15
+
+boundary:
+  - BP_TILT_CV
+  - MOD_BP2_TILT
+  - BP2_DISTOUT_L
+  - BP2_DISTOUT_R
+  - BP2_BANDOUT_L
+  - BP2_BANDOUT_R
+  - BP2_IRES_SUM
+  - BP2_VIRES
+  - BP2_FOCUS_CV
+  - BP2_VCTRL
+
