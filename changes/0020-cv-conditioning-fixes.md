@@ -238,6 +238,19 @@ whole E1 premise is flawed:
 - Also fold **M2** (mod OFFSET ±12V→±5V: scale R15 or use ±5V refs) and confirm **M4** (block-4 I/V comp
   cap, add small C_f ~few pF across R_f, 4 ch) here.
 
+#### H — SPICE-validated (2026-05-30), H-a viable. `specs/sim/modbus_depth.cir`
+- Depth: buggy 100k-norm → **~4.8%** at an unpatched destination (review ~3%, same ~20× deficit);
+  **direct low-Z normal → ~98%** (full depth restored). C2 confirmed + fixed.
+- Buffer-load budget (H2): real per-destination load ≈ **10k** (R_INV_IN dominates; the attenuverter
+  pot returns to −V_src, an inverted copy, not hard ground). 18 ∥ ≈ 561Ω → **~18 mA worst-case** (all
+  18 at ±10V, rare). **Two paralleled TL074 sections (U3 C/D) share ~9 mA each → adequate.** (My first
+  pass assumed 5k → 35mA → looked under-spec; the accurate 10k load makes H-a fine.) The earlier
+  "spare" U3 C/D get re-enabled as the parallel distribution buffer.
+- **Edit plan (block-3):** (1) drop the 18× `R18_n` (R_SRC_NORM 100k); (2) jack switch lug ties
+  `V_MODBUS` directly to each tip (low-Z normal, override plug breaks it); (3) re-wire `U3_SPARE_3/4`
+  → paralleled unity buffer driving `V_MODBUS` (each via a small ~47Ω share resistor); (4) M2: rescale
+  the OFFSET path (R15) for ±5V. Big 18-destination rewrite — do as its own commit + re-gate.
+
 ### New out-of-scope finding (log, separate change)
 - **THAT340 has NO internal PTAT/tempco** — aux-expo-converter's "on-chip compensation" is wrong. A real
   V/oct design needs an external **+3300 ppm/°C tempco resistor** in the expo (e.g. series with R_SHUNT).

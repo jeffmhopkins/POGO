@@ -1,0 +1,42 @@
+* POGO mod-bus depth + buffer load — C2/H2 validation (change 0020 §H)
+* BUG (C2): V_MODBUS -> R18(100k R_SRC_NORM) -> jack switch -> tip -> R37(100) -> V_src,
+*   where V_src is loaded by R_INV_IN(10k to virtual gnd) || attenuverter pot(10k). The 100k
+*   series into a ~few-k node divides the bus down to ~3% at each unpatched destination.
+* FIX (H-a): drop R18; switch lug ties V_MODBUS DIRECTLY (low-Z) to the tip; bus normals at
+*   full depth. Then the bus must drive 18 such loads -> size the distribution buffer (H2).
+*
+* Model ONE destination's DC load, then scale to 18 for the buffer current.
+* V_src load: R37(100) from bus; at V_src: R_INV_IN 10k to vground(~0) + pot 10k to -V_src.
+* Approx the attenuverter as ~5k to ground (pot mid + inverter). Use 5k.
+
+.param Rsrcnorm=100k    ; the buggy normalling R
+.param Rprot=100        ; R37 tip series
+.param Rload=5k         ; per-destination effective load at V_src (R_INV_IN || pot)
+
+Vbus bus 0 DC 5.0       ; mod bus at +5V (test level)
+
+* ---- BUGGY: bus -> 100k -> 100 -> Vsrc(5k load) ----
+Rnorm bus nb {Rsrcnorm}
+Rp_b  nb vsrc_b {Rprot}
+Rl_b  vsrc_b 0 {Rload}
+
+* ---- FIXED: bus -> (0 ohm switch) -> 100 -> Vsrc(5k load) ----
+Rp_f bus vsrc_f {Rprot}
+Rl_f vsrc_f 0 {Rload}
+
+.control
+  op
+  let depth_bug = v(vsrc_b)/5.0 * 100
+  let depth_fix = v(vsrc_f)/5.0 * 100
+  echo "=== mod depth at an unpatched destination (% of bus) ==="
+  echo "  BUGGY (100k norm) : " $&depth_bug " %   (review said ~3%)"
+  echo "  FIXED (direct)    : " $&depth_fix " %   (want ~100%)"
+
+  echo "=== buffer load: 18 destinations in parallel, bus at +-10V ==="
+  * 18 loads of (Rprot+Rload)=5.1k in parallel = 283 ohm; at 10V:
+  let rpar = (5000+100)/18
+  let iload = 10/rpar
+  echo "  parallel load = " $&rpar " ohm ; current at 10V = " $&iload " A"
+  echo "  -> a single TL074 section (~10-20mA linear) is INSUFFICIENT; needs a stronger buffer."
+.endc
+.end
