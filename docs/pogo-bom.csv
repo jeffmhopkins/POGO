@@ -14,6 +14,7 @@ audio,R5,Resistor,2,,4.7kΩ,0603,,,,,block-1,R_in alt gain stage (×2 ch: R5L/R5
 audio,R6,Resistor,2,,18kΩ,0603,,,,,block-1,R_f alt gain stage (×2 ch: R6L/R6R)
 audio,R38,Resistor,1,,100Ω,0603,,,,,block-1,ALT_BP_L series input protection
 audio,R39,Resistor,1,,100Ω,0603,,,,,block-1,ALT_BP_R series input protection
+audio,R134,Resistor,1,,22kΩ,0603,,,,,block-1,ALT_BP_L insertion-detect pulldown (ALT_L_TIP→GND; feeds BP3 selector ALT_L_DET)
 audio,D8,Diode,1,BAT54S,,SOT-23,POGO_Package_TO_SOT_SMD:SOT-23,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds11005.pdf,block-1,ALT_BP_L input clamp ±12V
 audio,D9,Diode,1,BAT54S,,SOT-23,POGO_Package_TO_SOT_SMD:SOT-23,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds11005.pdf,block-1,ALT_BP_R input clamp ±12V
 audio,C3,Capacitor,1,,100nF,0603,,,,,block-1,U2 +12V decoupling
@@ -296,11 +297,13 @@ audio,C110,Capacitor,14,,100nF,0603,,,,,block-6-svf2,"C_BYP: per-IC supply decou
 audio,C110,Capacitor,16,,100nF,0603,,,,,block-6-svf3,"C_BYP: per-IC supply decoupling; 2 per IC × 45 block-6 ICs (U15-U48, U67-U77)"
 audio,C110,Capacitor,12,,100nF,0603,,,,,block-6-dist1,"C_BYP: per-IC supply decoupling; 2 per IC × 45 block-6 ICs (U15-U48, U67-U77)"
 audio,C110,Capacitor,12,,100nF,0603,,,,,block-6-dist2,"C_BYP: per-IC supply decoupling; 2 per IC × 45 block-6 ICs (U15-U48, U67-U77)"
-audio,C110,Capacitor,12,,100nF,0603,,,,,block-6-dist3,"C_BYP: per-IC supply decoupling; 2 per IC × 45 block-6 ICs (U15-U48, U67-U77)"
+audio,C110,Capacitor,14,,100nF,0603,,,,,block-6-dist3,C_BYP: per-IC supply decoupling; 2 per IC (incl. U81 BP3 selector)
 audio,C110,Capacitor,8,,100nF,0603,,,,,block-6-mix,"C_BYP: per-IC supply decoupling; 2 per IC × 45 block-6 ICs (U15-U48, U67-U77)"
 audio,U75,IC,1,CD4053BM,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/cd4053b.pdf,block-6-dist1,"BP1 distortion mux 2 (stereo 1-of-3: U31=ch select stage 1, U75=stage 2)"
 audio,U76,IC,1,CD4053BM,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/cd4053b.pdf,block-6-dist2,BP2 distortion mux 2
 audio,U77,IC,1,CD4053BM,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/cd4053b.pdf,block-6-dist3,BP3 distortion mux 2
+audio,U81,IC,1,CD4053BM,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/cd4053b.pdf,block-6-dist3,"BP3 INPUT selector: ALT-VCA vs LP1 per channel (X=L, Y=R), gated by ALT_L_DET (change 0018)"
+audio,R133,Resistor,1,,100kΩ,0603,,,,,block-6-dist3,ALT_L_DET pull-up to +12V (BP3 selector; HIGH=ALT patched)
 audio,R128,Resistor,2,,100kΩ,0603,,,,,block-6-dist1,R_MODE_PU: DW5 mode-encoder pull-ups to 5V logic rail; 2 per group (SC/HC/WF → 2 control bits)
 audio,R128,Resistor,2,,100kΩ,0603,,,,,block-6-dist2,R_MODE_PU: DW5 mode-encoder pull-ups to 5V logic rail; 2 per group (SC/HC/WF → 2 control bits)
 audio,R128,Resistor,2,,100kΩ,0603,,,,,block-6-dist3,R_MODE_PU: DW5 mode-encoder pull-ups to 5V logic rail; 2 per group (SC/HC/WF → 2 control bits)

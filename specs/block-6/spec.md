@@ -218,8 +218,19 @@ Standard SVF BP peak is 1× (constant unity, independent of Q). No normalization
 - CD4053 triple 2-channel analog mux per group selects which mode's output passes
 - All 3 CD4053 select pins tied together → BP_DIST switch controls all groups simultaneously
 - One Dailywell DW5 (2M DPDT ON-ON-ON) toggle → its two poles give the 2 select lines to all 3 CD4053 ICs
-- Distortion runs post-SVF at audio rate (no oversampling in analog hardware)
+- Distortion runs **pre-SVF** (DISTn → SVFn) at audio rate (no oversampling in analog hardware)
 - BP3 output tap: taken at group 3's **post-bandpass** band output (`BP3_TAP`, after DIST3→SVF3), available at BP3_L/R_OUT jacks
+
+**BP3 input selector (change 0018):** BP3's distortion input is fed by a CD4053 mux (U81, in
+block-6-dist3) that picks, per channel, between the **LP1 band** (`LP1_OUT`, mux X0/Y0) and the
+**ALT-VCA voice** (`ALT_VCA_OUT` from block-4, mux X1/Y1). The select is `ALT_L_DET` — the
+ALT_BP_L jack insertion detect: J3's tip-switch lug (block-1) feeds `ALT_L_DET`, pulled to +12 V
+(R133) with a 22 kΩ pulldown on the ALT_L tip (R134); patched ⇒ HIGH ⇒ ALT-VCA, unpatched ⇒ LOW
+⇒ LP1. Both channels share `ALT_L_DET` (the plugin's asymmetric `bp3InR = L‖R` is not realized —
+the locked single-switch jacks have no free contact for an ALT_R detect; diverges only in the
+rare R-patched-but-not-L case). *(Phase-3R: like the other CD4053 selects, a +5 V/+12 V logic
+threshold margin should be verified on the prototype; ALT_L_DET uses a +12 V pull-up to stay
+clean against VDD=+12.)*
 
 **Oversampling:**
 - None. Hardware and DSP both run at base sample rate. Analog hardware is inherently alias-free; no oversampling required.

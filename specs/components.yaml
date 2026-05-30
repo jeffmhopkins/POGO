@@ -40,6 +40,7 @@ components:
   - { ref: R6,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "18kΩ",   tol: "1%", qty: 2, fn: "R_f alt gain stage (×2 ch: R6L/R6R)" }
   - { ref: R38,  board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "100Ω",   fn: "ALT_BP_L series input protection" }
   - { ref: R39,  board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "100Ω",   fn: "ALT_BP_R series input protection" }
+  - { ref: R134, board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "22kΩ",   fn: "ALT_BP_L insertion-detect pulldown (ALT_L_TIP→GND; feeds BP3 selector ALT_L_DET)" }
   - { ref: D8,   board: audio,   block: block-1, part: BAT54S,     pkg: SOT-23,   fn: "ALT_BP_L input clamp ±12V" }
   - { ref: D9,   board: audio,   block: block-1, part: BAT54S,     pkg: SOT-23,   fn: "ALT_BP_R input clamp ±12V" }
   - { ref: C3,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "100nF",  fn: "U2 +12V decoupling" }
@@ -369,11 +370,13 @@ components:
   - { ref: C110, board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "100nF",  qty: 16, fn: "C_BYP: per-IC supply decoupling; 2 per IC × 45 block-6 ICs (U15-U48, U67-U77)" }
   - { ref: C110, board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "100nF",  qty: 12, fn: "C_BYP: per-IC supply decoupling; 2 per IC × 45 block-6 ICs (U15-U48, U67-U77)" }
   - { ref: C110, board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "100nF",  qty: 12, fn: "C_BYP: per-IC supply decoupling; 2 per IC × 45 block-6 ICs (U15-U48, U67-U77)" }
-  - { ref: C110, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "100nF",  qty: 12, fn: "C_BYP: per-IC supply decoupling; 2 per IC × 45 block-6 ICs (U15-U48, U67-U77)" }
+  - { ref: C110, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "100nF",  qty: 14, fn: "C_BYP: per-IC supply decoupling; 2 per IC (incl. U81 BP3 selector)" }
   - { ref: C110, board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "100nF",  qty: 8, fn: "C_BYP: per-IC supply decoupling; 2 per IC × 45 block-6 ICs (U15-U48, U67-U77)" }
   - { ref: U75,  board: audio,   block: block-6-dist1, part: CD4053,     pkg: SOIC-16,  fn: "BP1 distortion mux 2 (stereo 1-of-3: U31=ch select stage 1, U75=stage 2)" }
   - { ref: U76,  board: audio,   block: block-6-dist2, part: CD4053,     pkg: SOIC-16,  fn: "BP2 distortion mux 2" }
   - { ref: U77,  board: audio,   block: block-6-dist3, part: CD4053,     pkg: SOIC-16,  fn: "BP3 distortion mux 2" }
+  - { ref: U81,  board: audio,   block: block-6-dist3, part: CD4053,     pkg: SOIC-16,  fn: "BP3 INPUT selector: ALT-VCA vs LP1 per channel (X=L, Y=R), gated by ALT_L_DET (change 0018)" }
+  - { ref: R133, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "ALT_L_DET pull-up to +12V (BP3 selector; HIGH=ALT patched)" }
   - { ref: R128, board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "R_MODE_PU: DW5 mode-encoder pull-ups to 5V logic rail; 2 per group (SC/HC/WF → 2 control bits)" }
   - { ref: R128, board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "R_MODE_PU: DW5 mode-encoder pull-ups to 5V logic rail; 2 per group (SC/HC/WF → 2 control bits)" }
   - { ref: R128, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "R_MODE_PU: DW5 mode-encoder pull-ups to 5V logic rail; 2 per group (SC/HC/WF → 2 control bits)" }
