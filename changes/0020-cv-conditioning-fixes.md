@@ -43,8 +43,8 @@ faithfully reproduces the plugin. No plugin/panel change (Lane B).
   block-6 DRIVE trims). ✓** Series R can't set a DC offset on a µA control input. And the shared
   unbuffered V_CTRL wiper couples all 4 cells. Needs a real offset-injection (divider→Ec+) + a
   wiper buffer.
-- **H4 — Wavefold mode phase-inverted vs Soft/Hard (block-6-dist, all 3 bands).** Net-by-net
-  polarity makes WF net-inverting; flips wet contribution at mix + BP3 tap. Add one inversion in WF.
+- **H4 — Wavefold phase — ❌ WITHDRAWN (SPICE-refuted 2026-05-30).** SC/HC/WF all share small-signal
+  sign (−drive) from the common node; the VCA inversion is common, no relative flip. See §F. No change.
 - **H5 — State variable tapped from LM13700 Darlington buffer → ~1.2 V DC into next OTA input
   (blocks 5,7,8).** Saturates the µV-class OTA input. Tap the unbuffered integrator node, or
   offset-correct. (Needs bias analysis to confirm severity/fix.)
@@ -157,10 +157,16 @@ Confidence tags: **[HC]** high (math/datasheet solid, verified) · **[NV]** need
     not — an unusual mono-into-R patch) and leave the wiring. Cheapest; small fidelity gap.
   - **Recommend E1+E2** for true plugin parity (it's a real, if narrow, behavioral divergence).
 
-### F. WF phase inversion — fixes H4 — block-6-dist1/2/3 [HC, confirm free op-amp]
-- WF path is net-inverting vs SC/HC (leading DRIVE-VCA I/V inversion + the folder's `2·Vclamp−Vfoldin`).
-- **Fix:** add one unity inversion in each WF path so all 3 modes share sign into the mux. Need a free
-  op-amp half in each dist section — **else +1 dual op-amp/section** (G6). Verifying U38/39/44/45 usage.
+### F. WF phase — H4 — block-6-dist1/2/3 — ❌ WITHDRAWN (H4 is FALSE; no change)
+- Original claim: WF net-inverting vs SC/HC → add an inversion. **SPICE refuted it** (`specs/sim/wf_phase.cir`).
+- Net trace from the common `BP1_DRIVEOUT` node: SC = inverting amp (R18/R19) → −drive; HC = inverting
+  (R20/R21) → −drive; WF = stage-1 invert (V_foldin = −drive) then folder `2·V_clamp − V_foldin` = below
+  threshold = +V_foldin = −drive. **All three are −drive → same small-signal sign.** The DRIVE-VCA
+  inversion ahead of them is common to all three, so it cannot create a *relative* phase difference.
+- SPICE: SC and WF slopes identical (both −1 V/V near 0; ∓1.0 at din=±1); WF folds above ±1.4V while
+  SC stays linear, but **phase agrees**. The agent's "Vfoldin=−Vin" was a sign-tracking error.
+- **Decision: NO netlist change.** Adding an inversion would have *introduced* a phase bug across all
+  3 bands. (2nd SPICE catch of a wrong proposed fix — validation working as intended.)
 
 ### G. BP3 R→L output normal — fixes M1 — block-6-mix + block-B [HC, wiring] — ✅ IMPLEMENTED
 - Re-route so J28's switch lug taps the **L source ahead of R's buffer/series-R** (true "R normals to L"),
