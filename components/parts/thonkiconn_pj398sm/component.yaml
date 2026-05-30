@@ -5,6 +5,7 @@ alt_mpn: PJ301M-12
 manufacturer: Qingpu (Thonkiconn)
 supplier: Thonk
 package: 3.5mm panel jack
+symbol: jack
 matches:
 - PJ301M-12
 footprint:

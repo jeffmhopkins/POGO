@@ -4,6 +4,7 @@ mpn: TL072CDT
 manufacturer: Texas Instruments
 supplier: '~'
 package: SOIC-8
+symbol: opamp2
 matches:
 - TL072CDT
 footprint:

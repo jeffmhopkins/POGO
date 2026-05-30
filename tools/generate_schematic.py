@@ -104,6 +104,15 @@ def validate_block(block: dict) -> list[str]:
             errs.append(f"{ref}: unknown sym '{sym}'")
             continue
         part_pins[ref] = S.all_pin_numbers(_SYMS[sym])
+        # When the ref binds a sourced part, the part's self-declared symbol
+        # primitive must agree with the sym wired here (catches wiring a part
+        # with the wrong symbol). Value-only refs (no `part`) keep sym standalone.
+        if spec.get("part"):
+            reg = registry.part_for(spec["part"]) or {}
+            declared = reg.get("symbol")
+            if declared and declared != sym:
+                errs.append(f"{ref}: sym '{sym}' != part '{spec['part']}' "
+                            f"declared symbol '{declared}'")
 
     # Each net entry must reference a known ref.pin exactly once across all nets.
     seen: dict[str, str] = {}     # "REF.PIN" -> net name

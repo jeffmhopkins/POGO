@@ -1,0 +1,180 @@
+# components/symbols/ota.yaml — AUTHORED symbol primitive (the nets `sym:` token = filename).
+# Pin `at` is the connection point; one source drives both the emitted symbol and the pin map.
+# Loaded dynamically by tools/symbols.py (globs components/symbols/*.yaml).
+lib_id: Amplifier_Operational:LM13700
+properties:
+- key: Reference
+  val: U
+  at: [9.144, 9.144, 0.0]
+  font: [1.27, 1.27]
+- key: Value
+  val: LM13700
+  at: [9.144, -9.144, 0.0]
+  font: [1.27, 1.27]
+units:
+- unit: 0
+  style: 1
+  graphics:
+  - kind: rectangle
+    width: 0.0
+    fill: none
+    start: [-1.0, -1.0]
+    end: [1.0, 1.0]
+  pins: []
+- unit: 1
+  style: 1
+  graphics:
+  - kind: rectangle
+    width: 0.254
+    fill: background
+    start: [-8.89, -10.16]
+    end: [8.89, 10.16]
+  pins:
+  - type: input
+    style: line
+    at: [-11.43, 8.89]
+    angle: 0.0
+    len: 2.54
+    name: Iabc_A
+    number: '1'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: input
+    style: line
+    at: [-11.43, 6.35]
+    angle: 0.0
+    len: 2.54
+    name: DiodeBias_A
+    number: '2'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: input
+    style: line
+    at: [-11.43, 3.81]
+    angle: 0.0
+    len: 2.54
+    name: In+_A
+    number: '3'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: input
+    style: line
+    at: [-11.43, 1.27]
+    angle: 0.0
+    len: 2.54
+    name: In-_A
+    number: '4'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: output
+    style: line
+    at: [-11.43, -1.27]
+    angle: 0.0
+    len: 2.54
+    name: Out_A
+    number: '5'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: power_in
+    style: line
+    at: [-11.43, -3.81]
+    angle: 0.0
+    len: 2.54
+    name: V-
+    number: '6'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: input
+    style: line
+    at: [-11.43, -6.35]
+    angle: 0.0
+    len: 2.54
+    name: BufIn_A
+    number: '7'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: output
+    style: line
+    at: [-11.43, -8.89]
+    angle: 0.0
+    len: 2.54
+    name: BufOut_A
+    number: '8'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: output
+    style: line
+    at: [11.43, -8.89]
+    angle: 180.0
+    len: 2.54
+    name: BufOut_B
+    number: '9'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: input
+    style: line
+    at: [11.43, -6.35]
+    angle: 180.0
+    len: 2.54
+    name: BufIn_B
+    number: '10'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: power_in
+    style: line
+    at: [11.43, -3.81]
+    angle: 180.0
+    len: 2.54
+    name: V+
+    number: '11'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: output
+    style: line
+    at: [11.43, -1.27]
+    angle: 180.0
+    len: 2.54
+    name: Out_B
+    number: '12'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: input
+    style: line
+    at: [11.43, 1.27]
+    angle: 180.0
+    len: 2.54
+    name: In-_B
+    number: '13'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: input
+    style: line
+    at: [11.43, 3.81]
+    angle: 180.0
+    len: 2.54
+    name: In+_B
+    number: '14'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: input
+    style: line
+    at: [11.43, 6.35]
+    angle: 180.0
+    len: 2.54
+    name: DiodeBias_B
+    number: '15'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: input
+    style: line
+    at: [11.43, 8.89]
+    angle: 180.0
+    len: 2.54
+    name: Iabc_B
+    number: '16'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+pin_names: {offset: 0.254, hide: true}
+pin_numbers_hide: true
+name: LM13700
+pinout_datasheet: TI LM13700 (SNOSBW2F) p.3 Pin Functions

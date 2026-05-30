@@ -4,6 +4,7 @@ mpn: BZX84C10
 manufacturer: Nexperia
 supplier: '~'
 package: SOT-23
+symbol: zener
 matches:
 - BZX84C10
 footprint:

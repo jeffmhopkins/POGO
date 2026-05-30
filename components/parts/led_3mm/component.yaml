@@ -4,6 +4,7 @@ mpn: '~'
 manufacturer: generic
 supplier: '~'
 package: 3mm THT LED
+symbol: led
 matches:
 - LED 3mm
 footprint:

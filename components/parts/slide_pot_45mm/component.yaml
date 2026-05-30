@@ -4,6 +4,7 @@ mpn: '~'
 manufacturer: Alpha/Alps
 supplier: Thonk
 package: 45mm slide
+symbol: trimpot
 matches:
 - PogoSlider
 footprint:

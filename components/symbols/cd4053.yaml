@@ -1,0 +1,175 @@
+# components/symbols/cd4053.yaml — AUTHORED symbol primitive (the nets `sym:` token = filename).
+# Pin `at` is the connection point; one source drives both the emitted symbol and the pin map.
+# Loaded dynamically by tools/symbols.py (globs components/symbols/*.yaml).
+lib_id: Analog_Switch:CD4053
+properties:
+- key: Reference
+  val: U
+  at: [7.62, 12.7, 0.0]
+  font: [1.27, 1.27]
+- key: Value
+  val: CD4053
+  at: [7.62, -12.7, 0.0]
+  font: [1.27, 1.27]
+units:
+- unit: 0
+  style: 1
+  graphics:
+  - kind: rectangle
+    width: 0.254
+    fill: background
+    start: [-6.35, -11.43]
+    end: [6.35, 11.43]
+  pins: []
+- unit: 1
+  style: 1
+  graphics: []
+  pins:
+  - type: input
+    style: line
+    at: [-8.89, 7.62]
+    angle: 0.0
+    len: 2.54
+    name: A
+    number: '11'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: input
+    style: line
+    at: [-8.89, 5.08]
+    angle: 0.0
+    len: 2.54
+    name: B
+    number: '10'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: input
+    style: line
+    at: [-8.89, 2.54]
+    angle: 0.0
+    len: 2.54
+    name: C
+    number: '9'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: input
+    style: line
+    at: [-8.89, 0.0]
+    angle: 0.0
+    len: 2.54
+    name: INH
+    number: '6'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: power_in
+    style: line
+    at: [-8.89, -2.54]
+    angle: 0.0
+    len: 2.54
+    name: VDD
+    number: '16'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: power_in
+    style: line
+    at: [-8.89, -5.08]
+    angle: 0.0
+    len: 2.54
+    name: VSS
+    number: '8'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: power_in
+    style: line
+    at: [-8.89, -7.62]
+    angle: 0.0
+    len: 2.54
+    name: VEE
+    number: '7'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: bidirectional
+    style: line
+    at: [8.89, 10.16]
+    angle: 180.0
+    len: 2.54
+    name: X
+    number: '14'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: bidirectional
+    style: line
+    at: [8.89, 7.62]
+    angle: 180.0
+    len: 2.54
+    name: X1
+    number: '13'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: bidirectional
+    style: line
+    at: [8.89, 5.08]
+    angle: 180.0
+    len: 2.54
+    name: X0
+    number: '12'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: bidirectional
+    style: line
+    at: [8.89, 2.54]
+    angle: 180.0
+    len: 2.54
+    name: Y
+    number: '15'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: bidirectional
+    style: line
+    at: [8.89, 0.0]
+    angle: 180.0
+    len: 2.54
+    name: Y1
+    number: '1'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: bidirectional
+    style: line
+    at: [8.89, -2.54]
+    angle: 180.0
+    len: 2.54
+    name: Y0
+    number: '2'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: bidirectional
+    style: line
+    at: [8.89, -5.08]
+    angle: 180.0
+    len: 2.54
+    name: Z
+    number: '4'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: bidirectional
+    style: line
+    at: [8.89, -7.62]
+    angle: 180.0
+    len: 2.54
+    name: Z1
+    number: '3'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: bidirectional
+    style: line
+    at: [8.89, -10.16]
+    angle: 180.0
+    len: 2.54
+    name: Z0
+    number: '5'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+pin_names: {offset: 0.254, hide: true}
+pin_numbers_hide: true
+name: CD4053
+pinout_datasheet: TI CD4053B (SCHS059) Pinout

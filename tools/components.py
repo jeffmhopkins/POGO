@@ -27,6 +27,12 @@ _COMPONENTS = _REPO / "components"
 _FOOTPRINTS_YAML = _COMPONENTS / "footprints.yaml"
 _PARTS_DIR = _COMPONENTS / "parts"
 _FP_ROOT = _REPO / "components" / "footprints"
+_SYMBOLS_DIR = _COMPONENTS / "symbols"
+
+
+def _symbol_tokens() -> set[str]:
+    """Known symbol-primitive tokens = components/symbols/<token>.yaml stems."""
+    return {p.stem for p in _SYMBOLS_DIR.glob("*.yaml")}
 
 # Required fields for every part record.
 _PART_REQUIRED = ("slug", "mpn", "package")
@@ -131,6 +137,7 @@ def validate() -> list[str]:
                 errs.append(f"footprints[{t}]: footprint file not found: {path.relative_to(_REPO)}")
 
     # Parts: required fields, unique slugs, footprint files exist when declared.
+    sym_tokens = _symbol_tokens()
     slugs: set[str] = set()
     for p in parts():
         slug = p.get("slug", "?")
@@ -148,6 +155,10 @@ def validate() -> list[str]:
                 path = _FP_ROOT / f'{fpr["lib"]}.pretty' / f'{fpr["name"]}.kicad_mod'
                 if not path.is_file():
                     errs.append(f"part '{slug}': footprint file not found: {path.relative_to(_REPO)}")
+        sym = p.get("symbol")
+        if sym is not None and sym not in sym_tokens:
+            errs.append(f"part '{slug}': symbol '{sym}' is not a known primitive "
+                        f"(components/symbols/{sym}.yaml missing)")
         ds = p.get("datasheet")
         if ds and not ds.get("url"):
             errs.append(f"part '{slug}': datasheet present but has no url")

@@ -2,7 +2,7 @@
 
 - **Slug:** per-file-symbols   **Branch:** `change/per-file-symbols`
 - **Lane:** B (build-system: symbol registry layout + component schema; no plugin DSP / panel geometry / nets connectivity content — schematics + BOM regenerate byte-identical)
-- **Status:** OPEN   **Blocks:** all schematic (structural)   **Boards:** n/a
+- **Status:** IMPLEMENTED (awaiting CI green + merge)   **Blocks:** all schematic (structural)   **Boards:** n/a
 - **Opened:** 2026-05-30
 
 ## Intent
@@ -33,7 +33,25 @@ shape, undoing 0012). Footprints follow the "same idea": the land patterns are a
 - All 5 CI gates green.
 - Docs: CLAUDE.md tree (symbols.yaml → symbols/), SCHEMATIC-GEN-PLAN archetype section.
 
+## Implementation (what landed)
+- `components/symbols/<token>.yaml` × 16 (authored): the monolith `components/symbols.yaml` split
+  one-for-one; `symbols.load()` now globs the dir. Verified: per-file load == monolith for all 16
+  specs (deep-equal), then the monolith deleted.
+- `component.yaml` × 19: each gains `symbol: <token>` after `package:` (the part now selects BOTH its
+  symbol and footprint primitive). `components.py --check` rejects a `symbol:` with no matching file.
+- `generate_schematic.py`: cross-check in `validate_block` — a ref with a `part:` must wire the same
+  `sym:` its resolved part declares as `symbol:`. Negative-tested (flip opa1612 → opamp4 ⇒ FAIL).
+
+## Verification (actual)
+- All 10 `.kicad_sch` and `pogo-bom.csv` BYTE-IDENTICAL (git shows zero generated-artifact changes;
+  `--check` clean without regen).
+- `tools/symbols.py --check` → 16 archetypes OK; all 5 CI gates green.
+- jack pin⊆pad WARN unchanged (pre-existing, tracked separately).
+
 ## Decisions log
 - 2026-05-30: per-archetype files (not per-MPN fold) + component-selected symbol primitive
   (maintainer: "individual files for each component… have the component itself select the primitive…
   each component fully self-contained").
+- 2026-05-30: footprints NOT further split — the `.kicad_mod` are already individual primitives and
+  `footprints.yaml` is the panel-side selector (order-significant); the symmetry the maintainer asked
+  for ("component selects the primitive") is the new `symbol:`/existing `footprint:` part fields.

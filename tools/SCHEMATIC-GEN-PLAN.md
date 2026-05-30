@@ -12,15 +12,16 @@ order, symbol gaps, and per-block transcription checklist*.
 ## How a block gets added (the repeatable unit of work)
 
 1. Write `specs/<block>/<block>.nets.yaml`:
-   - `parts:` — each `REF: { sym, part?, value }`. `sym` selects a symbol archetype
-     (lib symbol + pin geometry) from `components/symbols.yaml`; `part` (optional)
+   - `parts:` — each `REF: { sym, part?, value }`. `sym` selects a symbol primitive
+     (lib symbol + pin geometry) `components/symbols/<sym>.yaml`; `part` (optional)
      binds to the `components/` registry by a `matches[]` string for footprint/MPN;
-     passives use `value` only.
+     passives use `value` only. A sourced part also declares its `symbol:` in
+     `component.yaml`; `generate_schematic.py --check` asserts the two agree.
    - `nets:` — `NET_NAME: [REF.PIN, ...]`. Name-based connectivity.
    - `no_connect:` — every pin not in a net (e.g. LM13700 pin 12, THAT2180 pin 7).
    - `boundary:` — nets that leave the sheet to other blocks (doc + label shape).
-2. If the block uses a symbol not yet in `components/symbols.yaml`, add the archetype
-   there (lib_id, body graphics, per-unit pins with their `at` connection point, and a
+2. If the block uses a symbol not yet present, add `components/symbols/<token>.yaml`
+   (lib_id, body graphics, per-unit pins with their `at` connection point, and a
    `pinout_datasheet:` citation for non-primitives — `tools/symbols.py --check` enforces it).
 3. `python3 tools/generate_schematic.py --block <block>` → emits
    `kicad/pogo-<block>.kicad_sch`.
@@ -92,10 +93,10 @@ Remaining: **none** — all 10 blocks transcribed and `--check` clean (10/10). T
 
 ---
 
-## Symbol archetypes (`components/symbols.yaml`)
+## Symbol primitives (`components/symbols/<token>.yaml`)
 
-Symbols are **authored data**, not code. Each `sym:` token in a nets file keys an
-archetype in `components/symbols.yaml`; `tools/symbols.py` loads it and provides the
+Symbols are **authored data**, not code — one self-contained file per primitive, the
+filename being the nets `sym:` token. `tools/symbols.py` globs the dir and provides the
 emitter (`emit_symbol`), the pin connection-points (`pin_points`, the single source
 shared by emit + coverage), multi-unit `placement`, and the `selfcheck()` gate. A
 pin's `at` coordinate IS its connection point, so the lib-symbol geometry and the
