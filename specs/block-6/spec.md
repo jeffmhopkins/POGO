@@ -9,6 +9,8 @@ DSP source: `plugin/src/dsp/BandpassSVF.hpp`, `plugin/src/dsp/Distortion.hpp`, `
 
 Three bandpass resonators — each freely tunable over ~50 Hz–3.2 kHz (F_REF = 400 Hz at param = 0). Together they act as a resonator bank, vowel sculptor, or harmonic comb filter. All three bands default to the same center frequency; the user positions them independently via the per-band FREQ knobs.
 
+**Per-band signal order (change 0018, matching the locked plugin `Pogo.cpp:443–451`): DISTORTION *before* the bandpass.** Each band is `input → DISTn (drive + SC/HC/WF) → SVFn (2-pole bandpass) → band output`; the three band outputs are then summed and dry/wet-mixed. (BP1/BP2 input = LP1 band; BP3 input = the ALT-VCA-or-LP1 selector — see ALT path.) The hardware nets carry this as `LP1_OUT/BP3IN → distN → BPn_DISTOUT → svfN → BPn_BANDOUT/BP3_TAP → mix`.
+
 ### Global BP master controls
 
 **BP_OFFSET** shifts all three bands simultaneously (master V/oct offset). **BP_TILT** creates global stereo spread — L channel gets +tiltV, R gets −tiltV — separating the band positions across the stereo field.
@@ -30,17 +32,23 @@ Each band has:
 - **FREQ knob** (xl): per-band frequency offset in V/oct; F_REF = 400 Hz → range ~50 Hz–3.2 kHz
 - **FOCUS knob** (large): resonance (Q); `Q = 0.5 × 400^focus` → Q range 0.5–200; does not self-oscillate
 - **TILT knob** (large): per-band stereo spread, additive with global BP_TILT
-- **DIST knob** (large): per-band drive depth (0–1), applied post-SVF before distortion cell
-- **CLIP LED**: illuminates when the per-band distortion output exceeds ±4 V
+- **DIST knob** (large): per-band drive depth (0–1) into the distortion cell, which sits **before** the bandpass (0.20 = unity/threshold)
+- **CLIP LED**: illuminates when the per-band distortion output (pre-bandpass) exceeds ±4 V
 - CV inputs per band: FREQ, TILT, DIST jacks (each with attenuverter trimpot)
 
 ### ALT path
 
-`ALT_BP_L/R` jacks feed the BP input directly (bypassing VCA + LP1); the `ALT_GAIN` switch selects 1× or 5× pre-gain. When patched, BP processes the ALT signal instead of LP1 output.
+`ALT_BP_L/R` jacks (with the `ALT_GAIN` 1×/5× switch) feed **BP3 only**, and the ALT signal still
+passes **through the VCA** (same control as the main path) — it bypasses **LP1**, not the VCA (see
+block-1/block-4). A per-channel selector (block-6, BP3) routes the ALT-VCA signal (block-4
+`ALT_VCA_OUT_L/R`) into BP3's input when the ALT jacks are patched, else BP3 takes the LP1 band.
+BP1 and BP2 always take the LP1 band.
 
 ### BP3 output tap
 
-`BP3_L_OUT` and `BP3_R_OUT` jacks provide the BP3 per-band distortion output before the final mix — useful for parallel processing or sidechain routing.
+`BP3_L_OUT` and `BP3_R_OUT` jacks provide BP3's **post-bandpass band output** (the filtered BP3
+voice, after its distortion+SVF, before the 3-band sum and dry/wet mix) — useful for parallel
+processing or sidechain routing. R normals to L when the R jack is unpatched.
 
 
 ---
@@ -211,7 +219,7 @@ Standard SVF BP peak is 1× (constant unity, independent of Q). No normalization
 - All 3 CD4053 select pins tied together → BP_DIST switch controls all groups simultaneously
 - One Dailywell DW5 (2M DPDT ON-ON-ON) toggle → its two poles give the 2 select lines to all 3 CD4053 ICs
 - Distortion runs post-SVF at audio rate (no oversampling in analog hardware)
-- BP3 output tap: taken after distortion stage on group 3, available at BP3_L/R_OUT jacks
+- BP3 output tap: taken at group 3's **post-bandpass** band output (`BP3_TAP`, after DIST3→SVF3), available at BP3_L/R_OUT jacks
 
 **Oversampling:**
 - None. Hardware and DSP both run at base sample rate. Analog hardware is inherently alias-free; no oversampling required.
@@ -402,7 +410,7 @@ Channel X (control S_A):
 Channel Y (control S_B):
   Y0 input ← Channel X output
   Y1 input ← WF_out
-  Y output → DIST_out (→ BP_MIX input)
+  Y output → DIST_out (→ BPn_DISTOUT → SVF input; the SVF band output then goes to the mix)
 
 Channel Z: spare (inputs tied to GND; output unused)
 ```

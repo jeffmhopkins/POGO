@@ -1054,13 +1054,13 @@
   (effects (font (size 1.016 1.016)) (justify left))
   (uuid "dd63fdab-fd9a-566d-9bcf-e2309c067701")
 )
-(global_label "LP1_OUT_L"
+(global_label "BP1_DISTOUT_L"
   (shape output)
   (at 40.000 483.810 0)
   (effects (font (size 1.016 1.016)) (justify left))
   (uuid "43a04102-43f9-59b5-9d15-6221ece341f7")
 )
-(global_label "LP1_OUT_R"
+(global_label "BP1_DISTOUT_R"
   (shape output)
   (at 40.000 703.810 0)
   (effects (font (size 1.016 1.016)) (justify left))
@@ -1204,13 +1204,13 @@
   (effects (font (size 1.016 1.016)) (justify left))
   (uuid "96c60f75-7cda-5a8f-9ab6-97cc810343c6")
 )
-(global_label "BP1_BPBUF_L"
+(global_label "BP1_BANDOUT_L"
   (shape output)
   (at 47.620 172.000 0)
   (effects (font (size 1.016 1.016)) (justify left))
   (uuid "224e85af-3e1f-5813-b30b-0b815d6419aa")
 )
-(global_label "BP1_BPBUF_L"
+(global_label "BP1_BANDOUT_L"
   (shape output)
   (at 32.380 174.540 0)
   (effects (font (size 1.016 1.016)) (justify left))
@@ -1396,13 +1396,13 @@
   (effects (font (size 1.016 1.016)) (justify left))
   (uuid "0520ea0f-e984-5c93-a3ad-a29f43556805")
 )
-(global_label "BP1_BPBUF_R"
+(global_label "BP1_BANDOUT_R"
   (shape output)
   (at 47.620 227.000 0)
   (effects (font (size 1.016 1.016)) (justify left))
   (uuid "edd72e93-3552-57a5-a7df-90a41843b567")
 )
-(global_label "BP1_BPBUF_R"
+(global_label "BP1_BANDOUT_R"
   (shape output)
   (at 32.380 229.540 0)
   (effects (font (size 1.016 1.016)) (justify left))
