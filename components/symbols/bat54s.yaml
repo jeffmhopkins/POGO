@@ -1,0 +1,93 @@
+# components/symbols/bat54s.yaml — AUTHORED symbol primitive (the nets `sym:` token = filename).
+# Pin `at` is the connection point; one source drives both the emitted symbol and the pin map.
+# Loaded dynamically by tools/symbols.py (globs components/symbols/*.yaml).
+lib_id: Diode:BAT54S
+properties:
+- key: Reference
+  val: D
+  at: [0.0, 3.81, 0.0]
+  font: [1.27, 1.27]
+- key: Value
+  val: BAT54S
+  at: [0.0, 2.54, 0.0]
+  font: [1.27, 1.27]
+units:
+- unit: 0
+  style: 1
+  graphics:
+  - kind: polyline
+    width: 0.254
+    fill: none
+    pts:
+    - [-5.08, 0.0]
+    - [5.08, 0.0]
+  - kind: polyline
+    width: 0.254
+    fill: none
+    pts:
+    - [0.0, 0.0]
+    - [0.0, -2.54]
+  - kind: polyline
+    width: 0.254
+    fill: none
+    pts:
+    - [-3.302, 1.016]
+    - [-1.778, 0.0]
+    - [-3.302, -1.016]
+    - [-3.302, 1.016]
+  - kind: polyline
+    width: 0.254
+    fill: none
+    pts:
+    - [-1.778, 1.016]
+    - [-1.778, -1.016]
+  - kind: polyline
+    width: 0.254
+    fill: none
+    pts:
+    - [1.778, 1.016]
+    - [3.302, 0.0]
+    - [1.778, -1.016]
+    - [1.778, 1.016]
+  - kind: polyline
+    width: 0.254
+    fill: none
+    pts:
+    - [3.302, 1.016]
+    - [3.302, -1.016]
+  pins: []
+- unit: 1
+  style: 1
+  graphics: []
+  pins:
+  - type: passive
+    style: line
+    at: [-7.62, 0.0]
+    angle: 0.0
+    len: 2.54
+    name: A1
+    number: '1'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: passive
+    style: line
+    at: [0.0, -5.08]
+    angle: 90.0
+    len: 2.54
+    name: COM
+    number: '2'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: passive
+    style: line
+    at: [7.62, 0.0]
+    angle: 180.0
+    len: 2.54
+    name: K2
+    number: '3'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+pin_names: {offset: 0.254, hide: true}
+pin_numbers_hide: true
+name: BAT54S
+pinout_datasheet: Diodes Inc BAT54S (DS11005) Pin Config

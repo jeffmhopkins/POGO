@@ -4,6 +4,7 @@ mpn: TL074CDT
 manufacturer: Texas Instruments
 supplier: '~'
 package: SOIC-14
+symbol: opamp4
 matches:
 - TL074CDT
 footprint:

@@ -1,0 +1,103 @@
+# components/symbols/vca.yaml — AUTHORED symbol primitive (the nets `sym:` token = filename).
+# Pin `at` is the connection point; one source drives both the emitted symbol and the pin map.
+# Loaded dynamically by tools/symbols.py (globs components/symbols/*.yaml).
+lib_id: POGO:THAT2180
+properties:
+- key: Reference
+  val: U
+  at: [5.08, 7.62, 0.0]
+  font: [1.27, 1.27]
+- key: Value
+  val: THAT2180
+  at: [5.08, -7.62, 0.0]
+  font: [1.27, 1.27]
+units:
+- unit: 0
+  style: 1
+  graphics:
+  - kind: rectangle
+    width: 0.254
+    fill: background
+    start: [-6.35, -6.35]
+    end: [6.35, 6.35]
+  pins: []
+- unit: 1
+  style: 1
+  graphics: []
+  pins:
+  - type: input
+    style: line
+    at: [-8.89, 5.08]
+    angle: 0.0
+    len: 2.54
+    name: Input
+    number: '1'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: input
+    style: line
+    at: [-8.89, 2.54]
+    angle: 0.0
+    len: 2.54
+    name: Ec+
+    number: '2'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: input
+    style: line
+    at: [-8.89, 0.0]
+    angle: 0.0
+    len: 2.54
+    name: Ec-
+    number: '3'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: input
+    style: line
+    at: [-8.89, -2.54]
+    angle: 0.0
+    len: 2.54
+    name: Sym
+    number: '4'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: power_in
+    style: line
+    at: [-8.89, -5.08]
+    angle: 0.0
+    len: 2.54
+    name: Gnd
+    number: '6'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: output
+    style: line
+    at: [8.89, 5.08]
+    angle: 180.0
+    len: 2.54
+    name: Output
+    number: '8'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: power_in
+    style: line
+    at: [8.89, 2.54]
+    angle: 180.0
+    len: 2.54
+    name: V+
+    number: '7'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+  - type: power_in
+    style: line
+    at: [8.89, -2.54]
+    angle: 180.0
+    len: 2.54
+    name: V-
+    number: '5'
+    name_font: [1.016, 1.016]
+    num_font: [1.016, 1.016]
+pin_names: {offset: 0.254, hide: true}
+pin_numbers_hide: true
+name: THAT2180
+pinout_datasheet: THAT 2180 (Doc 600029 Rev 02) Table 1

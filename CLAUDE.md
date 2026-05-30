@@ -85,7 +85,7 @@ POGO/
 │   ├── components.py · build_components.py · footprint_svg.py · fetch_datasheets.py  ← components/BOM
 │   ├── generate_schematic.py     ← nets (specs/block-*/) → kicad/pogo-*.kicad_sch (--check gate)
 │   ├── gen_block6.py             ← block-6 netlist generator (3-group repetition)
-│   ├── symbols.py                ← loads components/symbols.yaml → emit + pin geometry + self-test
+│   ├── symbols.py                ← globs components/symbols/*.yaml → emit + pin geometry + self-test
 │   ├── kicad_common.py           ← generic KiCad s-expr emit primitives (symbol-agnostic)
 │   └── SCHEMATIC-GEN-PLAN.md     ← schematic rollout plan / per-block gate doc
 │
@@ -132,11 +132,13 @@ POGO/
 │   └── archive/
 │       └── 40hp-era-2026-05/     ← Superseded 40HP specs (envelope follower, old block names)
 │
-├── components/                   ← Component SOURCING (catalog + footprints + datasheets)
-│   ├── parts/<slug>/             ← one sourced part: component.yaml + datasheet.pdf
-│   ├── footprints/*.pretty       ← vendored KiCad footprint libs (resolve as POGO_*)
-│   ├── footprints.yaml           ← panel-type → footprint bindings
-│   └── symbols.yaml              ← authored KiCad symbol archetypes (lib_id, body, pin geometry, datasheet)
+├── components/                   ← Component SOURCING (catalog + footprints + symbols + datasheets)
+│   ├── parts/<slug>/             ← one self-contained sourced part: component.yaml (selects its
+│   │                               symbol + footprint primitive, mpn, datasheet) + datasheet.pdf
+│   ├── footprints/*.pretty       ← vendored KiCad footprint PRIMITIVES (.kicad_mod; resolve as POGO_*)
+│   ├── footprints.yaml           ← panel-type → footprint binding (panel-side primitive selector)
+│   └── symbols/<token>.yaml      ← authored KiCad symbol PRIMITIVES, one file per nets `sym:` token
+│                                   (lib_id, body, pin geometry, datasheet); globbed by tools/symbols.py
 │
 └── kicad/                        ← Generated KiCad artifacts (output only; generators in tools/)
     ├── pogo-*.kicad_sch          ← generated per-block schematics
@@ -370,7 +372,7 @@ spawns a **separate Lane A change** — the plugin leads; the schematic never si
 4. **Lock** [assistant, auto on G3] — record `Plugin LOCKED @ <blob-hashes>` (the locked `plugin/src/**` DSP files + `panel-data.yaml`) in the change file. These are frozen for the change; any further plugin/panel edit re-opens G2/G3. (Blob hashes, not commit SHA, so the record survives squash-merge.)
 5. **Spec** [assistant] — update affected block spec(s): §1 Intent + the functional spec to the locked behavior; assistant asserts parity vs the locked plugin. **G4**: you approve.
 6. **Topology + components** [assistant proposes] — topology prose only (spec §2, referencing `aux/*`); list any new component with rationale + candidate part/footprint. **G5**: you approve the topology. **G6a**: you approve each new component → it is added to `specs/components.yaml` (ref-uniqueness + `qty` rules) + the `components/` registry (`matches[]`) + datasheet entry. **G6b**: its footprint exists — resolves to a real library footprint, or a vendored `.kicad_mod` committed under `components/footprints/` with a datasheet land-pattern citation. **G6 must close before any netlist references the part.**
-7. **Schematic + artifacts** [assistant] — update the block's netlist source `specs/<block>/<block>.nets.yaml` (+ any new datasheet-cited symbol archetype in `components/symbols.yaml`), regenerate, **commit the generated `kicad/pogo-<block>.kicad_sch`** (it stays in `kicad/`, kept in sync with its `specs/` netlist by `generate_schematic.py --check`, not by directory adjacency); for every changed `boundary:` net, update *both* sheets and re-check. Build/refresh artifacts: schematic, `kicad/pogo-bom.csv`, panel (`plugin/res/Pogo*.svg` + `docs/panel-debug.html`). Link them in the change file (paths/links, not copies; the `.vcvplugin` lives only in the Actions run).
+7. **Schematic + artifacts** [assistant] — update the block's netlist source `specs/<block>/<block>.nets.yaml` (+ any new datasheet-cited symbol primitive `components/symbols/<token>.yaml`; a sourced part also declares `symbol:` in its `component.yaml`), regenerate, **commit the generated `kicad/pogo-<block>.kicad_sch`** (it stays in `kicad/`, kept in sync with its `specs/` netlist by `generate_schematic.py --check`, not by directory adjacency); for every changed `boundary:` net, update *both* sheets and re-check. Build/refresh artifacts: schematic, `kicad/pogo-bom.csv`, panel (`plugin/res/Pogo*.svg` + `docs/panel-debug.html`). Link them in the change file (paths/links, not copies; the `.vcvplugin` lives only in the Actions run).
 8. **Close** [assistant] — for a Lane A behavioral change, bump `plugin/plugin.json` `version` (semver) and tag the squash-merge; update `specs/STATUS.md` (reuse the `✅ ⚠️ 🔲 🚧` vocabulary; bump `Last updated`) and `tools/SCHEMATIC-GEN-PLAN.md` if a block's schematic moved; PR `change/<slug>` → `dev`; squash-merge on green CI. **Abandoned change** → set the change file `Status: ABANDONED` + reason, close-out PR with *only* the change file (discard the code commits).
 
 **Gates are hard stops** (assistant waits for your explicit OK): G1 intent · G2 panel · G3 behavior · G4 spec · G5 topology · G6a/b component+footprint. On rejection: log the reason in the decisions log, revert dependent work to the last gate-approved state, and re-enter at the failed step.

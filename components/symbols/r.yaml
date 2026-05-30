@@ -1,0 +1,49 @@
+# components/symbols/r.yaml — AUTHORED symbol primitive (the nets `sym:` token = filename).
+# Pin `at` is the connection point; one source drives both the emitted symbol and the pin map.
+# Loaded dynamically by tools/symbols.py (globs components/symbols/*.yaml).
+lib_id: Device:R
+properties:
+- key: Reference
+  val: R
+  at: [1.778, 0.0, 90.0]
+  font: [1.27, 1.27]
+- key: Value
+  val: R
+  at: [-1.778, 0.0, 90.0]
+  font: [1.27, 1.27]
+units:
+- unit: 0
+  style: 1
+  graphics:
+  - kind: rectangle
+    width: 0.254
+    fill: none
+    start: [-1.016, -2.032]
+    end: [1.016, 2.032]
+  pins: []
+- unit: 1
+  style: 1
+  graphics: []
+  pins:
+  - type: passive
+    style: line
+    at: [0.0, 3.81]
+    angle: 270.0
+    len: 1.778
+    name: '~'
+    number: '1'
+    name_font: [1.27, 1.27]
+    num_font: [1.27, 1.27]
+  - type: passive
+    style: line
+    at: [0.0, -3.81]
+    angle: 90.0
+    len: 1.778
+    name: '~'
+    number: '2'
+    name_font: [1.27, 1.27]
+    num_font: [1.27, 1.27]
+pin_names: {offset: 0.0, hide: true}
+pin_numbers_hide: true
+name: R
+primitive: true

@@ -4,6 +4,7 @@ mpn: LM13700M
 manufacturer: Texas Instruments
 supplier: '~'
 package: SOIC-16
+symbol: ota
 matches:
 - LM13700M
 footprint:

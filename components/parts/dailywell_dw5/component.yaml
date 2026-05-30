@@ -4,6 +4,7 @@ mpn: DW5 (2M DPDT ON-ON-ON)
 manufacturer: Dailywell
 supplier: Thonk
 package: sub-mini toggle 2M
+symbol: dw5
 matches:
 - Dailywell DW5 (2M DPDT ON-ON-ON)
 footprint:

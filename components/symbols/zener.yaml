@@ -1,0 +1,62 @@
+# components/symbols/zener.yaml — AUTHORED symbol primitive (the nets `sym:` token = filename).
+# Pin `at` is the connection point; one source drives both the emitted symbol and the pin map.
+# Loaded dynamically by tools/symbols.py (globs components/symbols/*.yaml).
+lib_id: Diode:D_Zener
+properties:
+- key: Reference
+  val: D
+  at: [2.032, 0.0, 90.0]
+  font: [1.27, 1.27]
+- key: Value
+  val: D_Zener
+  at: [-2.032, 0.0, 90.0]
+  font: [1.27, 1.27]
+units:
+- unit: 0
+  style: 1
+  graphics:
+  - kind: polyline
+    width: 0.254
+    fill: none
+    pts:
+    - [-1.27, 1.016]
+    - [1.27, 1.016]
+    - [0.0, -1.27]
+    - [-1.27, 1.016]
+  - kind: polyline
+    width: 0.254
+    fill: none
+    pts:
+    - [-1.778, 1.27]
+    - [-1.27, 1.27]
+    - [-1.27, 1.016]
+    - [1.27, 1.016]
+    - [1.27, 0.762]
+    - [1.778, 0.762]
+  pins: []
+- unit: 1
+  style: 1
+  graphics: []
+  pins:
+  - type: passive
+    style: line
+    at: [0.0, 3.81]
+    angle: 270.0
+    len: 2.794
+    name: A
+    number: '1'
+    name_font: [1.27, 1.27]
+    num_font: [1.27, 1.27]
+  - type: passive
+    style: line
+    at: [0.0, -3.81]
+    angle: 90.0
+    len: 2.794
+    name: K
+    number: '3'
+    name_font: [1.27, 1.27]
+    num_font: [1.27, 1.27]
+pin_names: {offset: 0.0, hide: true}
+pin_numbers_hide: true
+name: D_Zener
+pinout_datasheet: BZX84C series (NXP) Pinning

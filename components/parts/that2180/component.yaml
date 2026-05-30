@@ -4,6 +4,7 @@ mpn: THAT2180LD
 manufacturer: THAT Corporation
 supplier: '~'
 package: SOIC-8
+symbol: vca
 matches:
 - THAT2180
 footprint:

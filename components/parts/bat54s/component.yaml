@@ -4,6 +4,7 @@ mpn: BAT54S
 manufacturer: Diodes Inc.
 supplier: '~'
 package: SOT-23
+symbol: bat54s
 matches:
 - BAT54S
 footprint:

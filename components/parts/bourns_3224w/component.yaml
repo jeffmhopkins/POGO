@@ -4,6 +4,7 @@ mpn: 3224W-1-xxx
 manufacturer: Bourns
 supplier: '~'
 package: SMD
+symbol: trimpot
 matches:
 - Bourns 3224W
 footprint:

@@ -4,6 +4,7 @@ mpn: 3296W-1-xxx
 manufacturer: Bourns
 supplier: '~'
 package: through-hole
+symbol: trimpot
 matches:
 - Bourns 3296W
 footprint:

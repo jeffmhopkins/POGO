@@ -22,7 +22,7 @@ from pathlib import Path
 import yaml
 
 _REPO = Path(__file__).resolve().parent.parent
-_SYMBOLS_YAML = _REPO / "components" / "symbols.yaml"
+_SYMBOLS_DIR = _REPO / "components" / "symbols"
 
 
 # ── s-expr tokenizer (shared shape with generate_schematic) ───────────────────
@@ -288,9 +288,12 @@ _CACHE = None
 
 
 def load() -> dict:
+    """{token: spec} from components/symbols/*.yaml — one self-contained file per
+    symbol primitive, the filename stem being the nets `sym:` token."""
     global _CACHE
     if _CACHE is None:
-        _CACHE = yaml.safe_load(_SYMBOLS_YAML.read_text())["archetypes"]
+        _CACHE = {p.stem: yaml.safe_load(p.read_text())
+                  for p in sorted(_SYMBOLS_DIR.glob("*.yaml"))}
     return _CACHE
 
 

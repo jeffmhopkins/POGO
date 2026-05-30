@@ -1,0 +1,70 @@
+# components/symbols/led.yaml — AUTHORED symbol primitive (the nets `sym:` token = filename).
+# Pin `at` is the connection point; one source drives both the emitted symbol and the pin map.
+# Loaded dynamically by tools/symbols.py (globs components/symbols/*.yaml).
+lib_id: Device:LED
+properties:
+- key: Reference
+  val: LED
+  at: [2.54, 0.0, 90.0]
+  font: [1.27, 1.27]
+- key: Value
+  val: LED
+  at: [-2.54, 0.0, 90.0]
+  font: [1.27, 1.27]
+units:
+- unit: 0
+  style: 1
+  graphics:
+  - kind: polyline
+    width: 0.254
+    fill: none
+    pts:
+    - [-1.27, 1.27]
+    - [1.27, 1.27]
+    - [0.0, -1.016]
+    - [-1.27, 1.27]
+  - kind: polyline
+    width: 0.254
+    fill: none
+    pts:
+    - [-1.27, -1.016]
+    - [1.27, -1.016]
+  - kind: polyline
+    width: 0.254
+    fill: none
+    pts:
+    - [1.27, 1.778]
+    - [2.286, 2.794]
+  - kind: polyline
+    width: 0.254
+    fill: none
+    pts:
+    - [0.254, 2.032]
+    - [1.27, 3.048]
+  pins: []
+- unit: 1
+  style: 1
+  graphics: []
+  pins:
+  - type: passive
+    style: line
+    at: [0.0, 3.81]
+    angle: 270.0
+    len: 2.794
+    name: A
+    number: A
+    name_font: [1.27, 1.27]
+    num_font: [1.27, 1.27]
+  - type: passive
+    style: line
+    at: [0.0, -3.81]
+    angle: 90.0
+    len: 2.794
+    name: K
+    number: K
+    name_font: [1.27, 1.27]
+    num_font: [1.27, 1.27]
+pin_names: {offset: 1.016, hide: true}
+pin_numbers_hide: true
+name: LED
+primitive: true
