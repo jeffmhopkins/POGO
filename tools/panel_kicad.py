@@ -148,19 +148,21 @@ def footprint_shapes(ctype: str) -> list[tuple[float, float, float, float]]:
         rects.append((p["x"] - w / 2 - ox, p["y"] - h / 2 - oy,
                       p["x"] + w / 2 - ox, p["y"] + h / 2 - oy))
 
-    # body — prefer an F.Fab circle (round body); else the F.Fab outline bbox
-    fab_circ = [p for p in prims if p.get("t") == "circle" and "Fab" in p.get("layer", "")]
-    if fab_circ:
-        c = fab_circ[0]
-        rects.append((c["cx"] - c["r"] - ox, c["cy"] - c["r"] - oy,
-                      c["cx"] + c["r"] - ox, c["cy"] + c["r"] - oy))
-    else:
-        xs, ys = [], []
-        for p in prims:
-            if p.get("t") == "line" and "Fab" in p.get("layer", ""):
-                xs += [p["x1"], p["x2"]]; ys += [p["y1"], p["y2"]]
-        if xs:
-            rects.append((min(xs) - ox, min(ys) - oy, max(xs) - ox, max(ys) - oy))
+    # body — bounding box of the ENTIRE F.Fab outline (lines ∪ circles). The body
+    # keepout is the whole component outline; a footprint may carry both an outline
+    # rectangle (the real body, e.g. a 9mm pot's squarish base) AND a small indicator
+    # circle (the shaft/bushing) — taking the union avoids grabbing the tiny indicator
+    # and under-claiming the body (the bug behind pots/jacks not colliding).
+    xs, ys = [], []
+    for p in prims:
+        if "Fab" not in p.get("layer", ""):
+            continue
+        if p.get("t") == "line":
+            xs += [p["x1"], p["x2"]]; ys += [p["y1"], p["y2"]]
+        elif p.get("t") == "circle":
+            xs += [p["cx"] - p["r"], p["cx"] + p["r"]]; ys += [p["cy"] - p["r"], p["cy"] + p["r"]]
+    if xs:
+        rects.append((min(xs) - ox, min(ys) - oy, max(xs) - ox, max(ys) - oy))
 
     return rects
 
