@@ -31,7 +31,7 @@ MODULATION (parallel)
 ────────────────────────────────────────────────────────────────────────────────────────
   [block-2]  Dual LFO  →  LFO1 (±5V triangle, 0.05–20 Hz), LFO2 (same, independent)
   [block-3]  Mod Bus   →  LFO1 normalizes into MOD_IN; MOD_SCALE (0.2–5×), MOD_OFFSET (±5V)
-                          Bus → 20 CV destinations (each: override jack + attenuverter trimpot)
+                          Bus → 19 CV destinations (each: override jack + attenuverter trimpot)
                           LEDs: MOD_CLIP, MOD_POS, MOD_NEG
 ```
 

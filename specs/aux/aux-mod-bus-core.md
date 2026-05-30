@@ -204,7 +204,7 @@ is consistent with the mod bus gain calibration.
 | MOD_CLIP threshold | ±9.9V (±10V nominal) | Zener knee |
 | Bandwidth | >100 kHz | TL074; not audio-critical |
 | Offset null | <10 mV | After RV_MB_ZERO trim |
-| Output drive | 22 mA (buffered) | 22 attenuverter loads |
+| Output drive | 22 mA (buffered) | 19 attenuverter loads |
 
 ## Known Gotchas / Assembly Notes
 
@@ -219,7 +219,7 @@ is consistent with the mod bus gain calibration.
 - RV_MB_AMOUNT_MAX trim: apply a reference signal (e.g. 1V DC), set AMOUNT
   to max CW, trim until V_modbus = 5× input (5V DC)
 - Mod bus distribution buffer: essential given the 455 Ω combined load from
-  22 attenuverters; without it, TL074 half B is dissipating up to 220 mW (!!!)
+  19 attenuverters; without it, TL074 half B is dissipating up to 220 mW (!!!)
   at maximum V_modbus — add the buffer, it is not optional
 - MOD_IN jack normalling: LFO1_OUT connects to the NC contact of J_MOD_IN;
   when unpatched, LFO1 feeds the mod bus; when patched, external CV takes over.
@@ -232,5 +232,5 @@ is consistent with the mod bus gain calibration.
 
 | Block | Instance | Board | Notes |
 |---|---|---|---|
-| block-3 | MB_PROC | Control | Single instance; feeds all 22 attenuverters |
+| block-3 | MB_PROC | Control | Single instance; feeds all 19 attenuverters |
 | block-2 | LFO1 normalized in | Control | LFO1_OUT → NC contact of J_MOD_IN |

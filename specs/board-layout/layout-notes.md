@@ -60,7 +60,7 @@ Control board: ~244mm × 80mm (full 48HP width)
   - Connects to utility board via IDC ribbon cables
 
 Utility board: ~244mm × 80mm
-  - Mod bus processor, 22 attenuverter circuits, expo converters
+  - Mod bus processor, 19 attenuverter circuits, expo converters
   - Receives control voltages from control board via IDC ribbon
   - Connects to audio board via stacking headers
 

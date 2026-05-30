@@ -58,10 +58,11 @@ Each band has:
 > - **BP = the same 2-pole Simper SVF as LP1/HP/LP2** (`BandpassSVF.hpp` confirms it),
 >   so the topology mirrors block-5/8 but taps **v1 (BP)** instead of v2 (LP). Each group
 >   has its own per-channel Q-VCA OTA (U67-69) injecting damping current at the SUM_AMP
->   virtual ground, exactly like the shared-q sheet.
+>   virtual ground, exactly like the block-5-hosted shared Q-VCAs.
 > - **CD4053 mux is a stereo 1-of-3 built from two CD4053 per group** (muxB picks HC↔WF
 >   into a MID node; muxA picks SC↔MID), L on the X channel, R on the Y channel, Z spare.
-> - **CD4053 symbol pinout was wrong** in `kicad_common.py` and has been corrected to the
+> - **CD4053 symbol pinout was wrong** (now authored in `components/symbols/cd4053.yaml`) and
+>   has been corrected to the
 >   TI CD4053B datasheet (selects A/B/C = 11/10/9; X com/0/1 = 14/12/13; Y = 15/2/1;
 >   Z = 4/5/3). The prior symbol scrambled the channel numbers and overlapped VEE with a
 >   signal pin.

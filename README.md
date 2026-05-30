@@ -86,7 +86,8 @@ POGO/
 │   ├── build_panel.py             ← panel CLI: --check/--resource/--design/--cpp/--mfr
 │   ├── panel_svg.py · panel_rules.py · panel_cpp.py · panel_editor.py · panel_kicad.py
 │   ├── components.py · build_components.py · footprint_svg.py · fetch_datasheets.py  ← components/BOM
-│   ├── generate_schematic.py · gen_block6.py · kicad_common.py  ← schematic generator
+│   ├── generate_schematic.py · gen_block6.py  ← schematic generator (nets → .kicad_sch)
+│   ├── symbols.py · kicad_common.py  ← symbol loader/emitter + generic s-expr primitives
 │   ├── SCHEMATIC-GEN-PLAN.md      ← schematic rollout plan / gate doc
 │   └── panel-tool-guide.md
 │
@@ -128,10 +129,12 @@ POGO/
 │   ├── board-layout/layout-notes.md
 │   └── archive/40hp-era-2026-05/  ← Superseded 40HP specs
 │
-├── components/                    ← Component SOURCING (catalog + footprints + datasheets)
-│   ├── parts/<slug>/              ← Per-part: component.yaml (footprint, MPN, datasheet) + datasheet.pdf
-│   ├── footprints/*.pretty        ← Vendored KiCad footprint libs (resolve as POGO_*)
-│   ├── footprints.yaml            ← panel-type → footprint bindings
+├── components/                    ← Component SOURCING (catalog + footprints + symbols + datasheets)
+│   ├── parts/<slug>/              ← Per-part: component.yaml (selects symbol + footprint primitive,
+│   │                                MPN, datasheet) + datasheet.pdf
+│   ├── footprints/*.pretty        ← Vendored KiCad footprint primitives (resolve as POGO_*)
+│   ├── footprints.yaml            ← panel-type → footprint binding
+│   ├── symbols/<token>.yaml       ← Authored KiCad symbol primitives (one file per nets `sym:` token)
 │   └── README.md
 │
 ├── kicad/                         ← Generated KiCad artifacts (output only; generators in tools/)
@@ -175,8 +178,9 @@ open docs/panel-debug.html
 Schematics are **data-driven and generated per block**. Each block's netlist source lives
 with its spec (`specs/<block>/<block>.nets.yaml`) listing parts and name-based nets;
 `tools/generate_schematic.py` emits a byte-stable `kicad/pogo-<block>.kicad_sch`. All 10
-blocks + the shared-Q sheet are transcribed and verified. (Authored netlist in `specs/`,
-generated schematic in `kicad/` — linked by `--check`, not by directory adjacency.)
+blocks (A, B, 1–8) are transcribed and verified; the shared Q-VCAs (U9/U10) are hosted on
+block-5's sheet (dual-owned by block-5/block-8, no separate sheet). (Authored netlist in
+`specs/`, generated schematic in `kicad/` — linked by `--check`, not by directory adjacency.)
 
 ```bash
 # Regenerate all block schematics
@@ -190,7 +194,8 @@ python3 tools/generate_schematic.py --block block-6
 ```
 
 Connectivity is by net name, so per-block sheets merge at board level by matching boundary
-nets. Symbols/pinouts in `tools/kicad_common.py` are datasheet-verified. Vendored footprints
+nets. Symbols/pinouts are authored per-token in `components/symbols/<token>.yaml` and emitted by
+`tools/symbols.py` (datasheet-cited; `--check` self-tests them). Vendored footprints
 live in `components/footprints/*.pretty` (resolved via the generated `kicad/fp-lib-table`). The
 manufacturing BOM (`kicad/pogo-bom.csv`) is generated from `specs/components.yaml` + the
 `components/` registry. See `tools/SCHEMATIC-GEN-PLAN.md` for the rollout and per-block notes.
