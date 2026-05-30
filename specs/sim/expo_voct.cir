@@ -13,7 +13,7 @@
 * setpoint only; residual tempco-slope error noted as a known limit.
 
 Vfreq in 0 DC 1
-Rvoct  in a 51100
+Rvoct  in a 49900
 Rwiper a  b {RWIP}
 Rtempco b 0 1000
 

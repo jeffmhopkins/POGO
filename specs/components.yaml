@@ -599,7 +599,8 @@ components:
   - { ref: R107, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "HP IRES_AMP resonance CV input R (R_QINV)" }
   - { ref: R108, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "HP IRES_AMP feedback R (R_f_q)" }
   - { ref: R109, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "1MΩ",    fn: "HP expo I_ref fixed R; series with RV16 (R_IREF_A)" }
-  - { ref: R110, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "47kΩ",   tol: "1%", fn: "HP expo V/oct scaling R (R_VOCT)" }
+  - { ref: R110, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "49.9kΩ", tol: "1%", fn: "HP expo V/oct scaling R (R_VOCT); change 0020 §A: 47k→49.9k centers 17.92mV/oct at mid-trim" }
+  - { ref: R229, board: audio,   block: block-7, part: "Vishay TFPT", pkg: "0805", val: "1kΩ",    fn: "HP expo tempco shunt (HP_EXPO_BASE→GND); +4110ppm/K V/oct temp-comp; change 0020 §A/§4" }
   - { ref: R111, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "HP expo emitter degeneration (R_E)" }
   - { ref: R112, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "HP L OTA1 buffer (v1) emitter pulldown to V-" }
   - { ref: R113, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "HP L OTA2 buffer (v2) emitter pulldown to V-" }

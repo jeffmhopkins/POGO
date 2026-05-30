@@ -54,8 +54,9 @@ parts:
   R107: { sym: r, value: 100k }   # R_QINV
   R108: { sym: r, value: 100k }   # R_f_q
   R109: { sym: r, value: 1M }     # R_IREF_A
-  R110: { sym: r, value: 47k }    # R_VOCT
+  R110: { sym: r, value: 49k9 }   # R_VOCT (change 0020 §A: 47k→49.9k centers 17.92mV/oct at mid-trim)
   R111: { sym: r, value: 1k }     # R_E
+  R229: { sym: r, part: "Vishay TFPT", value: 1k }  # tempco shunt (change 0020 §A): HP_EXPO_BASE→GND, +4110ppm/K V/oct temp-comp
   R112: { sym: r, value: 10k }    # v1 L buffer pulldown
   R113: { sym: r, value: 10k }    # v2 L buffer pulldown
   R114: { sym: r, value: 10k }    # v1 R buffer pulldown
@@ -106,7 +107,8 @@ nets:
      D12.A,
      C86.2, C87.2, C88.2, C89.2, C90.2,
      C91.2, C92.2, C93.2, C94.2, C95.2, C96.2,
-     C99.2, C100.2, C101.2, C102.2, C103.2, C104.2, C105.2, C106.2]
+     C99.2, C100.2, C101.2, C102.2, C103.2, C104.2, C105.2, C106.2,
+     R229.2]
 
   # ---- L channel SVF ----
   BP_OUT_L:     [R30.1]                       # <- block-6 BP out L (boundary)
@@ -141,7 +143,7 @@ nets:
   # ---- expo converter (single shared L+R; no tilt) ----
   HP_VCTRL:     [R110.1]                       # <- control: HP V/oct CV (boundary)
   HP_VOCT_TR:   [R110.2, RV17.1, RV17.2]
-  HP_EXPO_BASE: [U55.2, RV17.3]
+  HP_EXPO_BASE: [U55.2, RV17.3, R229.1]   # Q1 base: V/oct via R110+RV17, tempco shunt R229 to GND (change 0020 §A)
   HP_IABC:      [U55.1, U49.1, U49.16, U50.1, U50.16, C87.1, C88.1]  # shared Iabc -> both OTAs
   HP_EXPO_EMIT: [U55.3, U55.12, R111.1]
   HP_IREF:      [U55.14, U55.13, RV16.3, C86.1]

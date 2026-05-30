@@ -503,7 +503,8 @@ audio,R106,Resistor,1,,100kΩ,0603,,,,,block-7,HP IRES_AMP V_bias input R (R_QBI
 audio,R107,Resistor,1,,100kΩ,0603,,,,,block-7,HP IRES_AMP resonance CV input R (R_QINV)
 audio,R108,Resistor,1,,100kΩ,0603,,,,,block-7,HP IRES_AMP feedback R (R_f_q)
 audio,R109,Resistor,1,,1MΩ,0603,,,,,block-7,HP expo I_ref fixed R; series with RV16 (R_IREF_A)
-audio,R110,Resistor,1,,47kΩ,0603,,,,,block-7,HP expo V/oct scaling R (R_VOCT)
+audio,R110,Resistor,1,,49.9kΩ,0603,,,,,block-7,HP expo V/oct scaling R (R_VOCT); change 0020 §A: 47k→49.9k centers 17.92mV/oct at mid-trim
+audio,R229,Resistor,1,TFPT0805L1001FM,1kΩ,0805,POGO_Resistor_SMD:R_0805_2012Metric,Vishay,,https://www.vishay.com/docs/33017/tfpt.pdf,block-7,HP expo tempco shunt (HP_EXPO_BASE→GND); +4110ppm/K V/oct temp-comp; change 0020 §A/§4
 audio,R111,Resistor,1,,1kΩ,0603,,,,,block-7,HP expo emitter degeneration (R_E)
 audio,R112,Resistor,1,,10kΩ,0603,,,,,block-7,HP L OTA1 buffer (v1) emitter pulldown to V-
 audio,R113,Resistor,1,,10kΩ,0603,,,,,block-7,HP L OTA2 buffer (v2) emitter pulldown to V-
