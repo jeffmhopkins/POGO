@@ -40,9 +40,9 @@ spec authors + group adversarial review → netlist + design-intent review → u
 | 1 — Pre-Gain | ✅ | ✅ | G4 text-only | No B1-local HW change (gain-stage netlist correct). Fixed: ALT destination (through VCA → **BP3 only**, bypasses LP1 not VCA), per-channel selector + asymmetric edge case documented, STALE banners lifted, aux refs, DSP cite, switch=path-select, aux OPA1612 note softened. **Substantive HW deferred → block-4 (ALT VCA cell) + block-6 (BP3 selector, distortion order).** |
 | 2 — Dual LFO | ✅ | ✅ | G4+G5+G6a/b | LFO core faithful. Both LFOs tap MOD_SRC switch (LFO1_OUT pos0 + new LFO2_OUT pos1); aux-lfo-core refreshed; topology-doc MOD_SRC + ALT fixed. **LED: full-cycle breathing NPN current-source driver** (MMBT3904 ×2 + base level-shift; D1/D2 removed, R9/R10→R_E) — matches plugin `(V_tri+5)/10`. New part **MMBT3904** registered (npn symbol, SOT-23). Switch wiring deferred to block-3. |
 | 3 — Mod Bus | ✅ | ✅ | G4+G5+G6(delete) | **Big block.** Wired MOD_SRC SW7 (DW5) 3-way LFO1/LFO2/EXT (COMs bridged), MOD_IN→EXT-only, accept LFO1+LFO2 boundary inputs. **Removed** 3 MOD LEDs + driver U4 + R56-60 (no plugin/panel backing; 7→6 TL074). **Removed** VCA_AMT attenuverter RV5+inverter (VCA = raw bus normal, depth pot → block-4). Renamed per-band `BP*_FOCUS`→`TILT` (plugin/panel have no FOCUS CV). Refreshed aux-mod-bus-core + aux-attenuverter; dropped phantom distribution buffer (load is light). 18 attenuverters + 1 raw VCA normal. |
-| 4 — VCA | 🔲 | 🔲 | — | **DEFERRED-IN (from B1):** add 2nd THAT2180 ALT VCA cell on shared `V_CTRL`. **DEFERRED-IN (from B3):** VCA_INPUT gets RAW V_modbus normal (no attenuverter); add VCA_AMT depth pot here (moved from block-3 RV5). |
+| 4 — VCA | ✅ | ✅ | G4+G5+G6a | **ALT-VCA built** (B1 deferral): +2 THAT2180 (U78/U79) + I/V (U80) + R/trims/caps, sharing V_ctrl → BP3 (boundary `ALT_VCA_OUT_L/R`). **OFS placement fixed** (D-3): OFS summed into CV before the symmetric AMT pot → unity at AMT=0 regardless of OFS. **RV24/RV25→RV44/RV45** (cleared block-6 base-ref collision). B3 deferral (raw bus normal + VCA_AMT pot) confirmed already-satisfied. aux-vca-cell refreshed (4 cells, SIP-8, power, board name). |
 | 5 — LP Filter 1 | 🔲 | 🔲 | — | |
-| 6 — Triple BP + Dist | 🔲 | 🔲 | — | **0017 core:** netlist still wires **SVF→DIST**; plugin is **DIST→SVF** (`Pogo.cpp:443`) — core reorder UNBUILT. **DEFERRED-IN (from B1):** add per-channel BP3 input selector (ALT-VCA vs main band; main normal when ALT unpatched); resolve `ALT_OUT_L/R`↔`BP3IN_L/R` boundary. CLIP LED on dist output; BP3 tap post-BP pre-mix. |
+| 6 — Triple BP + Dist | 🔲 | 🔲 | — | **0017 core:** netlist still wires **SVF→DIST**; plugin is **DIST→SVF** (`Pogo.cpp:443`) — core reorder UNBUILT. **DEFERRED-IN (from B1/B4):** add per-channel BP3 input selector choosing block-4 `ALT_VCA_OUT_L/R` vs main `bandL/R` (main normal when ALT unpatched). CLIP LED on dist output; BP3 tap post-BP pre-mix. |
 | 7 — HP Filter | 🔲 | 🔲 | — | |
 | 8 — LP Filter 2 | 🔲 | 🔲 | — | |
 | B — Output Buffers | 🔲 | 🔲 | — | §2–4 STALE. |
@@ -75,6 +75,11 @@ spec authors + group adversarial review → netlist + design-intent review → u
   3-way (COMs bridged); Phase-3R to verify ON-ON-ON contact sequence vs datasheet.
 - 2026-05-30: Also corrected a phantom block-3 "distribution buffer" (halves C+D paralleled):
   the bus actually drives 18×100k R_SRC_NORM (~5.6k, ~1.8mA), so no buffer is needed.
+- 2026-05-30: **Block 4** — user approved 2× THAT2180 for the ALT-VCA (mirrors main cell;
+  shares V_ctrl; THAT2180 count 2→4). Also fixed VCA_OFS placement (OFS before the symmetric
+  AMT pot) so AMT=0 ⇒ unity for any OFS, matching the plugin; and renumbered the VCA pots
+  RV24/RV25→RV44/RV45 to clear a base-ref collision with block-6's RV24_x/RV25_x expo trims.
+  Exact CV→Ec+ scaling, the effCV−5V pivot, and any V_ctrl wiper buffer remain Phase-3R.
 - 2026-05-30: **Block 2 LED** — divergence found: plugin LED breathes full-cycle
   `(raw+1)×0.5`, hardware was half-wave "pulsing" (and the spec falsely claimed a match).
   User chose **match plugin**, then **simpler/cheaper driver**: single-transistor NPN current

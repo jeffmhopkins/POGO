@@ -22,21 +22,30 @@ audio,C5,Capacitor,1,,100nF,0603,,,,,block-1,U3 +12V decoupling
 audio,C6,Capacitor,1,,100nF,0603,,,,,block-1,U3 -12V decoupling
 audio,U4,IC,1,THAT2180AL08-U,,SIP-8,POGO_Package_SIP:SIP-8_2.54mm,THAT Corporation,,https://www.thatcorp.com/datashts/THAT_2180-Series_Datasheet.pdf,block-4,"L-channel dB-law VCA (current-in/out); 8-pin SIP (THT, no SMD variant)"
 audio,U5,IC,1,THAT2180AL08-U,,SIP-8,POGO_Package_SIP:SIP-8_2.54mm,THAT Corporation,,https://www.thatcorp.com/datashts/THAT_2180-Series_Datasheet.pdf,block-4,"R-channel dB-law VCA (current-in/out); 8-pin SIP (THT, no SMD variant)"
-audio,U6,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-4,"I/V transimpedance converters (THAT2180 current outputs → V; L=A, R=B)"
-audio,U63,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-4,VCA CV conditioning: AMT attenuverter inverter (A) + CV/OFS summer-scaler (B)
+audio,U6,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-4,"main I/V transimpedance converters (THAT2180 current outputs → V; L=A, R=B)"
+audio,U63,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-4,VCA CV conditioning: CV+OFS summer (A) + effCV inverter (B); OFS summed before the AMT pot (0018)
+audio,U78,IC,1,THAT2180AL08-U,,SIP-8,POGO_Package_SIP:SIP-8_2.54mm,THAT Corporation,,https://www.thatcorp.com/datashts/THAT_2180-Series_Datasheet.pdf,block-4,ALT-L dB-law VCA (current-in/out) → BP3; 8-pin SIP (THT)
+audio,U79,IC,1,THAT2180AL08-U,,SIP-8,POGO_Package_SIP:SIP-8_2.54mm,THAT Corporation,,https://www.thatcorp.com/datashts/THAT_2180-Series_Datasheet.pdf,block-4,ALT-R dB-law VCA (current-in/out) → BP3; 8-pin SIP (THT)
+audio,U80,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-4,"ALT I/V transimpedance converters (ALT-L=A, ALT-R=B)"
 audio,RV1,Trimpot/Pot,1,3224W-1-xxx,500Ω,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-4,L unity-gain trim (Ec+ offset)
 audio,RV2,Trimpot/Pot,1,3224W-1-xxx,500Ω,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-4,R unity-gain trim (Ec+ offset)
 audio,R7,Resistor,1,,20kΩ,0603,,,,,block-4,R_in L: audio V→I into THAT2180 Input (pin 1)
 audio,R8,Resistor,1,,20kΩ,0603,,,,,block-4,R_in R
 audio,R40,Resistor,1,,20kΩ,0603,,,,,block-4,R_f L: I/V transimpedance feedback (unity at 0 dB; inverting)
 audio,R41,Resistor,1,,20kΩ,0603,,,,,block-4,R_f R
-audio,R42,Resistor,1,,10kΩ,0603,,,,,block-4,R_amt_inv_in: AMT attenuverter inverter input
-audio,R43,Resistor,1,,10kΩ,0603,,,,,block-4,R_amt_inv_fb: AMT attenuverter inverter feedback
-audio,R44,Resistor,1,,100kΩ,0603,,,,,block-4,R_sum_cv: CV summer input (AMT-attenuverted CV)
-audio,R45,Resistor,1,,100kΩ,0603,,,,,block-4,R_sum_ofs: CV summer input (OFS floor)
-audio,R46,Resistor,1,,2.4kΩ,0603,,,,,block-4,R_sum_fb: CV summer feedback; scales to ~6.1 mV/dB Ec+ range (Phase-3R trim)
+audio,R42,Resistor,1,,100kΩ,0603,,,,,block-4,R_sum_cv: CV+OFS summer — CV input (U63A)
+audio,R43,Resistor,1,,100kΩ,0603,,,,,block-4,R_sum_fb: CV+OFS summer feedback (U63A)
+audio,R44,Resistor,1,,100kΩ,0603,,,,,block-4,R_inv_in: effCV inverter input (U63B; generates +effCV)
+audio,R45,Resistor,1,,100kΩ,0603,,,,,block-4,"R_sum_ofs: CV+OFS summer — OFS floor input (U63A; pivot-referenced, Phase-3R)"
+audio,R46,Resistor,1,,100kΩ,0603,,,,,block-4,R_inv_fb: effCV inverter feedback (U63B)
+audio,R129,Resistor,1,,20kΩ,0603,,,,,block-4,R_in ALT-L: audio V→I into U78 Input (pin 1)
+audio,R130,Resistor,1,,20kΩ,0603,,,,,block-4,R_in ALT-R: into U79 Input
+audio,R131,Resistor,1,,20kΩ,0603,,,,,block-4,R_f ALT-L: I/V feedback (unity at 0 dB; inverting)
+audio,R132,Resistor,1,,20kΩ,0603,,,,,block-4,R_f ALT-R: I/V feedback
 audio,R9,Resistor,1,,100Ω,0603,,,,,block-4,VCA CV input series protection
 audio,D3,Diode,1,BAT54S,,SOT-23,POGO_Package_TO_SOT_SMD:SOT-23,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds11005.pdf,block-4,VCA CV input clamp ±12V
+audio,RV46,Trimpot/Pot,1,3224W-1-xxx,500Ω,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-4,ALT-L unity-gain trim (Ec+ offset)
+audio,RV47,Trimpot/Pot,1,3224W-1-xxx,500Ω,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-4,ALT-R unity-gain trim (Ec+ offset)
 audio,C7,Capacitor,1,,100nF,0603,,,,,block-4,U4 +12V (V+) decoupling
 audio,C8,Capacitor,1,,100nF,0603,,,,,block-4,U4 -12V (V-) decoupling
 audio,C9,Capacitor,1,,100nF,0603,,,,,block-4,U5 +12V (V+) decoupling
@@ -45,6 +54,12 @@ audio,C41,Capacitor,1,,100nF,0603,,,,,block-4,U6 +12V decoupling
 audio,C42,Capacitor,1,,100nF,0603,,,,,block-4,U6 -12V decoupling
 audio,C43,Capacitor,1,,100nF,0603,,,,,block-4,U63 +12V decoupling
 audio,C44,Capacitor,1,,100nF,0603,,,,,block-4,U63 -12V decoupling
+audio,C111,Capacitor,1,,100nF,0603,,,,,block-4,U78 (ALT-L VCA) V+ decoupling
+audio,C112,Capacitor,1,,100nF,0603,,,,,block-4,U78 V- decoupling
+audio,C113,Capacitor,1,,100nF,0603,,,,,block-4,U79 (ALT-R VCA) V+ decoupling
+audio,C114,Capacitor,1,,100nF,0603,,,,,block-4,U79 V- decoupling
+audio,C115,Capacitor,1,,100nF,0603,,,,,block-4,U80 (ALT I/V) +12V decoupling
+audio,C116,Capacitor,1,,100nF,0603,,,,,block-4,U80 -12V decoupling
 audio,U7,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-5,LP1 OTA integrators L
 audio,U8,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-5,LP1 OTA integrators R
 audio,U9,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,"block-5, block-8","LP1+LP2 Q VCA L (cell A=LP1, cell B=LP2)"
@@ -417,8 +432,8 @@ control,RV20,Trimpot/Pot,1,R0904N,,9mm,POGO_Potentiometer_THT:Potentiometer_Song
 control,RV21,Trimpot/Pot,1,R0904N,,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-3,HP_RES_ATT
 control,RV22,Trimpot/Pot,1,R0904N,,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-3,LP2_FREQ_ATT
 control,RV23,Trimpot/Pot,1,R0904N,,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-3,LP2_RES_ATT
-control,RV24,Trimpot/Pot,1,R0904N,1kΩ,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-4,VCA_AMT (-1 to +1); 1kΩ chosen to limit wiper impedance <250Ω (avoids 14% THAT2180 gain error at center travel)
-control,RV25,Trimpot/Pot,1,R0904N,,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-4,VCA_OFS (0 to 1)
+control,RV44,Trimpot/Pot,1,R0904N,1kΩ,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-4,VCA_AMT (-1 to +1); 1kΩ limits wiper impedance <250Ω (avoids THAT2180 gain error at center)
+control,RV45,Trimpot/Pot,1,R0904N,,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-4,VCA_OFS (0 to 1)
 control,RV26,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-5,LP1_FREQ (±5V/oct)
 control,RV27,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-5,LP1_TILT (±1)
 control,RV28,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-5,LP1_RES (0–1)

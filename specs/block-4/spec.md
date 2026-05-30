@@ -1,7 +1,7 @@
 # Block 4: VCA
 Pre-LP1 voltage-controlled amplifier; accents or ducks the signal entering the filter stack via mod bus or external CV.
 
-DSP source: `plugin/src/dsp/VcaBlock.hpp`, `plugin/src/Pogo.cpp` (lines 389–397)
+DSP source: `plugin/src/dsp/VcaBlock.hpp`, `plugin/src/Pogo.cpp` (control 382–386; main VCA 387–389; ALT VCA → BP3 439–441)
 
 ---
 
@@ -29,14 +29,23 @@ VCA directly. Plugging into VCA_INPUT overrides this.
 Both channels (L, R) are processed identically — the same CV and parameter values are applied
 to both, maintaining stereo balance.
 
+**ALT-BP VCA (added 2026-05-30, change 0018):** per the locked plugin (`Pogo.cpp:439–441`),
+the ALT-BP signal (block-1 `ALT_OUT_L/R`) passes through a **second** VCA driven by the **same**
+control (`V_ctrl`) as the main path, then feeds **BP3 only** (block 6). So the ALT voice is
+gated by the VCA exactly like the main voice. This is realized with two more THAT 2180 cells
+(ALT-L, ALT-R) sharing `V_ctrl`; their outputs leave as boundary nets to the block-6 BP3 input
+selector (which chooses ALT-VCA vs the main band depending on whether the ALT jacks are patched).
+
 ---
 
 ## 2. Theoretical Design and Topology
 
-> ✅ **CORRECTED 2026-05-29** — THAT2180 reworked to its real current-in/current-out
-> topology (datasheet pinout) with R_in + I/V op-amp per channel and Ec+ control; the
-> prior differential-voltage model (IN+/IN−/OUT+/OUT−, R_OUT_N) was wrong and is removed.
-> Verified in `specs/block-4/block-4.nets.yaml`. CV-conditioning scaling is Phase-3R bring-up.
+> ✅ **CORRECTED 2026-05-29; re-verified + extended 2026-05-30 (change 0018)** — THAT2180
+> current-in/current-out topology (datasheet pinout), R_in + I/V op-amp per channel, Ec+ control.
+> 0018 additions: (a) the **ALT-BP VCA cell** (2 more THAT2180 on the shared `V_ctrl`, → BP3);
+> (b) **VCA_OFS placement corrected** — OFS is now summed into the CV *before* the AMT
+> attenuverter (matching the plugin order `vcaCV = clamp(raw+OFS·5)` then the AMT law), so AMT=0
+> gives unity regardless of OFS. Exact CV→Ec+ scaling remains Phase-3R bring-up.
 
 ### Gain Law (DSP and hardware)
 
@@ -107,64 +116,81 @@ output pin and no IN−/OUT−/OUT-termination (the earlier differential-VCA mod
 **Unity-gain calibration:** a Bourns 3224W (500 Ω) per channel trims the Ec+ offset so
 `Ec+ = 0` ⇒ exactly 0 dB, matching L and R.
 
-**CV conditioning (U63 = dual TL072):**
+**CV conditioning (U63 = dual TL072) — OFS summed BEFORE the AMT attenuverter:**
 
-1. Raw CV enters through a 100 Ω series resistor + BAT54S clamp (standard CV protection); call
-   the protected node CVP.
-2. **AMT attenuverter:** a TL072 half (U63-A) inverts CVP to −CVP; the bipolar VCA_AMT pot
-   (RV24, CW=CVP, CCW=−CVP, wiper = AMT·CVP) produces the bipolar-scaled CV. Center detent = 0.
-3. **OFS floor:** the VCA_OFS pot (RV25) adds a DC floor.
-4. **Summer/scaler:** a TL072 half (U63-B) sums AMT·CVP + OFS and scales toward the
-   6.1 mV/dB Ec range → `V_ctrl`, which drives both channels' Ec+ via the per-channel unity
-   trims (RV1/RV2).
+The plugin adds the OFS floor to the CV *before* the AMT gain law (`vcaCV = clamp(raw + OFS·5,
+0, 10)`, then `control = 1 − AMT·(1−normCV)`). The analog chain mirrors that order:
 
-The exact summer/Ec scaling (to hit `Ec+ = 244 mV·(control−1)`) and the precise piecewise AMT
-law are nominal here and set at **Phase-3R bring-up** — consistent with the project's
-intentional DSP↔hardware deviation (linear DSP gain index vs. true dB-law hardware).
+1. Raw CV enters through a 100 Ω series resistor + BAT54S clamp (standard CV protection) → the
+   protected node CVP.
+2. **CV + OFS summer (U63-A):** an inverting summer combines CVP with the VCA_OFS floor (RV45,
+   referenced to set the effCV = 5 V unity pivot) → `−effCV`.
+3. **Inverter (U63-B):** inverts `−effCV` → `+effCV`.
+4. **AMT attenuverter:** the bipolar VCA_AMT pot (RV44) sits **symmetrically** across `+effCV`
+   (CW) and `−effCV` (CCW); the wiper is `V_ctrl = AMT·effCV`. Because the pot is symmetric about
+   ±effCV, the **center detent (AMT = 0) gives V_ctrl = 0 → unity regardless of OFS** — exactly
+   the plugin behavior, and the fix vs the old "OFS summed after AMT" topology.
+5. `V_ctrl` drives all four Ec+ pins (main L/R + ALT L/R) via per-channel unity trims
+   (RV1, RV2, RV46, RV47).
+
+The exact summer/Ec scaling (to hit `Ec+ = 244 mV·(control−1)`), the effCV−5 V pivot reference,
+and any `V_ctrl` wiper buffer are nominal here and set at **Phase-3R bring-up** — consistent with
+the project's intentional DSP↔hardware deviation (linear DSP gain index vs. true dB-law hardware).
+
+### ALT-BP VCA cell
+
+Two additional THAT 2180 cells (U78 = ALT-L, U79 = ALT-R) mirror the main audio path
+(R_in → THAT 2180 → I/V op-amp U80), but take their audio from block-1 `ALT_OUT_L/R` and emit
+`ALT_VCA_OUT_L/R` to the block-6 BP3 input selector. They share the **same** `V_ctrl` as the
+main cells (via trims RV46/RV47), so the ALT voice tracks the main VCA gain identically — as
+the plugin does (`VcaBlock::process(altL/R, vcaAmt, vcaCV)`). No separate CV conditioning is
+needed; U63B's `V_ctrl` now fans out to four Ec+ trims (light load).
 
 **Stage boundaries:** Block 1 (OPA1612 output, <50 Ω) drives R_in (20 kΩ) — negligible loss;
-VCA I/V output (op-amp, <100 Ω) drives LP1's input resistor — negligible loss.
+VCA I/V outputs (op-amp, <100 Ω) drive LP1 / BP3 input resistors — negligible loss.
 
 ---
 
 ## 3. Physical Design
 
-> ✅ **CORRECTED 2026-05-29** — THAT2180 reworked to its real current-in/current-out
-> topology (datasheet pinout) with R_in + I/V op-amp per channel and Ec+ control; the
-> prior differential-voltage model (IN+/IN−/OUT+/OUT−, R_OUT_N) was wrong and is removed.
-> Verified in `specs/block-4/block-4.nets.yaml`. CV-conditioning scaling is Phase-3R bring-up.
+> ✅ **CORRECTED 2026-05-29; extended 2026-05-30 (change 0018)** — THAT2180
+> current-in/current-out topology (datasheet pinout), R_in + I/V op-amp per channel, Ec+
+> control. 0018 added the ALT-BP VCA cell (2 more THAT2180 + I/V) and corrected the VCA_OFS
+> placement. Verified in `specs/block-4/block-4.nets.yaml`. CV→Ec+ scaling is Phase-3R bring-up.
 
 **Board assignment:** Audio board (carries audio-frequency signal; THAT 2180 and CV
-conditioning are co-located with the signal path).
+conditioning are co-located with the signal path). The VCA_AMT/OFS pots are on the control board.
 
 **Panel controls / jacks:**
 
 | Item | Qty | Type | Notes |
 |---|---|---|---|
 | VCA_INPUT jack | 1 | PJ301M-12 | Tip-switching; normalles to mod bus V_modbus |
-| VCA_AMT trimpot | 1 | 9 mm, centre detent | Bipolar –1× to +1× |
-| VCA_OFS trimpot | 1 | 9 mm | Unipolar 0–1 (CV floor) |
+| VCA_AMT trimpot (RV44) | 1 | 9 mm, centre detent | Bipolar –1× to +1× |
+| VCA_OFS trimpot (RV45) | 1 | 9 mm | Unipolar 0–1 (CV floor) |
 
-No LEDs for this block; status is not indicated on panel.
+No LEDs for this block; status is not indicated on panel. The ALT-BP VCA reuses block-1's
+existing ALT_BP_L/R jacks as its audio source — no new panel controls.
 
-**Stereo implementation:**
+**Stereo / cell implementation:**
 
-Two THAT 2180 ICs process L and R channels independently. The CV path is shared (same V_ctrl
-applied to both Ec+ pins via the per-channel unity trims), maintaining the stereo image.
-Unity-gain trimmers RV1/RV2 match the two channels for gain accuracy.
+**Four THAT 2180 ICs**: U4/U5 (main L/R) and U78/U79 (ALT-BP L/R). All four share one `V_ctrl`
+(applied to each Ec+ via a per-channel unity trim RV1/RV2/RV46/RV47), so the main and ALT
+voices track identically. Two dual TL072 I/V converters: U6 (main) + U80 (ALT). U63 (dual TL072)
+does the CV conditioning (CV+OFS summer + inverter).
 
 **Signal levels:**
 
-- Audio into R_in → Input (pin 1): from pre-gain block, ±10.5 V max (clipped by Block 1).
+- Audio into R_in → Input (pin 1): from pre-gain / ALT block, ±10.5 V max (clipped upstream).
 - I/V op-amp output: same range, attenuated by the dB-law gain.
 - eff_CV: 0–10 V (clamped).
 - Ec+ control: 0 V (unity) down to ≈ −244 mV (−40 dB), per the 6.1 mV/dB constant.
 
 **Power estimate:**
 
-- 2× THAT 2180: ~4 mA each = ~8 mA per rail.  (THAT Corp datasheet: Icc = 4 mA typ)
-- 1× TL072CDT (dual): ~3 mA per rail.  (TI: 1.4 mA/ch × 2 = 2.8 mA)
-- Total: +12 V ~11 mA, −12 V ~11 mA.
+- 4× THAT 2180: ~4 mA each = ~16 mA per rail.  (THAT Corp datasheet: Icc ≈ 4 mA typ)
+- 3× TL072CDT (dual, U6/U63/U80): ~2.8 mA each ≈ ~8.5 mA per rail.
+- Total: +12 V ~25 mA, −12 V ~25 mA.
 
 ---
 

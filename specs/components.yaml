@@ -52,21 +52,32 @@ components:
   #   Needs R_in (V→I) at input and a transimpedance op-amp (I→V) at output.)
   - { ref: U4,   board: audio,   block: block-4, part: THAT2180,   pkg: SIP-8,    fn: "L-channel dB-law VCA (current-in/out); 8-pin SIP (THT, no SMD variant)" }
   - { ref: U5,   board: audio,   block: block-4, part: THAT2180,   pkg: SIP-8,    fn: "R-channel dB-law VCA (current-in/out); 8-pin SIP (THT, no SMD variant)" }
-  - { ref: U6,   board: audio,   block: block-4, part: TL072CDT,   pkg: SOIC-8,   fn: "I/V transimpedance converters (THAT2180 current outputs → V; L=A, R=B)" }
-  - { ref: U63,  board: audio,   block: block-4, part: TL072CDT,   pkg: SOIC-8,   fn: "VCA CV conditioning: AMT attenuverter inverter (A) + CV/OFS summer-scaler (B)" }
+  - { ref: U6,   board: audio,   block: block-4, part: TL072CDT,   pkg: SOIC-8,   fn: "main I/V transimpedance converters (THAT2180 current outputs → V; L=A, R=B)" }
+  - { ref: U63,  board: audio,   block: block-4, part: TL072CDT,   pkg: SOIC-8,   fn: "VCA CV conditioning: CV+OFS summer (A) + effCV inverter (B); OFS summed before the AMT pot (0018)" }
+  # ALT-BP VCA cell (change 0018): the plugin runs the ALT signal through a VCA (shared control)
+  # into BP3 (Pogo.cpp:439-441). Mirrors the main cell; shares V_CTRL via RV46/RV47 trims.
+  - { ref: U78,  board: audio,   block: block-4, part: THAT2180,   pkg: SIP-8,    fn: "ALT-L dB-law VCA (current-in/out) → BP3; 8-pin SIP (THT)" }
+  - { ref: U79,  board: audio,   block: block-4, part: THAT2180,   pkg: SIP-8,    fn: "ALT-R dB-law VCA (current-in/out) → BP3; 8-pin SIP (THT)" }
+  - { ref: U80,  board: audio,   block: block-4, part: TL072CDT,   pkg: SOIC-8,   fn: "ALT I/V transimpedance converters (ALT-L=A, ALT-R=B)" }
   - { ref: RV1,  board: audio,   block: block-4, part: "Bourns 3224W", pkg: SMD,  val: "500Ω",   fn: "L unity-gain trim (Ec+ offset)" }
   - { ref: RV2,  board: audio,   block: block-4, part: "Bourns 3224W", pkg: SMD,  val: "500Ω",   fn: "R unity-gain trim (Ec+ offset)" }
   - { ref: R7,   board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "R_in L: audio V→I into THAT2180 Input (pin 1)" }
   - { ref: R8,   board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "R_in R" }
   - { ref: R40,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "R_f L: I/V transimpedance feedback (unity at 0 dB; inverting)" }
   - { ref: R41,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "R_f R" }
-  - { ref: R42,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "R_amt_inv_in: AMT attenuverter inverter input" }
-  - { ref: R43,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "R_amt_inv_fb: AMT attenuverter inverter feedback" }
-  - { ref: R44,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "R_sum_cv: CV summer input (AMT-attenuverted CV)" }
-  - { ref: R45,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "R_sum_ofs: CV summer input (OFS floor)" }
-  - { ref: R46,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "2.4kΩ",  fn: "R_sum_fb: CV summer feedback; scales to ~6.1 mV/dB Ec+ range (Phase-3R trim)" }
+  - { ref: R42,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "R_sum_cv: CV+OFS summer — CV input (U63A)" }
+  - { ref: R43,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "R_sum_fb: CV+OFS summer feedback (U63A)" }
+  - { ref: R44,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "R_inv_in: effCV inverter input (U63B; generates +effCV)" }
+  - { ref: R45,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "R_sum_ofs: CV+OFS summer — OFS floor input (U63A; pivot-referenced, Phase-3R)" }
+  - { ref: R46,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "R_inv_fb: effCV inverter feedback (U63B)" }
+  - { ref: R129, board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "R_in ALT-L: audio V→I into U78 Input (pin 1)" }
+  - { ref: R130, board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "R_in ALT-R: into U79 Input" }
+  - { ref: R131, board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "R_f ALT-L: I/V feedback (unity at 0 dB; inverting)" }
+  - { ref: R132, board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "20kΩ",   tol: "1%", fn: "R_f ALT-R: I/V feedback" }
   - { ref: R9,   board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100Ω",   fn: "VCA CV input series protection" }
   - { ref: D3,   board: audio,   block: block-4, part: BAT54S,     pkg: SOT-23,   fn: "VCA CV input clamp ±12V" }
+  - { ref: RV46, board: audio,   block: block-4, part: "Bourns 3224W", pkg: SMD,  val: "500Ω",   fn: "ALT-L unity-gain trim (Ec+ offset)" }
+  - { ref: RV47, board: audio,   block: block-4, part: "Bourns 3224W", pkg: SMD,  val: "500Ω",   fn: "ALT-R unity-gain trim (Ec+ offset)" }
   - { ref: C7,   board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U4 +12V (V+) decoupling" }
   - { ref: C8,   board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U4 -12V (V-) decoupling" }
   - { ref: C9,   board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U5 +12V (V+) decoupling" }
@@ -75,6 +86,12 @@ components:
   - { ref: C42,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U6 -12V decoupling" }
   - { ref: C43,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U63 +12V decoupling" }
   - { ref: C44,  board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U63 -12V decoupling" }
+  - { ref: C111, board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U78 (ALT-L VCA) V+ decoupling" }
+  - { ref: C112, board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U78 V- decoupling" }
+  - { ref: C113, board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U79 (ALT-R VCA) V+ decoupling" }
+  - { ref: C114, board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U79 V- decoupling" }
+  - { ref: C115, board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U80 (ALT I/V) +12V decoupling" }
+  - { ref: C116, board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "100nF",  fn: "U80 -12V decoupling" }
 
   # block-5: LP Filter 1
   - { ref: U7,   board: audio,   block: block-5, part: LM13700M,   pkg: SOIC-16,  fn: "LP1 OTA integrators L" }
@@ -534,9 +551,10 @@ components:
   - { ref: RV22, board: control, block: block-3, part: "lin pot",    pkg: "9mm",  fn: "LP2_FREQ_ATT" }
   - { ref: RV23, board: control, block: block-3, part: "lin pot",    pkg: "9mm",  fn: "LP2_RES_ATT" }
 
-  # block-4 panel controls
-  - { ref: RV24, board: control, block: block-4, part: "bipolar pot", pkg: "9mm", val: "1kΩ",   fn: "VCA_AMT (-1 to +1); 1kΩ chosen to limit wiper impedance <250Ω (avoids 14% THAT2180 gain error at center travel)" }
-  - { ref: RV25, board: control, block: block-4, part: "lin pot",    pkg: "9mm",  fn: "VCA_OFS (0 to 1)" }
+  # block-4 panel controls (renumbered RV24/RV25 -> RV44/RV45, change 0018: clears base-ref
+  # reuse with block-6's RV24_x/RV25_x expo trims)
+  - { ref: RV44, board: control, block: block-4, part: "bipolar pot", pkg: "9mm", val: "1kΩ",   fn: "VCA_AMT (-1 to +1); 1kΩ limits wiper impedance <250Ω (avoids THAT2180 gain error at center)" }
+  - { ref: RV45, board: control, block: block-4, part: "lin pot",    pkg: "9mm",  fn: "VCA_OFS (0 to 1)" }
 
   # block-5 panel controls
   - { ref: RV26, board: control, block: block-5, part: "xl knob",    pkg: "9mm",  fn: "LP1_FREQ (±5V/oct)" }
