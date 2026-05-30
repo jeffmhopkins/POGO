@@ -206,6 +206,21 @@ whole E1 premise is flawed:
 - Part research launched (background). G6a STOP until a real MPN + datasheet land. §E netlist edit
   (block-1 J4 + dist3 OR) waits on that.
 
+#### E — jack research result (2026-05-30): a panel-mechanical tradeoff surfaced
+- **Amphenol ACJS-MV35-5** — *only confirmed dual-switch* vertical 3.5mm jack. 5 pins (T=4, TN=5,
+  R=2, RN=3, S=1; two independent switch legs — datasheet 55010544-001-5). BUT **M6 bushing, not
+  the M8 Thonkiconn standard** → J4 becomes a mechanical outlier among POGO's ~24 jacks (different
+  panel hole), and the footprint must be **vendored** (no stock KiCad fp). Symbol `AudioJack3_SwitchTR`
+  exists in stock KiCad. Datasheet: amphenol-sine.com/pdf/datasheet/ACJS-MV35-5.pdf.
+- **Qingpu WQP-PJ3410** — Thonk-ecosystem, **M8 (fits the standard)**, taller. BUT dual-switch status
+  **UNCONFIRMED** — marketing says "switching on tip"; the clacktronics lib maps it to a switched-T/R
+  symbol only as a *substitute*. If it's switched-tip-only it does NOT give the detect → back to square
+  one. Would need physical verification.
+- **The tradeoff:** parity-certain (Amphenol, panel outlier + vendored fp) vs ecosystem-fit-but-risky
+  (PJ3410, unconfirmed). All to fix the narrow "ALT_R-only patched" case. **E3 (document) remains the
+  proportionate fallback** now that the dual-switch route is shown to cost a panel-standard break or a
+  sourcing risk. → user decision needed (next question).
+
 ### F. WF phase — H4 — block-6-dist1/2/3 — ❌ WITHDRAWN (H4 is FALSE; no change)
 - Original claim: WF net-inverting vs SC/HC → add an inversion. **SPICE refuted it** (`specs/sim/wf_phase.cir`).
 - Net trace from the common `BP1_DRIVEOUT` node: SC = inverting amp (R18/R19) → −drive; HC = inverting
