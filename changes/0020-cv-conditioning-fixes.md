@@ -49,9 +49,11 @@ faithfully reproduces the plugin. No plugin/panel change (Lane B).
 ### MED (fold in where cheap)
 - **M1 — BP3 R→L output normal averages (L+R)/2 through 2×1 kΩ instead of delivering L (block-6-mix). ✓**
 - **M2 — Mod OFFSET range ±12 V vs plugin ±5 V (block 3).** Scale R15 or use ±5 V references.
-- **M3 — BP per-band TILT CV missing the plugin ×0.22 (block 3 dest RV12/15/18).** (Note: review 5
-  found block-6 already applies 0.213 via R137/143/149 — reconcile WHERE the ×0.22 lives; may be a
-  non-issue if block-6 handles it. VERIFY before changing block-3.)
+- ~~M3 — BP per-band TILT CV missing the plugin ×0.22.~~ **RESOLVED / NON-ISSUE (verified
+  2026-05-30).** block-6-svf1/2/3 already apply it: `R137/R143/R149 = 470k` into the 100k tilt
+  summer = ×0.213 ≈ plugin ×0.22 (the net comment even says so). block-3's BP-tilt destinations are
+  plain attenuverters feeding `MOD_BP{n}_TILT` into that summer; the scaling is applied once, in
+  block-6, matching the plugin's single `×0.22f`. No change needed — dropped from scope.
 - **M4 — I/V transimpedance has no feedback comp cap (block-4, 4 channels).** Add small C_f.
 - **M5 — Q-cell Iabc bias math ignores the Iabc-pin rail potential (5,7,8).** Recheck arithmetic.
 
