@@ -26,7 +26,7 @@ Last updated: 2026-05-29 | Topology: 48HP | Source of truth: `tools/panel-data.y
 
 | Block | Name | §1 Intent | §2/§3/§4 | Notes |
 |---|---|---|---|---|
-| A | Input Buffer | ✅ panel-verified | ⚠️ STALE | OPA1612 follower, BAT54S clamp |
+| A | Input Buffer | ✅ panel-verified | ✅ re-verified 2026-05-30 | OPA1612 follower, BAT54S clamp; no behavioral divergence vs locked plugin (change 0018) |
 | 1 | Pre-Gain | ✅ panel-verified | ⚠️ STALE | OPA1612, 1×/5× switch; ALT_BP path |
 | 2 | Dual LFO | ✅ panel-verified | ✅ rate net FINALIZED 2026-05-29 | Integrator+Schmitt; drive-attenuator rate control (fixed R_INT + trimpot attenuator) |
 | 3 | Mod Bus | ✅ panel-verified | ✅ transcribed 2026-05-29 | 19 destinations; 7× TL074; ±10V zener clamp; MOD LEDs added; MOD_SRC deferred |

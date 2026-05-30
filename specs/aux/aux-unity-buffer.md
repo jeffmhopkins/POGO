@@ -188,10 +188,10 @@ This is well below thermal noise from source impedance (100 Ω source at 300K):
 
 | Block | Instance | Board | Notes |
 |---|---|---|---|
-| block-A | BUF_L, BUF_R | Control | OPA1612; non-inverting G=+1 |
-| block-B | BUF_L, BUF_R | Control | TL072; non-inverting G=+1; 1kΩ output |
-| block-5 | LP_OUT_BUF | Control | TL072 half; G=+1 for LP output |
-| block-5 | HP_INV_BUF | Control | TL072 half; G=−1 for HP polarity correction |
-| block-7 | HP_OUT_BUF | Control | TL072 half; G=−1 for HP polarity correction |
-| block-8 | LP2_OUT_BUF | Control | TL072 half; G=+1 for LP2 output |
-| block-6 | BP_OUT_BUF × 3 | Control | TL072; G=+1 for each BP group output |
+| block-A | BUF_L, BUF_R | audio | OPA1612; non-inverting G=+1 |
+| block-B | BUF_L, BUF_R | audio | TL072; non-inverting G=+1; 1kΩ output |
+| block-5 | LP_OUT_BUF | audio | TL072 half; G=+1 for LP output |
+| block-5 | HP_INV_BUF | audio | TL072 half; G=−1 for HP polarity correction |
+| block-7 | HP_OUT_BUF | audio | TL072 half; G=−1 for HP polarity correction |
+| block-8 | LP2_OUT_BUF | audio | TL072 half; G=+1 for LP2 output |
+| block-6 | BP_OUT_BUF × 3 | audio | TL072; G=+1 for each BP group output |
