@@ -1,7 +1,7 @@
 # Block 8: LP Filter 2
 Second independent 2-pole lowpass filter, after HP, for stacked or layered LP filtering with separate CV.
 
-DSP source: `plugin/src/dsp/LPFilter.hpp`, `plugin/src/Pogo.cpp` (lines 485–491)
+DSP source: `plugin/src/dsp/LPFilter.hpp`, `plugin/src/Pogo.cpp` (lines 486–492)
 
 ---
 
@@ -33,9 +33,11 @@ LP2's output feeds Block B (output buffers → MAIN_L/R jacks) directly.
 
 ## 2. Theoretical Design and Topology
 
-> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
-> It has not been verified against the current panel control set. Do not use for circuit
-> construction until re-verified. See `specs/STATUS.md` for current phase status.
+> ✅ **Re-verified 2026-05-30** against the locked plugin (change 0018). LP2 mirrors LP1
+> minus tilt: 2-pole Simper SVF, 632 Hz V/oct, self-oscillation, mono cutoff (single shared
+> expo). Output buffer is a **non-inverting** unity follower (matches LP2's un-negated v2 — no
+> polarity flip, unlike HP). Q via the shared U9/U10 cell B (hosted on block-5); boundary nets
+> pin-verified. No behavioral edits.
 
 ### DSP-to-analog mapping
 
@@ -120,9 +122,9 @@ output — identical to HP, simpler than LP1.
 
 ## 3. Physical Design
 
-> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
-> It has not been verified against the current panel control set. Do not use for circuit
-> construction until re-verified. See `specs/STATUS.md` for current phase status.
+> ✅ **Re-verified 2026-05-30** against the locked plugin (change 0018). Component values,
+> the shared U9/U10 cell-B Q boundary (hosted on block-5), the own IRES_AMP (U65), and the
+> non-inverting LP output follower verified consistent with §2 and the plugin. Doc-only pass.
 
 ### Component derivations
 
@@ -139,9 +141,10 @@ At default +2V CV: I_abc = 9.69µA × 2² = 38.8 µA → f₀ = 2528 Hz ✓. C0G
 **Input resistors, SUM_AMP feedback, linearizing resistors, Q control:** Identical values to LP1
 (100 kΩ, 100 kΩ, 1 kΩ, 1 MΩ respectively). See LP1 derivations in block-5/spec.md §3.
 
-**LP2 does not produce an HP output used downstream** (output goes directly to Block B, LP output
-only). The SUM_AMP HP_inv output is unused; the G = −1 HP buffer can be omitted or left
-unpopulated on LP2. The TL072 half can be repurposed as an additional buffer or left spare.
+**LP2 does not expose an HP output** (output goes directly to Block B, LP output only — the
+plugin LP2 returns `v2`/LP only). The SUM_AMP's HP-tap node is used internally by the SVF loop
+but not routed anywhere; LP2 therefore has no HP output buffer at all (U58/U59 half B is the LP
+output follower). This matches the plugin.
 
 ### Calibration trim pots
 

@@ -216,7 +216,9 @@ Required Iabc range:
   parasitic capacitance that could cause HF oscillation
 - C0G capacitors only — X7R will cause audible pitch drift with temperature
 - SUM_AMP inverting input is a virtual ground; do not add stray capacitance here
-- HP output polarity requires the inverting G=−1 buffer — do not omit it
+- HP output is a **unity G=+1 follower** on the (already-negated) SUM_AMP node — do NOT add a
+  second inversion (a G=−1 buffer here double-inverts vs the plugin; see §SUM_AMP Inversion and
+  HP Polarity, change 0018)
 - At high Q settings (Iabc_q → 0), the filter will self-oscillate; this is expected
   and intentional. Layout must be clean to avoid parasitic oscillation at low Q
 - Decoupling caps on every IC supply pin: 100 nF ceramic, within 1 mm of the pin
