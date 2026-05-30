@@ -287,6 +287,34 @@ ALT input) too. This is a **plugin (Lane A) change** (plugin leads), done here p
   loop (>100mA robust, +2 transistors — MMBT3904/3906 class); (iii) reduce the load (raise R_INV_IN
   10k→larger across 18 dests — but that changes attenuverter scaling/noise). **Recommend (ii)** — a
   transistor-boosted unity buffer is the standard, robust mod-bus distribution driver.
+
+#### ✅ H BUFFER DECISION (user, 2026-05-30): raise destination impedance (option iii)
+SPICE `modbus_hiZ.cir`: scaling the attenuverter network **×5** (R_INV_IN/FB 10k→**47k**, pot
+10k→**50k**; preserves the −1 inverter gain + ±1 attenuverter ratio, only impedance up) →
+**0.61 mA/dest, ~11.0 mA for all 18 at +10V** — comfortably within the re-enabled 2× U3 TL074
+distribution buffer (~40 mA peak). **No transistor boost, no extra IC.** Modest noise penalty (47k
+Johnson ≈ 28 nV/√Hz vs 18 nV at 10k) — acceptable on CV (non-audio) paths.
+
+#### ✅ §H IMPLEMENTED (2026-05-30) — C2 + H2 + M2 fixed, all gates green
+- 18 attenuverters scaled ×5 (R_INV_IN/FB 10k→47k in nets + BOM); R_SRC_NORM (18× R18) **removed**;
+  each jack switch lug now ties **directly** to the buffered `V_MODBUS` rail (low-Z normal). U3 C/D
+  re-enabled as paralleled unity distribution buffer (MB_INV out → U3.10/U3.12 in+ → U3.8/U3.14 out
+  → R227/R228 47Ω share → rail). M2: R15 100k→240k (OFFSET ±12V→±5V). +R227/R228 BOM rows; R18 row
+  dropped. block-3 schematic regenerated (141 parts/111 nets), all `--check` gates + parity green.
+- SPICE: depth ~3%→~98%; buffer load ~11mA (within 2× TL074). Verified V_MODBUS = 18 jack lugs + 2
+  share Rs, no R18 part remains.
+
+#### §H EDIT PLAN (validated; done — see above)
+1. **18 attenuverters:** `R_INV_IN_n`/`R_INV_FB_n` 10k→**47k** (nets); `R_INV_IN`/`R_INV_FB` qty-18 BOM
+   rows 10k→47k; pot value tag stays `lin pot` but spec the value as **50k** (RV6–RV23).
+2. **Drop the normalling R:** remove the 18× `R18_n` parts + their `JSW_*`↔`V_MODBUS` series; instead
+   tie each `JSW_*` (jack switch lug) **directly** to `V_MODBUS` (low-Z normal; override plug breaks
+   it). Remove the `R18` qty-19 BOM row (it was already mis-counted as 19; the VCA normal isn't an R18).
+3. **Re-enable U3 C/D buffer:** `U3_SPARE_3/4` → paralleled unity followers driving `V_MODBUS` from
+   `MB_INV` output, each via a small ~47Ω share R (R227/R228). V_MODBUS becomes the buffered rail.
+4. **M2 (OFFSET ±12V→±5V):** RV4 wiper currently spans ±12V into R15=100k (gain 1 vs R13=100k). Scale
+   so the wiper's usable range maps to ±5V: change R15 100k→**240k** (±12·100/240 ≈ ±5V at the summer).
+5. Regenerate sch/BOM/viz; full gate stack; commit.
 - **Edit plan (block-3):** (1) drop the 18× `R18_n` (R_SRC_NORM 100k); (2) jack switch lug ties
   `V_MODBUS` directly to each tip (low-Z normal, override plug breaks it); (3) re-wire `U3_SPARE_3/4`
   → paralleled unity buffer driving `V_MODBUS` (each via a small ~47Ω share resistor); (4) M2: rescale

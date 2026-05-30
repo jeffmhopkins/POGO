@@ -741,11 +741,14 @@ components:
   # block-3: Mod Bus passives — processor stage
   - { ref: R13,  board: utility, block: block-3, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "R_MB_F: feedback R, MB summer stage" }
   - { ref: R14,  board: utility, block: block-3, part: ~,          pkg: "0603",   val: "22kΩ",   fn: "R_MB_SRC: floor input R for V_src; with 470kΩ SCALE pot → G range 0.20×–4.55×" }
-  - { ref: R15,  board: utility, block: block-3, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "R_MB_OFF: offset pot input R" }
+  - { ref: R15,  board: utility, block: block-3, part: ~,          pkg: "0603",   val: "240kΩ",  fn: "R_MB_OFF: offset pot input R (change 0020 §M2: 100k→240k so RV4 ±12V wiper maps to ±5V at the summer)" }
   - { ref: R16,  board: utility, block: block-3, part: ~,          pkg: "0603",   val: "100kΩ",  tol: "1%", qty: 2, fn: "R_MB_INV: equal R_in + R_fb for polarity inverter stage" }
 
-  # block-3: Mod Bus passives — per-destination normalling and protection
-  - { ref: R18,  board: utility, block: block-3, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 19, fn: "R_SRC_NORM: bus normalling R per destination jack (19 destinations)" }
+  # block-3: Mod Bus passives — per-destination protection
+  # (R18 R_SRC_NORM removed — change 0020 §H: jacks normal LOW-Z directly to the buffered
+  #  V_MODBUS rail; the 100k series caused ~3% mod depth (C2). The bus is buffered by U3 C/D.)
+  - { ref: R227, board: utility, block: block-3, part: ~,          pkg: "0603",   val: "47Ω",    fn: "MB distribution-buffer U3-C output share R → V_MODBUS; change 0020 §H" }
+  - { ref: R228, board: utility, block: block-3, part: ~,          pkg: "0603",   val: "47Ω",    fn: "MB distribution-buffer U3-D output share R → V_MODBUS; change 0020 §H" }
   - { ref: R37,  board: utility, block: block-3, part: ~,          pkg: "0603",   val: "100Ω",   qty: 19, fn: "R_CLAMP: series CV protection per destination" }
   - { ref: D3,   board: utility, block: block-3, part: BAT54S,     pkg: SOT-23,   qty: 18, fn: "D_CLAMP: dual Schottky clamp per attenuverter destination CV input (18 total)" }
 
@@ -754,8 +757,8 @@ components:
   - { ref: C7,   board: utility, block: block-3, part: ~,          pkg: "0603",   val: "100nF",  qty: 12, fn: "C_BYPASS_MB: supply bypass; one per op-amp supply pin (6 ICs × 2 rails)" }
   # block-3 additions (2026-05-29): per-destination attenuverter inverter resistors
   # (missing from BOM), MOD_IN protection, ±10V mod-bus clamp zeners, MOD LEDs.
-  - { ref: R_INV_IN, board: utility, block: block-3, part: ~,      pkg: "0603",   val: "10kΩ",   tol: "1%", qty: 18, fn: "R_inv_in: attenuverter −V_src inverter input R; 1 per attenuverter destination (18); 1% for >60 dB center null" }
-  - { ref: R_INV_FB, board: utility, block: block-3, part: ~,      pkg: "0603",   val: "10kΩ",   tol: "1%", qty: 18, fn: "R_inv_fb: attenuverter −V_src inverter feedback R; 1 per attenuverter destination (18); 1% for >60 dB center null" }
+  - { ref: R_INV_IN, board: utility, block: block-3, part: ~,      pkg: "0603",   val: "47kΩ",   tol: "1%", qty: 18, fn: "R_inv_in: attenuverter −V_src inverter input R; 1 per attenuverter destination (18); 1% for >60 dB center null; change 0020 §H: 10k→47k (x5 hi-Z, cuts bus load to ~11mA)" }
+  - { ref: R_INV_FB, board: utility, block: block-3, part: ~,      pkg: "0603",   val: "47kΩ",   tol: "1%", qty: 18, fn: "R_inv_fb: attenuverter −V_src inverter feedback R; 1 per attenuverter destination (18); 1% for >60 dB center null; change 0020 §H: 10k→47k (matches R_inv_in to keep −1 gain)" }
   - { ref: R99,  board: utility, block: block-3, part: ~,          pkg: "0603",   val: "100Ω",   fn: "R_MODIN: MOD_IN series input protection" }
   - { ref: D4,   board: utility, block: block-3, part: BAT54S,     pkg: SOT-23,   fn: "D_MODIN: MOD_IN input clamp ±12V" }
   - { ref: D5,   board: utility, block: block-3, part: BZX84C10,   pkg: SOT-23,   fn: "D_ZCLAMP_P: mod-bus +10V clamp zener (back-to-back with D6)" }
