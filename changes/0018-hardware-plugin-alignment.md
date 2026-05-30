@@ -49,10 +49,34 @@ spec authors + group adversarial review → netlist + design-intent review → u
 
 ## Gate checklist (rolling, per block)
 
-- [ ] G4 spec §1 + functional approved (you) — per block
-- [ ] G5 topology approved (you) — per block, where topology changes
-- [ ] G6a/b components — only blocks needing new parts (expected: block-6 possibly none)
-- [ ] CI green (5 `--check` gates) after each block's edits
+All gates were taken interactively per block at the two checkpoints (after analysis, after
+edits) via AskUserQuestion approvals. Summary for final sign-off:
+
+- [x] G4 spec §1 + functional — approved per block (all 10) at checkpoint 2.
+- [x] G5 topology — approved for the blocks with topology changes: 1 (ALT path), 2 (LED
+      driver), 3 (MOD_SRC/LED removal/VCA), 4 (ALT-VCA, OFS), 6 (split + S2/S3/S5/S6/S7),
+      7 (HP follower + Q collapse), B (BP3_R normal).
+- [x] G6a/b components — only new part = **MMBT3904** (block-2 LED driver): registry +
+      `matches[]` + datasheet (onsemi product page) + SOT-23 footprint resolved. No other
+      new part types (THAT2180/TL072/TL074/CD4053/LM13700 already registered).
+- [x] CI `--check` ×5 + parity — green after every block's edits (verified locally each commit).
+- [ ] **CI run on the branch** (GitHub Actions: cross-compile + the 5 `--check` gates) — pending.
+- [ ] **Your final G4–G6 sign-off** on this consolidated record — pending.
+
+### Per-block gate summary (for review)
+
+| Block | Result | Gates exercised | New parts |
+|---|---|---|---|
+| A | doc-only (no divergence) | G4 | — |
+| 1 | ALT-path text fix | G4 | — |
+| 2 | LFO→MOD_SRC + breathing LED | G4·G5·**G6a** | MMBT3904 |
+| 3 | MOD_SRC wired; LEDs removed; VCA→raw; FOCUS→TILT | G4·G5 | — (net components removed) |
+| 4 | ALT-VCA cell; OFS fix; ref renumber | G4·G5·G6 | — (THAT2180 reused) |
+| 5 | re-verify + self-osc/doc | G4 | — |
+| 6 | split→7 + 7 alignment stages | G4·G5·G6 | — (parts reused; npn sym reused) |
+| 7 | HP polarity bug fix; Q collapse | G4·G5 | — (IC removed) |
+| 8 | re-verify (faithful) + doc | G4 | — |
+| B | BP3_R output normal; R37→R224 | G4·G5 | — |
 
 ## Decisions log
 
