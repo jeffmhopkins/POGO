@@ -652,8 +652,8 @@ components:
   - { ref: R77,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "LP2 OTA2 linearizing R L (R_LIN_B_L)" }
   - { ref: R78,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "LP2 OTA1 linearizing R R (R_LIN_A_R)" }
   - { ref: R79,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "LP2 OTA2 linearizing R R (R_LIN_B_R)" }
-  - { ref: R80,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "1MΩ",    fn: "LP2 Q V→I: V_ires_L → U9 cellB Iabc (R_Iabc_L)" }
-  - { ref: R81,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "1MΩ",    fn: "LP2 Q V→I: V_ires_R → U10 cellB Iabc (R_Iabc_R)" }
+  - { ref: R80,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "LP2 Q V→I: V_ires_L → U9 cellB Iabc (R_Iabc_L); change 0020 §D/M5: 1M→100k (Iabc pin ~−10.8V)" }
+  - { ref: R81,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "LP2 Q V→I: V_ires_R → U10 cellB Iabc (R_Iabc_R); change 0020 §D/M5: 1M→100k (Iabc pin ~−10.8V)" }
   - { ref: R82,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "LP2 IRES_AMP V_bias input R (R_QBIAS)" }
   - { ref: R83,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "LP2 IRES_AMP resonance CV input R (R_QINV)" }
   - { ref: R84,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "LP2 IRES_AMP feedback R (R_f_q)" }
@@ -661,10 +661,8 @@ components:
   - { ref: R86,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "49.9kΩ", tol: "1%", fn: "LP2 expo V/oct scaling R (R_VOCT); change 0020 §A: 47k→49.9k centers 17.92mV/oct at mid-trim" }
   - { ref: R230, board: audio,   block: block-8, part: "Vishay TFPT", pkg: "0805", val: "1kΩ",    fn: "LP2 expo tempco shunt (LP2_EXPO_BASE→GND); +4110ppm/K V/oct temp-comp; change 0020 §A/§4" }
   - { ref: R87,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "LP2 expo emitter degeneration (R_E)" }
-  - { ref: R88,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "LP2 L OTA1 buffer (v1) emitter pulldown to V-" }
-  - { ref: R89,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "LP2 L OTA2 buffer (v2) emitter pulldown to V-" }
-  - { ref: R90,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "LP2 R OTA1 buffer (v1) emitter pulldown to V-" }
-  - { ref: R91,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "LP2 R OTA2 buffer (v2) emitter pulldown to V-" }
+  # R88-R91 (LP2 integrator Darlington-buffer pulldowns) removed — change 0020 §C: state vars tap
+  # the unbuffered OTA outputs (pins 5/12); the on-chip buffers are unused.
   - { ref: D11,  board: audio,   block: block-8, part: 1N4148W,    pkg: SOD-123,  fn: "LP2 V_ires ≥0 clamp (anode GND, cathode V_ires)" }
   - { ref: C69,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100nF",  fn: "LP2 expo I_ref node bypass (C0G)" }
   - { ref: C70,  board: audio,   block: block-8, part: ~,          pkg: "0402",   val: "10nF",   fn: "LP2 OTA Iabc bypass L (C_IABC_L)" }
