@@ -5,7 +5,10 @@
   dropped the R→L normal + symmetric per-channel BP3 gating in `Pogo.cpp`). That slice needs G3 (VCV
   Rack verification) + a `plugin.json` version bump before close.
 - **Status:** OPEN — G1 confirmed (fix all CRIT+HIGH; full H5/H6/M5 fixes). Working per cluster.
-  **G3 PENDING** on the §E plugin change (user verifies in VCV Rack).
+  **✅ G3 PASSED (user, 2026-05-30): "plugin was good in branch"** — §E ALT-independence verified in
+  VCV Rack from the branch CI build. **Plugin LOCKED @** `Pogo.cpp` blob
+  `e611fa720bfbe6100f7d011d7ba0e1038f7c9662`, `plugin.json` blob `4188c1cea48208074e55d38f24566ad5c9a9723a`
+  (v2.1.0). Any further plugin edit re-opens G2/G3.
 - **Opened:** 2026-05-30
 - **Branch:** `change/0020-cv-conditioning-fixes` (now rebaselined on `dev` after #48/0019 merged).
 - **Stacked-on:** 0019 (merged to dev via #48; 0020's merge-base is 0019's tip — clean, no rebase needed).
@@ -230,7 +233,7 @@ switch lug), no dual-switch jack, no M8→M6 panel break, no new part type. Clea
 ALT input) too. This is a **plugin (Lane A) change** (plugin leads), done here per user direction:
 - **Plugin (`Pogo.cpp`):** `altR = altRConn ? PreGain(...) : 0` (dropped the `altLConn ? altL : 0`
   R→L normal); `bp3InR = altRConn ? VcaBlock(...) : bandR` (was `altLConn||altRConn`). L unchanged.
-  → **G3 PENDING: user verifies in VCV Rack** + version bump.
+  → **✅ G3 PASSED** (user verified in VCV Rack, 2026-05-30); plugin LOCKED @ v2.1.0.
 - **block-1:** J4 now mirrors J3 — `ALT_R_DET:[J4.3]` (own switch lug) + `R225` 22k tip pulldown on
   `ALT_R_TIP`; removed `J4.3` from `ALT_L_IN` (R→L normal gone). New boundary `ALT_R_DET`.
 - **block-6-dist3:** split the U81 selects — X/L select (pin11/A) stays `ALT_L_DET`; Y/R select
