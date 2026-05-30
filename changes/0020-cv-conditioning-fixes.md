@@ -89,6 +89,102 @@ components.yaml (new parts: shunt resistors, comp caps, possible buffer op-amps,
   confirm a free op-amp half exists per dist section (U38/39/44/45 usage) — else +1 component.
 - **H1 (BP3 selector):** see CONSTRAINT above — J4.3 already normalling; ALT_R_DET source is a G5 call.
 
+---
+
+## G5 TOPOLOGY PROPOSAL (2026-05-30) — awaiting user approval
+
+Datasheet-grounded values from a focused analog-design pass (LM13700 SNOSBW2F, THAT340 Doc 600041).
+Confidence tags: **[HC]** high (math/datasheet solid, verified) · **[NV]** needs datasheet re-verify
+(PDF text-extraction unavailable in this env — structural argument sound, exact value to confirm).
+
+### A. Expo V/oct divider — fixes C1 (+C3 base) — blocks 5,7,8 + propagate to 6-svf1/2/3 [HC]
+- **Root cause:** V/oct CV lands on the THAT340 base through series R only (no shunt) → ratio≈1 → rails.
+- **Fix:** add a base divider. ΔV_BE/oct = V_T·ln2 = **17.92 mV/oct** → need 1 V/oct ÷ 55.8.
+  - `R_VOCT` 47k → **43.2k (E96)**; add **R_SHUNT = 866Ω (E96)** base→GND; `RV_1VOCT` → **10k**
+    (gives ±10% slope-trim authority centered; keeps 20k 3224W usable at ~21% travel if we keep the part).
+  - Shunt to **GND**, not the I_ref node (loading I_ref shifts f_ref). f_ref trim (RV_REF) stays —
+    it's orthogonal (multiplicative/offset vs this slope). R_E (1k) and I_ref net unchanged.
+  - **No new part type** (866Ω is a new 0603 value). Counts: LP1 = 2 (L+R), HP = 1, LP2 = 1, BP×3 = 2 each.
+
+### B. LP1 tilt summing node — fixes C3 — block-5 (and the BP per-band tilt summers already OK) [HC]
+- **Plugin:** `lp1TiltV = LP1_TILT×5` → full tilt **±5 V/oct**; L=base+tilt, R=base−tilt; sums 1:1 with V_freq.
+- **Fix:** replace the direct R55/R56→base resistive mixing with a real **inverting summer** (V_freq +
+  ±V_tilt, 3× **100k** + op-amp half/channel) whose output feeds the §A divider. The existing tilt
+  inverter (U13-A) already makes −V_tilt for R. **+1 op-amp half per channel** (promote a dual→quad or
+  add a TL072 — G6 item). RV6 tilt-null stays as a center offset into the summer.
+
+### C. OTA state-variable tap — fixes H5 — blocks 5,7,8 [HC, pure reroute]
+- **Root cause:** v1/v2 tapped from LM13700 **Darlington buffer** outputs (pins 8/9), ~1.2–1.4 V
+  (2·V_BE, temp-dependent) below the integrator node → injects ~1.3 V DC into the next OTA's ±30mV input.
+- **Fix:** tap v1 from **pin 5**, v2 from **pin 12** (the unbuffered OTA outputs = the cap nodes; merge
+  `*_V1_*` into `*_V1CAP_*`, `*_V2_*` into `*_V2CAP_*`). Use the Darlington buffer (8/9) **only** for
+  output-jack / inter-block low-Z drive, never inside the loop or into an OTA input. **No new parts.**
+  47nF C0G caps stay on pins 5/12; f_ref math unchanged (gm/C identical) — removing the buffer *improves*
+  DC accuracy.
+
+### D. Q-cell Iabc bias + self-osc — fixes M5 (bias) + H6 (range) — blocks 5,7,8 [NV — re-verify pin V]
+- **M5 root cause:** spec assumes Iabc = V_ires/R_Iabc with the bias pin at 0 V. The LM13700 Iabc pin
+  actually sits ~2·V_BE above V− (**≈ −10.8 V at −12V rails**), so a 1 MΩ from a ~0 V node delivers
+  ~10.8 µA almost regardless of control → Q pinned at min. **(Structurally certain the pin is near V−,
+  not GND; the exact 1-vs-2 V_BE figure is the [NV] item.)**
+- **Proposed fix:** `R_Iabc` 1MΩ → **100k**; IRES_AMP drives V_ires **negative** in the ~−10.0…−10.8 V
+  window (Iabc = (V_ires−V_pin)/R_Iabc); **fix the clamp polarity** (current BAT54 clamps V_ires≥0,
+  wrong sign — should prevent going below V_pin).
+- **H6 root cause:** Q=2000 needs Iabc≈**260 pA**, far below the LM13700 controllable floor (~10–100 nA).
+  Honest controlled Q_max ≈ **10–50**.
+  - **Proposed:** clamp the *controlled* Q range to ~≤10 and reach self-oscillation via a **soft-limit:
+    2× BAT54S antiparallel across the BP-tap integrator cap** (BAT54 already in BOM — no new part type).
+    Alternative (cleaner, bigger blast radius): lower R_in so a comfortable Iabc maps to high Q — but
+    R_in is the SVF summing/gm-reference resistor, so it ripples into SUM_AMP gains. **Recommend the
+    soft-limit option.**
+
+### E. BP3 input selector ALT_R — fixes H1 — block-6-dist3 + block-1 [topology decision]
+- Plugin: `bp3InR = (altLConn || altRConn)`. Hardware gates both channels on ALT_L_DET only; no ALT_R_DET.
+- **Constraint:** J4's one switch lug is already the normalling contact. **Options for G5:**
+  - **(E1)** Derive ALT_R_DET with a comparator/transistor off J4's tip node (detect a patched plug by
+    the tip being driven), OR off the R134-style pulldown pattern — needs +1 small part on block-1.
+  - **(E2)** Add an OR (2 diodes + pullup, or a logic gate) of ALT_L_DET and ALT_R_DET → Y(R) select;
+    X(L) select stays ALT_L_DET. (Depends on E1 producing ALT_R_DET.)
+  - **(E3)** Document as a minor, rarely-hit limitation (only matters when ALT_R is patched but ALT_L is
+    not — an unusual mono-into-R patch) and leave the wiring. Cheapest; small fidelity gap.
+  - **Recommend E1+E2** for true plugin parity (it's a real, if narrow, behavioral divergence).
+
+### F. WF phase inversion — fixes H4 — block-6-dist1/2/3 [HC, confirm free op-amp]
+- WF path is net-inverting vs SC/HC (leading DRIVE-VCA I/V inversion + the folder's `2·Vclamp−Vfoldin`).
+- **Fix:** add one unity inversion in each WF path so all 3 modes share sign into the mux. Need a free
+  op-amp half in each dist section — **else +1 dual op-amp/section** (G6). Verifying U38/39/44/45 usage.
+
+### G. BP3 R→L output normal — fixes M1 — block-6-mix [HC, wiring]
+- Re-route so J28's switch lug taps the **L source ahead of R's buffer/series-R** (true "R normals to L"),
+  instead of tying two driven 1k outputs together (which gives (L+R)/2 and back-feeds the L jack).
+
+### H. Mod-bus depth + buffer — fixes C2 + H2 — block-3 [topology decision]
+- C2: 100k `R_SRC_NORM` into a ~3.3k destination node → ~3% depth. H2: spec'd distribution buffer is
+  absent (U3 C/D grounded as spares); bare MB_INV drives 18 loads.
+- **Options for G5:**
+  - **(H-a)** Direct/low-Z normal: bus normals onto V_src via the jack tip-switch (override breaks it),
+    drop R_SRC_NORM; **re-enable the U3 C/D distribution buffer** (per the spec's own §145) to drive the
+    18×~10k loads (~18 mA). Cleanest plugin parity. **Recommend.**
+  - **(H-b)** Per-destination buffer (18 unity buffers) — many parts, overkill.
+  - **(H-c)** Raise destination input impedance (10k→100k pots+inverters) so 100k norm divides less —
+    changes 18 attenuverter scalings + noise. Not recommended.
+- Also fold **M2** (mod OFFSET ±12V→±5V: scale R15 or use ±5V refs) and confirm **M4** (block-4 I/V comp
+  cap, add small C_f ~few pF across R_f, 4 ch) here.
+
+### New out-of-scope finding (log, separate change)
+- **THAT340 has NO internal PTAT/tempco** — aux-expo-converter's "on-chip compensation" is wrong. A real
+  V/oct design needs an external **+3300 ppm/°C tempco resistor** in the expo (e.g. series with R_SHUNT).
+  This affects ALL expo converters (5,7,8,6×3). Recommend a **separate change 0021** (it's a new
+  component type + every expo), not folded into 0020. Flagging now so it isn't lost.
+
+### Decisions I need from you (G5)
+1. **Mod-bus (H):** approve **H-a** (low-Z normal + re-enable U3 C/D buffer)?
+2. **BP3 selector (E):** **E1+E2** (full parity, +1 part on block-1) or **E3** (document limitation)?
+3. **Q-cell (D):** approve the soft-limit approach for H6, and OK to proceed on the [NV] bias values
+   (R_Iabc→100k, negative V_ires) flagged for datasheet re-verify at prototype — or hold D until the
+   LM13700 Iabc-pin voltage is confirmed on real hardware/a fetchable datasheet?
+4. **THAT340 tempco:** spin off as **0021** (recommended), or fold into 0020?
+
 ## Gate checklist
 - [x] **G1 — intent** confirmed (fix all CRIT+HIGH; full H5/H6/M5). 
 - [ ] **G5 — topology proposal** (assemble after analog-values agent returns) ← CURRENT STOP
