@@ -174,7 +174,7 @@ is confirmed in the datasheet, with slightly reduced headroom. Audio headroom wi
 | Audio bandwidth | >100 kHz | THAT 2180 specification |
 | THD+N | <0.01% | Unity gain, 1 kHz, ±5V input |
 | Dynamic range | >100 dB | THAT 2180 specification |
-| Audio input impedance (IN+) | ~20 kΩ | Small-signal; THAT 2180A14-U translinear cell |
+| Audio input impedance (IN+) | ~20 kΩ | Small-signal; THAT 2180 (SIP-8) translinear cell |
 | Audio output impedance (OUT+) | <100 Ω | Low-Z transimpedance output stage |
 | Input range | ±11V | Clamped at input buffer |
 | Output range | ±11V | ±12V supply |

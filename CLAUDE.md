@@ -15,11 +15,11 @@ Stereo Input (L + R)
   ├── [Block 1]  Pre-Gain            GAIN_MAIN switch: 1× or 5× (~14 dB), clip ±10.5V
   ├── [Block VCA] Pre-LP1 VCA        THAT 2180; VCA_AMT bipolar att; VCA_OFS floor; VCA_IN CV
   ├── [Block LP1] LP Filter 1        OTA-C SVF; LP1_FREQ, LP1_TILT (stereo spread), LP1_RES
-  │                                  ← ALT path: ALT_BP_L/R → GAIN_BP3 (1×/5×) → BP direct
-  ├── [Block BP]  Bandpass Bank      3× 2-pole OTA-C SVF bandpass resonators
-  │               BP_OFFSET (master), BP_MIX (dry/wet), BP_TILT (stereo spread), BP_DIST (soft/hard/fold)
-  │               Per-group: FREQ, FOCUS (Q), DIST (drive); 40 Hz–4 kHz range
-  │               BP3_L/R_OUT tap (after distortion, before mix)
+  │                                  ← ALT path: ALT_BP_L/R → GAIN_BP3 (1×/5×) → ALT-VCA → BP3
+  ├── [Block BP]  Bandpass Bank      3× 2-pole OTA-C SVF; distortion runs BEFORE the SVF (per band)
+  │               BP_OFFSET (master), BP_BYPASS + BP_WET (two output scalers), BP_TILT (stereo spread)
+  │               Per-group: FREQ, FOCUS (Q), TILT, DIST (drive), DIST_MODE (soft/hard/fold)
+  │               ≈50 Hz–3.2 kHz (F_REF 400 Hz, all 3 bands); BP3_L/R_OUT tap (post-SVF band, pre-mix; R normals to L)
   ├── [Block HP]  HP Filter          OTA-C SVF; HP_FREQ (slider), HP_RES
   ├── [Block LP2] LP Filter 2        OTA-C SVF; LP2_FREQ (slider), LP2_RES
   └── [Block B]   Output Buffers     1kΩ output, ±11V clamp → MAIN_L/R_OUT
@@ -27,10 +27,11 @@ Stereo Input (L + R)
 ────────────────────────────────────────────────────────────────────────────────────────
 MODULATION (parallel to signal chain)
 ────────────────────────────────────────────────────────────────────────────────────────
-LFO1 / LFO2  →  ±5V triangle, 0.05–20Hz; LFO1 normalizes into MOD_IN
-MOD_IN jack  →  Mod Bus Processor (SCALE exp 0.2–5×, OFFSET ±5V, clamp ±10V)
-Mod Bus      →  19 CV destinations (each: override jack + attenuverter trimpot)
-Lights       →  MOD_CLIP, MOD_POS, MOD_NEG
+LFO1 / LFO2  →  ±5V triangle, 0.05–20Hz; each with a "breathing" LED indicator
+MOD_SRC sw   →  selects bus source: LFO1 / LFO2 / External (MOD_IN jack)
+Mod Bus      →  Mod Bus Processor (SCALE 0.2–5×, OFFSET ±5V, clamp ±10V)
+             →  18 attenuverter destinations (override jack + attenuverter) + VCA raw normal
+Lights       →  LFO1, LFO2, BP1_CLIP, BP2_CLIP, BP3_CLIP
 ```
 
 ---
@@ -84,7 +85,7 @@ POGO/
 │   ├── panel_svg.py · panel_rules.py · panel_cpp.py · panel_editor.py · panel_kicad.py
 │   ├── components.py · build_components.py · footprint_svg.py · fetch_datasheets.py  ← components/BOM
 │   ├── generate_schematic.py     ← nets (specs/block-*/) → kicad/pogo-*.kicad_sch (--check gate)
-│   ├── gen_block6.py             ← block-6 netlist generator (3-group repetition)
+│   ├── build_netlist_viz.py      ← nets → docs/netlist.html interactive viewer (--check drift gate)
 │   ├── symbols.py                ← globs components/symbols/*.yaml → emit + pin geometry + self-test
 │   ├── kicad_common.py           ← generic KiCad s-expr emit primitives (symbol-agnostic)
 │   └── SCHEMATIC-GEN-PLAN.md     ← schematic rollout plan / per-block gate doc
@@ -123,7 +124,9 @@ POGO/
 │   ├── block-8/spec.md           ← LP Filter 2 (OTA-C SVF, independent)
 │   ├── block-B/spec.md           ← Output Buffers (TL072, MAIN + BP3 jacks)
 │   │   (each block-N/ also holds its block-N.nets.yaml — the netlist SOURCE;
-│   │    the generated .kicad_sch lives in kicad/)
+│   │    the generated .kicad_sch lives in kicad/. EXCEPTION: block-6 is split into
+│   │    7 section dirs specs/block-6-{svf1,svf2,svf3,dist1,dist2,dist3,mix}/ —
+│   │    specs/block-6/ holds only spec.md; gen_block6.py is superseded.)
 │   │
 │   ├── panel-design/
 │   │   └── panel-notes.md        ← Points to tools/panel-data.yaml (source of truth)
@@ -381,13 +384,13 @@ spawns a **separate Lane A change** — the plugin leads; the schematic never si
 
 - One change per branch/PR; the change file is committed and never deleted (abandoned → `ABANDONED`).
 - **Plugin = ground truth.** Spec and schematic follow the locked plugin; they never lead it.
-- **All five CI `--check` gates pass**: `components.py`, `fetch_datasheets.py` (datasheet-PDF integrity), `build_components.py`, `generate_schematic.py` (symbol archetype self-test incl. datasheet citation + pin⊆pad advisory, then per-block pin coverage + structural + byte-drift), `build_panel.py` (DRC).
+- **All six CI `--check` gates pass**: `components.py`, `fetch_datasheets.py` (datasheet-PDF integrity), `build_components.py`, `generate_schematic.py` (symbol archetype self-test incl. datasheet citation + pin⊆pad advisory, then per-block pin coverage + structural + byte-drift), `build_panel.py` (DRC), `build_netlist_viz.py` (docs/netlist.html byte-drift) — plus the `test_drc.py` pytest + `test_parity.py` Python↔JS DRC parity.
 - The `.nets.yaml` is authored design (lives in `specs/<block>/`); the generated `.kicad_sch` is a build artifact (lives in `kicad/`). They are linked by `generate_schematic.py --check`, not by directory adjacency.
 - No component is used in a netlist before G6 closes (in `components.yaml` + registry + footprint + datasheet).
 - Locked files stay unchanged after lock unless G2/G3 are re-opened.
 
 > **Enforcement note (honor-system, 2026-05):** these invariants are currently enforced by
-> assistant discipline + the five artifact-level `--check` gates, which verify *artifact
+> assistant discipline + the six artifact-level `--check` gates, which verify *artifact
 > self-consistency* (yaml↔sch, DRC, registry), **not** cross-layer plugin↔panel↔netlist drift
 > or lock state. Tracked follow-ups (a future change): `tools/check_locked.py` (locked blob
 > hashes unchanged), `tools/check_drift.py` (plugin enum surface ↔ panel control count ↔

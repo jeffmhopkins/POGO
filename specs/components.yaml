@@ -293,13 +293,13 @@ components:
   # block-6: Calibration trim pots
   - { ref: RV7,  board: audio,   block: block-6-svf1, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "BP1 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 200 Hz at 0V; ±25% range" }
   - { ref: RV8,  board: audio,   block: block-6-svf1, part: "Bourns 3224W", pkg: SMD,   val: "20kΩ",  fn: "BP1 1V/oct tracking trim; ±10% range" }
-  - { ref: RV9,  board: audio,   block: block-6-svf1, part: ~,          pkg: SMD,      fn: "BP1 Q_max trim (Iabc V_bias)" }
+  - { ref: RV9,  board: audio,   block: block-6-svf1, part: "Bourns 3224W", pkg: SMD,  val: "100kΩ", fn: "BP1 Q_max trim (Iabc V_bias)" }
   - { ref: RV10, board: audio,   block: block-6-svf2, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "BP2 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 1500 Hz at 0V; ±25% range" }
   - { ref: RV11, board: audio,   block: block-6-svf2, part: "Bourns 3224W", pkg: SMD,   val: "20kΩ",  fn: "BP2 1V/oct tracking trim; ±10% range" }
-  - { ref: RV12, board: audio,   block: block-6-svf2, part: ~,          pkg: SMD,      fn: "BP2 Q_max trim" }
+  - { ref: RV12, board: audio,   block: block-6-svf2, part: "Bourns 3224W", pkg: SMD,  val: "100kΩ", fn: "BP2 Q_max trim (Iabc V_bias)" }
   - { ref: RV13, board: audio,   block: block-6-svf3, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "BP3 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 6000 Hz at 0V; ±25% range" }
   - { ref: RV14, board: audio,   block: block-6-svf3, part: "Bourns 3224W", pkg: SMD,   val: "20kΩ",  fn: "BP3 1V/oct tracking trim; ±10% range" }
-  - { ref: RV15, board: audio,   block: block-6-svf3, part: ~,          pkg: SMD,      fn: "BP3 Q_max trim" }
+  - { ref: RV15, board: audio,   block: block-6-svf3, part: "Bourns 3224W", pkg: SMD,  val: "100kΩ", fn: "BP3 Q_max trim (Iabc V_bias)" }
 
   # block-6: Discrete semiconductors
   - { ref: D4,   board: audio,   block: block-6-dist1, part: 1N4148W,    pkg: SOD-123,  qty: 8, fn: "SC soft-clip diodes; 4 per path (2 antiparallel pairs) × 6 paths" }
@@ -637,7 +637,7 @@ components:
   - { ref: R33,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "LP2 SUM_AMP R_in R" }
   - { ref: RV19, board: audio,   block: block-8, part: "Bourns 3224W", pkg: SMD,   val: "500kΩ", fn: "LP2 f_ref trim rheostat; in series with R_IREF_A 1MΩ; ±25% range" }
   - { ref: RV20, board: audio,   block: block-8, part: "Bourns 3224W", pkg: SMD,   val: "20kΩ",  fn: "LP2 1V/oct tracking trim; ±10% range" }
-  - { ref: RV21, board: audio,   block: block-8, part: ~,          pkg: SMD,      fn: "LP2 Q_max trim" }
+  - { ref: RV21, board: audio,   block: block-8, part: "Bourns 3224W", pkg: SMD,  val: "100kΩ", fn: "LP2 Q_max trim (IRES_AMP V_bias; self-osc onset)" }
   # block-8 full circuit (expanded from spec §4, 2026-05-29): mirrors LP1 minus tilt
   # (single shared expo); Q VCA = shared U9/U10 cell B (hosted on block-5). Adds the LP2 IRES_AMP
   # (was missing), SUM_AMP fb, OTA R_LIN, expo network, Iabc bypass, buffer pulldowns,

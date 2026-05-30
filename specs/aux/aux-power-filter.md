@@ -1,6 +1,6 @@
 # Standard Power Supply Filtering
 
-> ⚠️ **STALE** — Circuit library entry pending re-verification against current panel design (2026-05-28).
+> ✅ **Re-verified 2026-05-30** (change 0018). Board power filtering / decoupling; content current.
 
 Applied to every POGO PCB at the power connector and at each IC.
 

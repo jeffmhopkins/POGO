@@ -1,7 +1,7 @@
 # Block 5: LP Filter 1
 First 2-pole lowpass filter in the signal chain, with stereo tilt for independent L/R cutoff spread.
 
-DSP source: `plugin/src/dsp/LPFilter.hpp`, `plugin/src/Pogo.cpp` (lines 399–408)
+DSP source: `plugin/src/dsp/LPFilter.hpp`, `plugin/src/Pogo.cpp` (lines 391–400)
 
 ---
 
@@ -107,7 +107,7 @@ curve is an approximation, not bit-exact — an accepted DSP↔analog deviation.
 
 ### Stereo tilt
 
-From Pogo.cpp lines 403–408:
+From Pogo.cpp lines 391–400:
 
 ```cpp
 float lp1TiltV = params[LP1_TILT_PARAM].getValue() * 5.f   // [−1,+1] knob → ±5 V/oct

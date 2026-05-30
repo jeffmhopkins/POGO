@@ -29,10 +29,11 @@ Stereo Input (L + R)
 ────────────────────────────────────────────────────────────────────────────────────────
 MODULATION (parallel)
 ────────────────────────────────────────────────────────────────────────────────────────
-  [block-2]  Dual LFO  →  LFO1 (±5V triangle, 0.05–20 Hz), LFO2 (same, independent)
-  [block-3]  Mod Bus   →  LFO1 normalizes into MOD_IN; MOD_SCALE (0.2–5×), MOD_OFFSET (±5V)
-                          Bus → 19 CV destinations (each: override jack + attenuverter trimpot)
-                          LEDs: MOD_CLIP, MOD_POS, MOD_NEG
+  [block-2]  Dual LFO  →  LFO1 (±5V triangle, 0.05–20 Hz), LFO2 (same, independent); breathing LEDs
+  [block-3]  Mod Bus   →  MOD_SRC switch selects LFO1 / LFO2 / External (MOD_IN jack);
+                          MOD_SCALE (0.2–5×), MOD_OFFSET (±5V), clamp ±10V
+                          Bus → 18 attenuverter destinations (override jack + attenuverter) + VCA raw normal
+  Lights              →  LFO1, LFO2, BP1_CLIP, BP2_CLIP, BP3_CLIP
 ```
 
 ---
@@ -115,7 +116,7 @@ MODULATION (parallel)
 
 ---
 
-## I/O (24 inputs, 6 outputs, 8 lights)
+## I/O (24 inputs, 6 outputs, 5 lights)
 
 ### Inputs
 | Input | Block | Notes |
@@ -142,10 +143,7 @@ MODULATION (parallel)
 ### Lights
 | Light | Block | Function |
 |---|---|---|
-| LFO1_LIGHT, LFO2_LIGHT | 2 | Brightness tracks LFO output |
-| MOD_CLIP_LIGHT | 3 | \|busV\| ≥ 9.9V |
-| MOD_POS_LIGHT | 3 | busV > 0 |
-| MOD_NEG_LIGHT | 3 | busV < 0 |
+| LFO1_LIGHT, LFO2_LIGHT | 2 | "Breathing" brightness tracks ½(LFO+1) |
 | BP1_CLIP_LIGHT | 6 | BP1 distortion output > ±4V |
 | BP2_CLIP_LIGHT | 6 | BP2 distortion output > ±4V |
 | BP3_CLIP_LIGHT | 6 | BP3 distortion output > ±4V |
@@ -183,27 +181,31 @@ BP_BYPASS_PARAM and BP_WET_PARAM are panel knobs only — no mod bus destination
 
 ## Power Budget (Estimate)
 
+Per-rail estimate (typical Icc: OPA1612 7.3 mA/pkg, TL072 1.4, TL074 2.6, LM13700 ~5,
+THAT2180 ~4, THAT340 ~0.5, CD4053 ~0.05, MMBT3904 ~3 on +12V only). Recomputed 2026-05-30
+after the change-0018 additions (ALT-BP VCA, per-band DRIVE VCAs + CLIP comparators, breathing
+LEDs). See `specs/analog-design-review.md` for the full device census + arithmetic.
+
 | Block | +12V | −12V | Dominant draw |
 |---|---|---|---|
-| A (Input Buffer) | ~6 mA | ~6 mA | 1× OPA1612 |
-| 1 (Pre-Gain) | ~11 mA | ~11 mA | 2× OPA1612 @ 5.5 mA ea |
-| 2 (Dual LFO) | ~5 mA | ~5 mA | 2× TL072CDT @ 2.6 mA ea |
-| 3 (Mod Bus) | ~18 mA | ~18 mA | 7× TL074CDT @ 2.6 mA ea (±12V actual) |
-| 4 (VCA) | ~11 mA | ~11 mA | 2× THAT 2180 @ 4 mA ea |
-| 5 (LP1) | ~27 mA | ~27 mA | 3× LM13700M + 2× OPA1612 |
-| 6 (BP + Dist) | ~104 mA | ~104 mA | 17× TL072CDT (SC+HC shared) + 6× OPA1612 + 6× LM13700M |
-| 7 (HP) | ~27 mA | ~27 mA | 3× LM13700M + 2× OPA1612 |
-| 8 (LP2) | ~23 mA | ~23 mA | 2× LM13700M + 2× OPA1612 |
-| B (Output Buffer) | ~5 mA | ~5 mA | 2× TL072CDT @ 2.6 mA ea |
-| **Total** | **~237 mA** | **~237 mA** | |
+| A (Input Buffer) | ~7 mA | ~7 mA | 1× OPA1612 |
+| 1 (Pre-Gain) | ~15 mA | ~15 mA | 2× OPA1612 |
+| 2 (Dual LFO) | ~9 mA | ~3 mA | 2× TL072 + 2× MMBT3904 (LED, +12V only) |
+| 3 (Mod Bus) | ~16 mA | ~16 mA | 6× TL074 |
+| 4 (VCA) | ~20 mA | ~20 mA | 4× THAT 2180 (main + ALT-BP) + 3× TL072 |
+| 5 (LP1) | ~37 mA | ~37 mA | 4× LM13700 + 2× OPA1612 + 2× THAT340 |
+| 6 (BP + Dist) | ~180 mA | ~179 mA | 9× LM13700 + 6× OPA1612 + 6× THAT340 + 6× THAT2180 (DRIVE) + dist/CLIP TL072/TL074 |
+| 7 (HP) | ~33 mA | ~33 mA | 3× LM13700 + 2× OPA1612 + 1× THAT340 |
+| 8 (LP2) | ~28 mA | ~28 mA | 2× LM13700 + 2× OPA1612 + 1× THAT340 |
+| B (Output Buffer) | ~3 mA | ~3 mA | 2× TL072 |
+| **Total** | **~326 mA** | **~321 mA** | |
 
-Use a powered bus with **≥300 mA capacity per rail**; 350 mA preferred for headroom.
+Use a powered bus with **≥400 mA capacity per rail** (typical draw ~326 mA; allow headroom for
+LM13700/THAT2180 peak and LED transients). Block 6 alone is ~180 mA (>half the module).
 Per-block details in each block spec's Power Draw Estimate section.
 
-Key reductions vs first-pass estimate: (1) SC+HC distortion paths share one TL072CDT per
-group/channel, eliminating 6 ICs from block-6; (2) NE5532D replaced by OPA1612 in block-1
-(better noise, lower power); (3) TL072/TL074 Icc corrected to ±12V operating figures (~2.6
-mA/pkg) from ±15V datasheet specs.
+Note: this supersedes the 2026-05-27 ~237 mA figure, which predated the per-band DRIVE engine
+(6× THAT2180 + 3× TL074) and CLIP comparators (3× TL074) — ~48 mA/rail not in the old budget.
 
 Thermal note: all OPA1612 in SOIC-8 dissipate ~132 mW — within limits with standard copper pour.
 

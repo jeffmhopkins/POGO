@@ -190,8 +190,8 @@ HP_RES_PARAM (0 to 1, default 0) + HP_RES_INPUT / 10  →  IRES_AMP  →  I_abc_
 
 Audio board. Place HP_L and HP_R SVF circuits between the BP output nodes and the LP2 input nodes.
 EXPO_HP (THAT340) placed centrally; U51 (Q) adjacent to HP OTA sections. The HP follower
-(G = −1 TL072 half) should be close to the SUM_AMP to minimize trace capacitance on the
-HP_inv node.
+(G = +1 unity, OPA1612 half B) should be close to the SUM_AMP to minimize trace capacitance on
+the HP_inv node.
 
 ### Power Draw Estimate
 
