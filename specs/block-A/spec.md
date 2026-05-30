@@ -108,10 +108,12 @@ intentional nonlinearity in this block.
   100 Ω is the community standard for Eurorack and keeps insertion loss negligible:
   voltage divider with a 1 MΩ op-amp input = 0.00001 dB attenuation.
 
-**Clamp diodes (D1, D2): BAT54S (dual Schottky, SOT-23)**
-- BAT54S contains two matched Schottky diodes in a single SOT-23. Anode of D_upper
-  connects to signal node; cathode to +12 V. Cathode of D_lower connects to −12 V;
-  anode to signal node. This holds the op-amp (+) input within ±(12 + 0.3) = ±12.3 V.
+**Clamp diodes (D1, D2): BAT54S (dual *series* Schottky, SOT-23)**
+- BAT54S is a **series** dual: D1 (A1=pin1 → K1) in series with D2 (A2 → K2=pin2), the two
+  meeting at the **series junction K1;A2 = pin 3**. That junction is wired to the signal node
+  (after R1/R2); pin 1 (A1) → −12 V, pin 2 (K2) → +12 V. D2 (junction→+12 V) is the high clamp
+  (conducts above +12.3 V); D1 (−12 V→junction) is the low clamp (conducts below −12.3 V). This
+  holds the op-amp (+) input within ±(12 + 0.3) = ±12.3 V. (See aux-cv-protection.md for the pin map.)
 
 **Op-amp (U1): OPA1612, SOIC-8**
 - Dual: one package serves both L and R channels.

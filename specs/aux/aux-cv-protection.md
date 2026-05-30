@@ -25,21 +25,27 @@ Jack sleeve → GND
 | Reference | Part | Package | Value | Notes |
 |---|---|---|---|---|
 | R_in | 100 Ω | 0603 | 100 Ω | Series current-limit resistor |
-| D_clamp | BAT54S | SOT-23 | — | Dual Schottky **series** configuration. **Pin orientation (CRITICAL)**: Pin 1 = Anode of D1 → connect to −12 V; Pin 2 = Common (signal node) → connect to signal after 100 Ω; Pin 3 = Cathode of D2 → connect to +12 V. A labeling error creates silent failure (no clamping). Every schematic using BAT54S must show Pin 1, 2, 3 explicitly. |
+| D_clamp | BAT54S | SOT-23 | — | Dual Schottky **series** configuration; the **series junction is the signal node**. **Pin orientation (CRITICAL, per Diodes Inc DS11005)**: Pin 1 = A1 (anode D1) → connect to −12 V; Pin 2 = K2 (cathode D2) → connect to +12 V; Pin 3 = K1;A2 (the series junction) → connect to the signal node (after 100 Ω). A pin-labeling error creates silent failure (no/incorrect clamping). Every schematic using BAT54S must show Pin 1, 2, 3 explicitly. |
 | C_bypass | 100 nF | 0603 | 100 nF | Optional: across input to GND for HF filtering |
 
 ## BAT54S Pinout Reference
 
 ```
-BAT54S SOT-23 (series configuration):
+BAT54S SOT-23 (series dual Schottky — junction at the signal node):
 
-Pin 1 (left) = Anode D1  ──►──── Pin 2 (center) = Common ──────►── Pin 3 (right) = Cathode D2
-connect to −12 V rail              connect to signal node              connect to +12 V rail
+  Pin 1 = A1              Pin 3 = K1;A2 (series junction)          Pin 2 = K2
+  ──►|── D1 ──────────────►  = SIGNAL NODE  ──────────── D2 ──►|──
+  → −12 V rail            (signal, after 100 Ω series R)          → +12 V rail
+
+  D1: A1(pin1, −12 V) → K1(pin3, signal)    low clamp  (conducts when signal < −12.3 V)
+  D2: A2(pin3, signal) → K2(pin2, +12 V)    high clamp (conducts when signal > +12.3 V)
 ```
 
-Correct: signal at Pin 2 is clamped to stay between −12 V (forward drop ≈ 0.3 V) and +12 V.
-Wrong (Pin 2 → GND instead of signal): clamps to GND, not ±12 V — circuit still functions but
-clamps at the wrong levels. Every schematic must show this connection explicitly with pin numbers.
+Correct: the signal sits on the **series junction (Pin 3)**, clamped to stay between −12 V
+and +12 V (Schottky forward drop ≈ 0.3 V). **Pin 3 — not Pin 2 — is the junction.** An earlier
+revision of this doc mislabeled the signal node as Pin 2; with a real BAT54S that reverse-biases
+D1 and pins the input toward +12 V (silent failure). Every schematic must show this connection
+explicitly with pin numbers.
 
 ## Unity-Gain Input Buffer
 

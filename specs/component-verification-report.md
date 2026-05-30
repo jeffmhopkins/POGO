@@ -1,6 +1,10 @@
 # POGO Component Verification Report — Adversarial Audit
 
-- **Change:** `0015-component-audit` (Lane C, audit/report-only)
+- **Change:** `0015-component-audit` (Lane B — audit + fixes applied; see `changes/0015-component-audit.md` → "Fixes applied")
+- **Status:** Findings below are the original audit. Most were subsequently **fixed in this
+  same change** (THAT2180 SIP-8, BAT54S series-pinout + nets, R_INV tol, slider sourcing,
+  bzx84c10 datasheet, opa1612 symbol, version strings). The jack `S/T/TN` divergence is the
+  main item left deferred (its own change, per the codebase). All 5 `--check` gates green.
 - **Date:** 2026-05-30
 - **Scope:** all 19 sourced parts (`components/parts/`), 16 symbol primitives
   (`components/symbols/`), vendored footprints (`components/footprints/`),
