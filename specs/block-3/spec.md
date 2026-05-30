@@ -1,34 +1,59 @@
 # Block 3: Mod Bus
-Centralized modulation processor: scales/offsets a source (LFO1 or external CV) and distributes to 19 destinations via attenuverters.
+Centralized modulation processor: selects a source (LFO1 / LFO2 / External) via MOD_SRC, scales/offsets it, and distributes to 18 attenuverter destinations (+ a raw VCA normal).
 
-DSP source: `plugin/src/dsp/ModBus.hpp`, `plugin/src/Pogo.cpp` (lines 370–387)
+DSP source: `plugin/src/dsp/ModBus.hpp`, `plugin/src/Pogo.cpp` (MOD_SRC selector 363–366; processor 368–370; distribution 373–379; VCA raw normal 382–386)
 
 ---
 
 ## 1. Intent
 
-The Mod Bus is the central modulation hub of POGO. A single voltage source — either LFO1
-(normalled in) or an external CV plugged into MOD_INPUT — is conditioned by two trimpots
-(SCALE and OFFSET) to produce a single shared bus voltage V_modbus in the range ±10 V. That
-bus voltage is then distributed to 19 modulation destinations throughout the filter stack.
-Each destination has a tip-switching override jack and a bipolar attenuverter trimpot.
+The Mod Bus is the central modulation hub of POGO. The bus source is chosen by the **MOD_SRC**
+3-position panel switch — **LFO 1**, **LFO 2**, or **External** (the MOD_IN jack; 0 V if
+unpatched) — per the locked plugin (`Pogo.cpp:363–366`). The selected source is conditioned by
+two trimpots (SCALE and OFFSET) to produce a single shared bus voltage V_modbus in the range
+±10 V. That bus voltage is distributed to **18 modulation destinations** throughout the filter
+stack, each with a tip-switching override jack and a bipolar attenuverter trimpot.
 
-The bus lets a single LFO sweep every filter parameter simultaneously, with each destination
+A 19th tap — **VCA depth** — is special: per the plugin (`Pogo.cpp:382–386`) the raw V_modbus
+normals directly into VCA_INPUT (no attenuverter), and the VCA's own bipolar depth control
+(VCA_AMT) lives in block 4. So the VCA is driven by the bus but is **not** one of the 18
+block-3 attenuverter destinations.
+
+The bus lets a single source sweep every filter parameter simultaneously, with each destination
 scaled and inverted independently. Plugging into any destination override jack breaks the bus
-normalling for that destination only, allowing an external per-parameter CV while the rest of
-the module still follows the shared bus.
+normalling for that destination only (the jack CV replaces the bus, scaled by the attenuverter),
+allowing an external per-parameter CV while the rest of the module still follows the shared bus.
 
-Three LEDs give continuous feedback: MOD_POS (green, proportional to positive bus level),
-MOD_NEG (red, proportional to negative bus level), and MOD_CLIP (white/bright, lights when
-|V_modbus| ≥ 9.9 V).
+*(There are no MOD-bus status LEDs: the plugin drives no MOD_POS/NEG/CLIP lights and the locked
+panel has no footprints for them. The earlier 3-LED scheme is removed — change 0018.)*
 
 ---
 
 ## 2. Theoretical Design and Topology
 
-> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
-> It has not been verified against the current panel control set. Do not use for circuit
-> construction until re-verified. See `specs/STATUS.md` for current phase status.
+> ✅ **Re-verified 2026-05-30** against the locked plugin (change 0018, 0017 follow-up).
+> Aligned to plugin ground truth: added the MOD_SRC 3-way source select; corrected the
+> destination set to **18 attenuverter destinations + 1 raw VCA normal** (per-band BP CV is
+> **TILT**, not FOCUS); removed the 3 MOD-bus LEDs + their driver IC (no plugin/panel
+> backing). Processor scale/offset/clamp math unchanged (faithful to `ModBus.hpp`).
+
+### Mod Source Select (MOD_SRC)
+
+The bus source is a 3-way analog selector (SW7, Dailywell DW5, DPDT ON-ON-ON) wiring LFO1 /
+LFO2 / External(MOD_IN) to the SCALE-pot input (V_SRC). The DPDT's two commons are bridged so
+the three positions present one source at a time:
+
+```
+A_COM(2) = V_SRC (selected output → SCALE pot)
+A1(1) = LFO1   ;   B1(4) = LFO2   ;   B2(6) = EXT (MOD_IN, post-protection)
+A2(3) ── bridged ── B_COM(5)
+  pos 0 → LFO1 ; pos 1 → LFO2 ; pos 2 → EXT
+```
+
+MOD_IN carries the standard 100 Ω + BAT54S input protection and feeds only the EXT throw —
+it no longer auto-normals into the bus (that was the pre-0017 behavior). *(Phase-3R: verify
+the DW5 ON-ON-ON contact sequence against the datasheet and swap throw assignments if the
+physical position↔param order differs.)*
 
 ### Mod Bus Processor
 
@@ -76,7 +101,7 @@ optional but recommended for accuracy.
 
 ### Per-Destination Attenuverter
 
-Each of the 19 mod destinations is identical:
+Each of the 18 attenuverter destinations is identical:
 
 1. Tip-switching Thonkiconn jack (PJ301M-12): tip is normalled to V_modbus via a 100 kΩ
    resistor; when a cable is inserted, the normalling resistor is broken and the external CV
@@ -103,26 +128,22 @@ Full CW: wiper at top → V_att = V_src.
 Full CCW: wiper at bottom → V_att = –V_src.
 
 The –V_src rail for each group of attenuverters is generated by one TL074 inverter stage.
-With 19 destinations and 4 op-amp sections per TL074, 5 TL074s provide 20 inverter stages
-(19 used, 1 spare). The Mod Bus Processor itself requires 2 op-amp stages (summer + inverter),
-using the remaining 2 sections of a sixth TL074. Total: 6× TL074CDT.
+With 18 attenuverter destinations and 4 op-amp sections per TL074, 5 TL074s provide 20 inverter
+stages (18 used, 2 spare). The Mod Bus Processor itself requires 2 op-amp stages (summer +
+inverter), using 2 sections of a sixth TL074. Total: **6× TL074CDT**.
 
-**LED driver circuits:**
-
-- MOD_POS: op-amp comparator (TL074 section) drives green LED + 1 kΩ series resistor when
-  V_bus > 0 V, brightness proportional to V_bus / 10 V via current control.
-- MOD_NEG: same topology, inverted input, red LED.
-- MOD_CLIP: comparator with 9.9 V threshold (resistor divider), drives white LED when
-  |V_bus| ≥ 9.9 V.
-- All three LED drivers fit in one additional TL074CDT. Total with LED drivers: 7× TL074CDT.
+**VCA path (not an attenuverter):** the raw V_modbus normals directly into the VCA_INPUT jack's
+tip-switch (handled in block 4); there is no block-3 attenuverter or inverter for the VCA. The
+VCA_AMT depth control is a block-4 panel pot. (The former block-3 VCA_AMT attenuverter — RV5 +
+its inverter — is removed, change 0018.)
 
 **Mod bus output clamp (±10 V):** Back-to-back 10 V zeners (BZX84C10, SOT-23)
 in the MB_INV feedback path. When V_modbus_inv exceeds ±10 V, the zeners conduct and
-clamp the output. Zener tolerance = ±5 %, so clamp onset is 9.5–10.5 V; MOD_CLIP
-LED activates at the zener knee.
+clamp the output. Zener tolerance = ±5 %, so clamp onset is 9.5–10.5 V (vs the DSP's hard
+±10 V — an accepted hardware deviation). There is no MOD_CLIP LED.
 
-**Distribution buffer:** V_modbus drives 19 × 10 kΩ attenuverter pots in parallel
-(10 kΩ ÷ 19 ≈ 526 Ω total load). At V_modbus = ±10 V this requires ~19 mA.
+**Distribution buffer:** V_modbus drives 18 × 10 kΩ attenuverter pots in parallel
+(10 kΩ ÷ 18 ≈ 556 Ω total load) plus the raw VCA normal. At V_modbus = ±10 V this is ~18 mA.
 To achieve reliable ±10 V swing at this load, MB_PROC_A uses both of its two spare
 sections (halves C and D) wired in parallel as a unity-gain buffer — each half drives
 ~9.5 mA, well within TL074 limits. A 47 Ω series resistor on each output before
@@ -132,73 +153,71 @@ the join prevents oscillation from unequal saturation times.
 
 | Function | Op-amp sections used | TL074CDT | Ref |
 |---|---|---|---|
-| MB summer + polarity inverter | 2 | 1× | MB_PROC_A (halves A+B) |
-| Distribution buffer (paralleled ×2) | 2 (halves C+D) | — | MB_PROC_A (uses all 4 halves) |
-| LED drivers (POS, NEG, CLIP) | 3 (1 spare) | 1× | MB_PROC_B |
-| Destination inverters (−V_src for bipolar pots) | 19 (+1 spare) | 5× | MB_INV_1–5 |
-| **Total** | **26 sections used** | **7× TL074CDT** | |
+| MB summer + polarity inverter | 2 | 1× | MB_PROC_A (halves A+B; C+D spare) |
+| Destination inverters (−V_src for bipolar pots) | 18 (+2 spare) | 5× | MB_INV_1–5 |
+| **Total** | **20 sections used** | **6× TL074CDT** | |
 
-Note: MB_PROC_A now uses all 4 sections: summer, inverter, and two paralleled buffer
-outputs. MB_PROC_B has 1 spare section. A single TL074CDT has 4 op-amp sections;
-the processor (2 sections) and LED drivers (3 sections) together need 5 sections and
-therefore span two ICs.
+Note: U4 (the former MB_PROC_B LED-driver IC) is removed with the MOD LEDs (change 0018),
+dropping the count from 7× to 6× TL074CDT. MB_PROC_A's two unused sections (C, D) and U9's
+two unused sections remain spare.
 
 ---
 
 ## 3. Physical Design
 
-> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
-> It has not been verified against the current panel control set. Do not use for circuit
-> construction until re-verified. See `specs/STATUS.md` for current phase status.
+> ✅ **Re-verified 2026-05-30** against the locked plugin + panel (change 0018). Source select
+> (MOD_SRC SW7) added; per-band BP CV corrected FOCUS→TILT; MOD LEDs + driver removed; VCA
+> attenuverter removed (raw bus normal handled in block 4). 6× TL074 (was 7×).
 
-**Board assignment:** Utility board (no audio-frequency signal path).
+**Board assignment:** Utility board (no audio-frequency signal path); MOD_SRC switch + pots on the control board.
 
 **Panel controls / jacks:**
 
 | Item | Count | Type | Notes |
 |---|---|---|---|
-| MOD_INPUT jack | 1 | PJ301M-12 | Tip-switching; LFO1 normalled in |
-| MOD_SCALE trimpot | 1 | 9 mm linear | 0.2×–5× exponential taper |
+| MOD_INPUT jack | 1 | PJ301M-12 | External source (MOD_SRC pos 2); no LFO normal |
+| MOD_SRC switch | 1 | DW5 3-pos (DPDT ON-ON-ON) | LFO 1 / LFO 2 / External |
+| MOD_SCALE trimpot | 1 | 9 mm log | 0.2×–5× exponential taper |
 | MOD_OFFSET trimpot | 1 | 9 mm linear | ±5 V |
-| MOD_CLIP LED | 1 | 3 mm, white | Lights at |V_bus| ≥ 9.9 V |
-| MOD_POS LED | 1 | 3 mm, green | Proportional to +V_bus |
-| MOD_NEG LED | 1 | 3 mm, red | Proportional to –V_bus |
-| Destination attenuverter pots | 19 | 9 mm bipolar | Centre-detent, –1× to +1× |
-| Destination override jacks | 19 | PJ301M-12 | Tip-switching; normalled to bus |
+| Destination attenuverter pots | 18 | 9 mm bipolar | Centre-detent, –1× to +1× |
+| Destination override jacks | 18 | PJ301M-12 | Tip-switching; normalled to bus |
 
-**Destination list (panel order, block affiliation):**
+**Destination list (18 attenuverter destinations; VCA is a separate raw normal):**
 
-| # | Jack enum | Attenuverter enum | Block |
-|---|---|---|---|
-| 1 | VCA_INPUT | VCA_AMT_PARAM | 4 (VCA) |
-| 2 | LP1_FREQ_INPUT | LP1_FREQ_ATT_PARAM | 5 (LP1) |
-| 3 | LP1_TILT_INPUT | LP1_TILT_ATT_PARAM | 5 (LP1) |
-| 4 | LP1_RES_INPUT | LP1_RES_ATT_PARAM | 5 (LP1) |
-| 5 | BP_FREQ_INPUT | BP_FREQ_ATT_PARAM | 6 (BP master) |
-| 6 | BP_TILT_INPUT | BP_TILT_ATT_PARAM | 6 (BP master) |
-| 7 | BP1_FREQ_INPUT | BP1_FREQ_ATT_PARAM | 6 (BP1) |
-| 8 | BP1_FOCUS_INPUT | BP1_FOCUS_ATT_PARAM | 6 (BP1) |
-| 9 | BP1_DIST_INPUT | BP1_DIST_ATT_PARAM | 6 (BP1) |
-| 10 | BP2_FREQ_INPUT | BP2_FREQ_ATT_PARAM | 6 (BP2) |
-| 11 | BP2_FOCUS_INPUT | BP2_FOCUS_ATT_PARAM | 6 (BP2) |
-| 12 | BP2_DIST_INPUT | BP2_DIST_ATT_PARAM | 6 (BP2) |
-| 13 | BP3_FREQ_INPUT | BP3_FREQ_ATT_PARAM | 6 (BP3) |
-| 14 | BP3_FOCUS_INPUT | BP3_FOCUS_ATT_PARAM | 6 (BP3) |
-| 15 | BP3_DIST_INPUT | BP3_DIST_ATT_PARAM | 6 (BP3) |
-| 16 | HP_FREQ_INPUT | HP_FREQ_ATT_PARAM | 7 (HP) |
-| 17 | HP_RES_INPUT | HP_RES_ATT_PARAM | 7 (HP) |
-| 18 | LP2_FREQ_INPUT | LP2_FREQ_ATT_PARAM | 8 (LP2) |
-| 19 | LP2_RES_INPUT | LP2_RES_ATT_PARAM | 8 (LP2) |
+| # | Jack enum | Attenuverter enum | Block | CV scaling at destination |
+|---|---|---|---|---|
+| 1 | LP1_FREQ_INPUT | LP1_FREQ_ATT_PARAM | 5 (LP1) | — |
+| 2 | LP1_TILT_INPUT | LP1_TILT_ATT_PARAM | 5 (LP1) | — |
+| 3 | LP1_RES_INPUT | LP1_RES_ATT_PARAM | 5 (LP1) | ÷10 |
+| 4 | BP_FREQ_INPUT | BP_FREQ_ATT_PARAM | 6 (BP master) | — |
+| 5 | BP_TILT_INPUT | BP_TILT_ATT_PARAM | 6 (BP master) | — |
+| 6 | BP1_FREQ_INPUT | BP1_FREQ_ATT_PARAM | 6 (BP1) | — |
+| 7 | BP1_TILT_INPUT | BP1_TILT_ATT_PARAM | 6 (BP1) | ×0.22 |
+| 8 | BP1_DIST_INPUT | BP1_DIST_ATT_PARAM | 6 (BP1) | — |
+| 9 | BP2_FREQ_INPUT | BP2_FREQ_ATT_PARAM | 6 (BP2) | — |
+| 10 | BP2_TILT_INPUT | BP2_TILT_ATT_PARAM | 6 (BP2) | ×0.22 |
+| 11 | BP2_DIST_INPUT | BP2_DIST_ATT_PARAM | 6 (BP2) | — |
+| 12 | BP3_FREQ_INPUT | BP3_FREQ_ATT_PARAM | 6 (BP3) | — |
+| 13 | BP3_TILT_INPUT | BP3_TILT_ATT_PARAM | 6 (BP3) | ×0.22 |
+| 14 | BP3_DIST_INPUT | BP3_DIST_ATT_PARAM | 6 (BP3) | — |
+| 15 | HP_FREQ_INPUT | HP_FREQ_ATT_PARAM | 7 (HP) | — |
+| 16 | HP_RES_INPUT | HP_RES_ATT_PARAM | 7 (HP) | ÷10 |
+| 17 | LP2_FREQ_INPUT | LP2_FREQ_ATT_PARAM | 8 (LP2) | — |
+| 18 | LP2_RES_INPUT | LP2_RES_ATT_PARAM | 8 (LP2) | ÷10 |
 
-Note: VCA_INPUT (destination #1) is physically located in the Block 4 zone on the panel but
-is logically a mod bus destination and is normalled to V_modbus.
+Per-band BP CV uses **TILT** (not FOCUS — BP FOCUS/Q has no CV input in the plugin). The
+`×0.22` (per-band TILT) and `÷10` (resonance) factors are plugin scaling laws applied at the
+**destination block's CV summing node** (blocks 5–8), not in the block-3 attenuverter.
+
+**VCA (raw normal, not an attenuverter):** VCA_INPUT is in the Block 4 panel zone; the raw
+V_modbus normals into its tip-switch (no attenuverter). VCA_AMT depth is a block-4 pot.
 
 **Power estimate:**
 
-7× TL074CDT at ≈ 2.6 mA per IC (TI datasheet: 0.65 mA/ch × 4 ch at ±12 V).
+6× TL074CDT at ≈ 2.6 mA per IC (TI datasheet: 0.65 mA/ch × 4 ch at ±12 V).
 
-- +12 V: ~18 mA
-- −12 V: ~18 mA
+- +12 V: ~16 mA
+- −12 V: ~16 mA
 
 ---
 

@@ -39,8 +39,8 @@ spec authors + group adversarial review → netlist + design-intent review → u
 | A — Input Buffers | ✅ | ✅ | Lane C (doc-only) | No behavioral divergence; spec/nets match plugin. Fixed: DSP line cite, LM4562→OPA1612 part note, STALE banners lifted, aux cross-refs, 100Ω clamp-current math, aux board-name table. **100Ω kept** (user). |
 | 1 — Pre-Gain | ✅ | ✅ | G4 text-only | No B1-local HW change (gain-stage netlist correct). Fixed: ALT destination (through VCA → **BP3 only**, bypasses LP1 not VCA), per-channel selector + asymmetric edge case documented, STALE banners lifted, aux refs, DSP cite, switch=path-select, aux OPA1612 note softened. **Substantive HW deferred → block-4 (ALT VCA cell) + block-6 (BP3 selector, distortion order).** |
 | 2 — Dual LFO | ✅ | ✅ | G4+G5+G6a/b | LFO core faithful. Both LFOs tap MOD_SRC switch (LFO1_OUT pos0 + new LFO2_OUT pos1); aux-lfo-core refreshed; topology-doc MOD_SRC + ALT fixed. **LED: full-cycle breathing NPN current-source driver** (MMBT3904 ×2 + base level-shift; D1/D2 removed, R9/R10→R_E) — matches plugin `(V_tri+5)/10`. New part **MMBT3904** registered (npn symbol, SOT-23). Switch wiring deferred to block-3. |
-| 3 — Mod Bus | 🔲 | 🔲 | — | Mod-source (0017): new MOD_SRC 3-way LFO1/LFO2/EXT. |
-| 4 — VCA | 🔲 | 🔲 | — | **DEFERRED-IN (from B1):** add 2nd THAT2180 ALT VCA cell on shared `V_CTRL` (G5/G6 new component) — plugin runs ALT through the VCA before BP3 (user: follow plugin). |
+| 3 — Mod Bus | ✅ | ✅ | G4+G5+G6(delete) | **Big block.** Wired MOD_SRC SW7 (DW5) 3-way LFO1/LFO2/EXT (COMs bridged), MOD_IN→EXT-only, accept LFO1+LFO2 boundary inputs. **Removed** 3 MOD LEDs + driver U4 + R56-60 (no plugin/panel backing; 7→6 TL074). **Removed** VCA_AMT attenuverter RV5+inverter (VCA = raw bus normal, depth pot → block-4). Renamed per-band `BP*_FOCUS`→`TILT` (plugin/panel have no FOCUS CV). Refreshed aux-mod-bus-core + aux-attenuverter; dropped phantom distribution buffer (load is light). 18 attenuverters + 1 raw VCA normal. |
+| 4 — VCA | 🔲 | 🔲 | — | **DEFERRED-IN (from B1):** add 2nd THAT2180 ALT VCA cell on shared `V_CTRL`. **DEFERRED-IN (from B3):** VCA_INPUT gets RAW V_modbus normal (no attenuverter); add VCA_AMT depth pot here (moved from block-3 RV5). |
 | 5 — LP Filter 1 | 🔲 | 🔲 | — | |
 | 6 — Triple BP + Dist | 🔲 | 🔲 | — | **0017 core:** netlist still wires **SVF→DIST**; plugin is **DIST→SVF** (`Pogo.cpp:443`) — core reorder UNBUILT. **DEFERRED-IN (from B1):** add per-channel BP3 input selector (ALT-VCA vs main band; main normal when ALT unpatched); resolve `ALT_OUT_L/R`↔`BP3IN_L/R` boundary. CLIP LED on dist output; BP3 tap post-BP pre-mix. |
 | 7 — HP Filter | 🔲 | 🔲 | — | |
@@ -68,6 +68,13 @@ spec authors + group adversarial review → netlist + design-intent review → u
   on ALT-through-VCA → block-4 gains a 2nd THAT2180 cell. (user)
 - 2026-05-30: Carried-forward block-6 finding: netlist distortion order (SVF→DIST) is the
   pre-0017 order; plugin is DIST→SVF — the core 0017 reorder is not yet built in hardware.
+- 2026-05-30: **Block 3** decisions (user): (a) REMOVE the 3 MOD-bus LEDs + driver — plugin
+  drives none, locked panel has no footprints; (b) FOLLOW plugin on VCA — raw bus normal into
+  VCA_INPUT, no attenuverter, VCA_AMT depth pot moves to block-4. FOCUS→TILT and MOD_SRC switch
+  wiring are settled by the locked panel+plugin (G4/G5, no toss-up). SW7 wired as passive DW5
+  3-way (COMs bridged); Phase-3R to verify ON-ON-ON contact sequence vs datasheet.
+- 2026-05-30: Also corrected a phantom block-3 "distribution buffer" (halves C+D paralleled):
+  the bus actually drives 18×100k R_SRC_NORM (~5.6k, ~1.8mA), so no buffer is needed.
 - 2026-05-30: **Block 2 LED** — divergence found: plugin LED breathes full-cycle
   `(raw+1)×0.5`, hardware was half-wave "pulsing" (and the spec falsely claimed a match).
   User chose **match plugin**, then **simpler/cheaper driver**: single-transistor NPN current

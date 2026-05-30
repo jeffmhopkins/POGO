@@ -374,54 +374,44 @@ utility,R24,Resistor,1,,10kΩ,0603,,,,,block-2,R_BGND2: LFO2 LED driver base —
 panel,LED1,LED,1,,,3mm,POGO_LED_THT:LED_D3.0mm,generic,,https://www.thonk.co.uk/product-category/electronic-component/led/,block-2,LFO1 rate/phase indicator
 panel,LED2,LED,1,,,3mm,POGO_LED_THT:LED_D3.0mm,generic,,https://www.thonk.co.uk/product-category/electronic-component/led/,block-2,LFO2 rate/phase indicator
 utility,U3,IC,1,TL074CDT,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl074.pdf,block-3,MB_PROC_A: MB summer (half A) + MB inverter (half B); 2 sections spare
-utility,U4,IC,1,TL074CDT,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl074.pdf,block-3,MB_PROC_B: MOD_POS LED driver (half A) + MOD_NEG LED driver (half B) + MOD_CLIP (half C); 1 section spare
 utility,U5,IC,1,TL074CDT,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl074.pdf,block-3,MB_INV_1: −V_src inverters for destinations 1–4
 utility,U6,IC,1,TL074CDT,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl074.pdf,block-3,MB_INV_2: −V_src inverters for destinations 5–8
 utility,U7,IC,1,TL074CDT,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl074.pdf,block-3,MB_INV_3: −V_src inverters for destinations 9–12
 utility,U8,IC,1,TL074CDT,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl074.pdf,block-3,MB_INV_4: −V_src inverters for destinations 13–16
-utility,U9,IC,1,TL074CDT,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl074.pdf,block-3,MB_INV_5: −V_src inverters for destinations 17–19 (1 section spare)
+utility,U9,IC,1,TL074CDT,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl074.pdf,block-3,MB_INV_5: −V_src inverters for destinations 17–18 (2 sections spare; VCA is not an attenuverter dest)
 utility,R13,Resistor,1,,100kΩ,0603,,,,,block-3,"R_MB_F: feedback R, MB summer stage"
 utility,R14,Resistor,1,,22kΩ,0603,,,,,block-3,R_MB_SRC: floor input R for V_src; with 470kΩ SCALE pot → G range 0.20×–4.55×
 utility,R15,Resistor,1,,100kΩ,0603,,,,,block-3,R_MB_OFF: offset pot input R
 utility,R16,Resistor,2,,100kΩ,0603,,,,,block-3,R_MB_INV: equal R_in + R_fb for polarity inverter stage
 utility,R18,Resistor,19,,100kΩ,0603,,,,,block-3,R_SRC_NORM: bus normalling R per destination jack (19 destinations)
 utility,R37,Resistor,19,,100Ω,0603,,,,,block-3,R_CLAMP: series CV protection per destination
-utility,D3,Diode,19,BAT54S,,SOT-23,POGO_Package_TO_SOT_SMD:SOT-23,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds11005.pdf,block-3,D_CLAMP: dual Schottky clamp per destination CV input (19 total)
-utility,R56,Resistor,1,,1kΩ,0603,,,,,block-3,"R_LED_POS: current limit, MOD_POS LED"
-utility,R57,Resistor,1,,1kΩ,0603,,,,,block-3,"R_LED_NEG: current limit, MOD_NEG LED"
-utility,R58,Resistor,1,,1kΩ,0603,,,,,block-3,"R_LED_CLIP: current limit, MOD_CLIP LED"
-utility,R59,Resistor,1,,9.9kΩ,0603,,,,,block-3,R_CLIP_DIV_H: upper leg of MOD_CLIP 9.9V threshold divider
-utility,R60,Resistor,1,,100Ω,0603,,,,,block-3,R_CLIP_DIV_L: lower leg of MOD_CLIP threshold divider
-utility,C7,Capacitor,14,,100nF,0603,,,,,block-3,C_BYPASS_MB: supply bypass; one per op-amp supply pin (7 ICs × 2 rails)
-utility,R_INV_IN,Resistor,19,,10kΩ,0603,,,,,block-3,R_inv_in: attenuverter −V_src inverter input R; 1 per destination; 1% for >60 dB center null
-utility,R_INV_FB,Resistor,19,,10kΩ,0603,,,,,block-3,R_inv_fb: attenuverter −V_src inverter feedback R; 1 per destination; 1% for >60 dB center null
+utility,D3,Diode,18,BAT54S,,SOT-23,POGO_Package_TO_SOT_SMD:SOT-23,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds11005.pdf,block-3,D_CLAMP: dual Schottky clamp per attenuverter destination CV input (18 total)
+utility,C7,Capacitor,12,,100nF,0603,,,,,block-3,C_BYPASS_MB: supply bypass; one per op-amp supply pin (6 ICs × 2 rails)
+utility,R_INV_IN,Resistor,18,,10kΩ,0603,,,,,block-3,R_inv_in: attenuverter −V_src inverter input R; 1 per attenuverter destination (18); 1% for >60 dB center null
+utility,R_INV_FB,Resistor,18,,10kΩ,0603,,,,,block-3,R_inv_fb: attenuverter −V_src inverter feedback R; 1 per attenuverter destination (18); 1% for >60 dB center null
 utility,R99,Resistor,1,,100Ω,0603,,,,,block-3,R_MODIN: MOD_IN series input protection
 utility,D4,Diode,1,BAT54S,,SOT-23,POGO_Package_TO_SOT_SMD:SOT-23,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds11005.pdf,block-3,D_MODIN: MOD_IN input clamp ±12V
 utility,D5,Diode,1,BZX84-C10,,SOT-23,POGO_Package_TO_SOT_SMD:SOT-23,Nexperia,,https://assets.nexperia.com/documents/data-sheet/BZX84_SER.pdf,block-3,D_ZCLAMP_P: mod-bus +10V clamp zener (back-to-back with D6)
 utility,D6,Diode,1,BZX84-C10,,SOT-23,POGO_Package_TO_SOT_SMD:SOT-23,Nexperia,,https://assets.nexperia.com/documents/data-sheet/BZX84_SER.pdf,block-3,D_ZCLAMP_N: mod-bus -10V clamp zener (cathode-to-cathode with D5)
-panel,LED3,LED,1,,,3mm,POGO_LED_THT:LED_D3.0mm,generic,,https://www.thonk.co.uk/product-category/electronic-component/led/,block-3,MOD_POS indicator (green)
-panel,LED4,LED,1,,,3mm,POGO_LED_THT:LED_D3.0mm,generic,,https://www.thonk.co.uk/product-category/electronic-component/led/,block-3,MOD_NEG indicator (red)
-panel,LED5,LED,1,,,3mm,POGO_LED_THT:LED_D3.0mm,generic,,https://www.thonk.co.uk/product-category/electronic-component/led/,block-3,MOD_CLIP indicator (amber)
 control,SW1,Switch,1,DW3 (2M DPDT ON-ON),,sub-mini toggle 2M,POGO_Button_Switch_THT:SW_Dailywell_DW3_DPDT,Dailywell,Thonk,https://www.thonk.co.uk/shop/sub-mini-toggle-switches/,block-1,GAIN_MAIN 1×/5×
 control,SW2,Switch,1,DW3 (2M DPDT ON-ON),,sub-mini toggle 2M,POGO_Button_Switch_THT:SW_Dailywell_DW3_DPDT,Dailywell,Thonk,https://www.thonk.co.uk/shop/sub-mini-toggle-switches/,block-1,GAIN_BP3 1×/5×
 control,RV1,Trimpot/Pot,1,R0904N,1MΩ,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-2,"LFO1_RATE panel pot (9mm log taper; rate attenuator on Schmitt output, 0.05–20 Hz)"
 control,RV2,Trimpot/Pot,1,R0904N,1MΩ,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-2,"LFO2_RATE panel pot (9mm log taper; rate attenuator on Schmitt output, 0.05–20 Hz)"
 control,RV3,Trimpot/Pot,1,R0904N,470kΩ,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-3,MOD_SCALE (0.2×–5×; log taper; in series with 22kΩ R_MB_SRC on utility board)
 control,RV4,Trimpot/Pot,1,R0904N,,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-3,MOD_OFFSET (±5V)
-control,RV5,Trimpot/Pot,1,R0904N,,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-3,VCA_AMT dest attenuverter
 control,RV6,Trimpot/Pot,1,R0904N,,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-3,LP1_FREQ_ATT
 control,RV7,Trimpot/Pot,1,R0904N,,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-3,LP1_TILT_ATT
 control,RV8,Trimpot/Pot,1,R0904N,,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-3,LP1_RES_ATT
 control,RV9,Trimpot/Pot,1,R0904N,,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-3,BP_FREQ_ATT
 control,RV10,Trimpot/Pot,1,R0904N,,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-3,BP_TILT_ATT
 control,RV11,Trimpot/Pot,1,R0904N,,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-3,BP1_FREQ_ATT
-control,RV12,Trimpot/Pot,1,R0904N,,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-3,BP1_FOCUS_ATT
+control,RV12,Trimpot/Pot,1,R0904N,,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-3,BP1_TILT_ATT
 control,RV13,Trimpot/Pot,1,R0904N,,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-3,BP1_DIST_ATT
 control,RV14,Trimpot/Pot,1,R0904N,,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-3,BP2_FREQ_ATT
-control,RV15,Trimpot/Pot,1,R0904N,,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-3,BP2_FOCUS_ATT
+control,RV15,Trimpot/Pot,1,R0904N,,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-3,BP2_TILT_ATT
 control,RV16,Trimpot/Pot,1,R0904N,,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-3,BP2_DIST_ATT
 control,RV17,Trimpot/Pot,1,R0904N,,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-3,BP3_FREQ_ATT
-control,RV18,Trimpot/Pot,1,R0904N,,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-3,BP3_FOCUS_ATT
+control,RV18,Trimpot/Pot,1,R0904N,,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-3,BP3_TILT_ATT
 control,RV19,Trimpot/Pot,1,R0904N,,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-3,BP3_DIST_ATT
 control,RV20,Trimpot/Pot,1,R0904N,,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-3,HP_FREQ_ATT
 control,RV21,Trimpot/Pot,1,R0904N,,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-3,HP_RES_ATT
@@ -435,7 +425,7 @@ control,RV28,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiomet
 control,SW4,Switch,1,DW5 (2M DPDT ON-ON-ON),,sub-mini toggle 2M,POGO_Button_Switch_THT:SW_Dailywell_DW5_DPDT,Dailywell,Thonk,https://www.thonk.co.uk/shop/sub-mini-toggle-switches/,block-6,BP1_DIST_MODE (Soft/Hard/Fold)
 control,SW5,Switch,1,DW5 (2M DPDT ON-ON-ON),,sub-mini toggle 2M,POGO_Button_Switch_THT:SW_Dailywell_DW5_DPDT,Dailywell,Thonk,https://www.thonk.co.uk/shop/sub-mini-toggle-switches/,block-6,BP2_DIST_MODE (Soft/Hard/Fold)
 control,SW6,Switch,1,DW5 (2M DPDT ON-ON-ON),,sub-mini toggle 2M,POGO_Button_Switch_THT:SW_Dailywell_DW5_DPDT,Dailywell,Thonk,https://www.thonk.co.uk/shop/sub-mini-toggle-switches/,block-6,BP3_DIST_MODE (Soft/Hard/Fold)
-control,SW7,Switch,1,DW5 (2M DPDT ON-ON-ON),,sub-mini toggle 2M,POGO_Button_Switch_THT:SW_Dailywell_DW5_DPDT,Dailywell,Thonk,https://www.thonk.co.uk/shop/sub-mini-toggle-switches/,block-3,MOD_SRC (3-way mod source select) — PLANNED; no plugin param yet
+control,SW7,Switch,1,DW5 (2M DPDT ON-ON-ON),,sub-mini toggle 2M,POGO_Button_Switch_THT:SW_Dailywell_DW5_DPDT,Dailywell,Thonk,https://www.thonk.co.uk/shop/sub-mini-toggle-switches/,block-3,MOD_SRC (3-way mod source select: LFO1 / LFO2 / External); bound to MOD_SRC_PARAM
 control,RV29,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6,BP_OFFSET master freq (±5V/oct)
 control,RV30,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6,BP_MIX dry/wet (0–1)
 control,RV31,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6,BP1_FREQ
@@ -457,20 +447,20 @@ panel,J3,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ
 panel,J4,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-1,ALT_BP_R_INPUT (normalles to ALT_L)
 panel,J5,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-2,LFO1_OUTPUT
 panel,J6,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-2,LFO2_OUTPUT
-panel,J7,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-3,MOD_INPUT (normalles to LFO1)
+panel,J7,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-3,MOD_INPUT — External mod source (MOD_SRC pos 2); no LFO normal
 panel,J8,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-3,LP1_FREQ_INPUT override
 panel,J9,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-3,LP1_TILT_INPUT override
 panel,J10,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-3,LP1_RES_INPUT override
 panel,J11,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-3,BP_FREQ_INPUT override
 panel,J12,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-3,BP_TILT_INPUT override
 panel,J13,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-3,BP1_FREQ_INPUT override
-panel,J14,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-3,BP1_FOCUS_INPUT override
+panel,J14,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-3,BP1_TILT_INPUT override
 panel,J15,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-3,BP1_DIST_INPUT override
 panel,J16,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-3,BP2_FREQ_INPUT override
-panel,J17,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-3,BP2_FOCUS_INPUT override
+panel,J17,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-3,BP2_TILT_INPUT override
 panel,J18,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-3,BP2_DIST_INPUT override
 panel,J19,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-3,BP3_FREQ_INPUT override
-panel,J20,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-3,BP3_FOCUS_INPUT override
+panel,J20,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-3,BP3_TILT_INPUT override
 panel,J21,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-3,BP3_DIST_INPUT override
 panel,J22,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-3,HP_FREQ_INPUT override
 panel,J23,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-3,HP_RES_INPUT override

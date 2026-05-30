@@ -1,21 +1,21 @@
-# POGO Block 3 — Mod Bus (MB processor + 3 MOD lights + 19 CV destinations)
+# POGO Block 3 — Mod Bus (MOD_SRC select + MB processor + 18 attenuverter CV destinations)
 #
-# GENERATED 2026-05-29 (19x repetition). Source: specs/components.yaml block-3,
-# aux-mod-bus-core / aux-attenuverter. MB_AMP scale/offset summer -> ±10V zener clamp
-# -> MB_INV -> V_MODBUS rail -> 3 lights + 19 destinations. Each destination: override
-# jack (tip-switch normals to V_MODBUS via R_SRC_NORM) + 100Ω/BAT54S protection +
-# TL074 -V_src inverter + bipolar attenuverter pot -> MOD_<DEST> (boundary; summed with
-# the panel CV at board level per the 2026-05-29 decision). VCA_AMT dest taps V_MODBUS
-# directly (its override jack J26 lives in block-4, normalled to MOD_BUS). MOD_SRC (SW7,
-# DW5) is deferred/planned and intentionally omitted.
+# Aligned to the locked plugin by change 0018 (0017 follow-up). MOD_SRC (SW7, DW5) is a
+# 3-way analog selector: LFO1 / LFO2 / External(MOD_IN) -> V_SRC. MB_AMP scale/offset
+# summer -> ±10V zener clamp -> MB_INV -> V_MODBUS rail -> 18 attenuverter destinations.
+# Each destination: override jack (tip-switch normals to V_MODBUS via R_SRC_NORM) +
+# 100Ω/BAT54S protection + TL074 -V_src inverter + bipolar attenuverter pot -> MOD_<DEST>
+# (boundary). The VCA path is NOT a block-3 attenuverter: per the plugin, V_MODBUS normals
+# RAW into VCA_INPUT (no attenuverter), handled in block-4; VCA_AMT is a block-4 depth pot.
+# The 3 MOD status LEDs (POS/NEG/CLIP) are removed — the plugin has no such lights and the
+# locked panel has no footprints for them. 6× TL074 (was 7×: U4 LED driver removed).
 
 block: block-3
 board: utility
 title: POGO Block 3 - Mod Bus
 
 parts:
-  U3: { sym: opamp4, part: "TL074CDT", value: TL074 }   # MB_AMP (A) + MB_INV (B); units 3,4 spare
-  U4: { sym: opamp4, part: "TL074CDT", value: TL074 }   # MOD_POS (A) + MOD_NEG (B) + MOD_CLIP (C); unit 4 spare
+  U3: { sym: opamp4, part: "TL074CDT", value: TL074 }   # MB_AMP (A) + MB_INV (B); units C,D spare
   U5: { sym: opamp4, part: "TL074CDT", value: TL074 }   # attenuverter -V_src inverters
   U6: { sym: opamp4, part: "TL074CDT", value: TL074 }   # attenuverter -V_src inverters
   U7: { sym: opamp4, part: "TL074CDT", value: TL074 }   # attenuverter -V_src inverters
@@ -32,19 +32,10 @@ parts:
   D6: { sym: zener, part: "BZX84C10", value: BZX84C10 }   # -10V clamp
   RV3: { sym: trimpot, part: "log pot", value: MOD_SCALE }   # SCALE pot (rheostat)
   RV4: { sym: trimpot, part: "lin pot", value: MOD_OFFSET }   # OFFSET pot
-  J7: { sym: jack, part: "PJ301M-12", value: MOD_IN }   # MOD_INPUT (normals to LFO1)
-  R56: { sym: r, value: 1k }   # R_LED_POS
-  R57: { sym: r, value: 1k }   # R_LED_NEG
-  R58: { sym: r, value: 1k }   # R_LED_CLIP
-  R59: { sym: r, value: 9k9 }   # clip divider H
-  R60: { sym: r, value: 100R }   # clip divider L
-  LED3: { sym: led, part: "LED 3mm", value: MOD_POS }
-  LED4: { sym: led, part: "LED 3mm", value: MOD_NEG }
-  LED5: { sym: led, part: "LED 3mm", value: MOD_CLIP }
+  J7: { sym: jack, part: "PJ301M-12", value: MOD_IN }   # MOD_INPUT — External source (MOD_SRC pos 2); no LFO normal
+  SW7: { sym: dw5, part: "Dailywell DW5", value: MOD_SRC }   # 3-way source select: LFO1 / LFO2 / EXT
   C7_1: { sym: c, value: 100nF }   # U3 V+ decoupling
   C7_8: { sym: c, value: 100nF }   # U3 V- decoupling
-  C7_2: { sym: c, value: 100nF }   # U4 V+ decoupling
-  C7_9: { sym: c, value: 100nF }   # U4 V- decoupling
   C7_3: { sym: c, value: 100nF }   # U5 V+ decoupling
   C7_10: { sym: c, value: 100nF }   # U5 V- decoupling
   C7_4: { sym: c, value: 100nF }   # U6 V+ decoupling
@@ -97,13 +88,13 @@ parts:
   R37_6: { sym: r, value: 100R }   # BP1_FREQ R_CLAMP
   D3_6: { sym: bat54s, part: "BAT54S", value: BAT54S }   # BP1_FREQ D_CLAMP
   R18_6: { sym: r, value: 100k }   # BP1_FREQ R_SRC_NORM
-  R_INV_IN_7: { sym: r, value: 10k }   # BP1_FOCUS inverter in
-  R_INV_FB_7: { sym: r, value: 10k }   # BP1_FOCUS inverter fb
-  RV12: { sym: trimpot, part: "lin pot", value: BP1_FOCUS_ATT }   # BP1_FOCUS attenuverter
-  J14: { sym: jack, part: "PJ301M-12", value: BP1_FOCUS }   # BP1_FOCUS override
-  R37_7: { sym: r, value: 100R }   # BP1_FOCUS R_CLAMP
-  D3_7: { sym: bat54s, part: "BAT54S", value: BAT54S }   # BP1_FOCUS D_CLAMP
-  R18_7: { sym: r, value: 100k }   # BP1_FOCUS R_SRC_NORM
+  R_INV_IN_7: { sym: r, value: 10k }   # BP1_TILT inverter in
+  R_INV_FB_7: { sym: r, value: 10k }   # BP1_TILT inverter fb
+  RV12: { sym: trimpot, part: "lin pot", value: BP1_TILT_ATT }   # BP1_TILT attenuverter
+  J14: { sym: jack, part: "PJ301M-12", value: BP1_TILT }   # BP1_TILT override
+  R37_7: { sym: r, value: 100R }   # BP1_TILT R_CLAMP
+  D3_7: { sym: bat54s, part: "BAT54S", value: BAT54S }   # BP1_TILT D_CLAMP
+  R18_7: { sym: r, value: 100k }   # BP1_TILT R_SRC_NORM
   R_INV_IN_8: { sym: r, value: 10k }   # BP1_DIST inverter in
   R_INV_FB_8: { sym: r, value: 10k }   # BP1_DIST inverter fb
   RV13: { sym: trimpot, part: "lin pot", value: BP1_DIST_ATT }   # BP1_DIST attenuverter
@@ -118,13 +109,13 @@ parts:
   R37_9: { sym: r, value: 100R }   # BP2_FREQ R_CLAMP
   D3_9: { sym: bat54s, part: "BAT54S", value: BAT54S }   # BP2_FREQ D_CLAMP
   R18_9: { sym: r, value: 100k }   # BP2_FREQ R_SRC_NORM
-  R_INV_IN_10: { sym: r, value: 10k }   # BP2_FOCUS inverter in
-  R_INV_FB_10: { sym: r, value: 10k }   # BP2_FOCUS inverter fb
-  RV15: { sym: trimpot, part: "lin pot", value: BP2_FOCUS_ATT }   # BP2_FOCUS attenuverter
-  J17: { sym: jack, part: "PJ301M-12", value: BP2_FOCUS }   # BP2_FOCUS override
-  R37_10: { sym: r, value: 100R }   # BP2_FOCUS R_CLAMP
-  D3_10: { sym: bat54s, part: "BAT54S", value: BAT54S }   # BP2_FOCUS D_CLAMP
-  R18_10: { sym: r, value: 100k }   # BP2_FOCUS R_SRC_NORM
+  R_INV_IN_10: { sym: r, value: 10k }   # BP2_TILT inverter in
+  R_INV_FB_10: { sym: r, value: 10k }   # BP2_TILT inverter fb
+  RV15: { sym: trimpot, part: "lin pot", value: BP2_TILT_ATT }   # BP2_TILT attenuverter
+  J17: { sym: jack, part: "PJ301M-12", value: BP2_TILT }   # BP2_TILT override
+  R37_10: { sym: r, value: 100R }   # BP2_TILT R_CLAMP
+  D3_10: { sym: bat54s, part: "BAT54S", value: BAT54S }   # BP2_TILT D_CLAMP
+  R18_10: { sym: r, value: 100k }   # BP2_TILT R_SRC_NORM
   R_INV_IN_11: { sym: r, value: 10k }   # BP2_DIST inverter in
   R_INV_FB_11: { sym: r, value: 10k }   # BP2_DIST inverter fb
   RV16: { sym: trimpot, part: "lin pot", value: BP2_DIST_ATT }   # BP2_DIST attenuverter
@@ -139,13 +130,13 @@ parts:
   R37_12: { sym: r, value: 100R }   # BP3_FREQ R_CLAMP
   D3_12: { sym: bat54s, part: "BAT54S", value: BAT54S }   # BP3_FREQ D_CLAMP
   R18_12: { sym: r, value: 100k }   # BP3_FREQ R_SRC_NORM
-  R_INV_IN_13: { sym: r, value: 10k }   # BP3_FOCUS inverter in
-  R_INV_FB_13: { sym: r, value: 10k }   # BP3_FOCUS inverter fb
-  RV18: { sym: trimpot, part: "lin pot", value: BP3_FOCUS_ATT }   # BP3_FOCUS attenuverter
-  J20: { sym: jack, part: "PJ301M-12", value: BP3_FOCUS }   # BP3_FOCUS override
-  R37_13: { sym: r, value: 100R }   # BP3_FOCUS R_CLAMP
-  D3_13: { sym: bat54s, part: "BAT54S", value: BAT54S }   # BP3_FOCUS D_CLAMP
-  R18_13: { sym: r, value: 100k }   # BP3_FOCUS R_SRC_NORM
+  R_INV_IN_13: { sym: r, value: 10k }   # BP3_TILT inverter in
+  R_INV_FB_13: { sym: r, value: 10k }   # BP3_TILT inverter fb
+  RV18: { sym: trimpot, part: "lin pot", value: BP3_TILT_ATT }   # BP3_TILT attenuverter
+  J20: { sym: jack, part: "PJ301M-12", value: BP3_TILT }   # BP3_TILT override
+  R37_13: { sym: r, value: 100R }   # BP3_TILT R_CLAMP
+  D3_13: { sym: bat54s, part: "BAT54S", value: BAT54S }   # BP3_TILT D_CLAMP
+  R18_13: { sym: r, value: 100k }   # BP3_TILT R_SRC_NORM
   R_INV_IN_14: { sym: r, value: 10k }   # BP3_DIST inverter in
   R_INV_FB_14: { sym: r, value: 10k }   # BP3_DIST inverter fb
   RV19: { sym: trimpot, part: "lin pot", value: BP3_DIST_ATT }   # BP3_DIST attenuverter
@@ -181,28 +172,25 @@ parts:
   R37_18: { sym: r, value: 100R }   # LP2_RES R_CLAMP
   D3_18: { sym: bat54s, part: "BAT54S", value: BAT54S }   # LP2_RES D_CLAMP
   R18_18: { sym: r, value: 100k }   # LP2_RES R_SRC_NORM
-  R_INV_IN_19: { sym: r, value: 10k }   # VCA_AMT inverter in
-  R_INV_FB_19: { sym: r, value: 10k }   # VCA_AMT inverter fb
-  RV5: { sym: trimpot, part: "bipolar pot", value: VCA_AMT_ATT }   # VCA_AMT attenuverter
+  # VCA is NOT a block-3 attenuverter (D-4): V_MODBUS normals RAW into VCA_INPUT in block-4.
 
 nets:
-  MOD_IN_TIP: [J7.1, R99.1]
-  V_SRC: [R99.2, D4.3, RV3.3]
+  # ---- MOD_SRC 3-way analog select (SW7, DW5 DPDT ON-ON-ON) ----
+  #   COMs bridged: A_COM(2)=output=V_SRC; A2(3)+B_COM(5) bridged; sources on outer throws.
+  #   pos0 -> A1(1)=LFO1 ; pos1 -> B1(4)=LFO2 ; pos2 -> B2(6)=EXT (MOD_IN).
+  #   NOTE (Phase-3R): verify the DW5 ON-ON-ON contact sequence vs datasheet; swap
+  #   throw assignments if the physical pos↔param(0/1/2) order differs.
+  MOD_IN_TIP: [J7.1, R99.1]                 # MOD_IN jack tip -> series protection
+  MOD_IN_EXT: [R99.2, D4.3, SW7.6]          # protected MOD_IN -> SW7 EXT throw (B2)
+  SW_AB_BRIDGE: [SW7.3, SW7.5]              # A2 tied to B_COM (3-way steering)
+  V_SRC: [SW7.2, RV3.3]                      # switch common (selected source) -> SCALE pot
   SCALE_W: [RV3.2, RV3.1, R14.1]
   MB_SUMINV: [U3.2, R14.2, R15.2, R13.1]
   OFFSET_W: [RV4.2, R15.1]
   V_MODBUS_INV: [U3.1, R13.2, R16_1.1, D5.1]
   ZMID: [D5.3, D6.3]
   MB_INVN: [U3.6, R16_1.2, R16_2.1]
-  V_MODBUS: [U3.7, R16_2.2, U4.3, U4.6, U4.10, R18_1.2, R18_2.2, R18_3.2, R18_4.2, R18_5.2, R18_6.2, R18_7.2, R18_8.2, R18_9.2, R18_10.2, R18_11.2, R18_12.2, R18_13.2, R18_14.2, R18_15.2, R18_16.2, R18_17.2, R18_18.2, RV5.3, R_INV_IN_19.1]
-  POS_OUT: [U4.1, R56.1]
-  LEDA_POS: [R56.2, LED3.A]
-  NEG_OUT: [U4.7, R57.1]
-  LEDA_NEG: [R57.2, LED4.A]
-  CLIP_REF: [R59.2, R60.1, U4.9]
-  CLIP_OUT: [U4.8, R58.1]
-  LEDA_CLIP: [R58.2, LED5.A]
-  U4_SPARE: [U4.14, U4.13]
+  V_MODBUS: [U3.7, R16_2.2, R18_1.2, R18_2.2, R18_3.2, R18_4.2, R18_5.2, R18_6.2, R18_7.2, R18_8.2, R18_9.2, R18_10.2, R18_11.2, R18_12.2, R18_13.2, R18_14.2, R18_15.2, R18_16.2, R18_17.2, R18_18.2]
   JTIP_LP1_FREQ: [J8.1, R37_1.1]
   VSRC_LP1_FREQ: [R37_1.2, D3_1.3, RV6.3, R_INV_IN_1.1]
   JSW_LP1_FREQ: [J8.3, R18_1.1]
@@ -239,12 +227,12 @@ nets:
   INVN_BP1_FREQ: [U6.6, R_INV_IN_6.2, R_INV_FB_6.1]
   NVSRC_BP1_FREQ: [U6.7, R_INV_FB_6.2, RV11.1]
   MOD_BP1_FREQ: [RV11.2]
-  JTIP_BP1_FOCUS: [J14.1, R37_7.1]
-  VSRC_BP1_FOCUS: [R37_7.2, D3_7.3, RV12.3, R_INV_IN_7.1]
-  JSW_BP1_FOCUS: [J14.3, R18_7.1]
-  INVN_BP1_FOCUS: [U6.9, R_INV_IN_7.2, R_INV_FB_7.1]
-  NVSRC_BP1_FOCUS: [U6.8, R_INV_FB_7.2, RV12.1]
-  MOD_BP1_FOCUS: [RV12.2]
+  JTIP_BP1_TILT: [J14.1, R37_7.1]
+  VSRC_BP1_TILT: [R37_7.2, D3_7.3, RV12.3, R_INV_IN_7.1]
+  JSW_BP1_TILT: [J14.3, R18_7.1]
+  INVN_BP1_TILT: [U6.9, R_INV_IN_7.2, R_INV_FB_7.1]
+  NVSRC_BP1_TILT: [U6.8, R_INV_FB_7.2, RV12.1]
+  MOD_BP1_TILT: [RV12.2]
   JTIP_BP1_DIST: [J15.1, R37_8.1]
   VSRC_BP1_DIST: [R37_8.2, D3_8.3, RV13.3, R_INV_IN_8.1]
   JSW_BP1_DIST: [J15.3, R18_8.1]
@@ -257,12 +245,12 @@ nets:
   INVN_BP2_FREQ: [U7.2, R_INV_IN_9.2, R_INV_FB_9.1]
   NVSRC_BP2_FREQ: [U7.1, R_INV_FB_9.2, RV14.1]
   MOD_BP2_FREQ: [RV14.2]
-  JTIP_BP2_FOCUS: [J17.1, R37_10.1]
-  VSRC_BP2_FOCUS: [R37_10.2, D3_10.3, RV15.3, R_INV_IN_10.1]
-  JSW_BP2_FOCUS: [J17.3, R18_10.1]
-  INVN_BP2_FOCUS: [U7.6, R_INV_IN_10.2, R_INV_FB_10.1]
-  NVSRC_BP2_FOCUS: [U7.7, R_INV_FB_10.2, RV15.1]
-  MOD_BP2_FOCUS: [RV15.2]
+  JTIP_BP2_TILT: [J17.1, R37_10.1]
+  VSRC_BP2_TILT: [R37_10.2, D3_10.3, RV15.3, R_INV_IN_10.1]
+  JSW_BP2_TILT: [J17.3, R18_10.1]
+  INVN_BP2_TILT: [U7.6, R_INV_IN_10.2, R_INV_FB_10.1]
+  NVSRC_BP2_TILT: [U7.7, R_INV_FB_10.2, RV15.1]
+  MOD_BP2_TILT: [RV15.2]
   JTIP_BP2_DIST: [J18.1, R37_11.1]
   VSRC_BP2_DIST: [R37_11.2, D3_11.3, RV16.3, R_INV_IN_11.1]
   JSW_BP2_DIST: [J18.3, R18_11.1]
@@ -275,12 +263,12 @@ nets:
   INVN_BP3_FREQ: [U7.13, R_INV_IN_12.2, R_INV_FB_12.1]
   NVSRC_BP3_FREQ: [U7.14, R_INV_FB_12.2, RV17.1]
   MOD_BP3_FREQ: [RV17.2]
-  JTIP_BP3_FOCUS: [J20.1, R37_13.1]
-  VSRC_BP3_FOCUS: [R37_13.2, D3_13.3, RV18.3, R_INV_IN_13.1]
-  JSW_BP3_FOCUS: [J20.3, R18_13.1]
-  INVN_BP3_FOCUS: [U8.2, R_INV_IN_13.2, R_INV_FB_13.1]
-  NVSRC_BP3_FOCUS: [U8.1, R_INV_FB_13.2, RV18.1]
-  MOD_BP3_FOCUS: [RV18.2]
+  JTIP_BP3_TILT: [J20.1, R37_13.1]
+  VSRC_BP3_TILT: [R37_13.2, D3_13.3, RV18.3, R_INV_IN_13.1]
+  JSW_BP3_TILT: [J20.3, R18_13.1]
+  INVN_BP3_TILT: [U8.2, R_INV_IN_13.2, R_INV_FB_13.1]
+  NVSRC_BP3_TILT: [U8.1, R_INV_FB_13.2, RV18.1]
+  MOD_BP3_TILT: [RV18.2]
   JTIP_BP3_DIST: [J21.1, R37_14.1]
   VSRC_BP3_DIST: [R37_14.2, D3_14.3, RV19.3, R_INV_IN_14.1]
   JSW_BP3_DIST: [J21.3, R18_14.1]
@@ -311,18 +299,19 @@ nets:
   INVN_LP2_RES: [U9.6, R_INV_IN_18.2, R_INV_FB_18.1]
   NVSRC_LP2_RES: [U9.7, R_INV_FB_18.2, RV23.1]
   MOD_LP2_RES: [RV23.2]
-  INVN_VCA_AMT: [U9.9, R_INV_IN_19.2, R_INV_FB_19.1]
-  NVSRC_VCA_AMT: [U9.8, R_INV_FB_19.2, RV5.1]
-  MOD_VCA_AMT: [RV5.2]
+  U9_SPARE_C: [U9.8, U9.9]                   # U9 unit C freed (VCA inverter removed); out->in-, in+ on GND
   U9_SPARE: [U9.14, U9.13]
   U3_SPARE_3: [U3.8, U3.9]
   U3_SPARE_4: [U3.14, U3.13]
-  "+12V": [U3.4, U4.4, D4.2, R59.1, RV4.3, D3_1.2, D3_2.2, D3_3.2, D3_4.2, D3_5.2, D3_6.2, D3_7.2, D3_8.2, D3_9.2, D3_10.2, D3_11.2, D3_12.2, D3_13.2, D3_14.2, D3_15.2, D3_16.2, D3_17.2, D3_18.2, U5.4, U6.4, U7.4, U8.4, U9.4, C7_1.1, C7_2.1, C7_3.1, C7_4.1, C7_5.1, C7_6.1, C7_7.1]
-  "-12V": [U3.11, U4.11, D4.1, RV4.1, D3_1.1, D3_2.1, D3_3.1, D3_4.1, D3_5.1, D3_6.1, D3_7.1, D3_8.1, D3_9.1, D3_10.1, D3_11.1, D3_12.1, D3_13.1, D3_14.1, D3_15.1, D3_16.1, D3_17.1, D3_18.1, U5.11, U6.11, U7.11, U8.11, U9.11, C7_8.1, C7_9.1, C7_10.1, C7_11.1, C7_12.1, C7_13.1, C7_14.1]
-  GND: [U3.3, U3.5, U4.2, U4.5, U4.12, R60.2, D6.1, J7.2, LED3.K, LED4.K, LED5.K, J8.2, U5.3, J9.2, U5.5, J10.2, U5.10, J11.2, U5.12, J12.2, U6.3, J13.2, U6.5, J14.2, U6.10, J15.2, U6.12, J16.2, U7.3, J17.2, U7.5, J18.2, U7.10, J19.2, U7.12, J20.2, U8.3, J21.2, U8.5, J22.2, U8.10, J23.2, U8.12, J24.2, U9.3, J25.2, U9.5, U9.10, U9.12, U3.10, U3.12, C7_1.2, C7_8.2, C7_2.2, C7_9.2, C7_3.2, C7_10.2, C7_4.2, C7_11.2, C7_5.2, C7_12.2, C7_6.2, C7_13.2, C7_7.2, C7_14.2]
-  LFO1_OUT: [J7.3]
+  "+12V": [U3.4, D4.2, RV4.3, D3_1.2, D3_2.2, D3_3.2, D3_4.2, D3_5.2, D3_6.2, D3_7.2, D3_8.2, D3_9.2, D3_10.2, D3_11.2, D3_12.2, D3_13.2, D3_14.2, D3_15.2, D3_16.2, D3_17.2, D3_18.2, U5.4, U6.4, U7.4, U8.4, U9.4, C7_1.1, C7_3.1, C7_4.1, C7_5.1, C7_6.1, C7_7.1]
+  "-12V": [U3.11, D4.1, RV4.1, D3_1.1, D3_2.1, D3_3.1, D3_4.1, D3_5.1, D3_6.1, D3_7.1, D3_8.1, D3_9.1, D3_10.1, D3_11.1, D3_12.1, D3_13.1, D3_14.1, D3_15.1, D3_16.1, D3_17.1, D3_18.1, U5.11, U6.11, U7.11, U8.11, U9.11, C7_8.1, C7_10.1, C7_11.1, C7_12.1, C7_13.1, C7_14.1]
+  GND: [U3.3, U3.5, D6.1, J7.2, J8.2, U5.3, J9.2, U5.5, J10.2, U5.10, J11.2, U5.12, J12.2, U6.3, J13.2, U6.5, J14.2, U6.10, J15.2, U6.12, J16.2, U7.3, J17.2, U7.5, J18.2, U7.10, J19.2, U7.12, J20.2, U8.3, J21.2, U8.5, J22.2, U8.10, J23.2, U8.12, J24.2, U9.3, J25.2, U9.5, U9.10, U9.12, U3.10, U3.12, C7_1.2, C7_8.2, C7_3.2, C7_10.2, C7_4.2, C7_11.2, C7_5.2, C7_12.2, C7_6.2, C7_13.2, C7_7.2, C7_14.2]
+  LFO1_OUT: [SW7.1]                          # boundary input from block-2 -> SW7 pos0
+  LFO2_OUT: [SW7.4]                          # boundary input from block-2 -> SW7 pos1
 
-no_connect: []
+# J7.3 (MOD_IN tip-switch lug) unused — MOD_IN no longer auto-normals (MOD_SRC switch selects it).
+no_connect:
+  - J7.3
 
 boundary:
   - MOD_LP1_FREQ
@@ -331,17 +320,17 @@ boundary:
   - MOD_BP_FREQ
   - MOD_BP_TILT
   - MOD_BP1_FREQ
-  - MOD_BP1_FOCUS
+  - MOD_BP1_TILT
   - MOD_BP1_DIST
   - MOD_BP2_FREQ
-  - MOD_BP2_FOCUS
+  - MOD_BP2_TILT
   - MOD_BP2_DIST
   - MOD_BP3_FREQ
-  - MOD_BP3_FOCUS
+  - MOD_BP3_TILT
   - MOD_BP3_DIST
   - MOD_HP_FREQ
   - MOD_HP_RES
   - MOD_LP2_FREQ
   - MOD_LP2_RES
-  - MOD_VCA_AMT
   - LFO1_OUT
+  - LFO2_OUT
