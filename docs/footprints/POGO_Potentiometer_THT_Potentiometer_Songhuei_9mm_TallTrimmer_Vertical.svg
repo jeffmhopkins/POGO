@@ -2,7 +2,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="154.2297" height="150" viewBox="0 0 154.2297 150" role="img" aria-label="footprint POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical">
 <rect x="0" y="0" width="154.2297" height="150" fill="#141414"/>
 <g transform="translate(18.0536,49.2091) scale(10.3164)">
-<circle cx="6.75" cy="2.5" r="4.85" fill="none" stroke="#4a5a66" stroke-width="0.12"/>
+<circle cx="7.5" cy="2.5" r="4.85" fill="none" stroke="#4a5a66" stroke-width="0.12"/>
 <line x1="-1.15" y1="9.17" x2="12.6" y2="9.17" stroke="#2a8a5a" stroke-width="0.12" stroke-dasharray="0.4,0.3" stroke-linecap="round"/>
 <line x1="-1.15" y1="-4.17" x2="-1.15" y2="9.17" stroke="#2a8a5a" stroke-width="0.12" stroke-dasharray="0.4,0.3" stroke-linecap="round"/>
 <line x1="12.6" y1="-4.17" x2="-1.15" y2="-4.17" stroke="#2a8a5a" stroke-width="0.12" stroke-dasharray="0.4,0.3" stroke-linecap="round"/>

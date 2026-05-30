@@ -43,6 +43,13 @@ def _export_rules_constants(rules: DesignRules) -> dict[str, Any]:
             "LED_CY":         list(rules_mod.LED_CY),
             "SLIDER_V45_CY":  list(rules_mod.SLIDER_V45_CY),
         },
+        # Real per-feature keepout rects (pads + body) per component type — the DRC
+        # overlap check uses these (not the bounding courtyard) so the live editor
+        # matches panel_rules._check_pcb_overlaps exactly.
+        "shapes": {
+            t: [list(r) for r in kicad_mod.footprint_shapes(t)]
+            for t in kicad_mod._FOOTPRINT_MAP
+        },
         # Panel-face nut / hole radii
         "panel_r": {
             "jack":        rules.jack_nut_r,

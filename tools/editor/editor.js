@@ -147,6 +147,17 @@
     const [x1, y1, x2, y2] = rotateRect(base, deg || 0);
     return [cx + x1, cy + y1, cx + x2, cy + y2];
   }
+  // Real per-feature keepout rects (pads + body), positioned + rotated — mirrors
+  // panel_kicad.footprint_shapes + panel_rules._check_pcb_overlaps.
+  const SH = C.shapes || {};
+  function footprintRects(cx, cy, type, deg) {
+    const base = SH[type];
+    if (!base) return [];
+    return base.map((r) => {
+      const [x1, y1, x2, y2] = rotateRect(r, deg || 0);
+      return [cx + x1, cy + y1, cx + x2, cy + y2];
+    });
+  }
   function panelR(type) {
     const P = C.panel_r;
     if (C.type_sets.jack.includes(type)) return P.jack;
@@ -248,16 +259,19 @@
       }
     }
 
-    // 3 ── PCB courtyard overlaps
-    const fp = comps.map((o) => ({ ...o, rect: courtyard(o.cx, o.cy, o.type, o.rot) })).filter((o) => o.rect);
+    // 3 ── PCB footprint overlaps (real pads + body, not the bounding courtyard)
+    const fp = comps.map((o) => ({ ...o, rects: footprintRects(o.cx, o.cy, o.type, o.rot) })).filter((o) => o.rects.length);
     for (let i = 0; i < fp.length; i++) {
       for (let j = i + 1; j < fp.length; j++) {
         const a = fp[i], b = fp[j];
-        const dx = Math.min(a.rect[2], b.rect[2]) - Math.max(a.rect[0], b.rect[0]);
-        const dy = Math.min(a.rect[3], b.rect[3]) - Math.max(a.rect[1], b.rect[1]);
-        if (dx > 0 && dy > 0) {
-          const gap = -Math.min(dx, dy);
-          rec(`[PCB OVERLAP] '${a.label}' (${a.type} @ cx=${f2(a.cx)},cy=${f2(a.cy)}) ↔ '${b.label}' (${b.type} @ cx=${f2(b.cx)},cy=${f2(b.cy)}) — courtyard overlap ${f2(dx)}×${f2(dy)}mm (gap=${f2(gap)}mm)`, a.c, b.c);
+        let wx = 0, wy = 0;
+        for (const ra of a.rects) for (const rb of b.rects) {
+          const dx = Math.min(ra[2], rb[2]) - Math.max(ra[0], rb[0]);
+          const dy = Math.min(ra[3], rb[3]) - Math.max(ra[1], rb[1]);
+          if (dx > 0 && dy > 0 && dx * dy > wx * wy) { wx = dx; wy = dy; }
+        }
+        if (wx > 0 && wy > 0) {
+          rec(`[PCB OVERLAP] '${a.label}' (${a.type} @ cx=${f2(a.cx)},cy=${f2(a.cy)}) ↔ '${b.label}' (${b.type} @ cx=${f2(b.cx)},cy=${f2(b.cy)}) — footprint overlap ${f2(wx)}×${f2(wy)}mm`, a.c, b.c);
         }
       }
     }

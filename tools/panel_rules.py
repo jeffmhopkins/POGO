@@ -9,6 +9,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from panel_kicad import footprint_courtyard as _fp_crtyd  # single source of truth
+from panel_kicad import footprint_shapes as _fp_shapes    # real per-feature keepout
 
 # ── PCB courtyard dimensions (mm, relative to the component's panel anchor) ───
 # These are DERIVED from each component's KiCad footprint F.CrtYd layer via
@@ -83,6 +84,16 @@ def _rotate_rect(
     xs = [p[0] for p in rotated]
     ys = [p[1] for p in rotated]
     return (min(xs), min(ys), max(xs), max(ys))
+
+
+def _translate_rect(
+    rect: tuple[float, float, float, float],
+    cx: float,
+    cy: float,
+) -> tuple[float, float, float, float]:
+    """Shift an anchor-relative rect to its panel position (cx,cy)."""
+    x1, y1, x2, y2 = rect
+    return (x1 + cx, y1 + cy, x2 + cx, y2 + cy)
 
 
 def _get_courtyard(
@@ -381,10 +392,14 @@ class DesignRules:
         return out
 
     def _check_pcb_overlaps(self, components: list[dict[str, Any]]) -> list[str]:
-        """PCB courtyard rectangles must not overlap each other.
+        """Real PCB footprint features must not collide between components.
 
-        Checks all component types that have a PCB footprint (jacks, pots,
-        switches, LEDs) — not just jacks and pots.
+        Tests each component's ACTUAL pads + body (panel_kicad.footprint_shapes) rather
+        than the single conservative courtyard bounding box, so densely interleaved parts
+        (e.g. 9mm pots whose offset side-pins sit in a neighbour's gap) are only flagged
+        on a genuine pad/body overlap. Real keepouts are a subset of the courtyard, so this
+        never regresses a layout that the courtyard check already passed.
+        Checks every footprinted type (jacks, pots, switches, LEDs).
         """
         out: list[str] = []
         footprinted = []
@@ -393,25 +408,30 @@ class DesignRules:
             cx     = float(comp.get("cx", 0))
             cy     = float(comp.get("cy", 0))
             rotate = int(comp.get("rotate", 0))
-            rect   = _get_courtyard(cx, cy, ctype, rotate)
-            if rect:
-                footprinted.append((comp, rect))
+            rects  = [_translate_rect(_rotate_rect(r, rotate), cx, cy)
+                      for r in _fp_shapes(ctype)]
+            if rects:
+                footprinted.append((comp, rects))
 
         for i in range(len(footprinted)):
             for j in range(i + 1, len(footprinted)):
-                ca, ra = footprinted[i]
-                cb, rb = footprinted[j]
-                dx, dy = _rect_overlap(ra, rb)
-                if dx > 0 and dy > 0:
+                ca, ras = footprinted[i]
+                cb, rbs = footprinted[j]
+                worst = (0.0, 0.0)
+                for ra in ras:
+                    for rb in rbs:
+                        dx, dy = _rect_overlap(ra, rb)
+                        if dx > 0 and dy > 0 and dx * dy > worst[0] * worst[1]:
+                            worst = (dx, dy)
+                if worst[0] > 0 and worst[1] > 0:
                     la  = _comp_label(ca)
                     lb  = _comp_label(cb)
                     cxa = float(ca.get("cx", 0)); cya = float(ca.get("cy", 0))
                     cxb = float(cb.get("cx", 0)); cyb = float(cb.get("cy", 0))
-                    gap = _rect_min_gap(ra, rb)
                     out.append(
                         f"[PCB OVERLAP] '{la}' ({ca['type']} @ cx={cxa:.2f},cy={cya:.2f})"
                         f" ↔ '{lb}' ({cb['type']} @ cx={cxb:.2f},cy={cyb:.2f})"
-                        f" — courtyard overlap {dx:.2f}×{dy:.2f}mm (gap={gap:.2f}mm)"
+                        f" — footprint overlap {worst[0]:.2f}×{worst[1]:.2f}mm"
                     )
         return out
 

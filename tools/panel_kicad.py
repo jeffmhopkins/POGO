@@ -96,10 +96,11 @@ def _parse_footprint(text: str) -> list[dict]:
         r = math.sqrt((ex - cx) ** 2 + (ey - cy) ** 2)
         prims.append({"t": "circle", "cx": cx, "cy": cy, "r": r, "layer": m[5]})
 
-    # pad (at x y [rot])
+    # pad (at x y [rot]) (size w h)
     for m in re.finditer(
         r'\(pad\s+("[^"]*"|[^\s)]+)\s+([^\s)]+)\s+([^\s)]+)\s+'
-        r'\(at\s+([-\d.]+)\s+([-\d.]+)(?:\s+[-\d.]+)?\)',
+        r'\(at\s+([-\d.]+)\s+([-\d.]+)(?:\s+([-\d.]+))?\)'
+        r'(?:\s+\(size\s+([-\d.]+)\s+([-\d.]+)\))?',
         text,
     ):
         prims.append({
@@ -109,9 +110,59 @@ def _parse_footprint(text: str) -> list[dict]:
             "shape": m[3],
             "x": float(m[4]),
             "y": float(m[5]),
+            "rot": float(m[6]) if m[6] else 0.0,
+            "w": float(m[7]) if m[7] else 0.0,
+            "h": float(m[8]) if m[8] else 0.0,
         })
 
     return prims
+
+
+def footprint_shapes(ctype: str) -> list[tuple[float, float, float, float]]:
+    """Real keepout shapes for a component type as anchor-relative rects (x1,y1,x2,y2).
+
+    Unlike footprint_courtyard() (one conservative bounding box), this returns the
+    component's ACTUAL physical features: every pad as its own rect, plus the body —
+    the F.Fab circle (round pot/jack body) if present, else the F.Fab outline bbox.
+    The DRC overlap check (panel_rules) tests these per-feature so densely interleaved
+    parts (e.g. 9mm pots whose side pins sit in a neighbour's gap) aren't false-flagged
+    by the bounding courtyard. Coordinates are translated from the footprint origin to
+    the panel anchor via the (ox,oy) offset in _FOOTPRINT_MAP.
+    """
+    entry = _FOOTPRINT_MAP.get(ctype)
+    if entry is None:
+        return []
+    rel_path, ox, oy = entry
+    prims = _load_footprint(rel_path)
+    rects: list[tuple[float, float, float, float]] = []
+
+    # pads → rects (90/270 rotation swaps w/h)
+    for p in prims:
+        if p.get("t") != "pad":
+            continue
+        w, h = p.get("w", 0.0), p.get("h", 0.0)
+        if w <= 0 or h <= 0:
+            continue
+        if int(p.get("rot", 0)) % 180 == 90:
+            w, h = h, w
+        rects.append((p["x"] - w / 2 - ox, p["y"] - h / 2 - oy,
+                      p["x"] + w / 2 - ox, p["y"] + h / 2 - oy))
+
+    # body — prefer an F.Fab circle (round body); else the F.Fab outline bbox
+    fab_circ = [p for p in prims if p.get("t") == "circle" and "Fab" in p.get("layer", "")]
+    if fab_circ:
+        c = fab_circ[0]
+        rects.append((c["cx"] - c["r"] - ox, c["cy"] - c["r"] - oy,
+                      c["cx"] + c["r"] - ox, c["cy"] + c["r"] - oy))
+    else:
+        xs, ys = [], []
+        for p in prims:
+            if p.get("t") == "line" and "Fab" in p.get("layer", ""):
+                xs += [p["x1"], p["x2"]]; ys += [p["y1"], p["y2"]]
+        if xs:
+            rects.append((min(xs) - ox, min(ys) - oy, max(xs) - ox, max(ys) - oy))
+
+    return rects
 
 
 # Cache parsed footprints so each file is read only once per build

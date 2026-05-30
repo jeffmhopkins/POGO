@@ -32,6 +32,24 @@ re-DRC → loop until clean.
   `HTML_EDITOR` (CI only runs `--check`/`--resource`, so the editor-write path was never exercised) →
   now writes `docs/panel-editor.html` only. This unblocks editor regeneration.
 
+## DRC refined to real footprint collisions (maintainer-requested)
+The PCB-overlap DRC previously compared each component's **conservative courtyard bounding
+box** — which for a 9mm pot wraps the offset side-pins + mounting legs, ~13.75×13.34mm — so
+densely interleaved pots were false-flagged even when the round bodies clear. Changed
+`_check_pcb_overlaps` (and the editor's live JS DRC) to test the **actual pads + body**:
+- `panel_kicad.footprint_shapes(ctype)` — per-feature keepout rects from the `.kicad_mod`
+  (each pad as its rect; body = the F.Fab circle for round pots, else the F.Fab bbox).
+- `panel_rules._check_pcb_overlaps` now overlaps every pad/body rect of A against B (real
+  keepout ⊆ courtyard, so it never regresses an already-passing layout). Message: "footprint
+  overlap" instead of "courtyard overlap".
+- `panel_editor.py` exports the shapes; `tools/editor/editor.js` `runDRC` mirrors it exactly,
+  so the editor's live overlaps match the gate. Use the editor's **kicad** layer to see the
+  real pads/body. (Body circle in the Songhuei footprint re-centred on the shaft.)
+
+Effect: courtyard's phantom 2.3×13.34mm overlaps → genuine ones (e.g. a neighbour's signal
+pin under a body = 1.8×1.8mm). 9mm pots still need ~12mm pitch (the pin/leg pads collide at
+11.43mm in some orientation), but the editor and DRC now agree on the *real* constraint.
+
 ## Pending (after the grid is settled)
 - **G2:** re-spaced `panel-data.yaml` (maintainer editor pass) → DRC clean → re-sync `--cpp` if positions move.
 - **G6a:** source the Song Huei tall trimmer in `specs/components.yaml` + `components/parts/` (+ datasheet).
