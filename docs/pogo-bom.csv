@@ -372,6 +372,69 @@ audio,R133,Resistor,1,,100kΩ,0603,,,,,block-6-dist3,ALT_L_DET pull-up to +12V (
 audio,R128,Resistor,2,,100kΩ,0603,,,,,block-6-dist1,R_MODE_PU: DW5 mode-encoder pull-ups to 5V logic rail; 2 per group (SC/HC/WF → 2 control bits)
 audio,R128,Resistor,2,,100kΩ,0603,,,,,block-6-dist2,R_MODE_PU: DW5 mode-encoder pull-ups to 5V logic rail; 2 per group (SC/HC/WF → 2 control bits)
 audio,R128,Resistor,2,,100kΩ,0603,,,,,block-6-dist3,R_MODE_PU: DW5 mode-encoder pull-ups to 5V logic rail; 2 per group (SC/HC/WF → 2 control bits)
+audio,U94,IC,1,TL074CDT,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl074.pdf,block-6-dist1,BP1 CLIP comparators (A:>+4L B:<-4L C:>+4R D:<-4R)
+audio,U95,IC,1,TL074CDT,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl074.pdf,block-6-dist2,BP2 CLIP comparators
+audio,U96,IC,1,TL074CDT,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl074.pdf,block-6-dist3,BP3 CLIP comparators
+audio,R177,Resistor,1,,100kΩ,0603,,,,,block-6-dist1,BP1 CLIP comp A in (DISTOUT_L)
+audio,R178,Resistor,1,,100kΩ,0603,,,,,block-6-dist1,BP1 CLIP comp B in (DISTOUT_L)
+audio,R179,Resistor,1,,100kΩ,0603,,,,,block-6-dist1,BP1 CLIP comp C in (DISTOUT_R)
+audio,R180,Resistor,1,,100kΩ,0603,,,,,block-6-dist1,BP1 CLIP comp D in (DISTOUT_R)
+audio,R181,Resistor,1,,2.2MΩ,0603,,,,,block-6-dist1,BP1 CLIP comp A hysteresis
+audio,R182,Resistor,1,,2.2MΩ,0603,,,,,block-6-dist1,BP1 CLIP comp B hysteresis
+audio,R183,Resistor,1,,2.2MΩ,0603,,,,,block-6-dist1,BP1 CLIP comp C hysteresis
+audio,R184,Resistor,1,,2.2MΩ,0603,,,,,block-6-dist1,BP1 CLIP comp D hysteresis
+audio,R185,Resistor,1,,1kΩ,0603,,,,,block-6-dist1,BP1 CLIP LED current-limit
+audio,R186,Resistor,1,,20kΩ,0603,,,,,block-6-dist1,VREF_P4 divider top (+12V); shared +4V CLIP threshold
+audio,R187,Resistor,1,,10kΩ,0603,,,,,block-6-dist1,VREF_P4 divider bottom
+audio,R188,Resistor,1,,20kΩ,0603,,,,,block-6-dist1,VREF_N4 divider top (−12V); shared −4V CLIP threshold
+audio,R189,Resistor,1,,10kΩ,0603,,,,,block-6-dist1,VREF_N4 divider bottom
+audio,R190,Resistor,1,,100kΩ,0603,,,,,block-6-dist1,BP1 CLIP comp B VREF_N4 series
+audio,R191,Resistor,1,,100kΩ,0603,,,,,block-6-dist1,BP1 CLIP comp D VREF_N4 series
+audio,R192,Resistor,1,,100kΩ,0603,,,,,block-6-dist2,BP2 CLIP comp A in
+audio,R193,Resistor,1,,100kΩ,0603,,,,,block-6-dist2,BP2 CLIP comp B in
+audio,R194,Resistor,1,,100kΩ,0603,,,,,block-6-dist2,BP2 CLIP comp C in
+audio,R195,Resistor,1,,100kΩ,0603,,,,,block-6-dist2,BP2 CLIP comp D in
+audio,R196,Resistor,1,,2.2MΩ,0603,,,,,block-6-dist2,BP2 CLIP comp A hysteresis
+audio,R197,Resistor,1,,2.2MΩ,0603,,,,,block-6-dist2,BP2 CLIP comp B hysteresis
+audio,R198,Resistor,1,,2.2MΩ,0603,,,,,block-6-dist2,BP2 CLIP comp C hysteresis
+audio,R199,Resistor,1,,2.2MΩ,0603,,,,,block-6-dist2,BP2 CLIP comp D hysteresis
+audio,R200,Resistor,1,,1kΩ,0603,,,,,block-6-dist2,BP2 CLIP LED current-limit
+audio,R201,Resistor,1,,100kΩ,0603,,,,,block-6-dist2,BP2 CLIP comp B VREF_N4 series
+audio,R202,Resistor,1,,100kΩ,0603,,,,,block-6-dist2,BP2 CLIP comp D VREF_N4 series
+audio,R203,Resistor,1,,100kΩ,0603,,,,,block-6-dist3,BP3 CLIP comp A in
+audio,R204,Resistor,1,,100kΩ,0603,,,,,block-6-dist3,BP3 CLIP comp B in
+audio,R205,Resistor,1,,100kΩ,0603,,,,,block-6-dist3,BP3 CLIP comp C in
+audio,R206,Resistor,1,,100kΩ,0603,,,,,block-6-dist3,BP3 CLIP comp D in
+audio,R207,Resistor,1,,2.2MΩ,0603,,,,,block-6-dist3,BP3 CLIP comp A hysteresis
+audio,R208,Resistor,1,,2.2MΩ,0603,,,,,block-6-dist3,BP3 CLIP comp B hysteresis
+audio,R209,Resistor,1,,2.2MΩ,0603,,,,,block-6-dist3,BP3 CLIP comp C hysteresis
+audio,R210,Resistor,1,,2.2MΩ,0603,,,,,block-6-dist3,BP3 CLIP comp D hysteresis
+audio,R211,Resistor,1,,1kΩ,0603,,,,,block-6-dist3,BP3 CLIP LED current-limit
+audio,R212,Resistor,1,,100kΩ,0603,,,,,block-6-dist3,BP3 CLIP comp B VREF_N4 series
+audio,R213,Resistor,1,,100kΩ,0603,,,,,block-6-dist3,BP3 CLIP comp D VREF_N4 series
+audio,D14_1a,Diode,1,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6-dist1,BP1 CLIP OR-steer comp A
+audio,D14_1b,Diode,1,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6-dist1,BP1 CLIP OR-steer comp B
+audio,D14_1c,Diode,1,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6-dist1,BP1 CLIP OR-steer comp C
+audio,D14_1d,Diode,1,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6-dist1,BP1 CLIP OR-steer comp D
+audio,D15_2a,Diode,1,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6-dist2,BP2 CLIP OR-steer comp A
+audio,D15_2b,Diode,1,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6-dist2,BP2 CLIP OR-steer comp B
+audio,D15_2c,Diode,1,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6-dist2,BP2 CLIP OR-steer comp C
+audio,D15_2d,Diode,1,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6-dist2,BP2 CLIP OR-steer comp D
+audio,D16_3a,Diode,1,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6-dist3,BP3 CLIP OR-steer comp A
+audio,D16_3b,Diode,1,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6-dist3,BP3 CLIP OR-steer comp B
+audio,D16_3c,Diode,1,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6-dist3,BP3 CLIP OR-steer comp C
+audio,D16_3d,Diode,1,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6-dist3,BP3 CLIP OR-steer comp D
+audio,C110_U94p,Capacitor,1,,100nF,0603,,,,,block-6-dist1,U94 +12V decoupling
+audio,C110_U94n,Capacitor,1,,100nF,0603,,,,,block-6-dist1,U94 −12V decoupling
+audio,C110_U95p,Capacitor,1,,100nF,0603,,,,,block-6-dist2,U95 +12V decoupling
+audio,C110_U95n,Capacitor,1,,100nF,0603,,,,,block-6-dist2,U95 −12V decoupling
+audio,C110_U96p,Capacitor,1,,100nF,0603,,,,,block-6-dist3,U96 +12V decoupling
+audio,C110_U96n,Capacitor,1,,100nF,0603,,,,,block-6-dist3,U96 −12V decoupling
+audio,C111_P4,Capacitor,1,,100nF,0603,,,,,block-6-dist1,VREF_P4 bypass
+audio,C111_N4,Capacitor,1,,100nF,0603,,,,,block-6-dist1,VREF_N4 bypass
+panel,BP1_CLIP_LED,Other,1,,,3mm,POGO_LED_THT:LED_D3.0mm,generic,,https://www.thonk.co.uk/product-category/electronic-component/led/,block-6-dist1,BP1 CLIP indicator (BP1_CLIP_LIGHT)
+panel,BP2_CLIP_LED,Other,1,,,3mm,POGO_LED_THT:LED_D3.0mm,generic,,https://www.thonk.co.uk/product-category/electronic-component/led/,block-6-dist2,BP2 CLIP indicator (BP2_CLIP_LIGHT)
+panel,BP3_CLIP_LED,Other,1,,,3mm,POGO_LED_THT:LED_D3.0mm,generic,,https://www.thonk.co.uk/product-category/electronic-component/led/,block-6-dist3,BP3 CLIP indicator (BP3_CLIP_LIGHT)
 audio,R124,Resistor,1,,1MΩ,0603,,,,,block-6-svf1,R_IREF_A_L: L-channel expo I_ref fixed R (U28-30); 1 per group
 audio,R124,Resistor,1,,1MΩ,0603,,,,,block-6-svf2,R_IREF_A_L: L-channel expo I_ref fixed R (U28-30); 1 per group
 audio,R124,Resistor,1,,1MΩ,0603,,,,,block-6-svf3,R_IREF_A_L: L-channel expo I_ref fixed R (U28-30); 1 per group

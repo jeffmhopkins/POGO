@@ -94,6 +94,26 @@ parts:
   C110_U90n: { sym: c, value: 100nF }
   C110_U93p: { sym: c, value: 100nF }
   C110_U93n: { sym: c, value: 100nF }
+  # ---- CLIP detector (change 0018, Stage 6): same cell as dist1, shared VREF_P4/N4 (boundary in) ----
+  U96: { sym: opamp4, part: TL074CDT, value: TL074 }    # BP3 CLIP comparators
+  C110_U96p: { sym: c, value: 100nF }
+  C110_U96n: { sym: c, value: 100nF }
+  R203: { sym: r, value: 100k }   # comp A in (DISTOUT_L -> in+)
+  R204: { sym: r, value: 100k }   # comp B in (DISTOUT_L -> in-)
+  R205: { sym: r, value: 100k }   # comp C in (DISTOUT_R -> in+)
+  R206: { sym: r, value: 100k }   # comp D in (DISTOUT_R -> in-)
+  R207: { sym: r, value: 2.2M }   # comp A hysteresis fb
+  R208: { sym: r, value: 2.2M }   # comp B hysteresis fb
+  R209: { sym: r, value: 2.2M }   # comp C hysteresis fb
+  R210: { sym: r, value: 2.2M }   # comp D hysteresis fb
+  R211: { sym: r, value: 1k }     # CLIP LED current-limit
+  R212: { sym: r, value: 100k }   # comp B VREF_N4 series into in+
+  R213: { sym: r, value: 100k }   # comp D VREF_N4 series into in+
+  D16_3a: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D16_3b: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D16_3c: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D16_3d: { sym: diode, part: 1N4148W, value: 1N4148W }
+  BP3_CLIP_LED: { sym: led, part: "LED 3mm", value: BP3_CLIP }
 
 nets:
   V5LOGIC: [R128_3sc.1, R128_3wf.1, R175.1, RV39.3]
@@ -152,15 +172,33 @@ nets:
   BP3_MID_L: [U77.14, U33.12]
   BP3_MID_R: [U77.15, U33.2]
   BP3_SEL_SC: [U33.11, U33.10, R128_3sc.2]
-  BP3_DISTOUT_L: [U33.14]
-  BP3_DISTOUT_R: [U33.15]
+  BP3_DISTOUT_L: [U33.14, R203.1, R204.1]
+  BP3_DISTOUT_R: [U33.15, R205.1, R206.1]
+  # ---- CLIP detector nets (change 0018, Stage 6); VREF_P4/N4 are boundary inputs from dist1 ----
+  BP3_CLIP_A_INP: [U96.3, R203.2, R207.2]
+  BP3_CLIP_C_INP: [U96.10, R205.2, R209.2]
+  BP3_CLIP_B_INN: [U96.6, R204.2]
+  BP3_CLIP_B_INP: [U96.5, R212.2, R208.2]
+  BP3_CLIP_D_INN: [U96.13, R206.2]
+  BP3_CLIP_D_INP: [U96.12, R213.2, R210.2]
+  BP3_CLIP_A_OUT: [U96.1, R207.1, D16_3a.A]
+  BP3_CLIP_B_OUT: [U96.7, R208.1, D16_3b.A]
+  BP3_CLIP_C_OUT: [U96.8, R209.1, D16_3c.A]
+  BP3_CLIP_D_OUT: [U96.14, R210.1, D16_3d.A]
+  BP3_CLIP_OR: [D16_3a.K, D16_3b.K, D16_3c.K, D16_3d.K, R211.1]
+  BP3_CLIP_LEDA: [R211.2, BP3_CLIP_LED.A]
+  VREF_P4: [U96.2, U96.9]              # <- dist1 shared +4V (boundary)
+  VREF_N4: [R212.1, R213.1]            # <- dist1 shared -4V (boundary)
   "+12V": [U33.16, C110_U33p.1, U38.8, C110_U38p.1, U39.8, C110_U39p.1, U44.8, C110_U44p.1, U45.8, C110_U45p.1, U77.16, C110_U77p.1, U81.16, C110_U81p.1, R133.1,
-           U89.7, U90.7, U93.4, C110_U89p.1, C110_U90p.1, C110_U93p.1]
+           U89.7, U90.7, U93.4, C110_U89p.1, C110_U90p.1, C110_U93p.1,
+           U96.4, C110_U96p.1]
   "-12V": [U33.7, C110_U33n.1, U38.4, C110_U38n.1, U39.4, C110_U39n.1, U44.4, C110_U44n.1, U45.4, C110_U45n.1, U77.7, C110_U77n.1, U81.7, C110_U81n.1,
-           U89.5, U90.5, U93.11, C110_U89n.1, C110_U90n.1, C110_U93n.1]
+           U89.5, U90.5, U93.11, C110_U89n.1, C110_U90n.1, C110_U93n.1,
+           U96.11, C110_U96n.1]
   GND: [U33.8, U33.6, C110_U33p.2, C110_U33n.2, C110_U38p.2, C110_U38n.2, C110_U39p.2, C110_U39n.2, C110_U44p.2, C110_U44n.2, C110_U45p.2, C110_U45n.2, U77.8, U77.6, C110_U77p.2, C110_U77n.2, U38.3, D5_3Lb.3, U38.5, U44.3, D6_3Lb.K, D6_3Lc.A, C_WF_3La.2, C_WF_3Lb.2, U39.3, D5_3Rb.3, U39.5, U45.3, D6_3Rb.K, D6_3Rc.A, C_WF_3Ra.2, C_WF_3Rb.2, U81.8, U81.6, U81.5, U81.3, U81.4, U81.9, C110_U81p.2, C110_U81n.2,
         U89.3, U89.4, U89.6, U90.3, U90.4, U90.6, U93.3, U93.5, U93.10, U93.12, RV39.1,
-        C110_U89p.2, C110_U89n.2, C110_U90p.2, C110_U90n.2, C110_U93p.2, C110_U93n.2]
+        C110_U89p.2, C110_U89n.2, C110_U90p.2, C110_U90n.2, C110_U93p.2, C110_U93n.2,
+        C110_U96p.2, C110_U96n.2, BP3_CLIP_LED.K]
 
 no_connect:
   - U33.3
@@ -173,6 +211,8 @@ no_connect:
   - U77.9
 
 boundary:
+  - VREF_P4          # <- dist1 shared +4V CLIP threshold
+  - VREF_N4          # <- dist1 shared -4V CLIP threshold
   - V5LOGIC
   - LP1_OUT_L        # <- block-5 (mux X0)
   - LP1_OUT_R        # <- block-5 (mux Y0)

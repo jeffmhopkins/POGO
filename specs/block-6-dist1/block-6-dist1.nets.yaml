@@ -92,6 +92,43 @@ parts:
   C110_U86n: { sym: c, value: 100nF }   # U86 V-
   C110_U91p: { sym: c, value: 100nF }   # U91 +12V
   C110_U91n: { sym: c, value: 100nF }   # U91 -12V
+  # ---- CLIP detector (change 0018, Stage 6): per-band ±4V window on the distortion output ----
+  # Plugin: BP1_CLIP_LIGHT = (max(|distOutL|,|distOutR|) > 4.0V) ? 1 : 0, monitoring the
+  # post-distortion / pre-SVF node (here the CD4053 mux output BP1_DISTOUT_L/_R). TL074 U94 =
+  # four open-loop comparators (>+4 L, <-4 L, >+4 R, <-4 R) with light positive-feedback
+  # hysteresis (R_hys_fb >> R_hys_in) to avoid chatter. Comparator outs are diode-OR'd
+  # (1N4148W steering) into the CLIP LED anode; LED sinks through a current-limit R to GND.
+  # ±4V thresholds come from the SHARED reference divider (below) -> VREF_P4 / VREF_N4
+  # (boundary out to dist2/dist3).
+  U94: { sym: opamp4, part: TL074CDT, value: TL074 }    # BP1 CLIP comparators (A:>+4L B:<-4L C:>+4R D:<-4R)
+  C110_U94p: { sym: c, value: 100nF }   # U94 +12V decoupling
+  C110_U94n: { sym: c, value: 100nF }   # U94 -12V decoupling
+  R177: { sym: r, value: 100k }   # CLIP comp A in (DISTOUT_L -> in+, >+4 detect)
+  R178: { sym: r, value: 100k }   # CLIP comp B in (DISTOUT_L -> in-, <-4 detect)
+  R179: { sym: r, value: 100k }   # CLIP comp C in (DISTOUT_R -> in+, >+4 detect)
+  R180: { sym: r, value: 100k }   # CLIP comp D in (DISTOUT_R -> in-, <-4 detect)
+  R181: { sym: r, value: 2.2M }   # CLIP comp A hysteresis fb (out -> in+; ~50mV @ ±12 swing)
+  R182: { sym: r, value: 2.2M }   # CLIP comp B hysteresis fb (out -> in+)
+  R183: { sym: r, value: 2.2M }   # CLIP comp C hysteresis fb (out -> in+)
+  R184: { sym: r, value: 2.2M }   # CLIP comp D hysteresis fb (out -> in+)
+  R185: { sym: r, value: 1k }     # CLIP LED current-limit (OR node -> LED anode -> GND)
+  R190: { sym: r, value: 100k }   # CLIP comp B VREF_N4 series into in+ (hys-sum node)
+  R191: { sym: r, value: 100k }   # CLIP comp D VREF_N4 series into in+ (hys-sum node)
+  D14_1a: { sym: diode, part: 1N4148W, value: 1N4148W }   # OR steer comp A
+  D14_1b: { sym: diode, part: 1N4148W, value: 1N4148W }   # OR steer comp B
+  D14_1c: { sym: diode, part: 1N4148W, value: 1N4148W }   # OR steer comp C
+  D14_1d: { sym: diode, part: 1N4148W, value: 1N4148W }   # OR steer comp D
+  BP1_CLIP_LED: { sym: led, part: "LED 3mm", value: BP1_CLIP }   # panel CLIP LED (BP1_CLIP_LIGHT)
+  # ---- SHARED ±4V threshold reference divider (change 0018, Stage 6) ----
+  # One +4V and one -4V node, shared by all 3 CLIP detectors (dist1/2/3) via boundary nets.
+  # +4V = +12 * 10k/(20k+10k); -4V = -12 * 10k/(20k+10k). Phase-3R: trim ratio to ±4.00V if
+  # the 1% divider error (~±40mV) matters; bypass caps tame comparator-input noise.
+  R186: { sym: r, value: 20k }    # VREF_P4 top (+12V -> node)
+  R187: { sym: r, value: 10k }    # VREF_P4 bottom (node -> GND)
+  R188: { sym: r, value: 20k }    # VREF_N4 top (-12V -> node)
+  R189: { sym: r, value: 10k }    # VREF_N4 bottom (node -> GND)
+  C111_P4: { sym: c, value: 100nF }   # VREF_P4 bypass
+  C111_N4: { sym: c, value: 100nF }   # VREF_N4 bypass
 
 nets:
   V5LOGIC: [R128_1sc.1, R128_1wf.1, R159.1, RV33.3]
@@ -146,15 +183,43 @@ nets:
   BP1_MID_L: [U75.14, U31.12]
   BP1_MID_R: [U75.15, U31.2]
   BP1_SEL_SC: [U31.11, U31.10, R128_1sc.2]
-  BP1_DISTOUT_L: [U31.14]
-  BP1_DISTOUT_R: [U31.15]
+  BP1_DISTOUT_L: [U31.14, R177.1, R178.1]
+  BP1_DISTOUT_R: [U31.15, R179.1, R180.1]
+  # ---- CLIP detector nets (change 0018, Stage 6) ----
+  # Comp A (U94-A): >+4 L. in+ (pin3) = DISTOUT_L via R177, hysteresis fb R181; in- (pin2) = VREF_P4.
+  #   out (pin1) HIGH when DISTOUT_L > +4. (DC: R177 to a slow node; signal swing dominates the decision.)
+  BP1_CLIP_A_INP: [U94.3, R177.2, R181.2]
+  # Comp C (U94-C): >+4 R. in+ (pin10) = DISTOUT_R via R179, hysteresis fb R183; in- (pin9) = VREF_P4.
+  BP1_CLIP_C_INP: [U94.10, R179.2, R183.2]
+  # Comp B (U94-B): <-4 L. in- (pin6) = DISTOUT_L via R178; in+ (pin5) = VREF_N4 via R190, hys fb R182.
+  #   out (pin7) HIGH when VREF_N4 > DISTOUT_L, i.e. DISTOUT_L < -4.
+  BP1_CLIP_B_INN: [U94.6, R178.2]
+  BP1_CLIP_B_INP: [U94.5, R190.2, R182.2]
+  # Comp D (U94-D): <-4 R. in- (pin13) = DISTOUT_R via R180; in+ (pin12) = VREF_N4 via R191, hys fb R184.
+  BP1_CLIP_D_INN: [U94.13, R180.2]
+  BP1_CLIP_D_INP: [U94.12, R191.2, R184.2]
+  # Comparator outputs -> hysteresis fb + OR steering diode anodes.
+  BP1_CLIP_A_OUT: [U94.1, R181.1, D14_1a.A]
+  BP1_CLIP_B_OUT: [U94.7, R182.1, D14_1b.A]
+  BP1_CLIP_C_OUT: [U94.8, R183.1, D14_1c.A]
+  BP1_CLIP_D_OUT: [U94.14, R184.1, D14_1d.A]
+  # Diode-OR node -> current-limit R -> LED anode; LED cathode -> GND.
+  BP1_CLIP_OR: [D14_1a.K, D14_1b.K, D14_1c.K, D14_1d.K, R185.1]
+  BP1_CLIP_LEDA: [R185.2, BP1_CLIP_LED.A]
+  # ---- shared ±4V reference divider; node = boundary out to dist2/dist3 ----
+  # P4 -> A/C in- directly (high-Z comparator inputs); N4 -> B/D in+ via R190/R191 (so hys fb sums).
+  VREF_P4: [R186.2, R187.1, C111_P4.1, U94.2, U94.9]
+  VREF_N4: [R188.2, R189.1, C111_N4.1, R190.1, R191.1]
   "+12V": [U31.16, C110_U31p.1, U34.8, C110_U34p.1, U35.8, C110_U35p.1, U40.8, C110_U40p.1, U41.8, C110_U41p.1, U75.16, C110_U75p.1,
-           U85.7, U86.7, U91.4, C110_U85p.1, C110_U86p.1, C110_U91p.1]
+           U85.7, U86.7, U91.4, C110_U85p.1, C110_U86p.1, C110_U91p.1,
+           U94.4, C110_U94p.1, R186.1]
   "-12V": [U31.7, C110_U31n.1, U34.4, C110_U34n.1, U35.4, C110_U35n.1, U40.4, C110_U40n.1, U41.4, C110_U41n.1, U75.7, C110_U75n.1,
-           U85.5, U86.5, U91.11, C110_U85n.1, C110_U86n.1, C110_U91n.1]
+           U85.5, U86.5, U91.11, C110_U85n.1, C110_U86n.1, C110_U91n.1,
+           U94.11, C110_U94n.1, R188.1]
   GND: [U31.8, U31.6, C110_U31p.2, C110_U31n.2, C110_U34p.2, C110_U34n.2, C110_U35p.2, C110_U35n.2, C110_U40p.2, C110_U40n.2, C110_U41p.2, C110_U41n.2, U75.8, U75.6, C110_U75p.2, C110_U75n.2, U34.3, D5_1Lb.3, U34.5, U40.3, D6_1Lb.K, D6_1Lc.A, C_WF_1La.2, C_WF_1Lb.2, U35.3, D5_1Rb.3, U35.5, U41.3, D6_1Rb.K, D6_1Rc.A, C_WF_1Ra.2, C_WF_1Rb.2,
         U85.3, U85.4, U85.6, U86.3, U86.4, U86.6, U91.3, U91.5, U91.10, U91.12, RV33.1,
-        C110_U85p.2, C110_U85n.2, C110_U86p.2, C110_U86n.2, C110_U91p.2, C110_U91n.2]
+        C110_U85p.2, C110_U85n.2, C110_U86p.2, C110_U86n.2, C110_U91p.2, C110_U91n.2,
+        C110_U94p.2, C110_U94n.2, BP1_CLIP_LED.K, R187.2, R189.2, C111_P4.2, C111_N4.2]
 
 no_connect:
   - U31.3
@@ -175,4 +240,6 @@ boundary:
   - BP1_DISTOUT_R
   - BP1_SEL_WF
   - BP1_SEL_SC
+  - VREF_P4          # -> dist2/dist3 CLIP detectors (shared +4V threshold; divider lives here)
+  - VREF_N4          # -> dist2/dist3 CLIP detectors (shared -4V threshold; divider lives here)
 

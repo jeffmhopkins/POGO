@@ -455,6 +455,70 @@ components:
   - { ref: R128, board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "R_MODE_PU: DW5 mode-encoder pull-ups to 5V logic rail; 2 per group (SC/HC/WF → 2 control bits)" }
   - { ref: R128, board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "R_MODE_PU: DW5 mode-encoder pull-ups to 5V logic rail; 2 per group (SC/HC/WF → 2 control bits)" }
   - { ref: R128, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "R_MODE_PU: DW5 mode-encoder pull-ups to 5V logic rail; 2 per group (SC/HC/WF → 2 control bits)" }
+  # block-6 CLIP detectors (change 0018, Stage 6): per-band ±4V window comparator -> panel CLIP LED
+  - { ref: U94,  board: audio,   block: block-6-dist1, part: TL074CDT,   pkg: SOIC-14,  fn: "BP1 CLIP comparators (A:>+4L B:<-4L C:>+4R D:<-4R)" }
+  - { ref: U95,  board: audio,   block: block-6-dist2, part: TL074CDT,   pkg: SOIC-14,  fn: "BP2 CLIP comparators" }
+  - { ref: U96,  board: audio,   block: block-6-dist3, part: TL074CDT,   pkg: SOIC-14,  fn: "BP3 CLIP comparators" }
+  - { ref: R177, board: audio,   block: block-6-dist1, part: ~, pkg: "0603", val: "100kΩ", fn: "BP1 CLIP comp A in (DISTOUT_L)" }
+  - { ref: R178, board: audio,   block: block-6-dist1, part: ~, pkg: "0603", val: "100kΩ", fn: "BP1 CLIP comp B in (DISTOUT_L)" }
+  - { ref: R179, board: audio,   block: block-6-dist1, part: ~, pkg: "0603", val: "100kΩ", fn: "BP1 CLIP comp C in (DISTOUT_R)" }
+  - { ref: R180, board: audio,   block: block-6-dist1, part: ~, pkg: "0603", val: "100kΩ", fn: "BP1 CLIP comp D in (DISTOUT_R)" }
+  - { ref: R181, board: audio,   block: block-6-dist1, part: ~, pkg: "0603", val: "2.2MΩ", fn: "BP1 CLIP comp A hysteresis" }
+  - { ref: R182, board: audio,   block: block-6-dist1, part: ~, pkg: "0603", val: "2.2MΩ", fn: "BP1 CLIP comp B hysteresis" }
+  - { ref: R183, board: audio,   block: block-6-dist1, part: ~, pkg: "0603", val: "2.2MΩ", fn: "BP1 CLIP comp C hysteresis" }
+  - { ref: R184, board: audio,   block: block-6-dist1, part: ~, pkg: "0603", val: "2.2MΩ", fn: "BP1 CLIP comp D hysteresis" }
+  - { ref: R185, board: audio,   block: block-6-dist1, part: ~, pkg: "0603", val: "1kΩ",   fn: "BP1 CLIP LED current-limit" }
+  - { ref: R186, board: audio,   block: block-6-dist1, part: ~, pkg: "0603", val: "20kΩ",  fn: "VREF_P4 divider top (+12V); shared +4V CLIP threshold" }
+  - { ref: R187, board: audio,   block: block-6-dist1, part: ~, pkg: "0603", val: "10kΩ",  fn: "VREF_P4 divider bottom" }
+  - { ref: R188, board: audio,   block: block-6-dist1, part: ~, pkg: "0603", val: "20kΩ",  fn: "VREF_N4 divider top (−12V); shared −4V CLIP threshold" }
+  - { ref: R189, board: audio,   block: block-6-dist1, part: ~, pkg: "0603", val: "10kΩ",  fn: "VREF_N4 divider bottom" }
+  - { ref: R190, board: audio,   block: block-6-dist1, part: ~, pkg: "0603", val: "100kΩ", fn: "BP1 CLIP comp B VREF_N4 series" }
+  - { ref: R191, board: audio,   block: block-6-dist1, part: ~, pkg: "0603", val: "100kΩ", fn: "BP1 CLIP comp D VREF_N4 series" }
+  - { ref: R192, board: audio,   block: block-6-dist2, part: ~, pkg: "0603", val: "100kΩ", fn: "BP2 CLIP comp A in" }
+  - { ref: R193, board: audio,   block: block-6-dist2, part: ~, pkg: "0603", val: "100kΩ", fn: "BP2 CLIP comp B in" }
+  - { ref: R194, board: audio,   block: block-6-dist2, part: ~, pkg: "0603", val: "100kΩ", fn: "BP2 CLIP comp C in" }
+  - { ref: R195, board: audio,   block: block-6-dist2, part: ~, pkg: "0603", val: "100kΩ", fn: "BP2 CLIP comp D in" }
+  - { ref: R196, board: audio,   block: block-6-dist2, part: ~, pkg: "0603", val: "2.2MΩ", fn: "BP2 CLIP comp A hysteresis" }
+  - { ref: R197, board: audio,   block: block-6-dist2, part: ~, pkg: "0603", val: "2.2MΩ", fn: "BP2 CLIP comp B hysteresis" }
+  - { ref: R198, board: audio,   block: block-6-dist2, part: ~, pkg: "0603", val: "2.2MΩ", fn: "BP2 CLIP comp C hysteresis" }
+  - { ref: R199, board: audio,   block: block-6-dist2, part: ~, pkg: "0603", val: "2.2MΩ", fn: "BP2 CLIP comp D hysteresis" }
+  - { ref: R200, board: audio,   block: block-6-dist2, part: ~, pkg: "0603", val: "1kΩ",   fn: "BP2 CLIP LED current-limit" }
+  - { ref: R201, board: audio,   block: block-6-dist2, part: ~, pkg: "0603", val: "100kΩ", fn: "BP2 CLIP comp B VREF_N4 series" }
+  - { ref: R202, board: audio,   block: block-6-dist2, part: ~, pkg: "0603", val: "100kΩ", fn: "BP2 CLIP comp D VREF_N4 series" }
+  - { ref: R203, board: audio,   block: block-6-dist3, part: ~, pkg: "0603", val: "100kΩ", fn: "BP3 CLIP comp A in" }
+  - { ref: R204, board: audio,   block: block-6-dist3, part: ~, pkg: "0603", val: "100kΩ", fn: "BP3 CLIP comp B in" }
+  - { ref: R205, board: audio,   block: block-6-dist3, part: ~, pkg: "0603", val: "100kΩ", fn: "BP3 CLIP comp C in" }
+  - { ref: R206, board: audio,   block: block-6-dist3, part: ~, pkg: "0603", val: "100kΩ", fn: "BP3 CLIP comp D in" }
+  - { ref: R207, board: audio,   block: block-6-dist3, part: ~, pkg: "0603", val: "2.2MΩ", fn: "BP3 CLIP comp A hysteresis" }
+  - { ref: R208, board: audio,   block: block-6-dist3, part: ~, pkg: "0603", val: "2.2MΩ", fn: "BP3 CLIP comp B hysteresis" }
+  - { ref: R209, board: audio,   block: block-6-dist3, part: ~, pkg: "0603", val: "2.2MΩ", fn: "BP3 CLIP comp C hysteresis" }
+  - { ref: R210, board: audio,   block: block-6-dist3, part: ~, pkg: "0603", val: "2.2MΩ", fn: "BP3 CLIP comp D hysteresis" }
+  - { ref: R211, board: audio,   block: block-6-dist3, part: ~, pkg: "0603", val: "1kΩ",   fn: "BP3 CLIP LED current-limit" }
+  - { ref: R212, board: audio,   block: block-6-dist3, part: ~, pkg: "0603", val: "100kΩ", fn: "BP3 CLIP comp B VREF_N4 series" }
+  - { ref: R213, board: audio,   block: block-6-dist3, part: ~, pkg: "0603", val: "100kΩ", fn: "BP3 CLIP comp D VREF_N4 series" }
+  - { ref: D14_1a, board: audio, block: block-6-dist1, part: 1N4148W, pkg: SOD-123, fn: "BP1 CLIP OR-steer comp A" }
+  - { ref: D14_1b, board: audio, block: block-6-dist1, part: 1N4148W, pkg: SOD-123, fn: "BP1 CLIP OR-steer comp B" }
+  - { ref: D14_1c, board: audio, block: block-6-dist1, part: 1N4148W, pkg: SOD-123, fn: "BP1 CLIP OR-steer comp C" }
+  - { ref: D14_1d, board: audio, block: block-6-dist1, part: 1N4148W, pkg: SOD-123, fn: "BP1 CLIP OR-steer comp D" }
+  - { ref: D15_2a, board: audio, block: block-6-dist2, part: 1N4148W, pkg: SOD-123, fn: "BP2 CLIP OR-steer comp A" }
+  - { ref: D15_2b, board: audio, block: block-6-dist2, part: 1N4148W, pkg: SOD-123, fn: "BP2 CLIP OR-steer comp B" }
+  - { ref: D15_2c, board: audio, block: block-6-dist2, part: 1N4148W, pkg: SOD-123, fn: "BP2 CLIP OR-steer comp C" }
+  - { ref: D15_2d, board: audio, block: block-6-dist2, part: 1N4148W, pkg: SOD-123, fn: "BP2 CLIP OR-steer comp D" }
+  - { ref: D16_3a, board: audio, block: block-6-dist3, part: 1N4148W, pkg: SOD-123, fn: "BP3 CLIP OR-steer comp A" }
+  - { ref: D16_3b, board: audio, block: block-6-dist3, part: 1N4148W, pkg: SOD-123, fn: "BP3 CLIP OR-steer comp B" }
+  - { ref: D16_3c, board: audio, block: block-6-dist3, part: 1N4148W, pkg: SOD-123, fn: "BP3 CLIP OR-steer comp C" }
+  - { ref: D16_3d, board: audio, block: block-6-dist3, part: 1N4148W, pkg: SOD-123, fn: "BP3 CLIP OR-steer comp D" }
+  - { ref: C110_U94p, board: audio, block: block-6-dist1, part: ~, pkg: "0603", val: "100nF", fn: "U94 +12V decoupling" }
+  - { ref: C110_U94n, board: audio, block: block-6-dist1, part: ~, pkg: "0603", val: "100nF", fn: "U94 −12V decoupling" }
+  - { ref: C110_U95p, board: audio, block: block-6-dist2, part: ~, pkg: "0603", val: "100nF", fn: "U95 +12V decoupling" }
+  - { ref: C110_U95n, board: audio, block: block-6-dist2, part: ~, pkg: "0603", val: "100nF", fn: "U95 −12V decoupling" }
+  - { ref: C110_U96p, board: audio, block: block-6-dist3, part: ~, pkg: "0603", val: "100nF", fn: "U96 +12V decoupling" }
+  - { ref: C110_U96n, board: audio, block: block-6-dist3, part: ~, pkg: "0603", val: "100nF", fn: "U96 −12V decoupling" }
+  - { ref: C111_P4, board: audio, block: block-6-dist1, part: ~, pkg: "0603", val: "100nF", fn: "VREF_P4 bypass" }
+  - { ref: C111_N4, board: audio, block: block-6-dist1, part: ~, pkg: "0603", val: "100nF", fn: "VREF_N4 bypass" }
+  - { ref: BP1_CLIP_LED, board: panel, block: block-6-dist1, part: "LED 3mm", pkg: "3mm", fn: "BP1 CLIP indicator (BP1_CLIP_LIGHT)" }
+  - { ref: BP2_CLIP_LED, board: panel, block: block-6-dist2, part: "LED 3mm", pkg: "3mm", fn: "BP2 CLIP indicator (BP2_CLIP_LIGHT)" }
+  - { ref: BP3_CLIP_LED, board: panel, block: block-6-dist3, part: "LED 3mm", pkg: "3mm", fn: "BP3 CLIP indicator (BP3_CLIP_LIGHT)" }
   - { ref: R124, board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "1MΩ",    qty: 1,  fn: "R_IREF_A_L: L-channel expo I_ref fixed R (U28-30); 1 per group" }
   - { ref: R124, board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "1MΩ",    qty: 1,  fn: "R_IREF_A_L: L-channel expo I_ref fixed R (U28-30); 1 per group" }
   - { ref: R124, board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "1MΩ",    qty: 1,  fn: "R_IREF_A_L: L-channel expo I_ref fixed R (U28-30); 1 per group" }

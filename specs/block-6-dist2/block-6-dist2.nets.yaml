@@ -89,6 +89,26 @@ parts:
   C110_U88n: { sym: c, value: 100nF }
   C110_U92p: { sym: c, value: 100nF }
   C110_U92n: { sym: c, value: 100nF }
+  # ---- CLIP detector (change 0018, Stage 6): same cell as dist1, shared VREF_P4/N4 (boundary in) ----
+  U95: { sym: opamp4, part: TL074CDT, value: TL074 }    # BP2 CLIP comparators
+  C110_U95p: { sym: c, value: 100nF }
+  C110_U95n: { sym: c, value: 100nF }
+  R192: { sym: r, value: 100k }   # comp A in (DISTOUT_L -> in+)
+  R193: { sym: r, value: 100k }   # comp B in (DISTOUT_L -> in-)
+  R194: { sym: r, value: 100k }   # comp C in (DISTOUT_R -> in+)
+  R195: { sym: r, value: 100k }   # comp D in (DISTOUT_R -> in-)
+  R196: { sym: r, value: 2.2M }   # comp A hysteresis fb
+  R197: { sym: r, value: 2.2M }   # comp B hysteresis fb
+  R198: { sym: r, value: 2.2M }   # comp C hysteresis fb
+  R199: { sym: r, value: 2.2M }   # comp D hysteresis fb
+  R200: { sym: r, value: 1k }     # CLIP LED current-limit
+  R201: { sym: r, value: 100k }   # comp B VREF_N4 series into in+
+  R202: { sym: r, value: 100k }   # comp D VREF_N4 series into in+
+  D15_2a: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D15_2b: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D15_2c: { sym: diode, part: 1N4148W, value: 1N4148W }
+  D15_2d: { sym: diode, part: 1N4148W, value: 1N4148W }
+  BP2_CLIP_LED: { sym: led, part: "LED 3mm", value: BP2_CLIP }
 
 nets:
   V5LOGIC: [R128_2sc.1, R128_2wf.1, R167.1, RV36.3]
@@ -139,15 +159,33 @@ nets:
   BP2_MID_L: [U76.14, U32.12]
   BP2_MID_R: [U76.15, U32.2]
   BP2_SEL_SC: [U32.11, U32.10, R128_2sc.2]
-  BP2_DISTOUT_L: [U32.14]
-  BP2_DISTOUT_R: [U32.15]
+  BP2_DISTOUT_L: [U32.14, R192.1, R193.1]
+  BP2_DISTOUT_R: [U32.15, R194.1, R195.1]
+  # ---- CLIP detector nets (change 0018, Stage 6); VREF_P4/N4 are boundary inputs from dist1 ----
+  BP2_CLIP_A_INP: [U95.3, R192.2, R196.2]
+  BP2_CLIP_C_INP: [U95.10, R194.2, R198.2]
+  BP2_CLIP_B_INN: [U95.6, R193.2]
+  BP2_CLIP_B_INP: [U95.5, R201.2, R197.2]
+  BP2_CLIP_D_INN: [U95.13, R195.2]
+  BP2_CLIP_D_INP: [U95.12, R202.2, R199.2]
+  BP2_CLIP_A_OUT: [U95.1, R196.1, D15_2a.A]
+  BP2_CLIP_B_OUT: [U95.7, R197.1, D15_2b.A]
+  BP2_CLIP_C_OUT: [U95.8, R198.1, D15_2c.A]
+  BP2_CLIP_D_OUT: [U95.14, R199.1, D15_2d.A]
+  BP2_CLIP_OR: [D15_2a.K, D15_2b.K, D15_2c.K, D15_2d.K, R200.1]
+  BP2_CLIP_LEDA: [R200.2, BP2_CLIP_LED.A]
+  VREF_P4: [U95.2, U95.9]              # <- dist1 shared +4V (boundary)
+  VREF_N4: [R201.1, R202.1]            # <- dist1 shared -4V (boundary)
   "+12V": [U32.16, C110_U32p.1, U36.8, C110_U36p.1, U37.8, C110_U37p.1, U42.8, C110_U42p.1, U43.8, C110_U43p.1, U76.16, C110_U76p.1,
-           U87.7, U88.7, U92.4, C110_U87p.1, C110_U88p.1, C110_U92p.1]
+           U87.7, U88.7, U92.4, C110_U87p.1, C110_U88p.1, C110_U92p.1,
+           U95.4, C110_U95p.1]
   "-12V": [U32.7, C110_U32n.1, U36.4, C110_U36n.1, U37.4, C110_U37n.1, U42.4, C110_U42n.1, U43.4, C110_U43n.1, U76.7, C110_U76n.1,
-           U87.5, U88.5, U92.11, C110_U87n.1, C110_U88n.1, C110_U92n.1]
+           U87.5, U88.5, U92.11, C110_U87n.1, C110_U88n.1, C110_U92n.1,
+           U95.11, C110_U95n.1]
   GND: [U32.8, U32.6, C110_U32p.2, C110_U32n.2, C110_U36p.2, C110_U36n.2, C110_U37p.2, C110_U37n.2, C110_U42p.2, C110_U42n.2, C110_U43p.2, C110_U43n.2, U76.8, U76.6, C110_U76p.2, C110_U76n.2, U36.3, D5_2Lb.3, U36.5, U42.3, D6_2Lb.K, D6_2Lc.A, C_WF_2La.2, C_WF_2Lb.2, U37.3, D5_2Rb.3, U37.5, U43.3, D6_2Rb.K, D6_2Rc.A, C_WF_2Ra.2, C_WF_2Rb.2,
         U87.3, U87.4, U87.6, U88.3, U88.4, U88.6, U92.3, U92.5, U92.10, U92.12, RV36.1,
-        C110_U87p.2, C110_U87n.2, C110_U88p.2, C110_U88n.2, C110_U92p.2, C110_U92n.2]
+        C110_U87p.2, C110_U87n.2, C110_U88p.2, C110_U88n.2, C110_U92p.2, C110_U92n.2,
+        C110_U95p.2, C110_U95n.2, BP2_CLIP_LED.K]
 
 no_connect:
   - U32.3
@@ -160,6 +198,8 @@ no_connect:
   - U76.9
 
 boundary:
+  - VREF_P4          # <- dist1 shared +4V CLIP threshold
+  - VREF_N4          # <- dist1 shared -4V CLIP threshold
   - V5LOGIC
   - LP1_OUT_L
   - LP1_OUT_R
