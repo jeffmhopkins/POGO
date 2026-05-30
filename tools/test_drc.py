@@ -578,3 +578,65 @@ class TestRealCollisionModel:
         viols = dr._check_pcb_overlaps([_comp("trimpot", 50, 50, "a"),
                                         _comp("trimpot", 60, 50, "b")])
         assert viols and "penetration" in viols[0] and "×" not in viols[0], viols
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Section 7: side-to-side + rotation failure modes (the offset-pin-cluster cases)
+#
+# A 9mm pot's 3 signal pins sit ~7.5mm to one side of the shaft, so collisions are
+# rotation-sensitive: same-rotation rows put B's pins under A's body; alternating
+# 0/180 interleaves them clear; 90° rows clash on the mounting legs. These lock the
+# exact feature pairs + boundary pitches so the model can't silently change.
+# ─────────────────────────────────────────────────────────────────────────────
+
+class TestSideBySideRotationModes:
+    _LABEL = ["pin1", "pin2", "pin3", "legA", "legB", "body"]
+
+    def _hits(self, rotA, rotB, axis, pitch):
+        """Set of (featureA, featureB) labels that overlap for two trimpots `pitch`
+        apart along `axis`, A@rotA B@rotB."""
+        ra = [_rotate_rect(r, rotA) for r in _pk.footprint_shapes("trimpot")]
+        rb = [_rotate_rect(r, rotB) for r in _pk.footprint_shapes("trimpot")]
+        ra = [(50 + x[0], 50 + x[1], 50 + x[2], 50 + x[3]) for x in ra]
+        off = (pitch if axis == "x" else 0, pitch if axis == "y" else 0)
+        rb = [(50 + off[0] + x[0], 50 + off[1] + x[1],
+               50 + off[0] + x[2], 50 + off[1] + x[3]) for x in rb]
+        hits = set()
+        for i, x in enumerate(ra):
+            for j, y in enumerate(rb):
+                dx = min(x[2], y[2]) - max(x[0], y[0])
+                dy = min(x[3], y[3]) - max(x[1], y[1])
+                if dx > 0 and dy > 0:
+                    hits.add((self._LABEL[i], self._LABEL[j]))
+        return hits
+
+    def test_same_rotation_side_by_side_is_pins_under_body(self):
+        """rot0/rot0 at 12.7mm: the only collisions are A.body vs B's three pins."""
+        hits = self._hits(0, 0, "x", 12.7)
+        assert hits == {("body", "pin1"), ("body", "pin2"), ("body", "pin3")}, hits
+
+    def test_same_rotation_clears_at_14mm(self):
+        assert self._hits(0, 0, "x", 14.0) == set()
+
+    def test_alternating_rotation_interleaves_clear(self):
+        """rot0/rot180 (pins facing apart) clears at the tight 11.43mm pitch."""
+        assert self._hits(0, 180, "x", 11.43) == set()
+
+    def test_rot90_row_clashes_on_legs(self):
+        """Both rotated 90°: pins point along the row; the clash is leg-pad vs leg-pad."""
+        hits = self._hits(90, 90, "x", 11.43)
+        assert hits == {("legB", "legA")}, hits
+
+    def test_rot90_row_clears_at_13mm(self):
+        assert self._hits(90, 90, "x", 13.0) == set()
+
+    def test_rot180_mirror_of_rot0(self):
+        """rot180/rot180 is the mirror of rot0/rot0: B.body vs A's pins."""
+        hits = self._hits(180, 180, "x", 12.7)
+        assert hits == {("pin1", "body"), ("pin2", "body"), ("pin3", "body")}, hits
+
+    def test_vertical_stack_same_rotation_collides_on_legs(self):
+        """Stacked vertically (rot0): the legs are top/bottom → leg vs leg/pin clash."""
+        hits = self._hits(0, 0, "y", 8.0)
+        assert hits, "vertical 8mm stack must collide"
+        assert hits == self._hits(0, 0, "y", 8.0)  # deterministic
