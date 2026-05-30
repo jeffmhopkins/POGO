@@ -15,6 +15,7 @@ audio,R6,Resistor,2,,18kΩ,0603,,,,,block-1,R_f alt gain stage (×2 ch: R6L/R6R)
 audio,R38,Resistor,1,,100Ω,0603,,,,,block-1,ALT_BP_L series input protection
 audio,R39,Resistor,1,,100Ω,0603,,,,,block-1,ALT_BP_R series input protection
 audio,R134,Resistor,1,,22kΩ,0603,,,,,block-1,ALT_BP_L insertion-detect pulldown (ALT_L_TIP→GND; feeds BP3 selector ALT_L_DET)
+audio,R225,Resistor,1,,22kΩ,0603,,,,,block-1,"ALT_BP_R insertion-detect pulldown (ALT_R_TIP→GND; feeds BP3 selector ALT_R_DET; change 0020, mirrors R134)"
 audio,D8,Diode,1,BAT54S,,SOT-23,POGO_Package_TO_SOT_SMD:SOT-23,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds11005.pdf,block-1,ALT_BP_L input clamp ±12V
 audio,D9,Diode,1,BAT54S,,SOT-23,POGO_Package_TO_SOT_SMD:SOT-23,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds11005.pdf,block-1,ALT_BP_R input clamp ±12V
 audio,C3,Capacitor,1,,100nF,0603,,,,,block-1,U2 +12V decoupling
@@ -377,7 +378,8 @@ audio,U75,IC,1,CD4053BM,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas
 audio,U76,IC,1,CD4053BM,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/cd4053b.pdf,block-6-dist2,BP2 distortion mux 2
 audio,U77,IC,1,CD4053BM,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/cd4053b.pdf,block-6-dist3,BP3 distortion mux 2
 audio,U81,IC,1,CD4053BM,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/cd4053b.pdf,block-6-dist3,"BP3 INPUT selector: ALT-VCA vs LP1 per channel (X=L, Y=R), gated by ALT_L_DET (change 0018)"
-audio,R133,Resistor,1,,100kΩ,0603,,,,,block-6-dist3,ALT_L_DET pull-up to +12V (BP3 selector; HIGH=ALT patched)
+audio,R133,Resistor,1,,100kΩ,0603,,,,,block-6-dist3,ALT_L_DET pull-up to +12V (BP3 X/L select; HIGH=ALT_L patched)
+audio,R226,Resistor,1,,100kΩ,0603,,,,,block-6-dist3,"ALT_R_DET pull-up to +12V (BP3 Y/R select; HIGH=ALT_R patched; change 0020, mirrors R133)"
 audio,R128,Resistor,2,,100kΩ,0603,,,,,block-6-dist1,R_MODE_PU: DW5 mode-encoder pull-ups to 5V logic rail; 2 per group (SC/HC/WF → 2 control bits)
 audio,R128,Resistor,2,,100kΩ,0603,,,,,block-6-dist2,R_MODE_PU: DW5 mode-encoder pull-ups to 5V logic rail; 2 per group (SC/HC/WF → 2 control bits)
 audio,R128,Resistor,2,,100kΩ,0603,,,,,block-6-dist3,R_MODE_PU: DW5 mode-encoder pull-ups to 5V logic rail; 2 per group (SC/HC/WF → 2 control bits)

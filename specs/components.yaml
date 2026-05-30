@@ -41,6 +41,7 @@ components:
   - { ref: R38,  board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "100Ω",   fn: "ALT_BP_L series input protection" }
   - { ref: R39,  board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "100Ω",   fn: "ALT_BP_R series input protection" }
   - { ref: R134, board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "22kΩ",   fn: "ALT_BP_L insertion-detect pulldown (ALT_L_TIP→GND; feeds BP3 selector ALT_L_DET)" }
+  - { ref: R225, board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "22kΩ",   fn: "ALT_BP_R insertion-detect pulldown (ALT_R_TIP→GND; feeds BP3 selector ALT_R_DET; change 0020, mirrors R134)" }
   - { ref: D8,   board: audio,   block: block-1, part: BAT54S,     pkg: SOT-23,   fn: "ALT_BP_L input clamp ±12V" }
   - { ref: D9,   board: audio,   block: block-1, part: BAT54S,     pkg: SOT-23,   fn: "ALT_BP_R input clamp ±12V" }
   - { ref: C3,   board: audio,   block: block-1, part: ~,          pkg: "0603",   val: "100nF",  fn: "U2 +12V decoupling" }
@@ -461,7 +462,8 @@ components:
   - { ref: U76,  board: audio,   block: block-6-dist2, part: CD4053,     pkg: SOIC-16,  fn: "BP2 distortion mux 2" }
   - { ref: U77,  board: audio,   block: block-6-dist3, part: CD4053,     pkg: SOIC-16,  fn: "BP3 distortion mux 2" }
   - { ref: U81,  board: audio,   block: block-6-dist3, part: CD4053,     pkg: SOIC-16,  fn: "BP3 INPUT selector: ALT-VCA vs LP1 per channel (X=L, Y=R), gated by ALT_L_DET (change 0018)" }
-  - { ref: R133, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "ALT_L_DET pull-up to +12V (BP3 selector; HIGH=ALT patched)" }
+  - { ref: R133, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "ALT_L_DET pull-up to +12V (BP3 X/L select; HIGH=ALT_L patched)" }
+  - { ref: R226, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "ALT_R_DET pull-up to +12V (BP3 Y/R select; HIGH=ALT_R patched; change 0020, mirrors R133)" }
   - { ref: R128, board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "R_MODE_PU: DW5 mode-encoder pull-ups to 5V logic rail; 2 per group (SC/HC/WF → 2 control bits)" }
   - { ref: R128, board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "R_MODE_PU: DW5 mode-encoder pull-ups to 5V logic rail; 2 per group (SC/HC/WF → 2 control bits)" }
   - { ref: R128, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "R_MODE_PU: DW5 mode-encoder pull-ups to 5V logic rail; 2 per group (SC/HC/WF → 2 control bits)" }

@@ -1,12 +1,14 @@
 # 0020 — CV-conditioning & behavioral netlist fixes (adversarial-review findings)
 
-- **Lane:** B (hardware-only). The plugin is ground truth and already LOCKED for these blocks;
-  only spec §2–4 / nets / components change. Enter at Step 5, gates G4–G6 + `--check`.
+- **Lane:** B→**A/B MIXED (reclassified 2026-05-30).** Mostly Lane B (spec/nets/components follow the
+  locked plugin), BUT §E introduced a **Lane A plugin DSP change** (ALT_BP_L/R made fully independent —
+  dropped the R→L normal + symmetric per-channel BP3 gating in `Pogo.cpp`). That slice needs G3 (VCV
+  Rack verification) + a `plugin.json` version bump before close.
 - **Status:** OPEN — G1 confirmed (fix all CRIT+HIGH; full H5/H6/M5 fixes). Working per cluster.
+  **G3 PENDING** on the §E plugin change (user verifies in VCV Rack).
 - **Opened:** 2026-05-30
-- **Branch:** `change/0020-cv-conditioning-fixes` (stacked on `change/0019-doc-staleness-refresh`;
-  rebase onto `dev` once 0019 merges).
-- **Stacked-on:** 0019 (inherits the corrected aux-expo / aux-distortion / block-6 docs).
+- **Branch:** `change/0020-cv-conditioning-fixes` (now rebaselined on `dev` after #48/0019 merged).
+- **Stacked-on:** 0019 (merged to dev via #48; 0020's merge-base is 0019's tip — clean, no rebase needed).
 
 ## Intent
 
@@ -220,6 +222,24 @@ whole E1 premise is flawed:
   (PJ3410, unconfirmed). All to fix the narrow "ALT_R-only patched" case. **E3 (document) remains the
   proportionate fallback** now that the dual-switch route is shown to cost a panel-standard break or a
   sourcing risk. → user decision needed (next question).
+
+#### ✅ E RESOLVED (user, 2026-05-30): keep ALT L & R fully INDEPENDENT (Lane A plugin change)
+Rather than chase a dual-switch jack to reproduce the R→L normal, the user chose to **make ALT_BP_L/R
+independent** — which dissolves the whole problem: each jack does one job (self-detect via its own
+switch lug), no dual-switch jack, no M8→M6 panel break, no new part type. Cleaner behavior (true stereo
+ALT input) too. This is a **plugin (Lane A) change** (plugin leads), done here per user direction:
+- **Plugin (`Pogo.cpp`):** `altR = altRConn ? PreGain(...) : 0` (dropped the `altLConn ? altL : 0`
+  R→L normal); `bp3InR = altRConn ? VcaBlock(...) : bandR` (was `altLConn||altRConn`). L unchanged.
+  → **G3 PENDING: user verifies in VCV Rack** + version bump.
+- **block-1:** J4 now mirrors J3 — `ALT_R_DET:[J4.3]` (own switch lug) + `R225` 22k tip pulldown on
+  `ALT_R_TIP`; removed `J4.3` from `ALT_L_IN` (R→L normal gone). New boundary `ALT_R_DET`.
+- **block-6-dist3:** split the U81 selects — X/L select (pin11/A) stays `ALT_L_DET`; Y/R select
+  (pin10/B) now `ALT_R_DET` with its own `R226` 100k pull-up. New boundary `ALT_R_DET`.
+- **components.yaml:** +R225 (block-1, 22k), +R226 (block-6-dist3, 100k). No new part *type*.
+- **Gates:** all green (components/build_components/netlist-viz/panel + schematic, only the pre-existing
+  jack-pad WARN); `ALT_R_DET` boundary resolves across both sheets. BOM regenerated.
+- **Supersedes** the dual-switch-jack plan above and the earlier E1/E2/E3 options. The narrow divergence
+  is now *fully fixed* (R gates on its own input), not documented-around.
 
 ### F. WF phase — H4 — block-6-dist1/2/3 — ❌ WITHDRAWN (H4 is FALSE; no change)
 - Original claim: WF net-inverting vs SC/HC → add an inversion. **SPICE refuted it** (`specs/sim/wf_phase.cir`).
