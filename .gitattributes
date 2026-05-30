@@ -21,6 +21,5 @@ docs/Pogo.svg                   linguist-generated=true
 docs/footprints/*.svg           linguist-generated=true
 plugin/res/Pogo.svg             linguist-generated=true
 plugin/res/Pogo-source.svg      linguist-generated=true
-design/panel-debug.html         linguist-generated=true
-design/panel-editor.html        linguist-generated=true
+docs/panel-debug.html           linguist-generated=true
 docs/panel-editor.html          linguist-generated=true

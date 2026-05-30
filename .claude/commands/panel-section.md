@@ -54,7 +54,7 @@ python3 tools/build_panel.py    # rebuild SVG + HTML
 python3 tools/build_panel.py --list   # review final positions
 ```
 
-Then commit: `git add tools/panel-data.yaml res/Pogo-source.svg design/panel-debug.html && git commit`
+Then commit: `git add tools/panel-data.yaml res/Pogo-source.svg docs/panel-debug.html && git commit`
 
 ## Report back
 

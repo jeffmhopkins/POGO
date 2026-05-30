@@ -51,7 +51,7 @@ What this change does and explicitly does not touch.
 ## Artifacts  (paths / links, not copies)
 
 - Plugin:    CI run <link> (`.vcvplugin`; artifacts expire ~30 days)
-- Panel:     `plugin/res/Pogo.svg`, `design/panel-debug.html`
+- Panel:     `plugin/res/Pogo.svg`, `docs/panel-debug.html`
 - Netlist (source): `specs/<block>/<block>.nets.yaml`
 - Schematic (generated): `kicad/pogo-<block>.kicad_sch`
 - BOM:       `kicad/pogo-bom.csv`
