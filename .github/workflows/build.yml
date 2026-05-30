@@ -42,6 +42,12 @@ jobs:
           python3 tools/fetch_datasheets.py --check
           python3 tools/build_components.py --check
           python3 tools/generate_schematic.py --check
+          # DRC-logic unit tests + Python↔JS editor parity (OS-independent → Linux only;
+          # run before the panel-layout DRC so the logic is validated independently).
+          python3 -m pip install --quiet pytest 2>/dev/null || apt-get install -y -qq python3-pytest
+          python3 -m pytest tools/test_drc.py -q
+          apt-get install -y -qq nodejs >/dev/null 2>&1 || true
+          python3 tools/test_parity.py
           python3 tools/build_panel.py --check
           # Regenerate plugin/res/Pogo-source.svg (source) AND plugin/res/Pogo.svg
           # (Inkscape text-to-path, loaded by VCV Rack) from panel-data.yaml.

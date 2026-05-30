@@ -32,8 +32,19 @@ _JACK_TYPE = "PJ301MPort"
 _LED_TYPE  = "SmallLight<RedLight>"
 
 
-def _cx(comp: dict) -> float:
-    return float(comp.get("cx", 0))
+def _cx(comp: dict, zone: Any = None, rules: Any = None) -> float:
+    """Resolve a component's panel x, mirroring build_panel._resolve_comp:
+    column-grid (`col` + zone `x_start`/`col_pitch`) → absolute, then global x_offset.
+    """
+    if "col" in comp and zone and "x_start" in zone:
+        x_start   = float(zone["x_start"])
+        col_pitch = float(zone.get("col_pitch", getattr(rules, "jack_pitch", 15.24)))
+        cx = x_start + (float(comp["col"]) + 0.5) * col_pitch
+    elif "cx" in comp:
+        cx = float(comp["cx"])
+    else:
+        return 0.0
+    return cx + (getattr(rules, "x_offset", 0.0) or 0.0)
 
 
 def _cy(comp: dict, rules: Any) -> float:
@@ -141,7 +152,7 @@ def generate_cpp_stubs(zones: list[dict], rules: Any) -> str:
 
         for comp in components:
             ctype = comp.get("type", "")
-            cx    = _cx(comp)
+            cx    = _cx(comp, zone, rules)
             cy    = _cy(comp, rules)
 
             # Params

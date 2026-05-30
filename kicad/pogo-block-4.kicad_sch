@@ -404,7 +404,7 @@
     (effects (font (size 1.27 1.27)) (justify left)))
   (property "Value" "VCA_AMT" (at 163.000 314.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
-  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles" (at 160.000 315.000 0)
+  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical" (at 160.000 315.000 0)
     (effects (font (size 1.016 1.016)) (hide yes)))
 )
 (symbol
@@ -418,7 +418,7 @@
     (effects (font (size 1.27 1.27)) (justify left)))
   (property "Value" "VCA_OFS" (at 43.000 369.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
-  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles" (at 40.000 370.000 0)
+  (property "Footprint" "POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical" (at 40.000 370.000 0)
     (effects (font (size 1.016 1.016)) (hide yes)))
 )
 (symbol

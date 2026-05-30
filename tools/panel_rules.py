@@ -9,6 +9,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from panel_kicad import footprint_courtyard as _fp_crtyd  # single source of truth
+from panel_kicad import footprint_shapes as _fp_shapes    # real per-feature keepout
 
 # ── PCB courtyard dimensions (mm, relative to the component's panel anchor) ───
 # These are DERIVED from each component's KiCad footprint F.CrtYd layer via
@@ -54,6 +55,11 @@ LED_TYPES         = {"led", "led_labeled"}
 # Minimum clearance from PCB courtyard edge to mounting hole centre (M3, r≈3.5mm)
 MOUNTING_HOLE_CLEARANCE_MM = 3.5
 
+# Copper-to-copper clearance between electrical pads of different components. 0.2mm is
+# the standard minimum pad-to-pad spacing across hobby fabs (JLCPCB, PCBWay; OSH Park
+# trace clearance 6mil/0.152mm). Two named pads closer than this fail the placement DRC.
+PCB_PAD_CLEARANCE_MM = 0.2
+
 JACK_TYPES = {"jack_input", "jack_output"}
 POT_TYPES  = {"trimpot", "knob"}
 
@@ -72,17 +78,28 @@ def _rotate_rect(
         return rect
     x1, y1, x2, y2 = rect
     corners = [(x1, y1), (x2, y1), (x1, y2), (x2, y2)]
+    # CW to match the SVG draw transform (rotate(+deg) = (x,y)->(-y,x) in y-down).
     if degrees == 90:
-        rotated = [(y, -x) for x, y in corners]
+        rotated = [(-y, x) for x, y in corners]
     elif degrees == 180:
         rotated = [(-x, -y) for x, y in corners]
     elif degrees == 270:
-        rotated = [(-y, x) for x, y in corners]
+        rotated = [(y, -x) for x, y in corners]
     else:
         return rect
     xs = [p[0] for p in rotated]
     ys = [p[1] for p in rotated]
     return (min(xs), min(ys), max(xs), max(ys))
+
+
+def _translate_rect(
+    rect: tuple[float, float, float, float],
+    cx: float,
+    cy: float,
+) -> tuple[float, float, float, float]:
+    """Shift an anchor-relative rect to its panel position (cx,cy)."""
+    x1, y1, x2, y2 = rect
+    return (x1 + cx, y1 + cy, x2 + cx, y2 + cy)
 
 
 def _get_courtyard(
@@ -381,37 +398,66 @@ class DesignRules:
         return out
 
     def _check_pcb_overlaps(self, components: list[dict[str, Any]]) -> list[str]:
-        """PCB courtyard rectangles must not overlap each other.
+        """Real PCB placement + copper-clearance check (the KiCad/fab split):
 
-        Checks all component types that have a PCB footprint (jacks, pots,
-        switches, LEDs) — not just jacks and pots.
+          • component BODIES (the F.Fab can) must not OVERLAP — placement rule.
+          • ELECTRICAL pads must keep PCB_PAD_CLEARANCE_MM (0.2mm) copper clearance.
+
+        Structural mounting tabs (unnamed pads, e.g. a 9mm pot's two case legs) are
+        excluded by footprint_shapes — they carry no signal, so we don't gate placement
+        on them. A pad sitting under a neighbour's (raised) body is NOT a collision; only
+        body-vs-body and pad-vs-pad are checked (no cross), matching real DRC.
         """
+        def _place(rs, cx, cy, rot):
+            return [_translate_rect(_rotate_rect(r, rot), cx, cy) for r in rs]
+
         out: list[str] = []
-        footprinted = []
+        placed = []
         for comp in components:
             ctype  = comp.get("type", "")
             cx     = float(comp.get("cx", 0))
             cy     = float(comp.get("cy", 0))
             rotate = int(comp.get("rotate", 0))
-            rect   = _get_courtyard(cx, cy, ctype, rotate)
-            if rect:
-                footprinted.append((comp, rect))
+            sh = _fp_shapes(ctype)
+            body = _place(sh["body"], cx, cy, rotate)
+            pads = _place(sh["pads"], cx, cy, rotate)
+            legs = _place(sh.get("legs", []), cx, cy, rotate)
+            if body or pads or legs:
+                placed.append((comp, body, pads, legs))
 
-        for i in range(len(footprinted)):
-            for j in range(i + 1, len(footprinted)):
-                ca, ra = footprinted[i]
-                cb, rb = footprinted[j]
-                dx, dy = _rect_overlap(ra, rb)
-                if dx > 0 and dy > 0:
-                    la  = _comp_label(ca)
-                    lb  = _comp_label(cb)
+        clr = PCB_PAD_CLEARANCE_MM
+        for i in range(len(placed)):
+            for j in range(i + 1, len(placed)):
+                ca, ba, pa, la_ = placed[i]
+                cb, bb, pb, lb_ = placed[j]
+                # Mechanical OVERLAP: body-vs-body, and a SIGNAL pin sitting in a body
+                # (a lead can't be under a neighbour's component). Legs are structural
+                # (snap tabs) and may pass under a raised body — not counted here.
+                body_pen = 0.0
+                for x, y in ([(a, b) for a in ba for b in bb] +   # body-body
+                             [(a, b) for a in pa for b in bb] +   # A signal pin in B body
+                             [(a, b) for a in ba for b in pb]):   # B signal pin in A body
+                    dx, dy = _rect_overlap(x, y)
+                    if dx > 0 and dy > 0:
+                        body_pen = max(body_pen, min(dx, dy))
+                # copper clearance on every pad/leg pair EXCEPT leg-vs-leg (structural
+                # tabs may abut each other but not a neighbour's signal pad).
+                pad_enc = 0.0
+                for x in pa:                       # signal-A vs (signal-B ∪ leg-B)
+                    for y in pb + lb_:
+                        pad_enc = max(pad_enc, clr - _rect_min_gap(x, y))
+                for x in la_:                      # leg-A vs signal-B
+                    for y in pb:
+                        pad_enc = max(pad_enc, clr - _rect_min_gap(x, y))
+                if body_pen > 0 or pad_enc > 0:
+                    la  = _comp_label(ca); lb = _comp_label(cb)
                     cxa = float(ca.get("cx", 0)); cya = float(ca.get("cy", 0))
                     cxb = float(cb.get("cx", 0)); cyb = float(cb.get("cy", 0))
-                    gap = _rect_min_gap(ra, rb)
+                    why = (f"bodies overlap {body_pen:.2f}mm" if body_pen > 0
+                           else f"pad clearance {clr - pad_enc:.2f}mm < {clr:.2f}mm")
                     out.append(
                         f"[PCB OVERLAP] '{la}' ({ca['type']} @ cx={cxa:.2f},cy={cya:.2f})"
-                        f" ↔ '{lb}' ({cb['type']} @ cx={cxb:.2f},cy={cyb:.2f})"
-                        f" — courtyard overlap {dx:.2f}×{dy:.2f}mm (gap={gap:.2f}mm)"
+                        f" ↔ '{lb}' ({cb['type']} @ cx={cxb:.2f},cy={cyb:.2f}) — {why}"
                     )
         return out
 

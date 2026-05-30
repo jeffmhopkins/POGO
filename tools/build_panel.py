@@ -1460,10 +1460,6 @@ Query commands (no files written):
     if args.editor:
         yaml_text     = DATA_FILE.read_text(encoding="utf-8")
         editor_html   = build_editor_html(data, rules, yaml_text)
-        HTML_EDITOR.parent.mkdir(parents=True, exist_ok=True)
-        HTML_EDITOR.write_text(editor_html, encoding="utf-8")
-        print(f"Wrote {HTML_EDITOR.relative_to(REPO_ROOT)}")
-        # Keep the GitHub Pages deploy copy in sync (self-contained single file).
         DOCS_EDITOR.parent.mkdir(parents=True, exist_ok=True)
         DOCS_EDITOR.write_text(editor_html, encoding="utf-8")
         print(f"Wrote {DOCS_EDITOR.relative_to(REPO_ROOT)}")

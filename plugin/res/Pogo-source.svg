@@ -164,15 +164,15 @@
   <circle cx="53.34" cy="78.0" r="7.0" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
   <line x1="53.34" y1="78.0" x2="53.34" y2="71.0" stroke="#aaa" stroke-width="0.7"/>
   <text x="53.34" y="88.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">RES</text>
-  <circle cx="41.91" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="41.91" y1="100.0" x2="41.91" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
-  <text x="41.91" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
-  <circle cx="53.34" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="53.34" y1="100.0" x2="53.34" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
-  <text x="53.34" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
-  <circle cx="64.77" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="64.77" y1="100.0" x2="64.77" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
-  <text x="64.77" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="41.785000000000004" cy="98.996" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="41.785000000000004" y1="98.996" x2="41.785000000000004" y2="96.496" stroke="#aaa" stroke-width="0.5"/>
+  <text x="41.785000000000004" y="104.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="53.34" cy="99.5" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="53.34" y1="99.5" x2="53.34" y2="97.0" stroke="#aaa" stroke-width="0.5"/>
+  <text x="53.34" y="105.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="64.77" cy="99.5" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="64.77" y1="99.5" x2="64.77" y2="97.0" stroke="#aaa" stroke-width="0.5"/>
+  <text x="64.77" y="105.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
   <circle cx="41.91" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="41.91" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
   <text x="41.91" y="119.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
@@ -199,12 +199,12 @@
   <circle cx="81.915" cy="80.0" r="4.5" fill="#1a1a1a" stroke="#555" stroke-width="0.6"/>
   <line x1="81.915" y1="80.0" x2="81.915" y2="75.5" stroke="#aaa" stroke-width="0.6"/>
   <text x="81.915" y="87.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">WET</text>
-  <circle cx="76.2" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="76.2" y1="100.0" x2="76.2" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
-  <text x="76.2" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
-  <circle cx="87.63" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="87.63" y1="100.0" x2="87.63" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
-  <text x="87.63" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="76.2" cy="99.5" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="76.2" y1="99.5" x2="76.2" y2="97.0" stroke="#aaa" stroke-width="0.5"/>
+  <text x="76.2" y="105.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="87.63" cy="99.5" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="87.63" y1="99.5" x2="87.63" y2="97.0" stroke="#aaa" stroke-width="0.5"/>
+  <text x="87.63" y="105.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
   <circle cx="76.2" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="76.2" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
   <text x="76.2" y="119.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
@@ -233,15 +233,15 @@
   <text x="102.345" y="90.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">DIST</text>
   <circle cx="118.49" cy="83.0" r="1.2" fill="#441111" stroke="#cc2222" stroke-width="0.4"/>
   <text x="118.49" y="90.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">CLIP</text>
-  <circle cx="99.06" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="99.06" y1="100.0" x2="99.06" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
-  <text x="99.06" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
-  <circle cx="110.49" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="110.49" y1="100.0" x2="110.49" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
-  <text x="110.49" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
-  <circle cx="121.92" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="121.92" y1="100.0" x2="121.92" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
-  <text x="121.92" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="99.06" cy="99.5" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="99.06" y1="99.5" x2="99.06" y2="97.0" stroke="#aaa" stroke-width="0.5"/>
+  <text x="99.06" y="105.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="110.49" cy="99.5" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="110.49" y1="99.5" x2="110.49" y2="97.0" stroke="#aaa" stroke-width="0.5"/>
+  <text x="110.49" y="105.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="121.92" cy="99.5" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="121.92" y1="99.5" x2="121.92" y2="97.0" stroke="#aaa" stroke-width="0.5"/>
+  <text x="121.92" y="105.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
   <circle cx="99.06" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="99.06" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
   <text x="99.06" y="119.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
@@ -273,15 +273,15 @@
   <text x="136.635" y="90.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">DIST</text>
   <circle cx="152.78" cy="83.0" r="1.2" fill="#441111" stroke="#cc2222" stroke-width="0.4"/>
   <text x="152.78" y="90.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">CLIP</text>
-  <circle cx="133.35" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="133.35" y1="100.0" x2="133.35" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
-  <text x="133.35" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
-  <circle cx="144.78" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="144.78" y1="100.0" x2="144.78" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
-  <text x="144.78" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
-  <circle cx="156.21" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="156.21" y1="100.0" x2="156.21" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
-  <text x="156.21" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="133.35" cy="99.5" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="133.35" y1="99.5" x2="133.35" y2="97.0" stroke="#aaa" stroke-width="0.5"/>
+  <text x="133.35" y="105.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="144.78" cy="99.5" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="144.78" y1="99.5" x2="144.78" y2="97.0" stroke="#aaa" stroke-width="0.5"/>
+  <text x="144.78" y="105.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="156.21" cy="99.5" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="156.21" y1="99.5" x2="156.21" y2="97.0" stroke="#aaa" stroke-width="0.5"/>
+  <text x="156.21" y="105.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
   <circle cx="133.35" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="133.35" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
   <text x="133.35" y="119.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
@@ -313,15 +313,15 @@
   <text x="170.925" y="90.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">DIST</text>
   <circle cx="187.07" cy="83.0" r="1.2" fill="#441111" stroke="#cc2222" stroke-width="0.4"/>
   <text x="187.07" y="90.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">CLIP</text>
-  <circle cx="167.64000000000001" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="167.64000000000001" y1="100.0" x2="167.64000000000001" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
-  <text x="167.64000000000001" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
-  <circle cx="179.07000000000002" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="179.07000000000002" y1="100.0" x2="179.07000000000002" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
-  <text x="179.07000000000002" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
-  <circle cx="190.5" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="190.5" y1="100.0" x2="190.5" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
-  <text x="190.5" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="167.64000000000001" cy="99.5" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="167.64000000000001" y1="99.5" x2="167.64000000000001" y2="97.0" stroke="#aaa" stroke-width="0.5"/>
+  <text x="167.64000000000001" y="105.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="179.07" cy="99.5" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="179.07" y1="99.5" x2="179.07" y2="97.0" stroke="#aaa" stroke-width="0.5"/>
+  <text x="179.07" y="105.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="190.5" cy="99.5" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="190.5" y1="99.5" x2="190.5" y2="97.0" stroke="#aaa" stroke-width="0.5"/>
+  <text x="190.5" y="105.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
   <circle cx="167.64000000000001" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="167.64000000000001" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
   <text x="167.64000000000001" y="119.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
@@ -357,12 +357,12 @@
   <circle cx="207.645" cy="87.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
   <line x1="207.645" y1="87.0" x2="207.645" y2="84.5" stroke="#aaa" stroke-width="0.5"/>
   <text x="207.645" y="92.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">RES</text>
-  <circle cx="201.93" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="201.93" y1="100.0" x2="201.93" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
-  <text x="201.93" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
-  <circle cx="213.36" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="213.36" y1="100.0" x2="213.36" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
-  <text x="213.36" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="201.93" cy="99.5" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="201.93" y1="99.5" x2="201.93" y2="97.0" stroke="#aaa" stroke-width="0.5"/>
+  <text x="201.93" y="105.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="213.36" cy="99.5" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="213.36" y1="99.5" x2="213.36" y2="97.0" stroke="#aaa" stroke-width="0.5"/>
+  <text x="213.36" y="105.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
   <circle cx="201.93" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="201.93" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
   <text x="201.93" y="119.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
@@ -395,12 +395,12 @@
   <circle cx="230.505" cy="87.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
   <line x1="230.505" y1="87.0" x2="230.505" y2="84.5" stroke="#aaa" stroke-width="0.5"/>
   <text x="230.505" y="92.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle">RES</text>
-  <circle cx="224.79" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="224.79" y1="100.0" x2="224.79" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
-  <text x="224.79" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
-  <circle cx="236.22" cy="100.0" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
-  <line x1="236.22" y1="100.0" x2="236.22" y2="97.5" stroke="#aaa" stroke-width="0.5"/>
-  <text x="236.22" y="105.5" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="224.79" cy="99.5" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="224.79" y1="99.5" x2="224.79" y2="97.0" stroke="#aaa" stroke-width="0.5"/>
+  <text x="224.79" y="105.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
+  <circle cx="236.22" cy="99.5" r="2.5" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <line x1="236.22" y1="99.5" x2="236.22" y2="97.0" stroke="#aaa" stroke-width="0.5"/>
+  <text x="236.22" y="105.0" fill="#999" font-family="monospace" font-size="1.8" text-anchor="middle"></text>
   <circle cx="224.79" cy="112.0" r="3.5" fill="none" stroke="#555" stroke-width="0.6"/>
   <circle cx="224.79" cy="112.0" r="1.4" fill="#333" stroke="#666" stroke-width="0.4"/>
   <text x="224.79" y="119.0" fill="#888" font-family="monospace" font-size="1.8" text-anchor="middle">FREQ</text>
