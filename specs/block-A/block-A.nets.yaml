@@ -30,16 +30,16 @@ parts:
 # net -> connection points (REF.PIN). Pins not listed here must appear in
 # no_connect, or --check fails (every part pin must be accounted for).
 nets:
-  "+12V":   [U1.8, D1.3, D2.3, C1.1]   # rail: opamp V+, both clamp cathodes, +decoup
+  "+12V":   [U1.8, D1.2, D2.2, C1.1]   # rail: opamp V+, both clamp cathodes, +decoup
   "-12V":   [U1.4, D1.1, D2.1, C2.1]   # rail: opamp V-, both clamp anodes,  -decoup
   GND:      [J1.2, J2.2, C1.2, C2.2]   # jack sleeves + decoupling returns
 
   L_IN_TIP: [J1.1, R1.1]               # L jack tip -> 100Ω series
-  L_IN_BUF: [R1.2, D1.2, U1.3]         # post-R clamp node -> U1A In+
+  L_IN_BUF: [R1.2, D1.3, U1.3]         # post-R clamp node -> U1A In+
   L_OUT:    [U1.1, U1.2, J2.3]         # U1A out=In- (G=+1) ; -> R normalling lug on J2
 
   R_IN_TIP: [J2.1, R2.1]               # R jack tip -> 100Ω series
-  R_IN_BUF: [R2.2, D2.2, U1.5]         # post-R clamp node -> U1B In+
+  R_IN_BUF: [R2.2, D2.3, U1.5]         # post-R clamp node -> U1B In+
   R_OUT:    [U1.7, U1.6]               # U1B out=In- (G=+1)
 
 # Pins intentionally left floating (no-connect); excluded from coverage check.

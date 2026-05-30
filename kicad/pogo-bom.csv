@@ -20,8 +20,8 @@ audio,C3,Capacitor,1,,100nF,0603,,,,,block-1,U2 +12V decoupling
 audio,C4,Capacitor,1,,100nF,0603,,,,,block-1,U2 -12V decoupling
 audio,C5,Capacitor,1,,100nF,0603,,,,,block-1,U3 +12V decoupling
 audio,C6,Capacitor,1,,100nF,0603,,,,,block-1,U3 -12V decoupling
-audio,U4,IC,1,THAT2180LD,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,THAT Corporation,,https://www.thatcorp.com/datashts/THAT_2180-Series_Datasheet.pdf,block-4,L-channel dB-law VCA (current-in/out)
-audio,U5,IC,1,THAT2180LD,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,THAT Corporation,,https://www.thatcorp.com/datashts/THAT_2180-Series_Datasheet.pdf,block-4,R-channel dB-law VCA (current-in/out)
+audio,U4,IC,1,THAT2180AL08-U,,SIP-8,POGO_Package_SIP:SIP-8_2.54mm,THAT Corporation,,https://www.thatcorp.com/datashts/THAT_2180-Series_Datasheet.pdf,block-4,"L-channel dB-law VCA (current-in/out); 8-pin SIP (THT, no SMD variant)"
+audio,U5,IC,1,THAT2180AL08-U,,SIP-8,POGO_Package_SIP:SIP-8_2.54mm,THAT Corporation,,https://www.thatcorp.com/datashts/THAT_2180-Series_Datasheet.pdf,block-4,"R-channel dB-law VCA (current-in/out); 8-pin SIP (THT, no SMD variant)"
 audio,U6,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-4,"I/V transimpedance converters (THAT2180 current outputs → V; L=A, R=B)"
 audio,U63,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-4,VCA CV conditioning: AMT attenuverter inverter (A) + CV/OFS summer-scaler (B)
 audio,RV1,Trimpot/Pot,1,3224W-1-xxx,500Ω,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-4,L unity-gain trim (Ec+ offset)
@@ -387,12 +387,12 @@ utility,R58,Resistor,1,,1kΩ,0603,,,,,block-3,"R_LED_CLIP: current limit, MOD_CL
 utility,R59,Resistor,1,,9.9kΩ,0603,,,,,block-3,R_CLIP_DIV_H: upper leg of MOD_CLIP 9.9V threshold divider
 utility,R60,Resistor,1,,100Ω,0603,,,,,block-3,R_CLIP_DIV_L: lower leg of MOD_CLIP threshold divider
 utility,C7,Capacitor,14,,100nF,0603,,,,,block-3,C_BYPASS_MB: supply bypass; one per op-amp supply pin (7 ICs × 2 rails)
-utility,R_INV_IN,Resistor,19,,10kΩ,0603,,,,,block-3,R_inv_in: attenuverter −V_src inverter input R; 1 per destination
-utility,R_INV_FB,Resistor,19,,10kΩ,0603,,,,,block-3,R_inv_fb: attenuverter −V_src inverter feedback R; 1 per destination
+utility,R_INV_IN,Resistor,19,,10kΩ,0603,,,,,block-3,R_inv_in: attenuverter −V_src inverter input R; 1 per destination; 1% for >60 dB center null
+utility,R_INV_FB,Resistor,19,,10kΩ,0603,,,,,block-3,R_inv_fb: attenuverter −V_src inverter feedback R; 1 per destination; 1% for >60 dB center null
 utility,R99,Resistor,1,,100Ω,0603,,,,,block-3,R_MODIN: MOD_IN series input protection
 utility,D4,Diode,1,BAT54S,,SOT-23,POGO_Package_TO_SOT_SMD:SOT-23,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds11005.pdf,block-3,D_MODIN: MOD_IN input clamp ±12V
-utility,D5,Diode,1,BZX84C10,,SOT-23,POGO_Package_TO_SOT_SMD:SOT-23,Nexperia,,,block-3,D_ZCLAMP_P: mod-bus +10V clamp zener (back-to-back with D6)
-utility,D6,Diode,1,BZX84C10,,SOT-23,POGO_Package_TO_SOT_SMD:SOT-23,Nexperia,,,block-3,D_ZCLAMP_N: mod-bus -10V clamp zener (cathode-to-cathode with D5)
+utility,D5,Diode,1,BZX84-C10,,SOT-23,POGO_Package_TO_SOT_SMD:SOT-23,Nexperia,,https://assets.nexperia.com/documents/data-sheet/BZX84_SER.pdf,block-3,D_ZCLAMP_P: mod-bus +10V clamp zener (back-to-back with D6)
+utility,D6,Diode,1,BZX84-C10,,SOT-23,POGO_Package_TO_SOT_SMD:SOT-23,Nexperia,,https://assets.nexperia.com/documents/data-sheet/BZX84_SER.pdf,block-3,D_ZCLAMP_N: mod-bus -10V clamp zener (cathode-to-cathode with D5)
 panel,LED3,LED,1,,,3mm,POGO_LED_THT:LED_D3.0mm,generic,,https://www.thonk.co.uk/product-category/electronic-component/led/,block-3,MOD_POS indicator (green)
 panel,LED4,LED,1,,,3mm,POGO_LED_THT:LED_D3.0mm,generic,,https://www.thonk.co.uk/product-category/electronic-component/led/,block-3,MOD_NEG indicator (red)
 panel,LED5,LED,1,,,3mm,POGO_LED_THT:LED_D3.0mm,generic,,https://www.thonk.co.uk/product-category/electronic-component/led/,block-3,MOD_CLIP indicator (amber)
@@ -441,9 +441,9 @@ control,RV36,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiomet
 control,RV37,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6,BP3_FREQ
 control,RV38,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6,BP3_FOCUS
 control,RV39,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6,BP3_DIST (drive)
-control,RV40,Trimpot/Pot,1,,,panel,POGO_Potentiometer_THT:Potentiometer_Slider_45mm_Vertical,Alpha/Alps,Thonk,https://www.thonk.co.uk/shop/alpha-sliders/,block-7,"HP_FREQ slider (±5V/oct, default -3V)"
+control,RV40,Trimpot/Pot,1,RA4522F-20-15F1,,panel,POGO_Potentiometer_THT:Potentiometer_Slider_45mm_Vertical,Alpha (Taiwan),Rapid / Banzai,https://www.rapidonline.com/taiwan-alpha-ra4522f-202-10c1-b10k-10k-45mm-slide-potentiometer-66-0142,block-7,"HP_FREQ slider (±5V/oct, default -3V)"
 control,RV41,Trimpot/Pot,1,3296W-1-xxx,,through-hole,POGO_Potentiometer_THT:Potentiometer_Bourns_3296W_Vertical,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3296.pdf,block-7,HP_RES trimpot (preset; 0–1)
-control,RV42,Trimpot/Pot,1,,,panel,POGO_Potentiometer_THT:Potentiometer_Slider_45mm_Vertical,Alpha/Alps,Thonk,https://www.thonk.co.uk/shop/alpha-sliders/,block-8,"LP2_FREQ slider (±5V/oct, default +2V)"
+control,RV42,Trimpot/Pot,1,RA4522F-20-15F1,,panel,POGO_Potentiometer_THT:Potentiometer_Slider_45mm_Vertical,Alpha (Taiwan),Rapid / Banzai,https://www.rapidonline.com/taiwan-alpha-ra4522f-202-10c1-b10k-10k-45mm-slide-potentiometer-66-0142,block-8,"LP2_FREQ slider (±5V/oct, default +2V)"
 control,RV43,Trimpot/Pot,1,3296W-1-xxx,,through-hole,POGO_Potentiometer_THT:Potentiometer_Bourns_3296W_Vertical,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3296.pdf,block-8,LP2_RES trimpot (preset; 0–1)
 panel,J1,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-A,L_IN_INPUT
 panel,J2,Jack,1,WQP-PJ398SM,,panel,POGO_Connector_Audio:Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles,Qingpu (Thonkiconn),Thonk,https://www.thonk.co.uk/shop/thonkiconn/,block-A,R_IN_INPUT (normalles to L)

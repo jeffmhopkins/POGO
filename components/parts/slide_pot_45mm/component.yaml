@@ -1,8 +1,8 @@
 # slide_pot_45mm — POGO sourced component (hand-maintained)
 slug: slide_pot_45mm
-mpn: '~'
-manufacturer: Alpha/Alps
-supplier: Thonk
+mpn: RA4522F-20-15F1
+manufacturer: Alpha (Taiwan)
+supplier: Rapid / Banzai
 package: 45mm slide
 symbol: trimpot
 matches:
@@ -11,9 +11,10 @@ footprint:
   lib: Potentiometer_THT
   name: Potentiometer_Slider_45mm_Vertical
 datasheet:
-  url: https://www.thonk.co.uk/shop/alpha-sliders/
+  url: https://www.rapidonline.com/taiwan-alpha-ra4522f-202-10c1-b10k-10k-45mm-slide-potentiometer-66-0142
   version: supplier page
 panel_types:
 - slider_V45
-notes: '45mm travel slide pot (HP_FREQ, LP2_FREQ). Exact MPN TBD. NOTE: Thonk stocks 20mm-travel sliders,
-  not 45mm — verify travel/source before BOM.'
+notes: '45mm-travel slide pot (HP_FREQ, LP2_FREQ). Alpha RA4522F = 45mm travel,
+  sourced via Rapid/Banzai (Thonk only stocks the 20mm RA2045F, which is NOT this part).
+  Taper/value (e.g. B10k linear) chosen per placement.'
