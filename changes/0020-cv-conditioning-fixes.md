@@ -195,6 +195,17 @@ whole E1 premise is flawed:
   faithfully costs either a new dual-switch jack (G6 + panel) or an unreliable analog sense. Documenting
   the limitation is the honest, proportionate call. **Needs user OK to drop E1+E2 → E3.**
 
+#### E DECISION (user, 2026-05-30): dual-switch jack for J4 — full parity
+- Replace J4 (ALT_BP_R) with a **dual-switch 3.5mm jack** (two switch contacts): contact 1 = R→L signal
+  normal (as today), contact 2 = independent ALT_R insertion-detect → `ALT_R_DET`. Then E2: OR
+  `ALT_R_DET` with `ALT_L_DET` into U81's **R-channel select only**; L-select stays `ALT_L_DET`.
+- **NEW PART TYPE → G6a/G6b required** before any net references it: real dual-switch jack MPN +
+  datasheet + a new symbol (≥5 pins: tip / tip-switch / ring-or-sleeve / 2nd-switch / sleeve) + a
+  vendored footprint + `footprints.yaml` panel binding. Also a **panel/footprint implication** (J4
+  mechanical footprint changes) — coordinate with the panel build.
+- Part research launched (background). G6a STOP until a real MPN + datasheet land. §E netlist edit
+  (block-1 J4 + dist3 OR) waits on that.
+
 ### F. WF phase — H4 — block-6-dist1/2/3 — ❌ WITHDRAWN (H4 is FALSE; no change)
 - Original claim: WF net-inverting vs SC/HC → add an inversion. **SPICE refuted it** (`specs/sim/wf_phase.cir`).
 - Net trace from the common `BP1_DRIVEOUT` node: SC = inverting amp (R18/R19) → −drive; HC = inverting
