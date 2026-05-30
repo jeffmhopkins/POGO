@@ -23,7 +23,6 @@ CLI:
 
 from __future__ import annotations
 
-import datetime as _dt
 import json
 import math
 import sys
@@ -233,8 +232,9 @@ def extract() -> dict:
                        "boundary": boundary, "refs": block_refs})
 
     return {
+        # No wall-clock timestamp: the artifact must be byte-stable so --check can drift-gate
+        # it like build_components.py does for the BOM (docs/netlist.html is served by Pages).
         "meta": {
-            "generated": _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
             "parts": len(parts), "footprinted": n_fp, "passive_or_symbol": n_sym,
             "nets": len(nets), "blocks": len(blocks), "geoms": len(geom),
             "warnings": len(warnings),
@@ -272,16 +272,24 @@ def main(argv) -> int:
             print(f"  … +{len(warnings) - 40} more")
         return 0
     if "--check" in argv:
-        # Gate: every block parsed, no hard extraction failure. Pin-mapping mismatches
-        # are advisory (centroid fallback), surfaced but non-fatal — the .nets.yaml
-        # pin-coverage gate already lives in generate_schematic.py.
-        ok = model["meta"]["blocks"] == len(_NETS_GLOB) and model["meta"]["parts"] > 0
-        hard = [w for w in warnings if "failed:" in w or "no symbol primitive" in w]
-        print("NETLIST-VIZ CHECK — " + ("OK" if ok and not hard else "FAIL"))
+        # Two gates, mirroring build_components.py --check:
+        #  1. extraction sanity — every block parsed, no hard failure (pin-mapping
+        #     mismatches are advisory/centroid-fallback; the .nets.yaml pin-coverage gate
+        #     already lives in generate_schematic.py);
+        #  2. drift — the committed docs/netlist.html must byte-match a fresh render, so the
+        #     Pages-served artifact stays in sync with the nets/registry (same as the BOM).
+        errs = []
+        if model["meta"]["blocks"] != len(_NETS_GLOB) or model["meta"]["parts"] == 0:
+            errs.append("extraction incomplete (blocks/parts)")
+        errs += [w for w in warnings if "failed:" in w or "no symbol primitive" in w]
+        fresh = render_html(model)
+        if (not _OUT.exists()) or _OUT.read_text() != fresh:
+            errs.append("docs/netlist.html is stale — run: python3 tools/build_netlist_viz.py")
+        print("NETLIST-VIZ CHECK — " + ("OK" if not errs else "FAIL"))
         print(_stats(model, warnings))
-        for w in hard:
-            print(f"  - {w}")
-        return 0 if (ok and not hard) else 1
+        for e in errs:
+            print(f"  - {e}")
+        return 0 if not errs else 1
     _OUT.write_text(render_html(model))
     print(f"wrote {_OUT.relative_to(_REPO)}")
     print(_stats(model, warnings))
@@ -729,7 +737,7 @@ function pick(wx,wy){
 const hidePower=document.getElementById('hidePower'), showLabels=document.getElementById('showLabels');
 function buildSide(){
   document.getElementById('metasub').textContent =
-    `${MODEL.meta.parts} parts · ${MODEL.meta.footprinted} fp / ${MODEL.meta.passive_or_symbol} sym · ${MODEL.meta.nets} nets · ${MODEL.meta.generated}`;
+    `${MODEL.meta.parts} parts · ${MODEL.meta.footprinted} fp / ${MODEL.meta.passive_or_symbol} sym · ${MODEL.meta.nets} nets · ${MODEL.meta.blocks} blocks`;
   const host=document.getElementById('blocks'); host.innerHTML='';
   const boards={}; MODEL.blocks.forEach(b=>(boards[b.board]=boards[b.board]||[]).push(b));
   Object.keys(boards).sort().forEach(board=>{

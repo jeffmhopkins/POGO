@@ -180,8 +180,14 @@ artifact is self-contained, so it fits the existing gate stack; no JS build step
 Extraction: **880 parts** (272 real footprints / 608 symbol glyphs), **591 nets**, 10 blocks,
 13 distinct geoms. **82 advisory pin-fallback warnings — all jacks** (footprint pads named
 `T/S/TN` vs the netlist's symbol-pin numbers `1/2/3`; wires attach at the jack body centroid).
-ICs/diodes/trimpots all map pad-exact. CI: `--check` added to all 3 build jobs; `docs/netlist.html`
-regenerated on Linux and staged into the hardware artifact bundle. Docs index card added.
+ICs/diodes/trimpots all map pad-exact.
+
+**BOM-parity build/CI (like `bom.html`):** the output is **byte-stable** (no wall-clock
+timestamp), committed at `docs/netlist.html` (served by GitHub Pages), and guarded by a
+`build_netlist_viz.py --check` **drift gate** that fails CI if the committed file doesn't
+byte-match a fresh render of the nets — mirroring `build_components.py --check` for the BOM.
+`--check` runs in all three CI jobs; the committed file is staged into the hardware artifact
+bundle. A **Netlist Visualizer** card is on `docs/index.html`.
 
 ## Decisions log
 

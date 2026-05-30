@@ -49,9 +49,9 @@ jobs:
           apt-get install -y -qq nodejs >/dev/null 2>&1 || true
           python3 tools/test_parity.py
           python3 tools/build_panel.py --check
-          # Netlist visualizer: validate extraction, then regenerate docs/netlist.html.
+          # Netlist visualizer: drift gate — the committed docs/netlist.html (served by
+          # Pages) must byte-match a fresh render of the nets, same as the BOM artifacts.
           python3 tools/build_netlist_viz.py --check
-          python3 tools/build_netlist_viz.py
           # Regenerate plugin/res/Pogo-source.svg (source) AND plugin/res/Pogo.svg
           # (Inkscape text-to-path, loaded by VCV Rack) from panel-data.yaml.
           python3 tools/build_panel.py --resource --mfr
