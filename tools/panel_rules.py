@@ -430,12 +430,16 @@ class DesignRules:
             for j in range(i + 1, len(placed)):
                 ca, ba, pa, la_ = placed[i]
                 cb, bb, pb, lb_ = placed[j]
-                body_pen = 0.0          # body-body overlap depth
-                for x in ba:
-                    for y in bb:
-                        dx, dy = _rect_overlap(x, y)
-                        if dx > 0 and dy > 0:
-                            body_pen = max(body_pen, min(dx, dy))
+                # Mechanical OVERLAP: body-vs-body, and a SIGNAL pin sitting in a body
+                # (a lead can't be under a neighbour's component). Legs are structural
+                # (snap tabs) and may pass under a raised body — not counted here.
+                body_pen = 0.0
+                for x, y in ([(a, b) for a in ba for b in bb] +   # body-body
+                             [(a, b) for a in pa for b in bb] +   # A signal pin in B body
+                             [(a, b) for a in ba for b in pb]):   # B signal pin in A body
+                    dx, dy = _rect_overlap(x, y)
+                    if dx > 0 and dy > 0:
+                        body_pen = max(body_pen, min(dx, dy))
                 # copper clearance on every pad/leg pair EXCEPT leg-vs-leg (structural
                 # tabs may abut each other but not a neighbour's signal pad).
                 pad_enc = 0.0

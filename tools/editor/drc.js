@@ -74,11 +74,10 @@
     for (let i = 0; i < fp.length; i++) {
       for (let j = i + 1; j < fp.length; j++) {
         const A = fp[i], B = fp[j];
+        // body-vs-body, and a SIGNAL pin sitting in a body (both directions). Legs exempt.
         let bodyPen = 0;
-        for (const x of A.body) for (const y of B.body) {
-          const [dx, dy] = rectOverlap(x, y);
-          if (dx > 0 && dy > 0) bodyPen = Math.max(bodyPen, Math.min(dx, dy));
-        }
+        const ov = (xs, ys) => { for (const x of xs) for (const y of ys) { const [dx, dy] = rectOverlap(x, y); if (dx > 0 && dy > 0) bodyPen = Math.max(bodyPen, Math.min(dx, dy)); } };
+        ov(A.body, B.body); ov(A.pads, B.body); ov(A.body, B.pads);
         let padEnc = 0;  // copper closer than clr; leg-vs-leg excluded
         for (const x of A.pads) for (const y of B.pads.concat(B.legs)) padEnc = Math.max(padEnc, clr - rectMinGap(x, y));
         for (const x of A.legs) for (const y of B.pads) padEnc = Math.max(padEnc, clr - rectMinGap(x, y));

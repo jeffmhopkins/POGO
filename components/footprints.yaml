@@ -10,7 +10,7 @@
 footprints:
   - { type: jack_input,  lib: Connector_Audio,   name: Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles, ox: 0.0, oy: 6.48 }
   - { type: jack_output, lib: Connector_Audio,   name: Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles, ox: 0.0, oy: 6.48 }
-  - { type: trimpot,     lib: Potentiometer_THT, name: Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,        ox: 7.5, oy: 2.5 }
+  - { type: trimpot,     lib: Potentiometer_THT, name: Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,        ox: 0.0, oy: 0.0 }
   - { type: knob,        lib: Potentiometer_THT, name: Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles, ox: 7.5, oy: 2.5 }
   - { type: slider_V45,  lib: Potentiometer_THT, name: Potentiometer_Slider_45mm_Vertical,                    ox: 0.0, oy: 0.0 }
   - { type: led,         lib: LED_THT,           name: LED_D3.0mm,                                            ox: 0.0, oy: 0.0 }

@@ -471,10 +471,9 @@ class TestDiscrepancySummary:
         )
 
     def test_trimpot_cy_extents_are_as_documented(self):
-        """TRIMPOT_CY from the Song Huei 9mm tall-trimmer footprint (same land pattern as
-        the Alpha RD901F 9mm); panel anchor = the shaft. The courtyard wraps the offset
-        pins + body + mounting legs, so it is asymmetric about the shaft."""
-        assert TRIMPOT_CY == (-8.65, -6.67, 5.1, 6.67), (
+        """TRIMPOT_CY from the Song Huei R0904N 9mm footprint; anchor = the (centred) shaft.
+        Courtyard bounds the 9.7mm square body + the snap-in legs (±6.4mm wide)."""
+        assert TRIMPOT_CY == (-6.5, -5.1, 6.5, 5.1), (
             f"TRIMPOT_CY changed: got {TRIMPOT_CY}."
         )
 
@@ -524,12 +523,13 @@ class TestCollisionModel:
         sh = _pk.footprint_shapes("trimpot")
         assert len(sh["pads"]) == 3 and len(sh["legs"]) == 2, sh
 
-    def test_trimpot_and_knob_share_land_pattern(self):
-        """Trimpot (Song Huei) and knob (Alpha RD901F) share the 9mm electrical land
-        pattern — same signal pads + mounting legs. (Bodies may differ: the trimpot's
-        F.Fab is the cleaned centred can; the knob keeps the KiCad RD901F outline.)"""
-        a, b = _pk.footprint_shapes("trimpot"), _pk.footprint_shapes("knob")
-        assert a["pads"] == b["pads"] and a["legs"] == b["legs"]
+    def test_trimpot_is_centred_square_pot(self):
+        """Song Huei R0904N: 9.7mm SQUARE body centred on the shaft (anchor), with the 3
+        signal pins close in (≤ the body half-width), not a side-offset can."""
+        sh = _pk.footprint_shapes("trimpot")
+        b = sh["body"][0]
+        assert round(b[2] - b[0], 1) == 9.7 and round(b[3] - b[1], 1) == 9.7
+        assert max(abs(p[0]) for p in sh["pads"]) < 4.85, "signal pins must sit within the body"
 
     # ── placement: bodies must not overlap ──────────────────────────────────────
     def test_pots_clear_side_by_side_at_body_width(self):
