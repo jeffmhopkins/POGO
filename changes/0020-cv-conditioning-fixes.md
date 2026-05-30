@@ -227,6 +227,30 @@ high-Z Ec+ port; and V_CTRL (RV44 wiper) is unbuffered into 4 cells.
   flag [NV] like the Q-cell, confirm at prototype. Same fix applies to block-6 DRIVE RV51-56 + their
   shared V_DRIVE_CTRL fan-out.
 
+## Implementation finding (2026-05-30): cluster C is a topology refinement, not a reroute
+Tracing block-5/7/8 during implementation, the "tap v1/v2 from pins 5/12" fix splits into:
+- **Safe, unambiguous (H5 literal fix):** move the HIGH-Z consumers — OTA2 In+ (`U7.14`/`U8.14`,
+  HP `U49.14`/`U50.14`, LP2 `U56.14`/`U57.14`) and Q-cell In+ (`U9.3`/`U10.3`, etc.) — from the
+  Darlington buffer outputs (pins 8/9) to the unbuffered cap nodes (pins 5/12). Removes the ~1.2 V
+  offset injected into the next OTA. No loading concern (OTA/Q inputs are high-Z). No new/removed parts.
+- **Needs design decision + validation:** the **v2/LP path** drives BOTH the output buffer and the
+  resistive feedback `R47`/`R48` (and HP/LP2 equivalents) from the Darlington (pin 9). Consequences:
+  (i) the LP/LP2 audio OUTPUT inherits the ~1.2 V Darlington DC offset; (ii) `R47` is a resistive load
+  that can't move to the unbuffered cap node without loading the integrator. The clean fix is to drive
+  the output buffer input + `R47` from the **precision op-amp buffer** (U11/U58/…) tapping the clean
+  cap node (pin 12), dropping the Darlington from the v2 signal path and **removing the R68/R69-class
+  pulldowns**. That's a real topology refinement (changes feedback source + removes parts) and its
+  **loop DC/stability cannot be validated in this env** (no SPICE; datasheet PDFs won't text-extract).
+
+### Proposed split (recommended)
+- **Do now (no resonant-loop risk, no validation needed):** clusters **E** (BP3 ALT_R selector),
+  **F** (WF phase invert), **G** (BP3 output normal), and **H** (mod-bus low-Z normal + U3 buffer +
+  M2/M4). These are digital-select / output-jack / summing wiring — well-understood, gate-checkable.
+- **Hold for validation:** clusters **A/B** (expo divider+tilt — math solid but tempco blocked on G6a),
+  **C** (OTA tap — the v2/loop refinement above), **D** (Q-cell [NV] bias), and **HIGH-3** ([NV]
+  THAT2180 Ec+). These touch the OTA-C resonant loop or carry [NV] values needing SPICE/bench/datasheet
+  confirmation. Implement them with a validation step (SPICE model or prototype) rather than blind edits.
+
 ## G6a — tempco resistor (NEW PART TYPE) — STOP, needs MPN confirmation
 The expo tempco (fold-in, decision 4) needs a real **+3300–3500 ppm/°C tempco resistor** (one per expo:
 blocks 5,7,8 + 6-svf1/2/3 L+R = ~8 parts). This is a new component type → **G6a (registry + datasheet)
