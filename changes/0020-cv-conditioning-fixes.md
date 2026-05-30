@@ -147,15 +147,53 @@ Confidence tags: **[HC]** high (math/datasheet solid, verified) · **[NV]** need
     soft-limit option.**
 
 ### E. BP3 input selector ALT_R — fixes H1 — block-6-dist3 + block-1 [topology decision]
-- Plugin: `bp3InR = (altLConn || altRConn)`. Hardware gates both channels on ALT_L_DET only; no ALT_R_DET.
-- **Constraint:** J4's one switch lug is already the normalling contact. **Options for G5:**
-  - **(E1)** Derive ALT_R_DET with a comparator/transistor off J4's tip node (detect a patched plug by
-    the tip being driven), OR off the R134-style pulldown pattern — needs +1 small part on block-1.
-  - **(E2)** Add an OR (2 diodes + pullup, or a logic gate) of ALT_L_DET and ALT_R_DET → Y(R) select;
-    X(L) select stays ALT_L_DET. (Depends on E1 producing ALT_R_DET.)
-  - **(E3)** Document as a minor, rarely-hit limitation (only matters when ALT_R is patched but ALT_L is
-    not — an unusual mono-into-R patch) and leave the wiring. Cheapest; small fidelity gap.
-  - **Recommend E1+E2** for true plugin parity (it's a real, if narrow, behavioral divergence).
+- Plugin: `bp3InR = (altLConn || altRConn)`; `bp3InL = altLConn`. Hardware gates BOTH selects on
+  ALT_L_DET only.
+- **Truth table (verified 2026-05-30 against `Pogo.cpp:345-441`):** the ONLY divergent case is
+  **"ALT_R patched, ALT_L empty"**: plugin sends ALT→BP3_R, hardware leaves BP3_R on LP1 (bandR). All
+  other 3 patch states already match. And the L channel is correct in ALL cases (only R is wrong) →
+  **the fix is R-channel-only.**
+- **Confirmed the ALT_R *signal* normal already works in hardware:** `block-1.nets.yaml:76` ties J4.3
+  (R jack switch lug) into `ALT_L_IN`, so an unpatched R jack routes the L signal into the R gain
+  stage → R VCA — matching the plugin's `altR = (altLConn ? altL : 0)`. So §E is ONLY the *selector
+  gating*, not the signal path.
+- **J4 switch-lug constraint:** J4.3 is the signal-normal contact (can't also be the detect). The
+  ALT_L detect (`ALT_L_DET=J3.3`) uses J3's *switch lug*, but J3 doesn't need its lug for normalling
+  (L is master); J4 does. → derive ALT_R_DET by **tip-sensing** instead (independent of the lug).
+- **Proposed E1+E2 (refined):**
+  - **E1 — tip-sense ALT_R_DET (block-1):** `ALT_R_TIP` already has the 100Ω + a pulldown pattern
+    available; add a detect that goes HIGH when a plug drives the tip. Simplest robust form: a small
+    NPN (MMBT3904, already in BOM) or comparator referencing the tip vs a threshold → logic-level
+    `ALT_R_DET`. +1 small part on block-1. (SPICE-check the threshold + that it ignores audio swing.)
+  - **E2 — OR into R select only (block-6-dist3):** `ALT_R_DET` OR `ALT_L_DET` → U81 **Y/R** select
+    (pins 10? — verify which select pin is the Y channel); **X/L select stays ALT_L_DET alone.**
+    Diode-OR (2× 1N4148 + pullup) into the existing R133 pull-up node. No new part type.
+  - **E3 (fallback):** document the narrow "R-only patched" limitation, no change.
+  - **Recommend E1+E2.** NOTE: tip-sense detect is an [NV]-class analog choice (threshold vs audio
+    swing) — SPICE the detector before wiring; if it proves fiddly, fall back to E3 + document.
+
+#### ⚠️ E1 INFEASIBLE — finding 2026-05-30 (overrides the E1+E2 selection)
+While designing the MMBT3904 tip-sense detector I proved it **cannot work reliably**, and that the
+whole E1 premise is flawed:
+- **A tip-VOLTAGE sense can't distinguish "patched but silent" from "unpatched."** Both leave the J4
+  tip near 0 V (a patched cable from an idle source = 0 V; unpatched = floating/pulled). The *only*
+  unambiguous "plug inserted" signal on a switched jack is the **switch contact opening** — which on a
+  PJ301M is the single lug J4.3, already consumed by the R→L signal normal (`ALT_L_IN`).
+- **One switch contact cannot do both** a reliable insertion-detect and the signal normal. This is a
+  hardware reality of the chosen jack, not a wiring oversight. (Contrast J3/ALT_L: J3's lug is free for
+  detect precisely because L, as master, needs no normal.)
+- **Options that remain real:**
+  - **E3 — document the narrow limitation (now recommended).** The only divergent case is "ALT_R
+    patched, ALT_L empty"; leave wiring, document. Zero new parts, zero new [NV] analog.
+  - **E-dual-jack — switch to a dual-switch (NN) jack for J4** (e.g. a Thonkiconn with 2 switch
+    contacts / a different jack PN): one contact does the normal, the other the detect. New part type
+    (G6) + panel/footprint change — heavier than the bug warrants.
+  - **E-source-normal — move the R→L normal to the amp input** (feed `ALT_R_IN` from `ALT_L_IN` via the
+    lug) and use the **tip+pulldown as detect** — but this still hits the patched-silent ambiguity
+    above, so it does NOT actually recover a reliable detect. Rejected.
+- **Recommendation: E3.** The "R-only patched" case is an unusual mono-into-right patch; reproducing it
+  faithfully costs either a new dual-switch jack (G6 + panel) or an unreliable analog sense. Documenting
+  the limitation is the honest, proportionate call. **Needs user OK to drop E1+E2 → E3.**
 
 ### F. WF phase — H4 — block-6-dist1/2/3 — ❌ WITHDRAWN (H4 is FALSE; no change)
 - Original claim: WF net-inverting vs SC/HC → add an inversion. **SPICE refuted it** (`specs/sim/wf_phase.cir`).
