@@ -64,6 +64,12 @@ All 6 `--check` gates + Python↔JS parity green. No plugin/panel/net-connectivi
 - 2026-05-30: dated design-review/verification snapshots → **re-perform** with analysis +
   adversarial agents (user choice), not just re-date.
 - 2026-05-30: completed the 4 unassigned audio-board Q_max trims to match their siblings (RV5/RV18).
+- 2026-05-30: ran a 6-agent adversarial engineering review (plugin→spec→nets→schematic). Folded
+  its pure-doc findings into 0019 (user choice): aux-expo-converter BP table+Used-By 200/1500/6000Hz
+  +150/22/4.7nF → 400Hz/68nF; aux-distortion HC "Schottky ±0.6V" → "BZX84C5V1 zener ±5.8V";
+  block-6 spec U27 "BP_TILT_INV" → output polarity-restore (L+R); components.yaml R105 fn U52→U51
+  cellB, RV7/10/13 fn 200/1500/6000Hz→400Hz. The review's netlist/topology findings (expo V/oct
+  divider, mod-bus depth, BP3 selector, VCA Ec+ trims, WF phase) are deferred to a new change 0020.
 
 ## Gate checklist
 

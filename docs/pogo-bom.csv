@@ -230,13 +230,13 @@ audio,C110_U93n,Capacitor,1,,100nF,0603,,,,,block-6-dist3,U93 −12V decoupling
 audio,U46,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-mix,half A = L wet summer (BP1+BP2+BP3 inv sum); half B = L final dry+wet summer (BYPASS+WET)
 audio,U47,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-mix,half A = R wet summer; half B = R final dry+wet summer
 audio,U48,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-mix,"wet re-inverter (G=−1): half A = L, half B = R (restores +bands from the inv wet sum)"
-audio,RV7,Trimpot/Pot,1,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-svf1,BP1 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 200 Hz at 0V; ±25% range
+audio,RV7,Trimpot/Pot,1,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-svf1,BP1 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 400 Hz at 0V; ±25% range
 audio,RV8,Trimpot/Pot,1,3224W-1-xxx,20kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-svf1,BP1 1V/oct tracking trim; ±10% range
 audio,RV9,Trimpot/Pot,1,3224W-1-xxx,100kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-svf1,BP1 Q_max trim (Iabc V_bias)
-audio,RV10,Trimpot/Pot,1,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-svf2,BP2 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 1500 Hz at 0V; ±25% range
+audio,RV10,Trimpot/Pot,1,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-svf2,BP2 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 400 Hz at 0V; ±25% range
 audio,RV11,Trimpot/Pot,1,3224W-1-xxx,20kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-svf2,BP2 1V/oct tracking trim; ±10% range
 audio,RV12,Trimpot/Pot,1,3224W-1-xxx,100kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-svf2,BP2 Q_max trim (Iabc V_bias)
-audio,RV13,Trimpot/Pot,1,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-svf3,BP3 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 6000 Hz at 0V; ±25% range
+audio,RV13,Trimpot/Pot,1,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-svf3,BP3 f_ref trim rheostat; in series with R_IREF_A 1MΩ; target 400 Hz at 0V; ±25% range
 audio,RV14,Trimpot/Pot,1,3224W-1-xxx,20kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-svf3,BP3 1V/oct tracking trim; ±10% range
 audio,RV15,Trimpot/Pot,1,3224W-1-xxx,100kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-svf3,BP3 Q_max trim (Iabc V_bias)
 audio,D4,Diode,8,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-6-dist1,SC soft-clip diodes; 4 per path (2 antiparallel pairs) × 6 paths
@@ -496,7 +496,7 @@ audio,R97,Resistor,1,,1kΩ,0603,,,,,block-7,HP OTA2 linearizing R L (R_LIN_B_L)
 audio,R98,Resistor,1,,1kΩ,0603,,,,,block-7,HP OTA1 linearizing R R (R_LIN_A_R)
 audio,R99,Resistor,1,,1kΩ,0603,,,,,block-7,HP OTA2 linearizing R R (R_LIN_B_R)
 audio,R104,Resistor,1,,1MΩ,0603,,,,,block-7,HP Q V→I: V_ires_L → U51 cellA Iabc (R_Iabc_L)
-audio,R105,Resistor,1,,1MΩ,0603,,,,,block-7,HP Q V→I: V_ires_R → U52 cellA Iabc (R_Iabc_R)
+audio,R105,Resistor,1,,1MΩ,0603,,,,,block-7,HP Q V→I: V_ires_R → U51 cellB Iabc (R_Iabc_R)
 audio,R106,Resistor,1,,100kΩ,0603,,,,,block-7,HP IRES_AMP V_bias input R (R_QBIAS)
 audio,R107,Resistor,1,,100kΩ,0603,,,,,block-7,HP IRES_AMP resonance CV input R (R_QINV)
 audio,R108,Resistor,1,,100kΩ,0603,,,,,block-7,HP IRES_AMP feedback R (R_f_q)

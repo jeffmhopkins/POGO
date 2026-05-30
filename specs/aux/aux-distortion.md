@@ -39,7 +39,7 @@ ASCII fallback (one BP group, one channel shown):
  ┌─────────────┐   ┌─────────────┐   ┌─────────────────┐
  │  SOFT CLIP  │   │  HARD CLIP  │   │    WAVEFOLD     │
  │  (SC path)  │   │  (HC path)  │   │    (WF path)    │
- │ tanh approx │   │ Schottky    │   │  op-amp fold    │
+ │ tanh approx │   │ zener clamp │   │  op-amp fold    │
  │ diode chain │   │ back-to-back│   │  network        │
  └──────┬──────┘   └──────┬──────┘   └────────┬────────┘
         │                 │                   │
@@ -104,12 +104,13 @@ Approximate circuit transfer:
 ```
 
 **HC (Hard Clip):**
-Schottky diodes (BAT54S) back-to-back between output and GND (or between ±reference
-voltages) hard-limit the output after an op-amp gain stage. Schottky V_f ≈ 0.3V;
-two in series = ±0.6V clip threshold. Combined with scaling, maps to DSP ±1 range.
+The plugin `hardClip` clamps to **±1.16 normalized** (`clamp((1+4d)·v, ±1.16)`), i.e. **±5.8 V**
+at the ×5 audio scaling. The netlist realizes this with **two BZX84C5V1 zeners back-to-back**
+(anode-to-anode), giving V_Z + V_F ≈ 5.1 V + 0.7 V ≈ **±5.8 V** — matching the plugin. (Schottky
+diodes, ~±0.6 V, would clip far too early; zeners are used precisely to reach ±5.8 V.)
 
 ```
-V_in → [R_in] → op-amp (+gain stage) → [BAT54S back-to-back clamp] → V_out
+V_in → [R_in] → op-amp (+gain stage) → [BZX84C5V1 back-to-back, ±5.8V] → V_out
 ```
 
 **WF (Wavefold):**
@@ -193,7 +194,7 @@ output to the BP3_OUT jacks; the BP3_R jack normals to BP3_L when unpatched.
 | U_SC | TL072CDT | SOIC-8 | — | SC path gain + diode network op-amp |
 | U_HC | TL072CDT | SOIC-8 | — | HC path gain stage |
 | U_WF | TL072CDT | SOIC-8 | — | WF fold op-amp |
-| D_HC_P, D_HC_N | BAT54S | SOT-23 | — | HC back-to-back Schottky clamp |
+| D_HC_P, D_HC_N | BZX84C5V1 | SOT-23 | — | HC back-to-back zener clamp (±5.8V) |
 | D_SC_1..4 | 1N4148W | SOD-123 | — | SC diode string (2 per rail, 4 total) |
 | R_SC_in | Resistor | 0603 | 10 kΩ | SC input resistor |
 | R_HC_in | Resistor | 0603 | 10 kΩ | HC input resistor |
@@ -247,9 +248,9 @@ knob→Ec+ dB mapping (and the knob≈0.20 ⇒ unity-gain bias) is a Phase-3R br
 - SC diode string: 1N4148W forward voltage varies with current; actual clipping
   threshold will be drive-dependent (diode V_f increases at higher current).
   This is part of the soft-clip character and is desirable.
-- HC path: BAT54S forward voltage ~0.3V → clip at ~0.6V differential. With a 5V
-  audio signal and gain = 5×, output clips at 0.6V/5 = 0.12V_in → severe clipping
-  at moderate signal levels. This is correct behavior for hard clip mode.
+- HC path: BZX84C5V1 back-to-back clamp at ±5.8V (V_Z 5.1V + V_F 0.7V), matching the
+  plugin's ±1.16 normalized hard-clip. The DRIVE VCA ahead of the cell sets how hard the
+  signal is pushed into this fixed threshold (so drive, not the clamp, controls clip onset).
 - WF path: the folder op-amp (Stage 2) is in standard G=+2 non-inverting configuration
   (V_clamp at (+), R_g/R_f divider at (−)). The passive diode clamp at (+) has no active
   elements and does not affect loop stability. No prototype stability verification required.

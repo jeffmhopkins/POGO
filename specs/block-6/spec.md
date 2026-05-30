@@ -507,7 +507,7 @@ rather than added at the BP output (V_dry − V_wet instead of V_dry + V_wet).
 ### BP output polarity restore (fixed)
 
 The hardware MIX amp output V_mix_inv is inherently negative-polarity (−V_dry − V_wet).
-A fixed G=−1 inverter (U27 half B, in the BP_TILT_INV TL072CDT) restores the expected
+A fixed G=−1 inverter (U27 half B, in the output polarity-restore TL072CDT) restores the expected
 positive-polarity BP output (+V_dry + V_wet). There is no user polarity control (BP_POL
 was removed — the plugin has no polarity param; the inversion below is always in path).
 
@@ -518,9 +518,10 @@ V_mix_inv ──[R_pol_in = 100 kΩ]──►(−) U27-B ──[R_pol_fb]──�
                                    (+) = GND
 ```
 
-U27 (BP_TILT_INV TL072CDT) halves:
-- Half A: generates −V_tilt for the R-channel expo converter (unchanged).
-- Half B: fixed G=−1 inverter; restores V_bp_out polarity (always in path; no switch).
+U27 (output polarity-restore TL072CDT) halves — both channels (change 0018; per-band tilt
+moved to U82/U83/U84):
+- Half B: fixed G=−1 inverter, restores **BP_OUT_L** polarity (always in path; no switch).
+- Half A: fixed G=−1 inverter, restores **BP_OUT_R** polarity (always in path; no switch).
 
 **Board assignment:** BP_MIX summing amp + output polarity-restore inverter on the audio board.
 
