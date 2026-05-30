@@ -3,7 +3,7 @@
 - **Slug:** tall-trimmer-pots   **Branch:** `change/tall-trimmer-pots`
 - **Lane:** B+panel (hardware part + panel geometry; plugin LOCKED/unchanged — `trimpot`-type controls
   stay `Trimpot` widget / `type: trimpot`). Gates: **G6b** footprint, **G6a** component, **G2** panel layout.
-- **Status:** OPEN — WIP (footprint vendored + bound; **panel re-layout pending — maintainer editor pass**)
+- **Status:** OPEN — WIP (footprint vendored + bound; **G2 panel re-layout APPLIED & DRC-clean**; G6a sourcing + BOM repoint pending)
 - **Opened:** 2026-05-30
 
 ## Intent
@@ -87,12 +87,34 @@ false-flagged by offset pins/legs; live panel 45→23 overlaps (the 23 are real 
 Mirrored in tools/editor/drc.js + parity (437 scenarios incl. the real panel); pads now
 drawn full-size in the editor (legs fainter). 45 unit tests / parity green.
 
-## Pending (after the grid is settled)
-- **G2:** re-spaced `panel-data.yaml` (maintainer editor pass) → DRC clean → re-sync `--cpp` if positions move.
-- **G6a:** source the Song Huei tall trimmer in `specs/components.yaml` + `components/parts/` (+ datasheet).
+## G2 applied (2026-05-30)
+Maintainer editor pass exported; pasted over `panel-data.yaml`. Attenuverter bank re-spaced
+(explicit `cx` per pot; ATT row cy 100→98.996/99.5 to clear the CV-jack row at cy 112 with the
+centred R0904N can). `build_panel.py --check` → **DRC PASS — no violations**; full gate stack +
+45 unit tests + 437-scenario parity green. Committed with regenerated `Pogo-source.svg` +
+`panel-editor.html` (`Pogo.svg` regenerates in CI — inkscape is CI-only).
+
+> **Pogo.cpp widget positions NOT synced** (plugin LOCKED, Lane B; the ATT move is ~1mm cosmetic
+> in the module GUI). Also surfaced a tooling bug: `build_panel.py --cpp` emits `cx=0.00` for any
+> **column-grid–positioned** component (the LFO/MOD/VCA trimpots + the CV jacks resolve their cx
+> from a zone column grid, which `panel_cpp._cx` does not apply — it only reads an explicit `cx`).
+> So `--cpp` output cannot be pasted wholesale without zeroing those x positions. Tracked as a
+> separate follow-up (teach `panel_cpp` the column-grid resolver, or have it consume resolved
+> positions from `panel_svg`).
+
+## Pending
+- **G6a:** source the Song Huei R0904N tall trimmer in `specs/components.yaml` + `components/parts/` (+ datasheet).
 - Repoint the ~25 `trimpot`-type BOM refs to the Song Huei part (centre-detent linear / log per control).
 - Regenerate BOM + schematics; all five `--check` gates green.
+- Eventually rename the footprint file to `…_Songhuei_R0904N_…` (filename still says `TallTrimmer`).
 
 ## Decisions log
 - 2026-05-30: maintainer chose Alpha/Song Huei 9mm tall trimmers for all small panel pots, and to drive
   the grid re-layout themselves in the panel editor (grid-first; BOM repoint after).
+- 2026-05-30: settled the collision model on the real **Song Huei R0904N** geometry — 9.7mm square
+  body, shaft centred, 3 signal pins one edge / 2 snap-in legs the opposite edge. DRC: bodies must
+  not overlap + a signal pin in a body fails; electrical copper keeps 0.2mm; leg-vs-leg and
+  leg-vs-body exempt, leg-vs-signal-pad flags. Python↔JS parity over 437 scenarios.
+- 2026-05-30: G2 layout applied & DRC-clean. Decided NOT to sync Pogo.cpp widget positions in this
+  Lane-B change (plugin locked; ~1mm cosmetic move) and to fix the `--cpp` column-grid `cx=0` bug
+  as a separate follow-up rather than hand-edit the locked plugin from unreliable generator output.
