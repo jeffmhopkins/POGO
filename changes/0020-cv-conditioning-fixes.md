@@ -273,14 +273,20 @@ ALT input) too. This is a **plugin (Lane A) change** (plugin leads), done here p
 - Also fold **M2** (mod OFFSET ±12V→±5V: scale R15 or use ±5V refs) and confirm **M4** (block-4 I/V comp
   cap, add small C_f ~few pF across R_f, 4 ch) here.
 
-#### H — SPICE-validated (2026-05-30), H-a viable. `specs/sim/modbus_depth.cir`
-- Depth: buggy 100k-norm → **~4.8%** at an unpatched destination (review ~3%, same ~20× deficit);
-  **direct low-Z normal → ~98%** (full depth restored). C2 confirmed + fixed.
-- Buffer-load budget (H2): real per-destination load ≈ **10k** (R_INV_IN dominates; the attenuverter
-  pot returns to −V_src, an inverted copy, not hard ground). 18 ∥ ≈ 561Ω → **~18 mA worst-case** (all
-  18 at ±10V, rare). **Two paralleled TL074 sections (U3 C/D) share ~9 mA each → adequate.** (My first
-  pass assumed 5k → 35mA → looked under-spec; the accurate 10k load makes H-a fine.) The earlier
-  "spare" U3 C/D get re-enabled as the parallel distribution buffer.
+#### H — SPICE-validated (2026-05-30). `specs/sim/modbus_depth.cir` + `modbus_load.cir`
+- Depth: buggy 100k-norm → **~3–4.8%** at an unpatched destination; **direct low-Z normal → ~98%**.
+  C2 confirmed + fixed.
+- ⚠️ **Buffer-load REVISED (modbus_load.cir, exact attenuverter model):** my 10k estimate was wrong —
+  it ignored the pot's path to −V_src. Exact per-dest load = `R_INV_IN(10k to vground) ∥ pot(10k to
+  −V_src=inverted copy, looks like 5k)` = **3.33k**. Model **reconciles the 3% bug figure exactly
+  (3.22%)**, confirming it's right. → **~2.9 mA/dest, ~52 mA for all 18 at +10V.**
+- **The mod bus is ONE source normalled to ALL 18 destinations at once**, so all-18-at-+10V is the
+  REAL worst case, not rare. **52 mA exceeds 2× TL074 sections (~40 mA peak) → H-a is UNDER-SPEC.**
+- **Buffer options (user decision needed):** (i) **3× TL074 ∥** (~60-75mA) — but U3 has only C+D free,
+  needs a 4th IC section / new TL074; (ii) **op-amp + BJT push-pull current boost** inside the feedback
+  loop (>100mA robust, +2 transistors — MMBT3904/3906 class); (iii) reduce the load (raise R_INV_IN
+  10k→larger across 18 dests — but that changes attenuverter scaling/noise). **Recommend (ii)** — a
+  transistor-boosted unity buffer is the standard, robust mod-bus distribution driver.
 - **Edit plan (block-3):** (1) drop the 18× `R18_n` (R_SRC_NORM 100k); (2) jack switch lug ties
   `V_MODBUS` directly to each tip (low-Z normal, override plug breaks it); (3) re-wire `U3_SPARE_3/4`
   → paralleled unity buffer driving `V_MODBUS` (each via a small ~47Ω share resistor); (4) M2: rescale
