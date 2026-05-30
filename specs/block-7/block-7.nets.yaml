@@ -48,8 +48,8 @@ parts:
   R98: { sym: r, value: 1k }      # R_LIN OTA1 R
   R99: { sym: r, value: 1k }      # R_LIN OTA2 R
   # (HP output buffer is now a unity follower — R100-R103 inverting-buffer resistors removed, change 0018)
-  R104: { sym: r, value: 1M }     # R_Iabc L (V_ires -> U51 cell A Iabc)
-  R105: { sym: r, value: 1M }     # R_Iabc R (V_ires -> U51 cell B Iabc)
+  R104: { sym: r, value: 100k }   # R_Iabc L (V_ires -> U51 cell A Iabc); change 0020 §D/M5: 1M→100k
+  R105: { sym: r, value: 100k }   # R_Iabc R (V_ires -> U51 cell B Iabc); change 0020 §D/M5: 1M→100k
   R106: { sym: r, value: 100k }   # R_QBIAS
   R107: { sym: r, value: 100k }   # R_QINV
   R108: { sym: r, value: 100k }   # R_f_q
@@ -57,10 +57,8 @@ parts:
   R110: { sym: r, value: 49k9 }   # R_VOCT (change 0020 §A: 47k→49.9k centers 17.92mV/oct at mid-trim)
   R111: { sym: r, value: 1k }     # R_E
   R229: { sym: r, part: "Vishay TFPT", value: 1k }  # tempco shunt (change 0020 §A): HP_EXPO_BASE→GND, +4110ppm/K V/oct temp-comp
-  R112: { sym: r, value: 10k }    # v1 L buffer pulldown
-  R113: { sym: r, value: 10k }    # v2 L buffer pulldown
-  R114: { sym: r, value: 10k }    # v1 R buffer pulldown
-  R115: { sym: r, value: 10k }    # v2 R buffer pulldown
+  # R112-R115 (Darlington-buffer pulldowns) removed — change 0020 §C: state vars now tap the
+  # unbuffered OTA outputs (pins 5/12); the on-chip buffers (pins 7/8/9/10) are unused.
   # (no spare Q cells now — U51 cell A = L Q, cell B = R Q; cell-B termination resistors removed)
 
   RV16: { sym: trimpot, part: "Bourns 3224W", value: HP_FREF }
@@ -98,7 +96,6 @@ nets:
   "-12V":
     [U49.6, U50.6, U51.6, U53.4, U54.4, U66.4,
      U55.4, U55.11, R111.2,
-     R112.2, R113.2, R114.2, R115.2,
      C92.1, C94.1, C96.1, C100.1, C102.1, C104.1, C106.1]
   GND:
     [U53.3, U54.3, U66.3, RV18.1,
@@ -114,20 +111,19 @@ nets:
   BP_OUT_L:     [R30.1]                       # <- block-6 BP out L (boundary)
   HP_SUMINV_L:  [U53.2, R30.2, R92.2, R94.1, U51.4, U51.5]  # SUM_AMP virtual ground (+ Q-cell A In-/Out)
   HP_HPINV_L:   [U53.1, R94.2, U49.3, U53.5]  # SUM_AMP out (HP_inv = HP tap) -> OTA1 In+ + follower In+
-  HP_V1CAP_L:   [U49.5, U49.7, C29A.1]
-  HP_V1_L:      [U49.8, U49.14, R112.1, U51.3]  # v1 -> OTA2 In+ + pulldown + Q-cell A In+
-  HP_V2CAP_L:   [U49.12, U49.10, C29B.1]
-  HP_V2_L:      [U49.9, R92.1, R113.1]        # v2 (LP) -> R_FB feedback + pulldown (not output)
+  # §C (change 0020): tap state variables from the UNBUFFERED OTA outputs (pins 5/12),
+  # NOT the Darlington buffer (8/9) which sits ~1.2V below + temp-dependent (SPICE ota_svf_loop.cir:
+  # 1.26V offset into the next OTA's ±30mV input). Buffers (7→8, 10→9) left unused; pulldowns removed.
+  HP_V1_L:      [U49.5, C29A.1, U49.14, U51.3]  # v1 = OTA1 unbuffered out (pin5) + cap -> OTA2 In+ + Q-cell A In+ (§C)
+  HP_V2_L:      [U49.12, C29B.1, R92.1]         # v2 = OTA2 unbuffered out (pin12) + cap -> R_FB feedback (§C)
   HP_OUT_L:     [U53.7, U53.6]                # HP unity follower out (= HP_inv tap) -> block-8 (boundary)
 
   # ---- R channel SVF ----
   BP_OUT_R:     [R31.1]                        # <- block-6 BP out R (boundary)
   HP_SUMINV_R:  [U54.2, R31.2, R93.2, R95.1, U51.13, U51.12]  # SUM_AMP v-ground + Q-cell B In-/Out
   HP_HPINV_R:   [U54.1, R95.2, U50.3, U54.5]  # SUM_AMP out (HP tap) -> OTA1 In+ + follower In+
-  HP_V1CAP_R:   [U50.5, U50.7, C29C.1]
-  HP_V1_R:      [U50.8, U50.14, R114.1, U51.14]  # v1 -> OTA2 In+ + pulldown + Q-cell B In+
-  HP_V2CAP_R:   [U50.12, U50.10, C29D.1]
-  HP_V2_R:      [U50.9, R93.1, R115.1]
+  HP_V1_R:      [U50.5, C29C.1, U50.14, U51.14]  # v1 = OTA1 unbuffered out (pin5) + cap -> OTA2 In+ + Q-cell B In+ (§C)
+  HP_V2_R:      [U50.12, C29D.1, R93.1]          # v2 = OTA2 unbuffered out (pin12) + cap -> R_FB feedback (§C)
   HP_OUT_R:     [U54.7, U54.6]                # HP unity follower out -> block-8 (boundary)
 
   # ---- OTA linearizing R (integrator In- pins) ----
@@ -150,10 +146,17 @@ nets:
   HP_IREF_TR:   [R109.2, RV16.1, RV16.2]
 
   # ---- IRES_AMP / Q driver (U66 half A) ----
+  # §D/M5 (change 0020): R_Iabc 1M→100k applied (R104/R105). The deeper IRES_AMP redesign — driving
+  # V_ires into the NEGATIVE ~−10.0..−10.8V window required because the LM13700 Iabc pin sits ~2·Vbe
+  # above V− (≈ −10.8V), NOT GND (SPICE q_cell.cir: Q≈0.74 at V_ires≈−10.73V; useful Q in a steep ~0.8V
+  # window just above the pin) — plus the matching V_bias reference + clamp-polarity flip, is a
+  # Phase-3R/trim-backed bring-up item ([NV]); RV18 (V_bias) needs fine/multi-turn resolution near the
+  # rail. Topology of the negative-drive bias network left for the block-5 combined-edit pass (shares
+  # the same IRES_AMP pattern) — see change-file §D. The clamp D12 stays as-is pending that redesign.
   HP_VBIAS:     [RV18.2, R106.1]
   HP_RES:       [R107.1]                       # resonance CV in (boundary)
   HP_IRES_SUM:  [U66.2, R106.2, R107.2, R108.1]
-  HP_VIRES:     [U66.1, R108.2, D12.K, R104.1, R105.1]  # V_ires (>=0 by D12) -> R_Iabc L+R
+  HP_VIRES:     [U66.1, R108.2, D12.K, R104.1, R105.1]  # V_ires -> R_Iabc L+R (clamp D12 unchanged pending §D bias redesign)
 
 no_connect:
   # LM13700 integrator linearizing-diode bias pins unused.
@@ -161,6 +164,15 @@ no_connect:
   - U49.15
   - U50.2
   - U50.15
+  # §C (change 0020): integrator Darlington buffers unused (state vars tap unbuffered pins 5/12).
+  - U49.7
+  - U49.8
+  - U49.9
+  - U49.10
+  - U50.7
+  - U50.8
+  - U50.9
+  - U50.10
   # Q-cell LM13700 (U51, both cells active): Darlington buffers + diode-bias pins unused.
   - U51.2
   - U51.7

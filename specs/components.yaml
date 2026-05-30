@@ -593,8 +593,8 @@ components:
   - { ref: R98,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "HP OTA1 linearizing R R (R_LIN_A_R)" }
   - { ref: R99,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "HP OTA2 linearizing R R (R_LIN_B_R)" }
   # R100-R103 removed (change 0018): HP output is a unity non-inverting follower, no inv-buffer resistors.
-  - { ref: R104, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "1MΩ",    fn: "HP Q V→I: V_ires_L → U51 cellA Iabc (R_Iabc_L)" }
-  - { ref: R105, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "1MΩ",    fn: "HP Q V→I: V_ires_R → U51 cellB Iabc (R_Iabc_R)" }
+  - { ref: R104, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "HP Q V→I: V_ires_L → U51 cellA Iabc (R_Iabc_L); change 0020 §D/M5: 1M→100k (Iabc pin ~−10.8V)" }
+  - { ref: R105, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "HP Q V→I: V_ires_R → U51 cellB Iabc (R_Iabc_R); change 0020 §D/M5: 1M→100k (Iabc pin ~−10.8V)" }
   - { ref: R106, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "HP IRES_AMP V_bias input R (R_QBIAS)" }
   - { ref: R107, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "HP IRES_AMP resonance CV input R (R_QINV)" }
   - { ref: R108, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "HP IRES_AMP feedback R (R_f_q)" }
@@ -602,10 +602,8 @@ components:
   - { ref: R110, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "49.9kΩ", tol: "1%", fn: "HP expo V/oct scaling R (R_VOCT); change 0020 §A: 47k→49.9k centers 17.92mV/oct at mid-trim" }
   - { ref: R229, board: audio,   block: block-7, part: "Vishay TFPT", pkg: "0805", val: "1kΩ",    fn: "HP expo tempco shunt (HP_EXPO_BASE→GND); +4110ppm/K V/oct temp-comp; change 0020 §A/§4" }
   - { ref: R111, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "HP expo emitter degeneration (R_E)" }
-  - { ref: R112, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "HP L OTA1 buffer (v1) emitter pulldown to V-" }
-  - { ref: R113, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "HP L OTA2 buffer (v2) emitter pulldown to V-" }
-  - { ref: R114, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "HP R OTA1 buffer (v1) emitter pulldown to V-" }
-  - { ref: R115, board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "HP R OTA2 buffer (v2) emitter pulldown to V-" }
+  # R112-R115 (HP integrator Darlington-buffer pulldowns) removed — change 0020 §C: state vars now
+  # tap the unbuffered OTA outputs (pins 5/12); the on-chip buffers are unused.
   - { ref: D12,  board: audio,   block: block-7, part: 1N4148W,    pkg: SOD-123,  fn: "HP V_ires ≥0 clamp (anode GND, cathode V_ires)" }
   - { ref: C86,  board: audio,   block: block-7, part: ~,          pkg: "0603",   val: "100nF",  fn: "HP expo I_ref node bypass (C0G)" }
   - { ref: C87,  board: audio,   block: block-7, part: ~,          pkg: "0402",   val: "10nF",   fn: "HP OTA Iabc bypass L (C_IABC_L)" }
