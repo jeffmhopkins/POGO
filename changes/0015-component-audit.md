@@ -61,6 +61,33 @@ prioritized list of recommended follow-up fixes.
 - Jack symbol pins `1/2/3` vs. footprint pads `S/T/TN` (tolerated WARN) — needs a verdict.
 - Supplier-page (NOPDF) parts — confirm each is genuinely catalog-only, not a missed PDF.
 
+## Result
+
+Audit complete. Report: `specs/component-verification-report.md`. 6 parallel adversarial
+agents (5 web-sourced part batches + 1 registry-internal). Two board-breaking findings
+independently re-verified by the lead.
+
+**HIGH (board-breaking):**
+- `that2180` — MPN `THAT2180LD` does not exist (real: `2180{A,B,C}L08-U`); package is
+  **8-pin SIP through-hole only**, not SOIC-8 SMD. Error propagated to `components.yaml`
+  U4/U5 and CLAUDE.md's component philosophy.
+- `bat54s` — symbol draws **common-cathode (BAT54C)** topology with the common node on
+  pin 2; real BAT54S is a **series** dual (1=A1, 2=K2, 3=K1;A2). Affects all clamp nets.
+
+**MEDIUM:** `R_INV_IN`/`R_INV_FB` missing `tol:1%` (header requires it; 38 parts); jack
+symbol pins `1/2/3` ↔ pads `S/T/TN` (+ `SW`↔`TN`); `slide_pot_45mm` unsourced + 20mm/45mm
+supplier conflict; `bzx84c10` no `datasheet:` block.
+
+**LOW/cosmetic:** `bourns_3296w` stale `version`; `opa1612` no `symbol:` field; 4 weak
+supplier-page datasheets; DW3/DW5 placeholder MPNs; cd4053 doc-number drift + EOL; 6 orphan
+footprints; `c.yaml` "+" on non-polarized cap; misc version-string style.
+
+**Verified correct:** all pinouts (opa1612, tl072/74, lm13700 16/16, that340, cd4053 16/16,
+that2180 pins, diodes/zeners), ref-uniqueness 476/476, `part:`↔`matches[]` 24×1:1, BOM 13/13.
+
+No fixes applied (report-only). Follow-ups listed in the report (Lane B / Lane C).
+
 ## Notes / Phase-3R flags
 
-Audit only; advances no block's 1R–6R status. Findings may spawn Lane-B fixes.
+Audit only; advances no block's 1R–6R status. Findings spawn Lane-B (that2180, bat54s,
+slide_pot_45mm, jack) and Lane-C (metadata) fixes — each its own gated change.
