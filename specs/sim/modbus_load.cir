@@ -1,0 +1,35 @@
+* POGO mod-bus REAL per-destination load — refine §H buffer budget (change 0020)
+* Earlier deck lumped V_src load as a single R (5k or 10k). Trace the ACTUAL attenuverter:
+*   V_src = pot pin3 = R_INV_IN.1
+*   R_INV_IN (10k) -> INVN (virtual ground ~0V)            => 10k to GND
+*   pot (10k) from V_src(pin3) to NVSRC(pin1) = -V_src     => 10k to an inverted copy
+*   inverter: NVSRC = -V_src (gain -1, low-Z op-amp out)
+* So V_src sees: 10k to 0V  ||  10k to (-V_src).
+* The pot path: I = (V_src-(-V_src))/10k = 2*V_src/10k => looks like 5k to GND.
+* Net V_src load = 10k || 5k = 3.33k. Bus drives through R37=100 ohm.
+
+* One destination, modeled exactly (inverter as a -1 VCVS):
+Vbus bus 0 DC 10
+Rprot bus vsrc 100          ; R37
+Rinv  vsrc invn 10k         ; R_INV_IN
+Einv  nvsrc 0 invn 0 -1e6   ; ideal inverting opamp (open loop) ...
+* simpler: model NVSRC = -V_src directly (the closed inverter output)
+* and R_INV_FB from invn to nvsrc closes it.
+Rfb   invn nvsrc 10k         ; R_INV_FB (closes the -1 inverter)
+Rpot  vsrc nvsrc 10k         ; attenuverter pot end-to-end
+
+.control
+  op
+  let isrc  = (10 - v(vsrc))/100      ; current the bus delivers to ONE destination
+  let rload = v(vsrc)/isrc            ; effective V_src node resistance (excl R37)
+  echo "one destination @ bus=10V:"
+  echo "  V_src      = " $&v(vsrc) " V"
+  echo "  I per dest = " $&isrc " A"
+  let itot = isrc*18
+  echo "  x18 destinations = " $&itot " A  <-- buffer worst-case current"
+  echo "  (note: depth with 100k bug = Vsrc_load/(100k+100+Vsrc_load) check below)"
+  let vsrcload = v(vsrc)/isrc
+  let depth_bug = vsrcload/(100e3+100+vsrcload)*100
+  echo "  implied bug depth = " $&depth_bug " %  (should match ~3%)"
+.endc
+.end

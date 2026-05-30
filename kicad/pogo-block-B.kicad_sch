@@ -439,19 +439,19 @@
   (uuid "2bf07339-7a41-50a8-b2ed-d4b3fdd68954")
 )
 (global_label "BP3_L_BUF"
-  (shape input)
+  (shape output)
   (at 107.620 40.000 0)
   (effects (font (size 1.016 1.016)) (justify left))
   (uuid "35c285d0-7b44-5981-bbc5-cf8801d17313")
 )
 (global_label "BP3_L_BUF"
-  (shape input)
+  (shape output)
   (at 92.380 42.540 0)
   (effects (font (size 1.016 1.016)) (justify left))
   (uuid "bbd6d635-4e89-5f74-88dd-d9f5a58d5116")
 )
 (global_label "BP3_L_BUF"
-  (shape input)
+  (shape output)
   (at 100.000 98.810 0)
   (effects (font (size 1.016 1.016)) (justify left))
   (uuid "9baf2461-021f-58eb-9266-2f158aa2d9f1")

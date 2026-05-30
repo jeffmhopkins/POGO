@@ -126,6 +126,12 @@ output — identical to HP, simpler than LP1.
 > the shared U9/U10 cell-B Q boundary (hosted on block-5), the own IRES_AMP (U65), and the
 > non-inverting LP output follower verified consistent with §2 and the plugin. Doc-only pass.
 
+> 🔧 **Change 0020 (CV-conditioning fixes):** mirrors block-7 §A/§C/§D.
+> - **§A:** `R86` R_VOCT **47k→49.9k** + **Vishay TFPT 1k tempco** shunt (R230) LP2_EXPO_BASE→GND.
+> - **§C:** v1/v2 tap the **unbuffered** OTA outputs (pins 5/12); v2 drives the LP output buffer +
+>   R_FB from the clean cap node. Pulldowns R88–R91 removed.
+> - **§D:** `R80/R81` R_Iabc **1M→100k** (Iabc pin ≈ −10.8 V). IRES_AMP negative-drive = Phase-3R trim.
+
 ### Component derivations
 
 **Integrator capacitors C1, C2 (per channel, ×2 channels = 4 total): 47 nF C0G/NP0 0603**

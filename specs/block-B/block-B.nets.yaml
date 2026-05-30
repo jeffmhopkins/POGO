@@ -57,7 +57,9 @@ nets:
   BP3_R_OUT:  [R224.2]                       # -> block-6 J28 (BP3_R jack) (boundary)
 
 # MAIN jacks (J29/J30) do not normal — independent L/R (switch lugs unused).
-# (BP3_R normals to BP3_L: that normalling is on J28 in block-6-mix, which owns the BP3 jacks.)
+# BP3_R normals to BP3_L on J28 (in block-6-mix): J28's switch lug taps BP3_L_BUF — U62A's
+# STIFF op-amp output (pre-R36, exported as boundary) — so an unpatched R jack reads clean L
+# without tying the two post-1k outputs into (L+R)/2 (change 0020 §G/M1; SPICE: bp3_normal.cir).
 no_connect:
   - J29.3
   - J30.3
@@ -70,3 +72,4 @@ boundary:
   - BP3_TAP_R    # from block-6 (BP3 group tap)
   - BP3_L_OUT    # to   block-6 (J27 BP3_L jack)
   - BP3_R_OUT    # to   block-6 (J28 BP3_R jack)
+  - BP3_L_BUF    # to   block-6 (J28 switch lug; BP3_R-normals-to-L, stiff pre-1k node, change 0020 §G)

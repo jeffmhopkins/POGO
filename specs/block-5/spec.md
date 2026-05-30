@@ -158,6 +158,23 @@ but its output is ignored in the signal chain until the ALT jacks are unpatched.
 > verified consistent with §2 and the plugin. Doc corrections only (banner, Q-curve note,
 > RV5/RV6 values).
 
+> 🔧 **Change 0020 (CV-conditioning fixes) — the netlist now reflects these; values updated here:**
+> - **§A Expo V/oct divider (C1):** the expo base previously saw the V/oct CV through series R only
+>   (no shunt → railed). Added a base divider: `R_VOCT` (R63/R66) **47k→49.9k** + a **Vishay TFPT
+>   1k tempco** shunt (R231/R232) base→GND. Centers 17.92 mV/oct (V_T·ln2) at mid-trim (SPICE
+>   `expo_voct.cir`). The tempco (+4110 ppm/K) is the temp-comp the THAT340 does NOT provide internally.
+> - **§B Stereo tilt (C3):** tilt now sums **passively** with V_freq at the tempco-shunted base via an
+>   equal series R — `R55/R56` **100k→54.9k** (=R_VOCT+RV_mid → 1:1 octave weight; SPICE
+>   `lp1_tilt_passive.cir`: freq=tilt=17.57 mV/V). **No op-amp summer needed.** U13-A still makes −V_tilt
+>   for the R channel; RV6 null retained.
+> - **§C OTA state-variable tap (H5):** v1/v2 now tap the **unbuffered** LM13700 OTA outputs (pins 5/12),
+>   not the Darlington buffers (8/9) which injected ~1.26 V temp-dependent DC into the next OTA input
+>   (SPICE `ota_svf_loop.cir`). Buffer emitter-pulldowns R68–R71 removed; buffer pins unused. f_ref
+>   unchanged (cap stays on the OTA output node).
+> - **§D Q-cell R_Iabc (M5):** `R57/R58` **1M→100k** — the LM13700 Iabc pin sits ~2·V_BE above V−
+>   (≈ −10.8 V, not GND), so 1 MΩ delivered ~14× too much I_abc. (The matching IRES_AMP negative-V_ires
+>   drive + clamp polarity is a trim-backed Phase-3R bring-up item — see change 0020 §D.)
+
 ### Component derivations
 
 **Integrator capacitors C1, C2 (per channel, ×2 channels = 4 total):**

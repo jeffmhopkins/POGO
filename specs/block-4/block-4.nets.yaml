@@ -55,6 +55,24 @@ parts:
   RV2: { sym: trimpot, part: "Bourns 3224W", value: VCA_UNITY_R }
   RV44: { sym: trimpot, part: "bipolar pot", value: VCA_AMT }   # VCA_AMT depth pot (was RV24)
   RV45: { sym: trimpot, part: "lin pot", value: VCA_OFS }       # VCA_OFS floor pot (was RV25)
+  # ---- HIGH-3 (change 0020): V_CTRL buffer + Ec+ voltage-injection trims ----
+  # The unity trims were series rheostats into the high-Z Ec+ port (couldn't set an offset; SPICE
+  # vca_ecplus.cir: ~0.004 dB). Replaced by: V_CTRL buffered (U97-A) then per-cell R_ec(10k)→Ec+,
+  # with the trim pot now a divider across a shared ±1.2V ref (REF_P/REF_N), wiper→R_inj(1M)→Ec+
+  # → ±~2 dB unity-null authority (SPICE vca_ecplus_full.cir: g_ctrl 0.984, −2.1..+1.9 dB).
+  U97: { sym: opamp2, part: TL072CDT, value: TL072 }   # A = V_CTRL unity buffer (B spare/ALT use)
+  C117: { sym: c, value: 100nF }   # U97 +12 decoupling
+  C118: { sym: c, value: 100nF }   # U97 -12 decoupling
+  R233: { sym: r, value: 45k3 }    # ±ref divider: +12V → REF_P
+  R234: { sym: r, value: 45k3 }    # ±ref divider: -12V → REF_N
+  R235: { sym: r, value: 10k }     # R_ec main-L (V_CTRL_BUF → EC_L)
+  R236: { sym: r, value: 10k }     # R_ec main-R
+  R237: { sym: r, value: 10k }     # R_ec ALT-L
+  R238: { sym: r, value: 10k }     # R_ec ALT-R
+  R239: { sym: r, value: 1M }      # R_inj main-L (trim wiper → EC_L)
+  R240: { sym: r, value: 1M }      # R_inj main-R
+  R241: { sym: r, value: 1M }      # R_inj ALT-L
+  R242: { sym: r, value: 1M }      # R_inj ALT-R
   RV46: { sym: trimpot, part: "Bourns 3224W", value: VCA_UNITY_ALT_L }   # ALT-L Ec+ unity trim
   RV47: { sym: trimpot, part: "Bourns 3224W", value: VCA_UNITY_ALT_R }   # ALT-R Ec+ unity trim
   C7:  { sym: c, value: 100nF }   # U4 V+
@@ -75,13 +93,17 @@ parts:
 
 nets:
   "+12V":  [U4.7, U5.7, U6.8, U63.8, U78.7, U79.7, U80.8, D3.2, RV45.3,
-            C7.1, C9.1, C41.1, C43.1, C111.1, C113.1, C115.1]
+            C7.1, C9.1, C41.1, C43.1, C111.1, C113.1, C115.1,
+            U97.8, C117.1, R233.1]   # HIGH-3: U97 buffer V+ + ref-divider top
   "-12V":  [U4.5, U5.5, U6.4, U63.4, U78.5, U79.5, U80.4, D3.1,
-            C8.1, C10.1, C42.1, C44.1, C112.1, C114.1, C116.1]
+            C8.1, C10.1, C42.1, C44.1, C112.1, C114.1, C116.1,
+            U97.4, C118.1, R234.1]   # HIGH-3: U97 buffer V- + ref-divider bottom
   GND:     [U4.3, U4.4, U4.6, U5.3, U5.4, U5.6, U6.3, U6.5, U63.3, U63.5,
             U78.3, U78.4, U78.6, U79.3, U79.4, U79.6, U80.3, U80.5,
             RV45.1, J26.2, C7.2, C8.2, C9.2, C10.2, C41.2, C42.2, C43.2, C44.2,
-            C111.2, C112.2, C113.2, C114.2, C115.2, C116.2]
+            C111.2, C112.2, C113.2, C114.2, C115.2, C116.2,
+            U97.5, C117.2, C118.2]   # HIGH-3: U97-B (+) in to GND + U97 decoupling returns
+  U97B_SPARE: [U97.7, U97.6]   # U97-B unused: out tied to in- (unity), in+ on GND
 
   # ---- main audio path (V->I  ->  THAT2180  ->  I/V) ----
   PG_OUT_L:  [R7.1]                       # <- block-1 pre-gain out L (boundary)
@@ -92,8 +114,9 @@ nets:
   IV_R_IN:   [U5.8, U6.6, R41.1]
   VCA_OUT_L: [U6.1, R40.2]                # I/V out L -> LP1 (boundary; inverted)
   VCA_OUT_R: [U6.7, R41.2]
-  EC_L:      [U4.2, RV1.1, RV1.2]         # Ec+ L via unity trim (rheostat)
-  EC_R:      [U5.2, RV2.1, RV2.2]
+  # Ec+ = V_CTRL_BUF via R_ec + trim-wiper injection via R_inj (HIGH-3, change 0020)
+  EC_L:      [U4.2, R235.2, R239.2]       # Ec+ main-L: R_ec(R235) from V_CTRL_BUF + R_inj(R239) from RV1 wiper
+  EC_R:      [U5.2, R236.2, R240.2]
 
   # ---- ALT-BP VCA (mirrors main; shared V_CTRL) -> BP3 (block-6) ----
   ALT_OUT_L:    [R129.1]                  # <- block-1 ALT gain-stage out L (boundary)
@@ -104,8 +127,8 @@ nets:
   ALT_IV_R_IN:  [U79.8, U80.6, R132.1]
   ALT_VCA_OUT_L: [U80.1, R131.2]          # ALT-L I/V out -> block-6 BP3 selector (boundary)
   ALT_VCA_OUT_R: [U80.7, R132.2]
-  EC_ALT_L:     [U78.2, RV46.1, RV46.2]   # Ec+ ALT-L via unity trim
-  EC_ALT_R:     [U79.2, RV47.1, RV47.2]
+  EC_ALT_L:     [U78.2, R237.2, R241.2]   # Ec+ ALT-L: R_ec(R237) from V_CTRL_BUF + R_inj(R241) from RV46 wiper
+  EC_ALT_R:     [U79.2, R238.2, R242.2]
 
   # ---- control path (CV+OFS summed BEFORE the symmetric AMT attenuverter) ----
   VCA_CV_TIP: [J26.1, R9.1]               # VCA_IN jack tip -> 100Ω
@@ -115,7 +138,17 @@ nets:
   NEFFCV:    [U63.1, R43.2, R44.1, RV44.1] # -effCV: summer out -> inverter in + AMT pot CCW(-)
   U63B_INV:  [U63.6, R44.2, R46.1]        # U63B: effCV inverter (-) node
   PEFFCV:    [U63.7, R46.2, RV44.3]       # +effCV: inverter out -> AMT pot CW(+)
-  V_CTRL:    [RV44.2, RV1.3, RV2.3, RV46.3, RV47.3]  # AMT wiper -> 4 Ec+ unity trims (main L/R + ALT L/R)
+  # HIGH-3 (change 0020): AMT wiper -> U97-A unity buffer -> V_CTRL_BUF -> 4× R_ec (decouples the
+  # 4 cells; the old unbuffered wiper drove all 4 trims and coupled them).
+  V_CTRL:    [RV44.2, U97.3]                       # AMT wiper -> buffer (+) in
+  V_CTRL_BUF: [U97.1, U97.2, R235.1, R236.1, R237.1, R238.1]  # buffer out=in- (unity) -> 4 R_ec
+  # Ec+ injection trims: each pot is a divider across the shared ±1.2V ref (REF_P/REF_N), wiper -> R_inj.
+  REF_P:     [R233.2, RV1.1, RV2.1, RV46.1, RV47.1]   # +1.2V ref rail -> trim pot top ends
+  REF_N:     [R234.2, RV1.3, RV2.3, RV46.3, RV47.3]   # -1.2V ref rail -> trim pot bottom ends
+  TRIMW_L:   [RV1.2, R239.1]                        # main-L trim wiper -> R_inj
+  TRIMW_R:   [RV2.2, R240.1]
+  TRIMW_ALT_L: [RV46.2, R241.1]
+  TRIMW_ALT_R: [RV47.2, R242.1]
 
   MOD_BUS:   [J26.3]                      # <- block-3 mod bus (VCA_IN normalling, boundary)
 

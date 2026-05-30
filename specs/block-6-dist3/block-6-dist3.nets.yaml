@@ -68,11 +68,13 @@ parts:
   D5_3Rb: { sym: zener, part: BZX84C5V1, value: BZX84C5V1 }
   R128_3sc: { sym: r, value: 100k }
   R128_3wf: { sym: r, value: 100k }
-  # BP3 input selector (change 0018): CD4053 picks ALT-VCA vs LP1 per channel, gated by ALT_L_DET
+  # BP3 input selector: CD4053 picks ALT-VCA vs LP1 per channel — X/L gated by ALT_L_DET (pin11/A),
+  # Y/R gated independently by ALT_R_DET (pin10/B) (change 0020: ALT L/R fully independent)
   U81: { sym: cd4053, part: CD4053, value: CD4053 }   # BP3 sel: X=L, Y=R (Z spare)
   C110_U81p: { sym: c, value: 100nF }
   C110_U81n: { sym: c, value: 100nF }
-  R133: { sym: r, value: 100k }                        # ALT_L_DET pull-up to +12V (select HIGH when patched)
+  R133: { sym: r, value: 100k }                        # ALT_L_DET pull-up to +12V (X/L select HIGH when patched)
+  R226: { sym: r, value: 100k }                        # ALT_R_DET pull-up to +12V (Y/R select; change 0020, mirrors R133)
   # ---- DRIVE VCA cell (mirrors block-4 THAT2180; see block-6-dist1 for prose) ----
   U89: { sym: vca, part: THAT2180, value: THAT2180 }   # BP3 DRIVE VCA L
   U90: { sym: vca, part: THAT2180, value: THAT2180 }   # BP3 DRIVE VCA R
@@ -85,8 +87,15 @@ parts:
   R174: { sym: r, value: 100k }   # drive summer: DRIVE-CV input (MOD_BP3_DIST)
   R175: { sym: r, value: 100k }   # drive summer: bias input (knob=0.20 ~ 0 dB unity; Phase-3R)
   R176: { sym: r, value: 100k }   # drive summer: feedback
-  RV55: { sym: trimpot, part: "Bourns 3224W", value: BP3_DRIVE_UNITY_L }  # Ec+ L unity trim
+  RV55: { sym: trimpot, part: "Bourns 3224W", value: BP3_DRIVE_UNITY_L }  # Ec+ L unity trim (HIGH-3 injection divider)
   RV56: { sym: trimpot, part: "Bourns 3224W", value: BP3_DRIVE_UNITY_R }  # Ec+ R unity trim
+  # HIGH-3 (change 0020): Ec+ voltage-injection trim (mirrors dist1). See dist1 for prose.
+  R255: { sym: r, value: 45k3 }   # ±ref divider +12V→REF_P3
+  R256: { sym: r, value: 45k3 }   # ±ref divider -12V→REF_N3
+  R257: { sym: r, value: 10k }    # R_ec L (V_DRIVE_CTRL_3→EC_BP3_DRIVE_L)
+  R258: { sym: r, value: 10k }    # R_ec R
+  R259: { sym: r, value: 1M }     # R_inj L (RV55 wiper→EC_BP3_DRIVE_L)
+  R260: { sym: r, value: 1M }     # R_inj R (RV56 wiper→EC_BP3_DRIVE_R)
   RV39: { sym: trimpot, part: "knob", value: BP3_DIST }   # DRIVE knob (control board; existing ref)
   C110_U89p: { sym: c, value: 100nF }
   C110_U89n: { sym: c, value: 100nF }
@@ -127,19 +136,24 @@ nets:
   BP3_DRIVEIV_R: [U90.8, U93.6, R172.1]
   BP3_DRIVEOUT_L: [U93.1, R171.2, R18_3L.1, R20_3L.1, R22_3L.1, C_WF_3La.1, C_WF_3Lb.1]   # -> SC/HC/WF
   BP3_DRIVEOUT_R: [U93.7, R172.2, R18_3R.1, R20_3R.1, R22_3R.1, C_WF_3Ra.1, C_WF_3Rb.1]   # -> SC/HC/WF
-  EC_BP3_DRIVE_L: [U89.2, RV55.1, RV55.2]
-  EC_BP3_DRIVE_R: [U90.2, RV56.1, RV56.2]
+  EC_BP3_DRIVE_L: [U89.2, R257.2, R259.2]        # Ec+ L: R_ec from V_DRIVE_CTRL_3 + R_inj from RV55 wiper (HIGH-3)
+  EC_BP3_DRIVE_R: [U90.2, R258.2, R260.2]
+  REF_P3: [R255.2, RV55.1, RV56.1]
+  REF_N3: [R256.2, RV55.3, RV56.3]
+  TRIMW_BP3_L: [RV55.2, R259.1]
+  TRIMW_BP3_R: [RV56.2, R260.1]
   MOD_BP3_DIST: [R174.1]
   BP3_DRIVE_KNOB: [RV39.2, R173.1]
   BP3_DRIVE_SUM: [U93.9, R173.2, R174.2, R175.2, R176.1]
-  V_DRIVE_CTRL_3: [U93.8, R176.2, RV55.3, RV56.3]
+  V_DRIVE_CTRL_3: [U93.8, R176.2, R257.1, R258.1] # summer out (low-Z) -> both R_ec (HIGH-3)
   BP3_DRIVE_SPARE: [U93.14, U93.13]
   # selector inputs: X0/Y0 = LP1 band (ALT unpatched), X1/Y1 = ALT-VCA (ALT patched)
   LP1_OUT_L: [U81.12]                     # <- block-5 LP1 band L (boundary) -> mux X0
   LP1_OUT_R: [U81.2]                      # <- block-5 LP1 band R -> mux Y0
   ALT_VCA_OUT_L: [U81.13]                 # <- block-4 ALT-VCA L (boundary) -> mux X1
   ALT_VCA_OUT_R: [U81.1]                  # <- block-4 ALT-VCA R -> mux Y1
-  ALT_L_DET: [U81.11, U81.10, R133.2]     # <- block-1 ALT_BP_L insertion detect (boundary); select A+B; pull-up via R133
+  ALT_L_DET: [U81.11, R133.2]             # <- block-1 ALT_BP_L detect (boundary); X/L select (A, pin11); pull-up R133
+  ALT_R_DET: [U81.10, R226.2]             # <- block-1 ALT_BP_R detect (boundary); Y/R select (B, pin10); pull-up R226 (change 0020)
   BP3_SCVG_L: [U38.2, R18_3L.2, R19_3L.1, D4_3Lb.K, D4_3Lc.A]
   BP3_SCOUT_L: [U38.1, R19_3L.2, D4_3La.A, D4_3Ld.K, U33.13]
   BP3_SCM1_L: [D4_3La.K, D4_3Lb.A]
@@ -189,12 +203,12 @@ nets:
   BP3_CLIP_LEDA: [R211.2, BP3_CLIP_LED.A]
   VREF_P4: [U96.2, U96.9]              # <- dist1 shared +4V (boundary)
   VREF_N4: [R212.1, R213.1]            # <- dist1 shared -4V (boundary)
-  "+12V": [U33.16, C110_U33p.1, U38.8, C110_U38p.1, U39.8, C110_U39p.1, U44.8, C110_U44p.1, U45.8, C110_U45p.1, U77.16, C110_U77p.1, U81.16, C110_U81p.1, R133.1,
+  "+12V": [U33.16, C110_U33p.1, U38.8, C110_U38p.1, U39.8, C110_U39p.1, U44.8, C110_U44p.1, U45.8, C110_U45p.1, U77.16, C110_U77p.1, U81.16, C110_U81p.1, R133.1, R226.1,
            U89.7, U90.7, U93.4, C110_U89p.1, C110_U90p.1, C110_U93p.1,
-           U96.4, C110_U96p.1]
+           U96.4, C110_U96p.1, R255.1]
   "-12V": [U33.7, C110_U33n.1, U38.4, C110_U38n.1, U39.4, C110_U39n.1, U44.4, C110_U44n.1, U45.4, C110_U45n.1, U77.7, C110_U77n.1, U81.7, C110_U81n.1,
            U89.5, U90.5, U93.11, C110_U89n.1, C110_U90n.1, C110_U93n.1,
-           U96.11, C110_U96n.1]
+           U96.11, C110_U96n.1, R256.1]
   GND: [U33.8, U33.6, C110_U33p.2, C110_U33n.2, C110_U38p.2, C110_U38n.2, C110_U39p.2, C110_U39n.2, C110_U44p.2, C110_U44n.2, C110_U45p.2, C110_U45n.2, U77.8, U77.6, C110_U77p.2, C110_U77n.2, U38.3, D5_3Lb.3, U38.5, U44.3, D6_3Lb.K, D6_3Lc.A, C_WF_3La.2, C_WF_3Lb.2, U39.3, D5_3Rb.3, U39.5, U45.3, D6_3Rb.K, D6_3Rc.A, C_WF_3Ra.2, C_WF_3Rb.2, U81.8, U81.6, U81.5, U81.3, U81.4, U81.9, C110_U81p.2, C110_U81n.2,
         U89.3, U89.4, U89.6, U90.3, U90.4, U90.6, U93.3, U93.5, U93.10, U93.12, RV39.1,
         C110_U89p.2, C110_U89n.2, C110_U90p.2, C110_U90n.2, C110_U93p.2, C110_U93n.2,
@@ -218,7 +232,8 @@ boundary:
   - LP1_OUT_R        # <- block-5 (mux Y0)
   - ALT_VCA_OUT_L    # <- block-4 ALT-VCA (mux X1)
   - ALT_VCA_OUT_R    # <- block-4 ALT-VCA (mux Y1)
-  - ALT_L_DET        # <- block-1 ALT_BP_L insertion detect (select)
+  - ALT_L_DET        # <- block-1 ALT_BP_L insertion detect (X/L select)
+  - ALT_R_DET        # <- block-1 ALT_BP_R insertion detect (Y/R select, change 0020)
   - MOD_BP3_DIST     # <- block-3 DRIVE CV (drive-control summer)
   - BP3_DISTOUT_L
   - BP3_DISTOUT_R

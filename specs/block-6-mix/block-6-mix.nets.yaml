@@ -85,8 +85,12 @@ nets:
   BP_OUT_L:   [U27.7, R17_fb.2]                    # +(dry+wet) L → block-7 (boundary)
   BP_POLVG_R: [U27.2, R222.2, R223.1]
   BP_OUT_R:   [U27.1, R223.2]                      # +(dry+wet) R → block-7 (boundary)
-  BP3_L_OUT: [J27.1, J28.3]        # buffered BP3 L -> J27 tip + J28 normalling lug (BP3_R normals to L, change 0018)
-  BP3_R_OUT: [J28.1]               # buffered BP3 R -> J28 tip; when J28 unpatched, tip carries BP3_L via J28.3
+  BP3_L_OUT: [J27.1]               # buffered BP3 L (post-1k) -> J27 tip
+  BP3_R_OUT: [J28.1]               # buffered BP3 R (post-1k) -> J28 tip
+  # BP3_R normals to BP3_L (change 0020 §G/M1): J28 switch lug taps the L buffer's STIFF
+  # op-amp output (BP3_L_BUF, pre-1k series R, from block-B) so an unpatched R jack reads
+  # clean L without tying the two post-1k outputs together (the old (L+R)/2 bug).
+  BP3_L_BUF: [J28.3]               # <- block-B U62A stiff output (boundary); R-normals-to-L
   BP1_BANDOUT_L: [R26_L1.1]
   BP1_BANDOUT_R: [R26_R1.1]
   BP2_BANDOUT_L: [R26_L2.1]
@@ -113,6 +117,7 @@ boundary:
   - BP3_TAP_R
   - BP3_L_OUT
   - BP3_R_OUT
+  - BP3_L_BUF      # <- block-B U62A stiff output (BP3_R-normals-to-L switch lug)
   - BP_OUT_L
   - BP_OUT_R
 

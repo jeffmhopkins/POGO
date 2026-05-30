@@ -341,7 +341,10 @@ struct Pogo : Module {
 		float pgL = PreGain::process(inL, params[GAIN_PARAM].getValue());
 		float pgR = PreGain::process(inR, params[GAIN_PARAM].getValue());
 
-		// ALT path: ALT_BP_L/R → GAIN_BP3 → bypasses VCA+LP1, feeds BP directly
+		// ALT path: ALT_BP_L/R → GAIN_BP3 → bypasses VCA+LP1, feeds BP directly.
+		// L and R are fully INDEPENDENT (change 0020): each ALT input gates its own BP3
+		// channel; no R→L normal (lets the hardware use two standard single-switch jacks,
+		// each self-detecting via its own switch lug — no dual-switch jack / panel break).
 		bool altLConn = inputs[ALT_BP_L_INPUT].isConnected();
 		bool altRConn = inputs[ALT_BP_R_INPUT].isConnected();
 		float altL = altLConn
@@ -349,7 +352,7 @@ struct Pogo : Module {
 		    : 0.f;
 		float altR = altRConn
 		    ? PreGain::process(inputs[ALT_BP_R_INPUT].getVoltage(), params[ALT_GAIN_PARAM].getValue())
-		    : (altLConn ? altL : 0.f); // normalise R to L alt if only L patched
+		    : 0.f;
 
 		// ── LFOs ─────────────────────────────────────────────────────────────
 		float lfo1Raw = lfo1.process(params[LFO1_RATE_PARAM].getValue(), dt);
@@ -436,9 +439,10 @@ struct Pogo : Module {
 			clamp(params[BP3_DIST_PARAM].getValue() + modDest(BP3_DIST_INPUT, BP3_DIST_ATT_PARAM), 0.f, 1.f),
 		};
 
-		// ALT path feeds BP3 only (VCA-applied); BP1+BP2 always use LP1 output
+		// ALT path feeds BP3 only (VCA-applied); BP1+BP2 always use LP1 output.
+		// Independent per-channel gating (change 0020): R gates on its own ALT_R, not L||R.
 		float bp3InL = altLConn ? VcaBlock::process(altL, vcaAmt, vcaCV) : bandL;
-		float bp3InR = (altLConn || altRConn) ? VcaBlock::process(altR, vcaAmt, vcaCV) : bandR;
+		float bp3InR = altRConn ? VcaBlock::process(altR, vcaAmt, vcaCV) : bandR;
 
 		// ── Distortion BEFORE the bandpass (per band: x → DISTn → BPn) ───────
 		// Each band distorts its own feed first, then the SVF filters it.
