@@ -2,7 +2,7 @@
 
 - **Slug:** netlist-visualizer    **Branch:** `change/netlist-visualizer` (fresh off `dev`)
 - **Lane:** C (tooling / docs — reads nets, changes no connectivity)
-- **Status:** OPEN
+- **Status:** BUILT (awaiting your in-browser review of `docs/netlist.html`)
 - **Blocks:** none (read-only over all blocks)   **Boards:** audio, utility
 - **Opened:** 2026-05-30       **Closed:** —
 - **PR:** —              **CI run:** —
@@ -159,9 +159,20 @@ artifact is self-contained, so it fits the existing gate stack; no JS build step
 
 - [x] Fresh `change/netlist-visualizer` branch off `dev` (stale branch left untouched)
 - [x] Passive-rendering decision closed → symbol glyph (A), Lane C
-- [ ] You approve the revised plan
-- [ ] `--check` modes green locally
+- [x] You approve the revised plan (2026-05-30) — incl. docs index card requirement
+- [x] `--check` modes green locally (components / build_components / generate_schematic /
+      build_panel / build_netlist_viz all OK)
 - [ ] CI green (existing 5 `--check` gates + plugin build + new viz `--check`)
+- [ ] You review `docs/netlist.html` in a browser
+
+## Build result (2026-05-30)
+
+`tools/build_netlist_viz.py` → `docs/netlist.html` (264 KB, self-contained, no deps).
+Extraction: **880 parts** (272 real footprints / 608 symbol glyphs), **591 nets**, 10 blocks,
+13 distinct geoms. **82 advisory pin-fallback warnings — all jacks** (footprint pads named
+`T/S/TN` vs the netlist's symbol-pin numbers `1/2/3`; wires attach at the jack body centroid).
+ICs/diodes/trimpots all map pad-exact. CI: `--check` added to all 3 build jobs; `docs/netlist.html`
+regenerated on Linux and staged into the hardware artifact bundle. Docs index card added.
 
 ## Decisions log
 
