@@ -90,15 +90,15 @@ audio,R51,Resistor,1,,1kΩ,0603,,,,,block-5,LP1 OTA1 linearizing R R (R_LIN_A_R)
 audio,R52,Resistor,1,,1kΩ,0603,,,,,block-5,LP1 OTA2 linearizing R R (R_LIN_B_R)
 audio,R53,Resistor,1,,100kΩ,0603,,,,,block-5,LP1 SUM_AMP feedback R L (R_f_L)
 audio,R54,Resistor,1,,100kΩ,0603,,,,,block-5,LP1 SUM_AMP feedback R R (R_f_R)
-audio,R55,Resistor,1,,100kΩ,0603,,,,,block-5,"LP1 tilt summer R, L expo input (+V_tilt)"
-audio,R56,Resistor,1,,100kΩ,0603,,,,,block-5,"LP1 tilt summer R, R expo input (−V_tilt)"
-audio,R57,Resistor,1,,1MΩ,0603,,,,,block-5,LP1 Q V→I: V_ires_L → U9 cellA Iabc (R_Iabc_L)
-audio,R58,Resistor,1,,1MΩ,0603,,,,,block-5,LP1 Q V→I: V_ires_R → U10 cellA Iabc (R_Iabc_R)
+audio,R55,Resistor,1,,54.9kΩ,0603,,,,,block-5,"LP1 tilt series R, L expo base (+V_tilt); change 0020 §B: 100k→54.9k (=R_VOCT+RV_mid) for 1:1 octave passive sum at the tempco-shunted base"
+audio,R56,Resistor,1,,54.9kΩ,0603,,,,,block-5,"LP1 tilt series R, R expo base (−V_tilt); change 0020 §B: 100k→54.9k"
+audio,R57,Resistor,1,,100kΩ,0603,,,,,block-5,LP1 Q V→I: V_ires_L → U9 cellA Iabc (R_Iabc_L); change 0020 §D/M5: 1M→100k (Iabc pin ~−10.8V)
+audio,R58,Resistor,1,,100kΩ,0603,,,,,block-5,LP1 Q V→I: V_ires_R → U10 cellA Iabc (R_Iabc_R); change 0020 §D/M5: 1M→100k
 audio,R59,Resistor,1,,100kΩ,0603,,,,,block-5,LP1 IRES_AMP V_bias input R (R_QBIAS)
 audio,R60,Resistor,1,,100kΩ,0603,,,,,block-5,LP1 IRES_AMP resonance CV input R (R_QINV)
 audio,R61,Resistor,1,,100kΩ,0603,,,,,block-5,LP1 IRES_AMP feedback R (R_f_q)
 audio,R62,Resistor,1,,1MΩ,0603,,,,,block-5,LP1 expo I_ref fixed R; series with RV3 (R_IREF_A)
-audio,R63,Resistor,1,,47kΩ,0603,,,,,block-5,LP1 expo V/oct scaling R (R_VOCT)
+audio,R63,Resistor,1,,49.9kΩ,0603,,,,,block-5,LP1 expo L V/oct scaling R (R_VOCT_L); change 0020 §A: 47k→49.9k centers 17.92mV/oct at mid-trim
 audio,R64,Resistor,1,,1kΩ,0603,,,,,block-5,LP1 expo emitter degeneration (R_E)
 audio,D10,Diode,1,1N4148W,,SOD-123,POGO_Diode_SMD:D_SOD-123,Diodes Inc.,,https://www.diodes.com/assets/Datasheets/ds30086.pdf,block-5,"LP1 V_ires ≥0 clamp (anode GND, cathode V_ires); prevents reverse Iabc"
 audio,C45,Capacitor,1,,100nF,0603,,,,,block-5,"LP1 expo I_ref node bypass (C_IREF, C0G)"
@@ -126,17 +126,15 @@ audio,C64,Capacitor,1,,100nF,0603,,,,,block-5,U14 V+ decoupling
 audio,C65,Capacitor,1,,100nF,0603,,,,,block-5,U14 V- decoupling
 audio,U64,IC,1,THAT340S14-U,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,THAT Corporation,,https://thatcorp.com/datashts/THAT_300-Series_Datasheet.pdf,block-5,LP1 expo converter R (matched NPN Q1/Q2)
 audio,R65,Resistor,1,,1MΩ,0603,,,,,block-5,LP1 expo R I_ref fixed R; series with RV22 (R_IREF_A_R)
-audio,R66,Resistor,1,,47kΩ,0603,,,,,block-5,LP1 expo R V/oct scaling R (R_VOCT_R)
+audio,R66,Resistor,1,,49.9kΩ,0603,,,,,block-5,LP1 expo R V/oct scaling R (R_VOCT_R); change 0020 §A: 47k→49.9k
+audio,R231,Resistor,1,TFPT0805L1001FM,1kΩ,0805,POGO_Resistor_SMD:R_0805_2012Metric,Vishay,,https://www.vishay.com/docs/33017/tfpt.pdf,block-5,LP1 expo L tempco shunt (LP1_EXPO_BASE_L→GND); +4110ppm/K V/oct temp-comp; change 0020 §A/§4
+audio,R232,Resistor,1,TFPT0805L1001FM,1kΩ,0805,POGO_Resistor_SMD:R_0805_2012Metric,Vishay,,https://www.vishay.com/docs/33017/tfpt.pdf,block-5,LP1 expo R tempco shunt (LP1_EXPO_BASE_R→GND); +4110ppm/K V/oct temp-comp; change 0020 §A/§4
 audio,R67,Resistor,1,,1kΩ,0603,,,,,block-5,LP1 expo R emitter degeneration (R_E_R)
 audio,RV22,Trimpot/Pot,1,3224W-1-xxx,500kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-5,LP1 f_ref trim rheostat R
 audio,RV23,Trimpot/Pot,1,3224W-1-xxx,20kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-5,LP1 1V/oct tracking trim R
 audio,C66,Capacitor,1,,100nF,0603,,,,,block-5,LP1 expo R I_ref node bypass (C0G)
 audio,C67,Capacitor,1,,100nF,0603,,,,,block-5,U64 V+ decoupling
 audio,C68,Capacitor,1,,100nF,0603,,,,,block-5,U64 V- decoupling
-audio,R68,Resistor,1,,10kΩ,0603,,,,,block-5,LP1 L OTA1 buffer (v1) emitter pulldown to V-
-audio,R69,Resistor,1,,10kΩ,0603,,,,,block-5,LP1 L OTA2 buffer (v2) emitter pulldown to V-
-audio,R70,Resistor,1,,10kΩ,0603,,,,,block-5,LP1 R OTA1 buffer (v1) emitter pulldown to V-
-audio,R71,Resistor,1,,10kΩ,0603,,,,,block-5,LP1 R OTA2 buffer (v2) emitter pulldown to V-
 audio,U15,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-6-svf1,BP1 OTA integrators + Q L
 audio,U16,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-6-svf1,BP1 OTA integrators + Q R
 audio,U17,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-6-svf2,BP2 OTA integrators + Q L

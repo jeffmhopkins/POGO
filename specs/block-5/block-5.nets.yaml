@@ -68,32 +68,33 @@ parts:
   R51: { sym: r, value: 1k }      # R_LIN OTA1 R
   R52: { sym: r, value: 1k }      # R_LIN OTA2 R
 
-  # --- LM13700 buffer emitter pulldowns to V- (v1/v2 state-variable outputs) ---
-  R68: { sym: r, value: 10k }     # v1 L buffer pulldown
-  R69: { sym: r, value: 10k }     # v2 L buffer pulldown
-  R70: { sym: r, value: 10k }     # v1 R buffer pulldown
-  R71: { sym: r, value: 10k }     # v2 R buffer pulldown
+  # R68-R71 (Darlington-buffer pulldowns) removed — change 0020 §C: state vars tap unbuffered pins 5/12.
 
-  # --- tilt summer + tilt inverter resistors ---
-  R55: { sym: r, value: 100k }            # tilt summer R, L expo input (+V_tilt)
-  R56: { sym: r, value: 100k }            # tilt summer R, R expo input (-V_tilt)
-  R_TILT_INV_IN: { sym: r, value: 100k }  # tilt inverter input R
+  # --- tilt: passively summed at the expo base with V_freq (change 0020 §B) ---
+  # With the §A tempco shunt making the base low-Z, tilt is fed through a series R EQUAL to the
+  # V_freq series (R_VOCT+RV_mid ≈ 54.9k) so it sums 1:1 in octaves at the base (SPICE
+  # lp1_tilt_passive.cir: freq 17.57 / tilt 17.57 mV/V). No op-amp summer needed.
+  R55: { sym: r, value: 54k9 }            # tilt series R, L expo base (+V_tilt); =R_VOCT+RV_mid for 1:1 octave sum
+  R56: { sym: r, value: 54k9 }            # tilt series R, R expo base (-V_tilt)
+  R_TILT_INV_IN: { sym: r, value: 100k }  # tilt inverter input R (U13-A makes -V_tilt for R channel)
   R_TILT_INV_FB: { sym: r, value: 100k }  # tilt inverter feedback R
 
   # --- Q V->I and IRES_AMP resistors ---
-  R57: { sym: r, value: 1M }      # R_Iabc L (V_ires -> U9 cellA Iabc, boundary)
-  R58: { sym: r, value: 1M }      # R_Iabc R (V_ires -> U10 cellA Iabc, boundary)
+  R57: { sym: r, value: 100k }    # R_Iabc L (V_ires -> U9 cellA Iabc, boundary); change 0020 §D/M5: 1M→100k (Iabc pin ~−10.8V)
+  R58: { sym: r, value: 100k }    # R_Iabc R (V_ires -> U10 cellA Iabc, boundary); change 0020 §D/M5: 1M→100k
   R59: { sym: r, value: 100k }    # R_QBIAS (IRES_AMP V_bias in)
   R60: { sym: r, value: 100k }    # R_QINV (IRES_AMP resonance CV in)
   R61: { sym: r, value: 100k }    # R_f_q (IRES_AMP feedback)
 
   # --- expo converter resistors (L = R62/R63/R64; R = R65/R66/R67) ---
   R62: { sym: r, value: 1M }      # R_IREF_A L
-  R63: { sym: r, value: 47k }     # R_VOCT L
+  R63: { sym: r, value: 49k9 }    # R_VOCT L (change 0020 §A: 47k→49.9k centers 17.92mV/oct at mid-trim)
   R64: { sym: r, value: 1k }      # R_E L (emitter degeneration to -12V)
   R65: { sym: r, value: 1M }      # R_IREF_A R
-  R66: { sym: r, value: 47k }     # R_VOCT R
+  R66: { sym: r, value: 49k9 }    # R_VOCT R (change 0020 §A)
   R67: { sym: r, value: 1k }      # R_E R
+  R231: { sym: r, part: "Vishay TFPT", value: 1k }  # tempco shunt L (change 0020 §A): LP1_EXPO_BASE_L→GND
+  R232: { sym: r, part: "Vishay TFPT", value: 1k }  # tempco shunt R (change 0020 §A): LP1_EXPO_BASE_R→GND
 
   # --- trim pots (L = RV3/RV4; R = RV22/RV23) ---
   RV3:  { sym: trimpot, part: "Bourns 3224W", value: LP1_FREF_L }
@@ -149,9 +150,8 @@ nets:
   "-12V":
     [U7.6, U8.6, U11.4, U12.4, U13.4,
      U14.4, U14.11, U64.4, U64.11, R64.2, R67.2, RV6.1,
-     R68.2, R69.2, R70.2, R71.2,
      C51.1, C53.1, C59.1, C61.1, C63.1, C65.1, C68.1,
-     U9.6, U10.6, C55.1, C57.1]   # + shared Q-VCAs
+     U9.6, U10.6, C55.1, C57.1]   # + shared Q-VCAs (R68-71 pulldowns removed, §C)
   GND:
     [U11.3, U12.3, U13.5, U13.3,          # SUM_AMP / IRES_AMP / tilt-inv non-inv inputs
      RV5.1,                                # V_bias divider bottom
@@ -161,26 +161,25 @@ nets:
      C45.2, C66.2, C46.2, C47.2,
      C50.2, C51.2, C52.2, C53.2, C58.2, C59.2,
      C60.2, C61.2, C62.2, C63.2, C64.2, C65.2, C67.2, C68.2,
-     C48.2, C49.2, C54.2, C55.2, C56.2, C57.2, C84.2, C85.2]   # + shared Q-VCAs
+     C48.2, C49.2, C54.2, C55.2, C56.2, C57.2, C84.2, C85.2,   # + shared Q-VCAs
+     R231.2, R232.2]   # expo tempco shunts → GND (§A)
 
   # ---- L channel SVF ----
   VCA_OUT_L:    [R10.1]                       # <- block-4 VCA out L (boundary, inverted)
   LP1_SUMINV_L: [U11.2, R10.2, R47.2, R53.1, U9.4, U9.5]  # SUM_AMP v-ground + Q-cell A In-/Out
   LP1_HP_L:     [U11.1, R53.2, U7.3]          # SUM_AMP out (HP) -> OTA1 In+
-  LP1_V1CAP_L:  [U7.5, U7.7, C11.1]           # OTA1 out -> C1 + Darlington BufIn (v1 cap node)
-  LP1_V1_L:     [U7.8, U7.14, R68.1, U9.3]    # v1 (BP) -> OTA2 In+ + pulldown + Q-cell A In+
-  LP1_V2CAP_L:  [U7.12, U7.10, C12.1]         # OTA2 out -> C2 + Darlington BufIn (v2 cap node)
-  LP1_LP_L:     [U7.9, U11.5, R47.1, R69.1]   # BufOut_B = v2 (LP) -> LP buffer In+ + R_FB + pulldown
+  # §C (change 0020): tap v1/v2 from the UNBUFFERED OTA outputs (pins 5/12), not the Darlington
+  # buffers (8/9, ~1.26V offset → next OTA; SPICE ota_svf_loop.cir). Buffers 7/8/9/10 unused; pulldowns gone.
+  LP1_V1_L:     [U7.5, C11.1, U7.14, U9.3]    # v1 (BP) = OTA1 unbuffered out (pin5) + cap -> OTA2 In+ + Q-cell A In+
+  LP1_V2_L:     [U7.12, C12.1, U11.5, R47.1]  # v2 (LP) = OTA2 unbuffered out (pin12) + cap -> LP buffer In+ + R_FB
   LP1_OUT_L:    [U11.7, U11.6]                # LP buffer out (unity) -> block BP (boundary)
 
   # ---- R channel SVF ----
   VCA_OUT_R:    [R11.1]                        # <- block-4 VCA out R (boundary, inverted)
   LP1_SUMINV_R: [U12.2, R11.2, R48.2, R54.1, U10.4, U10.5]  # SUM_AMP v-ground + Q-cell A In-/Out
   LP1_HP_R:     [U12.1, R54.2, U8.3]          # SUM_AMP out (HP) -> OTA1 In+
-  LP1_V1CAP_R:  [U8.5, U8.7, C13.1]
-  LP1_V1_R:     [U8.8, U8.14, R70.1, U10.3]   # v1 (BP) -> OTA2 In+ + pulldown + Q-cell A In+
-  LP1_V2CAP_R:  [U8.12, U8.10, C14.1]
-  LP1_LP_R:     [U8.9, U12.5, R48.1, R71.1]
+  LP1_V1_R:     [U8.5, C13.1, U8.14, U10.3]   # v1 (BP) = OTA1 unbuffered out (pin5) + cap -> OTA2 In+ + Q-cell A In+ (§C)
+  LP1_V2_R:     [U8.12, C14.1, U12.5, R48.1]  # v2 (LP) = OTA2 unbuffered out (pin12) + cap -> LP buffer In+ + R_FB (§C)
   LP1_OUT_R:    [U12.7, U12.6]                # -> block BP (boundary)
 
   # ---- OTA linearizing R (In- pins) ----
@@ -193,14 +192,14 @@ nets:
   LP1_VCTRL:     [R63.1, R66.1]                # <- V/oct control voltage in (boundary; to both expos)
   # L expo (U14) -> U7 Iabc
   LP1_VOCT_TR_L: [R63.2, RV4.1, RV4.2]          # R_VOCT_L -> RV4 (rheostat)
-  LP1_EXPO_BASE_L: [U14.2, RV4.3, R55.2]        # Q1 base L: V/oct + +V_tilt
+  LP1_EXPO_BASE_L: [U14.2, RV4.3, R55.2, R231.1]  # Q1 base L: V/oct(R63+RV4) + V_tilt(R55) passively summed; tempco R231 shunt→GND (§A/§B)
   LP1_IABC_L:    [U14.1, U7.1, U7.16, C46.1]    # L Iabc -> OTA1+OTA2 L
   LP1_EXPO_EMIT_L: [U14.3, U14.12, R64.1]       # Q1+Q2 emitters L -> R_E -> -12V
   LP1_IREF_L:    [U14.14, U14.13, RV3.3, C45.1] # Q2 collector+base (diode-conn ref) + bypass
   LP1_IREF_TR_L: [R62.2, RV3.1, RV3.2]          # +12V -> R_IREF_L -> RV3 (rheostat)
   # R expo (U64) -> U8 Iabc
   LP1_VOCT_TR_R: [R66.2, RV23.1, RV23.2]
-  LP1_EXPO_BASE_R: [U64.2, RV23.3, R56.2, RV6.2]  # Q1 base R: V/oct + -V_tilt + null trim
+  LP1_EXPO_BASE_R: [U64.2, RV23.3, R56.2, RV6.2, R232.1]  # Q1 base R: V/oct(R66+RV23) + -V_tilt(R56) + null trim(RV6); tempco R232 shunt→GND (§A/§B)
   LP1_IABC_R:    [U64.1, U8.1, U8.16, C47.1]
   LP1_EXPO_EMIT_R: [U64.3, U64.12, R67.1]
   LP1_IREF_R:    [U64.14, U64.13, RV22.3, C66.1]
@@ -233,6 +232,15 @@ no_connect:
   - U7.15
   - U8.2
   - U8.15
+  # §C (change 0020): integrator Darlington buffers unused (state vars tap unbuffered pins 5/12).
+  - U7.7
+  - U7.8
+  - U7.9
+  - U7.10
+  - U8.7
+  - U8.8
+  - U8.9
+  - U8.10
   # THAT340 PNP transistors Q3 (5,6,7) and Q4 (8,9,10) unused, both expos.
   - U14.5
   - U14.6
