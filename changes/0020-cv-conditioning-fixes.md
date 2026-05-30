@@ -251,6 +251,32 @@ Tracing block-5/7/8 during implementation, the "tap v1/v2 from pins 5/12" fix sp
   THAT2180 Ec+). These touch the OTA-C resonant loop or carry [NV] values needing SPICE/bench/datasheet
   confirmation. Implement them with a validation step (SPICE model or prototype) rather than blind edits.
 
+## G5b DECISIONS round 2 (user, 2026-05-30) — de-risking Tier 2
+1. **Trim-pot strategy (user):** "can we do it so that we have trim pots that enable us to do this
+   post-build?" → **YES, and adopt it as the design principle for all [NV] nodes.** Rather than
+   pre-committing exact unverifiable values, design each uncertain node with **calibration trim
+   authority wide enough to span the uncertainty**, dialed in at bench bring-up. Most already have a
+   trim (expo RV_REF + RV_1VOCT; VCA Ec+ RV1/2/46/47; Q-cell V_bias RV5/RV9…). Work = ensure the trim
+   covers the corrected range + correct wiring, not guess a fixed resistor. This is the standard synth
+   bring-up approach and removes the "blind analog surgery" objection for D, HIGH-3, and the Q-cell bias.
+2. **ngspice (user: set it up):** ✅ **ngspice-42 installed & verified** (AC analysis runs). Tier-2
+   resonant-loop / [NV] fixes will be **validated with small SPICE models** (expo converter, OTA-C SVF
+   loop, Q-cell bias, VCA Ec+) BEFORE committing the netlist edits — no longer deferred to prototype-only.
+   SPICE decks live in `specs/sim/` (new dir) committed alongside the change for reproducibility.
+
+## Tempco resistor (G6a) — research result (2026-05-30)
+Deep-research found **no in-production SMD part exactly at +3300 ppm/°C with 1k**:
+- **Panasonic ERA-S33J102V** (0805, 1k, +3300 ppm, the textbook match) — **EOL/obsolete at DigiKey.**
+- **Vishay TFPT0805L1001FM** (0805, 1k) — **active + in stock**, but **+4110 ppm/K** (out of the 3000–3600
+  band; over-compensates ~25%). KiCad `Resistor_SMD:R_0805_2012Metric`.
+- **KRL/Riedon C-2AQ** (1k, +3500 ppm, ±1%) — **in production**, synth-standard, but **through-hole only**;
+  clean datasheet not extractable (order-by-description from synth distributors).
+**Implication + how the trim strategy helps:** the tempco TCR mismatch (3300 vs 3500 vs 4110 ppm) is
+*exactly* what a trimmable V/oct slope (RV_1VOCT, §A) absorbs — a higher-TCR part just shifts the trim
+setpoint. So selecting the **active Vishay TFPT (+4110)** is viable IF the expo divider math is re-centered
+for 4110 ppm and RV_1VOCT spans it. **G6a decision still needed (see question).** Until an MPN is locked,
+§A wires the divider with a placeholder tempco footprint in series with R_SHUNT (expo fix not blocked).
+
 ## G6a — tempco resistor (NEW PART TYPE) — STOP, needs MPN confirmation
 The expo tempco (fold-in, decision 4) needs a real **+3300–3500 ppm/°C tempco resistor** (one per expo:
 blocks 5,7,8 + 6-svf1/2/3 L+R = ~8 parts). This is a new component type → **G6a (registry + datasheet)
