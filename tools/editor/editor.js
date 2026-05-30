@@ -130,34 +130,18 @@
     if (C.type_sets.led.includes(type)) return CY.LED_CY;
     return null;
   }
-  function rotateRect(rect, deg) {
-    if (!deg) return rect.slice();
-    const [x1, y1, x2, y2] = rect;
-    let pts = [[x1, y1], [x2, y1], [x1, y2], [x2, y2]];
-    // CW to match the SVG draw transform (rotate(+deg) = (x,y)->(-y,x) in y-down).
-    if (deg === 90) pts = pts.map(([x, y]) => [-y, x]);
-    else if (deg === 180) pts = pts.map(([x, y]) => [-x, -y]);
-    else if (deg === 270) pts = pts.map(([x, y]) => [y, -x]);
-    else return rect.slice();
-    const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]);
-    return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)];
-  }
+  // Geometry/overlap come from PogoDRC (tools/editor/drc.js) — the single source
+  // shared with the parity test, so the editor can't drift from panel_rules.py.
+  const rotateRect = PogoDRC.rotateRect;
   function courtyard(cx, cy, type, deg) {
     const base = courtyardConst(type);
     if (!base) return null;
     const [x1, y1, x2, y2] = rotateRect(base, deg || 0);
     return [cx + x1, cy + y1, cx + x2, cy + y2];
   }
-  // Real per-feature keepout rects (pads + body), positioned + rotated — mirrors
-  // panel_kicad.footprint_shapes + panel_rules._check_pcb_overlaps.
   const SH = C.shapes || {};
   function footprintRects(cx, cy, type, deg) {
-    const base = SH[type];
-    if (!base) return [];
-    return base.map((r) => {
-      const [x1, y1, x2, y2] = rotateRect(r, deg || 0);
-      return [cx + x1, cy + y1, cx + x2, cy + y2];
-    });
+    return PogoDRC.footprintRects(SH[type], cx, cy, deg || 0);
   }
   function panelR(type) {
     const P = C.panel_r;
@@ -260,28 +244,16 @@
       }
     }
 
-    // 3 ── PCB footprint overlaps (real pads + body, not the bounding courtyard).
-    // fp carries both: `rects` (real per-feature, for overlaps here) and `rect`
-    // (bounding courtyard, used by §4 mounting-hole clearance — matches the CLI).
-    const fp = comps.map((o) => ({
-      ...o,
-      rect:  courtyard(o.cx, o.cy, o.type, o.rot),
-      rects: footprintRects(o.cx, o.cy, o.type, o.rot),
-    })).filter((o) => o.rect);
-    for (let i = 0; i < fp.length; i++) {
-      for (let j = i + 1; j < fp.length; j++) {
-        const a = fp[i], b = fp[j];
-        let wx = 0, wy = 0;
-        for (const ra of a.rects) for (const rb of b.rects) {
-          const dx = Math.min(ra[2], rb[2]) - Math.max(ra[0], rb[0]);
-          const dy = Math.min(ra[3], rb[3]) - Math.max(ra[1], rb[1]);
-          if (dx > 0 && dy > 0 && dx * dy > wx * wy) { wx = dx; wy = dy; }
-        }
-        if (wx > 0 && wy > 0) {
-          rec(`[PCB OVERLAP] '${a.label}' (${a.type} @ cx=${f2(a.cx)},cy=${f2(a.cy)}) ↔ '${b.label}' (${b.type} @ cx=${f2(b.cx)},cy=${f2(b.cy)}) — footprint overlap ${f2(wx)}×${f2(wy)}mm`, a.c, b.c);
-        }
-      }
+    // 3 ── PCB footprint overlaps (real pads + body) via PogoDRC — the single source
+    // shared with the parity test, byte-faithful to panel_rules._check_pcb_overlaps.
+    for (const o of PogoDRC.pcbOverlaps(comps, SH)) {
+      const a = o.a, b = o.b;
+      rec(`[PCB OVERLAP] '${a.label}' (${a.type} @ cx=${f2(a.cx)},cy=${f2(a.cy)}) ↔ '${b.label}' (${b.type} @ cx=${f2(b.cx)},cy=${f2(b.cy)}) — footprint overlap (penetration ${f2(o.pen)}mm)`, a.c, b.c);
     }
+
+    // §4 (mounting-hole) and §5 (rail keepout) use the bounding courtyard, matching
+    // the CLI's _check_mounting_clearance / _check_pcb_keepout.
+    const fp = comps.map((o) => ({ ...o, rect: courtyard(o.cx, o.cy, o.type, o.rot) })).filter((o) => o.rect);
 
     // 4 ── mounting-hole clearance
     const mhr = C.mounting_hole_clearance_mm;

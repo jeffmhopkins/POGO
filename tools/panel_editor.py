@@ -26,6 +26,7 @@ from panel_rules import DesignRules
 
 _HERE = Path(__file__).resolve().parent
 _EDITOR_JS = _HERE / "editor" / "editor.js"
+_DRC_JS = _HERE / "editor" / "drc.js"
 _EDITOR_CSS = _HERE / "editor" / "editor.css"
 
 
@@ -130,7 +131,7 @@ def build_editor_html(data: dict, rules: DesignRules, yaml_text: str) -> str:
     }
     payload_json = json.dumps(payload, ensure_ascii=False)
 
-    js  = _EDITOR_JS.read_text(encoding="utf-8")
+    js  = _DRC_JS.read_text(encoding="utf-8") + "\n" + _EDITOR_JS.read_text(encoding="utf-8")
     css = _EDITOR_CSS.read_text(encoding="utf-8")
 
     return f"""<!DOCTYPE html>

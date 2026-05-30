@@ -50,6 +50,28 @@ Effect: courtyard's phantom 2.3×13.34mm overlaps → genuine ones (e.g. a neigh
 pin under a body = 1.8×1.8mm). 9mm pots still need ~12mm pitch (the pin/leg pads collide at
 11.43mm in some orientation), but the editor and DRC now agree on the *real* constraint.
 
+## DRC verification suite (reviewed plan WS3 / #3 / WS3.5 — done)
+After an adversarial review of the test plan, implemented:
+- **WS1 (footprint/body):** `footprint_shapes` body = bbox of the full F.Fab outline (was
+  grabbing the tiny indicator circle → jack/knob/pot under-claimed); restored the pot's
+  squarish base. Bodies now correct (pot/knob 11.35×9.5, jack 9×12.5, LED its circle).
+- **#3 (metric):** `_check_pcb_overlaps` reports boolean + true penetration depth (max over
+  colliding feature-pairs of min(dx,dy)), not the lossy max-area pair.
+- **WS3 (unit tests):** `tools/test_drc.py` updated to the real pads+body model — proximity
+  thresholds derived from `footprint_shapes` via `_touch_sep` (no courtyard magic numbers);
+  new `TestRealCollisionModel` locks body=squarish base, trimpot==knob land pattern,
+  pin-of-neighbour-under-body collides, clear @14mm, rotation matches the SVG draw,
+  full colliding-pair set, penetration message. **41 pass / 1 xfail.**
+- **#2 / WS3.5 (parity):** extracted the editor's pure DRC into `tools/editor/drc.js`
+  (`PogoDRC`, UMD — browser + Node); `editor.js` now delegates to it (single source);
+  `panel_editor.py` embeds it. `tools/test_parity.py` runs Python `_check_pcb_overlaps`
+  and the JS twin (via `tools/editor/drc_cli.js` under Node) over 437 scenarios (every
+  type × rotation × separation, a cluster, AND the real panel) and asserts identical
+  collisions + penetrations. **The gate immediately caught a real drift** — JS read
+  `c.rot` while Python/panel-data use `rotate` (JS silently ignored rotation); fixed.
+- **CI:** `test_drc` (pytest) + `test_parity` (Node) wired into the Linux gate block,
+  before the panel-layout DRC.
+
 ## Pending (after the grid is settled)
 - **G2:** re-spaced `panel-data.yaml` (maintainer editor pass) → DRC clean → re-sync `--cpp` if positions move.
 - **G6a:** source the Song Huei tall trimmer in `specs/components.yaml` + `components/parts/` (+ datasheet).
