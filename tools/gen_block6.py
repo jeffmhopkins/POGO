@@ -28,6 +28,18 @@ via a Phase-3R element (see the FLAG notes printed into the YAML header).
 Run:  python3 tools/gen_block6.py     # writes specs/block-6/block-6.nets.yaml
 """
 from pathlib import Path
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import symbols as S
+_SYM = S.load()
+# Board RAIL POLICY: which committed rail each NAMED supply pin connects to.
+# (Pin NUMBERS come from components/symbols.yaml; the rail choice is board policy, not symbol data.)
+_RAIL = {
+    "ota":    {"V+": "P12", "V-": "N12"},
+    "opamp2": {"V+": "P12", "V-": "N12"},
+    "expo":   {"SUB": "N12"},                       # THAT340: both SUB pins -> -12V (no Vcc)
+    "cd4053": {"VDD": "P12", "VEE": "N12", "VSS": "GND", "INH": "GND"},
+}
 
 OUT = Path(__file__).resolve().parent.parent / "specs" / "block-6" / "block-6.nets.yaml"
 
@@ -61,21 +73,13 @@ CH = ("L", "R")
 # type -> (Vplus_pin, Vminus_pin, gnd_pins, vplus_is_decoupled, vminus_is_decoupled)
 def supply(ref, typ):
     """Wire an IC's supply pins to the rails and add its two C110 decoupling caps."""
-    if typ == "ota":            # LM13700: V+=11, V-=6
-        P12.append(f"{ref}.11"); N12.append(f"{ref}.6")
-        vp, vn = "+12V", "-12V"
-    elif typ == "opamp2":       # OPA1612 / TL072: V+=8, V-=4
-        P12.append(f"{ref}.8"); N12.append(f"{ref}.4")
-        vp, vn = "+12V", "-12V"
-    elif typ == "expo":         # THAT340: no Vcc; SUB(4,11) -> -12V (most-negative)
-        N12.append(f"{ref}.4"); N12.append(f"{ref}.11")
-        vp, vn = "+12V", "-12V"   # local rail-bypass caps (like block-5 C64/C65)
-    elif typ == "cd4053":       # VDD=16->+12, VEE=7->-12, VSS=8->GND, INH=6->GND
-        P12.append(f"{ref}.16"); N12.append(f"{ref}.7")
-        GND.append(f"{ref}.8"); GND.append(f"{ref}.6")
-        vp, vn = "+12V", "-12V"   # VDD / VEE bypass
-    else:
+    if typ not in _RAIL:
         raise ValueError(typ)
+    bucket = {"P12": P12, "N12": N12, "GND": GND}
+    for name, railkey in _RAIL[typ].items():
+        for num in S.pin_number(_SYM[typ], name):
+            bucket[railkey].append(f"{ref}.{num}")
+    vp, vn = "+12V", "-12V"
     # two decoupling caps per IC (C110, qty 90 = 2 x 45 ICs)
     cp, cn = f"C110_{ref}p", f"C110_{ref}n"
     part(cp, "{ sym: c, value: 100nF }", f"{ref} {vp} decoupling")
@@ -502,7 +506,7 @@ HEADER = '''# POGO Block 6 — Triple Bandpass + Distortion (3x 2-pole OTA-C SVF
 #   specs/components.yaml  (block-6 rows, 119; refs authoritative; grouped qty -> suffix instances)
 #   plugin/src/dsp/BandpassSVF.hpp + Distortion.hpp + Pogo.cpp lines 401-490 (GROUND TRUTH signal flow)
 #   specs/block-6/spec.md (STALE §2/§3/§4), specs/aux/aux-ota-c-svf / aux-q-control / aux-expo / aux-distortion
-#   datasheet-corrected pinout: kicad_common.py sym_lm13700 / sym_that340 / sym_cd4053 (CD4053 FIXED this pass)
+#   datasheet-cited pinouts: components/symbols.yaml archetypes ota / expo / cd4053 (loaded via tools/symbols.py)
 #
 # Locked decisions (Option B DSP-faithful Q-VCAs, per-channel expo, +3 CD4053 stereo mux, Q control)
 # per SCHEMATIC-GEN-PLAN.md "block-6 readiness". Refdes suffixes: L/R for stereo pairs,
