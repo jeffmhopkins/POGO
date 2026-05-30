@@ -660,7 +660,8 @@ components:
   - { ref: R83,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "LP2 IRES_AMP resonance CV input R (R_QINV)" }
   - { ref: R84,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "100kΩ",  fn: "LP2 IRES_AMP feedback R (R_f_q)" }
   - { ref: R85,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "1MΩ",    fn: "LP2 expo I_ref fixed R; series with RV19 (R_IREF_A)" }
-  - { ref: R86,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "47kΩ",   tol: "1%", fn: "LP2 expo V/oct scaling R (R_VOCT)" }
+  - { ref: R86,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "49.9kΩ", tol: "1%", fn: "LP2 expo V/oct scaling R (R_VOCT); change 0020 §A: 47k→49.9k centers 17.92mV/oct at mid-trim" }
+  - { ref: R230, board: audio,   block: block-8, part: "Vishay TFPT", pkg: "0805", val: "1kΩ",    fn: "LP2 expo tempco shunt (LP2_EXPO_BASE→GND); +4110ppm/K V/oct temp-comp; change 0020 §A/§4" }
   - { ref: R87,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "1kΩ",    fn: "LP2 expo emitter degeneration (R_E)" }
   - { ref: R88,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "LP2 L OTA1 buffer (v1) emitter pulldown to V-" }
   - { ref: R89,  board: audio,   block: block-8, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "LP2 L OTA2 buffer (v2) emitter pulldown to V-" }

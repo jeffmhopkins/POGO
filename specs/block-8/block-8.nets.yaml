@@ -52,8 +52,9 @@ parts:
   R83: { sym: r, value: 100k }    # R_QINV
   R84: { sym: r, value: 100k }    # R_f_q
   R85: { sym: r, value: 1M }      # R_IREF_A
-  R86: { sym: r, value: 47k }     # R_VOCT
+  R86: { sym: r, value: 49k9 }    # R_VOCT (change 0020 §A: 47k→49.9k centers 17.92mV/oct at mid-trim)
   R87: { sym: r, value: 1k }      # R_E
+  R230: { sym: r, part: "Vishay TFPT", value: 1k }  # tempco shunt (change 0020 §A): LP2_EXPO_BASE→GND, +4110ppm/K V/oct temp-comp
 
   RV19: { sym: trimpot, part: "Bourns 3224W", value: LP2_FREF }
   RV20: { sym: trimpot, part: "Bourns 3224W", value: LP2_1VOCT }
@@ -94,7 +95,8 @@ nets:
      D11.A,
      C69.2, C70.2, C71.2,
      C72.2, C73.2, C74.2, C75.2, C76.2, C77.2, C78.2, C79.2,
-     C80.2, C81.2, C82.2, C83.2]
+     C80.2, C81.2, C82.2, C83.2,
+     R230.2]
 
   # ---- L channel SVF ----
   HP_OUT_L:     [R32.1]                       # <- block-7 HP out L (boundary)
@@ -125,7 +127,7 @@ nets:
   # ---- expo converter (single, shared L+R; no tilt) ----
   LP2_VCTRL:    [R86.1]                        # <- control: LP2 V/oct CV (boundary)
   LP2_VOCT_TR:  [R86.2, RV20.1, RV20.2]        # R_VOCT -> RV20 (rheostat)
-  LP2_EXPO_BASE: [U60.2, RV20.3]               # Q1 base = V/oct
+  LP2_EXPO_BASE: [U60.2, RV20.3, R230.1]       # Q1 base: V/oct via R86+RV20, tempco shunt R230 to GND (change 0020 §A)
   LP2_IABC:     [U60.1, U56.1, U56.16, U57.1, U57.16, C70.1, C71.1]  # shared Iabc -> both OTAs
   LP2_EXPO_EMIT: [U60.3, U60.12, R87.1]        # Q1+Q2 emitters -> R_E -> -12V
   LP2_IREF:     [U60.14, U60.13, RV19.3, C69.1]  # Q2 collector+base (diode-conn ref) + bypass
