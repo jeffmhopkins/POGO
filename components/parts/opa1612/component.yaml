@@ -4,6 +4,7 @@ mpn: OPA1612AID
 manufacturer: Texas Instruments
 supplier: '~'
 package: SOIC-8
+symbol: opamp2
 matches:
 - OPA1612
 footprint:

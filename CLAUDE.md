@@ -216,7 +216,7 @@ Only begin after Phase 2R is complete for the block. Design the actual circuit:
 - **SMD preferred**: 0603 passives, SOIC-8/14 ICs, SOT-23 discretes
 - **Op-amps**: TL072 (general), LM4562 (low noise), NE5532 (audio)
 - **OTAs**: LM13700 (SOIC-16) for SVF integrators
-- **Signal VCA**: THAT 2180 (SOIC-8)
+- **Signal VCA**: THAT 2180 (8-pin SIP, through-hole — no SMD variant exists)
 - **Expo converter**: THAT340 (temperature-compensated NPN)
 - **Protection diodes**: BAT54 dual Schottky (SOT-23)
 

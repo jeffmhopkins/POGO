@@ -1,6 +1,11 @@
 # components/symbols/bat54s.yaml — AUTHORED symbol primitive (the nets `sym:` token = filename).
 # Pin `at` is the connection point; one source drives both the emitted symbol and the pin map.
 # Loaded dynamically by tools/symbols.py (globs components/symbols/*.yaml).
+#
+# BAT54S = SERIES dual Schottky (SOT-23). Real pinout per Diodes Inc DS11005 / Nexperia:
+#   pin 1 = A1 (anode D1) · pin 2 = K2 (cathode D2) · pin 3 = K1;A2 (series junction).
+# Both diodes point the same way: pin1 →D1→ junction(pin3) →D2→ pin2.
+# For a ±rail clamp the SIGNAL sits on the junction (pin 3); the rails go to pins 1 & 2.
 lib_id: Diode:BAT54S
 properties:
 - key: Reference
@@ -15,19 +20,31 @@ units:
 - unit: 0
   style: 1
   graphics:
-  - kind: polyline
+  - kind: polyline      # pin1 lead-in
     width: 0.254
     fill: none
     pts:
     - [-5.08, 0.0]
+    - [-3.302, 0.0]
+  - kind: polyline      # junction wire (K1;A2): D1 cathode bar -> D2 anode base
+    width: 0.254
+    fill: none
+    pts:
+    - [-1.778, 0.0]
+    - [1.778, 0.0]
+  - kind: polyline      # pin2 lead-out
+    width: 0.254
+    fill: none
+    pts:
+    - [3.302, 0.0]
     - [5.08, 0.0]
-  - kind: polyline
+  - kind: polyline      # junction tap down to pin3
     width: 0.254
     fill: none
     pts:
     - [0.0, 0.0]
     - [0.0, -2.54]
-  - kind: polyline
+  - kind: polyline      # D1 triangle (anode at pin1 side, points right)
     width: 0.254
     fill: none
     pts:
@@ -35,13 +52,13 @@ units:
     - [-1.778, 0.0]
     - [-3.302, -1.016]
     - [-3.302, 1.016]
-  - kind: polyline
+  - kind: polyline      # D1 cathode bar (K1, at junction)
     width: 0.254
     fill: none
     pts:
     - [-1.778, 1.016]
     - [-1.778, -1.016]
-  - kind: polyline
+  - kind: polyline      # D2 triangle (anode at junction, points right)
     width: 0.254
     fill: none
     pts:
@@ -49,7 +66,7 @@ units:
     - [3.302, 0.0]
     - [1.778, -1.016]
     - [1.778, 1.016]
-  - kind: polyline
+  - kind: polyline      # D2 cathode bar (K2, at pin2)
     width: 0.254
     fill: none
     pts:
@@ -71,23 +88,23 @@ units:
     num_font: [1.016, 1.016]
   - type: passive
     style: line
-    at: [0.0, -5.08]
-    angle: 90.0
+    at: [7.62, 0.0]
+    angle: 180.0
     len: 2.54
-    name: COM
+    name: K2
     number: '2'
     name_font: [1.016, 1.016]
     num_font: [1.016, 1.016]
   - type: passive
     style: line
-    at: [7.62, 0.0]
-    angle: 180.0
+    at: [0.0, -5.08]
+    angle: 90.0
     len: 2.54
-    name: K2
+    name: K1;A2
     number: '3'
     name_font: [1.016, 1.016]
     num_font: [1.016, 1.016]
 pin_names: {offset: 0.254, hide: true}
 pin_numbers_hide: true
 name: BAT54S
-pinout_datasheet: Diodes Inc BAT54S (DS11005) Pin Config
+pinout_datasheet: Diodes Inc BAT54S (DS11005) — series; 1=A1, 2=K2, 3=K1;A2 junction

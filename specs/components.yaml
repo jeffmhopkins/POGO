@@ -50,8 +50,8 @@ components:
   # block-4: VCA (THAT2180 current-in/current-out; topology corrected 2026-05-29
   #   from datasheet — Input=1, Ec+=2, Ec-=3, Sym=4, V-=5, Gnd=6, V+=7, Output=8.
   #   Needs R_in (V→I) at input and a transimpedance op-amp (I→V) at output.)
-  - { ref: U4,   board: audio,   block: block-4, part: THAT2180,   pkg: SOIC-8,   fn: "L-channel dB-law VCA (current-in/out)" }
-  - { ref: U5,   board: audio,   block: block-4, part: THAT2180,   pkg: SOIC-8,   fn: "R-channel dB-law VCA (current-in/out)" }
+  - { ref: U4,   board: audio,   block: block-4, part: THAT2180,   pkg: SIP-8,    fn: "L-channel dB-law VCA (current-in/out); 8-pin SIP (THT, no SMD variant)" }
+  - { ref: U5,   board: audio,   block: block-4, part: THAT2180,   pkg: SIP-8,    fn: "R-channel dB-law VCA (current-in/out); 8-pin SIP (THT, no SMD variant)" }
   - { ref: U6,   board: audio,   block: block-4, part: TL072CDT,   pkg: SOIC-8,   fn: "I/V transimpedance converters (THAT2180 current outputs → V; L=A, R=B)" }
   - { ref: U63,  board: audio,   block: block-4, part: TL072CDT,   pkg: SOIC-8,   fn: "VCA CV conditioning: AMT attenuverter inverter (A) + CV/OFS summer-scaler (B)" }
   - { ref: RV1,  board: audio,   block: block-4, part: "Bourns 3224W", pkg: SMD,  val: "500Ω",   fn: "L unity-gain trim (Ec+ offset)" }
@@ -491,8 +491,8 @@ components:
   - { ref: C7,   board: utility, block: block-3, part: ~,          pkg: "0603",   val: "100nF",  qty: 14, fn: "C_BYPASS_MB: supply bypass; one per op-amp supply pin (7 ICs × 2 rails)" }
   # block-3 additions (2026-05-29): per-destination attenuverter inverter resistors
   # (missing from BOM), MOD_IN protection, ±10V mod-bus clamp zeners, MOD LEDs.
-  - { ref: R_INV_IN, board: utility, block: block-3, part: ~,      pkg: "0603",   val: "10kΩ",   qty: 19, fn: "R_inv_in: attenuverter −V_src inverter input R; 1 per destination" }
-  - { ref: R_INV_FB, board: utility, block: block-3, part: ~,      pkg: "0603",   val: "10kΩ",   qty: 19, fn: "R_inv_fb: attenuverter −V_src inverter feedback R; 1 per destination" }
+  - { ref: R_INV_IN, board: utility, block: block-3, part: ~,      pkg: "0603",   val: "10kΩ",   tol: "1%", qty: 19, fn: "R_inv_in: attenuverter −V_src inverter input R; 1 per destination; 1% for >60 dB center null" }
+  - { ref: R_INV_FB, board: utility, block: block-3, part: ~,      pkg: "0603",   val: "10kΩ",   tol: "1%", qty: 19, fn: "R_inv_fb: attenuverter −V_src inverter feedback R; 1 per destination; 1% for >60 dB center null" }
   - { ref: R99,  board: utility, block: block-3, part: ~,          pkg: "0603",   val: "100Ω",   fn: "R_MODIN: MOD_IN series input protection" }
   - { ref: D4,   board: utility, block: block-3, part: BAT54S,     pkg: SOT-23,   fn: "D_MODIN: MOD_IN input clamp ±12V" }
   - { ref: D5,   board: utility, block: block-3, part: BZX84C10,   pkg: SOT-23,   fn: "D_ZCLAMP_P: mod-bus +10V clamp zener (back-to-back with D6)" }

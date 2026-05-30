@@ -172,4 +172,4 @@ units:
 pin_names: {offset: 0.254, hide: true}
 pin_numbers_hide: true
 name: CD4053
-pinout_datasheet: TI CD4053B (SCHS059) Pinout
+pinout_datasheet: TI CD4053B (SCHS047O) Pinout

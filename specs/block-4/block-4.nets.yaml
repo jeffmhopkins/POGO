@@ -54,7 +54,7 @@ parts:
   J26: { sym: jack, part: PJ301M-12, value: VCA_IN }
 
 nets:
-  "+12V":  [U4.7, U5.7, U6.8, U63.8, D3.3, RV25.3, C7.1, C9.1, C41.1, C43.1]
+  "+12V":  [U4.7, U5.7, U6.8, U63.8, D3.2, RV25.3, C7.1, C9.1, C41.1, C43.1]
   "-12V":  [U4.5, U5.5, U6.4, U63.4, D3.1, C8.1, C10.1, C42.1, C44.1]
   GND:     [U4.3, U4.4, U4.6, U5.3, U5.4, U5.6, U6.3, U6.5, U63.3, U63.5,
             RV25.1, J26.2, C7.2, C8.2, C9.2, C10.2, C41.2, C42.2, C43.2, C44.2]
@@ -73,7 +73,7 @@ nets:
 
   # ---- control path ----
   VCA_CV_TIP: [J26.1, R9.1]               # VCA_IN jack tip -> 100Ω
-  CVP:       [R9.2, D3.2, R42.1, RV24.3]  # protected CV: clamp, AMT inverter in, pot CW(+)
+  CVP:       [R9.2, D3.3, R42.1, RV24.3]  # protected CV: clamp, AMT inverter in, pot CW(+)
   NCVP:      [U63.1, R43.2, RV24.1]       # -CV: inverter out -> pot CCW(-)
   U63A_INV:  [U63.2, R42.2, R43.1]        # AMT inverter (-) node
   AMT_W:     [RV24.2, R44.1]              # attenuverter wiper = AMT*CV -> summer

@@ -37,7 +37,7 @@ units:
     at: [0.0, 3.81]
     angle: 270.0
     len: 3.048
-    name: +
+    name: '~'
     number: '1'
     name_font: [1.27, 1.27]
     num_font: [1.27, 1.27]
