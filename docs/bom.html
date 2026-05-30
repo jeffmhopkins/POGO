@@ -32,7 +32,7 @@
     th .arr { color: #ff8800; font-size: 10px; }
     tr:hover td { background: #141414; }
     td.num { text-align: right; color: #cfcfcf; }
-    td.ref { color: #fff; font-weight: bold; white-space: nowrap; }
+    td.ref { color: #fff; font-weight: bold; white-space: normal; word-break: break-word; }
     td.fn { color: #888; }
     .grp td {
       background: #11181c; color: #7fe7ff; font-weight: bold; letter-spacing: .05em;
@@ -60,6 +60,7 @@
     <div class="bar">
       <input type="search" id="q" placeholder="search ref / value / MPN / function / block…" autocomplete="off">
       <label class="toggle"><input type="checkbox" id="grp"> group by block</label>
+      <label class="toggle"><input type="checkbox" id="clp"> collapse by value</label>
       <span class="count" id="count"></span>
     </div>
 
@@ -166,9 +167,32 @@ function bodyRow(r, grouping) {
     `<td class="${cls(k)}">${cell(k, r[k], r)}</td>`).join("") + "</tr>";
 }
 
+// Collapse identical parts (same board/type/value/package/MPN/footprint/datasheet)
+// into one synthetic row: sum Qty, list every Ref, union Block + Function.
+function collapseRows(items) {
+  const map = new Map();
+  for (const r of items) {
+    const key = [r.Board, r.Type, r.Value, r.Package, r.MPN, r.Footprint, r.Datasheet].join("");
+    let g = map.get(key);
+    if (!g) { g = Object.assign({}, r, { _refs: [], _blocks: new Set(), _fns: new Set(), _qty: 0 }); map.set(key, g); }
+    for (const x of String(r.Ref || "").split(/,\s*/)) if (x) g._refs.push(x);
+    for (const b of String(r.Block || "").split(/,\s*/)) if (b) g._blocks.add(b);
+    if (r.Function) g._fns.add(r.Function);
+    g._qty += (+r.Qty || 0);
+  }
+  return [...map.values()].map(g => {
+    g.Ref = g._refs.join(", ");
+    g.Qty = String(g._qty);
+    g.Block = [...g._blocks].sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).join(", ");
+    g.Function = [...g._fns].join(" · ");
+    return g;
+  });
+}
+
 function render() {
   const q = document.getElementById("q").value.trim().toLowerCase();
   const grouping = document.getElementById("grp").checked;
+  const collapse = document.getElementById("clp").checked;
   let data = rows;
   if (q) data = data.filter(r => COLS.some(([k]) => (r[k] || "").toLowerCase().includes(q)));
   data = sorted(data);
@@ -183,19 +207,24 @@ function render() {
       for (const b of (r.Block || "(unassigned)").split(/,\s*/))
         (groups[b] ||= []).push(r);
     for (const g of Object.keys(groups).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))) {
-      const items = groups[g];
+      let items = groups[g];
       const qty = items.reduce((s, r) => s + (+r.Qty || 0), 0);
-      html += `<tr class="grp"><td colspan="${ncols}">${esc(g)}<span class="gn">${items.length} refs · ${qty} pcs</span></td></tr>`;
+      if (collapse) items = sorted(collapseRows(items));
+      const u = collapse ? "values" : "refs";
+      html += `<tr class="grp"><td colspan="${ncols}">${esc(g)}<span class="gn">${items.length} ${u} · ${qty} pcs</span></td></tr>`;
       for (const r of items) html += bodyRow(r, grouping);
     }
   } else {
-    for (const r of data) html += bodyRow(r, grouping);
+    let items = collapse ? sorted(collapseRows(data)) : data;
+    for (const r of items) html += bodyRow(r, grouping);
   }
   html += "</tbody></table>";
   document.getElementById("out").innerHTML = html;
 
   const totQty = data.reduce((s, r) => s + (+r.Qty || 0), 0);
-  document.getElementById("count").textContent = `${data.length} refs · ${totQty} pcs`;
+  const count = collapse ? collapseRows(data).length : data.length;
+  const unit = collapse ? "values" : "refs";
+  document.getElementById("count").textContent = `${count} ${unit} · ${totQty} pcs`;
 
   document.querySelectorAll("th[data-k]").forEach(th => th.onclick = () => {
     const k = th.dataset.k;
@@ -214,6 +243,7 @@ fetch("pogo-bom.csv")
     });
     document.getElementById("q").addEventListener("input", render);
     document.getElementById("grp").addEventListener("change", render);
+    document.getElementById("clp").addEventListener("change", render);
     render();
   })
   .catch(e => {
