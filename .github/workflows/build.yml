@@ -49,6 +49,9 @@ jobs:
           apt-get install -y -qq nodejs >/dev/null 2>&1 || true
           python3 tools/test_parity.py
           python3 tools/build_panel.py --check
+          # Netlist visualizer: drift gate — the committed docs/netlist.html (served by
+          # Pages) must byte-match a fresh render of the nets, same as the BOM artifacts.
+          python3 tools/build_netlist_viz.py --check
           # Regenerate plugin/res/Pogo-source.svg (source) AND plugin/res/Pogo.svg
           # (Inkscape text-to-path, loaded by VCV Rack) from panel-data.yaml.
           python3 tools/build_panel.py --resource --mfr
@@ -63,6 +66,7 @@ jobs:
           cp kicad/pogo-bom.csv /tmp/hw/
           cp plugin/res/Pogo.svg /tmp/hw/ 2>/dev/null || true
           cp docs/panel-debug.html /tmp/hw/ 2>/dev/null || true
+          cp docs/netlist.html /tmp/hw/ 2>/dev/null || true
 
       - name: Upload hardware artifact
         uses: actions/upload-artifact@v7
@@ -112,6 +116,7 @@ jobs:
           python3 tools/build_components.py --check
           python3 tools/generate_schematic.py --check
           python3 tools/build_panel.py --check
+          python3 tools/build_netlist_viz.py --check
           # Regenerate Pogo-source.svg + Pogo.svg (Inkscape text-to-path) from the YAML.
           python3 tools/build_panel.py --resource --mfr
 
@@ -174,6 +179,7 @@ jobs:
           python3 tools/build_components.py --check
           python3 tools/generate_schematic.py --check
           python3 tools/build_panel.py --check
+          python3 tools/build_netlist_viz.py --check
           # Regenerate Pogo-source.svg + Pogo.svg (Inkscape text-to-path) from the YAML.
           python3 tools/build_panel.py --resource --mfr
 
