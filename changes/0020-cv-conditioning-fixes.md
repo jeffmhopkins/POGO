@@ -256,7 +256,12 @@ Tracing block-5/7/8 during implementation, the "tap v1/v2 from pins 5/12" fix sp
 - **ota_svf_loop.cir [DONE]:** (1) H5 confirmed — Darlington tap injects **1.26 V** into the next OTA
   input vs ±30 mV linear range (**42× over**); unbuffered tap (§C fix) = **0 V**. (2) gm-C integrator
   corner = **634.6 Hz** at Iabc 9.69 µA (target 632, 0.4%) — re-tap doesn't change f_ref.
-- **q_cell.cir [TODO]** · **vca_ecplus.cir [TODO]**.
+- **q_cell.cir [DONE]:** M5 confirmed — 1MΩ@0V → Iabc 10.8µA (14× the claimed 0.74µA, Q pinned).
+  §D fix R_Iabc=100k, V_ires −10.0→−10.795V maps Q = 0.065→0.74→2.6→10.4. Butterworth (Q≈0.74) at
+  V_ires≈−10.73V. **Design consequence:** useful Q lives in a ~0.8V window just above the −10.8V pin
+  and is very steep (~10mV ≈ 5× Q) → V_bias trim needs fine/multi-turn resolution near the rail; H6
+  self-osc via soft-limit diodes (Iabc can't precisely set Q>~10–50). Sized when wiring §D.
+- **vca_ecplus.cir [TODO]**.
 
 ### Proposed split (recommended)
 - **Do now (no resonant-loop risk, no validation needed):** clusters **E** (BP3 ALT_R selector),
