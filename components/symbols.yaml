@@ -1,0 +1,1659 @@
+# components/symbols.yaml — AUTHORED archetype symbol definitions (the nets `sym:` token).
+# Pin `at` is the connection point; one source drives both the emitted symbol and pin map.
+# Generated once from the (datasheet-verified) kicad_common.sym_*() functions, now source of truth.
+archetypes:
+  jack:
+    lib_id: Device:Audio_Jack_3.5mm_SwitchT
+    properties:
+    - key: Reference
+      val: J
+      at: [0.0, 5.08, 0.0]
+      font: [1.27, 1.27]
+    - key: Value
+      val: Audio_Jack_3.5mm_SwitchT
+      at: [0.0, -7.62, 0.0]
+      font: [1.27, 1.27]
+    units:
+    - unit: 0
+      style: 1
+      graphics:
+      - kind: circle
+        width: 0.254
+        fill: none
+        center: [0.0, 0.0]
+        radius: 2.159
+      - kind: polyline
+        width: 0.254
+        fill: none
+        pts:
+        - [-2.159, 0.0]
+        - [-3.175, 0.0]
+      - kind: polyline
+        width: 0.254
+        fill: none
+        pts:
+        - [2.159, 0.0]
+        - [3.175, 0.0]
+      pins: []
+    - unit: 1
+      style: 1
+      graphics: []
+      pins:
+      - type: passive
+        style: line
+        at: [-5.08, 0.0]
+        angle: 0.0
+        len: 1.905
+        name: T
+        number: '1'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+      - type: passive
+        style: line
+        at: [5.08, 0.0]
+        angle: 180.0
+        len: 1.905
+        name: S
+        number: '2'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+      - type: passive
+        style: line
+        at: [0.0, -5.08]
+        angle: 90.0
+        len: 1.905
+        name: SW
+        number: '3'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+    pin_names: {offset: 1.016, hide: true}
+    pin_numbers_hide: true
+    name: Audio_Jack_3.5mm_SwitchT
+    primitive: true
+  r:
+    lib_id: Device:R
+    properties:
+    - key: Reference
+      val: R
+      at: [1.778, 0.0, 90.0]
+      font: [1.27, 1.27]
+    - key: Value
+      val: R
+      at: [-1.778, 0.0, 90.0]
+      font: [1.27, 1.27]
+    units:
+    - unit: 0
+      style: 1
+      graphics:
+      - kind: rectangle
+        width: 0.254
+        fill: none
+        start: [-1.016, -2.032]
+        end: [1.016, 2.032]
+      pins: []
+    - unit: 1
+      style: 1
+      graphics: []
+      pins:
+      - type: passive
+        style: line
+        at: [0.0, 3.81]
+        angle: 270.0
+        len: 1.778
+        name: '~'
+        number: '1'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+      - type: passive
+        style: line
+        at: [0.0, -3.81]
+        angle: 90.0
+        len: 1.778
+        name: '~'
+        number: '2'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+    pin_names: {offset: 0.0, hide: true}
+    pin_numbers_hide: true
+    name: R
+    primitive: true
+  c:
+    lib_id: Device:C
+    properties:
+    - key: Reference
+      val: C
+      at: [1.778, 0.0, 0.0]
+      font: [1.27, 1.27]
+    - key: Value
+      val: C
+      at: [1.778, -2.54, 0.0]
+      font: [1.27, 1.27]
+    units:
+    - unit: 0
+      style: 1
+      graphics:
+      - kind: polyline
+        width: 0.508
+        fill: none
+        pts:
+        - [-2.032, -0.762]
+        - [2.032, -0.762]
+      - kind: polyline
+        width: 0.508
+        fill: none
+        pts:
+        - [-2.032, 0.762]
+        - [2.032, 0.762]
+      pins: []
+    - unit: 1
+      style: 1
+      graphics: []
+      pins:
+      - type: passive
+        style: line
+        at: [0.0, 3.81]
+        angle: 270.0
+        len: 3.048
+        name: +
+        number: '1'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+      - type: passive
+        style: line
+        at: [0.0, -3.81]
+        angle: 90.0
+        len: 3.048
+        name: '~'
+        number: '2'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+    pin_names: {offset: 0.254}
+    pin_numbers_hide: true
+    name: C
+    primitive: true
+  bat54s:
+    lib_id: Diode:BAT54S
+    properties:
+    - key: Reference
+      val: D
+      at: [0.0, 3.81, 0.0]
+      font: [1.27, 1.27]
+    - key: Value
+      val: BAT54S
+      at: [0.0, 2.54, 0.0]
+      font: [1.27, 1.27]
+    units:
+    - unit: 0
+      style: 1
+      graphics:
+      - kind: polyline
+        width: 0.254
+        fill: none
+        pts:
+        - [-5.08, 0.0]
+        - [5.08, 0.0]
+      - kind: polyline
+        width: 0.254
+        fill: none
+        pts:
+        - [0.0, 0.0]
+        - [0.0, -2.54]
+      - kind: polyline
+        width: 0.254
+        fill: none
+        pts:
+        - [-3.302, 1.016]
+        - [-1.778, 0.0]
+        - [-3.302, -1.016]
+        - [-3.302, 1.016]
+      - kind: polyline
+        width: 0.254
+        fill: none
+        pts:
+        - [-1.778, 1.016]
+        - [-1.778, -1.016]
+      - kind: polyline
+        width: 0.254
+        fill: none
+        pts:
+        - [1.778, 1.016]
+        - [3.302, 0.0]
+        - [1.778, -1.016]
+        - [1.778, 1.016]
+      - kind: polyline
+        width: 0.254
+        fill: none
+        pts:
+        - [3.302, 1.016]
+        - [3.302, -1.016]
+      pins: []
+    - unit: 1
+      style: 1
+      graphics: []
+      pins:
+      - type: passive
+        style: line
+        at: [-7.62, 0.0]
+        angle: 0.0
+        len: 2.54
+        name: A1
+        number: '1'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: passive
+        style: line
+        at: [0.0, -5.08]
+        angle: 90.0
+        len: 2.54
+        name: COM
+        number: '2'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: passive
+        style: line
+        at: [7.62, 0.0]
+        angle: 180.0
+        len: 2.54
+        name: K2
+        number: '3'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+    pin_names: {offset: 0.254, hide: true}
+    pin_numbers_hide: true
+    name: BAT54S
+    pinout_datasheet: Diodes Inc BAT54S (DS11005) Pin Config
+  opamp2:
+    lib_id: Amplifier_Operational:OPA1612
+    properties:
+    - key: Reference
+      val: U
+      at: [5.08, 5.08, 0.0]
+      font: [1.27, 1.27]
+    - key: Value
+      val: OPA1612
+      at: [5.08, -5.08, 0.0]
+      font: [1.27, 1.27]
+    units:
+    - unit: 0
+      style: 1
+      graphics:
+      - kind: rectangle
+        width: 0.0
+        fill: none
+        start: [-1.0, -1.0]
+        end: [1.0, 1.0]
+      pins: []
+    - unit: 1
+      style: 1
+      graphics:
+      - kind: polyline
+        width: 0.254
+        fill: background
+        pts:
+        - [-5.08, -5.08]
+        - [-5.08, 5.08]
+        - [5.08, 0.0]
+        - [-5.08, -5.08]
+      pins:
+      - type: input
+        style: line
+        at: [-7.62, 2.54]
+        angle: 0.0
+        len: 2.54
+        name: In-
+        number: '2'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+      - type: input
+        style: line
+        at: [-7.62, -2.54]
+        angle: 0.0
+        len: 2.54
+        name: In+
+        number: '3'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+      - type: output
+        style: line
+        at: [7.62, 0.0]
+        angle: 180.0
+        len: 2.54
+        name: Out
+        number: '1'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+    - unit: 2
+      style: 1
+      graphics:
+      - kind: polyline
+        width: 0.254
+        fill: background
+        pts:
+        - [-5.08, -5.08]
+        - [-5.08, 5.08]
+        - [5.08, 0.0]
+        - [-5.08, -5.08]
+      pins:
+      - type: input
+        style: line
+        at: [-7.62, 2.54]
+        angle: 0.0
+        len: 2.54
+        name: In-
+        number: '6'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+      - type: input
+        style: line
+        at: [-7.62, -2.54]
+        angle: 0.0
+        len: 2.54
+        name: In+
+        number: '5'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+      - type: output
+        style: line
+        at: [7.62, 0.0]
+        angle: 180.0
+        len: 2.54
+        name: Out
+        number: '7'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+    - unit: 3
+      style: 1
+      graphics: []
+      pins:
+      - type: power_in
+        style: line
+        at: [0.0, 7.62]
+        angle: 270.0
+        len: 2.54
+        name: V+
+        number: '8'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+      - type: power_in
+        style: line
+        at: [0.0, -7.62]
+        angle: 90.0
+        len: 2.54
+        name: V-
+        number: '4'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+    pin_names: {offset: 0.254, hide: true}
+    pin_numbers_hide: true
+    name: OPA1612
+    placement:
+    - {unit: 1, dx: 0.0, dy: 0.0}
+    - {unit: 2, dx: 0.0, dy: 22.0}
+    - {unit: 3, dx: 24.0, dy: 11.0}
+    pinout_datasheet: TI OPA1612 (SBOS450) Pin Configuration
+  dw3:
+    lib_id: Switch:SW_Dailywell_DW3
+    properties:
+    - key: Reference
+      val: SW
+      at: [0.0, 9.144, 0.0]
+      font: [1.27, 1.27]
+    - key: Value
+      val: SW_DW3
+      at: [0.0, -9.144, 0.0]
+      font: [1.27, 1.27]
+    units:
+    - unit: 0
+      style: 1
+      graphics:
+      - kind: rectangle
+        width: 0.254
+        fill: background
+        start: [-2.54, -7.62]
+        end: [2.54, 7.62]
+      - kind: polyline
+        width: 0.254
+        fill: none
+        pts:
+        - [-2.54, 5.08]
+        - [1.27, 6.35]
+      - kind: polyline
+        width: 0.254
+        fill: none
+        pts:
+        - [-2.54, -5.08]
+        - [1.27, -3.81]
+      pins: []
+    - unit: 1
+      style: 1
+      graphics: []
+      pins:
+      - type: passive
+        style: line
+        at: [5.08, 6.35]
+        angle: 180.0
+        len: 2.54
+        name: A1
+        number: '1'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: passive
+        style: line
+        at: [-5.08, 5.08]
+        angle: 0.0
+        len: 2.54
+        name: A_COM
+        number: '2'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: passive
+        style: line
+        at: [5.08, 3.81]
+        angle: 180.0
+        len: 2.54
+        name: A2
+        number: '3'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: passive
+        style: line
+        at: [5.08, -3.81]
+        angle: 180.0
+        len: 2.54
+        name: B1
+        number: '4'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: passive
+        style: line
+        at: [-5.08, -5.08]
+        angle: 0.0
+        len: 2.54
+        name: B_COM
+        number: '5'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: passive
+        style: line
+        at: [5.08, -6.35]
+        angle: 180.0
+        len: 2.54
+        name: B2
+        number: '6'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+    pin_names: {offset: 0.254, hide: true}
+    pin_numbers_hide: true
+    name: SW_DW3
+    pinout_datasheet: Dailywell DW3 2M DPDT datasheet
+  dw5:
+    lib_id: Switch:SW_Dailywell_DW5
+    properties:
+    - key: Reference
+      val: SW
+      at: [0.0, 9.144, 0.0]
+      font: [1.27, 1.27]
+    - key: Value
+      val: SW_DW5
+      at: [0.0, -9.144, 0.0]
+      font: [1.27, 1.27]
+    units:
+    - unit: 0
+      style: 1
+      graphics:
+      - kind: rectangle
+        width: 0.254
+        fill: background
+        start: [-2.54, -7.62]
+        end: [2.54, 7.62]
+      - kind: polyline
+        width: 0.254
+        fill: none
+        pts:
+        - [-2.54, 5.08]
+        - [1.27, 6.35]
+      - kind: polyline
+        width: 0.254
+        fill: none
+        pts:
+        - [-2.54, -5.08]
+        - [1.27, -3.81]
+      pins: []
+    - unit: 1
+      style: 1
+      graphics: []
+      pins:
+      - type: passive
+        style: line
+        at: [5.08, 6.35]
+        angle: 180.0
+        len: 2.54
+        name: A1
+        number: '1'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: passive
+        style: line
+        at: [-5.08, 5.08]
+        angle: 0.0
+        len: 2.54
+        name: A_COM
+        number: '2'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: passive
+        style: line
+        at: [5.08, 3.81]
+        angle: 180.0
+        len: 2.54
+        name: A2
+        number: '3'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: passive
+        style: line
+        at: [5.08, -3.81]
+        angle: 180.0
+        len: 2.54
+        name: B1
+        number: '4'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: passive
+        style: line
+        at: [-5.08, -5.08]
+        angle: 0.0
+        len: 2.54
+        name: B_COM
+        number: '5'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: passive
+        style: line
+        at: [5.08, -6.35]
+        angle: 180.0
+        len: 2.54
+        name: B2
+        number: '6'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+    pin_names: {offset: 0.254, hide: true}
+    pin_numbers_hide: true
+    name: SW_DW5
+    pinout_datasheet: Dailywell DW5 2M DPDT datasheet
+  diode:
+    lib_id: Device:D
+    properties:
+    - key: Reference
+      val: D
+      at: [2.032, 0.0, 90.0]
+      font: [1.27, 1.27]
+    - key: Value
+      val: D
+      at: [-2.032, 0.0, 90.0]
+      font: [1.27, 1.27]
+    units:
+    - unit: 0
+      style: 1
+      graphics:
+      - kind: polyline
+        width: 0.254
+        fill: none
+        pts:
+        - [-1.27, 1.27]
+        - [1.27, 1.27]
+        - [0.0, -1.016]
+        - [-1.27, 1.27]
+      - kind: polyline
+        width: 0.254
+        fill: none
+        pts:
+        - [-1.27, -1.016]
+        - [1.27, -1.016]
+      pins: []
+    - unit: 1
+      style: 1
+      graphics: []
+      pins:
+      - type: passive
+        style: line
+        at: [0.0, 3.81]
+        angle: 270.0
+        len: 2.794
+        name: A
+        number: A
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+      - type: passive
+        style: line
+        at: [0.0, -3.81]
+        angle: 90.0
+        len: 2.794
+        name: K
+        number: K
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+    pin_names: {offset: 0.0, hide: true}
+    pin_numbers_hide: true
+    name: D
+    primitive: true
+  zener:
+    lib_id: Diode:D_Zener
+    properties:
+    - key: Reference
+      val: D
+      at: [2.032, 0.0, 90.0]
+      font: [1.27, 1.27]
+    - key: Value
+      val: D_Zener
+      at: [-2.032, 0.0, 90.0]
+      font: [1.27, 1.27]
+    units:
+    - unit: 0
+      style: 1
+      graphics:
+      - kind: polyline
+        width: 0.254
+        fill: none
+        pts:
+        - [-1.27, 1.016]
+        - [1.27, 1.016]
+        - [0.0, -1.27]
+        - [-1.27, 1.016]
+      - kind: polyline
+        width: 0.254
+        fill: none
+        pts:
+        - [-1.778, 1.27]
+        - [-1.27, 1.27]
+        - [-1.27, 1.016]
+        - [1.27, 1.016]
+        - [1.27, 0.762]
+        - [1.778, 0.762]
+      pins: []
+    - unit: 1
+      style: 1
+      graphics: []
+      pins:
+      - type: passive
+        style: line
+        at: [0.0, 3.81]
+        angle: 270.0
+        len: 2.794
+        name: A
+        number: '1'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+      - type: passive
+        style: line
+        at: [0.0, -3.81]
+        angle: 90.0
+        len: 2.794
+        name: K
+        number: '3'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+    pin_names: {offset: 0.0, hide: true}
+    pin_numbers_hide: true
+    name: D_Zener
+    pinout_datasheet: BZX84C series (NXP) Pinning
+  led:
+    lib_id: Device:LED
+    properties:
+    - key: Reference
+      val: LED
+      at: [2.54, 0.0, 90.0]
+      font: [1.27, 1.27]
+    - key: Value
+      val: LED
+      at: [-2.54, 0.0, 90.0]
+      font: [1.27, 1.27]
+    units:
+    - unit: 0
+      style: 1
+      graphics:
+      - kind: polyline
+        width: 0.254
+        fill: none
+        pts:
+        - [-1.27, 1.27]
+        - [1.27, 1.27]
+        - [0.0, -1.016]
+        - [-1.27, 1.27]
+      - kind: polyline
+        width: 0.254
+        fill: none
+        pts:
+        - [-1.27, -1.016]
+        - [1.27, -1.016]
+      - kind: polyline
+        width: 0.254
+        fill: none
+        pts:
+        - [1.27, 1.778]
+        - [2.286, 2.794]
+      - kind: polyline
+        width: 0.254
+        fill: none
+        pts:
+        - [0.254, 2.032]
+        - [1.27, 3.048]
+      pins: []
+    - unit: 1
+      style: 1
+      graphics: []
+      pins:
+      - type: passive
+        style: line
+        at: [0.0, 3.81]
+        angle: 270.0
+        len: 2.794
+        name: A
+        number: A
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+      - type: passive
+        style: line
+        at: [0.0, -3.81]
+        angle: 90.0
+        len: 2.794
+        name: K
+        number: K
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+    pin_names: {offset: 1.016, hide: true}
+    pin_numbers_hide: true
+    name: LED
+    primitive: true
+  trimpot:
+    lib_id: Device:R_POT
+    properties:
+    - key: Reference
+      val: RV
+      at: [2.54, 0.0, 0.0]
+      font: [1.27, 1.27]
+      justify: [left]
+    - key: Value
+      val: R_POT
+      at: [2.54, -2.54, 0.0]
+      font: [1.27, 1.27]
+      justify: [left]
+    units:
+    - unit: 0
+      style: 1
+      graphics:
+      - kind: rectangle
+        width: 0.254
+        fill: none
+        start: [-1.016, -2.032]
+        end: [1.016, 2.032]
+      - kind: polyline
+        width: 0.254
+        fill: none
+        pts:
+        - [-1.778, 0.0]
+        - [-1.016, 0.0]
+      - kind: polyline
+        width: 0.254
+        fill: none
+        pts:
+        - [-1.778, 0.0]
+        - [-1.27, 0.508]
+      - kind: polyline
+        width: 0.254
+        fill: none
+        pts:
+        - [-1.778, 0.0]
+        - [-1.27, -0.508]
+      pins: []
+    - unit: 1
+      style: 1
+      graphics: []
+      pins:
+      - type: passive
+        style: line
+        at: [0.0, -3.81]
+        angle: 90.0
+        len: 1.778
+        name: '~'
+        number: '1'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+      - type: passive
+        style: line
+        at: [-3.81, 0.0]
+        angle: 0.0
+        len: 2.794
+        name: Wiper
+        number: '2'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+      - type: passive
+        style: line
+        at: [0.0, 3.81]
+        angle: 270.0
+        len: 1.778
+        name: '~'
+        number: '3'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+    pin_names: {offset: 1.016, hide: true}
+    pin_numbers_hide: true
+    name: R_POT
+    primitive: true
+  vca:
+    lib_id: POGO:THAT2180
+    properties:
+    - key: Reference
+      val: U
+      at: [5.08, 7.62, 0.0]
+      font: [1.27, 1.27]
+    - key: Value
+      val: THAT2180
+      at: [5.08, -7.62, 0.0]
+      font: [1.27, 1.27]
+    units:
+    - unit: 0
+      style: 1
+      graphics:
+      - kind: rectangle
+        width: 0.254
+        fill: background
+        start: [-6.35, -6.35]
+        end: [6.35, 6.35]
+      pins: []
+    - unit: 1
+      style: 1
+      graphics: []
+      pins:
+      - type: input
+        style: line
+        at: [-8.89, 5.08]
+        angle: 0.0
+        len: 2.54
+        name: Input
+        number: '1'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: input
+        style: line
+        at: [-8.89, 2.54]
+        angle: 0.0
+        len: 2.54
+        name: Ec+
+        number: '2'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: input
+        style: line
+        at: [-8.89, 0.0]
+        angle: 0.0
+        len: 2.54
+        name: Ec-
+        number: '3'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: input
+        style: line
+        at: [-8.89, -2.54]
+        angle: 0.0
+        len: 2.54
+        name: Sym
+        number: '4'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: power_in
+        style: line
+        at: [-8.89, -5.08]
+        angle: 0.0
+        len: 2.54
+        name: Gnd
+        number: '6'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: output
+        style: line
+        at: [8.89, 5.08]
+        angle: 180.0
+        len: 2.54
+        name: Output
+        number: '8'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: power_in
+        style: line
+        at: [8.89, 2.54]
+        angle: 180.0
+        len: 2.54
+        name: V+
+        number: '7'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: power_in
+        style: line
+        at: [8.89, -2.54]
+        angle: 180.0
+        len: 2.54
+        name: V-
+        number: '5'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+    pin_names: {offset: 0.254, hide: true}
+    pin_numbers_hide: true
+    name: THAT2180
+    pinout_datasheet: THAT 2180 (Doc 600029 Rev 02) Table 1
+  ota:
+    lib_id: Amplifier_Operational:LM13700
+    properties:
+    - key: Reference
+      val: U
+      at: [9.144, 9.144, 0.0]
+      font: [1.27, 1.27]
+    - key: Value
+      val: LM13700
+      at: [9.144, -9.144, 0.0]
+      font: [1.27, 1.27]
+    units:
+    - unit: 0
+      style: 1
+      graphics:
+      - kind: rectangle
+        width: 0.0
+        fill: none
+        start: [-1.0, -1.0]
+        end: [1.0, 1.0]
+      pins: []
+    - unit: 1
+      style: 1
+      graphics:
+      - kind: rectangle
+        width: 0.254
+        fill: background
+        start: [-8.89, -10.16]
+        end: [8.89, 10.16]
+      pins:
+      - type: input
+        style: line
+        at: [-11.43, 8.89]
+        angle: 0.0
+        len: 2.54
+        name: Iabc_A
+        number: '1'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: input
+        style: line
+        at: [-11.43, 6.35]
+        angle: 0.0
+        len: 2.54
+        name: DiodeBias_A
+        number: '2'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: input
+        style: line
+        at: [-11.43, 3.81]
+        angle: 0.0
+        len: 2.54
+        name: In+_A
+        number: '3'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: input
+        style: line
+        at: [-11.43, 1.27]
+        angle: 0.0
+        len: 2.54
+        name: In-_A
+        number: '4'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: output
+        style: line
+        at: [-11.43, -1.27]
+        angle: 0.0
+        len: 2.54
+        name: Out_A
+        number: '5'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: power_in
+        style: line
+        at: [-11.43, -3.81]
+        angle: 0.0
+        len: 2.54
+        name: V-
+        number: '6'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: input
+        style: line
+        at: [-11.43, -6.35]
+        angle: 0.0
+        len: 2.54
+        name: BufIn_A
+        number: '7'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: output
+        style: line
+        at: [-11.43, -8.89]
+        angle: 0.0
+        len: 2.54
+        name: BufOut_A
+        number: '8'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: output
+        style: line
+        at: [11.43, -8.89]
+        angle: 180.0
+        len: 2.54
+        name: BufOut_B
+        number: '9'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: input
+        style: line
+        at: [11.43, -6.35]
+        angle: 180.0
+        len: 2.54
+        name: BufIn_B
+        number: '10'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: power_in
+        style: line
+        at: [11.43, -3.81]
+        angle: 180.0
+        len: 2.54
+        name: V+
+        number: '11'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: output
+        style: line
+        at: [11.43, -1.27]
+        angle: 180.0
+        len: 2.54
+        name: Out_B
+        number: '12'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: input
+        style: line
+        at: [11.43, 1.27]
+        angle: 180.0
+        len: 2.54
+        name: In-_B
+        number: '13'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: input
+        style: line
+        at: [11.43, 3.81]
+        angle: 180.0
+        len: 2.54
+        name: In+_B
+        number: '14'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: input
+        style: line
+        at: [11.43, 6.35]
+        angle: 180.0
+        len: 2.54
+        name: DiodeBias_B
+        number: '15'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: input
+        style: line
+        at: [11.43, 8.89]
+        angle: 180.0
+        len: 2.54
+        name: Iabc_B
+        number: '16'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+    pin_names: {offset: 0.254, hide: true}
+    pin_numbers_hide: true
+    name: LM13700
+    pinout_datasheet: TI LM13700 (SNOSBW2F) p.3 Pin Functions
+  expo:
+    lib_id: POGO:THAT340
+    properties:
+    - key: Reference
+      val: U
+      at: [9.144, 9.144, 0.0]
+      font: [1.27, 1.27]
+    - key: Value
+      val: THAT340
+      at: [9.144, -9.144, 0.0]
+      font: [1.27, 1.27]
+    units:
+    - unit: 0
+      style: 1
+      graphics:
+      - kind: rectangle
+        width: 0.254
+        fill: background
+        start: [-8.89, -8.89]
+        end: [8.89, 8.89]
+      pins: []
+    - unit: 1
+      style: 1
+      graphics: []
+      pins:
+      - type: output
+        style: line
+        at: [-11.43, 7.62]
+        angle: 0.0
+        len: 2.54
+        name: Q1_C
+        number: '1'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: input
+        style: line
+        at: [-11.43, 5.08]
+        angle: 0.0
+        len: 2.54
+        name: Q1_B
+        number: '2'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: passive
+        style: line
+        at: [-11.43, 2.54]
+        angle: 0.0
+        len: 2.54
+        name: Q1_E
+        number: '3'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: power_in
+        style: line
+        at: [-11.43, 0.0]
+        angle: 0.0
+        len: 2.54
+        name: SUB
+        number: '4'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: passive
+        style: line
+        at: [-11.43, -2.54]
+        angle: 0.0
+        len: 2.54
+        name: Q3_E
+        number: '5'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: input
+        style: line
+        at: [-11.43, -5.08]
+        angle: 0.0
+        len: 2.54
+        name: Q3_B
+        number: '6'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: output
+        style: line
+        at: [-11.43, -7.62]
+        angle: 0.0
+        len: 2.54
+        name: Q3_C
+        number: '7'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: output
+        style: line
+        at: [11.43, -7.62]
+        angle: 180.0
+        len: 2.54
+        name: Q4_C
+        number: '8'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: input
+        style: line
+        at: [11.43, -5.08]
+        angle: 180.0
+        len: 2.54
+        name: Q4_B
+        number: '9'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: passive
+        style: line
+        at: [11.43, -2.54]
+        angle: 180.0
+        len: 2.54
+        name: Q4_E
+        number: '10'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: power_in
+        style: line
+        at: [11.43, 0.0]
+        angle: 180.0
+        len: 2.54
+        name: SUB
+        number: '11'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: passive
+        style: line
+        at: [11.43, 2.54]
+        angle: 180.0
+        len: 2.54
+        name: Q2_E
+        number: '12'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: input
+        style: line
+        at: [11.43, 5.08]
+        angle: 180.0
+        len: 2.54
+        name: Q2_B
+        number: '13'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: output
+        style: line
+        at: [11.43, 7.62]
+        angle: 180.0
+        len: 2.54
+        name: Q2_C
+        number: '14'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+    pin_names: {offset: 0.254, hide: true}
+    pin_numbers_hide: true
+    name: THAT340
+    pinout_datasheet: THAT 340 (Doc 600041) Pin Assignments
+  opamp4:
+    lib_id: Amplifier_Operational:TL074
+    properties:
+    - key: Reference
+      val: U
+      at: [5.08, 5.08, 0.0]
+      font: [1.27, 1.27]
+    - key: Value
+      val: TL074
+      at: [5.08, -5.08, 0.0]
+      font: [1.27, 1.27]
+    units:
+    - unit: 0
+      style: 1
+      graphics:
+      - kind: rectangle
+        width: 0.0
+        fill: none
+        start: [-1.0, -1.0]
+        end: [1.0, 1.0]
+      pins: []
+    - unit: 1
+      style: 1
+      graphics:
+      - kind: polyline
+        width: 0.254
+        fill: background
+        pts:
+        - [-5.08, -5.08]
+        - [-5.08, 5.08]
+        - [5.08, 0.0]
+        - [-5.08, -5.08]
+      pins:
+      - type: input
+        style: line
+        at: [-7.62, 2.54]
+        angle: 0.0
+        len: 2.54
+        name: In-
+        number: '2'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+      - type: input
+        style: line
+        at: [-7.62, -2.54]
+        angle: 0.0
+        len: 2.54
+        name: In+
+        number: '3'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+      - type: output
+        style: line
+        at: [7.62, 0.0]
+        angle: 180.0
+        len: 2.54
+        name: Out
+        number: '1'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+    - unit: 2
+      style: 1
+      graphics:
+      - kind: polyline
+        width: 0.254
+        fill: background
+        pts:
+        - [-5.08, -5.08]
+        - [-5.08, 5.08]
+        - [5.08, 0.0]
+        - [-5.08, -5.08]
+      pins:
+      - type: input
+        style: line
+        at: [-7.62, 2.54]
+        angle: 0.0
+        len: 2.54
+        name: In-
+        number: '6'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+      - type: input
+        style: line
+        at: [-7.62, -2.54]
+        angle: 0.0
+        len: 2.54
+        name: In+
+        number: '5'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+      - type: output
+        style: line
+        at: [7.62, 0.0]
+        angle: 180.0
+        len: 2.54
+        name: Out
+        number: '7'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+    - unit: 3
+      style: 1
+      graphics:
+      - kind: polyline
+        width: 0.254
+        fill: background
+        pts:
+        - [-5.08, -5.08]
+        - [-5.08, 5.08]
+        - [5.08, 0.0]
+        - [-5.08, -5.08]
+      pins:
+      - type: input
+        style: line
+        at: [-7.62, 2.54]
+        angle: 0.0
+        len: 2.54
+        name: In-
+        number: '9'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+      - type: input
+        style: line
+        at: [-7.62, -2.54]
+        angle: 0.0
+        len: 2.54
+        name: In+
+        number: '10'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+      - type: output
+        style: line
+        at: [7.62, 0.0]
+        angle: 180.0
+        len: 2.54
+        name: Out
+        number: '8'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+    - unit: 4
+      style: 1
+      graphics:
+      - kind: polyline
+        width: 0.254
+        fill: background
+        pts:
+        - [-5.08, -5.08]
+        - [-5.08, 5.08]
+        - [5.08, 0.0]
+        - [-5.08, -5.08]
+      pins:
+      - type: input
+        style: line
+        at: [-7.62, 2.54]
+        angle: 0.0
+        len: 2.54
+        name: In-
+        number: '13'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+      - type: input
+        style: line
+        at: [-7.62, -2.54]
+        angle: 0.0
+        len: 2.54
+        name: In+
+        number: '12'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+      - type: output
+        style: line
+        at: [7.62, 0.0]
+        angle: 180.0
+        len: 2.54
+        name: Out
+        number: '14'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+    - unit: 5
+      style: 1
+      graphics: []
+      pins:
+      - type: power_in
+        style: line
+        at: [0.0, 3.81]
+        angle: 270.0
+        len: 1.27
+        name: V+
+        number: '4'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+      - type: power_in
+        style: line
+        at: [0.0, -3.81]
+        angle: 90.0
+        len: 1.27
+        name: V-
+        number: '11'
+        name_font: [1.27, 1.27]
+        num_font: [1.27, 1.27]
+    pin_names: {offset: 0.254, hide: true}
+    pin_numbers_hide: true
+    name: TL074
+    placement:
+    - {unit: 1, dx: 0.0, dy: 0.0}
+    - {unit: 2, dx: 18.0, dy: 0.0}
+    - {unit: 3, dx: 36.0, dy: 0.0}
+    - {unit: 4, dx: 0.0, dy: 22.0}
+    - {unit: 5, dx: 18.0, dy: 22.0}
+    pinout_datasheet: TI TL074 (SLOS080) Pin Configuration
+  cd4053:
+    lib_id: Analog_Switch:CD4053
+    properties:
+    - key: Reference
+      val: U
+      at: [7.62, 12.7, 0.0]
+      font: [1.27, 1.27]
+    - key: Value
+      val: CD4053
+      at: [7.62, -12.7, 0.0]
+      font: [1.27, 1.27]
+    units:
+    - unit: 0
+      style: 1
+      graphics:
+      - kind: rectangle
+        width: 0.254
+        fill: background
+        start: [-6.35, -11.43]
+        end: [6.35, 11.43]
+      pins: []
+    - unit: 1
+      style: 1
+      graphics: []
+      pins:
+      - type: input
+        style: line
+        at: [-8.89, 7.62]
+        angle: 0.0
+        len: 2.54
+        name: A
+        number: '11'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: input
+        style: line
+        at: [-8.89, 5.08]
+        angle: 0.0
+        len: 2.54
+        name: B
+        number: '10'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: input
+        style: line
+        at: [-8.89, 2.54]
+        angle: 0.0
+        len: 2.54
+        name: C
+        number: '9'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: input
+        style: line
+        at: [-8.89, 0.0]
+        angle: 0.0
+        len: 2.54
+        name: INH
+        number: '6'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: power_in
+        style: line
+        at: [-8.89, -2.54]
+        angle: 0.0
+        len: 2.54
+        name: VDD
+        number: '16'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: power_in
+        style: line
+        at: [-8.89, -5.08]
+        angle: 0.0
+        len: 2.54
+        name: VSS
+        number: '8'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: power_in
+        style: line
+        at: [-8.89, -7.62]
+        angle: 0.0
+        len: 2.54
+        name: VEE
+        number: '7'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: bidirectional
+        style: line
+        at: [8.89, 10.16]
+        angle: 180.0
+        len: 2.54
+        name: X
+        number: '14'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: bidirectional
+        style: line
+        at: [8.89, 7.62]
+        angle: 180.0
+        len: 2.54
+        name: X1
+        number: '13'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: bidirectional
+        style: line
+        at: [8.89, 5.08]
+        angle: 180.0
+        len: 2.54
+        name: X0
+        number: '12'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: bidirectional
+        style: line
+        at: [8.89, 2.54]
+        angle: 180.0
+        len: 2.54
+        name: Y
+        number: '15'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: bidirectional
+        style: line
+        at: [8.89, 0.0]
+        angle: 180.0
+        len: 2.54
+        name: Y1
+        number: '1'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: bidirectional
+        style: line
+        at: [8.89, -2.54]
+        angle: 180.0
+        len: 2.54
+        name: Y0
+        number: '2'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: bidirectional
+        style: line
+        at: [8.89, -5.08]
+        angle: 180.0
+        len: 2.54
+        name: Z
+        number: '4'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: bidirectional
+        style: line
+        at: [8.89, -7.62]
+        angle: 180.0
+        len: 2.54
+        name: Z1
+        number: '3'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+      - type: bidirectional
+        style: line
+        at: [8.89, -10.16]
+        angle: 180.0
+        len: 2.54
+        name: Z0
+        number: '5'
+        name_font: [1.016, 1.016]
+        num_font: [1.016, 1.016]
+    pin_names: {offset: 0.254, hide: true}
+    pin_numbers_hide: true
+    name: CD4053
+    pinout_datasheet: TI CD4053B (SCHS059) Pinout

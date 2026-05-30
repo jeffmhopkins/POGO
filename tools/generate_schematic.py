@@ -42,6 +42,7 @@ sys.path.insert(0, str(_REPO / "tools"))
 
 import kicad_common as kc          # noqa: E402
 import components as registry      # noqa: E402
+import symbols as S                # noqa: E402  (data-driven symbol archetypes)
 
 
 # ── deterministic UUIDs (byte-stable output) ─────────────────────────────────
@@ -58,39 +59,14 @@ def _make_det_uid():
     return _uid
 
 
-# ── symbol table: sym name -> (lib_id, lib_symbol fn, all-pins fn) ────────────
-# all-pins fn returns {pin_number: (x, y)} for EVERY electrical pin of the symbol.
-
-SYM_TABLE = {
-    "jack":   ("Device:Audio_Jack_3.5mm_SwitchT", kc.sym_jack,    kc.jack_pins),
-    "r":      ("Device:R",                          kc.sym_r,       kc.r_pins),
-    "c":      ("Device:C",                          kc.sym_c,       kc.c_pins),
-    "bat54s": ("Diode:BAT54S",                      kc.sym_bat54s,  kc.bat54s_pins),
-    "opamp2": ("Amplifier_Operational:OPA1612",     kc.sym_opa1612, kc.opamp_dual_all_pins),
-    "dw3":    ("Switch:SW_Dailywell_DW3",           kc.sym_dw3,     kc.dpdt6_pins),
-    "dw5":    ("Switch:SW_Dailywell_DW5",           kc.sym_dw5,     kc.dpdt6_pins),
-    "diode":  ("Device:D",                          kc.sym_diode,   kc.diode2_pins),
-    "zener":  ("Diode:D_Zener",                     kc.sym_zener,   kc.zener_pins),
-    "led":    ("Device:LED",                        kc.sym_led,     kc.diode2_pins),
-    "trimpot":("Device:R_POT",                      kc.sym_rpot,    kc.rpot_pins),
-    "vca":    ("POGO:THAT2180",                     kc.sym_that2180, kc.that2180_pins),
-    "ota":    ("Amplifier_Operational:LM13700",     kc.sym_lm13700, kc.lm13700_pins),
-    "expo":   ("POGO:THAT340",                      kc.sym_that340, kc.that340_pins),
-    "opamp4": ("Amplifier_Operational:TL074",       kc.sym_tl074,   kc.opamp_quad_all_pins),
-    "cd4053": ("Analog_Switch:CD4053",              kc.sym_cd4053,  kc.cd4053_pins),
-}
+# ── symbol archetypes: loaded from components/symbols.yaml (keyed by the nets `sym:`
+# token). Each carries lib_id, body graphics, per-unit pins (with the connection-point
+# `at`), placement offsets, and a datasheet citation. Renderer: tools/symbols.py.
+_SYMS = S.load()
 
 # Layout grid (mm). Symbols only need to not overlap — nets connect by name.
 _COL_DX, _ROW_DY, _NCOLS, _X0, _Y0 = 60.0, 55.0, 3, 40.0, 40.0
 
-# Multi-unit symbols: one ref → several gate instances at distinct offsets so their
-# pins don't overlap (the lib_symbol draws every unit at the same local origin).
-#   sym -> (per_unit_pins_fn, [(unit_no, dx, dy), ...])
-MULTI_UNIT = {
-    "opamp2": (kc.opamp_unit_pins, [(1, 0.0, 0.0), (2, 0.0, 22.0), (3, 24.0, 11.0)]),
-    "opamp4": (kc.opamp_quad_unit_pins,
-               [(1, 0.0, 0.0), (2, 18.0, 0.0), (3, 36.0, 0.0), (4, 0.0, 22.0), (5, 18.0, 22.0)]),
-}
 
 
 def _resolve_footprint(part_str: str | None) -> str:
@@ -124,11 +100,10 @@ def validate_block(block: dict) -> list[str]:
     part_pins: dict[str, set[str]] = {}
     for ref, spec in parts.items():
         sym = spec.get("sym")
-        if sym not in SYM_TABLE:
+        if sym not in _SYMS:
             errs.append(f"{ref}: unknown sym '{sym}'")
             continue
-        _, _, pins_fn = SYM_TABLE[sym]
-        part_pins[ref] = set(pins_fn(0.0, 0.0).keys())
+        part_pins[ref] = S.all_pin_numbers(_SYMS[sym])
 
     # Each net entry must reference a known ref.pin exactly once across all nets.
     seen: dict[str, str] = {}     # "REF.PIN" -> net name
@@ -175,7 +150,8 @@ def validate_block(block: dict) -> list[str]:
 # generated s-expr, re-derive every pin's connection point straight from the
 # lib_symbols geometry, and confirm each global label lands exactly on a pin and
 # each pin is either labeled or an intended no-connect. Catches malformed s-expr,
-# dangling lib_ids, and any drift between sym_*() geometry and *_pins() helpers.
+# dangling lib_ids, and any mismatch between the placed-pin coords and the emitted
+# lib_symbols geometry (the archetype's connection points, from components/symbols.yaml).
 
 _EPS = 1e-3
 
@@ -330,7 +306,7 @@ def build(block: dict) -> str:
 
     kc.emit("(lib_symbols")
     for sym in sorted(used_syms):
-        kc.emit(SYM_TABLE[sym][1]())
+        kc.emit(S.emit_symbol(_SYMS[sym]))
     kc.emit(")")
 
     # Place symbols on a grid (declaration order) and record pin coordinates.
@@ -339,19 +315,21 @@ def build(block: dict) -> str:
         col, row = i % _NCOLS, i // _NCOLS
         ox, oy = _X0 + col * _COL_DX, _Y0 + row * _ROW_DY
         sym = spec["sym"]
-        lib_id, _, pins_fn = SYM_TABLE[sym]
+        arch = _SYMS[sym]
+        lib_id = arch["lib_id"]
         fp = _resolve_footprint(spec.get("part"))
-        if sym in MULTI_UNIT:
+        layout = S.placement(arch)
+        if len(layout) > 1:
             # Place each gate unit as its own instance at a distinct offset.
-            unit_pins_fn, layout = MULTI_UNIT[sym]
+            host = layout[0][0]
             for unit, dx, dy in layout:
                 kc.place_symbol(lib_id, ref, spec.get("value", ""), ox + dx, oy + dy,
-                                unit=unit, footprint=(fp if unit == 1 else ""))
-                for pin, (px, py) in unit_pins_fn(ox + dx, oy + dy, unit).items():
+                                unit=unit, footprint=(fp if unit == host else ""))
+                for pin, (px, py) in S.pin_points(arch, ox + dx, oy + dy, unit=unit).items():
                     pin_xy[f"{ref}.{pin}"] = (px, py)
         else:
             kc.place_symbol(lib_id, ref, spec.get("value", ""), ox, oy, footprint=fp)
-            for pin, (px, py) in pins_fn(ox, oy).items():
+            for pin, (px, py) in S.pin_points(arch, ox, oy).items():
                 pin_xy[f"{ref}.{pin}"] = (px, py)
 
     # Drop a global label at every wired pin (name-based connectivity).
@@ -365,6 +343,50 @@ def build(block: dict) -> str:
 
     kc.end_schematic()
     return "\n".join(kc.OUT) + "\n"
+
+
+def footprint_pad_advisory(blocks: list[dict]) -> list[str]:
+    """Warn-first guard: every symbol pin should map to a real footprint pad.
+
+    For each part that binds BOTH a symbol archetype and a footprint, the symbol's
+    pin NUMBERS must be a subset of the footprint's pad numbers (allowing the
+    archetype's authored `nc_pads`). A symbol pin with no pad is a connection that
+    silently vanishes at PCB netlist time — the class of error that the data-driven
+    refactor exists to catch. Parts with no footprint yet (generic R/C) are skipped.
+
+    Returned as WARNINGS, not failures: the current jack archetype uses numeric pins
+    against an alpha-pad (S/T/TN) footprint — a known, pre-existing divergence to
+    reconcile in its own change, not something this refactor should block CI on.
+    """
+    try:
+        import footprint_svg as fps
+    except Exception:                                # noqa: BLE001
+        return []
+    pads: dict[str, set[str]] = {}
+    for fid, _slug, path in fps.iter_footprints():
+        pads[fid] = {p["num"] for p in fps.parse_footprint(path.read_text())["pads"]}
+
+    warns: list[str] = []
+    seen: set[tuple] = set()
+    for block in blocks:
+        for ref, spec in block["parts"].items():
+            sym = spec.get("sym")
+            part = spec.get("part")
+            if sym not in _SYMS or not part:
+                continue
+            fid = _resolve_footprint(part)
+            if not fid or fid not in pads:
+                continue
+            key = (sym, fid)
+            if key in seen:
+                continue
+            seen.add(key)
+            nc = set(_SYMS[sym].get("nc_pads") or [])
+            missing = S.all_pin_numbers(_SYMS[sym]) - pads[fid] - nc
+            if missing:
+                warns.append(f"{sym} → {fid}: symbol pin(s) {sorted(missing)} "
+                             f"have no footprint pad (pads: {sorted(pads[fid])})")
+    return warns
 
 
 def out_path_for(block: dict) -> Path:
@@ -389,8 +411,20 @@ def _main(argv: list[str]) -> int:
             return 1
 
     rc = 0
+    loaded: list[dict] = []
+
+    # Symbol archetype self-test (structure, emitter faithfulness, datasheet
+    # provenance) — a malformed archetype would corrupt every block's symbols.
+    sym_errs = S.selfcheck()
+    if sym_errs:
+        print("SCHEMATIC CHECK — FAIL (symbol archetypes):")
+        for e in sym_errs:
+            print(f"  - {e}")
+        rc = 1
+
     for f in files:
         block = load_block(f)
+        loaded.append(block)
         errs = validate_block(block)
         if errs:
             print(f"SCHEMATIC CHECK — FAIL ({f.name}):")
@@ -425,6 +459,11 @@ def _main(argv: list[str]) -> int:
             print(f"Wrote {out.relative_to(_REPO)}  "
                   f"[{len(block['parts'])} parts, {len(block['nets'])} nets, "
                   f"parens {'balanced' if opens == closes else 'UNBALANCED'}]")
+
+    # Warn-first symbol-pin ⊆ footprint-pad guard (does not fail the build).
+    for w in footprint_pad_advisory(loaded):
+        print(f"SCHEMATIC CHECK — WARN: {w}")
+
     return rc
 
 

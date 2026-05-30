@@ -12,13 +12,16 @@ order, symbol gaps, and per-block transcription checklist*.
 ## How a block gets added (the repeatable unit of work)
 
 1. Write `specs/<block>/<block>.nets.yaml`:
-   - `parts:` — each `REF: { sym, part?, value }`. `sym` selects the lib symbol +
-     pin map from `SYM_TABLE`; `part` (optional) binds to the `components/`
-     registry by a `matches[]` string for footprint/MPN; passives use `value` only.
+   - `parts:` — each `REF: { sym, part?, value }`. `sym` selects a symbol archetype
+     (lib symbol + pin geometry) from `components/symbols.yaml`; `part` (optional)
+     binds to the `components/` registry by a `matches[]` string for footprint/MPN;
+     passives use `value` only.
    - `nets:` — `NET_NAME: [REF.PIN, ...]`. Name-based connectivity.
    - `no_connect:` — every pin not in a net (e.g. LM13700 pin 12, THAT2180 pin 7).
    - `boundary:` — nets that leave the sheet to other blocks (doc + label shape).
-2. If the block uses a symbol/pin-map not yet in `SYM_TABLE`, add it (see gaps below).
+2. If the block uses a symbol not yet in `components/symbols.yaml`, add the archetype
+   there (lib_id, body graphics, per-unit pins with their `at` connection point, and a
+   `pinout_datasheet:` citation for non-primitives — `tools/symbols.py --check` enforces it).
 3. `python3 tools/generate_schematic.py --block <block>` → emits
    `kicad/pogo-<block>.kicad_sch`.
 4. `python3 tools/generate_schematic.py --check` must pass (pin coverage +
@@ -89,35 +92,42 @@ Remaining: **none** — all 10 blocks transcribed and `--check` clean (10/10). T
 
 ---
 
-## Symbol / pin-helper gaps to close (in `tools/kicad_common.py`)
+## Symbol archetypes (`components/symbols.yaml`)
 
-`SYM_TABLE` (in `generate_schematic.py`) maps `sym` → (lib_id, `sym_*()`,
-**all-pins fn**). The all-pins fn must return *every electrical pin* so the coverage
-validator works. Current state:
+Symbols are **authored data**, not code. Each `sym:` token in a nets file keys an
+archetype in `components/symbols.yaml`; `tools/symbols.py` loads it and provides the
+emitter (`emit_symbol`), the pin connection-points (`pin_points`, the single source
+shared by emit + coverage), multi-unit `placement`, and the `selfcheck()` gate. A
+pin's `at` coordinate IS its connection point, so the lib-symbol geometry and the
+coverage pin-map cannot drift — the bug class behind the LM13700 / THAT340 / CD4053
+fixes (a hand-written `sym_*()` body disagreeing with its `*_pins()` helper). The old
+per-symbol `sym_*()` / `*_pins()` functions in `kicad_common.py` are gone; that file
+is now only the generic, symbol-agnostic s-expr emitters.
 
-| Device | lib symbol | all-pins helper | Gap |
+All 16 archetypes are present and self-test clean (`tools/symbols.py --check`, also run
+inside `generate_schematic.py --check`):
+
+| `sym` | lib_id | units | datasheet citation |
 |---|---|---|---|
-| OPA1612 / TL072 / LM4562 / NE5532 | ✅ | `opamp_dual_all_pins` ✅ | none |
-| BAT54S | ✅ | `bat54s_pins` ✅ | none |
-| Jack (PJ398SM) | ✅ | `jack_pins` ✅ | none |
-| R / C / pot+trimpot+slider | ✅ | `r_pins`/`c_pins`/`rpot_pins` ✅ | none |
-| THAT340 | ✅ | `that340_pins` ✅ (all 16) | wire into SYM_TABLE |
-| CD4053 | ✅ | `cd4053_pins` ✅ (all 16) | wire into SYM_TABLE |
-| THAT2180 | ✅ sym (pinout CORRECTED) | ✅ `that2180_pins` | done (sym `vca`); datasheet pinout Input=1,Ec+=2,Ec−=3,Sym=4,V−=5,Gnd=6,V+=7,Output=8 |
-| THAT340 | ✅ sym (CORRECTED to SO14) | ✅ `that340_pins` (SO14) | done; datasheet-verified 14-pin (2 NPN Q1/Q2 + 2 PNP Q3/Q4); expo uses NPN pair |
-| **LM13700** | ✅ sym (CORRECTED) | ✅ `lm13700_pins` | done; datasheet-verified (prior symbol had 13/16 pins wrong incl. V+/V−) |
-| **CD4053** | ✅ sym (CORRECTED 2026-05-29) | ✅ `cd4053_pins` | done; channel pin numbers were scrambled + VEE(7)/X1_C(12) overlapped — fixed to TI CD4053B pinout |
-| **TL074** | ✅ sym | partial (`opamp_quad_pins`, no power) | add `opamp_quad_all_pins` (units 1–4 + V+ 4, V− 11) |
-| DW3 toggle (DPDT ON-ON) | ✅ `sym_dw3` | ✅ `dpdt6_pins` | done (sym `dw3` in SYM_TABLE) |
-| DW5 toggle (DPDT ON-ON-ON) | ✅ `sym_dw5` | ✅ `dpdt6_pins` (shared) | done (sym `dw5`); same 6-pin body as DW3 |
-| Diode (1N4148W) | ✅ `sym_diode` | ✅ `diode2_pins` | done (sym `diode`); pins A/K; SOD-123 footprint vendored |
-| LED (3 mm) | ✅ `sym_led` | ✅ `diode2_pins` (shared) | done (sym `led`); pins A/K match LED_D3.0mm |
-| Trimpot / pot (3-pin) | ✅ `sym_rpot` | ✅ `rpot_pins` | done (sym `trimpot` in SYM_TABLE) |
+| `opamp2` (OPA1612 / TL072 / LM4562 / NE5532) | `Amplifier_Operational:OPA1612` | A,B,pwr | ✅ |
+| `opamp4` (TL074) | `Amplifier_Operational:TL074` | A–D,pwr | ✅ |
+| `ota` (LM13700) | `Amplifier_Operational:LM13700` | 1 | ✅ datasheet-verified 16-pin |
+| `vca` (THAT2180) | `POGO:THAT2180` | 1 | ✅ Input=1…Output=8 |
+| `expo` (THAT340) | `POGO:THAT340` | 1 | ✅ SO14 (NPN Q1/Q2 + PNP Q3/Q4) |
+| `cd4053` | `Analog_Switch:CD4053` | 1 | ✅ TI CD4053B (no coincident pins) |
+| `bat54s` | `Diode:BAT54S` | 1 | ✅ |
+| `dw3` / `dw5` (Dailywell DPDT) | `Switch:SW_Dailywell_DW3/5` | 1 | ✅ |
+| `zener` (BZX84) | `Diode:D_Zener` | 1 | ✅ (pad 2 = N/C) |
+| `diode` / `led` / `r` / `c` / `trimpot` / `jack` | Device:* | 1 | primitive (self-evident) |
 
-The stale `sym_spdt`/`sym_sp3t` + `spdt_pins`/`sp3t_pins` are 40HP single-pole
-parts and must **not** be reused — the 48HP toggles are the Dailywell DPDT DW3/DW5
-(see the switch-standardization work). Footprints already exist in
+The stale 40HP single-pole `sym_spdt`/`sym_sp3t` are **deleted** (the 48HP toggles are
+the Dailywell DPDT DW3/DW5). DPDT footprints live in
 `components/footprints/Button_Switch_THT.pretty/` and resolve via the registry.
+
+> **Known divergence (warn-first):** the `jack` archetype numbers its pins `1/2/3`
+> (T/S/SW) while the QingPu PJ398SM footprint pads are `S/T/TN`. `generate_schematic.py
+> --check` prints this as a `WARN` (symbol-pin ⊆ footprint-pad guard) without failing.
+> Reconcile the pin-number ↔ pad-name scheme in its own Lane-B change before PCB netlist.
 
 ---
 
