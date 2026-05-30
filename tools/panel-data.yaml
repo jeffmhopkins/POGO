@@ -213,13 +213,13 @@ zones:
     col_pitch: 11.43
     cols: 3
     components:
-      # PLANNED control — not yet implemented in the plugin (no MOD_SRC_PARAM); shown
-      # on the panel but intentionally has no cpp_param link until the DSP exists.
+      # 3-way mod-source select: LFO1 / LFO2 / EXT (MOD_IN jack). DW5 = 3-position.
       - id: MOD_SRC_SW
         type: toggle_dw5
         col: 0
         cy: 89.5
         label: "MOD SRC"
+        cpp_param: "MOD_SRC_PARAM"
       - id: SCALE
         type: trimpot
         col: 1

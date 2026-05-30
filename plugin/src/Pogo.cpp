@@ -123,6 +123,7 @@ struct Pogo : Module {
 		LFO1_RATE_PARAM,
 		LFO2_RATE_PARAM,
 		// Zone 0c — MOD BUS / VCA
+		MOD_SRC_PARAM,          // switch 0/1/2: LFO1 / LFO2 / EXT (MOD_IN jack)
 		MOD_SCALE_PARAM,        // trimpot 0–1 → 0.2×–5×
 		MOD_OFFSET_PARAM,       // trimpot −1–1 → ±5 V
 		VCA_AMT_PARAM,          // trimpot −1–1 (bipolar attenuverter)
@@ -159,7 +160,7 @@ struct Pogo : Module {
 		// LP2
 		LP2_FREQ_PARAM, LP2_RES_PARAM,
 		LP2_FREQ_ATT_PARAM, LP2_RES_ATT_PARAM,
-		NUM_PARAMS   // 52
+		NUM_PARAMS   // 53
 	};
 
 	enum InputId {
@@ -201,6 +202,7 @@ struct Pogo : Module {
 		configParam(LFO2_RATE_PARAM, 0.f, 1.f, 0.3f, "LFO 2 Rate");
 
 		// Zone 0c
+		configSwitch(MOD_SRC_PARAM, 0.f, 2.f, 0.f, "Mod Source", {"LFO 1", "LFO 2", "External"});
 		configParam(MOD_SCALE_PARAM,  0.f,  1.f, 0.5f, "Mod Scale");
 		configParam(MOD_OFFSET_PARAM, -1.f, 1.f, 0.f,  "Mod Offset");
 		configParam(VCA_AMT_PARAM,    -1.f, 1.f, 0.f,  "VCA Depth");
@@ -307,8 +309,6 @@ struct Pogo : Module {
 	// ── DSP state ────────────────────────────────────────────────────────────
 	LFO lfo1, lfo2;
 	TripleBandpass bandpassL, bandpassR;
-	// Distortion taps — post-SVF per-group distorted outputs
-	float distTapL[3] = {}, distTapR[3] = {};
 	LPFilter lp1L, lp1R;
 	LPFilter lp2L, lp2R;
 	HPFilter hpL, hpR;
@@ -316,7 +316,6 @@ struct Pogo : Module {
 	void onReset() override {
 		lfo1.reset(); lfo2.reset();
 		bandpassL.reset(); bandpassR.reset();
-		for (int i = 0; i < 3; i++) distTapL[i] = distTapR[i] = 0.f;
 		lp1L.reset(); lp1R.reset();
 		lp2L.reset(); lp2R.reset();
 		hpL.reset();  hpR.reset();
@@ -359,10 +358,12 @@ struct Pogo : Module {
 		float lfo2V   = lfo2Raw * 5.f;   // ±5 V
 
 		// ── Mod bus ───────────────────────────────────────────────────────────
-		// LFO1 normalises to mod bus; MOD_INPUT jack overrides when patched
-		float modSrcV = inputs[MOD_INPUT].isConnected()
-		                ? inputs[MOD_INPUT].getVoltage()
-		                : lfo1V;
+		// MOD SRC switch selects the bus source: 0 = LFO1, 1 = LFO2,
+		// 2 = EXT (MOD_INPUT jack only; 0 V if unpatched — jack is ignored otherwise).
+		int   modSrc  = (int)std::round(params[MOD_SRC_PARAM].getValue());
+		float modSrcV = (modSrc == 0) ? lfo1V
+		              : (modSrc == 1) ? lfo2V
+		              : (inputs[MOD_INPUT].isConnected() ? inputs[MOD_INPUT].getVoltage() : 0.f);
 
 		float busV = ModBusProcessor::process(modSrcV,
 		                                      params[MOD_SCALE_PARAM].getValue(),
@@ -439,29 +440,37 @@ struct Pogo : Module {
 		float bp3InL = altLConn ? VcaBlock::process(altL, vcaAmt, vcaCV) : bandL;
 		float bp3InR = (altLConn || altRConn) ? VcaBlock::process(altR, vcaAmt, vcaCV) : bandR;
 
+		// ── Distortion BEFORE the bandpass (per band: x → DISTn → BPn) ───────
+		// Each band distorts its own feed first, then the SVF filters it.
+		// BP1/BP2 distort the LP1 output; BP3 distorts the main/ALT feed.
+		float distInL[3] = { bandL, bandL, bp3InL };
+		float distInR[3] = { bandR, bandR, bp3InR };
+		float bpInL[3], bpInR[3];
+		for (int i = 0; i < 3; i++) {
+			bpInL[i] = Distortion::process(distInL[i], driveCv[i], distMode[i]);
+			bpInR[i] = Distortion::process(distInR[i], driveCv[i], distMode[i]);
+		}
+		// CLIP LEDs monitor the distortion stage output (now pre-filter).
+		lights[BP1_CLIP_LIGHT].setBrightness(
+			(std::max(std::abs(bpInL[0]), std::abs(bpInR[0])) > 4.0f) ? 1.f : 0.f);
+		lights[BP2_CLIP_LIGHT].setBrightness(
+			(std::max(std::abs(bpInL[1]), std::abs(bpInR[1])) > 4.0f) ? 1.f : 0.f);
+		lights[BP3_CLIP_LIGHT].setBrightness(
+			(std::max(std::abs(bpInL[2]), std::abs(bpInR[2])) > 4.0f) ? 1.f : 0.f);
+
 		// Per-group tilt: global bpTiltCv + per-band groupTiltV; L gets +, R gets −
 		float tiltL[3] = { bpTiltCv + groupTiltV[0], bpTiltCv + groupTiltV[1], bpTiltCv + groupTiltV[2] };
 		float tiltR[3] = { -(bpTiltCv + groupTiltV[0]), -(bpTiltCv + groupTiltV[1]), -(bpTiltCv + groupTiltV[2]) };
-		bandpassL.process(bandL, bp3InL, freqV, focusCv, tiltL, fs);
-		bandpassR.process(bandR, bp3InR, freqV, focusCv, tiltR, fs);
+		bandpassL.process(bpInL, freqV, focusCv, tiltL, fs);
+		bandpassR.process(bpInR, freqV, focusCv, tiltR, fs);
 
-		float dSumL = 0.f, dSumR = 0.f;
-		for (int i = 0; i < 3; i++) {
-			distTapL[i] = Distortion::process(bandpassL.prevOut[i], driveCv[i], distMode[i]);
-			distTapR[i] = Distortion::process(bandpassR.prevOut[i], driveCv[i], distMode[i]);
-			dSumL += distTapL[i];
-			dSumR += distTapR[i];
-		}
-		lights[BP1_CLIP_LIGHT].setBrightness(
-			(std::max(std::abs(distTapL[0]), std::abs(distTapR[0])) > 4.0f) ? 1.f : 0.f);
-		lights[BP2_CLIP_LIGHT].setBrightness(
-			(std::max(std::abs(distTapL[1]), std::abs(distTapR[1])) > 4.0f) ? 1.f : 0.f);
-		lights[BP3_CLIP_LIGHT].setBrightness(
-			(std::max(std::abs(distTapL[2]), std::abs(distTapR[2])) > 4.0f) ? 1.f : 0.f);
+		// Sum the three filtered bands; BP3 OUT taps the post-BP3 band (pre-mix).
+		float dSumL = bandpassL.prevOut[0] + bandpassL.prevOut[1] + bandpassL.prevOut[2];
+		float dSumR = bandpassR.prevOut[0] + bandpassR.prevOut[1] + bandpassR.prevOut[2];
 		float wetL    = clamp(dSumL, -10.5f, 10.5f);
 		float wetR    = clamp(dSumR, -10.5f, 10.5f);
-		float bp3OutL = distTapL[2];
-		float bp3OutR = distTapR[2];
+		float bp3OutL = bandpassL.prevOut[2];
+		float bp3OutR = bandpassR.prevOut[2];
 
 		float bpOutL = clamp(bandL * bypass + wetL * wet, -12.f, 12.f);
 		float bpOutR = clamp(bandR * bypass + wetR * wet, -12.f, 12.f);
@@ -521,11 +530,12 @@ struct PogoWidget : ModuleWidget {
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(30.48f, 65.90f)), module, Pogo::LFO2_RATE_PARAM));
 
 		// ── Zone 0c — MOD BUS / VCA ────────────────────────────────────
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(7.62f, 83.00f)), module, Pogo::MOD_SCALE_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(30.48f, 83.00f)), module, Pogo::VCA_AMT_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(7.62f, 96.34f)), module, Pogo::MOD_OFFSET_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(30.48f, 96.34f)), module, Pogo::VCA_OFS_PARAM));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.62f, 112.00f)), module, Pogo::MOD_INPUT));
+		addParam(createParamCentered<PogoToggle3>(mm2px(Vec(7.62f, 89.50f)), module, Pogo::MOD_SRC_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(19.05f, 83.75f)), module, Pogo::MOD_SCALE_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(30.48f, 83.75f)), module, Pogo::VCA_AMT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(19.05f, 95.25f)), module, Pogo::MOD_OFFSET_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(30.48f, 95.25f)), module, Pogo::VCA_OFS_PARAM));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(19.05f, 112.00f)), module, Pogo::MOD_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(30.48f, 112.00f)), module, Pogo::VCA_INPUT));
 
 		// ── Zone — LP1 Low-Pass Filter ─────────────────────────────────
