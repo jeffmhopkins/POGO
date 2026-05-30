@@ -3,7 +3,7 @@
 - **Slug:** tall-trimmer-pots   **Branch:** `change/tall-trimmer-pots`
 - **Lane:** B+panel (hardware part + panel geometry; plugin LOCKED/unchanged — `trimpot`-type controls
   stay `Trimpot` widget / `type: trimpot`). Gates: **G6b** footprint, **G6a** component, **G2** panel layout.
-- **Status:** OPEN — WIP (footprint vendored + bound; **G2 panel re-layout APPLIED & DRC-clean**; G6a sourcing + BOM repoint pending)
+- **Status:** OPEN — ready for close (footprint vendored+bound, **G2 applied & DRC-clean**, **G6a sourced**, **BOM repointed**, `--cpp` bug fixed, GUI synced; all gates green)
 - **Opened:** 2026-05-30
 
 ## Intent
@@ -102,11 +102,41 @@ centred R0904N can). `build_panel.py --check` → **DRC PASS — no violations**
 > separate follow-up (teach `panel_cpp` the column-grid resolver, or have it consume resolved
 > positions from `panel_svg`).
 
+## G6a + BOM repoint + tool fix (2026-05-30) — DONE
+- **`--cpp` generator bug fixed** (`tools/panel_cpp.py`): `_cx` now mirrors
+  `build_panel._resolve_comp` — resolves column-grid (`col`+zone `x_start`/`col_pitch`)
+  and adds `rules.x_offset`. Was emitting `cx=0.00` for all column-grid components
+  (LFO/MOD/VCA trimpots + CV jacks). Verified `--cpp` == authoritative `resolve_components`
+  for all 80 widgets.
+- **Pogo.cpp widget sync (GUI only):** synced the 18 in-scope attenuverter Y positions to
+  the re-spaced panel (cy 100→99.5; LP1_FREQ_ATT 41.91/100→41.79/99.0). DSP `process()`
+  untouched → behavior identical (G3 holds). **Pre-existing, out-of-scope drift left as-is
+  and documented:** the MOD/VCA cluster (MOD_INPUT/SCALE/OFFSET, VCA_AMT/OFS) sits a full
+  column off in the committed Pogo.cpp (predates this branch — panel-data base→current did
+  not move it). A follow-up Lane-A "resync plugin GUI to panel" change should fix it now that
+  `--cpp` is reliable.
+- **G6a part sourced:** `components/parts/songhuei_r0904n/component.yaml` (mpn R0904N, Song
+  Huei, Thonk; symbol `trimpot`; footprint `Potentiometer_Songhuei_9mm_TallTrimmer_Vertical`;
+  url-only supplier datasheet like alpha; `matches: lin pot / log pot / bipolar pot`).
+- **Registry repoint (unique resolution):** moved the three taper tags **off** `alpha_rd901f`
+  (it keeps `knob / large knob / xl knob` → still the panel knobs) onto `songhuei_r0904n`.
+  Now `lin/log/bipolar pot → R0904N`, `knob/large/xl knob → alpha`. The big freq/focus/dist
+  finger-**knobs** stay Alpha; only the small finger-**pots** move to R0904N.
+- **RV41/RV43** (HP_RES, LP2_RES) repointed `Bourns 3296W → "lin pot"` (R0904N) — they are
+  panel `type: trimpot` RES controls. `bourns_3296w` part is now unreferenced (kept in the
+  catalog; no BOM rows).
+- **Regenerated:** block-2/3/4 schematics (att/LFO/VCA pot Footprint alpha→R0904N), BOM
+  (`kicad/pogo-bom.csv` + `docs/pogo-bom.csv` — 27 control pots now Song Huei R0904N).
+  RV41/RV43 are BOM-only (not drawn as block-7/8 symbols), so only their BOM rows changed.
+- **All gates green:** components / fetch_datasheets / build_components / generate_schematic /
+  build_panel `--check`, plus `test_drc` (45 pass/1 xfail) + 437-scenario parity.
+
 ## Pending
-- **G6a:** source the Song Huei R0904N tall trimmer in `specs/components.yaml` + `components/parts/` (+ datasheet).
-- Repoint the ~25 `trimpot`-type BOM refs to the Song Huei part (centre-detent linear / log per control).
-- Regenerate BOM + schematics; all five `--check` gates green.
+- Maintainer load the CI `.vcvplugin` to eyeball the synced attenuverter GUI (behavior unchanged).
 - Eventually rename the footprint file to `…_Songhuei_R0904N_…` (filename still says `TallTrimmer`).
+- Follow-up (separate change): resync the pre-existing MOD/VCA plugin-GUI column drift; consider
+  retiring the now-unreferenced `bourns_3296w` catalog part.
+- Close out #0016 (PR `change/tall-trimmer-pots` → dev; squash on green CI).
 
 ## Decisions log
 - 2026-05-30: maintainer chose Alpha/Song Huei 9mm tall trimmers for all small panel pots, and to drive
