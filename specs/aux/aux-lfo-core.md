@@ -188,17 +188,16 @@ LED only drives on the positive half-cycle, producing a pulsing rather than
 breathing effect. Phase 3R to choose: breathing (no diode, DC bias resistor) or
 pulsing (half-wave rectified). Document as open item.
 
-### Expo Taper vs Log Pot (Phase 3R Open Item)
+### Rate taper — RESOLVED (drive-attenuator + 9mm log panel pot)
 
-The DSP rate taper is 0.05 × 400^x — a genuine exponential curve spanning 400:1
-frequency ratio. A log-taper pot spans approximately 10:1 to 100:1 depending on the
-pot quality. To accurately reproduce the DSP taper:
-- Log pot + end resistors: achieves approximately 400:1 with careful end resistor
-  selection; acceptable for most applications
-- THAT340 expo converter: exact exponential; adds ~1 THAT340 + trim circuit per LFO;
-  enables future CV-over-rate (V/Hz or V/oct sync)
-
-Phase 3R must choose. Document both options in block-2/spec.md.
+The DSP rate taper is 0.05 × 400^x — a genuine exponential spanning 400:1. This is
+**RESOLVED** in block-2/spec.md §2/§3: it is **not** reproduced by varying R_int with a
+pot (that needs a 400:1 resistance swing). Instead block-2 uses a **drive-attenuator** —
+R_int is fixed and a pot divides the Schmitt square-wave drive into the integrator
+(f ∝ wiper fraction). The rate control is a **9mm log-taper panel pot** (RD901F family, as
+the attenuverters); the log taper gives the roughly exponential rate-vs-rotation sweep. The
+THAT340-expo option is **not** used (the log panel pot is adequate and far cheaper);
+CV-over-rate is deferred to a future revision.
 
 ## Component Values (POGO-specific)
 
@@ -207,9 +206,9 @@ Phase 3R must choose. Document both options in block-2/spec.md.
 | U_LFO1 | TL072CDT | SOIC-8 | — | Half A = integrator; half B = Schmitt trigger |
 | U_LFO2 | TL072CDT | SOIC-8 | — | Half A = integrator; half B = Schmitt trigger (LFO2) |
 | C_INT | C0G ceramic | 0603 | 47 nF | Integrator cap; C0G for frequency stability |
-| R_INT | Log-taper pot | 9mm T18 | 1 MΩ | RATE pot; sets oscillation frequency |
-| R_CW_END | Resistor | 0603 | 270 kΩ | CW end resistor; limits R_INT min (f_max = 20 Hz) |
-| R_CCW_END | Resistor | 0603 | 10 MΩ | CCW end resistor; limits R_INT max (f_min ~0.05 Hz) |
+| R_INT | Resistor | 0603 | 590 kΩ | **Fixed** integrator input R; sets f_max ≈ 20 Hz at full drive |
+| RV_RATE | Log-taper pot | 9mm T18 | 1 MΩ | RATE panel pot (drive attenuator on V_sq; RD901F family, as the attenuverters) |
+| R_FLOOR | Resistor | 0603 | 2.4 kΩ | Divider floor (pot bottom → GND); sets f_min ≈ 0.05 Hz |
 | R_HYS | Resistor | 0603 | 82 kΩ | Schmitt trigger hysteresis; sets ±5V threshold |
 | R_fb_sq | Resistor | 0603 | 100 kΩ | Schmitt trigger feedback resistor |
 | R_LED_LFO | Resistor | 0603 | 1.5 kΩ | LFO LED current limit |
@@ -221,11 +220,12 @@ Phase 3R must choose. Document both options in block-2/spec.md.
 ### Component Values Derivation Summary
 
 ```
-C_INT = 47 nF (C0G)
-R_INT_effective range: 266 kΩ (f = 20 Hz) to 106 MΩ (f = 0.05 Hz)
-  Achievable with 1 MΩ log pot + R_CW_END = 270 kΩ (in parallel):
-    R_min ≈ 270 kΩ || 1 MΩ = 213 kΩ → f_max = 1/(4 × 213k × 47n) = 25 Hz ✓ (a little fast, trimmed OK)
-    R_max ≈ 1 MΩ + R_CCW_END = up to full pot + 10 MΩ → f_min ≈ 0.05 Hz ✓
+C_INT = 47 nF (C0G); R_INT = 590 kΩ (fixed)
+Drive-attenuator: f = k · f_max, k = wiper fraction of RV_RATE (1 MΩ log) divider on V_sq
+    f_max ≈ 1/(4 × 590k × 47n) ≈ 19.8 Hz   (k ≈ 1, full CW)
+    k_min = R_FLOOR/(RV_RATE + R_FLOOR) = 2.4k/(1M + 2.4k) ≈ 0.0024 → f_min ≈ 0.047 Hz ✓
+  (Log taper reshapes the middle of the throw into the exponential sweep; end points set by
+   the divider. Wiper source impedance into R_INT is a prototype-trim item — see block-2 §2.)
 
 Schmitt trigger thresholds:
   V_H = 5V (target)
@@ -238,7 +238,7 @@ Schmitt trigger thresholds:
 | Parameter | Value | Condition |
 |---|---|---|
 | Frequency range | 0.05 – 20 Hz | Full RATE pot sweep |
-| Frequency taper | ~log (anti-log pot) | Log-taper pot + end resistors |
+| Frequency taper | ~exponential | Log-taper pot in drive-attenuator divider |
 | Output amplitude | ±5V triangle | ±12V supply, V_H calibrated |
 | Output waveform | Triangle | Integrator output |
 | Frequency stability | ±1% / °C | C0G cap; TL072 offset drift |
