@@ -8,7 +8,8 @@ DSP source: `plugin/src/dsp/LFO.hpp`, `plugin/src/Pogo.cpp` (lines 364–368)
 ## 1. Intent
 
 Block 2 provides two continuously running triangle-wave low-frequency oscillators. Each
-has a front-panel rate trimpot (screwdriver-set preset) spanning 0.05 Hz (a 20-second period, useful for slow filter
+has a front-panel rate pot (9mm, log taper — the same panel-pot family as the
+attenuverters) spanning 0.05 Hz (a 20-second period, useful for slow filter
 sweeps) to 20 Hz (at the boundary of audio, approaching ring-modulation territory). Each
 LFO drives a front-panel LED that brightens on positive half-cycles and dims on negative
 half-cycles, giving a visual indication of rate and phase. Both LFOs have output jacks
@@ -21,9 +22,11 @@ jack only, no automatic normalling.
 
 ## 2. Theoretical Design and Topology
 
-> ✅ **FINALIZED 2026-05-29** — Rate network reworked to the drive-attenuator topology
-> (fixed R_INT + trimpot attenuator on the Schmitt output) and verified against the
-> plugin rate law and the components.yaml BOM. Transcribed in `specs/block-2/block-2.nets.yaml`.
+> ✅ **FINALIZED 2026-05-29; pot updated 2026-05-30** — Rate network uses the drive-attenuator
+> topology (fixed R_INT + pot attenuator on the Schmitt output), verified against the plugin
+> rate law and the components.yaml BOM. The rate control is a **9mm log-taper panel pot**
+> (RD901F family, as the attenuverters) — a player control, not a screwdriver trimmer.
+> Transcribed in `specs/block-2/block-2.nets.yaml`.
 
 ### DSP-to-analog mapping
 
@@ -66,16 +69,14 @@ duration 2×V_H×R_int×C_int/V_sat. Rearranging for the integrator resistor:
 R_int = V_sat / (4 × V_H × f × C_int)
 ```
 
-**Rate control — drive-attenuator (FINALIZED 2026-05-29):** The DSP uses
-`speedHz = 0.05 × 400^param`, spanning 0.05–20 Hz (a 400:1 range). Since
+**Rate control — drive-attenuator (FINALIZED 2026-05-29; pot updated 2026-05-30):** The DSP
+uses `speedHz = 0.05 × 400^param`, spanning 0.05–20 Hz (a 400:1 range). Since
 f ∝ 1/(R_int·C_int), covering 400:1 by varying R_int would need a 400:1 resistance
-swing (≈590 kΩ → 234 MΩ) — impossible from a single 1 MΩ linear trimpot used as a
-rheostat (series R is only additive). The 3296W is a cermet preset (linear taper only;
-no log option), so the earlier "R_CW_END/R_CCW_END" rheostat scheme could not deliver
-the range and is **superseded**.
+swing (≈590 kΩ → 234 MΩ) — impractical from a single pot used as a rheostat (series R is
+only additive). So the earlier "R_CW_END/R_CCW_END" rheostat scheme is **superseded**.
 
 Instead, R_int is **fixed** and the rate is set by **attenuating the Schmitt
-square-wave drive into the integrator**. The trimpot is wired as a voltage divider on
+square-wave drive into the integrator**. The pot is wired as a voltage divider on
 V_sq; its wiper feeds R_int. The integrator charge current is V_drive/R_int = k·V_sq/R_int
 with k ∈ [k_min, 1] the wiper fraction, so f scales linearly with k:
 
@@ -83,10 +84,17 @@ with k ∈ [k_min, 1] the wiper fraction, so f scales linearly with k:
 f = k · V_sat / (4 · V_H · R_int · C_int)
 ```
 
-This covers the full 400:1 range from one linear trimpot. Because the trimpot is a
-set-once preset, the (now linear-in-rotation) rate law is irrelevant — the user simply
-turns to the desired rate during setup. A small floor resistor (R_FLOOR) at the divider
+The rate control is a **9mm log-taper panel pot** (RD901F family — the same panel-pot type as
+the attenuverters and MOD_SCALE), **not** a screwdriver trimmer: it is meant to be swept by
+hand. The **log taper** makes the wiper fraction k rise roughly exponentially across rotation,
+so f (∝ k) approximates the plugin's `0.05 × 400^param` law over the throw — a musical sweep
+rather than a linear one bunched at one end. A small floor resistor (R_FLOOR) at the divider
 bottom bounds k_min so the LFO cannot stall at DC.
+
+> **Prototype-verify (Phase 3R):** with a 1 MΩ pot the wiper source impedance (up to ~R_pot/4 ≈
+> 250 kΩ near mid-rotation) adds to R_INT (590 kΩ) and perturbs the f-vs-rotation curve. Trim
+> R_FLOOR / pot value on the prototype, or buffer the wiper, if the deviation from the intended
+> log sweep is objectionable.
 
 ### Topology: integrator + Schmitt trigger
 
@@ -157,9 +165,10 @@ Items 1 and 3 below are intentional DSP advantages kept by design. Item 2 is now
    this with a one-pole LP filter at 10× the LFO rate, producing the same characteristic
    soft peak rounding. This is sonically desirable (softer modulation edges).
 
-3. **Rate law:** The DSP uses a precise exponential: `0.05 × 400^param`. The hardware
-   trimpot is linear-taper; the rate set corresponds to a specific wiper position during
-   setup, not a swept performance control. Exact exponential tracking is not required.
+3. **Rate law:** The DSP uses a precise exponential: `0.05 × 400^param`. The hardware uses a
+   log-taper panel pot whose rotation tracks that exponential approximately (it IS a swept
+   performance control). Exact exponential tracking is not required — the log taper just keeps
+   the sweep musical across the throw.
 
 4. **Frequency accuracy:** Component tolerances on R_int and C_int affect absolute
    frequency. A 10% tolerance capacitor produces ±10% frequency error at any given
@@ -172,9 +181,11 @@ Items 1 and 3 below are intentional DSP advantages kept by design. Item 2 is now
 
 ## 3. Physical Design
 
-> ✅ **FINALIZED 2026-05-29** — Rate network reworked to the drive-attenuator topology
-> (fixed R_INT + trimpot attenuator on the Schmitt output) and verified against the
-> plugin rate law and the components.yaml BOM. Transcribed in `specs/block-2/block-2.nets.yaml`.
+> ✅ **FINALIZED 2026-05-29; pot updated 2026-05-30** — Rate network uses the drive-attenuator
+> topology (fixed R_INT + pot attenuator on the Schmitt output), verified against the plugin
+> rate law and the components.yaml BOM. The rate control is a **9mm log-taper panel pot**
+> (RD901F family, as the attenuverters) — a player control, not a screwdriver trimmer.
+> Transcribed in `specs/block-2/block-2.nets.yaml`.
 
 ### Component values and derivations
 
@@ -190,17 +201,20 @@ R_INT = V_sat / (4 × V_H × f_max × C_INT) = 11 / (4 × 5 × 20 × 47n) = 585 
 → R_INT = 590 kΩ (E96, 1%)  → f_max ≈ 19.8 Hz at k = 1
 ```
 
-**Rate attenuator (RV_RATE = 1 MΩ linear trimpot + R_FLOOR):** the trimpot is a divider
+**Rate attenuator (RV_RATE = 1 MΩ log-taper panel pot + R_FLOOR):** the pot is a divider
 on V_sq — top (pin 3) to V_sq, bottom (pin 1) to GND via R_FLOOR, wiper (pin 2) to R_INT.
-The wiper fraction k sets the charge current and thus f = k · f_max:
+The wiper fraction k sets the charge current and thus f = k · f_max. The end points are set
+by the divider exactly as for a linear pot (the log taper only reshapes the middle of the
+throw into the exponential sweep):
 ```
-k_max ≈ 1                         → f_max ≈ 19.8 Hz   (wiper at top)
+k_max ≈ 1                         → f_max ≈ 19.8 Hz   (full CW)
 k_min = R_FLOOR / (RV + R_FLOOR)  → f_min ≈ k_min · f_max
 R_FLOOR = 2.4 kΩ → k_min = 2.4k / (1M + 2.4k) ≈ 0.0024 → f_min ≈ 0.047 Hz ✓
 ```
-R_INT (590 kΩ) loads the wiper in parallel with R_FLOOR (≈2.39 kΩ effective); the small
-shift is absorbed when the preset is dialled in at assembly. Achievable range ≈0.05–20 Hz
-from a single linear trimpot. C_INT must be C0G (timing stability).
+R_INT (590 kΩ) loads the wiper; with a 1 MΩ pot the wiper source impedance (up to ~R_pot/4)
+is not negligible against R_INT, so the f-vs-rotation curve is to be trimmed/verified on the
+prototype (see §2 note — re-trim R_FLOOR/pot value or buffer the wiper if needed). Achievable
+range ≈0.05–20 Hz. C_INT must be C0G (timing stability).
 
 **Schmitt trigger thresholds (±5 V):** Positive feedback divider from comparator output
 to (+) input, with a lower resistor to GND:
@@ -242,16 +256,17 @@ LFO2 (U2): identical, standalone — V_tri → R12 → J6 (LFO2 jack); no normal
 
 ### Calibration points
 
-The rate trimpot (RV1/RV2) IS the calibration: dial each LFO to the desired rate at
-assembly. R_INT (590 kΩ) sets the fast endpoint; R_FLOOR (2.4 kΩ) sets the slow floor.
-C_INT tolerance shifts absolute frequency but the preset absorbs it. No additional rate
-trimmer is needed.
+No factory rate trimmer is needed: the panel rate pot (RV1/RV2) is the user's control.
+R_INT (590 kΩ) sets the fast endpoint; R_FLOOR (2.4 kΩ) sets the slow floor; C_INT
+tolerance shifts absolute frequency but the wide throw easily covers 0.05–20 Hz, so the
+player just dials the rate they want.
 
-### Trim pots
+### Pots
 
-RV1/RV2 (1 MΩ linear, Bourns 3296W) are the rate presets, wired as drive attenuators on
-the Schmitt output (not as rheostats). Linear taper is correct — the rate law across
-rotation is irrelevant for a set-once preset.
+RV1/RV2 (1 MΩ **log taper**, RD901F 9mm panel pot — the same family as the attenuverters)
+are the rate controls, wired as drive attenuators on the Schmitt output (not as rheostats).
+The log taper gives the roughly exponential rate-vs-rotation sweep (see §2 prototype-verify
+note on wiper loading).
 
 ### Board assignment
 

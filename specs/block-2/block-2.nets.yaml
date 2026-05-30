@@ -44,8 +44,8 @@ parts:
   D2:  { sym: diode, part: 1N4148W, value: 1N4148W }    # D_LED2
   LED1: { sym: led, part: "LED 3mm", value: LFO1 }
   LED2: { sym: led, part: "LED 3mm", value: LFO2 }
-  RV1: { sym: trimpot, part: "Bourns 3296W", value: LFO1_RATE }
-  RV2: { sym: trimpot, part: "Bourns 3296W", value: LFO2_RATE }
+  RV1: { sym: trimpot, part: "log pot", value: LFO1_RATE }
+  RV2: { sym: trimpot, part: "log pot", value: LFO2_RATE }
   J5:  { sym: jack, part: PJ301M-12, value: LFO1 }
   J6:  { sym: jack, part: PJ301M-12, value: LFO2 }
 
