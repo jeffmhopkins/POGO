@@ -53,6 +53,33 @@ def _comp(ctype: str, cx: float, cy: float, cid: str = "test", rotate: int = 0) 
     return {"type": ctype, "cx": cx, "cy": cy, "id": cid, "rotate": rotate}
 
 
+import panel_kicad as _pk  # noqa: E402  (real footprint keepout shapes)
+
+
+def _collide(a_type, b_type, axis, sep, rot_a=0, rot_b=0):
+    """True if A@(50,50) and B@(+sep along axis) collide per the real DRC check."""
+    bx = 50.0 + (sep if axis == "x" else 0.0)
+    by = 50.0 + (sep if axis == "y" else 0.0)
+    return bool(make_rules()._check_pcb_overlaps([
+        _comp(a_type, 50.0, 50.0, "a", rot_a),
+        _comp(b_type, bx, by, "b", rot_b),
+    ]))
+
+
+def _touch_sep(a_type, b_type, axis, rot_a=0, rot_b=0):
+    """Smallest centre-to-centre separation along `axis` at which A and B are CLEAR,
+    found by binary-searching the REAL _check_pcb_overlaps — so it tracks the live model
+    (body overlap + 0.2mm copper clearance) rather than re-deriving geometry."""
+    lo, hi = 0.0, 80.0
+    for _ in range(48):
+        mid = (lo + hi) / 2
+        if _collide(a_type, b_type, axis, mid, rot_a, rot_b):
+            lo = mid
+        else:
+            hi = mid
+    return hi
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Section 1: SVG draw size vs. DRC courtyard size
 #
@@ -186,128 +213,49 @@ class TestCourtyardVsDrawSize:
 # ─────────────────────────────────────────────────────────────────────────────
 
 class TestDrcCatchesOverlaps:
-    """DRC must fire when components are placed too close together."""
+    """DRC must fire when REAL footprints (pads + body) are placed too close.
+    Separations come from _touch_sep (derived from footprint_shapes), so they track
+    the geometry rather than a hard-coded courtyard width. Pattern per type: at the
+    touch separation → clear; 0.5mm closer → exactly one overlap violation."""
 
     def setup_method(self):
         self.dr = make_rules()
 
-    # ── jack (horizontal separation) ─────────────────────────────────────────
-    # JACK_CY width = 10.0mm → minimum x-separation = 10.0mm (gap=0)
-    def test_jack_horizontal_pass_at_minimum_gap(self):
-        """Two jacks 10.0mm apart horizontally: DRC must pass (gap=0)."""
-        comps = [
-            _comp("jack_input", 50.0, 50.0, "j1"),
-            _comp("jack_input", 60.0, 50.0, "j2"),   # exactly 10mm apart
-        ]
-        viols = self.dr._check_pcb_overlaps(comps)
-        assert viols == [], f"Unexpected violations at gap=0: {viols}"
+    def _pair(self, a, b, axis, sep, ra=0, rb=0):
+        bx = 50.0 + (sep if axis == "x" else 0.0)
+        by = 50.0 + (sep if axis == "y" else 0.0)
+        return self.dr._check_pcb_overlaps([
+            _comp(a, 50.0, 50.0, "a", ra),
+            _comp(b, bx, by, "b", rb),
+        ])
 
-    def test_jack_horizontal_fail_at_0_5mm_overlap(self):
-        """Two jacks 9.5mm apart: DRC must report overlap."""
-        comps = [
-            _comp("jack_input", 50.0, 50.0, "j1"),
-            _comp("jack_input", 59.5, 50.0, "j2"),   # 0.5mm into courtyard
-        ]
-        viols = self.dr._check_pcb_overlaps(comps)
-        assert len(viols) == 1, f"Expected 1 violation, got: {viols}"
-        assert "PCB OVERLAP" in viols[0]
-        assert "j1" in viols[0] and "j2" in viols[0]
+    def _assert_boundary(self, a, b, axis, ra=0, rb=0):
+        sep = _touch_sep(a, b, axis, ra, rb)
+        assert sep is not None
+        assert self._pair(a, b, axis, sep + 0.05, ra, rb) == [], \
+            f"{a}/{b} should be clear just past touch sep {sep:.2f}"
+        v = self._pair(a, b, axis, sep - 0.5, ra, rb)
+        assert len(v) == 1 and "PCB OVERLAP" in v[0], \
+            f"{a}/{b} should report 1 overlap 0.5mm inside touch sep {sep:.2f}: {v}"
+        return sep
 
-    # ── trimpot (horizontal separation) ──────────────────────────────────────
-    # TRIMPOT_CY width = 5.33mm → minimum x-separation = 5.33mm
-    def test_trimpot_horizontal_pass_at_minimum_gap(self):
-        """Two trimpots 5.33mm apart: DRC must pass."""
-        cx2 = 50.0 + 2 * 2.665   # exactly 2 × half-widths apart
-        comps = [
-            _comp("trimpot", 50.0, 50.0, "t1"),
-            _comp("trimpot", cx2,  50.0, "t2"),
-        ]
-        viols = self.dr._check_pcb_overlaps(comps)
-        assert viols == [], f"Unexpected violations at gap=0: {viols}"
+    def test_jack_horizontal(self):
+        self._assert_boundary("jack_input", "jack_input", "x")
 
-    def test_trimpot_horizontal_fail_at_0_5mm_overlap(self):
-        """Two trimpots 4.83mm apart: DRC must report overlap."""
-        cx2 = 50.0 + 2 * 2.665 - 0.5
-        comps = [
-            _comp("trimpot", 50.0, 50.0, "t1"),
-            _comp("trimpot", cx2,  50.0, "t2"),
-        ]
-        viols = self.dr._check_pcb_overlaps(comps)
-        assert len(viols) == 1, f"Expected 1 violation, got: {viols}"
-        assert "PCB OVERLAP" in viols[0]
+    def test_trimpot_horizontal(self):
+        # 9mm pots side-by-side: only the bodies (centred ~9.7mm can) gate placement —
+        # offset pins/legs don't (no pad-vs-body), so the boundary ≈ the body width.
+        sep = self._assert_boundary("trimpot", "trimpot", "x")
+        assert 9.0 < sep < 10.5, f"trimpot x touch sep {sep:.2f} not ~9.7mm (body width)"
 
-    # ── toggle (vertical separation) ──────────────────────────────────────────
-    # TOGGLE_CY height = 9.64mm (y∈[-4.82, +4.82]) → min y-sep = 9.64mm
-    def test_toggle_vertical_pass_at_minimum_gap(self):
-        """Two toggles stacked 9.64mm apart: DRC must pass."""
-        dy = abs(TOGGLE_CY[1]) + abs(TOGGLE_CY[3])  # 4.82 + 4.82 = 9.64
-        comps = [
-            _comp("toggle_dw3", 50.0, 50.0,       "s1"),
-            _comp("toggle_dw5", 50.0, 50.0 + dy,  "s2"),
-        ]
-        viols = self.dr._check_pcb_overlaps(comps)
-        assert viols == [], f"Unexpected violations at gap=0: {viols}"
+    def test_toggle_vertical(self):
+        self._assert_boundary("toggle_dw3", "toggle_dw3", "y")
 
-    def test_toggle_vertical_fail_at_0_5mm_overlap(self):
-        """Two toggles stacked 9.14mm apart: DRC must report overlap."""
-        dy = abs(TOGGLE_CY[1]) + abs(TOGGLE_CY[3]) - 0.5
-        comps = [
-            _comp("toggle_dw3", 50.0, 50.0,       "s1"),
-            _comp("toggle_dw3", 50.0, 50.0 + dy,  "s2"),
-        ]
-        viols = self.dr._check_pcb_overlaps(comps)
-        assert len(viols) == 1, f"Expected 1 violation, got: {viols}"
-        assert "PCB OVERLAP" in viols[0]
+    def test_led_vertical(self):
+        self._assert_boundary("led", "led", "y")
 
-    # ── LED ───────────────────────────────────────────────────────────────────
-    # LED_CY height = 5.5mm (y∈[-1.5, +4.0]) → min y-sep = 5.5mm
-    def test_led_vertical_pass_at_minimum_gap(self):
-        """Two LEDs stacked 5.5mm apart: DRC must pass."""
-        dy = abs(LED_CY[1]) + abs(LED_CY[3])  # 1.5 + 4.0 = 5.5
-        comps = [
-            _comp("led", 50.0, 50.0,       "l1"),
-            _comp("led", 50.0, 50.0 + dy,  "l2"),
-        ]
-        viols = self.dr._check_pcb_overlaps(comps)
-        assert viols == [], f"Unexpected violations at gap=0: {viols}"
-
-    def test_led_vertical_fail_at_0_5mm_overlap(self):
-        """Two LEDs stacked 5.0mm apart: DRC must report overlap."""
-        dy = abs(LED_CY[1]) + abs(LED_CY[3]) - 0.5
-        comps = [
-            _comp("led", 50.0, 50.0,       "l1"),
-            _comp("led", 50.0, 50.0 + dy,  "l2"),
-        ]
-        viols = self.dr._check_pcb_overlaps(comps)
-        assert len(viols) == 1, f"Expected 1 violation, got: {viols}"
-        assert "PCB OVERLAP" in viols[0]
-
-    # ── cross-type: jack + trimpot ────────────────────────────────────────────
-    # Vertical separation in same column:
-    # jack bottom edge: +6.5mm, trimpot top edge: -3.385mm → gap threshold = 9.885mm
-    def test_jack_trimpot_vertical_pass_at_minimum_gap(self):
-        """jack_input above a trimpot at gap=0 must pass DRC."""
-        jack_cy = 50.0
-        # gap=0 → trimpot cy = jack_cy + JACK_CY[3] + abs(TRIMPOT_CY[1])
-        tp_cy = jack_cy + JACK_CY[3] + abs(TRIMPOT_CY[1])   # 50 + 6.5 + 3.385 = 59.885
-        comps = [
-            _comp("jack_input", 50.0, jack_cy, "j1"),
-            _comp("trimpot",    50.0, tp_cy,   "t1"),
-        ]
-        viols = self.dr._check_pcb_overlaps(comps)
-        assert viols == [], f"Unexpected violations at gap=0: {viols}"
-
-    def test_jack_trimpot_vertical_fail_when_0_5mm_closer(self):
-        """jack_input + trimpot at 0.5mm overlap must fail DRC."""
-        jack_cy = 50.0
-        tp_cy   = jack_cy + JACK_CY[3] + abs(TRIMPOT_CY[1]) - 0.5
-        comps = [
-            _comp("jack_input", 50.0, jack_cy, "j1"),
-            _comp("trimpot",    50.0, tp_cy,   "t1"),
-        ]
-        viols = self.dr._check_pcb_overlaps(comps)
-        assert len(viols) == 1, f"Expected 1 violation, got: {viols}"
-        assert "PCB OVERLAP" in viols[0]
+    def test_jack_trimpot_vertical(self):
+        self._assert_boundary("jack_input", "trimpot", "y")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -323,37 +271,34 @@ class TestDrcCatchesOverlaps:
 class TestToggleTrimpotClearance:
     """Verify toggle↔trimpot vertical clearance is driven by the footprint courtyards."""
 
-    DRC_THRESHOLD = TOGGLE_CY[3] + abs(TRIMPOT_CY[1])   # 4.82 + 3.385 = 8.205
-
-    def test_pass_just_above_threshold(self):
-        """At threshold + 0.01mm (gap > 0), DRC passes."""
+    def test_pass_just_above_touch(self):
+        """At the real-footprint touch separation + 0.05mm, DRC passes."""
         dr = make_rules()
-        delta = self.DRC_THRESHOLD + 0.01
+        sep = _touch_sep("toggle_dw5", "trimpot", "y")
         comps = [
-            _comp("toggle_dw5", 50.0, 50.0,         "sw1"),
-            _comp("trimpot",    50.0, 50.0 + delta, "tp1"),
+            _comp("toggle_dw5", 50.0, 50.0,             "sw1"),
+            _comp("trimpot",    50.0, 50.0 + sep + 0.05, "tp1"),
         ]
-        assert dr._check_pcb_overlaps(comps) == [], (
-            f"At delta={delta:.3f}mm (gap=+0.01mm) DRC should pass."
-        )
+        assert dr._check_pcb_overlaps(comps) == [], f"should pass just past touch sep {sep:.2f}"
 
-    def test_fail_below_threshold(self):
-        """At threshold − 0.5mm the courtyards overlap and DRC must fire."""
+    def test_fail_below_touch(self):
+        """0.5mm inside the real-footprint touch separation, DRC must fire."""
         dr = make_rules()
-        delta = self.DRC_THRESHOLD - 0.5
+        sep = _touch_sep("toggle_dw5", "trimpot", "y")
         comps = [
-            _comp("toggle_dw5", 50.0, 50.0,         "sw1"),
-            _comp("trimpot",    50.0, 50.0 + delta, "tp1"),
+            _comp("toggle_dw5", 50.0, 50.0,            "sw1"),
+            _comp("trimpot",    50.0, 50.0 + sep - 0.5, "tp1"),
         ]
         viols = dr._check_pcb_overlaps(comps)
-        assert len(viols) >= 1, f"DRC must catch overlap at delta={delta:.3f}mm, got: {viols}"
+        assert len(viols) >= 1, f"DRC must catch overlap 0.5mm inside touch sep {sep:.2f}: {viols}"
 
-    def test_threshold_gap_is_zero(self):
-        """At exactly the threshold, the courtyard gap is ≈ 0 (boundary contact)."""
-        sw_rect = _get_courtyard(50.0, 50.0,                       "toggle_dw5", 0)
-        tp_rect = _get_courtyard(50.0, 50.0 + self.DRC_THRESHOLD,  "trimpot",    0)
+    def test_courtyard_threshold_gap_is_zero(self):
+        """The COURTYARD boundary contact (still used by the rail/MH checks) is gap ≈ 0."""
+        thr = TOGGLE_CY[3] + abs(TRIMPOT_CY[1])
+        sw_rect = _get_courtyard(50.0, 50.0,        "toggle_dw5", 0)
+        tp_rect = _get_courtyard(50.0, 50.0 + thr,  "trimpot",    0)
         gap = _rect_min_gap(sw_rect, tp_rect)
-        assert abs(gap) < 0.01, f"Expected gap ≈ 0 at threshold, got {gap:.6f}mm"
+        assert abs(gap) < 0.01, f"Expected courtyard gap ≈ 0 at threshold, got {gap:.6f}mm"
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -462,17 +407,16 @@ class TestJackRotate180:
             f"Expected PCB KEEPOUT for rotate=180 jack at cy=113.0, got: {viols}"
         )
 
-    def test_rotate_180_courtyard_overlap_detection_correct(self):
-        """Two jacks 10mm apart with one rotate=180 must still detect overlap when 9mm apart."""
+    def test_rotate_180_overlap_detection_correct(self):
+        """A rotate=180 jack must still collide on x. The jack body is x-symmetric (±4.5,
+        width 9.0), so 180° doesn't change the x-extent; 8mm apart → 1mm body overlap."""
         dr = make_rules()
-        # JACK_CY is x-symmetric so rotate=180 doesn't change x-extent.
-        # Two jacks 9mm apart in x → courtyard overlap regardless of y-rotation.
         comps = [
             _comp("jack_input", 50.0, 50.0, "j1", rotate=0),
-            _comp("jack_input", 59.0, 50.0, "j2", rotate=180),
+            _comp("jack_input", 58.0, 50.0, "j2", rotate=180),
         ]
         viols = dr._check_pcb_overlaps(comps)
-        assert len(viols) == 1, f"Expected 1 overlap for jacks 9mm apart: {viols}"
+        assert len(viols) == 1, f"Expected 1 overlap for jacks 8mm apart (body 9mm): {viols}"
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -527,8 +471,9 @@ class TestDiscrepancySummary:
         )
 
     def test_trimpot_cy_extents_are_as_documented(self):
-        """TRIMPOT_CY from Bourns 3296W footprint; panel anchor = pin2 (wiper/actuator)."""
-        assert TRIMPOT_CY == (-2.665, -3.385, 2.665, 3.385), (
+        """TRIMPOT_CY from the Song Huei R0904N 9mm footprint; anchor = the (centred) shaft.
+        Courtyard bounds the 9.7mm square body + the snap-in legs (±6.4mm wide)."""
+        assert TRIMPOT_CY == (-6.5, -5.1, 6.5, 5.1), (
             f"TRIMPOT_CY changed: got {TRIMPOT_CY}."
         )
 
@@ -545,3 +490,104 @@ class TestDiscrepancySummary:
             f"TOGGLE_PANEL_R changed: got {TOGGLE_PANEL_R}. Expected 3.8 "
             "(10-48 locking washer OD ~Ø7.6mm; panel hole is Ø4.95mm, bushing Ø6.00mm)."
         )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Section 7: real placement + copper-clearance model (the live _check_pcb_overlaps)
+#
+# Model: component BODIES (the F.Fab can) must not overlap; ELECTRICAL (named) pads keep
+# PCB_PAD_CLEARANCE_MM copper clearance; structural mounting legs (unnamed pads) are
+# exempt from leg-vs-leg but still clash a neighbour's signal pad. No pad-vs-body cross.
+# ─────────────────────────────────────────────────────────────────────────────
+
+from panel_rules import PCB_PAD_CLEARANCE_MM
+
+
+class TestCollisionModel:
+    def setup_method(self):
+        self.dr = make_rules()
+
+    def _v(self, comps):
+        return self.dr._check_pcb_overlaps(comps)
+
+    # ── body geometry ──────────────────────────────────────────────────────────
+    def test_pot_body_is_centred_can(self):
+        """Pot body = the ~9.7mm round can centred on the shaft (anchor), symmetric."""
+        body = _pk.footprint_shapes("trimpot")["body"][0]
+        w, h = body[2] - body[0], body[3] - body[1]
+        assert 9.0 < w < 10.5 and 9.0 < h < 10.5, f"body {w:.2f}x{h:.2f} not ~9.7mm can"
+        assert abs(body[0] + body[2]) < 0.3 and abs(body[1] + body[3]) < 0.3, \
+            f"body not centred on shaft: {body}"
+
+    def test_trimpot_has_3_signal_pads_and_2_legs(self):
+        sh = _pk.footprint_shapes("trimpot")
+        assert len(sh["pads"]) == 3 and len(sh["legs"]) == 2, sh
+
+    def test_trimpot_is_centred_square_pot(self):
+        """Song Huei R0904N: 9.7mm SQUARE body centred on the shaft (anchor), with the 3
+        signal pins close in (≤ the body half-width), not a side-offset can."""
+        sh = _pk.footprint_shapes("trimpot")
+        b = sh["body"][0]
+        assert round(b[2] - b[0], 1) == 9.7 and round(b[3] - b[1], 1) == 9.7
+        assert max(abs(p[0]) for p in sh["pads"]) < 4.85, "signal pins must sit within the body"
+
+    # ── placement: bodies must not overlap ──────────────────────────────────────
+    def test_pots_clear_side_by_side_at_body_width(self):
+        """The reported bug: side-by-side pots at >= the body width must be CLEAR
+        (offset pins under a neighbour body are NOT a collision)."""
+        assert self._v([_comp("trimpot", 50, 50, "a"), _comp("trimpot", 61.43, 50, "b")]) == []
+        assert self._v([_comp("trimpot", 50, 50, "a"), _comp("trimpot", 62.7, 50, "b")]) == []
+
+    def test_pots_clear_stacked_vertically(self):
+        """Vertical stack: mounting-leg pads no longer collide (leg-vs-leg exempt)."""
+        for p in (10.0, 11.0, 11.43, 12.0):
+            assert self._v([_comp("trimpot", 50, 50, "a"), _comp("trimpot", 50, 50 + p, "b")]) == [], p
+
+    def test_bodies_overlap_below_can_width_flags(self):
+        v = self._v([_comp("trimpot", 50, 50, "a"), _comp("trimpot", 59.0, 50, "b")])  # 9mm < 9.7
+        assert len(v) == 1 and "bodies overlap" in v[0], v
+
+    # ── copper clearance ────────────────────────────────────────────────────────
+    def test_signal_pads_within_clearance_flag(self):
+        """Two pots whose signal pins come within 0.2mm must flag pad clearance.
+        Pins sit at anchor x=-7.5; place B's pins onto A's pins (B left of A by ~15mm
+        puts B's right-side... ) — use a known-tight horizontal where pins meet."""
+        # B mirrored (rot 180) so its pins face A's pins across the gap, tuned to <0.2mm.
+        v = self._v([_comp("trimpot", 50, 50, "a", 0), _comp("trimpot", 50 + 1.6, 50, "b", 180)])
+        assert any("pad clearance" in s or "bodies overlap" in s for s in v), v
+
+    def test_leg_vs_leg_is_exempt(self):
+        """Two pots stacked so ONLY their mounting legs are near (bodies clear): no flag.
+        At 10mm vertical the bodies (±4.85) just clear and the legs abut — must be clear."""
+        assert self._v([_comp("trimpot", 50, 50, "a"), _comp("trimpot", 50, 50 + 10.0, "b")]) == []
+
+    def test_leg_vs_signal_pad_flags(self):
+        """A mounting leg intersecting a neighbour's SIGNAL pad IS a violation. Place B so
+        a signal pin lands on A's leg while bodies stay clear."""
+        # A leg at anchor (0,+4.8). B signal pin at anchor (-7.5, 0) -> put B at (+7.5,+4.8)
+        # from A so that pin sits on A's leg; bodies (±4.85) are ~8.8mm apart diagonally → clear.
+        v = self._v([_comp("trimpot", 50, 50, "a"), _comp("trimpot", 57.5, 54.8, "b")])
+        assert v, "leg intersecting neighbour signal pad must flag"
+
+    # ── message + parity-relevant shape ─────────────────────────────────────────
+    def test_message_states_body_or_pad_reason(self):
+        v = self._v([_comp("trimpot", 50, 50, "a"), _comp("trimpot", 59.0, 50, "b")])
+        assert v and ("bodies overlap" in v[0] or "pad clearance" in v[0])
+
+    def test_clearance_is_industry_default(self):
+        assert PCB_PAD_CLEARANCE_MM == 0.2
+
+    # ── rotation still consistent with the draw ─────────────────────────────────
+    def test_rotation_matches_svg_draw_direction(self):
+        rr = _rotate_rect((-7.5, 0.0, -7.5, 0.0), 90)
+        assert (round(rr[0], 3), round(rr[1], 3)) == (0.0, -7.5)
+
+    def test_full_colliding_pair_set_in_cluster(self):
+        """Row of 3 pots overlapping bodies (8.5mm pitch): both adjacent pairs flag,
+        the end pair (17mm) is clear."""
+        comps = [_comp("trimpot", 50.0, 50.0, "p0"),
+                 _comp("trimpot", 58.5, 50.0, "p1"),
+                 _comp("trimpot", 67.0, 50.0, "p2")]
+        viols = self.dr._check_pcb_overlaps(comps)
+        got = {frozenset([w.split("'")[1], w.split("'")[3]]) for w in viols}
+        assert got == {frozenset(["p0", "p1"]), frozenset(["p1", "p2"])}, viols

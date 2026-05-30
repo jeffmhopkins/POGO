@@ -6,9 +6,6 @@ supplier: Thonk
 package: 9mm
 symbol: trimpot
 matches:
-- lin pot
-- log pot
-- bipolar pot
 - knob
 - large knob
 - xl knob
