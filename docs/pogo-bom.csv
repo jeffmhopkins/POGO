@@ -148,10 +148,13 @@ audio,U23,IC,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas
 audio,U24,IC,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/opa1612.pdf,block-6-svf2,BP2 SUM_AMP + buffer R
 audio,U25,IC,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/opa1612.pdf,block-6-svf3,BP3 SUM_AMP + buffer L
 audio,U26,IC,1,OPA1612AID,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/opa1612.pdf,block-6-svf3,BP3 SUM_AMP + buffer R
-audio,U27,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-mix,BP tilt inverter half A (−V_tilt for R); fixed BP output polarity-restore inverter (G=−1) half B
+audio,U27,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-mix,half A = unused (per-band tilt moved to svf U82-84); fixed BP output polarity-restore inverter (G=−1) half B
 audio,U28,IC,1,THAT340S14-U,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,THAT Corporation,,https://thatcorp.com/datashts/THAT_300-Series_Datasheet.pdf,block-6-svf1,BP1 expo converter
 audio,U29,IC,1,THAT340S14-U,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,THAT Corporation,,https://thatcorp.com/datashts/THAT_300-Series_Datasheet.pdf,block-6-svf2,BP2 expo converter
 audio,U30,IC,1,THAT340S14-U,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,THAT Corporation,,https://thatcorp.com/datashts/THAT_300-Series_Datasheet.pdf,block-6-svf3,BP3 expo converter
+audio,U82,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-svf1,per-band TILT summer+inverter
+audio,U83,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-svf2,per-band TILT summer+inverter
+audio,U84,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-6-svf3,per-band TILT summer+inverter
 audio,U31,IC,1,CD4053BM,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/cd4053b.pdf,block-6-dist1,BP1 distortion mux (SC/HC/WF select)
 audio,U32,IC,1,CD4053BM,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/cd4053b.pdf,block-6-dist2,BP2 distortion mux
 audio,U33,IC,1,CD4053BM,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/cd4053b.pdf,block-6-dist3,BP3 distortion mux
@@ -206,7 +209,6 @@ audio,R14,Resistor,2,,100kΩ,0603,,,,,block-6-svf3,SVF SUM_AMP R_fb; 1 per group
 audio,R15,Resistor,2,,100kΩ,0603,,,,,block-6-svf1,SVF SUM_AMP R_Q input; 1 per group per channel
 audio,R15,Resistor,2,,100kΩ,0603,,,,,block-6-svf2,SVF SUM_AMP R_Q input; 1 per group per channel
 audio,R15,Resistor,2,,100kΩ,0603,,,,,block-6-svf3,SVF SUM_AMP R_Q input; 1 per group per channel
-audio,R16,Resistor,2,,100kΩ,0603,,,,,block-6-mix,BP tilt inverter R_in + R_fb in U27 half A
 audio,R17,Resistor,2,,100kΩ,0603,,,,,block-6-mix,BP output polarity-restore inverter R_in + R_fb in U27 half B
 audio,R18,Resistor,2,,10kΩ,0603,,,,,block-6-dist1,R_SC_in; SC path input R; 1 per path × 6 paths
 audio,R18,Resistor,2,,10kΩ,0603,,,,,block-6-dist2,R_SC_in; SC path input R; 1 per path × 6 paths
@@ -299,6 +301,12 @@ audio,C110,Capacitor,12,,100nF,0603,,,,,block-6-dist1,"C_BYP: per-IC supply deco
 audio,C110,Capacitor,12,,100nF,0603,,,,,block-6-dist2,"C_BYP: per-IC supply decoupling; 2 per IC × 45 block-6 ICs (U15-U48, U67-U77)"
 audio,C110,Capacitor,14,,100nF,0603,,,,,block-6-dist3,C_BYP: per-IC supply decoupling; 2 per IC (incl. U81 BP3 selector)
 audio,C110,Capacitor,8,,100nF,0603,,,,,block-6-mix,"C_BYP: per-IC supply decoupling; 2 per IC × 45 block-6 ICs (U15-U48, U67-U77)"
+audio,C119,Capacitor,1,,100nF,0603,,,,,block-6-svf1,C_BYP: U82 V+ decoupling (BP1 TILT summer+inverter)
+audio,C120,Capacitor,1,,100nF,0603,,,,,block-6-svf1,C_BYP: U82 V− decoupling (BP1 TILT summer+inverter)
+audio,C121,Capacitor,1,,100nF,0603,,,,,block-6-svf2,C_BYP: U83 V+ decoupling (BP2 TILT summer+inverter)
+audio,C122,Capacitor,1,,100nF,0603,,,,,block-6-svf2,C_BYP: U83 V− decoupling (BP2 TILT summer+inverter)
+audio,C123,Capacitor,1,,100nF,0603,,,,,block-6-svf3,C_BYP: U84 V+ decoupling (BP3 TILT summer+inverter)
+audio,C124,Capacitor,1,,100nF,0603,,,,,block-6-svf3,C_BYP: U84 V− decoupling (BP3 TILT summer+inverter)
 audio,U75,IC,1,CD4053BM,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/cd4053b.pdf,block-6-dist1,"BP1 distortion mux 2 (stereo 1-of-3: U31=ch select stage 1, U75=stage 2)"
 audio,U76,IC,1,CD4053BM,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/cd4053b.pdf,block-6-dist2,BP2 distortion mux 2
 audio,U77,IC,1,CD4053BM,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/cd4053b.pdf,block-6-dist3,BP3 distortion mux 2
@@ -319,6 +327,24 @@ audio,R126,Resistor,1,,1kΩ,0603,,,,,block-6-svf3,R_E_L: L-channel expo emitter 
 audio,R127,Resistor,2,,100kΩ,0603,,,,,block-6-svf1,R_TILT_SUM: ±V_tilt summing R into each expo base (+L / −R); 1 per expo (6)
 audio,R127,Resistor,2,,100kΩ,0603,,,,,block-6-svf2,R_TILT_SUM: ±V_tilt summing R into each expo base (+L / −R); 1 per expo (6)
 audio,R127,Resistor,2,,100kΩ,0603,,,,,block-6-svf3,R_TILT_SUM: ±V_tilt summing R into each expo base (+L / −R); 1 per expo (6)
+audio,R135,Resistor,1,,100kΩ,0603,,,,,block-6-svf1,BP1 TILT summer R_master: master tilt (BP_TILT_CV) → summer
+audio,R136,Resistor,1,,100kΩ,0603,,,,,block-6-svf1,BP1 TILT summer R_knob: TILT knob (RV48) wiper → summer
+audio,R137,Resistor,1,,470kΩ,0603,,,,,block-6-svf1,BP1 TILT summer R_cv: per-band TILT CV (MOD_BP1_TILT) → summer (×0.213)
+audio,R138,Resistor,1,,100kΩ,0603,,,,,block-6-svf1,BP1 TILT summer R_sumfb: summer feedback
+audio,R139,Resistor,1,,100kΩ,0603,,,,,block-6-svf1,BP1 TILT inverter R_invin
+audio,R140,Resistor,1,,100kΩ,0603,,,,,block-6-svf1,BP1 TILT inverter R_invfb
+audio,R141,Resistor,1,,100kΩ,0603,,,,,block-6-svf2,BP2 TILT summer R_master: master tilt (BP_TILT_CV) → summer
+audio,R142,Resistor,1,,100kΩ,0603,,,,,block-6-svf2,BP2 TILT summer R_knob: TILT knob (RV49) wiper → summer
+audio,R143,Resistor,1,,470kΩ,0603,,,,,block-6-svf2,BP2 TILT summer R_cv: per-band TILT CV (MOD_BP2_TILT) → summer (×0.213)
+audio,R144,Resistor,1,,100kΩ,0603,,,,,block-6-svf2,BP2 TILT summer R_sumfb: summer feedback
+audio,R145,Resistor,1,,100kΩ,0603,,,,,block-6-svf2,BP2 TILT inverter R_invin
+audio,R146,Resistor,1,,100kΩ,0603,,,,,block-6-svf2,BP2 TILT inverter R_invfb
+audio,R147,Resistor,1,,100kΩ,0603,,,,,block-6-svf3,BP3 TILT summer R_master: master tilt (BP_TILT_CV) → summer
+audio,R148,Resistor,1,,100kΩ,0603,,,,,block-6-svf3,BP3 TILT summer R_knob: TILT knob (RV50) wiper → summer
+audio,R149,Resistor,1,,470kΩ,0603,,,,,block-6-svf3,BP3 TILT summer R_cv: per-band TILT CV (MOD_BP3_TILT) → summer (×0.213)
+audio,R150,Resistor,1,,100kΩ,0603,,,,,block-6-svf3,BP3 TILT summer R_sumfb: summer feedback
+audio,R151,Resistor,1,,100kΩ,0603,,,,,block-6-svf3,BP3 TILT inverter R_invin
+audio,R152,Resistor,1,,100kΩ,0603,,,,,block-6-svf3,BP3 TILT inverter R_invfb
 audio,U49,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-7,HP OTA integrators L
 audio,U50,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-7,HP OTA integrators R
 audio,U51,IC,1,LM13700M,,SOIC-16,POGO_Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/lm13700.pdf,block-7,HP Q VCA L (cell A; cell B spare)
@@ -533,6 +559,9 @@ control,RV36,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiomet
 control,RV37,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6-svf3,BP3_FREQ
 control,RV38,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6-svf3,BP3_FOCUS
 control,RV39,Trimpot/Pot,1,RD901F-40-00D,,9mm,POGO_Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles,Alpha (Taiwan),Thonk,https://www.thonk.co.uk/shop/alpha-9mm-pots/,block-6-dist3,BP3_DIST (drive)
+control,RV48,Trimpot/Pot,1,R0904N,,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-6-svf1,"BP1_TILT knob (per-band tilt, bipolar; wiper → svf1 TILT summer)"
+control,RV49,Trimpot/Pot,1,R0904N,,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-6-svf2,"BP2_TILT knob (per-band tilt, bipolar; wiper → svf2 TILT summer)"
+control,RV50,Trimpot/Pot,1,R0904N,,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-6-svf3,"BP3_TILT knob (per-band tilt, bipolar; wiper → svf3 TILT summer)"
 control,RV40,Trimpot/Pot,1,RA4522F-20-15F1,,panel,POGO_Potentiometer_THT:Potentiometer_Slider_45mm_Vertical,Alpha (Taiwan),Rapid / Banzai,https://www.rapidonline.com/taiwan-alpha-ra4522f-202-10c1-b10k-10k-45mm-slide-potentiometer-66-0142,block-7,"HP_FREQ slider (±5V/oct, default -3V)"
 control,RV41,Trimpot/Pot,1,R0904N,,9mm,POGO_Potentiometer_THT:Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,Song Huei (Taiwan),Thonk,https://www.thonk.co.uk/shop/9mm-tall-trimmers/,block-7,HP_RES panel trimpot (R0904N finger pot; 0–1)
 control,RV42,Trimpot/Pot,1,RA4522F-20-15F1,,panel,POGO_Potentiometer_THT:Potentiometer_Slider_45mm_Vertical,Alpha (Taiwan),Rapid / Banzai,https://www.rapidonline.com/taiwan-alpha-ra4522f-202-10c1-b10k-10k-45mm-slide-potentiometer-66-0142,block-8,"LP2_FREQ slider (±5V/oct, default +2V)"

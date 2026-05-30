@@ -73,10 +73,35 @@ parts:
   R119_1: { sym: r, value: 100k }
   RV9: { sym: trimpot, part: "Bourns 3224W", value: BP1_QMAX }
   D13_1: { sym: diode, part: 1N4148W, value: 1N4148W }
+  # Per-band BP1 TILT summer + inverter (master tilt + TILT knob + per-band TILT CV)
+  U82: { sym: opamp2, part: TL072CDT, value: TL072 }
+  C119: { sym: c, value: 100nF }
+  C120: { sym: c, value: 100nF }
+  RV48: { sym: trimpot, part: "bipolar pot", value: BP1_TILT }
+  R135: { sym: r, value: 100k }   # R_master: master tilt → summer
+  R136: { sym: r, value: 100k }   # R_knob:   TILT knob wiper → summer
+  R137: { sym: r, value: 470k }   # R_cv:     per-band TILT CV → summer (×0.213 ≈ plugin ×0.22)
+  R138: { sym: r, value: 100k }   # R_sumfb:  summer feedback
+  R139: { sym: r, value: 100k }   # R_invin:  inverter input
+  R140: { sym: r, value: 100k }   # R_invfb:  inverter feedback
 
 nets:
-  BP_TILT_CV: [R127_1L.1]
-  BP_NTILT: [R127_1R.1]
+  # BP_TILT_CV (master tilt) now feeds ONLY the per-band summer R_master input.
+  BP_TILT_CV: [R135.1]
+  # Per-band TILT CV from block-3 (MOD_BP1_TILT) → summer R_cv input.
+  MOD_BP1_TILT: [R137.1]
+  # Per-band TILT summer (−): master + knob + per-band CV.
+  BP1_TILTSUM: [U82.2, R135.2, R136.2, R137.2, R138.1]
+  # Summer output = −total tilt → feeds R expo base (re-pointed R127_1R) + inverter input.
+  BP1_TILT_NEG: [U82.1, R138.2, R139.1, R127_1R.1]
+  # Inverter (−) node.
+  BP1_TILT_INVN: [U82.6, R139.2, R140.1]
+  # Inverter output = +total tilt → feeds L expo base (re-pointed R127_1L).
+  BP1_TILT_POS: [U82.7, R140.2, R127_1L.1]
+  # TILT knob wiper → summer R_knob input.
+  BP1_TILT_KNOB: [RV48.2, R136.1]
+  # RV48 ends to bipolar tilt reference.
+  # Phase-3R: tilt range scaling — exact reference/scaling TBD (nominal ±12V rails here).
   BP1_DISTOUT_L: [R13_1L.1]
   BP1_DISTOUT_R: [R13_1R.1]
   BP1_SUMINV_L: [U21.2, R13_1L.2, R14_1L.2, R15_1L.1, U67.4, U67.5]
@@ -118,9 +143,9 @@ nets:
   BP1_VIRES: [U73.1, R119_1.2, D13_1.K, R116_1L.1, R116_1R.1]
   BP2_IRES_SUM: [U73.6]
   BP2_VIRES: [U73.7]
-  "+12V": [U15.11, C110_U15p.1, U16.11, C110_U16p.1, U21.8, C110_U21p.1, U22.8, C110_U22p.1, C110_U28p.1, U67.11, C110_U67p.1, C110_U70p.1, U73.8, C110_U73p.1, R124_1.1, R120_1.1, RV9.3]
-  "-12V": [U15.6, C110_U15n.1, U16.6, C110_U16n.1, U21.4, C110_U21n.1, U22.4, C110_U22n.1, U28.4, U28.11, C110_U28n.1, U67.6, C110_U67n.1, U70.4, U70.11, C110_U70n.1, U73.4, C110_U73n.1, R123_1Lv1.2, R123_1Lv2.2, R123_1Rv1.2, R123_1Rv2.2, R126_1.2, R122_1.2]
-  GND: [C110_U15p.2, C110_U15n.2, C110_U16p.2, C110_U16n.2, C110_U21p.2, C110_U21n.2, C110_U22p.2, C110_U22n.2, C110_U28p.2, C110_U28n.2, C110_U67p.2, C110_U67n.2, C110_U70p.2, C110_U70n.2, C110_U73p.2, C110_U73n.2, U21.3, C15_Lv1.2, C15_Lv2.2, R12_1La.2, R12_1Lb.2, C107_1L.2, U22.3, C15_Rv1.2, C15_Rv2.2, R12_1Ra.2, R12_1Rb.2, C107_1R.2, C109_1L.2, C108_1L.2, C109_1R.2, C108_1R.2, RV9.1, D13_1.A, U73.3, U73.5]
+  "+12V": [U15.11, C110_U15p.1, U16.11, C110_U16p.1, U21.8, C110_U21p.1, U22.8, C110_U22p.1, C110_U28p.1, U67.11, C110_U67p.1, C110_U70p.1, U73.8, C110_U73p.1, R124_1.1, R120_1.1, RV9.3, U82.8, C119.1, RV48.3]
+  "-12V": [U15.6, C110_U15n.1, U16.6, C110_U16n.1, U21.4, C110_U21n.1, U22.4, C110_U22n.1, U28.4, U28.11, C110_U28n.1, U67.6, C110_U67n.1, U70.4, U70.11, C110_U70n.1, U73.4, C110_U73n.1, R123_1Lv1.2, R123_1Lv2.2, R123_1Rv1.2, R123_1Rv2.2, R126_1.2, R122_1.2, U82.4, C120.1, RV48.1]
+  GND: [C110_U15p.2, C110_U15n.2, C110_U16p.2, C110_U16n.2, C110_U21p.2, C110_U21n.2, C110_U22p.2, C110_U22n.2, C110_U28p.2, C110_U28n.2, C110_U67p.2, C110_U67n.2, C110_U70p.2, C110_U70n.2, C110_U73p.2, C110_U73n.2, U21.3, C15_Lv1.2, C15_Lv2.2, R12_1La.2, R12_1Lb.2, C107_1L.2, U22.3, C15_Rv1.2, C15_Rv2.2, R12_1Ra.2, R12_1Rb.2, C107_1R.2, C109_1L.2, C108_1L.2, C109_1R.2, C108_1R.2, RV9.1, D13_1.A, U73.3, U73.5, U82.3, U82.5, C119.2, C120.2]
 
 no_connect:
   - U67.2
@@ -148,7 +173,7 @@ no_connect:
 
 boundary:
   - BP_TILT_CV
-  - BP_NTILT
+  - MOD_BP1_TILT
   - BP1_DISTOUT_L
   - BP1_DISTOUT_R
   - BP1_BANDOUT_L

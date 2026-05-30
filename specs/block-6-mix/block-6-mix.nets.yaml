@@ -18,8 +18,6 @@ parts:
   U48: { sym: opamp2, part: TL072CDT, value: TL072 }
   C110_U48p: { sym: c, value: 100nF }
   C110_U48n: { sym: c, value: 100nF }
-  R16_in: { sym: r, value: 100k }
-  R16_fb: { sym: r, value: 100k }
   R17_in: { sym: r, value: 100k }
   R17_fb: { sym: r, value: 100k }
   R29: { sym: r, value: 1k }
@@ -42,9 +40,13 @@ parts:
   J28: { sym: jack, part: PJ301M-12, value: BP3_R_OUT }
 
 nets:
-  BP_TILT_CV: [R16_in.1]
-  BP_TILT_INVN: [U27.2, R16_in.2, R16_fb.1]
-  BP_NTILT: [U27.1, R16_fb.2]
+  # BP_TILT_CV stays a boundary output; it is now consumed by the per-band TILT
+  # summers in block-6-svf1/2/3 (R135.1 / R141.1 / R147.1). Master tilt inversion
+  # (former U27-A master tilt-inverter output) is GONE: per-band L/R split now
+  # happens inside each SVF's own TILT summer+inverter.
+  # U27-A is now an unused half: wired as a harmless unity buffer (in− tied to out,
+  # in+ already to GND) with its output left unconnected (output net U27A_UNUSED).
+  U27A_UNUSED: [U27.1, U27.2]
   V5LOGIC: [R29.2, D7.3, C27.1, C28.1]
   BP_WETVG_L: [U46.2, R26_L1.2, R26_L2.2, R26_L3.2, R26_Lf.1]
   BP_WETSUM_L: [U46.1, R26_Lf.2, U48.3]
@@ -78,7 +80,6 @@ no_connect:
 
 boundary:
   - BP_TILT_CV
-  - BP_NTILT
   - V5LOGIC
   - LP1_OUT_L
   - LP1_OUT_R

@@ -192,10 +192,14 @@ components:
   - { ref: U24,  board: audio,   block: block-6-svf2, part: OPA1612,   pkg: SOIC-8,   fn: "BP2 SUM_AMP + buffer R" }
   - { ref: U25,  board: audio,   block: block-6-svf3, part: OPA1612,   pkg: SOIC-8,   fn: "BP3 SUM_AMP + buffer L" }
   - { ref: U26,  board: audio,   block: block-6-svf3, part: OPA1612,   pkg: SOIC-8,   fn: "BP3 SUM_AMP + buffer R" }
-  - { ref: U27,  board: audio,   block: block-6-mix, part: TL072CDT,   pkg: SOIC-8,   fn: "BP tilt inverter half A (−V_tilt for R); fixed BP output polarity-restore inverter (G=−1) half B" }
+  - { ref: U27,  board: audio,   block: block-6-mix, part: TL072CDT,   pkg: SOIC-8,   fn: "half A = unused (per-band tilt moved to svf U82-84); fixed BP output polarity-restore inverter (G=−1) half B" }
   - { ref: U28,  board: audio,   block: block-6-svf1, part: THAT340S14-U, pkg: SOIC-14,   fn: "BP1 expo converter" }
   - { ref: U29,  board: audio,   block: block-6-svf2, part: THAT340S14-U, pkg: SOIC-14,   fn: "BP2 expo converter" }
   - { ref: U30,  board: audio,   block: block-6-svf3, part: THAT340S14-U, pkg: SOIC-14,   fn: "BP3 expo converter" }
+  # block-6: per-band BP TILT summer + inverter (master tilt + TILT knob + per-band TILT CV)
+  - { ref: U82,  board: audio,   block: block-6-svf1, part: TL072CDT,   pkg: SOIC-8,   fn: "per-band TILT summer+inverter" }
+  - { ref: U83,  board: audio,   block: block-6-svf2, part: TL072CDT,   pkg: SOIC-8,   fn: "per-band TILT summer+inverter" }
+  - { ref: U84,  board: audio,   block: block-6-svf3, part: TL072CDT,   pkg: SOIC-8,   fn: "per-band TILT summer+inverter" }
   - { ref: U31,  board: audio,   block: block-6-dist1, part: CD4053,     pkg: SOIC-16,  fn: "BP1 distortion mux (SC/HC/WF select)" }
   - { ref: U32,  board: audio,   block: block-6-dist2, part: CD4053,     pkg: SOIC-16,  fn: "BP2 distortion mux" }
   - { ref: U33,  board: audio,   block: block-6-dist3, part: CD4053,     pkg: SOIC-16,  fn: "BP3 distortion mux" }
@@ -266,7 +270,6 @@ components:
   - { ref: R15,  board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "SVF SUM_AMP R_Q input; 1 per group per channel" }
   - { ref: R15,  board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "SVF SUM_AMP R_Q input; 1 per group per channel" }
   - { ref: R15,  board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "SVF SUM_AMP R_Q input; 1 per group per channel" }
-  - { ref: R16,  board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "BP tilt inverter R_in + R_fb in U27 half A" }
   - { ref: R17,  board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "BP output polarity-restore inverter R_in + R_fb in U27 half B" }
 
   # block-6: Passives — SC distortion paths
@@ -372,6 +375,13 @@ components:
   - { ref: C110, board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "100nF",  qty: 12, fn: "C_BYP: per-IC supply decoupling; 2 per IC × 45 block-6 ICs (U15-U48, U67-U77)" }
   - { ref: C110, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "100nF",  qty: 14, fn: "C_BYP: per-IC supply decoupling; 2 per IC (incl. U81 BP3 selector)" }
   - { ref: C110, board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "100nF",  qty: 8, fn: "C_BYP: per-IC supply decoupling; 2 per IC × 45 block-6 ICs (U15-U48, U67-U77)" }
+  # block-6: per-band TILT summer/inverter (U82-84) supply decoupling, 2 per IC
+  - { ref: C119, board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "100nF",  qty: 1,  fn: "C_BYP: U82 V+ decoupling (BP1 TILT summer+inverter)" }
+  - { ref: C120, board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "100nF",  qty: 1,  fn: "C_BYP: U82 V− decoupling (BP1 TILT summer+inverter)" }
+  - { ref: C121, board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "100nF",  qty: 1,  fn: "C_BYP: U83 V+ decoupling (BP2 TILT summer+inverter)" }
+  - { ref: C122, board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "100nF",  qty: 1,  fn: "C_BYP: U83 V− decoupling (BP2 TILT summer+inverter)" }
+  - { ref: C123, board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "100nF",  qty: 1,  fn: "C_BYP: U84 V+ decoupling (BP3 TILT summer+inverter)" }
+  - { ref: C124, board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "100nF",  qty: 1,  fn: "C_BYP: U84 V− decoupling (BP3 TILT summer+inverter)" }
   - { ref: U75,  board: audio,   block: block-6-dist1, part: CD4053,     pkg: SOIC-16,  fn: "BP1 distortion mux 2 (stereo 1-of-3: U31=ch select stage 1, U75=stage 2)" }
   - { ref: U76,  board: audio,   block: block-6-dist2, part: CD4053,     pkg: SOIC-16,  fn: "BP2 distortion mux 2" }
   - { ref: U77,  board: audio,   block: block-6-dist3, part: CD4053,     pkg: SOIC-16,  fn: "BP3 distortion mux 2" }
@@ -392,6 +402,27 @@ components:
   - { ref: R127, board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "R_TILT_SUM: ±V_tilt summing R into each expo base (+L / −R); 1 per expo (6)" }
   - { ref: R127, board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "R_TILT_SUM: ±V_tilt summing R into each expo base (+L / −R); 1 per expo (6)" }
   - { ref: R127, board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 2,  fn: "R_TILT_SUM: ±V_tilt summing R into each expo base (+L / −R); 1 per expo (6)" }
+
+  # block-6: per-band BP TILT summer+inverter passives (U82-84). Per band: R_master, R_knob,
+  # R_cv (470k≈×0.213 of plugin's ×0.22), R_sumfb, R_invin, R_invfb. svf1 R135-140 / svf2 R141-146 / svf3 R147-152.
+  - { ref: R135, board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "BP1 TILT summer R_master: master tilt (BP_TILT_CV) → summer" }
+  - { ref: R136, board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "BP1 TILT summer R_knob: TILT knob (RV48) wiper → summer" }
+  - { ref: R137, board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "470kΩ",  qty: 1,  fn: "BP1 TILT summer R_cv: per-band TILT CV (MOD_BP1_TILT) → summer (×0.213)" }
+  - { ref: R138, board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "BP1 TILT summer R_sumfb: summer feedback" }
+  - { ref: R139, board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "BP1 TILT inverter R_invin" }
+  - { ref: R140, board: audio,   block: block-6-svf1, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "BP1 TILT inverter R_invfb" }
+  - { ref: R141, board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "BP2 TILT summer R_master: master tilt (BP_TILT_CV) → summer" }
+  - { ref: R142, board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "BP2 TILT summer R_knob: TILT knob (RV49) wiper → summer" }
+  - { ref: R143, board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "470kΩ",  qty: 1,  fn: "BP2 TILT summer R_cv: per-band TILT CV (MOD_BP2_TILT) → summer (×0.213)" }
+  - { ref: R144, board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "BP2 TILT summer R_sumfb: summer feedback" }
+  - { ref: R145, board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "BP2 TILT inverter R_invin" }
+  - { ref: R146, board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "BP2 TILT inverter R_invfb" }
+  - { ref: R147, board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "BP3 TILT summer R_master: master tilt (BP_TILT_CV) → summer" }
+  - { ref: R148, board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "BP3 TILT summer R_knob: TILT knob (RV50) wiper → summer" }
+  - { ref: R149, board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "470kΩ",  qty: 1,  fn: "BP3 TILT summer R_cv: per-band TILT CV (MOD_BP3_TILT) → summer (×0.213)" }
+  - { ref: R150, board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "BP3 TILT summer R_sumfb: summer feedback" }
+  - { ref: R151, board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "BP3 TILT inverter R_invin" }
+  - { ref: R152, board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "100kΩ",  qty: 1,  fn: "BP3 TILT inverter R_invfb" }
 
   # block-7: HP Filter (refs shifted from old U34–U40 to U49–U55)
   - { ref: U49,  board: audio,   block: block-7, part: LM13700M,   pkg: SOIC-16,  fn: "HP OTA integrators L" }
@@ -658,6 +689,9 @@ components:
   - { ref: RV37, board: control, block: block-6-svf3, part: "knob",       pkg: "9mm",  fn: "BP3_FREQ" }
   - { ref: RV38, board: control, block: block-6-svf3, part: "knob",       pkg: "9mm",  fn: "BP3_FOCUS" }
   - { ref: RV39, board: control, block: block-6-dist3, part: "knob",       pkg: "9mm",  fn: "BP3_DIST (drive)" }
+  - { ref: RV48, board: control, block: block-6-svf1, part: "bipolar pot", pkg: "9mm",  fn: "BP1_TILT knob (per-band tilt, bipolar; wiper → svf1 TILT summer)" }
+  - { ref: RV49, board: control, block: block-6-svf2, part: "bipolar pot", pkg: "9mm",  fn: "BP2_TILT knob (per-band tilt, bipolar; wiper → svf2 TILT summer)" }
+  - { ref: RV50, board: control, block: block-6-svf3, part: "bipolar pot", pkg: "9mm",  fn: "BP3_TILT knob (per-band tilt, bipolar; wiper → svf3 TILT summer)" }
 
   # block-7 panel controls
   - { ref: RV40, board: control, block: block-7, part: "PogoSlider", pkg: panel,  fn: "HP_FREQ slider (±5V/oct, default -3V)" }
