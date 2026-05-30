@@ -580,7 +580,7 @@ audio,U62,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas I
 audio,R34,Resistor,1,,1kΩ,0603,,,,,block-B,MAIN_L output protection
 audio,R35,Resistor,1,,1kΩ,0603,,,,,block-B,MAIN_R output protection
 audio,R36,Resistor,1,,1kΩ,0603,,,,,block-B,BP3_L output protection
-audio,R37,Resistor,1,,1kΩ,0603,,,,,block-B,BP3_R output protection
+audio,R224,Resistor,1,,1kΩ,0603,,,,,block-B,"BP3_R output protection (renumbered from R37 to clear block-3 R37 collision, change 0018)"
 audio,C37,Capacitor,1,,100nF,0603,,,,,block-B,U61 +12V decoupling
 audio,C38,Capacitor,1,,100nF,0603,,,,,block-B,U61 -12V decoupling
 audio,C39,Capacitor,1,,100nF,0603,,,,,block-B,U62 +12V decoupling

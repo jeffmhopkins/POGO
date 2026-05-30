@@ -14,16 +14,22 @@ internal signal chain from load impedance variations introduced by downstream pa
 and modules, hold the output voltage within the ±11 V Eurorack-safe window, and provide
 a low-output-impedance drive via a 1 kΩ series resistor (the standard Eurorack output
 protection value). The user hears MAIN_L/R as the fully processed signal and optionally
-uses BP3_L/R as a pre-mix formant send for parallel processing. LFO outputs are available
-as modulation sources for other modules.
+uses BP3_L/R as a pre-mix formant send for parallel processing. **BP3_R normals to BP3_L:**
+when the BP3_R jack is unpatched, its tip carries the BP3_L signal (mono fill from L), matching
+the plugin (`Pogo.cpp:498–499`); this output-jack normalling is implemented on J28 in block-6-mix
+(which owns the BP3 jacks). MAIN_L/R are independent (no normalling). LFO outputs are available
+as modulation sources for other modules (their series resistors live on the utility board with
+block-2, not in block-B's audio-board BOM).
 
 ---
 
 ## 2. Theoretical Design and Topology
 
-> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
-> It has not been verified against the current panel control set. Do not use for circuit
-> construction until re-verified. See `specs/STATUS.md` for current phase status.
+> ✅ **Re-verified 2026-05-30** against the locked plugin (change 0018). MAIN = non-inverting
+> unity follower + 1kΩ series + ±11V via TL072 swing (= plugin `clamp(±11)`, like block-A). BP3
+> outputs = svf3 v1 tap (post-bandpass, pre-mix), buffered; **BP3_R normals to BP3_L** when the
+> R jack is unpatched (normalling on J28 in block-6-mix). No behavioral edits in §2 beyond the
+> BP3_R normal.
 
 ### DSP-to-analog mapping
 
@@ -80,15 +86,15 @@ with the input impedance of the downstream module (typically 100 kΩ), resulting
 a −0.087 dB attenuation (100k/(100k+1k) = 0.990×), negligible in practice. The DSP clamp at ±11 V maps cleanly
 to the TL072 output swing.
 
-→ References `aux/unity-buffer.md`
+→ References `aux/aux-unity-buffer.md`
 
 ---
 
 ## 3. Physical Design
 
-> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
-> It has not been verified against the current panel control set. Do not use for circuit
-> construction until re-verified. See `specs/STATUS.md` for current phase status.
+> ✅ **Re-verified 2026-05-30** against the locked plugin (change 0018). Output buffers (U61/U62
+> followers), 1kΩ series R, decoupling verified vs §2. The LFO output series resistors are
+> block-2's (utility board), listed here editorially only. R37→R224 (cleared block-3 collision).
 
 ### Component values and derivations
 
@@ -145,7 +151,7 @@ near the LFO output stage, but are logically Block B's responsibility.
 - 2× TL072CDT (U_MAIN, U_BP3, dual SOIC-8): ~2.6 mA each = ~5 mA  (TI: 1.3 mA/ch × 2 at ±12V)
 - **+12V: ~5 mA | −12V: ~5 mA**
 
-→ References `aux/unity-buffer.svg` for op-amp follower schematic primitive.
+→ References `aux/aux-unity-buffer.md` for the op-amp follower ASCII schematic (no SVGs in aux/).
 
 ---
 

@@ -1,7 +1,7 @@
 # POGO Block B — Output Buffers (MAIN_L/R + BP3_L/R) — schematic netlist
 #
 # Source of truth for connectivity, transcribed from:
-#   specs/components.yaml  (block-B rows: U61/U62, R34-R37, J29/J30 — BOM authoritative)
+#   specs/components.yaml  (block-B rows: U61/U62, R34-R224, J29/J30 — BOM authoritative)
 #   plugin/src/Pogo.cpp    (OutputId enum + process(): MAIN/BP3 clamp ±11V)
 #   specs/block-B/spec.md §1 (panel-verified intent), specs/aux/aux-unity-buffer.md
 #
@@ -27,7 +27,7 @@ parts:
   R34: { sym: r, value: 1k }                            # MAIN_L series protection
   R35: { sym: r, value: 1k }                            # MAIN_R series protection
   R36: { sym: r, value: 1k }                            # BP3_L  series protection
-  R37: { sym: r, value: 1k }                            # BP3_R  series protection
+  R224: { sym: r, value: 1k }                            # BP3_R  series protection
   J29: { sym: jack, part: PJ301M-12, value: MAIN_L }
   J30: { sym: jack, part: PJ301M-12, value: MAIN_R }
   C37: { sym: c, value: 100nF }            # U61 +12V decoupling
@@ -52,11 +52,12 @@ nets:
   BP3_TAP_L:  [U62.3]                       # <- block-6 BP3 tap L (boundary)
   BP3_TAP_R:  [U62.5]                       # <- block-6 BP3 tap R (boundary)
   BP3_L_BUF:  [U62.1, U62.2, R36.1]        # U62A out=In- feedback -> R36
-  BP3_R_BUF:  [U62.7, U62.6, R37.1]        # U62B out=In- feedback -> R37
+  BP3_R_BUF:  [U62.7, U62.6, R224.1]        # U62B out=In- feedback -> R224
   BP3_L_OUT:  [R36.2]                       # -> block-6 J27 (BP3_L jack) (boundary)
-  BP3_R_OUT:  [R37.2]                       # -> block-6 J28 (BP3_R jack) (boundary)
+  BP3_R_OUT:  [R224.2]                       # -> block-6 J28 (BP3_R jack) (boundary)
 
-# Output jacks do not normal; switch lug unused.
+# MAIN jacks (J29/J30) do not normal — independent L/R (switch lugs unused).
+# (BP3_R normals to BP3_L: that normalling is on J28 in block-6-mix, which owns the BP3 jacks.)
 no_connect:
   - J29.3
   - J30.3

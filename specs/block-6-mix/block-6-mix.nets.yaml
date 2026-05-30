@@ -85,8 +85,8 @@ nets:
   BP_OUT_L:   [U27.7, R17_fb.2]                    # +(dry+wet) L → block-7 (boundary)
   BP_POLVG_R: [U27.2, R222.2, R223.1]
   BP_OUT_R:   [U27.1, R223.2]                      # +(dry+wet) R → block-7 (boundary)
-  BP3_L_OUT: [J27.1]
-  BP3_R_OUT: [J28.1]
+  BP3_L_OUT: [J27.1, J28.3]        # buffered BP3 L -> J27 tip + J28 normalling lug (BP3_R normals to L, change 0018)
+  BP3_R_OUT: [J28.1]               # buffered BP3 R -> J28 tip; when J28 unpatched, tip carries BP3_L via J28.3
   BP1_BANDOUT_L: [R26_L1.1]
   BP1_BANDOUT_R: [R26_R1.1]
   BP2_BANDOUT_L: [R26_L2.1]
@@ -98,8 +98,7 @@ nets:
   GND: [C110_U27p.2, C110_U27n.2, C110_U46p.2, C110_U46n.2, C110_U47p.2, C110_U47n.2, C110_U48p.2, C110_U48n.2, U27.3, U27.5, U48.3, U48.5, D7.1, C27.2, C28.2, U46.3, U46.5, U47.3, U47.5, J27.2, J28.2, RV30.1, RV57.1, RV58.1, RV59.1]
 
 no_connect:
-  - J27.3
-  - J28.3
+  - J27.3        # BP3_L jack switch lug unused (no normal source for L)
 
 boundary:
   - BP_TILT_CV

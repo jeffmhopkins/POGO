@@ -35,7 +35,7 @@ Last updated: 2026-05-29 | Topology: 48HP | Source of truth: `tools/panel-data.y
 | 6 | Triple BP + Dist | ✅ panel-verified | ✅ aligned 2026-05-30 (0018) | Split into 7 sections + aligned to plugin: DIST→SVF reorder, F_REF 400Hz, BP3 ALT-VCA selector, per-band TILT ×0.22, variable DRIVE (THAT2180 VCA/band), CLIP drivers, two-scaler dry/wet. Exact drive/clip/mix scaling = Phase-3R. U73 shared svf1/svf2. |
 | 7 | HP Filter | ✅ panel-verified | ✅ aligned 2026-05-30 (0018) | OTA-C SVF; HP output unity follower (polarity bug fixed); Q collapsed to 1 LM13700 (cell A=L/B=R); mono cutoff/self-osc = LP1 |
 | 8 | LP Filter 2 | ✅ panel-verified | ✅ re-verified 2026-05-30 (0018) | OTA-C SVF, mono (single expo); non-inverting LP output (matches plugin); Q via shared U9/U10 cell B (block-5); no behavioral divergence |
-| B | Output Buffer | ✅ panel-verified | ⚠️ STALE | TL072; MAIN_L/R from LP2 + BP3_L/R tap |
+| B | Output Buffer | ✅ panel-verified | ✅ aligned 2026-05-30 (0018) | TL072 non-inverting followers; MAIN_L/R from LP2 + BP3 tap; BP3_R→L output normal added; ±11V via swing |
 
 ## aux/ Circuit Library (`specs/aux/aux-*.md`)
 

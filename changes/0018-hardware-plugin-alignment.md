@@ -2,7 +2,7 @@
 
 - **Slug:** hardware-plugin-alignment   **Branch:** `claude/hardware-plugin-alignment-KSBDQ`
 - **Lane:** B (hardware-only) — per-block; some blocks reduce to Lane C (doc-only)
-- **Status:** OPEN
+- **Status:** SPEC-DONE — all 10 blocks aligned to the locked plugin (pending CI + your review)
 - **Blocks:** all (A, 1, 2, 3, 4, 5, 6, 7, 8, B)   **Boards:** audio, utility, control, panel
 - **Opened:** 2026-05-30       **Closed:** —
 - **PR:** —              **CI run:** —
@@ -45,7 +45,7 @@ spec authors + group adversarial review → netlist + design-intent review → u
 | 6 — Triple BP + Dist | ✅ split + 7 stages | ✅ | G5+G6a | Split into 7 sections + 7 alignment stages, all gates green. **S1:** F_REF→400Hz, 2-pole. **S2:** DIST→SVF reorder. **S3:** BP3 selector (CD4053 U81). **S4:** per-band TILT (TL072 U82-84 + knobs RV48-50 + ×0.22 CV). **S5:** variable DRIVE (THAT2180 VCA/band U85-90 + I/V U91-93, mirrors block-4; shared dB-law approximates per-mode gain — deviation). **S6:** CLIP drivers (TL074 U94-96 ±4V window + diode-OR → panel LEDs; shared VREF). **S7:** two-scaler dry/wet (U48→re-inverter; BYPASS RV30/58 + new WET RV57/59 pots; final summer + L/R polarity restore U27). Polarity arranged so wet adds with dry; exact phase/tapers Phase-3R. |
 | 7 — HP Filter | ✅ | ✅ | G4+G5 | **Polarity bug fixed:** HP output was a spurious G=−1 inverting buffer → phase-flipped vs plugin; converted to unity follower on the SUM_AMP node (R100-103 removed). **Q collapsed** 2 LM13700→1 (U51 cell A=L/B=R; U52+C97/98+R_QB removed). RV18=100k. Lifted STALE banners; fixed aux-ota-c-svf HP-polarity algebra, THAT340 SOIC-8→14, aux-q-control HP IC note. RES÷10 / mono-cutoff / self-osc confirmed faithful (= LP1). |
 | 8 — LP Filter 2 | ✅ | ✅ | G4 (doc) | No behavioral divergence — LP2 = LP1-minus-tilt, faithful. Output buffer correctly **non-inverting** (matches un-negated v2; HP→LP2→MAIN = 3× G+1 followers, no net inversion). Shared U9/U10 cell-B Q boundary (hosted block-5) pin-verified on both sides; own IRES_AMP U65. Lifted §2/§3 STALE banners; fixed the cross-cutting `aux-ota-c-svf` stale gotcha ("HP requires G=−1 buffer" → unity follower) left by the block-7 fix; cleaned §3 HP-buffer wording + DSP cite. |
-| B — Output Buffers | 🔲 | 🔲 | — | §2–4 STALE. |
+| B — Output Buffers | ✅ | ✅ | G4+G5 | MAIN non-inverting unity follower + 1kΩ + ±11V swing = plugin clamp (faithful, like block-A). BP3 tap = svf3 v1 (post-bandpass, pre-mix) faithful. **Added BP3_R→BP3_L output normalling** (J28.3→BP3_L_OUT in block-6-mix; plugin `Pogo.cpp:498-499`). Renumbered block-B R37→R224 (cleared block-3 R37 collision). Lifted STALE banners; fixed aux refs + LFO-resistor scoping note. |
 
 ## Gate checklist (rolling, per block)
 
