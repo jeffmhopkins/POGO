@@ -607,7 +607,7 @@
   (uuid "7f73e540-249b-5472-862b-9bae68c4d609")
   (property "Reference" "C15_Lv1" (at 103.000 593.000 0)
     (effects (font (size 1.27 1.27)) (justify left)))
-  (property "Value" "150nF" (at 103.000 589.500 0)
+  (property "Value" "68nF" (at 103.000 589.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
 )
 (symbol
@@ -619,7 +619,7 @@
   (uuid "f6853ad6-949e-54e1-8bca-aff1f22c4c4b")
   (property "Reference" "C15_Lv2" (at 163.000 593.000 0)
     (effects (font (size 1.27 1.27)) (justify left)))
-  (property "Value" "150nF" (at 163.000 589.500 0)
+  (property "Value" "68nF" (at 163.000 589.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
 )
 (symbol
@@ -751,7 +751,7 @@
   (uuid "44fb5350-f17c-5c30-a4b0-8cfebc947c3f")
   (property "Reference" "C15_Rv1" (at 103.000 813.000 0)
     (effects (font (size 1.27 1.27)) (justify left)))
-  (property "Value" "150nF" (at 103.000 809.500 0)
+  (property "Value" "68nF" (at 103.000 809.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
 )
 (symbol
@@ -763,7 +763,7 @@
   (uuid "3866134d-b14e-58f4-aef6-063100b32304")
   (property "Reference" "C15_Rv2" (at 163.000 813.000 0)
     (effects (font (size 1.27 1.27)) (justify left)))
-  (property "Value" "150nF" (at 163.000 809.500 0)
+  (property "Value" "68nF" (at 163.000 809.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
 )
 (symbol

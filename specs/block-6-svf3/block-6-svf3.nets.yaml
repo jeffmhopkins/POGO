@@ -37,8 +37,8 @@ parts:
   R12_3Lb: { sym: r, value: 1k }
   R123_3Lv1: { sym: r, value: 10k }
   R123_3Lv2: { sym: r, value: 10k }
-  C23_Lv1: { sym: c, value: 4.7nF }
-  C23_Lv2: { sym: c, value: 4.7nF }
+  C23_Lv1: { sym: c, value: 68nF }
+  C23_Lv2: { sym: c, value: 68nF }
   C108_3L: { sym: c, value: 10nF }
   C107_3L: { sym: c, value: 10nF }
   R116_3L: { sym: r, value: 1M }
@@ -49,8 +49,8 @@ parts:
   R12_3Rb: { sym: r, value: 1k }
   R123_3Rv1: { sym: r, value: 10k }
   R123_3Rv2: { sym: r, value: 10k }
-  C23_Rv1: { sym: c, value: 4.7nF }
-  C23_Rv2: { sym: c, value: 4.7nF }
+  C23_Rv1: { sym: c, value: 68nF }
+  C23_Rv2: { sym: c, value: 68nF }
   C108_3R: { sym: c, value: 10nF }
   C107_3R: { sym: c, value: 10nF }
   R116_3R: { sym: r, value: 1M }

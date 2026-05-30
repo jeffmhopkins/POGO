@@ -1,9 +1,9 @@
 # aux: OTA-C State Variable Filter (2-Pole)
 
 > ✅ **Re-verified 2026-05-30** (content rewritten 2026-05-29) against the locked plugin via
-> block-5 (LP1). The 2-pole OTA-C SVF core matches the plugin's Simper 2-pole SVF. NOTE: the
-> BP-bank 4-pole-vs-2-pole question (below) is a **block-6** item and remains open until that
-> block is verified. Shared by LP1/LP2/HP/BP.
+> block-5 (LP1) and block-6 (BP). The 2-pole OTA-C SVF core matches the plugin's Simper 2-pole
+> SVF. The BP-bank "4-pole-vs-2-pole" question is **RESOLVED: 2-pole** (the plugin BP is a single
+> 2-pole SVFGroup; the old 4-pole claim was wrong — see below). Shared by LP1/LP2/HP/BP.
 
 Design status: [x] draft → [ ] reviewed → [ ] validated on prototype
 
@@ -143,19 +143,16 @@ The LP output (v₂, integrator 2 output node) is loaded by the second OTA diffe
 input. A unity-gain non-inverting buffer (TL072 half) drives the LP output jack at
 low impedance without disturbing the integrator node.
 
-### DSP 4-Pole vs Hardware 2-Pole
+### BP pole count — RESOLVED: 2-pole (matches plugin)
 
-The DSP BandpassSVF.hpp processes each BP group through a cascade of two 2-pole SVF
-stages, producing a 4-pole (24 dB/oct) response per group. The hardware specification
-is 2-pole (12 dB/oct) per group. This is an intentional hardware simplification:
-- The 4-pole DSP cascade requires 4× integrator cells per channel per group
-- 2-pole per group is musically useful and reduces IC count significantly
-- Board layout for 2-pole is substantially simpler
-- Phase 3R should confirm whether 2-pole vs 4-pole is an acceptable deviation or
-  whether cascading two aux-ota-c-svf instances per group is required
+**Resolved 2026-05-30 (change 0018):** the plugin's `BandpassSVF.hpp` processes each BP group
+through a **single 2-pole `SVFGroup`** returning the `v1` (bandpass) tap — **2-pole, 12 dB/oct**,
+one stage per group, no cascade (`SVFGroup::process` returns v1; `TripleBandpass::process` calls
+each group once). The earlier "DSP is 4-pole (cascade of two stages)" claim was **wrong**. The
+hardware is 2-pole per group, so **it matches the plugin exactly** — no cascade, no extra
+integrator cells, no deviation.
 
-For LP1, LP2, HP: DSP is 2-pole, hardware is 2-pole — exact match.
-For BP groups: DSP is 4-pole, hardware is 2-pole — requires Phase 3R decision.
+For LP1, LP2, HP, and the BP groups alike: DSP is 2-pole, hardware is 2-pole — exact match.
 
 ## Component Values (POGO-specific)
 

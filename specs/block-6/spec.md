@@ -100,12 +100,17 @@ H_BP(s) = (ω₀/Q · s) / (s² + ω₀/Q · s + ω₀²)
 
 Peak at s = jω₀: |H_BP(jω₀)| = 1 (constant unity, regardless of Q). Q controls bandwidth only, not peak amplitude.
 
-**f_ref per group** (at 0V CV):
-| Group | f_ref | Formant |
+**f_ref per group** (at 0V CV): **all three bands = 400 Hz** (matches the locked plugin
+`BandpassSVF.hpp:42` `F_REF = {400, 400, 400}`). The bands default to the same center and the
+player spreads them via the per-band FREQ knobs — they are not fixed-formant. (The earlier
+`{200, 1500, 6000}` per-group formant assignment matched a stale code comment, not the plugin
+code, and is superseded — change 0018. Integrator caps are now a uniform 68 nF C0G, trimmed to
+400 Hz by each band's f_ref trim.)
+| Group | f_ref | Cap |
 |---|---|---|
-| BP1 | 200 Hz | Low vowel body (F1) |
-| BP2 | 1500 Hz | Mid vowel / consonant (F2) |
-| BP3 | 6000 Hz | High formant / sibilance (F3) |
+| BP1 | 400 Hz | 68 nF (C15) |
+| BP2 | 400 Hz | 68 nF (C19) |
+| BP3 | 400 Hz | 68 nF (C23) |
 
 **Frequency control:**
 ```
@@ -197,8 +202,8 @@ Standard SVF BP peak is 1× (constant unity, independent of Q). No normalization
 - One TL072 half used as tilt inverter (shared across all 3 groups, same tilt offset applied to all)
 
 **Expo converters:**
-- One THAT340 per group (BP1, BP2, BP3) — 3× THAT340 total — each shared between L and R channels
-- Different f_ref per group requires separate expo trims (RV_BP1_REF, RV_BP2_REF, RV_BP3_REF)
+- **Per-channel** THAT340: one per L and one per R, per group — 6× THAT340 total (U28-U30 L, U70-U72 R)
+- Each band/channel has its own f_ref trim (RV_BP{1,2,3}_REF L/R), all targeting **400 Hz at 0 V**
 
 **Distortion hardware (see aux-distortion.md):**
 - Three sub-circuit chains per group: SC / HC / WF all running simultaneously
@@ -489,9 +494,9 @@ U27 (BP_TILT_INV TL072CDT) halves:
 
 | Ref | Range | Purpose |
 |---|---|---|
-| RV_BP1_REF | 500 kΩ; ±25% f_ref | BP1 cutoff reference (target: 200 Hz at 0V); in series with R_IREF_A 1 MΩ |
-| RV_BP2_REF | 500 kΩ; ±25% f_ref | BP2 cutoff reference (target: 1500 Hz at 0V); in series with R_IREF_A 1 MΩ |
-| RV_BP3_REF | 500 kΩ; ±25% f_ref | BP3 cutoff reference (target: 6000 Hz at 0V); in series with R_IREF_A 1 MΩ |
+| RV_BP1_REF | 500 kΩ; ±25% f_ref | BP1 cutoff reference (target: **400 Hz** at 0V); in series with R_IREF_A 1 MΩ |
+| RV_BP2_REF | 500 kΩ; ±25% f_ref | BP2 cutoff reference (target: **400 Hz** at 0V); in series with R_IREF_A 1 MΩ |
+| RV_BP3_REF | 500 kΩ; ±25% f_ref | BP3 cutoff reference (target: **400 Hz** at 0V); in series with R_IREF_A 1 MΩ |
 | RV_BP1_1VOCT | 20 kΩ; ±10% tracking | BP1 expo 1V/oct calibration |
 | RV_BP2_1VOCT | 20 kΩ; ±10% tracking | BP2 expo 1V/oct calibration |
 | RV_BP3_1VOCT | 20 kΩ; ±10% tracking | BP3 expo 1V/oct calibration |
@@ -501,9 +506,11 @@ U27 (BP_TILT_INV TL072CDT) halves:
 
 ### Integrator Cap Derivation
 
-BP1 (f_ref = 200 Hz): C = 192µS/(2π×200) = 153 nF → use 150 nF (C0G, 0805)
-BP2 (f_ref = 1500 Hz): C = 192µS/(2π×1500) = 20.4 nF → use 22 nF (C0G, 0603)
-BP3 (f_ref = 6000 Hz): C = 192µS/(2π×6000) = 5.1 nF → use 4.7 nF (C0G, 0603)
+All three bands target f_ref = **400 Hz** (plugin `F_REF = {400,400,400}`):
+C = g_m_ref / (2π × 400) ≈ 192 µS / (2π × 400) = 76 nF → use **68 nF (C0G, 0805)** for all three
+bands (C15/C19/C23), with the per-band f_ref trim (RV_BP{n}_REF, ±25%) calibrating to exactly
+400 Hz. (Superseded: the earlier per-band 150/22/4.7 nF caps implemented a stale {200,1500,6000}
+formant spread that does not match the plugin code — change 0018.)
 
 (Exact values adjusted via RV_BPx_REF trim; derive from nominal at I_abc = 10µA.)
 

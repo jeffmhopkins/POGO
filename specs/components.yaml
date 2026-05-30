@@ -244,9 +244,9 @@ components:
   - { ref: D7,   board: audio,   block: block-6-mix, part: BZX84C5V1,  pkg: SOT-23,   fn: "CD4053 logic supply 5.1V zener shunt (from +12V with R_5V_logic)" }
 
   # block-6: Passives — SVF integrator caps
-  - { ref: C15,  board: audio,   block: block-6-svf1, part: ~,          pkg: "0805",   val: "150nF",  qty: 4, fn: "BP1 integrator caps (C0G; 2 per channel × L+R)" }
-  - { ref: C19,  board: audio,   block: block-6-svf2, part: ~,          pkg: "0603",   val: "22nF",   qty: 4, fn: "BP2 integrator caps (C0G; 2 per channel × L+R)" }
-  - { ref: C23,  board: audio,   block: block-6-svf3, part: ~,          pkg: "0603",   val: "4.7nF",  qty: 4, fn: "BP3 integrator caps (C0G; 2 per channel × L+R)" }
+  - { ref: C15,  board: audio,   block: block-6-svf1, part: ~,          pkg: "0805",   val: "68nF",   qty: 4, fn: "BP1 integrator caps (C0G; f_ref=400Hz via trim; 2 per channel × L+R)" }
+  - { ref: C19,  board: audio,   block: block-6-svf2, part: ~,          pkg: "0805",   val: "68nF",   qty: 4, fn: "BP2 integrator caps (C0G; f_ref=400Hz; 2 per channel × L+R)" }
+  - { ref: C23,  board: audio,   block: block-6-svf3, part: ~,          pkg: "0805",   val: "68nF",   qty: 4, fn: "BP3 integrator caps (C0G; f_ref=400Hz; 2 per channel × L+R)" }
 
   # block-6: Passives — CD4053 logic supply
   - { ref: C27,  board: audio,   block: block-6-mix, part: ~,          pkg: "0603",   val: "10µF",   fn: "CD4053 logic supply bulk bypass (electrolytic or ceramic)" }

@@ -545,7 +545,7 @@
   (uuid "2566fb36-b9fc-5f19-a15f-56612956090c")
   (property "Reference" "C19_Lv1" (at 103.000 538.000 0)
     (effects (font (size 1.27 1.27)) (justify left)))
-  (property "Value" "22nF" (at 103.000 534.500 0)
+  (property "Value" "68nF" (at 103.000 534.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
 )
 (symbol
@@ -557,7 +557,7 @@
   (uuid "7ace53b5-7748-5ae4-bcc1-2aee2107369e")
   (property "Reference" "C19_Lv2" (at 163.000 538.000 0)
     (effects (font (size 1.27 1.27)) (justify left)))
-  (property "Value" "22nF" (at 163.000 534.500 0)
+  (property "Value" "68nF" (at 163.000 534.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
 )
 (symbol
@@ -689,7 +689,7 @@
   (uuid "35c285d0-7b44-5981-bbc5-cf8801d17313")
   (property "Reference" "C19_Rv1" (at 103.000 758.000 0)
     (effects (font (size 1.27 1.27)) (justify left)))
-  (property "Value" "22nF" (at 103.000 754.500 0)
+  (property "Value" "68nF" (at 103.000 754.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
 )
 (symbol
@@ -701,7 +701,7 @@
   (uuid "bbd6d635-4e89-5f74-88dd-d9f5a58d5116")
   (property "Reference" "C19_Rv2" (at 163.000 758.000 0)
     (effects (font (size 1.27 1.27)) (justify left)))
-  (property "Value" "22nF" (at 163.000 754.500 0)
+  (property "Value" "68nF" (at 163.000 754.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
 )
 (symbol
