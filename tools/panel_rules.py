@@ -418,13 +418,17 @@ class DesignRules:
             for j in range(i + 1, len(footprinted)):
                 ca, ras = footprinted[i]
                 cb, rbs = footprinted[j]
-                worst = (0.0, 0.0)
+                # Collision = ANY feature-rect of A overlaps ANY of B. Report the
+                # deepest penetration = max over colliding pairs of min(dx,dy) (the
+                # smallest shift that separates that pair) — a true geometric depth,
+                # not the lossy max-AREA pair.
+                pen = 0.0
                 for ra in ras:
                     for rb in rbs:
                         dx, dy = _rect_overlap(ra, rb)
-                        if dx > 0 and dy > 0 and dx * dy > worst[0] * worst[1]:
-                            worst = (dx, dy)
-                if worst[0] > 0 and worst[1] > 0:
+                        if dx > 0 and dy > 0:
+                            pen = max(pen, min(dx, dy))
+                if pen > 0:
                     la  = _comp_label(ca)
                     lb  = _comp_label(cb)
                     cxa = float(ca.get("cx", 0)); cya = float(ca.get("cy", 0))
@@ -432,7 +436,7 @@ class DesignRules:
                     out.append(
                         f"[PCB OVERLAP] '{la}' ({ca['type']} @ cx={cxa:.2f},cy={cya:.2f})"
                         f" ↔ '{lb}' ({cb['type']} @ cx={cxb:.2f},cy={cyb:.2f})"
-                        f" — footprint overlap {worst[0]:.2f}×{worst[1]:.2f}mm"
+                        f" — footprint overlap (penetration {pen:.2f}mm)"
                     )
         return out
 
