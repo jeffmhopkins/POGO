@@ -23,6 +23,11 @@
       padding: 7px 10px; font: inherit; min-width: 240px; flex: 1 1 240px;
     }
     input[type=search]:focus { outline: none; border-color: #00d4ff; }
+    select {
+      background: #141414; border: 1px solid #2a2a2a; border-radius: 5px; color: #ddd;
+      padding: 6px 8px; font: inherit; cursor: pointer;
+    }
+    select:focus { outline: none; border-color: #00d4ff; }
     label.toggle { color: #9ab; cursor: pointer; user-select: none; display: inline-flex; align-items: center; gap: 6px; }
     .count { color: #4a6070; margin-left: auto; }
     table { border-collapse: collapse; width: 100%; }
@@ -61,6 +66,7 @@
       <input type="search" id="q" placeholder="search ref / value / MPN / function / block…" autocomplete="off">
       <label class="toggle"><input type="checkbox" id="grp"> group by block</label>
       <label class="toggle"><input type="checkbox" id="clp"> collapse by value</label>
+      <label class="toggle">sort <select id="srt"></select></label>
       <span class="count" id="count"></span>
     </div>
 
@@ -155,15 +161,26 @@ function sorted(data) {
   return copy;
 }
 
-function headRow(grouping) {
-  return "<tr>" + COLS.filter(c => !(grouping && c[0] === "Block")).map(([k, lbl]) => {
+// Which columns to drop from the table for the current view. Block hides while
+// grouping (its value is the group header). Collapsing by value folds many parts
+// into one row, so Ref/Block/Function aggregate and stop being per-row meaningful
+// — hide them too. Hidden columns stay sortable via the sort menu.
+function hidden(key, grouping, collapse) {
+  if (key === "Block" && (grouping || collapse)) return true;
+  if (collapse && (key === "Ref" || key === "Function")) return true;
+  return false;
+}
+function visCols(grouping, collapse) { return COLS.filter(c => !hidden(c[0], grouping, collapse)); }
+
+function headRow(grouping, collapse) {
+  return "<tr>" + visCols(grouping, collapse).map(([k, lbl]) => {
     const arr = sortKey === k ? `<span class="arr">${sortDir > 0 ? "▲" : "▼"}</span>` : "";
     return `<th data-k="${k}">${esc(lbl)} ${arr}</th>`;
   }).join("") + "</tr>";
 }
 
-function bodyRow(r, grouping) {
-  return "<tr>" + COLS.filter(c => !(grouping && c[0] === "Block")).map(([k]) =>
+function bodyRow(r, grouping, collapse) {
+  return "<tr>" + visCols(grouping, collapse).map(([k]) =>
     `<td class="${cls(k)}">${cell(k, r[k], r)}</td>`).join("") + "</tr>";
 }
 
@@ -197,8 +214,8 @@ function render() {
   if (q) data = data.filter(r => COLS.some(([k]) => (r[k] || "").toLowerCase().includes(q)));
   data = sorted(data);
 
-  const ncols = COLS.length - (grouping ? 1 : 0);
-  let html = `<table><thead>${headRow(grouping)}</thead><tbody>`;
+  const ncols = visCols(grouping, collapse).length;
+  let html = `<table><thead>${headRow(grouping, collapse)}</thead><tbody>`;
   if (!data.length) {
     html += `<tr><td colspan="${ncols}" class="msg">no parts match “${esc(q)}”</td></tr>`;
   } else if (grouping) {
@@ -212,11 +229,11 @@ function render() {
       if (collapse) items = sorted(collapseRows(items));
       const u = collapse ? "values" : "refs";
       html += `<tr class="grp"><td colspan="${ncols}">${esc(g)}<span class="gn">${items.length} ${u} · ${qty} pcs</span></td></tr>`;
-      for (const r of items) html += bodyRow(r, grouping);
+      for (const r of items) html += bodyRow(r, grouping, collapse);
     }
   } else {
     let items = collapse ? sorted(collapseRows(data)) : data;
-    for (const r of items) html += bodyRow(r, grouping);
+    for (const r of items) html += bodyRow(r, grouping, collapse);
   }
   html += "</tbody></table>";
   document.getElementById("out").innerHTML = html;
@@ -225,6 +242,9 @@ function render() {
   const count = collapse ? collapseRows(data).length : data.length;
   const unit = collapse ? "values" : "refs";
   document.getElementById("count").textContent = `${count} ${unit} · ${totQty} pcs`;
+
+  // Keep the sort menu in step with header-click sorting.
+  document.getElementById("srt").value = sortKey || "";
 
   document.querySelectorAll("th[data-k]").forEach(th => th.onclick = () => {
     const k = th.dataset.k;
@@ -240,6 +260,16 @@ fetch("pogo-bom.csv")
     const header = table[0];
     rows = table.slice(1).filter(r => r.length > 1).map(r => {
       const o = {}; header.forEach((h, i) => o[h] = r[i] ?? ""); return o;
+    });
+    // Sort menu lets you sort by any column — including ones hidden by the
+    // group/collapse toggles (e.g. Block while collapsed by value).
+    const srt = document.getElementById("srt");
+    srt.innerHTML = `<option value="">— sort —</option>` +
+      COLS.map(([k, lbl]) => `<option value="${k}">${esc(lbl)}</option>`).join("");
+    srt.addEventListener("change", () => {
+      sortKey = srt.value || null;
+      sortDir = 1;
+      render();
     });
     document.getElementById("q").addEventListener("input", render);
     document.getElementById("grp").addEventListener("change", render);
