@@ -315,15 +315,17 @@ setpoint. So selecting the **active Vishay TFPT (+4110)** is viable IF the expo 
 for 4110 ppm and RV_1VOCT spans it. **G6a decision still needed (see question).** Until an MPN is locked,
 §A wires the divider with a placeholder tempco footprint in series with R_SHUNT (expo fix not blocked).
 
-## G6a — tempco resistor (NEW PART TYPE) — STOP, needs MPN confirmation
-The expo tempco (fold-in, decision 4) needs a real **+3300–3500 ppm/°C tempco resistor** (one per expo:
-blocks 5,7,8 + 6-svf1/2/3 L+R = ~8 parts). This is a new component type → **G6a (registry + datasheet)
-+ G6b (footprint)** must close before any net references it. I will not fabricate an MPN. Candidate
-families to confirm: Vishay TFPT (PTC thermistor, +3000–6000 ppm/°C, 0603/0805) or a synth-standard
-+3300 ppm/°C tempco resistor. **Next action options:** (i) deep-research a real sourceable MPN +
-datasheet, or (ii) user specifies a preferred part. Until then the expo-divider fix (§A) can be wired
-*without* the tempco (tempco R sits in series with R_SHUNT and can be added when the MPN lands), so §A
-is not blocked — but the tempco itself is.
+## G6a/G6b — tempco resistor (NEW PART TYPE) — ✅ CLOSED (2026-05-30)
+Registered **Vishay TFPT0805L1001FM** (1kΩ, 0805, +4110 ppm/K) as `components/parts/vishay_tfpt/`:
+- **G6a:** `component.yaml` (mpn, manufacturer, `symbol: r`, `matches: ["Vishay TFPT"]`) + cached
+  datasheet PDF (5pp, sha256 `c75464…`, 120630 B) from vishay.com/docs/33017. `matches` token added.
+- **G6b:** footprint — the repo had **no resistor footprint** (README "passives" item was deferred), so
+  vendored the standard IPC `R_0805_2012Metric.kicad_mod` under `components/footprints/Resistor_SMD.pretty/`
+  (2 pads, IPC_7351 nominal), resolved as `POGO_Resistor_SMD:R_0805_2012Metric`; one fp-lib-table row added.
+  This de-defers the README "vendored R_0603/C_0603 footprints" item (first passive footprint in repo).
+- All 3 component gates pass (components/build_components/fetch_datasheets `--check` OK). Part is NOT yet
+  in `specs/components.yaml` — that's the §A netlist step (the tempco sits as the shunt leg of the expo
+  divider). **§A is now unblocked.**
 
 ## Gate checklist
 - [x] **G1 — intent** confirmed (fix all CRIT+HIGH; full H5/H6/M5). 

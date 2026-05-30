@@ -1,0 +1,20 @@
+# vishay_tfpt — POGO sourced component (hand-maintained)
+slug: vishay_tfpt
+mpn: TFPT0805L1001FM
+manufacturer: Vishay
+supplier: '~'
+package: 0805
+symbol: r
+matches:
+- Vishay TFPT
+footprint:
+  lib: Resistor_SMD
+  name: R_0805_2012Metric
+datasheet:
+  url: https://www.vishay.com/docs/33017/tfpt.pdf
+  version: Document Number 33017
+  sha256: c75464ae69757239dcfbbad062122af94947a9f91d5796bd9996adf8e3cb5966
+  bytes: 120630
+notes: Temperature-dependent nickel thin-film chip resistor (linear PTC), 1kΩ, 0805, TCR ~+4110 ppm/K.
+  Tempco resistor for expo V/oct temperature compensation; the trimmable V/oct slope absorbs the TCR mismatch
+  (change 0020).
