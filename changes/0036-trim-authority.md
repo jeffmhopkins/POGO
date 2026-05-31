@@ -28,6 +28,30 @@ PARALLEL instances, and assert the adjustable element's range still brackets the
 - **Q-cell negative-drive bias** (block-7/5/8) + **D12 clamp** — needs the negative-drive bias network
   *designed* first (Phase-3R); there's no trim circuit to authority-check until that topology exists.
 
+## Manifest (Stage 1) ✅ — datasheet/physics bands extracted
+| Constant | Band {min,nom,max} | Basis |
+|---|---|---|
+| THAT2180 Ec+ gain const | **6.0 / 6.1 / 6.2 mV/dB** | THAT2180 datasheet (Doc 600029) EC table — all grades identical; worst case = 6.2 (least dB authority) |
+| V_T·ln2 (THAT340 expo) | 16.32 / 17.92 / 19.30 mV/oct (0/25/50 °C) | physics V_T=kT/q; cross-checks to +0.336 %/K = the THAT2180 +0.33 %/°C tempco |
+
+**Three checks:** `vca_unity_band` (block-4), `drive_db_band` (block-6-dist1), `voct_slope_band` (block-7).
+Each sweeps the constant across the band as parallel instances and asserts the trim still reaches/brackets
+the target at the WORST extreme (6.2 mV/dB for the THAT2180 ones).
+
+**Band-framing decision (assistant, physics):** for `voct_slope_band` the trim-authority band is the
+**room-temp calibration spread** (R_VOCT ±1 %, R_T tol, expo part spread — a few %), NOT the full 0–50 °C
+V_T swing — temperature drift is the **tempco resistor's** job (its raison d'être), not the one-time trim.
+So the 10k netlist pot's ±~10 % span is ample; the check PASSES on the correct band.
+
+**Finding to flag (the deriver surfaced it):** RV_1VOCT is **10k in the netlist** but the block-7 spec
+calibration table says **20k**. Under the correct room-temp band both are adequate (10k ±10 %, 20k ±20 %),
+so it's a **documentation inconsistency**, not a failing trim result — flag it for reconciliation, don't
+fail the check on the over-strict full-temperature premise.
+
+**DRIVE scope (open spec dep):** the knob→Ec+ full-scale voltage is Phase-3R-undefined, so `drive_db_band`
+proves "the summer+injection topology has ample (≫10×) headroom to command the SOFT +34.75 dB target across
+the mV/dB band" — the calibratability claim — with that scope stated explicitly (escalate the spec gap).
+
 ## Pipeline
 1. **Derive** [1 agent] — read the THAT2180 / THAT340 / LM13700 datasheets (`components/parts/*`) to
    establish DEFENSIBLE tolerance bands; read the existing authority decks; emit a manifest of the
