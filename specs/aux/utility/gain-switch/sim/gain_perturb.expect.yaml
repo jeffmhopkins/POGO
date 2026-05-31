@@ -1,0 +1,16 @@
+deck: gain_perturb.cir
+description: LIBRARY primitive NON-VACUITY — the 5× gain emerges from R_f/R_g; doubling R_f moves the gain. No netlist_bind (library primitive).
+plugin_ref: "plugin/src/dsp/PreGain.hpp:12 — 5× realized by G = 1 + R_f/R_g"
+measurements:
+  # Correct R_f = 18k → G = 1 + 18/4.7 = 4.83 (DERIVED from the ratio law).
+  - name: gain_ok
+    expect: 4.83
+    tol_abs: 0.05
+  # Perturbed R_f = 36k → G = 1 + 36/4.7 = 8.66 — gain clearly changed.
+  - name: gain_bad
+    expect: 8.66
+    tol_abs: 0.05
+  # The gain MOVED by ~3.83 when R_f was perturbed → non-vacuous (must be > 0).
+  - name: moved
+    expect: 3.83
+    tol_abs: 0.05

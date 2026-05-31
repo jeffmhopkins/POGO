@@ -1,0 +1,29 @@
+* aux/utility/gain-switch — NON-VACUITY proof: the 5× gain EMERGES from R_f/R_g.
+* Two parallel non-inverting amps, Vin = 1 V:
+*   A (correct): R_f = 18k, R_g = 4.7k → G = 1 + 18/4.7 = 4.83.
+*   B (perturbed): R_f doubled to 36k → G = 1 + 36/4.7 = 8.66.
+* The measured gain MOVES when R_f is perturbed → the deck is bound to the real resistor ratio,
+* not a textbook 5×. (No netlist_bind: library primitive, generic values.)
+
+.param RG=4700
+
+Vin sa 0 DC 1
+
+* correct R_f = 18k
+EopA rawA 0 sa niA 1e6
+RgA niA 0 {RG}
+RfA rawA niA 18000
+
+* perturbed R_f = 36k (2× → gain rises)
+EopB rawB 0 sa niB 1e6
+RgB niB 0 {RG}
+RfB rawB niB 36000
+
+.control
+  op
+  let gain_ok  = v(rawA)    ; 1 + 18/4.7 = 4.83
+  let gain_bad = v(rawB)    ; 1 + 36/4.7 = 8.66
+  let moved = gain_bad - gain_ok   ; must be clearly > 0
+  print gain_ok gain_bad moved
+.endc
+.end

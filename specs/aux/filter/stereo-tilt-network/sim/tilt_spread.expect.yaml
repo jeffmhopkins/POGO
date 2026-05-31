@@ -1,0 +1,22 @@
+deck: tilt_spread.cir
+description: LIBRARY primitive — stereo ± spread V_L=base+tilt, V_R=base−tilt; tilt=0 → L==R (no spread). No netlist_bind by design (no netlist behind a library primitive).
+plugin_ref: "plugin/src/Pogo.cpp:402-403 (LP1) & 466-467 (BP) — L = base + tilt, R = base − tilt; common-mode = base, spread = 2·tilt"
+measurements:
+  # Representative point base=2 V, tilt=0.5 V. Normalized to octave units via the pure-base
+  # weight (tilt=0 node), so the passive-divider constant cancels and the LAW is what's pinned.
+  #   V_L (octave units) = base + tilt = 2 + 0.5 = 2.5   ← DERIVED from the plugin law, not deck output
+  - name: vL_oct
+    expect: 2.5
+    tol_abs: 0.01
+  #   V_R (octave units) = base − tilt = 2 − 0.5 = 1.5
+  - name: vR_oct
+    expect: 1.5
+    tol_abs: 0.01
+  # At tilt = 0 the L channel sits exactly on the base (= 2.0 octave units) — no upward spread.
+  - name: mono_oct
+    expect: 2.0
+    tol_abs: 0.01
+  # At tilt = 0 L and R are identical → L−R = 0 mV (mono; the ± spread collapses).
+  - name: monoLR
+    expect: 0.0
+    tol_abs: 0.5
