@@ -1,0 +1,15 @@
+deck: drive_summer.cir
+description: "[NV-free] BP1 DRIVE control summer (U91 half-C) is a unity inverting summer — V_DRIVE_CTRL_1 = −(Vknob+Vcv+Vbias) with R157=R158=R159=R160=100k. Checks the unity-weight summing ratio (knob, CV, bias all enter at gain −1); the knob→dB mapping is [NV]. Mirrors block-4 cv_summer."
+plugin_ref: "specs/block-6-dist1 nets BP1_DRIVE_SUM/V_DRIVE_CTRL_1 (R157/R158/R159 inputs, R160 fb, all 100k); Distortion.hpp:34–37 (driveParam summed knob+CV+bias before exp dB map). THAT2180 mV/dB absolute is [NV]; only the −1 input ratio is checked."
+netlist_bind:  # deck literals must equal the live block-6-dist1.nets.yaml values
+  R_knob: "R157=100k"
+  R_cv: "R158=100k"
+  R_bias: "R159=100k"
+  R_fb: "R160=100k"
+measurements:
+  - name: sum_one      # DERIVED FROM SPEC: −(R160/R157)·1 = −(100k/100k)·1 = −1.0
+    expect: -1.0
+    tol_abs: 0.03      # near-exact ratio; ideal op-amp + 1% resistors
+  - name: sum_three    # DERIVED: −(R160/R157 + R160/R158 + R160/R159)·1 = −(1+1+1) = −3.0
+    expect: -3.0
+    tol_abs: 0.03

@@ -1,0 +1,21 @@
+deck: drive_ref_divider.cir
+description: "[change-0025 fix] BP1 DRIVE Ec+ unity-trim ±ref rails REF_P1/REF_N1 = ±1.195V, set by R243/R244 from ±12V loaded by the two parallel 10k unity trims RV51∥RV52 (5k bridge). block-6 mirror of the block-4 ref_divider: R243/R244 45k3→22k6 — the bug 45k3 gave only ±0.628V; the fix targets ±1.2V Ec+ reference. block-6 had no SPICE check for this until now."
+plugin_ref: "specs/block-6-dist1 nets REF_P1/REF_N1 (R243/R244 22k6) + spec.md DRIVE HIGH-3 — local ±1.2V reference; analog-only, no plugin DSP (THAT2180 absolute dB is [NV], only the ±ref level is checked here)"
+# NETLIST BINDING: the deck's R243/R244 literal MUST equal the netlist. The bind pins the CORRECTED
+# 22k6 — if the netlist regressed to 45k3 (the bug) this bind FAILS, guarding the change-0025 fix.
+# RV51/RV52 are symbolic (BP1_DRIVE_UNITY_L/R) → UNBINDABLE; the 5k bridge is a known-topology literal.
+netlist_bind:
+  R_ref_top: "R243=22k6"
+  R_ref_bot: "R244=22k6"
+measurements:
+  # DERIVED from the corrected divider math (NOT the deck output):
+  #   node eqn at REF_P1 (symmetry REF_P1=-REF_N1=x):  (12 - x)/22600 = 2x/5000
+  #   => 5000*(12-x) = 2*22600*x  => 60000 = 50200*x  => x = 1.195 V  ≈ +1.2V (the design intent).
+  #   (the bug value 45k3 gives 5000*(12-x)=90600*x => 60000=95600*x => x≈0.628V → fails this assertion.)
+  # tol_abs 0.1 absorbs ideal-pot-loading + E96 rounding.
+  - name: ref_p
+    expect: 1.195
+    tol_abs: 0.1
+  - name: ref_n
+    expect: -1.195     # symmetry: REF_N1 = -REF_P1
+    tol_abs: 0.1

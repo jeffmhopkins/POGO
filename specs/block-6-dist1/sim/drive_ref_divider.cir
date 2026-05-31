@@ -1,0 +1,35 @@
+* POGO block-6-dist1 DRIVE — local +-ref divider REF_P1/REF_N1 = +-1.195V (change 0025 fix)
+* CLAIM: the BP1 DRIVE Ec+ unity-trim reference rails REF_P1/REF_N1 = +-1.195V (~+-1.2V),
+* set by R243/R244 (22k6) from +-12V, loaded by the two 10k unity trim pots RV51/RV52 acting
+* as the divider lower legs in parallel between REF_P1 and REF_N1. Passive symmetric divider.
+*
+* Topology (from block-6-dist1.nets.yaml):
+*   +12V -> R243 -> REF_P1 ; -12V -> R244 -> REF_N1 ;
+*   RV51/RV52 = 10k pots end-to-end (pin1=REF_P1, pin3=REF_N1) -> two 10k in PARALLEL
+*   = 10k/2 = 5k bridging REF_P1<->REF_N1.
+*   NOTE: RV51/RV52 carry SYMBOLIC values (BP1_DRIVE_UNITY_L/R), NOT ohmic — UNBINDABLE.
+*   The 10k pot value / 5k parallel bridge is a known-topology spec literal (NOT a netlist
+*   bind); only R243/R244 are value-pinned via netlist_bind below.
+*
+* By symmetry REF_P1 = -REF_N1 = x. Node eqn at REF_P1: (12-x)/R_top = 2x/R_bridge.
+*   (12-x)/22600 = 2x/5000  ->  5000*(12-x) = 45200*x  ->  60000 = 50200*x  ->  x = 1.195V.
+*
+* change 0025: R243/R244 were 45.3k (-> only +-0.628V -> too-small Ec+ authority). The bug:
+* 45.3k was sized as if ONE 10k bridge (10k) loaded REF, but BOTH trims load REF in PARALLEL
+* (5k). Fixed to 22.6k. block-6 never had a SPICE check for this; this deck + its bind add it.
+
+.param Rbridge=5k    ; two 10k unity trims (RV51,RV52) end-to-end in parallel = 5k REF_P1<->REF_N1
+
+Vpos vpos 0 DC 12
+Vneg vneg 0 DC -12
+R243 vpos refp 22.6k    ; +ref divider top  (netlist R243, change 0025: 45k3->22k6)
+R244 vneg refn 22.6k    ; -ref divider bottom (netlist R244, change 0025: 45k3->22k6)
+Rbr  refp refn {Rbridge}
+
+.control
+  op
+  let ref_p = v(refp)
+  let ref_n = v(refn)
+  print ref_p ref_n
+.endc
+.end

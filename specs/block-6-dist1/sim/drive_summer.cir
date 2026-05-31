@@ -1,0 +1,37 @@
+* POGO block-6-dist1 DRIVE — U91 half-C unity inverting drive-control summer (NV-free ratio check)
+* CLAIM (nets BP1_DRIVE_SUM/V_DRIVE_CTRL_1; R157/R158/R159/R160 all 100k):
+*   U91-C inverting summer:  V_DRIVE_CTRL_1 = -(R160/R157)*Vknob - (R160/R158)*Vcv - (R160/R159)*Vbias
+*                                          = -(Vknob + Vcv + Vbias)   [R157=R158=R159=R160=100k]
+*   Proves the DRIVE knob, DRIVE CV (MOD_BP1_DIST), and bias all enter at UNITY weight ahead of
+*   the Ec+ trims. Ideal op-amp (Eop high-gain VCVS) stands in for the TL074 half: the summer gains
+*   are set entirely by the feedback resistor ratios — the law under test. THAT2180 absolute dB is
+*   [NV]; this deck checks only the unity-summing RATIO, not the knob->dB mapping.
+* PARALLEL instances (no alter-loops). The bind guards R157..R160; e.g. R160->33k makes each gain -3.
+
+* ===== instance S1: knob=+1, cv=0, bias=0  -> V_DRIVE_CTRL = -(R160/R157)*1 = -1.0 =====
+Vknob1 knob1 0 DC 1
+Vcv1   cv1   0 DC 0
+Vbias1 bias1 0 DC 0
+Esum1  out1 0 0 sa1 1e6        ; (+) at GND, (-)=sa1 virtual ground
+R157a  knob1 sa1 100k          ; R157 (DRIVE-knob input)
+R158a  cv1   sa1 100k          ; R158 (DRIVE-CV input)
+R159a  bias1 sa1 100k          ; R159 (bias input)
+R160a  out1  sa1 100k          ; R160 (feedback)
+
+* ===== instance S3: knob=cv=bias=+1  -> V_DRIVE_CTRL = -(1+1+1) = -3.0 =====
+Vknob3 knob3 0 DC 1
+Vcv3   cv3   0 DC 1
+Vbias3 bias3 0 DC 1
+Esum3  out3 0 0 sa3 1e6
+R157b  knob3 sa3 100k
+R158b  cv3   sa3 100k
+R159b  bias3 sa3 100k
+R160b  out3  sa3 100k
+
+.control
+  op
+  let sum_one   = v(out1)   ; DERIVED -(R160/R157)*1 = -100k/100k = -1.0
+  let sum_three = v(out3)   ; DERIVED -(R160/R157 + R160/R158 + R160/R159)*1 = -(1+1+1) = -3.0
+  print sum_one sum_three
+.endc
+.end

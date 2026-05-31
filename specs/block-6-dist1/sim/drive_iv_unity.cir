@@ -1,0 +1,43 @@
+* POGO block-6-dist1 DRIVE VCA — transimpedance I/V gives unity (-1) at 0 dB; input is virtual ground
+* CLAIM (nets R153/R155, U85/U91-A; mirrors block-4 iv_unity):
+*   The BP1 DRIVE THAT2180 (U85) is current-in (pin1 ~ virtual ground) / current-out (pin8).
+*   LP1_OUT_L drives R_in (R153, 20k) into the input node:  I_in = LP1_OUT_L / R_in.
+*   At 0 dB the THAT2180 current gain is unity BY DEFINITION (Ec+=0), so I_out = I_in.
+*   The I/V op-amp (U91 half-A, (+)=GND) sinks I_out through R_f (R155, 20k): OUT = -I_out*R_f.
+*   Product = -(R_f/R_in) = -(20k/20k) = -1.0.  [NV]-FREE: pure resistor RATIO — the THAT2180
+*   6.1 mV/dB constant CANCELS (unity current copy at 0 dB), so no device constant appears.
+* Ideal models (justification): the THAT2180 at 0 dB is an ideal current copy I_out=I_in=V(vca_in)/R_in
+*   (Gcopy VCCS senses (V(audio)-V(vca_in))/R_in and pushes that current into the I/V summing node) —
+*   stands in for the Blackmer cell whose 0-dB current gain is unity by definition (the law under test
+*   is the R_f/R_in ratio, not the device). The I/V is an ideal high-gain op-amp (Eop), (+) = GND, so
+*   its (-) node ivin is a virtual ground; vca_in is held near 0 by the cell low input impedance,
+*   modeled as a small Rsink to GND so the input node reads the virtual-ground condition.
+* PARALLEL single instance (op point). The netlist_bind guards R153 (R_in) and R155 (R_f).
+* R_in/R_f are single .param symbols used by BOTH the resistor element AND the current-copy B-source,
+* so a Rin perturbation genuinely moves the gain (no faked hardcoded ratio).
+
+.param Rin=20k          ; R153 (must equal netlist R153 via the bind below)
+.param Rf=20k           ; R155
+
+Vaudio audio 0 DC 1
+
+* R_in (R153): LP1_OUT_L -> vca_in (THAT2180 current-input node).
+Rin  audio vca_in {Rin}
+
+* THAT2180 input node ~ virtual ground: low input impedance to GND (translinear cell).
+Rsink vca_in 0 1
+
+* THAT2180 at 0 dB = ideal current copy: I_out = I_in = (V(audio)-V(vca_in))/R_in, pushed into ivin.
+Bcopy 0 ivin I = (V(audio)-V(vca_in))/{Rin}
+
+* I/V op-amp (U91-A): (+) = GND (node 0), (-) = ivin (virtual ground). Out via R_f.
+Eop  out 0 0 ivin 1e6
+Rf   out ivin {Rf}       ; R_f (R155)
+
+.control
+  op
+  let iv_gain     = v(out)         ; DERIVED -(R_f/R_in) = -(20k/20k) = -1.0
+  let vin_node_v  = v(vca_in)      ; DERIVED ~ 0 V (current input -> virtual ground -> Z_in~R_in)
+  print iv_gain vin_node_v
+.endc
+.end
