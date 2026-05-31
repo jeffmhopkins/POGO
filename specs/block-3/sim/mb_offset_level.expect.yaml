@@ -1,0 +1,28 @@
+deck: mb_offset_level.cir
+description: "OFFSET range — RV4's ±12V wiper feeds U3-A summer via R15=240k against R13=100k feedback, then unity inverter (R16) → ±5.0V bus offset, matching plugin offsetParam*5. Guards change 0020 §M2 (R15 100k→240k); the bug instances document that R15=100k gave out-of-range ±12V."
+plugin_ref: "plugin/src/dsp/ModBus.hpp:24 — offset = offsetParam*5.f → ±5V at param ±1; spec/block-3/spec.md §2 'Offset range' + §3 §M2"
+# NETLIST BINDING: the load-bearing FIX literals must equal the live netlist. R15=240k is the
+# change-0020 §M2 fix; if it regressed to 100k this bind FAILS (and offset_pos/neg would be ±12).
+# The ±12V rail is a deck literal (board power), not bound. The R15=100k BUG instances are
+# documentary literals (intentionally NOT equal to the netlist) so they carry no bind.
+netlist_bind:
+  R_MB_F:   "R13=100k"     # summer feedback
+  R_MB_OFF: "R15=240k"     # offset input (the §M2 fix value)
+  R_MB_INV_IN: "R16_1=100k"   # polarity inverter in
+  R_MB_INV_FB: "R16_2=100k"   # polarity inverter fb
+measurements:
+  # DERIVED independently from the netlist: contribution = -V_w*(R13/R15) = -(+12)*(100/240) = -5.0,
+  # then unity inverter (-1) -> +5.0. (NOT copied from deck output.)
+  - name: offset_pos
+    expect: 5.0
+    tol_abs: 0.1
+  - name: offset_neg
+    expect: -5.0
+    tol_abs: 0.1
+  # Documentary: pre-§M2 bug R15=100k -> -V_w*(100/100)=-12, inverted -> +12 (out of ±10 bus range).
+  - name: offset_bug_pos
+    expect: 12.0
+    tol_abs: 0.1
+  - name: offset_bug_neg
+    expect: -12.0
+    tol_abs: 0.1

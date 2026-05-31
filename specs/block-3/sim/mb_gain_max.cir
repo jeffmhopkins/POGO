@@ -1,0 +1,23 @@
+* POGO block-3 Mod Bus — SCALE full-CW gain (V_src path, max gain)
+* CLAIM (spec.md §2 "Gain range derivation":88; ModBus.hpp:19 amountGain(1)=5.0):
+*   SCALE pot RV3 at full-CW = 0 ohm in series with the floor R14=22k. The inverting summer
+*   (U3-A) then has Rin = R14 = 22k and Rf = R13 = 100k, so the V_src gain magnitude is
+*   R13/R14 = 100/22 = 4.545x.
+*   This is the ANALOG APPROXIMATION of the plugin's 5.0x endpoint (amountGain(1)=0.2*25^1=5.0).
+*   The -9% gap (4.545 vs 5.0) is a DOCUMENTED, INTENTIONAL deviation (spec.md:88 "4.55x ~= 5x");
+*   expect is DERIVED FROM THE NETLIST (R13/R14), not the plugin 5.0.
+*
+* Ideal op-amp (Eop high-gain VCVS) stands in for the TL074 half: the closed-loop gain is set
+* entirely by Rf/Rin — the law under test. Single instance (no pot value here = full CW).
+
+Vsrc  vsrc 0 DC 1
+Esum  out 0 0 sn 1e6          ; (+) at GND, (-)=sn virtual ground
+R14   vsrc sn 22k             ; R_MB_SRC floor (netlist R14=22k); pot=0R at full-CW
+R13   out  sn 100k            ; R_MB_F feedback (netlist R13=100k)
+
+.control
+  op
+  let g_max = -v(out)/1.0      ; DERIVED gain magnitude = R13/R14 = 100/22 = 4.545
+  print g_max
+.endc
+.end
