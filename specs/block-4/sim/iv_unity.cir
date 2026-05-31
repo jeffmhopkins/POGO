@@ -1,5 +1,5 @@
 * POGO block-4 VCA — transimpedance I/V gives unity (−1) magnitude at 0 dB; input is virtual ground
-* CLAIM (spec §2 "Audio path"; aux-vca-cell.md §Transfer Function; nets R7/R40, U4/U6):
+* CLAIM (spec §2 "Audio path"; aux/vca/vca-cell/spec.md §Transfer Function; nets R7/R40, U4/U6):
 *   The THAT2180 is current-in (pin1 Input ≈ virtual ground) / current-out (pin8 Output).
 *   AUDIO_IN drives R_in (R7, 20k) into the input node:  I_in = AUDIO_IN / R_in.
 *   At 0 dB the THAT2180 current gain is unity BY DEFINITION (Ec+=0), so I_out = I_in.

@@ -3,7 +3,7 @@
 # Source of truth for connectivity, transcribed from:
 #   specs/components.yaml  (block-B rows: U61/U62, R34-R224, J29/J30 — BOM authoritative)
 #   plugin/src/Pogo.cpp    (OutputId enum + process(): MAIN/BP3 clamp ±11V)
-#   specs/block-B/spec.md §1 (panel-verified intent), specs/aux/aux-unity-buffer.md
+#   specs/block-B/spec.md §1 (panel-verified intent), specs/aux/utility/unity-buffer/spec.md
 #
 # Scope note (reconciled against ground truth): block-B is the MAIN output buffers
 # (U61: MAIN_L/R) and the BP3 tap buffers (U62: BP3_L/R) plus their 1kΩ series

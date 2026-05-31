@@ -3,7 +3,7 @@
 # Source of truth, transcribed from:
 #   specs/components.yaml  (block-5 rows incl. the shared Q-VCAs U9/U10; refs exact)
 #   specs/block-5/spec.md  (§2 topology, §3 physical, §4 component table)
-#   specs/aux/aux-ota-c-svf.md / aux-q-control.md / aux-expo-converter.md
+#   specs/aux/filter/ota-c-svf/spec.md / aux/filter/q-control/spec.md / aux/filter/expo-converter/spec.md
 #   datasheet-corrected pinouts: kicad_common.py sym_lm13700 / sym_that340 / sym_opa1612
 #
 # Built by dual derivation (independent agent draft + my net-by-net review). Two

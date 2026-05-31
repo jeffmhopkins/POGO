@@ -1,5 +1,5 @@
 * POGO block-7 — IRES_AMP inverting summer (U66 half A): resonance-CV -> V_ires polarity
-* CLAIM (aux-q-control §IRES_AMP detail; spec §3 Q control): the IRES_AMP is an inverting
+* CLAIM (aux/filter/q-control §IRES_AMP detail; spec §3 Q control): the IRES_AMP is an inverting
 * summer with (+) at GND and three 100 kΩ resistors — R_QBIAS (R106), R_QINV (R107), R_f_q
 * (R108) — so
 *   V_ires = −(V_bias·R_f_q/R_QBIAS + V_res·R_f_q/R_QINV) = −(V_bias + V_res)   (unity weights).

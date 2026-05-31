@@ -1,5 +1,7 @@
 # Standard Power Supply Filtering
 
+**Type:** `utility` · part of the [aux circuit library](../../_LIBRARY.md)
+
 > ✅ **Re-verified 2026-05-30** (change 0018). Board power filtering / decoupling; content current.
 
 Applied to every POGO PCB at the power connector and at each IC.

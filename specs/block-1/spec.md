@@ -114,7 +114,7 @@ switch produces a transient click (charge redistribution on the feedback network
 hardware-only consideration. The clip level varies slightly with temperature and load;
 the DSP specifies ±10.5 V as nominal, consistent with OPA1612 datasheet typical figures.
 
-→ References `aux/aux-unity-buffer.md`
+→ References `aux/utility/unity-buffer/spec.md`
 
 ---
 
@@ -171,7 +171,7 @@ ALT_OUT_L/R → [block-4 ALT VCA cell, shared control] → [block-6 BP3 per-chan
 ```
 
 ALT inputs carry the standard POGO jack protection (100 Ω series + BAT54S clamp to
-±12 V, per `aux/aux-cv-protection.md` — every jack input). J4 (ALT_BP_R) tip-switch
+±12 V, per `aux/utility/cv-protection/spec.md` — every jack input). J4 (ALT_BP_R) tip-switch
 normalls to the protected ALT_L input node so an unpatched R channel duplicates L
 through R's own identical gain stage and the shared toggle (added 2026-05-29).
 
@@ -195,7 +195,7 @@ length carrying unshielded pre-gain signals.
 - 2× OPA1612 (U2, U3, dual SOIC-8): ~5.5 mA each = ~11 mA  (Iq = 2.75 mA/ch × 2)
 - **+12V: ~11 mA | −12V: ~11 mA**
 
-→ References `aux/aux-unity-buffer.md` for the op-amp gain-stage ASCII schematic primitive.
+→ References `aux/utility/unity-buffer/spec.md` for the op-amp gain-stage ASCII schematic primitive.
 (The aux/ library is ASCII-only — there are no SVG schematic files.)
 
 ---

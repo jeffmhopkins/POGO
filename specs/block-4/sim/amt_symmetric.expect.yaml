@@ -1,6 +1,6 @@
 deck: amt_symmetric.cir
 description: AMT pot RV44 is symmetric across ±effCV (CW=PEFFCV via RV44.3, CCW=NEFFCV via RV44.1, wiper=V_CTRL); at AMT center V_CTRL=(PEFFCV+NEFFCV)/2=0 -> unity REGARDLESS OF OFS (the 0018 OFS-placement fix), matching VcaBlock control=1-AMT*(1-normCV) with AMT=0 => unity
-plugin_ref: "plugin/src/dsp/VcaBlock.hpp:21-24 — control = 1 - amtParam*(1-normCV); AMT=0 => control=1 => unity. spec/block-4/spec.md §2 step 4 + aux-vca-cell.md §Schematic (symmetric AMT, OFS summed BEFORE the pot)"
+plugin_ref: "plugin/src/dsp/VcaBlock.hpp:21-24 — control = 1 - amtParam*(1-normCV); AMT=0 => control=1 => unity. spec/block-4/spec.md §2 step 4 + aux/vca/vca-cell/spec.md §Schematic (symmetric AMT, OFS summed BEFORE the pot)"
 netlist_bind:  # deck literals must equal live block-4.nets.yaml values
   R_sum_cv: "R42=100k"    # U63A CV input
   R_sum_fb: "R43=100k"    # U63A feedback

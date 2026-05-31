@@ -97,7 +97,7 @@ a function of load current and rail accuracy; it typically saturates at ±10.8 V
 ±11.2 V. This is consistent with the DSP spec and requires no correction. There is no
 intentional nonlinearity in this block.
 
-→ References `aux/aux-unity-buffer.md` (Variant A, non-inverting follower), `aux/aux-cv-protection.md`
+→ References `aux/utility/unity-buffer/spec.md` (Variant A, non-inverting follower), `aux/utility/cv-protection/spec.md`
 
 ---
 
@@ -125,7 +125,7 @@ intentional nonlinearity in this block.
   meeting at the **series junction K1;A2 = pin 3**. That junction is wired to the signal node
   (after R1/R2); pin 1 (A1) → −12 V, pin 2 (K2) → +12 V. D2 (junction→+12 V) is the high clamp
   (conducts above +12.3 V); D1 (−12 V→junction) is the low clamp (conducts below −12.3 V). This
-  holds the op-amp (+) input within ±(12 + 0.3) = ±12.3 V. (See aux-cv-protection.md for the pin map.)
+  holds the op-amp (+) input within ±(12 + 0.3) = ±12.3 V. (See aux/utility/cv-protection/spec.md for the pin map.)
 
 **Op-amp (U1): OPA1612, SOIC-8**
 - Dual: one package serves both L and R channels.
@@ -164,7 +164,7 @@ jacks are located to keep input traces short and shielded from digital noise.
 - 1× OPA1612 (U1, dual SOIC-8): ~6 mA  (Iq = 2.75 mA/channel × 2 channels = 5.5 mA)
 - **+12V: ~6 mA | −12V: ~6 mA**
 
-→ References `aux/aux-unity-buffer.md` (Variant A) for the op-amp follower ASCII schematic
+→ References `aux/utility/unity-buffer/spec.md` (Variant A) for the op-amp follower ASCII schematic
 primitive. (The aux/ library is ASCII-only — there are no SVG schematic files.)
 
 ---

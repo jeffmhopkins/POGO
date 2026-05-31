@@ -8,7 +8,7 @@
 *   old spec assumed) -> Q pinned at min.
 * FIX (netlist R104/R105 = 100k): V_ires driven negative to ~-10.73V near the pin ->
 *   Iabc ~0.7µA -> Q ~0.74 (Butterworth). Q = V_T_diff/(Iabc*R_in), V_T_diff=52mV,
-*   R_in=100k (aux-q-control §"Q Formula"; HPFilter.hpp:21 Q=0.5*pow(4000,res) -> Butterworth
+*   R_in=100k (aux/filter/q-control §"Q Formula"; HPFilter.hpp:21 Q=0.5*pow(4000,res) -> Butterworth
 *   floor ~0.7 at res=0).
 
 .param Vpin=-10.8          ; LM13700 Iabc pin ≈ 2*Vbe above -12V rail

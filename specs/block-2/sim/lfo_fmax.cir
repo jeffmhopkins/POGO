@@ -1,5 +1,5 @@
 * POGO block-2 LFO oscillator — HEADLINE f_max = 20 Hz at full rate drive (.tran)
-* CLAIM (aux-lfo-core.md formula; spec block-2 §2 line 67; plugin LFO.hpp:16):
+* CLAIM (aux/modulation/lfo-core/spec.md formula; spec block-2 §2 line 67; plugin LFO.hpp:16):
 *   The integrator + Schmitt relaxation oscillator runs at
 *     f = (R5+R7) / (4 * R7 * R_INT * C_INT)
 *   At full rate drive (rate pot wiper at the top, k=1: V_sq drives R1 directly),
@@ -12,7 +12,7 @@
 * This deck builds a REAL hysteretic oscillator (a memoryless B-source cannot oscillate;
 * the integrator's capacitor state is what breaks the loop and sustains the triangle).
 *
-* TOPOLOGY (per spec §2 lines 106-135 / aux-lfo-core):
+* TOPOLOGY (per spec §2 lines 106-135 / aux/modulation/lfo-core):
 *   - Integrator: ideal op-amp Eint, (+) = GND(0), (-) = nsum (virtual ground),
 *     out = nvtri (the triangle). R1 (R_INT) from the square drive to nsum; C1 (C_INT)
 *     feedback nsum -> nvtri. The inverting integrator gives nvtri = -(1/R1C1) integral(drive).

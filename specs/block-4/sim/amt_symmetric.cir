@@ -1,5 +1,5 @@
 * POGO block-4 VCA — symmetric AMT attenuverter: AMT center = unity regardless of OFS (0018 fix)
-* CLAIM (spec §2 step 4; aux-vca-cell.md §Schematic; nets U63A_SUM/NEFFCV/U63B_INV/PEFFCV/V_CTRL):
+* CLAIM (spec §2 step 4; aux/vca/vca-cell/spec.md §Schematic; nets U63A_SUM/NEFFCV/U63B_INV/PEFFCV/V_CTRL):
 *   U63A is an inverting CV+OFS summer:  NEFFCV = −(R43/R42·CVP + R43/R45·OFS) = −(CVP+OFS)
 *   U63B is a unity inverter:            PEFFCV = −(R46/R44)·NEFFCV = +(CVP+OFS) = −NEFFCV
 *   The AMT pot RV44 sits SYMMETRICALLY across ±effCV: top (RV44.3)=PEFFCV, bottom (RV44.1)=NEFFCV,

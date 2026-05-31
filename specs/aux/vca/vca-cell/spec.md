@@ -1,5 +1,7 @@
 # aux: VCA Cell (THAT 2180 Exponential VCA)
 
+**Type:** `vca` · part of the [aux circuit library](../../_LIBRARY.md)
+
 > ✅ **CORRECTED 2026-05-29** — Topology fixed to the real THAT2180 current-in/current-out
 > device (was wrongly modelled as a differential voltage VCA with no output op-amp).
 > Pinout from datasheet Doc 600029 Rev 02 Table 1. Verified in `specs/block-4/block-4.nets.yaml`.
@@ -130,7 +132,7 @@ RV_VCA_UNITY (change 0020: **10 kΩ** SMD trimpot, voltage-injection divider —
 ```
 100Ω series resistor: limits short-circuit current into BAT54S clamping diodes
 BAT54S (SOT-23 dual Schottky): clamps input to ±(Vcc + 0.3V) ≈ ±12.3V
-Complies with aux-cv-input-protection pattern used throughout POGO
+Complies with aux/utility/cv-protection pattern used throughout POGO
 ```
 
 ### True Stereo

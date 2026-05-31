@@ -1,6 +1,6 @@
 deck: gain_law_shape.cir
 description: "[NV] INTENT/MODELING check (not a netlist check): confirms the spec's claimed gain law is exponential/log-linear (equal Ec+ steps -> equal dB steps) + unity anchor at Ec+=0. CAVEAT (verify stage): with no netlist_bind and a single exp() functional form, `linearity≡0` is a property of exp(), not of block-4's wiring — it would pass for ANY VCA. The genuine netlist-bound Ec+/dB-authority verification lives in vca_ecplus / vctrl_buffer / ref_divider; this deck documents intent only. The 6.1 mV/dB device constant is [NV] and is NOT asserted."
-plugin_ref: "plugin/src/dsp/VcaBlock.hpp:26-27 — G = 10^(2*(control-1)) = exponential gain (G_dB = 40*(control-1)); spec/block-4 §2 Gain Law; aux-vca-cell.md §THAT 2180 Gain Law"
+plugin_ref: "plugin/src/dsp/VcaBlock.hpp:26-27 — G = 10^(2*(control-1)) = exponential gain (G_dB = 40*(control-1)); spec/block-4 §2 Gain Law; aux/vca/vca-cell/spec.md §THAT 2180 Gain Law"
 # netlist_bind: NONE — the linearity ratio cancels all constants (db_step2−db_step1 is independent
 # of the dB slope); the 6.1 mV/dB used to place test points is a device constant, not a netlist ref.
 measurements:

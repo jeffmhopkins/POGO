@@ -3,7 +3,7 @@
 # Source of truth, transcribed from:
 #   specs/components.yaml  (block-2 rows; BOM authoritative)
 #   specs/block-2/spec.md  (FINALIZED 2026-05-29: drive-attenuator rate control)
-#   specs/aux/aux-lfo-core.md (integrator + Schmitt trigger core)
+#   specs/aux/modulation/lfo-core/spec.md (integrator + Schmitt trigger core)
 #   plugin/src/dsp/LFO.hpp (f = 0.05*400^param; triangle ±5V; LFO1 normals to mod bus)
 #
 # Each LFO = one TL072: half A = integrator (triangle), half B = Schmitt comparator

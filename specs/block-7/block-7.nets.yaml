@@ -2,7 +2,7 @@
 #
 # Source of truth, transcribed from:
 #   specs/components.yaml (block-7 rows; BOM authoritative, refs exact)
-#   specs/block-7/spec.md (§2-§4) ; aux-ota-c-svf / aux-q-control / aux-expo-converter
+#   specs/block-7/spec.md (§2-§4) ; aux/filter/ota-c-svf / aux/filter/q-control / aux/filter/expo-converter
 #   datasheet-corrected pinouts: kicad_common.py sym_lm13700 / sym_that340 / sym_opa1612
 #
 # Structure = LP2 (block-8) topology with two HP differences:

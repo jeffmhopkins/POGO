@@ -1,5 +1,7 @@
 # aux: Exponential Frequency Converter (V/Oct to Iabc)
 
+**Type:** `filter` · part of the [aux circuit library](../../_LIBRARY.md)
+
 > ✅ **Re-verified 2026-05-30** (content rewritten 2026-05-29) against the locked plugin via
 > block-5. THAT340 V/oct→Iabc converter; `f0 = f_ref·2^V` (1 V/oct). The per-channel-expo
 > decision (one THAT340 per channel for true stereo tilt) is current. Shared by LP1/LP2/HP/BP.

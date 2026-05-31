@@ -1,5 +1,7 @@
 # aux: Unity-Gain Buffer (Non-Inverting and Inverting)
 
+**Type:** `utility` · part of the [aux circuit library](../../_LIBRARY.md)
+
 > ✅ **Re-verified 2026-05-30** (change 0018). G=+1 unity follower; HP output is a unity follower (no G=−1 buffer).
 
 Design status: [ ] draft → [ ] reviewed → [ ] validated on prototype
@@ -110,7 +112,7 @@ buffer output does not need output clamping; the downstream signal stays within
 
 ### HP Output Buffer — unity follower (NOT inverting)
 
-The OTA-C SVF SUM_AMP (see aux-ota-c-svf) produces the HP tap already at its output node:
+The OTA-C SVF SUM_AMP (see aux/filter/ota-c-svf) produces the HP tap already at its output node:
   HP_inv = −(x − k·v₁ − v₂)
 
 The plugin `HPFilter::process` deliberately **returns this same negated value**
@@ -118,7 +120,7 @@ The plugin `HPFilter::process` deliberately **returns this same negated value**
 therefore takes that node through a **unity non-inverting follower (G=+1)** for drive
 isolation only — `HP_out = HP_inv`, matching the plugin. Do **not** add a second inversion:
 an earlier G=−1 buffer here double-inverted and phase-flipped HP vs the plugin (bug fixed in
-change 0018; the inverting-buffer resistors were removed). See aux-ota-c-svf §SUM_AMP
+change 0018; the inverting-buffer resistors were removed). See aux/filter/ota-c-svf §SUM_AMP
 Inversion and HP Polarity.
 
 ### IC Pairing
@@ -183,7 +185,7 @@ This is well below thermal noise from source impedance (100 Ω source at 300K):
   inputs must stay above −11V to avoid phase reversal — this is fine for audio signals
   but note it if unity buffers appear near the rail for bias circuits
 - The 100 Ω series resistor and BAT54S at Block A form the CV input protection; this
-  same pattern is reused at all CV input jacks (see aux-cv-protection.md)
+  same pattern is reused at all CV input jacks (see aux/utility/cv-protection/spec.md)
 - R_out (1 kΩ) at output jacks: omit on internal signal nodes to avoid unnecessary
   insertion loss and HF roll-off with capacitive loads (e.g., cable capacitance
   30 pF: f_−3dB = 1/(2π × 1kΩ × 30pF) = 5.3 MHz — fine for audio)

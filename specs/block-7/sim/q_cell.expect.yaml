@@ -9,7 +9,7 @@ netlist_bind:
   R_Iabc_L: "R104=100k"
   R_Iabc_R: "R105=100k"
 measurements:
-  # Derived from the NETLIST (R104/R105 = 100k) + aux-q-control §D math (Iabc=(V_ires-V_pin)/R_Iabc,
+  # Derived from the NETLIST (R104/R105 = 100k) + aux/filter/q-control §D math (Iabc=(V_ires-V_pin)/R_Iabc,
   # Q=52mV/(Iabc*100k)). NOTE: spec.md:152-153 still says R_Iabc=1MΩ / 0.74V — that line is STALE
   # (pre-0020); these expects are derived from the 100k netlist value, NOT that stale spec line.
   - name: iabc_bug_uA    # 1M from ~0V: ~10.8µA — ~14x the ~0.74µA the stale spec assumed (Q pinned)

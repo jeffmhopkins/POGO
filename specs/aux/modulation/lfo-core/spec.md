@@ -1,5 +1,7 @@
 # aux: LFO Core (Triangle Oscillator)
 
+**Type:** `modulation` · part of the [aux circuit library](../../_LIBRARY.md)
+
 > ✅ **Re-verified 2026-05-30** against the locked plugin (change 0018). Updated for: both
 > LFOs feed the MOD_SRC switch (no MOD_IN auto-normal); rate pot is a **log panel pot**
 > (player control), not a linear preset; LED driver is **full-cycle breathing** (matches
@@ -144,7 +146,7 @@ Option A — Log-taper pot (preferred for simplicity):
   True 400:1 range may require custom end-resistor tuning.
 
 Option B — THAT340 expo converter:
-  Same architecture as aux-expo-converter; V/Hz tracking.
+  Same architecture as aux/filter/expo-converter; V/Hz tracking.
   More accurate exponential taper; harder to calibrate.
   Enables V/oct or V/Hz LFO sync if a SYNC input is added later.
   Phase 3R decision: prefer Option A unless sync is required.

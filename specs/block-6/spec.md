@@ -186,7 +186,7 @@ DSP and hardware are aligned on all BP signal-processing behaviors:
 - No oversampling (both)
 - Distortion thresholds: SC ±1.4V, HC ±5.8V, WF ±1.4V (both)
 
-→ See aux-ota-c-svf.md for SVF topology; aux-distortion.md for distortion cells.
+→ See aux/filter/ota-c-svf/spec.md for SVF topology; aux/distortion/overview/spec.md for distortion cells.
 
 ---
 
@@ -229,7 +229,7 @@ Standard SVF BP peak is 1× (constant unity, independent of Q). No normalization
 - **Per-channel** THAT340: one per L and one per R, per group — 6× THAT340 total (U28-U30 L, U70-U72 R)
 - Each band/channel has its own f_ref trim (RV_BP{1,2,3}_REF L/R), all targeting **400 Hz at 0 V**
 
-**Distortion hardware (see aux-distortion.md):**
+**Distortion hardware (see aux/distortion/overview/spec.md):**
 - **Variable DRIVE (change 0018):** each band has a stereo VCA at its distortion input — a
   THAT2180 current-in/I-V-out cell per channel (mirrors the block-4 VCA), gain set by the
   per-band DRIVE knob (RV33/36/39) + DRIVE CV (`MOD_BPn_DIST`) summed into Ec+. This is the

@@ -1,6 +1,6 @@
 deck: ires_summer.cir
 description: HP IRES_AMP (U66 half A) is an inverting summer with unity weights (R_QBIAS=R_QINV=R_f_q=100k) -> V_ires = −(V_bias + V_res); higher res-CV drives V_ires negative -> Iabc_q down -> Q up. Checks RATIO + SIGN only (absolute V_bias self-osc setpoint is [NV], §D negative-drive window)
-plugin_ref: "aux-q-control.md §IRES_AMP detail: V_ires = −(V_bias·R_f_q/R_QBIAS + V_res·R_f_q/R_QINV); plugin/src/dsp/HPFilter.hpp Q=0.5·4000^res (higher res -> higher Q)"
+plugin_ref: "aux/filter/q-control/spec.md §IRES_AMP detail: V_ires = −(V_bias·R_f_q/R_QBIAS + V_res·R_f_q/R_QINV); plugin/src/dsp/HPFilter.hpp Q=0.5·4000^res (higher res -> higher Q)"
 netlist_bind:  # change 0024 — deck literals must equal the live netlist values
   R_QBIAS: "R106=100k"
   R_QINV: "R107=100k"

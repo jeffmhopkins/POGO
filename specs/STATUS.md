@@ -44,17 +44,17 @@ Last updated: 2026-05-30 | Topology: 48HP | Source of truth: `tools/panel-data.y
 
 | File | Status | Notes |
 |---|---|---|
-| aux-ota-c-svf | ✅ re-verified 2026-05-30 | OTA-C SVF; HP unity-follower (polarity fix); BP 2-pole |
-| aux-expo-converter | ✅ re-verified 2026-05-30 | THAT340S14-U (SOIC-14); per-channel vs shared expo |
-| aux-q-control | ✅ re-verified 2026-05-30 | IRES_AMP driver; LP1/LP2/HP IC sharing |
-| aux-vca-cell | ✅ re-verified 2026-05-30 | THAT 2180 current-in/I-V-out; 4 cells (main + ALT-BP) |
-| aux-unity-buffer | ✅ re-verified 2026-05-30 | G=+1 follower; HP is unity (no G=−1 buffer) |
-| aux-distortion | ✅ re-verified 2026-05-30 | dist BEFORE SVF; per-band mode + DRIVE VCA |
-| aux-attenuverter | ✅ re-verified 2026-05-30 | Bipolar pot + TL074 inverter; 18 destinations |
-| aux-mod-bus-core | ✅ re-verified 2026-05-30 | MB_AMP + MB_INV; ±10V clamp; 18 dest + VCA normal |
-| aux-lfo-core | ✅ re-verified 2026-05-30 | Integrator + Schmitt; breathing-LED driver |
-| aux-cv-protection | ✅ re-verified 2026-05-30 | 100Ω + BAT54S clamp |
-| aux-power-filter | ✅ re-verified 2026-05-30 | Board power filtering |
+| aux/filter/ota-c-svf | ✅ re-verified 2026-05-30 | OTA-C SVF; HP unity-follower (polarity fix); BP 2-pole |
+| aux/filter/expo-converter | ✅ re-verified 2026-05-30 | THAT340S14-U (SOIC-14); per-channel vs shared expo |
+| aux/filter/q-control | ✅ re-verified 2026-05-30 | IRES_AMP driver; LP1/LP2/HP IC sharing |
+| aux/vca/vca-cell | ✅ re-verified 2026-05-30 | THAT 2180 current-in/I-V-out; 4 cells (main + ALT-BP) |
+| aux/utility/unity-buffer | ✅ re-verified 2026-05-30 | G=+1 follower; HP is unity (no G=−1 buffer) |
+| aux/distortion/overview | ✅ re-verified 2026-05-30 | dist BEFORE SVF; per-band mode + DRIVE VCA |
+| aux/modulation/attenuverter | ✅ re-verified 2026-05-30 | Bipolar pot + TL074 inverter; 18 destinations |
+| aux/modulation/mod-bus-core | ✅ re-verified 2026-05-30 | MB_AMP + MB_INV; ±10V clamp; 18 dest + VCA normal |
+| aux/modulation/lfo-core | ✅ re-verified 2026-05-30 | Integrator + Schmitt; breathing-LED driver |
+| aux/utility/cv-protection | ✅ re-verified 2026-05-30 | 100Ω + BAT54S clamp |
+| aux/utility/power-filter | ✅ re-verified 2026-05-30 | Board power filtering |
 
 No SVG files — ASCII schematics within each `.md` are the source of truth.
 Circuit diagrams in spec text must be self-sufficient.
@@ -135,7 +135,7 @@ uses **R_in (V→I)** at the input and a **transimpedance op-amp (I→V) per cha
 output (inverting, unity at 0 dB; the inversion is compensated by LP1's inverting SUM_AMP).
 Gain via Ec+ (+6.1 mV/dB; Ec+ = 244 mV·(control−1)); Ec−/Sym/Gnd → AGND. The bogus
 R_OUT_N_L/R were removed and an I/V op-amp (U6) + CV-conditioning op-amp (U63) added.
-See `specs/block-4/block-4.nets.yaml`, `specs/aux/aux-vca-cell.md`, `specs/block-4/spec.md`.
+See `specs/block-4/block-4.nets.yaml`, `specs/aux/vca/vca-cell/spec.md`, `specs/block-4/spec.md`.
 
 **Open prototype questions:** None. All resolved.
 - block-2 LFO LED: pulsing confirmed (half-wave rectified via D_LED 1N4148W). Signal

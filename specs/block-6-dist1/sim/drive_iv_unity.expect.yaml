@@ -1,6 +1,6 @@
 deck: drive_iv_unity.cir
 description: "[NV-free] BP1 DRIVE VCA transimpedance I/V is unity (−1) at 0 dB — pure resistor ratio −(R_f/R_in)=−(20k/20k)=−1; THAT2180 0-dB current gain is unity by definition so the 6.1 mV/dB constant cancels. Mirrors block-4 iv_unity. Also pins the current-input/virtual-ground (Z_in≈R_in=20k)."
-plugin_ref: "specs/block-6-dist1 nets BP1_DRIVEIN/IV/OUT (R153 R_in, R155 R_f) + Distortion.hpp:28 driveParam=0.20→unity; aux-vca-cell.md §Transfer Function: OUT=−I_out·R_f, R_f=R_in → −1. THAT2180 absolute mV/dB is [NV]; only the 0-dB ratio is checked."
+plugin_ref: "specs/block-6-dist1 nets BP1_DRIVEIN/IV/OUT (R153 R_in, R155 R_f) + Distortion.hpp:28 driveParam=0.20→unity; aux/vca/vca-cell/spec.md §Transfer Function: OUT=−I_out·R_f, R_f=R_in → −1. THAT2180 absolute mV/dB is [NV]; only the 0-dB ratio is checked."
 netlist_bind:  # deck literals must equal the live block-6-dist1.nets.yaml values
   R_in_L: "R153=20k"
   R_f_L: "R155=20k"

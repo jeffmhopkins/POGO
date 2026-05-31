@@ -1,5 +1,7 @@
 # aux: Q (Resonance) Control for OTA-C SVF
 
+**Type:** `filter` · part of the [aux circuit library](../../_LIBRARY.md)
+
 > ✅ **Re-verified 2026-05-30** (content rewritten 2026-05-29) against the locked plugin via
 > block-5. LM13700 Q-cell reaches self-oscillation (Q → ∞ as Iabc_q → 0), matching the plugin's
 > `Q = 0.5·4000^res`; Q_min ≈ 0.70 (Butterworth) is an accepted analog floor. Shared by LP1/LP2/HP.

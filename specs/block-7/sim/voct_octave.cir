@@ -6,7 +6,7 @@
 * Ideal-expo stand-in: there is no THAT340 SPICE model in-env, so the matched-pair
 *   expo is modelled as the IDEAL exponential current Iabc = Iref*exp(Vbase/V_T)
 *   (V_T = 25.85mV) — exactly the law the THAT340 + the §A V/oct base divider are built
-*   to realise (aux-expo-converter §"Analog Exponential Core"). The base voltage is the
+*   to realise (aux/filter/expo-converter §"Analog Exponential Core"). The base voltage is the
 *   CV scaled by the V_T*ln2 = 17.92 mV/oct slope (Vbase = CV*0.01792), so each +1V of CV
 *   adds one octave: exp(0.01792/0.02585) = 2.000. Because each instance's gm is a fixed
 *   DC-determined constant, the expo current is folded into the per-instance gm via a
@@ -14,7 +14,7 @@
 *
 * gm-C integrator = LM13700 OTA-C integrator: Gint 0 out in out {gm} + Cint {C}, a 1st-
 *   order LP whose -3dB corner f0 = gm/(2*pi*C) is the SVF cutoff. gm = Iabc/0.052
-*   (V_T_diff = 52mV, aux-q-control Q-denominator), C = 47n (C29A/C29B C0G integrator cap).
+*   (V_T_diff = 52mV, aux/filter/q-control Q-denominator), C = 47n (C29A/C29B C0G integrator cap).
 *
 * The assertions are the RATIOS only (NV-free: the absolute Iref cancels). Iref = 9.70µA
 *   is set so f0(0V) ~= 632Hz purely for transparency (printed f0_0v).
