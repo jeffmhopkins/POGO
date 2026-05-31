@@ -1,0 +1,56 @@
+* aux/distortion/hard-clip LIBRARY check — hard-clip brick wall at ±5.8 V (= plugin ±1.16 × 5 V)
+* GENERIC LIBRARY DECK (no netlist_bind by design — per _LIBRARY.md a library block has no single
+*   netlist behind it; representative hardcoded values verify the transfer math / topology).
+* CLAIM (Distortion.hpp:12-16 + spec §Transfer Function):
+*   HARD mode is  y = clamp((1+4d)·v, ±1.16) -> a linear gain stage then a hard clamp to ±1.16
+*   normalized = ±5.8 V at the ×5 audio scaling. The analog cell = unity gain stage (R_f=R_in)
+*   + back-to-back BZX84C5V1 zeners (V_Z 5.1 + V_F 0.7 = ±5.8 V):
+*     - below the clamp the output is LINEAR (follows the unity-gain law);
+*     - above it the output hard-clamps to ±5.8 V (brick wall).
+*   This deck drives the cell clean (below clamp) and hard (well past clamp) and reads the clamped
+*   output, confirming the analog clamp level matches the plugin's normalized threshold × 5 V.
+*
+* IDEAL MODELS (one line each):
+*  - Eop : ideal high-gain VCVS op-amp (stands for U_HC, TL072) -> exact closed-loop ratio R_f/R_in
+*          (=unity), the load-bearing cell-gain fact.
+*  - Bhc : behavioral ±5.8 V hard clamp standing for the back-to-back BZX84C5V1 zener pair. The
+*          ±5.8 V level is the device-constant [NV] the zeners set (V_Z+V_F); here the deck checks the
+*          PLUGIN's design-intent clamp law clamp(·, ±5.8) in the ×5 V domain — modeled with the exact
+*          ternary clamp so the brick wall under test IS the plugin's.
+* PARALLEL instances (guide rule 5): one below clamp (linear), one well above on +rail (clamp +5.8),
+*   one well below on -rail (symmetric clamp -5.8). Each instance is an independent copy.
+
+.param Rin=10k          ; R_HC_in  (input)
+.param Rf=10k           ; R_HC_f   (feedback) -> cell gain -R_f/R_in = -1 (unity)
+.param Vclip=5.8        ; hard-clip level in volts = plugin clamp 1.16 × 5 V (BZX84C5V1 Vz+Vf) [NV]
+
+* ---- instance A: small input -3 V -> unity inverter -> +3 V clean, below ±5.8 clamp -> linear ----
+Va  ain 0 DC -3
+Ria ain agm {Rin}
+Rfa agm aclean {Rf}
+Eopa aclean 0 0 agm 1e6                 ; (+) at ground -> inverting; aclean = -Rf/Rin * Va = +3 V
+Bha aout 0 V = (V(aclean)>Vclip)?Vclip:((V(aclean)<(-Vclip))?(-Vclip):V(aclean))
+
+* ---- instance B: large input -20 V -> stage +20 V, far past clamp -> +5.8 V brick wall ----
+Vb  bin 0 DC -20
+Rib bin bgm {Rin}
+Rfb bgm bclean {Rf}
+Eopb bclean 0 0 bgm 1e6                 ; bclean = -Rf/Rin * (-20) = +20 V
+Bhb bout 0 V = (V(bclean)>Vclip)?Vclip:((V(bclean)<(-Vclip))?(-Vclip):V(bclean))
+
+* ---- instance C: large input +20 V -> stage -20 V -> -5.8 V clamp (symmetric) ----
+Vc  cin 0 DC 20
+Ric cin cgm {Rin}
+Rfc cgm cclean {Rf}
+Eopc cclean 0 0 cgm 1e6                 ; cclean = -20 V
+Bhc cout 0 V = (V(cclean)>Vclip)?Vclip:((V(cclean)<(-Vclip))?(-Vclip):V(cclean))
+
+.control
+  op
+  let hc_linear   = v(aout)        ; -3 in -> stage +3 -> |+3|<5.8 -> +3 V (linear, below clamp)
+  let hc_clip_pos = v(bout)        ; DERIVED +5.8 V hard ceiling (plugin 1.16 × 5 V)
+  let hc_clip_neg = v(cout)        ; DERIVED -5.8 V hard ceiling (symmetric)
+  let hc_clip_norm = v(bout)/5.0   ; DERIVED -> 1.16 (plugin hardClip clamp, Distortion.hpp:15)
+  print hc_linear hc_clip_pos hc_clip_neg hc_clip_norm
+.endc
+.end

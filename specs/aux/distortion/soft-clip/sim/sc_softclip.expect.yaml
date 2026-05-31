@@ -1,0 +1,24 @@
+deck: sc_softclip.cir
+description: "LIBRARY (generic) check — soft-clip cell: unity gain stage + diode soft-clip ceiling at ±Vth ≈ ±1.4 V realizing the plugin tanh S-curve. No netlist_bind by design (library block)."
+plugin_ref: "plugin/src/dsp/Distortion.hpp:33-37 — SOFT: y = Vth*tanh(G*v/Vth), Vth=0.28 (=1.4V/5V at ×5 audio scaling)"
+measurements:
+  # Linear region: input +0.5 V -> unity inverting stage -> clean -0.5 V; |−0.5| << 1.4 so the
+  # tanh soft-clip barely bends it. DERIVED from the plugin law in the ×5 V domain:
+  #   y = 1.4·tanh(-0.5/1.4) = 1.4·tanh(-0.357) = 1.4·(-0.3424) = -0.479 V (NOT ±1.4 -> proves
+  #   the cell is linear below the knee, not always clamped).
+  - name: sc_linear
+    expect: -0.479
+    tol_abs: 0.01
+  # Soft ceiling, + rail: large drive -> tanh saturates to +Vth·5 = +1.4 V.
+  # DERIVED: 1.4·tanh(8/1.4) = 1.4·0.99998 = 1.39998 ≈ 1.4 V (plugin Vth 0.28 × 5 V).
+  - name: sc_ceil_pos
+    expect: 1.4
+    tol_abs: 0.01
+  # Soft ceiling, − rail (symmetric): -> -1.4 V.
+  - name: sc_ceil_neg
+    expect: -1.4
+    tol_abs: 0.01
+  # Back-conversion: ceiling / 5 = plugin normalized Vth = 0.28. Near-exact (tol_abs).
+  - name: sc_ceil_norm
+    expect: 0.28
+    tol_abs: 0.002

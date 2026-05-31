@@ -1,0 +1,23 @@
+deck: hc_hardclip.cir
+description: "LIBRARY (generic) check — hard-clip cell: unity gain stage + back-to-back BZX84C5V1 zener brick wall at ±5.8 V realizing the plugin ±1.16 normalized hard clip. No netlist_bind by design (library block)."
+plugin_ref: "plugin/src/dsp/Distortion.hpp:12-16 — HARD: y = clamp((1+4d)*v, ±1.16) → ±5.8 V at ×5 audio scaling (BZX84C5V1 Vz 5.1 + Vf 0.7)"
+measurements:
+  # Linear region: input -3 V -> unity inverting stage -> clean +3 V; |+3| < 5.8 so the clamp is
+  # inactive. DERIVED: out = +3 V (NOT ±5.8 -> proves the cell is linear below the clamp, not always
+  # clamped).
+  - name: hc_linear
+    expect: 3.0
+    tol_abs: 0.01
+  # Hard ceiling, + rail: large drive -> clamp brick-walls at +1.16·5 = +5.8 V.
+  # DERIVED from the plugin clamp ±1.16 × 5 V (NOT copied from deck output).
+  - name: hc_clip_pos
+    expect: 5.8
+    tol_abs: 0.01
+  # Hard ceiling, − rail (symmetric): -> -5.8 V.
+  - name: hc_clip_neg
+    expect: -5.8
+    tol_abs: 0.01
+  # Back-conversion: clamp / 5 = plugin normalized clamp = 1.16. Near-exact (tol_abs).
+  - name: hc_clip_norm
+    expect: 1.16
+    tol_abs: 0.002
