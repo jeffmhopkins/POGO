@@ -1,6 +1,7 @@
 # aux: OTA-C State Variable Filter (2-Pole)
 
 **Type:** `filter` · part of the [aux circuit library](../../_LIBRARY.md)
+**Composes:** [gm-c-integrator](../gm-c-integrator/spec.md) (×2 — the two integrators of the loop; `ω₀ = gm/C`)
 
 > ✅ **Re-verified 2026-05-30** (content rewritten 2026-05-29) against the locked plugin via
 > block-5 (LP1) and block-6 (BP). The 2-pole OTA-C SVF core matches the plugin's Simper 2-pole

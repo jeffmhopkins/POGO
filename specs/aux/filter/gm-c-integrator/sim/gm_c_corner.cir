@@ -1,0 +1,28 @@
+* aux/filter/gm-c-integrator — corner f = gm/(2*pi*C) (LIBRARY primitive check)
+* Generic representative values (NO netlist_bind by design — there is no netlist behind a
+* library primitive). This primitive IS the OTA transconductor gm driving a cap C; its
+* 1st-order corner / integrator unity-gain frequency is f = gm/(2*pi*C). The composed
+* ota-c-svf reads this same law as its ω0 = gm/C at each of its two integrator nodes.
+* Plugin ref: LPFilter.hpp:20-22 / HPFilter.hpp:18-21 — f0 maps to SVF g=tan(pi*f0/fs);
+* the analog prototype ω0 = gm/C (aux/filter/gm-c-integrator §Transfer Function).
+*
+* gm and C are INDEPENDENT representative literals (NOT derived from the target frequency),
+* so the measured corner genuinely MOVES if either changes — f is computed from the real
+* gm-C, never pinned by the deck setup. Pick C = 10 nF and gm for a clean 1.000 kHz corner:
+*   f = gm/(2*pi*C) -> gm = 2*pi*1000*10nF = 62.832 uS.
+* Ideal model justification: Gint is a VCCS (the OTA's I_out = gm*Vin); Cint integrates the
+* current. This is exactly the gm-C integrator under test — no LM13700 device model needed,
+* because the law f = gm/(2*pi*C) is a property of the transconductor+cap, not the silicon.
+
+.param C=10n           ; integrator cap (independent literal)
+.param gm=62.832u      ; representative transconductance (independent of C) -> corner 1.000 kHz
+
+Vac ain 0 AC 1 DC 0
+Gint 0 ointg ain ointg {gm}    ; gm-C integrator wired as a 1st-order LP (node fed back to IN-)
+Cint ointg 0 {C}
+
+.control
+  ac dec 100 10 100k
+  meas ac fcorner_hz when vdb(ointg)=-3.01
+.endc
+.end

@@ -1,6 +1,7 @@
 # aux: Exponential Frequency Converter (V/Oct to Iabc)
 
 **Type:** `filter` · part of the [aux circuit library](../../_LIBRARY.md)
+**Composes:** [voct-expo-divider](../voct-expo-divider/spec.md) (the V/oct base divider — delivers V_T·ln2 = 17.92 mV/oct to the expo pair)
 
 > ✅ **Re-verified 2026-05-30** (content rewritten 2026-05-29) against the locked plugin via
 > block-5. THAT340 V/oct→Iabc converter; `f0 = f_ref·2^V` (1 V/oct). The per-channel-expo

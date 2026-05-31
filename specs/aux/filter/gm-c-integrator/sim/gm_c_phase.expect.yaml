@@ -1,0 +1,14 @@
+deck: gm_c_phase.cir
+description: LIBRARY primitive check — pure gm-C integrator has unity gain (0 dB) and -90° phase at f_u = gm/(2*pi*C); no netlist_bind by design (no netlist behind a library primitive)
+plugin_ref: "plugin/src/dsp/LPFilter.hpp:38-42 — trapezoidal integration of the two state variables; analog prototype is the ideal integrator V_out=(gm/sC)·V_in, ω_unity = gm/C (aux/filter/gm-c-integrator §Transfer Function)"
+measurements:
+  # Derived from the integrator law, not deck output:
+  #  |H(jω)| = gm/(ωC) = 1 at ω = gm/C  ->  0 dB at f_u = gm/(2π·C) = 1000 Hz.
+  - name: gain_at_fu
+    expect: 0.0
+    tol_abs: 0.2          # near-exact 0 dB at unity-gain frequency (ideal integrator)
+  # An ideal integrator has constant -90° phase (the cap integrates the OTA current).
+  # ngspice vp() reports phase in RADIANS, so -90° = -pi/2 = -1.5708 rad.
+  - name: phase_at_fu
+    expect: -1.5708
+    tol_abs: 0.02         # near-exact -pi/2; ideal-model rounding only

@@ -1,0 +1,48 @@
+* aux/filter/voct-expo-divider — octave-doubling ratio (LIBRARY primitive, value-INDEPENDENT)
+* Generic ratio check (NO netlist_bind — library primitive; I_ref and the exact V_T CANCEL in
+* the ratio). This proves the END-TO-END divider law: the base divider delivers V_T*ln2 per input
+* volt, and the downstream BJT (I_c = I_ref*exp(Vbe/V_T)) therefore doubles I_abc per octave —
+* matching DSP f0 = f_ref*2^Vctrl (LPFilter.hpp:20 / HPFilter.hpp:18). We feed the SAME divider
+* ratio used by voct_slope.cir into the BJT law and check Iabc(+n V)/Iabc(0) = 2^n.
+*
+* The divider (Rseries:Rshunt = 54804:1000) sets V_base = Vctrl*0.01792 = Vctrl*V_T*ln2. The
+* B-source evaluates I = exp(V_base/V_T) (collector law; I_ref=1 cancels in the ratio). PARALLEL
+* instances at Vctrl = 0,1,2,3 V (per the guide's parallel-instance rule — no alter loops).
+* Ideal model: resistor divider + B-source diode/BJT law; the octave RATIO is invariant to V_T
+* and I_ref, so it isolates the DIVIDER ratio (54804:1000) — a wrong divider breaks the 2/4/8.
+
+.param VT=0.02585
+
+* Vctrl = 0 V
+Vc0 vin0 0 DC 0
+Rser0 vin0 nb0 54804
+Rsh0  nb0 0 1000
+Bi0 0 ni0 I = exp(V(nb0)/VT)
+Rs0 ni0 0 1
+* Vctrl = 1 V
+Vc1 vin1 0 DC 1
+Rser1 vin1 nb1 54804
+Rsh1  nb1 0 1000
+Bi1 0 ni1 I = exp(V(nb1)/VT)
+Rs1 ni1 0 1
+* Vctrl = 2 V
+Vc2 vin2 0 DC 2
+Rser2 vin2 nb2 54804
+Rsh2  nb2 0 1000
+Bi2 0 ni2 I = exp(V(nb2)/VT)
+Rs2 ni2 0 1
+* Vctrl = 3 V
+Vc3 vin3 0 DC 3
+Rser3 vin3 nb3 54804
+Rsh3  nb3 0 1000
+Bi3 0 ni3 I = exp(V(nb3)/VT)
+Rs3 ni3 0 1
+
+.control
+  op
+  let ratio_1oct = v(ni1)/v(ni0)
+  let ratio_2oct = v(ni2)/v(ni0)
+  let ratio_3oct = v(ni3)/v(ni0)
+  print ratio_1oct ratio_2oct ratio_3oct
+.endc
+.end
