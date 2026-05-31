@@ -1,6 +1,19 @@
 deck: bp3_normal.cir
 description: BP3 R→L output normal — §G fix (change 0020 M1)
 plugin_ref: "plugin/src/Pogo.cpp:497-499 — BP3_R unpatched outputs bp3OutL (clean L), L jack undisturbed"
+# netlist_bind: NONE (topology / ratio facts where the only load-bearing values CANCEL, per the
+# SPICE-DECK-GUIDE "ratio check" exception — and what values exist are NOT in this block's netlist):
+#   - j28_fixed=3.0: J28 switch lug taps the STIFF buffer node (BP3_L_BUF, pre-1k); the series R
+#     is DOWNSTREAM of the tap, so its value cannot affect the tapped voltage (pure topology fact —
+#     value-independent: Q3 below holds j28_fixed=3.0 under any series-R perturbation).
+#   - j28_buggy=2.0: two MATCHED post-1k outputs (R36==R224) tied together -> exact midpoint
+#     (VL*Rr+VR*Rl)/(Rl+Rr); the COMMON R value cancels — only the R36==R224 MATCH matters (ratio
+#     fact). The check IS falsifiable on that match: mismatching R36/R224 moves j28_buggy off 2.0
+#     (Q3: Rr 1k->3k gives j28_buggy=2.5, tripping the ±0.02 assertion). But the match is between two
+#     refs (R36, R224) that physically live in BLOCK-B's netlist, not block-6-mix — and the runner
+#     resolves netlist_bind against block-6-mix.nets.yaml only — so there is no block-6-mix ref to
+#     bind. The only block-6-mix part this deck touches is the J28 jack (BP3_R_OUT), which has no
+#     bindable value. Honest result per the guide: no bind (ratio + out-of-block), NOT a faked bind.
 measurements:
   - name: j28_buggy     # old wiring: two post-1k outputs tied -> (L+R)/2 = 2.0 (the bug)
     expect: 2.0

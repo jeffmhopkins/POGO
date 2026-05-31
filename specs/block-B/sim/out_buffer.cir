@@ -1,0 +1,34 @@
+* POGO block-B — MAIN output buffer: unity follower + 1k series R + 11V clamp
+* Ground truth: Pogo.cpp:499-500  outputs[MAIN_L/R] = clamp(LP2_out, -11V, +11V).
+* Hardware (spec.md §2): non-inverting unity follower (G=+1) -> 1kohm series R (R34/R35,
+* protection) -> jack. Into a downstream module's ~100k input impedance the 1k series R
+* forms a divider 100k/(100k+1k) = 0.99010x (-0.087 dB) (spec §"Hardware deviations").
+* Op-amps modeled as ideal unity followers (Ebuf, 0 ohm out) — the real device's finite
+* Zout (<<1 ohm for TL072 at audio) is negligible vs the 1k series R, so the follower+1k
+* divider law under test is preserved. The 11V ceiling is the TL072 swing on +/-12V rails,
+* set by the device, NOT by any bindable resistor -> modeled as a behavioral clamp [NV].
+
+.param VIN=5.0
+.param RSER=1k
+.param RLOAD=100k
+
+* --- (1) unity follower in-band: G=+1 (topology; Vin=5V) ---
+Vsig nin 0 DC {VIN}
+Ebuf nbuf 0 nin 0 1          ; ideal unity follower (out tied to In- in HW)
+
+* --- (2) 1k series R into a 100k downstream load -> output divider (R34/R35) ---
+Rser nbuf nout {RSER}        ; R34 (MAIN_L) / R35 (MAIN_R), 1k series protection
+Rload nout 0 {RLOAD}         ; downstream module input impedance (standard ~100k)
+
+* --- (3) over-rail clamp: drive the follower past +/-11V, confirm 11V ceiling [NV] ---
+Vov nov 0 DC 17
+Bclamp nclamp 0 V = (V(nov) > 11) ? 11 : ((V(nov) < -11) ? -11 : V(nov))
+
+.control
+  op
+  let unity_gain = v(nbuf)/5.0          ; follower gain = +1 (topology)
+  let div_ratio  = v(nout)/v(nbuf)      ; 1k-into-100k divider = 0.99010
+  let clamp_hi   = v(nclamp)            ; +17V driven -> clamped to +11V [NV]
+  print unity_gain div_ratio clamp_hi
+.endc
+.end
