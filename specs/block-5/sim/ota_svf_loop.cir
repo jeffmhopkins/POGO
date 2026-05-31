@@ -1,0 +1,32 @@
+* POGO OTA-C SVF — §C OTA tap DC-offset + f_ref (change 0020; runner-ready 0022)
+* (1) §C/H5: tapping the state variable from the LM13700 Darlington buffer injects a
+*     temp-dependent ~2·Vbe (~1.26V) DC offset into the next OTA's ±30mV input; the
+*     unbuffered tap (the fix) injects 0. (2) the gm-C integrator corner = f_ref (632Hz).
+* Idealized parts capture the load-bearing physics (no LM13700 SPICE model in-env).
+* Applies to LP1 (block-5) and mirrored in HP (block-7) / LP2 (block-8).
+
+.param VT=0.02585
+.param Iabc=9.69u
+.param gm={Iabc/(2*VT)}    ; ~187 uS at the trim target
+.param C=47n               ; C0G integrator cap
+.param Vbe=0.63            ; Darlington = 2*Vbe
+
+* --- (1) state-variable tap DC offset ---
+Vcap ncap 0 DC 1.0
+Bdar nbuf 0 V = V(ncap) - 2*Vbe   ; buggy Darlington-buffer tap
+Bfix nfix 0 V = V(ncap)           ; §C fix: unbuffered tap
+
+* --- (2) gm-C integrator as a 1st-order LP; corner = gm/(2*pi*C) ---
+Vac ain 0 AC 1 DC 0
+Gint 0 ointg ain ointg {gm}
+Cint ointg 0 {C}
+
+.control
+  op
+  let offset_buggy = v(ncap) - v(nbuf)   ; ~1.26 V (the H5 bug)
+  let offset_fixed = v(ncap) - v(nfix)   ; 0 V (the §C fix)
+  print offset_buggy offset_fixed
+  ac dec 50 10 100k
+  meas ac fref_hz when vdb(ointg)=-3.01
+.endc
+.end

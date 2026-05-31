@@ -1,0 +1,13 @@
+deck: q_cell.cir
+description: Q-cell Iabc bias — §D/M5 R_Iabc fix accounting for the LM13700 Iabc-pin rail (change 0020)
+plugin_ref: "plugin/src/dsp/LPFilter.hpp — Q = 0.5·4000^res; Butterworth Q≈0.7 floor"
+measurements:
+  - name: iabc_bug_uA    # 1M from ~0V: ~10.8µA — ~14× the ~0.74µA the old spec assumed (Q pinned)
+    expect: 10.8
+    tol_abs: 0.3
+  - name: iabc_fix_uA    # 100k, V_ires=-10.73V: ~0.7µA (controllable)
+    expect: 0.7
+    tol_abs: 0.1
+  - name: q_fix          # resulting Q at the Butterworth setpoint
+    expect: 0.74
+    tol_abs: 0.05
