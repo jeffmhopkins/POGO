@@ -8,63 +8,69 @@
 * Model (= expo_voct.cir base divider, real netlist values): series R_VOCT (R110=49.9k)
 * into the base node, pot RV_1VOCT (RV17), shunt R_T (R229=1k) to GND. Driven by 1 V at the
 * CV input -> the base voltage IS the mV/oct slope. Divider ratio R_T/(R_VOCT+RV+R_T).
-* Three parallel instances span the 10k netlist pot at CCW / mid / CW.
+*
+* RV_1VOCT is a Bourns 3224W **20 kOhm** pot (specs/components.yaml; block-7 spec.md:185;
+* aux voct-expo-divider). The 20k span is 14.10 (CCW, RV=20k) ... 19.65 (CW, RV=0) mV/oct; the
+* V_T*ln2 target (17.92) is reached at RV~=4910 ohm = ~24.5% CW travel (NOT mechanical mid).
+* (RV17 carries a SYMBOLIC nets value HP_1VOCT -> UNBINDABLE; 20k is the documented part value.)
 *
 * Band basis (room-temp calibration spread, +/-5% around 17.92 mV/oct):
 *   R_VOCT +/-1% (Vishay 49.9k) + R_T +/-1% + THAT340 matched-pair V_T spread (tight, ~+/-1%)
 *   + 25C tempco-cancellation residual (~+/-1-2%) -> RSS ~+/-3%, rounded to +/-5% for margin.
 *   Band = 17.92*0.95 ... 17.92*1.05 = 17.024 ... 18.816 mV/oct.
-* The 10k pot reaches 16.42 (CCW, below band) ... 19.65 (CW, above band) -> brackets both edges.
+* The 20k pot reaches 14.10 (CCW, well below band) ... 19.65 (CW, above band) -> brackets both
+* edges with ample margin, and the target is reachable within travel.
 *
 * Ideal model: pure resistor divider driven by 1 V — this IS the passive base divider; no
 * active device is needed to check the ratio that sets mV/oct (slope = ratio, the expo BJT
-* just consumes that base drive). RV17 carries a SYMBOLIC nets value (HP_1VOCT) so it is
-* UNBINDABLE — its 10k modeled value is a documented literal from the netlist pot part.
+* just consumes that base drive).
 
 Vf vin 0 DC 1
 
-* --- 10k netlist pot, CCW end (RV=10k): low end of span ---
+* --- 20k pot, CCW end (RV=20k): low end of span ---
 Rva vin na 49900
-Rwa na nlo 10000
+Rwa na nlo 20000
 Rta nlo 0 1000
-* --- 10k netlist pot, mid (RV=5k): lands on target ---
+* --- 20k pot, target point (RV=4910): lands on V_T*ln2 = 17.92 (~24.5% CW travel) ---
 Rvb vin nb 49900
-Rwb nb nmid 5000
-Rtb nmid 0 1000
-* --- 10k netlist pot, CW end (RV=0): high end of span ---
+Rwb nb ntgt 4910
+Rtb ntgt 0 1000
+* --- 20k pot, CW end (RV=0): high end of span ---
 Rvc vin nc 49900
 Rwc nc nhi 0.001
 Rtc nhi 0 1000
 
 * --- FALSIFIABILITY self-test: a too-small 2k pot, re-centered on target at mid (RV=1k),
-*     so R_VOCT' = 1000/0.01792 - 1k - 1k = 53804. Its reachable span is only ~17.6..18.2,
+*     so R_VOCT' = 1000/0.01792 - 1k - 1k = 53810. Its reachable span is only ~17.6..18.2,
 *     INSIDE the +/-5% band -> it CANNOT bracket both edges. The bracket booleans below go
 *     FALSE for it, proving the check fails when the trim is too small. (NOT asserted true.) ---
-Rvd vin nd 53804
+Rvd vin nd 53810
 Rwd nd nf2lo 2000
 Rtd nf2lo 0 1000
-Rve vin ne 53804
+Rve vin ne 53810
 Rwe ne nf2hi 0.001
 Rte nf2hi 0 1000
 
 .control
   op
   let mv_lo  = v(nlo)*1000
-  let mv_mid = v(nmid)*1000
+  let mv_tgt = v(ntgt)*1000
   let mv_hi  = v(nhi)*1000
   * room-temp band edges (DERIVED: 17.92 +/-5%)
   let band_lo = 17.024
   let band_hi = 18.816
-  * the 10k trim must reach BELOW band_lo and ABOVE band_hi to bracket the whole band
+  * the 20k trim must reach BELOW band_lo and ABOVE band_hi to bracket the whole band
   let brackets_lo = (mv_lo le band_lo) ? 1 : 0
   let brackets_hi = (mv_hi ge band_hi) ? 1 : 0
+  * and the target itself must be reachable within travel (here at RV~=4910)
+  let target_reachable = ((mv_tgt gt 17.74) and (mv_tgt lt 18.10)) ? 1 : 0
   * falsifiability: 2k re-centered span
   let mv_f2lo = v(nf2lo)*1000
   let mv_f2hi = v(nf2hi)*1000
   let f2_brackets_lo = (mv_f2lo le band_lo) ? 1 : 0
   let f2_brackets_hi = (mv_f2hi ge band_hi) ? 1 : 0
-  print mv_lo mv_mid mv_hi
-  print brackets_lo brackets_hi
+  print mv_lo mv_tgt mv_hi
+  print brackets_lo brackets_hi target_reachable
   print mv_f2lo mv_f2hi f2_brackets_lo f2_brackets_hi
 .endc
 .end

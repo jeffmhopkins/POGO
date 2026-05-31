@@ -64,9 +64,44 @@ the mV/dB band" — the calibratability claim — with that scope stated explici
 4. **Integrate** — full gate; update `specs/SPICE-COVERAGE.md` §C (move these from deferred → trim-authority
    verified, keeping the absolute as [NV]).
 
+## Stage 2 — write (2 parallel + 1 self-authored) ✅ — 4 decks, all PASS
+- Group A (THAT2180 6.0–6.2 mV/dB): `vca_unity_band` (block-4), `drive_db_band` (block-6-dist1).
+- Group B (THAT340 V_T·ln2): `voct_slope_band` (block-7 + aux mirror — room-temp trim authority).
+- + self-authored after the user's "modules heat up" point: `voct_tempco_tracking` (block-7 — the FULL
+  0–50 °C temperature-tracking check, the more realistic condition).
+
+## Stage 3 — verify-intent (1 adversarial) ✅ — 3 SOUND, 1 WEAK (fixed), real findings
+- `vca_unity_band` **SOUND** (band datasheet-confirmed 6.0/6.1/6.2; worst case 6.2; perturbation fails).
+- `drive_db_band` **SOUND** (scope: reachability not knob-scaling, Phase-3R — stated; falsifiable).
+- `voct_tempco_tracking` **SOUND** (residual −2.1/+1.5% independently confirmed; tempco-off → ±8–10% fails).
+- `voct_slope_band` **WEAK → FIXED:** the deck modeled the 1V/oct pot as **10k**, but the sourced part is
+  **20 kΩ** (components.yaml; block-7 spec.md:185; RV17 symbolic → netlist_bind blind, exactly the drift
+  class verify exists to catch). Corrected both decks (block-7 + aux mirror) to 20k: span 14.10–19.65
+  mV/oct, target reached at ~24.5% travel (NOT mid — the old "mid lands on target" narrative was wrong),
+  still brackets the ±5% band with more margin. PASS; falsifiability (2k trim) intact.
+
+## Stage 4 — integrate ✅
+- Fixed `voct_slope_band` (block-7 + aux) 10k→20k pot + corrected narrative (the MEDIUM verify defect).
+- Fixed the aux `voct-expo-divider/spec.md` §Temperature-compensation: the claim "the slope trim absorbs
+  the ~20% TCR excess" is **physically wrong** (a one-time room-temp null cannot correct a tempco *slope*
+  mismatch — the residual is permanent). Rewrote to the correct physics: ideal tempco ≈ +3394 ppm/K; the
+  POGO +4110 ppm/K over-comps ~21% → permanent ≈±2% cutoff residual (ok for a filter); a ~+3300–3400 ppm/K
+  part would track ≈8× tighter.
+- Corrected my own mis-attribution: CLAUDE.md does NOT cite +3300 ppm — the +3300–3500 target is in the aux
+  specs (now reconciled).
+- **SPICE-COVERAGE §C:** VCA Ec+ / DRIVE / THAT340-V/oct moved deferred → **trim-authority/temperature
+  verified**. Logged the +4110-vs-ideal tempco finding + the pre-existing `expo_voct` 10k-pot follow-up.
+- All 7 `--check` gates green; 4 new decks (5 with the aux mirror).
+
+## Findings for the user (decisions, not blockers)
+1. **Tempco part value:** the +4110 ppm/K Vishay TFPT over-compensates → ≈±2% cutoff tracking over 0–50 °C.
+   Fine for a filter, but a ~+3300–3400 ppm/K part would track ≈8× tighter (≈±0.25%). Component choice.
+2. **expo_voct/voct_octave 10k-pot model** (pre-existing, block-7/5/8 + aux) vs the 20k sourced part — a
+   conservative inaccuracy; recommend a focused deck-cleanup change to reconcile.
+
 ## Gate checklist
-- [ ] Stage 1 derive → manifest (datasheet bands + checks)
-- [ ] Stage 2 write decks (parallel)
-- [ ] Stage 3 verify-intent (adversarial)
-- [ ] Stage 4 integrate (all 7 gates green; SPICE-COVERAGE §C updated)
+- [x] Stage 1 derive → manifest (datasheet bands + checks)
+- [x] Stage 2 write decks (4 decks: vca_unity_band, drive_db_band, voct_slope_band, voct_tempco_tracking)
+- [x] Stage 3 verify-intent (3 SOUND, 1 WEAK→fixed; found the 20k-pot drift + the wrong tempco claim)
+- [x] Stage 4 integrate (fixes applied; SPICE-COVERAGE §C updated; all 7 gates green)
 - [ ] PR `change/0036-trim-authority` → `dev`
