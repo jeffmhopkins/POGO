@@ -1,0 +1,59 @@
+* POGO block-6-dist1 — WF folder reflection: V_out = 2*V_clamp - V_fold_in (G=+2 non-inv)
+* CLAIM (the signature wavefold check): the WF folder (U40, half B) is a non-inverting G=+2
+*   stage. V_fold_in feeds R25 (R_g, BP1_VFOLDIN_L->BP1_WFFVG_L) to the op-amp (-); the passive
+*   diode clamp output feeds the op-amp (+); R_f_wf (BP1_WFFVG_L->BP1_WFOUT_L) is the feedback.
+*   Non-inverting law:  V_out = V_clamp*(1 + R_f/R_g) - V_fold_in*(R_f/R_g).
+*   With R_g = R_f = 10k -> (1+R_f/R_g)=2, (R_f/R_g)=1  ->  V_out = 2*V_clamp - V_fold_in.
+*   Below |V_fold_in|<Vth: V_clamp=V_fold_in -> V_out = 2*V_in - V_in = V_in (slope +1).
+*   Above Vth: V_clamp pins at +1.4 -> V_out = 2.8 - V_in (slope -1) -> TRUE slope reversal/fold.
+*
+* IDEAL MODELS (one line each):
+*  - Eop* : ideal high-gain VCVS op-amp (stands for U40 half-B TL072) -> exact closed-loop ratio
+*           set by R25/R_f_wf, which is the load-bearing fact (the +2 folder ratio).
+*  - Bclmp*: behavioral +-1.4V clamp standing for the passive 2x1N4148W-per-rail clamp at the (+)
+*           input (R24 series + D6 diodes). The +-1.4V Vth is DOCUMENTARY/[NV] (set by diode part
+*           numbers, NOT a bindable resistor) — NOT bound; only the folder GAIN RATIO (R25/R_f_wf)
+*           is netlist_bound. Modeled ideally because the reflection slope-reversal is what's under
+*           test, and that comes from the +2 ratio acting on the clamped (+) node.
+*
+* PARALLEL instances at three V_fold_in points (guide rule 5): +0.7 (below Vth, linear),
+*   +2.0 and +2.8 (above Vth, folded). Each instance is an independent copy.
+
+.param Rg=10k       ; R25_1L  (R_g, folder (-) input)
+.param Rf=10k       ; R_f_wf_1L (folder feedback) -> (1+Rf/Rg)=2, (Rf/Rg)=1
+.param Vth=1.4      ; DOCUMENTARY clamp Vth (2x1N4148W/rail) — [NV], not bound
+
+* ---- instance A: V_fold_in = +0.7 (below Vth -> linear pass-through) ----
+Va  ain 0 DC 0.7
+Bca acl 0 V = (V(ain)>Vth)?Vth:((V(ain)<(-Vth))?(-Vth):V(ain))
+Rga ain agm {Rg}
+Rfa agm aout {Rf}
+Eopa aout 0 acl agm 1e6
+
+* ---- instance B: V_fold_in = +2.0 (above Vth -> folded, V_out=2.8-2.0=0.8) ----
+Vb  bin 0 DC 2.0
+Bcb bcl 0 V = (V(bin)>Vth)?Vth:((V(bin)<(-Vth))?(-Vth):V(bin))
+Rgb bin bgm {Rg}
+Rfb bgm bout {Rf}
+Eopb bout 0 bcl bgm 1e6
+
+* ---- instance C: V_fold_in = +2.8 (above Vth -> folded, V_out=2.8-2.8=0.0; the reflection) ----
+Vc  cin 0 DC 2.8
+Bcc ccl 0 V = (V(cin)>Vth)?Vth:((V(cin)<(-Vth))?(-Vth):V(cin))
+Rgc cin cgm {Rg}
+Rfc cgm cout {Rf}
+Eopc cout 0 ccl cgm 1e6
+
+* slope reversal as a B-source (guide: booleans via B-source ternary, NOT a `let` compare —
+*   ngspice `let` mangles the `>` comparison). out DECREASES as input rises 2.0 -> 2.8
+*   (0.8 -> 0.0) => out(2.0) > out(2.8) => emit 1.0 (slope reversed = true fold).
+Bsr srev 0 V = (V(bout)>V(cout))?1.0:0.0
+
+.control
+  op
+  let wf_lin  = v(aout)          ; +0.7 in -> +0.7 out (linear, below Vth)
+  let wf_fold = v(cout)          ; +2.8 in -> 0.0 out  (2*1.4 - 2.8, the reflection)
+  let wf_slope_rev = v(srev)     ; B-source boolean: 1.0 if out(2.0)>out(2.8) (slope reversed)
+  print wf_lin wf_fold wf_slope_rev
+.endc
+.end

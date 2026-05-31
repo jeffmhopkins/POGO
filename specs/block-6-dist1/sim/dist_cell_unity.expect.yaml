@@ -1,0 +1,20 @@
+deck: dist_cell_unity.cir
+description: "HC (R20/R21=10k) and SC (R18/R19=10k) gain cells are UNITY inverting stages (gain = -R_fb/R_in = -1). The clip/fold ONSET is set by the DRIVE VCA ahead of these cells (and the fixed diode/zener clamp threshold), NOT by the cell gain. Below the clamp thresholds (+1V drive → |out|=1V < WF/SC 1.4V, HC 5.8V) the cells are clean unity inverters. Bound to R18-R21 via netlist_bind, so a drift in R_in or R_fb (which would change the cell gain and falsely imply the cell sets clip onset) FAILS this deck."
+plugin_ref: "aux-distortion.md §HC/§SC (op-amp +gain stage, R_in/R_fb=10k unity, clamp sets level) + Distortion.hpp:28-46 — DRIVE VCA gain (driveParam) precedes the cell; the cell+clamp is fixed"
+# NETLIST BINDING: the unity ratios HC R20:R21 and SC R18:R19 = 10k:10k. If R_fb drifted (e.g. R21→50k)
+# the cell gain would become -5 (not -1) → the cell would itself set clip onset → assertions fail.
+netlist_bind:
+  R_hc_in: "R20_1L=10k"    # HC inverting input  (BP1_DRIVEOUT_L -> BP1_HCVG_L)
+  R_hc_fb: "R21_1L=10k"    # HC feedback         (BP1_HCVG_L     -> BP1_HCOUT_L)
+  R_sc_in: "R18_1L=10k"    # SC inverting input  (BP1_DRIVEOUT_L -> BP1_SCVG_L)
+  R_sc_fb: "R19_1L=10k"    # SC feedback         (BP1_SCVG_L     -> BP1_SCOUT_L)
+measurements:
+  # DERIVED from the inverting law gain = -R_fb/R_in (NOT copied from deck output):
+  #   HC: -R21/R20 = -10k/10k = -1 ; +1V in -> -1.0V out.
+  - name: hc_gain
+    expect: -1.0
+    tol_abs: 0.02        # near-exact: ideal op-amp, equal Rs
+  #   SC: -R19/R18 = -10k/10k = -1 ; +1V in -> -1.0V out.
+  - name: sc_gain
+    expect: -1.0
+    tol_abs: 0.02
