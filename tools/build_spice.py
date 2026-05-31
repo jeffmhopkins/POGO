@@ -130,6 +130,8 @@ def parse_value(s: str) -> float:
         whole, suf, frac = m.groups()
         mult = 1.0 if suf == "R" else _SUFFIX[suf]
         return float(f"{whole}.{frac}") * mult
+    # bare trailing R = ohms unit (100R, 47R) — strip once R-notation (1R0/4k7) is ruled out
+    s = re.sub(r"(?<=\d)R$", "", s)
     # standard: <number><suffix?>  e.g. 100k, 47n, 1M, 220, 4.7k
     m = re.fullmatch(r"([0-9.]+)\s*(meg|p|n|u|µ|m|k|K|M|g|G)?", s)
     if m:

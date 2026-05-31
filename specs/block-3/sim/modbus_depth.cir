@@ -5,7 +5,7 @@
 * R_INV_IN 10k || pot-to-(-Vsrc) ~5k) and the 100k R_SRC_NORM -> ~3% depth. The §H FIX removes the
 * norm (low-Z normal) so depth is ~99% regardless of load (here shown with the ×5 hi-Z 16.3k load).
 
-.param Rprot=100
+.param Rprot=100        ; = R37_1 (LP1_FREQ destination clamp series, 100R); netlist-bound in .expect.yaml
 
 Vbus bus 0 DC 5
 
@@ -14,9 +14,14 @@ Rnorm bus nb 100k
 Rpb   nb vb {Rprot}
 Rlb   vb 0 3300
 
-* --- FIXED (§H): low-Z normal (no R_SRC_NORM) into the ×5 hi-Z 16.3k load ---
-Rpf bus vf {Rprot}
-Rlf vf 0 16300
+* --- FIXED (§H): low-Z normal (no R_SRC_NORM) into the hi-Z destination load ---
+* The §H fix raised the attenuverter input R_INV_IN 10k->47k; the destination load is
+* that 47k inverter input (= R_INV_IN_1, netlist-bound below) to its virtual ground, in
+* PARALLEL with the ~25k pot leg (RV6 at noon ~ half of 50k — documentary literal, since
+* the pot value is symbolic in nets). 47k || 25k = 16.3k (the §H hi-Z load).
+Rpf  bus vf {Rprot}
+Rinv vf 0 47k          ; = R_INV_IN_1 (netlist-bound) — the §H hi-Z load term
+Rpot vf 0 25k          ; pot leg ~25k (RV6 noon; documentary, symbolic pot value)
 
 .control
   op

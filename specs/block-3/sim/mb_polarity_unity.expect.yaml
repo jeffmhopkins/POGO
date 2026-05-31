@@ -1,0 +1,11 @@
+deck: mb_polarity_unity.cir
+description: "MB_INV (U3-B) is a UNITY polarity inverter: gain = -(R16_2/R16_1) = -(100k/100k) = -1.0, restoring sign after the inverting summer so the bus matches the plugin's non-inverted V_src*gain+offset. Ratio check catches single-ref drift (R16_2→200k → -2), not a coordinated change of both refs (acknowledged limit)."
+plugin_ref: "plugin/src/dsp/ModBus.hpp:25 — return clamp(sourceV*gain + offset, …) (bus is NON-inverted vs V_src → the 2nd analog stage must invert); spec/block-3/spec.md:83 'A second stage inverts to restore correct polarity'"
+netlist_bind:  # deck literals must equal live block-3.nets.yaml; R16_2→200k would give -2 → fail
+  R_MB_INV_IN: "R16_1=100k"   # inverter input
+  R_MB_INV_FB: "R16_2=100k"   # inverter feedback
+measurements:
+  # DERIVED from the netlist: g_inv = -(R16_2/R16_1) = -(100k/100k) = -1.0  (NOT deck output)
+  - name: g_inv
+    expect: -1.0
+    tol_abs: 0.01

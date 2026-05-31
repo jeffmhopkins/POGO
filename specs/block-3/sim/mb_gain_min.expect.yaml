@@ -1,0 +1,14 @@
+deck: mb_gain_min.cir
+description: "SCALE full-CCW (RV3=470k in series with R14=22k): MB summer V_src gain = R13/(R14+RV3) = 100k/492k = 0.2033× (plugin amountGain(0)=0.2×). RV3's 470k is an UNBOUND spec literal — the netlist carries RV3 value: MOD_SCALE (symbolic), not a number; the 470k lives only in spec prose (spec.md:90). Only R13/R14 are netlist-bound."
+plugin_ref: "plugin/src/dsp/ModBus.hpp:19 — amountGain(0)=0.2*25^0=0.2; spec/block-3/spec.md:89-90 'R_src_max=492k → G_min=100/492=0.20×'"
+# tol_pct 3 (loose): the Rin is a TWO-resistor series sum (22k floor + 470k log pot) and the pot
+# carries log-taper tolerance; 0.2033 vs the plugin 0.2 already differs by ~1.6%, so the band must
+# absorb pot tolerance on top. RV3=470k is NOT bound (symbolic netlist value MOD_SCALE).
+netlist_bind:
+  R_MB_F:   "R13=100k"   # summer feedback
+  R_MB_SRC: "R14=22k"    # V_src floor (the bound part of the 492k series Rin)
+measurements:
+  # DERIVED from netlist R13/R14 + spec RV3=470k: g_min = 100k/(22k+470k) = 100/492 = 0.20325 (NOT deck output)
+  - name: g_min
+    expect: 0.2033
+    tol_pct: 3

@@ -1,0 +1,64 @@
+* POGO block-3 Mod Bus — OFFSET range (change 0020 §M2 guard)
+* CLAIM (spec.md §2 "Offset range" + §3 §M2; ModBus.hpp:24 offset = offsetParam*5 -> +-5V):
+*   The OFFSET pot RV4 wiper swings across the +-12V rails. It feeds the inverting summer
+*   (U3-A) through R15=240k against feedback R13=100k. The offset contribution at the summer
+*   output is  -V_wiper*(R13/R15) = -V_wiper*(100/240) = -+5.0V for V_wiper=++12V.
+*   A unity polarity inverter (U3-B, R16_1/R16_2 = 100k/100k = -1) follows, restoring the sign
+*   so the bus offset matches the plugin's +offsetParam*5 (+-5V at the pot extremes).
+*
+*   The +-12V rail is a DECK LITERAL (board power assumption), not a netlist component value.
+*
+* change 0020 §M2 regression guard: R15 was 100k (-> offset = -+12V, OUT OF the +-10V bus range).
+*   The fix R15=100k->240k maps the +-12V wiper to +-5V. To DOCUMENT why 240k, two extra
+*   instances model the OLD BUG (R15=100k) and print offset_bug_pos/neg = -+12V.
+*
+* Ideal op-amps (Eop high-gain VCVS) stand in for the TL074 halves: summer/inverter gains are
+* set entirely by the feedback-resistor ratios — the law under test. PARALLEL instances, no alter.
+
+* ===== instance P: OFFSET wiper = +12V  (R15=240k FIX) =====
+* summer: (-)=sp virtual ground, (+) at GND ; out=sumop = -(R13/R15)*Vw = -(100/240)*12 = -5.0
+Vwp   vwp 0 DC 12
+Esp   sumop 0 0 sp 1e6
+R15p  vwp   sp 240k          ; R15 offset input (netlist R15=240k)
+R13p  sumop sp 100k          ; R13 summer feedback (netlist R13=100k)
+* polarity inverter: out=offp = -(R16_2/R16_1)*sumop = -1*(-5.0) = +5.0
+Eip   offp 0 0 ip 1e6
+R161p sumop ip 100k          ; R16_1 inverter in (netlist R16_1=100k)
+R162p offp  ip 100k          ; R16_2 inverter fb (netlist R16_2=100k)
+
+* ===== instance N: OFFSET wiper = -12V  (R15=240k FIX) =====
+Vwn   vwn 0 DC -12
+Esn   sumon 0 0 sn 1e6
+R15n  vwn   sn 240k
+R13n  sumon sn 100k
+Ein   offn 0 0 in_ 1e6
+R161n sumon in_ 100k
+R162n offn  in_ 100k
+
+* ===== instance BUGP: OLD BUG R15=100k, wiper +12V -> -(100/100)*12 = -12 -> +12 after inv =====
+Vwbp  vwbp 0 DC 12
+Esbp  sumobp 0 0 sbp 1e6
+R15bp vwbp   sbp 100k         ; the PRE-fix bug value (documentary only; NOT bound)
+R13bp sumobp sbp 100k
+Eibp  offbp 0 0 ibp 1e6
+R161bp sumobp ibp 100k
+R162bp offbp  ibp 100k
+
+* ===== instance BUGN: OLD BUG R15=100k, wiper -12V -> -12 after inv =====
+Vwbn  vwbn 0 DC -12
+Esbn  sumobn 0 0 sbn 1e6
+R15bn vwbn   sbn 100k
+R13bn sumobn sbn 100k
+Eibn  offbn 0 0 ibn 1e6
+R161bn sumobn ibn 100k
+R162bn offbn  ibn 100k
+
+.control
+  op
+  let offset_pos     = v(offp)     ; DERIVED -(-100/240*12) = +5.0
+  let offset_neg     = v(offn)     ; DERIVED -(-100/240*-12) = -5.0
+  let offset_bug_pos = v(offbp)    ; DERIVED bug R15=100k -> +12 (out of +-10 range)
+  let offset_bug_neg = v(offbn)    ; DERIVED bug R15=100k -> -12
+  print offset_pos offset_neg offset_bug_pos offset_bug_neg
+.endc
+.end

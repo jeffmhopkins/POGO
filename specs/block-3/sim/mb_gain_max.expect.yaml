@@ -1,0 +1,11 @@
+deck: mb_gain_max.cir
+description: "SCALE full-CW (RV3=0Ω): MB summer V_src gain = R13/R14 = 100k/22k = 4.545×. This is the analog approximation of the plugin's 5.0× endpoint (amountGain(1)=5); the −9% gap (4.545 vs 5.0) is a DOCUMENTED intentional deviation (spec.md:88). expect is DERIVED FROM THE NETLIST ratio, not the plugin 5.0."
+plugin_ref: "plugin/src/dsp/ModBus.hpp:19 — amountGain(1)=0.2*25^1=5.0 (analog target); spec/block-3/spec.md:88 'G_max=100/22=4.55× ≈ 5×'"
+netlist_bind:  # deck literals must equal live block-3.nets.yaml; R14→100k would drop gain to 1.0 → fail
+  R_MB_F:   "R13=100k"   # summer feedback
+  R_MB_SRC: "R14=22k"    # V_src floor (pot=0Ω at full-CW)
+measurements:
+  # DERIVED from the netlist: g_max = R13/R14 = 100k/22k = 4.5454…  (NOT the plugin 5.0, NOT deck output)
+  - name: g_max
+    expect: 4.545
+    tol_pct: 2

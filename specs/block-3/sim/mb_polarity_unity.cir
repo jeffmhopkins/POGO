@@ -1,0 +1,22 @@
+* POGO block-3 Mod Bus — MB_INV polarity inverter unity gain
+* CLAIM (spec.md §2:83 "A second stage inverts to restore correct polarity"; nets MB_INVN/V_MODBUS_RAW):
+*   The processor's 2nd stage (U3-B, MB_INV) is a UNITY inverter: Rin=R16_1=100k, Rf=R16_2=100k,
+*   so gain = -(R16_2/R16_1) = -(100/100) = -1.0. It restores polarity after the inverting summer
+*   so the bus follows the plugin's NON-inverted V_src*gain+offset.
+*
+*   LIMIT (noted in expect): this ratio check catches single-ref DRIFT (e.g. R16_2 100k->200k -> -2),
+*   not a COORDINATED change of BOTH refs (which keeps the ratio = -1).
+*
+* Ideal op-amp (Eop high-gain VCVS) stands in for the TL074 half: gain = -Rf/Rin. Single instance.
+
+Vin  vin 0 DC 1
+Einv out 0 0 sn 1e6           ; (+) at GND, (-)=sn virtual ground
+R161 vin sn 100k              ; R16_1 inverter in (netlist R16_1=100k)
+R162 out sn 100k              ; R16_2 inverter fb (netlist R16_2=100k)
+
+.control
+  op
+  let g_inv = v(out)          ; DERIVED -(R16_2/R16_1)*1 = -1.0
+  print g_inv
+.endc
+.end

@@ -1,0 +1,25 @@
+* POGO block-3 Mod Bus — SCALE full-CCW gain (V_src path, min gain)
+* CLAIM (spec.md §2 "Gain range derivation":89-90; ModBus.hpp:19 amountGain(0)=0.2):
+*   SCALE pot RV3 at full-CCW = 470k in series with the floor R14=22k. The inverting summer
+*   (U3-A) then has Rin = R14 + RV3 = 22k + 470k = 492k and Rf = R13 = 100k, so the V_src gain
+*   magnitude is R13/(R14+RV3) = 100/492 = 0.2033x  (plugin amountGain(0)=0.2x).
+*
+*   UNBOUND SPEC LITERAL: RV3's 470k is NOT a netlist component value — block-3.nets.yaml carries
+*   RV3 value: MOD_SCALE (a symbolic label, not a number the bind parser can resolve). The 470k
+*   lives only in spec prose (spec.md:90). It therefore appears here as a deck literal and CANNOT
+*   be in netlist_bind. Only R14 (the floor) and R13 (feedback) are netlist-bound.
+*
+* Ideal op-amp (Eop high-gain VCVS) stands in for the TL074 half: closed-loop gain = Rf/Rin.
+* Single instance (full CCW = pot at its 470k extreme).
+
+Vsrc  vsrc 0 DC 1
+Esum  out 0 0 sn 1e6          ; (+) at GND, (-)=sn virtual ground
+Rin   vsrc sn 492k            ; R14(22k netlist) + RV3(470k spec literal, UNBOUND) = 492k
+R13   out  sn 100k            ; R_MB_F feedback (netlist R13=100k)
+
+.control
+  op
+  let g_min = -v(out)/1.0      ; DERIVED gain = R13/(R14+RV3) = 100/492 = 0.2033
+  print g_min
+.endc
+.end
