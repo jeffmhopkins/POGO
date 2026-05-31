@@ -72,12 +72,38 @@ artifact), LED Vf/brightness/beta, MOD_SRC tap, pinouts, output normalling, sour
 - 2026-05-31: picked block-2 LFO (distinct time-domain oscillator physics, ⚪→FULL, first transient deck)
   over the quick filter-sibling baseline promotions (block-5/8). Done: block-7, block-4, block-3, block-6-dist1.
 
+## Stage 2 — writers (2 parallel) ✅ — 6 decks, all PASS
+- **Group OSC (first `.tran` decks):** lfo_fmax (real integrator+Schmitt loop oscillates → fhz=20.000 Hz;
+  binds R1/R5/R7/C1), lfo_fmin (`op` divider k_min=0.002394 → 0.0479 Hz; binds R3, RV1=1M unbindable),
+  lfo_vsat_indep (two-V_sat ratio=1.0 proves V_sat cancels), lfo_vth_ratio (Schmitt 0.4505=R7/(R5+R7)).
+- **Group LED:** led_bias (NPN base superposition 0.584/1.314/2.044V; binds R19/R20/R21), led_slope
+  (I_LED 0→3.07mA range; binds R9 + bias Rs; Vbe [NV] → loose tol/shape).
+- Found **3 new ngspice gotchas** (now in the guide): `gt`/`and` not `>` in `let` (a bare `>` is a shell
+  redirect — created stray `iled_0)` files); `2k4` misparsed inside a `.cir` (write `2.4k`, bind `2k4`);
+  `.param` not in `.control` vector scope. Cleaned the stray redirect artifacts.
+
+## Stage 3 — verifiers (2 parallel adversarial) ✅ — live ngspice perturbation; ALL SOUND
+- **OSC: all 4 SOUND, no defects.** lfo_fmax's frequency is GENUINELY set by the bound R1/C1/R5/R7 —
+  every perturbation moves fhz to the formula value (R1→1M→11.79Hz, C1→100nF→9.40Hz), and it's invariant
+  to the `.ic` kick / step / stop time (so NOT pinned by the sim setup — the deepest `.tran` risk, ruled
+  out). lfo_vsat_indep ratio=1.0 is a real guard (the bind catches drift), honestly scoped.
+- **LED: both SOUND, no defects.** All 4 bias/slope binds load-bearing; the [NV] tol is honest (Vbe band
+  physically bounded; a bias-resistor error is caught by the bind, NOT swallowed by the loose tolerance).
+  Verifier used an isolated `git worktree` (no concurrent-perturbation race).
+
+## Stage 4 — integrate ✅ (no deck fixes needed; guide extended; gates green)
+- **No netlist bug found** (f_max=20Hz, Schmitt ratio, LED bias all verified correct — like block-3/6, the
+  values were already right). The run's products: the first transient-deck coverage + the reusable pattern.
+- **Extended `tools/SPICE-DECK-GUIDE.md`** with the `.tran`/`.ic`/`meas`-period oscillator pattern (items
+  10–12 + a transient subsection) so the next time-domain block reuses it.
+- All 7 `--check` gates green; 6 block-2 decks pass (46 decks total).
+
 ## Gate checklist
-- [ ] Stage 1 derive → manifest
-- [ ] Stage 2 write decks (parallel)
-- [ ] Stage 3 verify-intent (parallel adversarial)
-- [ ] Stage 4 integrate (fix findings; all 7 gates green)
-- [ ] Update `specs/SPICE-COVERAGE.md` (block-2 NONE → FULL)
+- [x] Stage 1 derive → manifest (6 checks; f=20Hz headline, V_sat cancels, first `.tran`)
+- [x] Stage 2 write decks (2 parallel → 6 decks; found 3 new ngspice gotchas)
+- [x] Stage 3 verify-intent (2 adversarial → ALL SOUND; oscillator proven value-bound, not vacuous)
+- [x] Stage 4 integrate (no deck fixes; extended the guide; all 7 gates green)
+- [x] Update `specs/SPICE-COVERAGE.md` (block-2 NONE → FULL)
 - [ ] PR `change/0028-spice-math-block2lfo` → `dev` (after 0027 merges; rebase first)
 
 ## Outstanding (tracked in `specs/SPICE-COVERAGE.md`)
