@@ -1,0 +1,35 @@
+* aux/filter/q-control — DSP resonance taper Q = 0.5*pow(BASE, res) (LIBRARY generic check)
+* Generic / value-INDEPENDENT law check (NO netlist_bind — library block). The panel
+* resonance knob maps to Q through an EXPONENTIAL taper in the plugin:
+*   LP/HP:  Q = 0.5 * 4000^res   (HPFilter.hpp:21 / LPFilter.hpp:25)   res in [0,1]
+*   BP   :  Q = 0.5 * 400^q      (BandpassSVF.hpp:46)                   q   in [0,1]
+* The analog Q-cell must span this range via its Iabc (the inverting IRES_AMP driver).
+* This deck pins the EXPONENT law itself (the shape the hardware control taper must follow),
+* independent of any component value. Ideal model: B-sources evaluate 0.5*pow(base,res)
+* directly (no device under test — this is the mapping the spec/plugin define).
+* PARALLEL instances at representative res points per the guide.
+
+* --- LP/HP taper, base 4000 ---
+*   res=0.0 -> Q = 0.5*4000^0   = 0.5     (flat floor, DSP min)
+*   res=0.5 -> Q = 0.5*4000^0.5 = 0.5*63.246 = 31.623
+*   res=1.0 -> Q = 0.5*4000^1   = 2000.0  (self-osc territory)
+Blp0 nlp0 0 V = 0.5*pow(4000, 0.0)
+Blp5 nlp5 0 V = 0.5*pow(4000, 0.5)
+Blp1 nlp1 0 V = 0.5*pow(4000, 1.0)
+
+* --- BP taper, base 400 ---
+*   q=0.0 -> Q = 0.5*400^0 = 0.5
+*   q=1.0 -> Q = 0.5*400^1 = 200.0
+Bbp0 nbp0 0 V = 0.5*pow(400, 0.0)
+Bbp1 nbp1 0 V = 0.5*pow(400, 1.0)
+
+.control
+  op
+  let q_lp_min = v(nlp0)    ; 0.5
+  let q_lp_mid = v(nlp5)    ; 31.623
+  let q_lp_max = v(nlp1)    ; 2000
+  let q_bp_min = v(nbp0)    ; 0.5
+  let q_bp_max = v(nbp1)    ; 200
+  print q_lp_min q_lp_mid q_lp_max q_bp_min q_bp_max
+.endc
+.end

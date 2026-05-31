@@ -1,0 +1,41 @@
+* aux/vca/vca-cell LIBRARY check — THAT2180 dB-law SHAPE: equal Ec+ steps -> equal dB steps, unity at Ec+=0
+* GENERIC LIBRARY DECK (no netlist_bind by design — a behavioral dB-law transfer with no netlist behind it).
+* CLAIM (spec §THAT 2180 Gain Law; VcaBlock.hpp:26-27): the gain index is exponential
+*   G = 10^(G_dB/20) with G_dB = Ec+/(6.1 mV/dB). The LOAD-BEARING facts are (a) UNITY anchor at
+*   Ec+=0 (true for any dB constant) and (b) LOG-LINEARITY: equal Ec+ voltage steps -> EQUAL dB
+*   output steps. The plugin mirror G=10^(2*(control-1)) is likewise exponential -> equal control
+*   steps give equal dB steps.
+* [NV] DISCIPLINE: the absolute slope 6.1 mV/dB is an UNMEASURABLE device constant. This deck does
+*   NOT assert any absolute mV/dB. The 6.1 mV/dB appears ONLY to PLACE the three test points (Ec+ =
+*   0, -61 mV, -122 mV == 0, -10, -20 dB by the spec's own constant). The load-bearing assertion is
+*   linearity = db_step2 - db_step1 = 0 — a pure SHAPE check whose ratio CANCELS the constant. The
+*   only other assertion is the UNITY anchor (Ec+=0 -> G=1), true for ANY dB constant.
+* Behavioral VCA (justification): Bg out = V(in)*10^(V(ec)/0.0061/20) is the exact dB-law transfer of
+*   the THAT2180; it stands in for the translinear cell. We do NOT trust the 0.0061 absolute — we test
+*   that EQUAL Ec+ steps give EQUAL dB steps (holds for any exponential law). PARALLEL instances.
+
+Vin0 in0 0 DC 1
+Vin1 in1 0 DC 1
+Vin2 in2 0 DC 1
+
+* instance 0: Ec+ = 0 mV   -> G = 1 (unity anchor)
+Vec0 ec0 0 DC 0
+Bg0  g0 0 V = V(in0)*10**(V(ec0)/0.0061/20)
+
+* instance 1: Ec+ = -61 mV  -> -10 dB by the spec constant (used only to PLACE the point)
+Vec1 ec1 0 DC -0.061
+Bg1  g1 0 V = V(in1)*10**(V(ec1)/0.0061/20)
+
+* instance 2: Ec+ = -122 mV -> -20 dB by the spec constant
+Vec2 ec2 0 DC -0.122
+Bg2  g2 0 V = V(in2)*10**(V(ec2)/0.0061/20)
+
+.control
+  op
+  let g_unity   = v(g0)                       ; DERIVED unity anchor: Ec+=0 -> G=1.0
+  let db_step1  = 20*log10(v(g1)/v(g0))       ; ~ -10 dB (first equal step)
+  let db_step2  = 20*log10(v(g2)/v(g1))       ; ~ -10 dB (second equal step)
+  let linearity = db_step2 - db_step1         ; DERIVED 0.0 -> equal dB steps = log-linear (LOAD-BEARING)
+  print g_unity db_step1 db_step2 linearity
+.endc
+.end

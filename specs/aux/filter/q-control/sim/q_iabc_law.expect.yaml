@@ -1,0 +1,15 @@
+deck: q_iabc_law.cir
+description: LIBRARY (generic) check — Q = V_T_diff/(Iabc_q*R_in) hyperbola; representative Iabc -> round Q; no netlist_bind by design (no netlist behind a library block)
+plugin_ref: "plugin/src/dsp/HPFilter.hpp:21 / LPFilter.hpp:25 — Q=0.5*pow(4000,res); analog Q-cell realizes Q via Iabc per aux/filter/q-control §Q Formula Q=V_T_diff/(Iabc_q*R_in), V_T_diff=52mV, R_in=100k"
+measurements:
+  # Derived from the law Q = 0.052/(Iabc[A]*1e5), NOT deck output. Each V_ires sets Iabc via
+  # the R_Iabc=100k current; the named Q recomputes the hyperbola and must hit the round target.
+  - name: q_butter
+    expect: 0.70
+    tol_pct: 2
+  - name: q_cheby
+    expect: 1.00
+    tol_pct: 2
+  - name: q_high
+    expect: 5.00
+    tol_pct: 2

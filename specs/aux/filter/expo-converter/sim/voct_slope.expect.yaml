@@ -1,0 +1,8 @@
+deck: voct_slope.cir
+description: LIBRARY (generic) check — V/oct base divider delivers V_T*ln2 = 17.92 mV/oct; no netlist_bind by design (no netlist behind a library block)
+plugin_ref: "plugin/src/dsp/HPFilter.hpp:18 / LPFilter.hpp:20 — f0 = f_ref*2^cutoffV (1 V/oct); analog base needs V_T*ln2 per octave"
+measurements:
+  # Derived from the law (not deck output): V_T*ln2 at 25C = 0.02585*0.69315 = 17.92 mV/oct.
+  - name: mv_per_oct
+    expect: 17.92
+    tol_pct: 1

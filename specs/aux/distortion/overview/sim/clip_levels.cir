@@ -1,0 +1,46 @@
+* aux/distortion/overview LIBRARY check — the three clip LEVELS at the overview level
+* GENERIC LIBRARY DECK (no netlist_bind by design — per _LIBRARY.md a library block has no single
+*   netlist behind it; representative hardcoded clamp levels verify the plugin's normalized targets
+*   scaled by the ±5 V audio scaling).
+* CLAIM (Distortion.hpp:15,24 + spec §Analog Approximations):
+*   - HC (hard clip): plugin clamps to ±1.16 NORMALIZED = ±5.8 V at the ×5 audio scaling.
+*       Analog: two BZX84C5V1 zeners back-to-back -> V_Z(5.1) + V_F(0.7) ≈ ±5.8 V.
+*   - WF / SC: passive diode clamp Vth = 0.28 NORMALIZED = ±1.4 V at ×5.
+*       Analog: 2× 1N4148W per rail -> ±(2×0.7) = ±1.4 V.
+*   This deck drives each clamp hard and reads the clamped output, confirming the analog clamp
+*   levels equal the plugin's normalized thresholds × 5 V (and the back-conversion / 5 -> the
+*   plugin normals 1.16 and 0.28). The clamp Vth values are device constants [NV] in real parts;
+*   here the library deck checks the PLUGIN's normalized targets ×5 V (the design intent).
+* Ideal models (justification): each clamp is a behavioral ±level B-source standing in for the
+*   passive zener / diode-string clamp — the overview-level fact under test is the LEVEL the
+*   selected analog path limits to, not the per-cell diode curve (that detail is the 0032 cell
+*   entries soft-clip/hard-clip/wavefolder). PARALLEL instances (guide rule 5).
+
+* --- HC: back-to-back zeners, ±5.8 V (= 5.1 zener + 0.7 fwd) ---
+Vhc hin 0 DC 10              ; drive well past clip (both rails)
+Rhc hin hnode 1k
+Bhc hclip 0 V = (V(hnode)>5.8)?5.8:((V(hnode)<-5.8)?-5.8:V(hnode))
+Rhx hnode hclip 0.001        ; ideal clamp output = limited node
+
+* --- HC negative rail (independent instance) ---
+Vhcn hinn 0 DC -10
+Rhcn hinn hnoden 1k
+Bhcn hclipn 0 V = (V(hnoden)>5.8)?5.8:((V(hnoden)<-5.8)?-5.8:V(hnoden))
+Rhxn hnoden hclipn 0.001
+
+* --- WF/SC: 2×1N4148 per rail, ±1.4 V ---
+Vwf win 0 DC 10
+Rwf win wnode 1k
+Bwf wclip 0 V = (V(wnode)>1.4)?1.4:((V(wnode)<-1.4)?-1.4:V(wnode))
+Rwx wnode wclip 0.001
+
+.control
+  op
+  let hc_clip_v  = v(hclip)            ; DERIVED +5.8 V (plugin +1.16 × 5 V)
+  let hc_clip_vn = v(hclipn)           ; DERIVED -5.8 V (negative rail symmetric)
+  let wf_clip_v  = v(wclip)            ; DERIVED +1.4 V (plugin Vth 0.28 × 5 V)
+  let hc_norm    = v(hclip)/5.0        ; DERIVED -> 1.16 (plugin hardClip clamp, Distortion.hpp:15)
+  let wf_norm    = v(wclip)/5.0        ; DERIVED -> 0.28 (plugin wavefold Vth, Distortion.hpp:24)
+  print hc_clip_v hc_clip_vn wf_clip_v hc_norm wf_norm
+.endc
+.end

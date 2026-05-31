@@ -1,0 +1,17 @@
+deck: clamp_current.cir
+description: LIBRARY (generic) check — 100Ω series + BAT54S clamp; clamp LEVEL (rail+Vf [NV]) + R-dependent clamp CURRENT; no netlist_bind by design (no netlist behind a library block)
+plugin_ref: "plugin/src/dsp/InputBuffer.hpp:8-10 — buffer is a ±11V clamp; the BAT54S rail clamp sits ahead of it. Spec aux/utility/cv-protection §Schematic + BAT54S Pinout Reference (clamp to ±12V rails, Vf≈0.3V)"
+# Generic library values (no netlist behind it). clamp_hi is the BAT54S Vf + rail = ~12.3V, a
+# PART constant -> [NV] documentary. clamp_i is the genuinely R-dependent falsifiable fact:
+# I = (Vin - Vclamp)/R_in = (17 - 12.3)/100 = 0.047 A (halve R_in -> double I). inband confirms
+# the 100Ω is transparent in-band (no diode conducts), a topology fact.
+measurements:
+  - name: clamp_hi       # +17V over-drive -> BAT54S clamps to ~+12.3V (rail + Schottky Vf) — [NV]
+    expect: 12.3
+    tol_abs: 0.2         # absorbs the [NV] Vf band (~12.0-12.6V)
+  - name: clamp_i        # clamp current through R_in = (17-12.3)/100 = 0.047 A; R-load-bearing
+    expect: 0.047
+    tol_abs: 0.005       # tol absorbs the [NV] Vf band (12.0-12.6V -> 0.044-0.050 A)
+  - name: inband         # in-band +3V passes the 100Ω unchanged (no clamp) -> 0V error
+    expect: 0.0
+    tol_abs: 0.001

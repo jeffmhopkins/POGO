@@ -1,0 +1,17 @@
+deck: amt_symmetric_unity.cir
+description: "LIBRARY (generic, NO netlist_bind by design): the symmetric AMT attenuverter sits across +-effCV, so the center detent gives V_ctrl=0 -> Ec+=0 -> UNITY gain for ANY OFS (the 0018 OFS-before-AMT fix). Confirms OFS-independence at center (vctrl=0 at OFS=0 AND OFS=2) and the full +-effCV span at the CW/CCW ends. Representative equal 100k summer/inverter Rs; pot total cancels in the divider ratio."
+plugin_ref: "plugin/src/dsp/VcaBlock.hpp:21-25 — control=1-AMT·(1-normCV) (AMT>=0) / 1+AMT·normCV (AMT<0); AMT=0 (center) => control=1 => unity for any CV/OFS; aux/vca/vca-cell/spec.md §Schematic symmetric AMT"
+# Generic library check — verifies the topology law (symmetric attenuverter + OFS-before-AMT), not a netlist value.
+measurements:
+  - name: vctrl_center_ofs0
+    expect: 0.0           # center detent -> V_ctrl=0 -> unity (OFS=0)
+    tol_abs: 0.005
+  - name: vctrl_center_ofs2
+    expect: 0.0           # STILL 0 with OFS=2 -> OFS-independent unity at center (0018 fix)
+    tol_abs: 0.005
+  - name: vctrl_cw
+    expect: 1.0           # full CW -> V_ctrl = +effCV = +(CVP+OFS) = +(1+0)
+    tol_abs: 0.01
+  - name: vctrl_ccw
+    expect: -1.0          # full CCW -> V_ctrl = -effCV = -(CVP+OFS) = -(1+0)
+    tol_abs: 0.01

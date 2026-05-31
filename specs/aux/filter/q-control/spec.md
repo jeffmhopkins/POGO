@@ -186,7 +186,7 @@ Bourns 3224W 100 kΩ SMD trimpot. Adjusts V_bias to set:
 | U_Q_C | LM13700M | SOIC-16 | — | Cell A = HP Q L; Cell B = HP Q R (both active, mono Q) |
 | U_Q_BP1..3 | LM13700M | SOIC-16 | — | One per BP group; cell A = L channel, cell B = R channel |
 | U_IRES | TL072CDT | SOIC-8 | — | Half A = IRES_AMP per filter; can share TL072 with SUM_AMP |
-| R_Iabc | Resistor | 0603 | 1 MΩ | V_ires → Iabc conversion; 0.74V / 1MΩ = 0.74 µA at flat Q |
+| R_Iabc | Resistor | 0603 | 100 kΩ | V_ires → Iabc conversion (change 0020 §D/M5: 1M→100k; live netlists R57/R58, R104/R105). Iabc=(V_ires−V_pin)/R_Iabc with V_pin≈−10.8V; V_ires driven negative (≈−10.73V) for the ~0.74µA Butterworth Iabc — see banner. |
 | R_QBIAS | Resistor | 0603 | 100 kΩ | Sets V_bias contribution to IRES_AMP |
 | R_QINV | Resistor | 0603 | 100 kΩ | Sets V_res scaling at IRES_AMP |
 | R_f_q | Resistor | 0603 | 100 kΩ | IRES_AMP feedback resistor |
@@ -206,7 +206,7 @@ Bourns 3224W 100 kΩ SMD trimpot. Adjusts V_bias to set:
 
 ## Known Gotchas / Assembly Notes
 
-- R_Iabc (1 MΩ) at high impedance — keep trace short, away from audio signal paths
+- R_Iabc (100 kΩ; change 0020 §D/M5, was 1 MΩ) — keep trace short, away from audio signal paths
 - At near self-oscillation, any coupling from audio into the Iabc_q node will create
   audible pitch modulation of the self-oscillation frequency; shield trace if needed
 - IRES_AMP output must be clamped to prevent negative V_ires from reverse-biasing the

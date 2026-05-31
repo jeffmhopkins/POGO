@@ -1,0 +1,15 @@
+deck: lfo_oscillation.cir
+description: >
+  Generic library check (hardcoded representative values; NO netlist_bind by design — there
+  is no netlist behind a library block). Verifies the lfo-core triangle relaxation-oscillator
+  FREQUENCY law f=(R_FB_SQ+R_HYS)/(4*R_HYS*R_INT*C_INT) via a REAL integrator+Schmitt .tran loop.
+  Representative R/C (100k/82k/100k/10nF) chosen for ~555 Hz to keep the run short.
+plugin_ref: "plugin/src/dsp/LFO.hpp:16 — speedHz=0.05*400^param (triangle whose rate is set by integrator R*C + Schmitt divider); analog law per spec.md 'Oscillation Frequency' lines 100-106"
+measurements:
+  # DERIVED from the spec formula, NOT copied from deck output:
+  #   f = (R_FB_SQ+R_HYS)/(4*R_HYS*R_INT*C_INT)
+  #     = (100k+82k)/(4*82k*100k*10nF) = 182000/327.84 = 554.9 Hz
+  # tol_pct 5 absorbs the ideal-comparator edge timing + finite-step period quantization.
+  - name: fhz
+    expect: 554.9
+    tol_pct: 5

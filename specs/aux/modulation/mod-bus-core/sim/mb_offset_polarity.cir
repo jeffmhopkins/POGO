@@ -1,0 +1,52 @@
+* aux/modulation/mod-bus-core — OFFSET contribution + double-inversion polarity (LIBRARY generic)
+* LIBRARY CHECK (generic hardcoded representative values; NO netlist_bind by design, per
+* specs/aux/_LIBRARY.md "Library sim convention").
+*
+* CLAIM (spec.md "Hardware Summing Amplifier" lines 82-90, "MB_INV" 96-101):
+*   1) The OFFSET enters the inverting summer through R_off against feedback R_f; with R_f=R_off
+*      the offset contribution at the summer output is -V_off (gain magnitude 1). A +-5V offset
+*      reference therefore yields a +-5V offset contribution -> matches plugin offset=offsetParam*5
+*      (ModBus.hpp:24).
+*   2) The summer INVERTS and MB_INV (unity G=-1) restores polarity, so the net bus offset has
+*      the SAME sign as the +-5V reference (the double-inversion law, spec lines 92-101). This is
+*      what makes the bus follow the NON-inverted plugin sum V_src*gain + offset (ModBus.hpp:25).
+*
+* REPRESENTATIVE VALUES (generic library; spec's R_f=R_off=100k, MB_INV R_inv_in=R_inv_f=100k):
+*   With V_src grounded (isolate the offset path) and V_off = +5 / -5:
+*     summer out = -(R_f/R_off)*V_off = -V_off
+*     bus  out   = -(R_inv_f/R_inv_in)*summer = +V_off
+*   DERIVED: offset_pos = +5.0 (for V_off=+5), offset_neg = -5.0 (for V_off=-5).
+*
+* IDEAL MODELS (justification): Esum/Einv (1e6 VCVS) stand in for the two TL074 halves; both
+*   closed-loop gains are pure feedback-resistor ratios (the law under test). V_src=0 isolates the
+*   offset contribution. PARALLEL instances (one per offset sign), no alter.
+
+* ===== instance P: V_off = +5 -> bus offset = +5 =====
+Vsrcp vsrcp 0 DC 0               ; V_src path grounded (isolate offset)
+Voffp voffp 0 DC 5              ; +5V offset reference (the +-5 ref derived from ModBus.hpp:24)
+Esump sumop 0 0 spp 1e6          ; summer (+)=GND, (-)=spp virtual ground
+Rsrcp vsrcp spp 20k             ; R_src (V_src path; V_src=0 so it contributes nothing)
+Roffp voffp spp 100k            ; R_off offset input
+Rfp   sumop spp 100k            ; R_f summer feedback (R_f/R_off = 1)
+Einvp offp 0 0 ipp 1e6          ; MB_INV unity inverter
+Riip  sumop ipp 100k            ; R_inv_in
+Rifp  offp  ipp 100k            ; R_inv_f (R_inv_f/R_inv_in = 1 -> G=-1)
+
+* ===== instance N: V_off = -5 -> bus offset = -5 =====
+Vsrcn vsrcn 0 DC 0
+Voffn voffn 0 DC -5
+Esumn sumon 0 0 spn 1e6
+Rsrcn vsrcn spn 20k
+Roffn voffn spn 100k
+Rfn   sumon spn 100k
+Einvn offn 0 0 ipn 1e6
+Riin  sumon ipn 100k
+Rifn  offn  ipn 100k
+
+.control
+  op
+  let offset_pos = v(offp)       ; DERIVED -(R_f/R_off)*(+5) then -(1)*... = +5.0
+  let offset_neg = v(offn)       ; DERIVED -(R_f/R_off)*(-5) then -(1)*... = -5.0
+  print offset_pos offset_neg
+.endc
+.end

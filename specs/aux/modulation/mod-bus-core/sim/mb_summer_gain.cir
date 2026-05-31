@@ -1,0 +1,41 @@
+* aux/modulation/mod-bus-core — inverting-summer SCALE gain law G = R_f/R_src (LIBRARY generic)
+* LIBRARY CHECK (generic hardcoded representative values; NO netlist_bind by design — there is
+* no netlist behind a library block, per specs/aux/_LIBRARY.md "Library sim convention").
+*
+* CLAIM (spec.md "Hardware Summing Amplifier" lines 82-90 + "DSP Reference" 71-77):
+*   The mod-bus processor's V_src path gain magnitude is set by the inverting summer ratio
+*     |G| = R_f / R_src
+*   matching the plugin's exponential SCALE taper gain = 0.2*25^amountParam (ModBus.hpp:19),
+*   whose endpoints are 0.2x (amountParam=0) and 5x (amountParam=1). The analog approximates
+*   those endpoints with the R_src extremes: R_src small -> high gain, R_src large -> low gain.
+*
+* REPRESENTATIVE VALUES (generic library; the spec's R_f=100k with two R_src ends bracketing
+*   the 0.2x..5x DSP range):
+*     R_f = 100k.
+*     MAX gain end: R_src = 20k  -> |G| = 100k/20k = 5.0   (matches amountGain(1)=5.0)
+*     MIN gain end: R_src = 500k -> |G| = 100k/500k = 0.2  (matches amountGain(0)=0.2)
+*   The summer INVERTS, so v(out) = -G*V_src; we take the magnitude (-v(out)/V_src).
+*
+* IDEAL MODEL (justification): Eop (1e6 VCVS) stands in for the TL074 half. The closed-loop
+*   gain of an inverting amp is set entirely by R_f/R_src (virtual-ground at the (-) node), which
+*   IS the law under test — no device model needed. PARALLEL instances (one per gain end), no alter.
+
+Vsrc vsrc 0 DC 1
+
+* --- MAX gain end: R_src = 20k -> |G| = 5.0 ---
+Emax outmax 0 0 snmax 1e6        ; (+) at GND, (-)=snmax virtual ground
+Rsmax vsrc  snmax 20k            ; R_src (high-gain end)
+Rfmax outmax snmax 100k          ; R_f feedback
+
+* --- MIN gain end: R_src = 500k -> |G| = 0.2 ---
+Emin outmin 0 0 snmin 1e6
+Rsmin vsrc  snmin 500k           ; R_src (low-gain end)
+Rfmin outmin snmin 100k          ; R_f feedback
+
+.control
+  op
+  let g_max = -v(outmax)/1.0      ; DERIVED |G| = R_f/R_src = 100k/20k  = 5.0
+  let g_min = -v(outmin)/1.0      ; DERIVED |G| = R_f/R_src = 100k/500k = 0.2
+  print g_max g_min
+.endc
+.end

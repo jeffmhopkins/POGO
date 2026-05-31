@@ -1,0 +1,42 @@
+* aux/filter/expo-converter — exponential law I_abc = I_ref*2^Voct (LIBRARY generic check)
+* Generic / value-INDEPENDENT ratio check (NO netlist_bind — library block; the I_ref and
+* exact V_T cancel in the ratio). The THAT340 expo transistor obeys the diode/BJT law
+* I_c = I_ref * exp(Vbe_diff / V_T). With the base divider feeding V_T*ln2 per octave, each
+* +1 octave at the CV input multiplies I_abc by exactly 2 -> matches the DSP f0=f_ref*2^Vctrl
+* (HPFilter.hpp:18). We confirm the OCTAVE-DOUBLING ratio, which is independent of I_ref/V_T.
+*
+* Ideal model justification: a B-source evaluates I = exp(Vb/VT) directly (the BJT collector
+* law); the divider produces Vb = Voct * V_T*ln2. So I(Voct=n) / I(Voct=0) must equal 2^n.
+* PARALLEL instances at Voct = 0, 1, 2, 3 (per the guide's parallel-instance rule).
+
+.param VT=0.02585
+.param ln2=0.6931472
+.param slope={VT*ln2}     ; 17.92 mV/oct delivered to the base
+
+* Each instance: Vb node = Voct*slope; current = exp(Vb/VT) via a B-source into a 1-ohm sense.
+* Voct = 0
+Vb0 nb0 0 DC {0*slope}
+Bi0 0 ni0 I = exp(V(nb0)/VT)
+Rs0 ni0 0 1
+* Voct = 1
+Vb1 nb1 0 DC {1*slope}
+Bi1 0 ni1 I = exp(V(nb1)/VT)
+Rs1 ni1 0 1
+* Voct = 2
+Vb2 nb2 0 DC {2*slope}
+Bi2 0 ni2 I = exp(V(nb2)/VT)
+Rs2 ni2 0 1
+* Voct = 3
+Vb3 nb3 0 DC {3*slope}
+Bi3 0 ni3 I = exp(V(nb3)/VT)
+Rs3 ni3 0 1
+
+.control
+  op
+  * ratios to the Voct=0 reference: must be 2, 4, 8
+  let ratio_1oct = v(ni1)/v(ni0)
+  let ratio_2oct = v(ni2)/v(ni0)
+  let ratio_3oct = v(ni3)/v(ni0)
+  print ratio_1oct ratio_2oct ratio_3oct
+.endc
+.end

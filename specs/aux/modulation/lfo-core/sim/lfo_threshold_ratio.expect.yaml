@@ -1,0 +1,13 @@
+deck: lfo_threshold_ratio.cir
+description: >
+  Generic library check (hardcoded representative values; NO netlist_bind by design). Verifies
+  the Schmitt hysteresis threshold ratio V_pk/V_sat = R_HYS/(R_FB_SQ+R_HYS) that sets the
+  triangle amplitude. The absolute +/-5 V is [NV] (depends on op-amp V_sat); we pin the
+  V_sat-free RATIO, which is set purely by R_HYS, R_FB_SQ.
+plugin_ref: "plugin/src/dsp/LFO.hpp:20 — unit triangle mapped to +/-5 V output; analog amplitude = Schmitt V_H = V_sat*R_HYS/(R_FB_SQ+R_HYS) per spec.md lines 108-114"
+measurements:
+  # DERIVED from the spec formula: V_pk/V_sat = R_HYS/(R_FB_SQ+R_HYS) = 82k/(100k+82k) = 0.4505.
+  # tol_pct 3 covers the peak riding slightly below the ideal threshold (finite comparator edge).
+  - name: vth_ratio
+    expect: 0.4505
+    tol_pct: 3

@@ -1,0 +1,22 @@
+deck: q_dsp_map.cir
+description: "LIBRARY (generic) check — pins the DSP resonance taper CONSTANTS Q=0.5*pow(base,res) (LP/HP base 4000, BP base 400). NOTE: this guards the taper-constant transcription (the plugin Q law), NOT an analog topology — the hardware Iabc->Q realization is checked by q_iabc_law. No netlist_bind by design."
+plugin_ref: "plugin/src/dsp/HPFilter.hpp:21 Q=0.5*pow(4000,res); LPFilter.hpp:25 same; BandpassSVF.hpp:46 Q=0.5*pow(400,qParam)"
+measurements:
+  # Derived directly from the plugin exponential taper, NOT deck output:
+  #   LP/HP: 0.5*4000^0=0.5, 0.5*4000^0.5=31.623, 0.5*4000^1=2000
+  - name: q_lp_min
+    expect: 0.5
+    tol_abs: 0.005
+  - name: q_lp_mid
+    expect: 31.623
+    tol_pct: 1
+  - name: q_lp_max
+    expect: 2000.0
+    tol_pct: 1
+  #   BP: 0.5*400^0=0.5, 0.5*400^1=200
+  - name: q_bp_min
+    expect: 0.5
+    tol_abs: 0.005
+  - name: q_bp_max
+    expect: 200.0
+    tol_pct: 1

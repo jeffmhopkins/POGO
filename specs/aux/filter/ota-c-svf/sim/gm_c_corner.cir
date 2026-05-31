@@ -1,0 +1,26 @@
+* aux/filter/ota-c-svf — gm-C integrator corner = gm/(2*pi*C) (LIBRARY generic check)
+* Generic representative values (NO netlist_bind by design — there is no netlist behind a
+* library block). The OTA-C SVF integrator is a transconductor gm driving a cap C; its
+* unity-gain frequency / 1st-order corner is f = gm/(2*pi*C). Plugin ref: the Simper SVF
+* coefficient g = tan(pi*f0/fs) ~ pi*f0/fs = (pi/fs)*(gm/C)/(2pi)... the analog ω0 = gm/C.
+*
+* Representative pick for a CLEAN round corner: C = 10 nF, gm chosen so f = 1.000 kHz exactly.
+*   gm = 2*pi*f*C = 2*pi*1000*10nF = 62.832 uS.
+* Ideal model justification: Gint is a VCCS (the OTA's I_out = gm*Vin); Cint integrates the
+* current. This is exactly the gm-C integrator under test — no LM13700 device model needed,
+* because the law f = gm/(2*pi*C) is a property of the transconductor+cap, not the silicon.
+
+* gm and C are INDEPENDENT representative literals (NOT derived from the target frequency), so
+* the measured corner genuinely MOVES if either changes — f is computed from the real gm-C.
+.param C=10n           ; integrator cap
+.param gm=62.832u      ; representative transconductance (fixed, independent of C) -> corner 1.000 kHz
+
+Vac ain 0 AC 1 DC 0
+Gint 0 ointg ain ointg {gm}    ; gm-C integrator wired as a 1st-order LP (gm into C, fed back)
+Cint ointg 0 {C}
+
+.control
+  ac dec 100 10 100k
+  meas ac fcorner_hz when vdb(ointg)=-3.01
+.endc
+.end

@@ -1,0 +1,46 @@
+* aux/filter/q-control — Q = V_T_diff/(Iabc_q*R_in) hyperbolic resonance law (LIBRARY generic)
+* Generic representative values (NO netlist_bind by design — there is no netlist behind a
+* library block). The LM13700 Q-cell injects a feedback current set by its bias current
+* Iabc_q; the resulting SVF damping is 1/Q = Iabc_q*R_in/V_T_diff, i.e.
+*       Q = V_T_diff / (Iabc_q * R_in)
+* with V_T_diff = 52 mV (2*26mV, both sides of the OTA differential pair) and R_in = 100 kΩ
+* (aux/filter/q-control §"Q Formula").  So Q = 0.052/(Iabc_q[A]*1e5) = 0.52/(Iabc_q[µA]).
+* Plugin ref: HPFilter.hpp:21 / LPFilter.hpp:25  Q = 0.5*pow(4000,res); the analog Q-cell
+* realizes this Q via its Iabc — this deck pins the analog Iabc<->Q hyperbola the cell uses.
+*
+* Iabc_q is just the resistor current through R_Iabc (V_ires - V_pin)/R_Iabc; the LM13700
+* Iabc pin sits ~2*Vbe above V- (≈ -10.8V at -12V rails), NOT GND (change 0020 §D/M5). We
+* model the pin as a fixed DC potential and read the current with i(Vsrc) — no LM13700 model
+* needed, because the Q law depends only on the value of Iabc, not on the silicon producing it.
+*
+* Representative picks (round Q targets), R_Iabc = 100k, V_pin = -10.8 V:
+*   Q = 0.70 (Butterworth floor)  -> Iabc = 0.052/(0.70*1e5) = 0.7429 µA -> V_ires = -10.7257 V
+*   Q = 1.00 (Chebyshev onset)    -> Iabc = 0.052/(1.00*1e5) = 0.5200 µA -> V_ires = -10.7480 V
+*   Q = 5.00 (high resonance)     -> Iabc = 0.052/(5.00*1e5) = 0.1040 µA -> V_ires = -10.7896 V
+* PARALLEL instances per the guide's parallel-instance rule.
+
+.param Rabc=100k
+.param Vpin=-10.8
+
+* --- Q = 0.70 setpoint ---
+Vir_a na 0 DC -10.7257
+Ra na pina {Rabc}
+Vpa pina 0 DC {Vpin}
+* --- Q = 1.00 setpoint ---
+Vir_b nb 0 DC -10.7480
+Rb nb pinb {Rabc}
+Vpb pinb 0 DC {Vpin}
+* --- Q = 5.00 setpoint ---
+Vir_c nc 0 DC -10.7896
+Rc nc pinc {Rabc}
+Vpc pinc 0 DC {Vpin}
+
+.control
+  op
+  * resulting Q from each Iabc via Q = 0.052/(Iabc*R_in), R_in = 100k = 1e5
+  let q_butter = 0.052/(i(Vpa)*1e5)   ; -> ~0.70
+  let q_cheby  = 0.052/(i(Vpb)*1e5)   ; -> ~1.00
+  let q_high   = 0.052/(i(Vpc)*1e5)   ; -> ~5.00
+  print q_butter q_cheby q_high
+.endc
+.end

@@ -1,0 +1,23 @@
+deck: svf_taps.cir
+description: "LIBRARY (generic) check — SVF LP/HP/BP tap topology (DC->LP, HF->HP, peak->BP at f0). NOTE: checks tap MAGNITUDE topology only; the plugin HP sign-flip -(x-k*v1-v2) is not verified here (block-7 hp_polarity covers HP polarity). No netlist_bind by design."
+plugin_ref: "plugin/src/dsp/HPFilter.hpp:40 HP=-(x-k*v1-v2); LPFilter.hpp:42 LP=v2; BandpassSVF.hpp:24 BP=v1 — standard 2-pole SVF taps"
+measurements:
+  # Derived from the SVF transfer functions H_LP/H_BP/H_HP (spec §Transfer Function), NOT deck output:
+  #   at DC (1 Hz << f0): |H_LP|->1, |H_HP|->0
+  - name: lp_dc
+    expect: 1.0
+    tol_abs: 0.02
+  - name: hp_dc
+    expect: 0.0
+    tol_abs: 0.02
+  #   at HF (1 MHz >> f0): |H_HP|->1, |H_LP|->0
+  - name: hp_hf
+    expect: 1.0
+    tol_abs: 0.02
+  - name: lp_hf
+    expect: 0.0
+    tol_abs: 0.02
+  #   at f0=1kHz with Q=1: |H_BP| peak = Q = 1.0
+  - name: bp_f0
+    expect: 1.0
+    tol_pct: 3

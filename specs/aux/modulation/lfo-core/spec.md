@@ -126,6 +126,13 @@ Triangle output:
 
 ### Frequency Range Derivation
 
+> **⚠️ Superseded vary-R_INT analysis (kept for context only).** This subsection derives the
+> range assuming R_INT is *varied* by the pot (Option A/B below). That scheme is **NOT used** —
+> see "Rate taper — RESOLVED" below and the Overview: R_INT is **fixed at 590 kΩ** and the pot is a
+> **drive-attenuator** on the Schmitt square (f ∝ wiper fraction), with R_FLOOR = 2.4 kΩ setting
+> f_min. The current f_max comes from the fixed R_INT·C_INT (≈1/(4·590k·47nF) ≈ 19.8 Hz), not from
+> an R_min. Treat the 266 kΩ–106 MΩ / Option A/B text below as historical.
+
 ```
 Required: f_min = 0.05 Hz, f_max = 20 Hz (ratio = 400:1)
 

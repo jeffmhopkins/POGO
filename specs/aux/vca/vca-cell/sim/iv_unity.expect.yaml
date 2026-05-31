@@ -1,0 +1,11 @@
+deck: iv_unity.cir
+description: "LIBRARY (generic, NO netlist_bind by design): THAT2180 current-in/current-out audio path gives unity magnitude -1 at 0 dB via the I/V transimpedance ratio -(R_f/R_in)=-1 (representative R_in=R_f=20k). The 6.1 mV/dB device constant CANCELS at 0 dB (unity current copy) — [NV]-free pure resistor ratio. Also confirms the input node sits at virtual ground (current-input topology)."
+plugin_ref: "plugin/src/dsp/VcaBlock.hpp:27-28 (G=1 at control=1 -> 0 dB unity); aux/vca/vca-cell/spec.md §Transfer Function AUDIO_OUT=-(R_f/R_in)·...·AUDIO_IN, unity at Ec+=0"
+# Generic library check — verifies the transfer math/topology, not a specific netlist value.
+measurements:
+  - name: gain
+    expect: -1.0          # -(R_f/R_in) = -(20k/20k); single inversion (LP1 SUM_AMP restores polarity)
+    tol_abs: 0.01         # near-exact: ideal op-amp + equal Rs
+  - name: vin_node_v
+    expect: 0.0           # current-input node held at virtual ground (Z_in ~ R_in)
+    tol_abs: 0.01

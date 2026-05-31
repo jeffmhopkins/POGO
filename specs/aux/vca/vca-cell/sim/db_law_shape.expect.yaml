@@ -1,0 +1,11 @@
+deck: db_law_shape.cir
+description: "LIBRARY (generic, NO netlist_bind by design): THAT2180 dB-law SHAPE. Load-bearing facts: (a) UNITY anchor at Ec+=0 (true for any dB constant), and (b) LOG-LINEARITY — equal Ec+ voltage steps give EQUAL dB output steps. The absolute 6.1 mV/dB slope is an UNMEASURABLE device constant [NV]; it appears ONLY to place the three test points (0, -61, -122 mV). The asserted `linearity = db_step2 - db_step1 = 0` is a pure ratio that CANCELS the constant, so it is genuinely value-independent."
+plugin_ref: "plugin/src/dsp/VcaBlock.hpp:26-27 — G=10^(2*(control-1)) exponential dB-law (equal control steps -> equal dB); aux/vca/vca-cell/spec.md §THAT 2180 Gain Law G_dB=Ec+/6.1mV, G=10^(G_dB/20)"
+# Generic library check — verifies the dB-law shape (unity anchor + log-linearity), not the [NV] absolute slope.
+measurements:
+  - name: g_unity
+    expect: 1.0          # Ec+=0 -> G=1; unity anchor, holds for ANY dB constant
+    tol_abs: 0.001       # near-exact: 10^0 = 1
+  - name: linearity
+    expect: 0.0          # equal Ec+ steps -> equal dB steps; ratio cancels the [NV] 6.1mV/dB slope
+    tol_abs: 0.01        # LOAD-BEARING log-linearity test (value-independent by construction)

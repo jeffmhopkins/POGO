@@ -1,0 +1,18 @@
+deck: mb_clamp.cir
+description: >
+  Generic library check (hardcoded representative values; NO netlist_bind by design). Verifies
+  the processor output +-10V hard clamp V_bus=clamp(V_src*gain+offset,-10,+10): +7 passes, +15
+  clamps to +10, -15 clamps to -10. The behavioral B-source clamp models the back-to-back 10V
+  zeners in the MB_INV feedback; the exact zener knee/tolerance is a prototype-trim item.
+plugin_ref: "plugin/src/dsp/ModBus.hpp:25 — clamp(sourceV*gain+offset, -10.f, 10.f); spec.md 'Clamp Implementation' lines 114-129"
+measurements:
+  # DERIVED from the +-10V clamp law, NOT copied from deck output:
+  - name: pass_in
+    expect: 7.0
+    tol_abs: 0.01
+  - name: clamp_hi
+    expect: 10.0
+    tol_abs: 0.01
+  - name: clamp_lo
+    expect: -10.0
+    tol_abs: 0.01
