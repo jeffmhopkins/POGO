@@ -52,10 +52,19 @@ pinouts, ALT shared-V_ctrl connectivity, sourcing/power/layout, THD/feedthrough 
 2. **`vca_ecplus_full.cir` referenced in spec.md:167 + aux:6 but does NOT exist.** Reconcile the
    dangling reference (the new `vca-vctrl-buffer-unity` deck effectively reconstructs it).
 
-### Writer slices (parallel)
-- **A:** vca-amt-symmetric-unity, vca-cv-summer-ratio (the U63 control-chain topology/ratio — most complex)
-- **B:** vca-iv-unity (+input-Z), vca-gain-law-shape (audio path + dB-law shape)
-- **C:** vca-vctrl-buffer-unity, vca-ref-divider-level (HIGH-3 seam) + **retrofit netlist_bind into vca_ecplus**
+### Stage 2 — writers (3 parallel) ✅ COMPLETE — 6 new decks + retrofit, all PASS
+- **A:** amt_symmetric (0018 OFS-fix: V_ctrl=0 at AMT-center for any OFS; binds R42-R46), cv_summer (unity summer ratios).
+- **B:** iv_unity (−R_f/R_in=−1, binds R7/R40=20k), gain_law_shape (dB log-linearity + unity anchor; NO bind — NV-correct).
+- **C:** vctrl_buffer (U97-A loaded unity g_ctrl≈0.984; reconstructs the absent vca_ecplus_full.cir), ref_divider
+  (±1.2V from R233/R234=45k3) + **retrofit: added netlist_bind to vca_ecplus.expect.yaml** (R235/R236=10k, R239/R240=1M
+  — the binds RESOLVED, so the 0023 deck's old literals did match the netlist; now bound).
+- Writers self-ran Q3 probes (R46→200k, R43→200k, R40→200k, R235→1M, R233→4k53 all fail correctly).
+  8 block-4 decks pass; no netlist↔spec divergence found. Reconciles the dangling vca_ecplus_full.cir ref.
+
+### Stage 3 — verifiers (2 parallel adversarial) — RUNNING
+Sharpest block-4 angles: (1) does gain_law_shape (NO bind, [NV]) genuinely fail when perturbed or is it
+vacuous? (2) is vctrl_buffer's tolerance hiding a buffer-absent case? (3) does amt_symmetric's
+value-independent ofs0 instance weaken the OFS-fix claim (the load-bearing one is ofs2)?
 
 ## Decisions log
 - 2026-05-31: picked block-4 over block-5 (filter sibling, low new value) and block-6 (sprawling, most
