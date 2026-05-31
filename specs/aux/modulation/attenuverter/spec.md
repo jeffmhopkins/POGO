@@ -1,6 +1,7 @@
 # aux: Attenuverter (Bipolar Modulation Scaling)
 
 **Type:** `modulation` · part of the [aux circuit library](../../_LIBRARY.md)
+**Composes:** [inverting-summer](../inverting-summer/spec.md)
 
 > ✅ **Re-verified 2026-05-30** against the locked plugin (change 0018). Used at **18**
 > attenuverter destinations (the VCA is a raw bus normal, not an attenuverter; per-band BP CV
