@@ -26,18 +26,37 @@ The **HIGH-3 DRIVE Ec+ ±ref divider** (R243/R244 = **22k6**) was the *fix* appl
 check; **block-6's copy was never checked**. This run closes that gap: a block-6 ref-divider deck
 binding R243=22k6, proving the 0025 fix holds here too (regression-guards the 45k3 mistake).
 
-## Candidate claims (pre-derive sketch — the deriver produces the authoritative manifest)
-- **wf-folder-reflection** — Buchla folder V_out = 2·V_clamp − V_in: non-inv G=+2 from R25/R_f_wf=10k
-  (1+R_f/R_g) → the signature wavefold topology. Bind R25, R_f_wf.
-- **dist-cell-unity** — HC/SC op-amp gain stages unity inverting: R20/R21=10k (HC), R18/R19=10k (SC).
-  The clip *onset* is set by the DRIVE VCA ahead, not these cells. Bind the pairs.
-- **drive-iv-unity** — DRIVE VCA I/V transimpedance −R155/R153 = −20k/20k = −1 (mirrors block-4). Bind.
-- **drive-summer-unity** — DRIVE control summer R157/158/159/160 = 100k unity (knob+CV+bias). Bind.
-- **drive-ref-divider** — HIGH-3 ±ref ±1.2V from R243/R244=22k6 (the 0025 fix; block-6 was unchecked). Bind R243.
-- **clip-threshold-4v** — ±4V CLIP window divider R186/R187 = 20k/10k → +12·10/30 = +4V (R188/189 → −4V).
-  Plugin BP1_CLIP_LIGHT threshold ±4V. Bind R186, R187.
-- **dist_clip retrofit** — audit + bind what's bindable (the clamp thresholds are zener/diode-Vf → [NV]).
-- [NV] DRIVE Ec+ injection authority (THAT2180 6.1mV/dB) — same as block-4; trim-authority only.
+## Manifest (Stage 1) ✅ — arithmetic verified independently against the netlist + plugin
+
+| id | claim (computed) | netlist refs (bind) | nv | shortlist |
+|---|---|---|---|---|
+| **D3 drive-ref-divider** | REF_P1 = ±**1.195V** from R243/R244=22k6 + RV51∥RV52 5k bridge (the 0025 fix; block-6 unchecked) | R243=22k6, R244=22k6 | NO | **#1 (top)** |
+| **C1 wf-folder-reflection** | Buchla folder V_out = 2·V_clamp − V_in, G=+2 from R25/R_f_wf=10k → slope reversal past ±Vth | R25_1L=10k, R_f_wf_1L=10k | clamp level [NV]; ratio NO | #2 (signature) |
+| **L1 clip-threshold-4v** | ±4V CLIP window: R186/R187=20k/10k → +12·10/30 = **+4.0V**; R188/R189 → −4.0V | R186,R187,R188,R189 | NO | #3 |
+| **D2 drive-summer-unity** | Ec+ control summer R157/158/159/160=100k → −1 each (knob+CV+bias) | R157–R160=100k | NO | #4 |
+| **D1 drive-iv-unity** | DRIVE VCA I/V −R155/R153 = −20k/20k = −1 (mirrors block-4) | R153=20k, R155=20k | NO | #5 |
+| **C2 dist-cell-unity** | HC/SC op-amp stages −1 (R20/R21, R18/R19=10k); clip onset set by DRIVE, not cell | R18/R19/R20/R21=10k | NO | #6 |
+| C3 dist_clip (existing) | HC ±5.8V / WF-SC ±1.4V clamp levels | — (zener/diode part#, unbindable) | **YES** | keep documentary [NV] |
+| ~~L2 clip-hysteresis~~ | comparator hysteresis width | — (model-dependent, no plugin counterpart) | — | **skip (WEAK)** |
+
+**Escalations from the deriver (recorded):**
+1. **The block-6 ref-divider gap is real** — 0025 fixed R243/R244 45k3→22k6 but only block-4 got a
+   `ref_divider` deck. D3 closes it (binds R243=22k6; reverting to 45k3 → ±0.628V fails). Top priority.
+2. **dist_clip is honestly [NV]/unbindable** — the ±5.8V/±1.4V thresholds live in part numbers
+   (BZX84C5V1 Vz, 1N4148W Vf); no resistor sets the level. Keep as documentary; add an explicit
+   "[NV]: no bindable resistor" note (do NOT fake a bind).
+3. **Possible stale netlist comment** — R181 hysteresis is annotated "~50mV @ ±12 swing" but the naive
+   100k/2.2M math gives ~545mV. Flag for investigation (the L2 hysteresis check is skipped as WEAK, but
+   the comment may need a correction — Stage 4 to confirm/fix if it's genuinely stale).
+4. **Symbolic trim values** — RV51/RV52/RV33 carry symbolic value fields (not ohmic) → unbindable, like
+   block-4 RVs and block-3 RV3. Only the known 10k-pot bridge topology feeds D3.
+
+**NOT spice-able (out of scope):** CD4053 mux Ron/switching/logic, DIST_MODE switch encoding, pinouts,
+THAT2180 absolute dB (6.1mV/dB) + DRIVE knob→Ec+ map (Phase-3R), zener/diode clamp absolutes, diode-OR
++ LED, oversampling (none), sourcing/power/decoupling, SVF-side claims (belong to block-6-svf*).
+
+**Writer slices:** Group A (DRIVE chain): D3, D1, D2. Group B (dist cells): C1, C2, + C3 [NV] note.
+Group C (CLIP): L1 (+ investigate the R181 ~50mV comment).
 
 ## Pipeline (per the guide)
 1. **Derive** [1 agent] — structured manifest of block-6-dist math claims → check candidates.
