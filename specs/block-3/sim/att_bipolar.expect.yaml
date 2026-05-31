@@ -1,0 +1,20 @@
+deck: att_bipolar.cir
+description: Bipolar attenuverter pot is wired V_src<->wiper<->-V_src (RV6), so the wiper spans [+V_src, 0, -V_src] across CW/noon/CCW — the analog of applyDestination=source*att, att in [-1,+1]. Falsifies a unipolar V_src<->GND miswire (which would give noon=+2.5, CCW=0).
+plugin_ref: "plugin/src/dsp/ModBus.hpp:32 — applyDestination(busV, overrideV, hasOverride, att) = source*att, att in [-1,+1]; spec/block-3/spec.md §2 (bipolar pot topology, noon=0V/CW=+V_src/CCW=-V_src)"
+# NO netlist_bind: this is a value-independent divider RATIO / TOPOLOGY check. The pot resistance
+# cancels (any equal R_top=R_bot gives noon=0; the CW/CCW limits depend only on which lug the wiper
+# reaches, not on the pot value), and the +/-V_src rails are the inverter outputs, not netlist
+# resistors. Per the guide, a ratio/topology check where the constant cancels needs no bind.
+measurements:
+  # DERIVED: full CW -> wiper at top lug -> +V_src = +5.0
+  - name: att_cw
+    expect: 5.0
+    tol_pct: 1
+  # DERIVED: noon -> (+V_src + -V_src)/2 = 0.0 (this is THE bipolar assertion; GND-miswire -> +2.5)
+  - name: att_noon
+    expect: 0.0
+    tol_abs: 0.05
+  # DERIVED: full CCW -> wiper at bottom lug -> -V_src = -5.0 (GND-miswire -> 0)
+  - name: att_ccw
+    expect: -5.0
+    tol_pct: 1

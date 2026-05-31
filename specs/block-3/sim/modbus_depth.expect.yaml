@@ -1,6 +1,12 @@
 deck: modbus_depth.cir
 description: Mod-bus depth at an unpatched destination — §H fix (change 0020 C2)
 plugin_ref: "plugin/src/dsp/ModBus.hpp — applyDestination: source*att at full scale (~100% expected)"
+netlist_bind:  # only the 100R protection series R is a single live netlist ref
+  R_CLAMP: "R37_1=100R"   # LP1_FREQ destination clamp series (Rprot=100 in the deck)
+# NOTE: the 3300 (buggy) and 16300 (fixed) load literals are DERIVED parallel combinations
+# (10k||~5k pot-leg, and 47k||~25k pot-leg respectively), NOT single netlist refs, so they
+# cannot be cleanly bound. The old 100k R_SRC_NORM was DELETED in §H (no current ref exists).
+# These remain documentary/derived literals; only the 100R protection R is netlist-bound.
 measurements:
   - name: depth_bug      # 100k R_SRC_NORM into the original 3.3k node: ~3% (the C2 bug)
     expect: 3.2

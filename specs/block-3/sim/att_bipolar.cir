@@ -1,0 +1,36 @@
+* POGO block-3 mod-bus — bipolar attenuverter pot TOPOLOGY (V_src <-> wiper <-> -V_src)
+* CLAIM (spec §2 "Bipolar pot topology", nets VSRC/NVSRC/MOD_LP1_FREQ via RV6):
+*   The pot bridges V_src (top lug) and -V_src (bottom lug); wiper = attenuated CV.
+*     full CW  -> wiper = +V_src     (R_top -> 0)
+*     noon     -> wiper = 0          (R_top = R_bot, the +V_src and -V_src halves cancel)
+*     full CCW -> wiper = -V_src     (R_bot -> 0)
+*   This is the analog of applyDestination = source*att with att in [-1,+1] (ModBus.hpp:32).
+*   FALSIFIABLE FACT: the bottom lug ties to -V_src (BIPOLAR), NOT GND. If it were wired to GND
+*   (a UNIPOLAR miswire) noon would read +2.5V and full CCW 0V -> the assertions below FAIL.
+* Here V_src = +5 and -V_src = -5; the -5 STANDS FOR the unity-inverter output (att_inverter.cir,
+* nvsrc = -V_src). The pot is modelled as two resistors R_top (V_src->wiper) + R_bot (wiper->-V_src).
+* PARALLEL instances (no alter-loops): one independent divider per wiper position.
+
+Vsrc  vsrc  0 DC  5            ; +V_src rail (protected destination node)
+Vnsrc nvsrc 0 DC -5            ; -V_src rail = unity-inverter output (= -V_src)
+
+* --- full CW: wiper at top lug, R_top -> 0 ---  wiper = +V_src = +5
+Rtcw  vsrc  ncw  1m
+Rbcw  ncw   nvsrc 10k
+
+* --- noon: R_top = R_bot = 5k ---  wiper = (+5 + -5)/2 = 0
+Rtnn  vsrc  nnoon 5k
+Rbnn  nnoon nvsrc 5k
+
+* --- full CCW: wiper at bottom lug, R_bot -> 0 ---  wiper = -V_src = -5
+Rtcc  vsrc  ncc  10k
+Rbcc  ncc   nvsrc 1m
+
+.control
+  op
+  let att_cw   = v(ncw)        ; DERIVED +V_src = +5.0
+  let att_noon = v(nnoon)      ; DERIVED 0.0 (bipolar; would be +2.5 if bottom lug were GND)
+  let att_ccw  = v(ncc)        ; DERIVED -V_src = -5.0 (would be 0 if bottom lug were GND)
+  print att_cw att_noon att_ccw
+.endc
+.end

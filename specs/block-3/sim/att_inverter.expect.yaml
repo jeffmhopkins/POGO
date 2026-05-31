@@ -1,0 +1,11 @@
+deck: att_inverter.cir
+description: Per-destination -V_src generator is a UNITY inverter, R_INV_FB_1/R_INV_IN_1 = 47k/47k = -1 (analog of the sign needed for the bipolar attenuverter span). Catches single-ref drift (one resistor left at the old 10k -> -0.213) but not a coordinated both-resistors change.
+plugin_ref: "plugin/src/dsp/ModBus.hpp:32 — applyDestination = source*att, att in [-1,+1]; the -V_src rail (= -1*V_src) sets the att=-1 end. spec/block-3/spec.md §2 (per-dest -V_src TL074 inverter)"
+netlist_bind:  # deck literals must equal live block-3.nets.yaml values
+  R_INV_IN: "R_INV_IN_1=47k"   # LP1_FREQ inverter input
+  R_INV_FB: "R_INV_FB_1=47k"   # LP1_FREQ inverter feedback
+measurements:
+  # DERIVED: nvsrc = -(R_INV_FB_1/R_INV_IN_1)*V_src = -(47k/47k)*1 = -1.0
+  - name: nvsrc
+    expect: -1.0
+    tol_abs: 0.01

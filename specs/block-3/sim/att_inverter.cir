@@ -1,0 +1,24 @@
+* POGO block-3 mod-bus — per-destination -V_src UNITY inverter (R_INV_FB/R_INV_IN = -1)
+* CLAIM (spec §2 "Per-Destination Attenuverter", nets INVN_LP1_FREQ / NVSRC_LP1_FREQ):
+*   Each attenuverter's -V_src rail is an inverting amp:  nvsrc = -(R_INV_FB/R_INV_IN)*V_src.
+*   Representative instance = LP1_FREQ (U5 unit A): R_INV_IN_1 = 47k, R_INV_FB_1 = 47k -> gain -1.
+*   Change 0020 §H raised these 10k->47k for the hi-Z bus load; the RATIO 47k/47k stays -1.
+*   This ratio check catches single-ref drift (e.g. a transcription error leaving ONE resistor at
+*   the old 10k -> -0.213, fails) but NOT a coordinated change of BOTH (the ratio would survive).
+* Ideal op-amp (Eop high-gain VCVS) stands in for the TL074 section: the closed-loop gain is set
+* entirely by the feedback resistor ratio, which is the law under test.
+
+* V_src = +1V tap (the protected destination node VSRC_LP1_FREQ feeding R_INV_IN_1)
+Vsrc vsrc 0 DC 1
+
+* Inverting amp: (+) at GND, (-) = nminus virtual ground; out = nvsrc
+Eop  nvsrc 0 0 nminus 1e6
+Rin  vsrc  nminus 47k          ; R_INV_IN_1 (inverter input)
+Rf   nvsrc nminus 47k          ; R_INV_FB_1 (inverter feedback)
+
+.control
+  op
+  let nvsrc = v(nvsrc)         ; DERIVED -(R_INV_FB_1/R_INV_IN_1)*1 = -(47k/47k) = -1.0
+  print nvsrc
+.endc
+.end

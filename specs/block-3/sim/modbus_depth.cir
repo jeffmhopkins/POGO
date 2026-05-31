@@ -5,7 +5,7 @@
 * R_INV_IN 10k || pot-to-(-Vsrc) ~5k) and the 100k R_SRC_NORM -> ~3% depth. The §H FIX removes the
 * norm (low-Z normal) so depth is ~99% regardless of load (here shown with the ×5 hi-Z 16.3k load).
 
-.param Rprot=100
+.param Rprot=100        ; = R37_1 (LP1_FREQ destination clamp series, 100R); netlist-bound in .expect.yaml
 
 Vbus bus 0 DC 5
 
