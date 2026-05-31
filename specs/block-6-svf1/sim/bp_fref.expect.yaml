@@ -1,6 +1,10 @@
 deck: bp_fref.cir
 description: BP integrator f_ref — confirms the 68nF cap gives 400Hz (not a copied 47nF → ~582Hz)
 plugin_ref: "plugin/src/dsp/BandpassSVF.hpp:42 — F_REF = {400,400,400} Hz (all 3 bands)"
+netlist_bind:  # the load-bearing literal: the 68nF BP integrator cap that sets f_ref=400Hz
+  C_int: "C15_Lv1=68nF"   # BP1 integrator cap (C=68n in deck); the value under test
+  # The 47n in the deck is a deliberate CONTRAST/trap (what a copied LP1/HP cap would give,
+  # ~582Hz) — it is NOT a netlist value, so it gets no bind by design.
 measurements:
   - name: fref_hz       # 68nF (the actual BP cap) → ~400 Hz, matching the plugin
     expect: 400.0

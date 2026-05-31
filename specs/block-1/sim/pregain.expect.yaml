@@ -1,6 +1,13 @@
 deck: pregain.cir
 description: Block-1 pre-gain 5× stage — gain network + clip rail
 plugin_ref: "plugin/src/dsp/PreGain.hpp — GAIN=5: clamp(5×Vin, ±10.5V)"
+# The gain (1 + R4/R3) is a RESISTOR RATIO — both legs are load-bearing, so both are bound
+# to the netlist (R3L=R_g, R4L=R_f, the L-channel main gain pair; R is the matched twin).
+# The ±10.5V clip is NOT resistor-set: it is the OPA1612 output saturation on ±12V rails
+# (a device/rail limit, like block-6 dist_clip) — [NV], no honest netlist ref to bind to.
+netlist_bind:
+  R_g: "R3L=4k7"     # non-inverting amp lower leg (to GND) — deck literal 4700
+  R_f: "R4L=18k"     # feedback leg — deck literal 18000; G = 1 + 18k/4.7k = 4.83×
 measurements:
   - name: gain        # 1 + 18k/4.7k = 4.83× (≈5×; within tolerance of the plugin's 5×)
     expect: 4.83

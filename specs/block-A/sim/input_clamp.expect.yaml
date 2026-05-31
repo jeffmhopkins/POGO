@@ -1,6 +1,13 @@
 deck: input_clamp.cir
 description: Block-A input buffer — unity follower + BAT54S over-voltage clamp
 plugin_ref: "plugin/src/dsp/InputBuffer.hpp — buffered input, ±11V clamp (op-amp swing); BAT54S to ±12V rails"
+# The unity gain (G=+1) is an IDEAL FOLLOWER (100% feedback, no resistor ratio) — value-
+# independent, so it carries no bind (per the guide's ratio/unity exemption).
+# The 100Ω series protection R IS bindable — bound to R1 (R2 is its matched twin); deck
+# literal 100 (Rsa/Rov). The clamp level (~±12.3V) is the BAT54S Schottky Vf + the ±12V
+# rail, set entirely by the part number D1/D2 — [NV], not resistor-set, no honest bind.
+netlist_bind:
+  R_prot: "R1=100R"   # 100Ω series protection resistor — deck literals Rsa/Rov = 100
 measurements:
   - name: unity        # OPA1612 unity follower
     expect: 1.0

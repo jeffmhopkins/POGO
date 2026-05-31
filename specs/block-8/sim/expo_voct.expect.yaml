@@ -1,6 +1,10 @@
 deck: expo_voct.cir
 description: block-8 expo V/oct base-divider slope + trim authority (change 0020 §A)
 plugin_ref: "plugin/src/dsp/LPFilter.hpp — f0 = f_ref·2^cutoffV (1 V/oct); analog base needs V_T·ln2 = 17.92 mV/oct"
+netlist_bind:  # deck literals must equal the live block-8 netlist values
+  R_VOCT: "R86=49k9"     # series V/oct resistor (49900 in deck)
+  R_TEMPCO: "R230=1k"    # Vishay TFPT tempco shunt to GND (1000 in deck)
+  # RV20 (1V/oct trim) is a 10k pot swept 0/5k/10k — symbolic spec value LP2_1VOCT, not bindable.
 measurements:
   # The 1V/oct trim must span 17.92 mV/oct (V_T·ln2) with the target centered, so there is
   # authority both ways to absorb the Vishay TFPT +4110ppm tempco tolerance + component spread.
