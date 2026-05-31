@@ -1,0 +1,36 @@
+* aux/utility/distribution-buffer LIBRARY check — buffered fan-out passes ~unity; series-R throttles
+* GENERIC LIBRARY DECK (no netlist_bind by design — per _LIBRARY.md; representative values verify the
+*   topology fact (buffered low-Z rail vs un-buffered series-R divider), not a netlist resistor).
+* CLAIM (spec §Overview / §Transfer Function; block-3 §H, change 0020): a UN-BUFFERED series-R normal
+*   (100k R_SRC_NORM) into a low-Z destination (~3.3k) forms a divider that collapses depth to ~3% of
+*   the bus (the §H BUG). A BUFFERED low-Z rail (unity follower output) delivers ~full bus voltage to
+*   the same destination regardless of load (the §H FIX) — the buffer's low output impedance supplies
+*   the load current instead of a series resistor.
+* Ideal models (justification): the op-amp distribution buffer is modeled as an ideal unity follower
+*   (Ebuf out 0 in 0 1) — it stands in for the paralleled MB_PROC_A C/D halves; the load-bearing fact
+*   under test is the ROUTING/divider topology (buffered rail = ~unity vs series-R = throttled), NOT
+*   the op-amp's real output-current drive (which an ideal follower cannot model — see spec Sim-scope).
+*   PARALLEL instances; both pass/throttle made falsifiable by perturbing the modeled R below.
+
+.param Rseries=100k     ; un-buffered series normal (the bug: R_SRC_NORM, REMOVED by §H)
+.param Rdest=3300       ; representative low-Z destination load (~3.3k per-dest equivalent)
+.param Rshare=47        ; buffered-rail share resistor (small vs load -> negligible drop)
+
+Vbus bus 0 DC 5
+
+* ===== instance UNBUF: series-R normal into the low-Z destination (the §H BUG) =====
+Rser  bus nu 100k
+Rdu   nu  0  3300
+
+* ===== instance BUF: unity follower drives a low-Z rail through R_share into the same load (FIX) =====
+Ebuf  rail 0 bus 0 1     ; ideal unity distribution buffer (paralleled C/D halves)
+Rsh   rail nb {Rshare}
+Rdb   nb  0  3300
+
+.control
+  op
+  let depth_unbuf = v(nu)/5.0 * 100    ; DERIVED 3.3k/(100k+3.3k)=3.19% (series-R divider; the bug)
+  let depth_buf   = v(nb)/5.0 * 100    ; DERIVED 3300/(3300+47)=98.6% (buffered rail; the fix)
+  print depth_unbuf depth_buf
+.endc
+.end

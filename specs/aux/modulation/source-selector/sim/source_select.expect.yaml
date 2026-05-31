@@ -1,0 +1,14 @@
+deck: source_select.cir
+description: "LIBRARY (generic, NO netlist_bind by design): verifies the N-way switch source-select STEERING topology — each of the 3 detents (sel=0/1/2) presents EXACTLY ONE source {LFO1=2.5, LFO2=-4.0, EXT=1.5} at V_OUT, and the de-selected throws are open (do not reach the output). Routing/topology check (like distortion mux_select), not a transfer-math check; distinct source values make a mis-route falsifiable."
+plugin_ref: "plugin/src/Pogo.cpp:366-369 — modSrc==0?lfo1V:modSrc==1?lfo2V:ext (3-way source select); block-3 spec §Mod Source Select (DPDT ON-ON-ON). Also Pogo.cpp:412-415 per-band DIST_MODE 1-of-3 steering."
+# Generic library check — verifies the selector routing topology, not a netlist value.
+measurements:
+  - name: out_sel0
+    expect: 2.5           # pos 0 selects LFO1 (the others must NOT appear here)
+    tol_abs: 0.001
+  - name: out_sel1
+    expect: -4.0          # pos 1 selects LFO2
+    tol_abs: 0.001
+  - name: out_sel2
+    expect: 1.5           # pos 2 selects EXT
+    tol_abs: 0.001

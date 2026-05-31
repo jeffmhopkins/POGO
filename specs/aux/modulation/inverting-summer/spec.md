@@ -149,4 +149,4 @@ generic primitive form):
 | aux/modulation/attenuverter | −V_att inverter | control | single-input, R_in=R_f → G=−1 (negative pot rail) |
 | block-3 | U3-A MB_AMP, U3-B MB_INV | control | the live mod-bus instance |
 | block-3 | MB_INV_1..5 (−V_att) | control | per-destination attenuverter inverters |
-| block-7 | HP SUM_AMP | audio | SVF summing node (x − k·v1 − v2) |
+| block-7 | HP SUM_AMP | audio | OTA-C SVF-input inverting summing amp (x − k·v1 − v2); the same primitive also provides the HP-polarity restore so the SUM_AMP node equals the plugin HP output (no separate aux entry needed) |

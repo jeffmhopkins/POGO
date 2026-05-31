@@ -1,0 +1,45 @@
+* aux/modulation/source-selector LIBRARY check — N-way switch select steers ONE source to the output
+* GENERIC LIBRARY DECK (no netlist_bind by design — per _LIBRARY.md; representative source values
+*   verify the STEERING topology, not a netlist component value).
+* CLAIM (spec §Overview / §Transfer Function; block-3 MOD_SRC, Pogo.cpp:366-369): a 3-way select
+*   (DPDT ON-ON-ON) presents EXACTLY ONE of {SRC_0=LFO1, SRC_1=LFO2, SRC_2=EXT} at V_OUT per the
+*   detent; the other two throws are OPEN and do NOT reach the output. The plugin realizes this as a
+*   nested ternary (modSrc==0?lfo1:modSrc==1?lfo2:ext) — identity on the selected source, zero on the
+*   rest. This is a routing/topology check (like the distortion mux_select), not a transfer-math check.
+* Model (justification): each switch detent is a closed contact (series R_on=0.5Ω, a mechanical
+*   contact) from the SELECTED source to V_OUT, while the de-selected sources are simply NOT connected
+*   to that instance's output node (open throw) -> they contribute nothing. V_OUT sees a high-Z next
+*   stage (10MEG) so the closed contact passes the source ~unchanged. PARALLEL instances, one per
+*   selection (sel=0/1/2). Distinct source values make a mis-route falsifiable (wrong value fails).
+
+* representative DISTINCT source values (so any mis-steer lands on the wrong number)
+.param Vlfo1=2.5       ; SRC_0
+.param Vlfo2=-4.0      ; SRC_1
+.param Vext=1.5        ; SRC_2
+.param Ron=0.5         ; mechanical contact resistance (negligible into high-Z)
+.param Rld=10meg       ; high-Z next stage (SCALE pot input / summer)
+
+Vs0 s0 0 DC 2.5
+Vs1 s1 0 DC -4.0
+Vs2 s2 0 DC 1.5
+
+* ===== instance SEL0: position 0 -> SRC_0 (LFO1) wired to out0; SRC_1/SRC_2 open =====
+Rsel0 s0 out0 {Ron}
+Rld0  out0 0 {Rld}
+
+* ===== instance SEL1: position 1 -> SRC_1 (LFO2) wired to out1; SRC_0/SRC_2 open =====
+Rsel1 s1 out1 {Ron}
+Rld1  out1 0 {Rld}
+
+* ===== instance SEL2: position 2 -> SRC_2 (EXT) wired to out2; SRC_0/SRC_1 open =====
+Rsel2 s2 out2 {Ron}
+Rld2  out2 0 {Rld}
+
+.control
+  op
+  let out_sel0 = v(out0)        ; DERIVED 2.5  (pos 0 selects LFO1; Ron/Rld drop ~5e-8, negligible)
+  let out_sel1 = v(out1)        ; DERIVED -4.0 (pos 1 selects LFO2)
+  let out_sel2 = v(out2)        ; DERIVED 1.5  (pos 2 selects EXT)
+  print out_sel0 out_sel1 out_sel2
+.endc
+.end

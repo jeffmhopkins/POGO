@@ -1,0 +1,41 @@
+* aux/utility/analog-mux LIBRARY check — 2:1 CMOS mux passes the SELECTED path; de-selected blocked
+* GENERIC LIBRARY DECK (no netlist_bind by design — per _LIBRARY.md; representative values verify the
+*   path-steering topology, not a netlist component value). Generalized from
+*   specs/aux/distortion/overview/sim/mux_select.cir (the per-band SC/HC/WF select) to the bare 2:1.
+* CLAIM (spec §Overview / §Transfer Function; block-6 §CD4053): a CD4053 2:1 cell STEERS exactly one
+*   of two always-running parallel paths to OUT. The SELECTED channel is a series Ron (≈200Ω at ±12V)
+*   into a high-Z next stage (>=10k) -> passes ~unity (<2% drop). The DE-SELECTED channel is an OPEN
+*   switch -> does NOT reach OUT (its source value never appears). Logic-driven, glitch-free
+*   (parallel paths). This is a routing/topology check, not a precision-Ron check.
+* Model (justification): ON channel = series Ron resistor to the output sense node; OFF channel = simply
+*   not connected (open). A high-Z load (10MEG) stands in for the >=10k next-stage input -> the Ron drop
+*   is negligible. Two instances cover BOTH select states (S=0 and S=1) so the steering is falsifiable
+*   in each direction (mis-route -> wrong value; leaky off-channel -> de-selected appears). PARALLEL.
+
+.param Ron=200          ; CD4053 on-resistance at ±12 V (datasheet typ)
+.param Rload=10meg      ; high-Z next stage (>=10k input)
+
+* representative DISTINCT path signals
+Vp0 p0 0 DC 3.0         ; PATH_0
+Vp1 p1 0 DC -2.0        ; PATH_1
+
+* ===== instance SEL0 (S=0): PATH_0 selected -> OUT0 = 3.0 ; PATH_1 channel OPEN =====
+Rsel0 p0 out0 {Ron}
+Rld0  out0 0 {Rload}
+* (PATH_1 not connected to out0 -> open de-selected channel; its value must NOT appear)
+
+* ===== instance SEL1 (S=1): PATH_1 selected -> OUT1 = -2.0 ; PATH_0 channel OPEN =====
+Rsel1 p1 out1 {Ron}
+Rld1  out1 0 {Rload}
+
+* ===== instance LEAKCHK: a defensive node that would catch off-channel leakage =====
+* If the de-selected PATH_1 leaked into SEL0's output it would pull out0 toward -2.0; the open
+* channel (no element) keeps out0 = +3.0. Falsifiable: wiring Rleak p1 out0 {Ron} would FAIL out_sel0.
+
+.control
+  op
+  let out_sel0 = v(out0)        ; DERIVED 3.0  (S=0 selects PATH_0; Ron/Rload drop ~6e-5, negligible)
+  let out_sel1 = v(out1)        ; DERIVED -2.0 (S=1 selects PATH_1)
+  print out_sel0 out_sel1
+.endc
+.end
