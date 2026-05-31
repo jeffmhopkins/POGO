@@ -1,0 +1,24 @@
+deck: voct_tempco_tracking.cir
+description: "TEMPERATURE-TRACKING (full 0–50 °C band, 'modules heat up'): the Vishay TFPT +4110 ppm/K tempco shunt holds the V/oct CUTOFF slope near V_T·ln2 as the module heats — residual ≈ −2.1%/+1.5% across 0–50 °C, within a ±3% filter-cutoff spec. Distinct from voct_slope_band (room-temp trim authority). [NV] on the part tempco; R_T nominal netlist-bound."
+plugin_ref: "plugin/src/dsp/HPFilter.hpp / LPFilter.hpp — 1 V/oct cutoff; analog needs slope=V_T·ln2(T). The tempco resistor compensates V_T=kT/q drift (+3333 ppm/K) so the once-trimmed slope tracks over temperature."
+netlist_bind:
+  R_TEMPCO: "R229=1k"   # the Vishay TFPT tempco shunt nominal (its +4110 ppm/K is a datasheet part property, [NV])
+# Targets V_T·ln2(T)=0.059732·T_K mV/oct: 0°C=16.315, 50°C=19.302 (DERIVED from physics, not deck output).
+# WITH the +4110 ppm/K tempco the slope tracks to within ~±2%; WITHOUT it (R_T fixed) the drift is ±8–10%
+# (the falsifier) — so this deck proves the tempco resistor earns its place. R_VOCT (R110) sets the nominal
+# ratio (bound in voct_slope_band); R_fixed=54806 is the trimmed R_VOCT+RV.
+measurements:
+  - name: slope_cold     # 0 °C: divider with R_T=889.65 (the +4110 ppm/K shrink)
+    expect: 15.973
+    tol_pct: 1
+  - name: slope_hot      # 50 °C: R_T=1095.15
+    expect: 19.591
+    tol_pct: 1
+  - name: err_cold       # tracking residual at 0 °C, vs V_T·ln2(0C)
+    expect: -2.10
+    tol_abs: 0.3
+  - name: err_hot        # tracking residual at 50 °C
+    expect: 1.50
+    tol_abs: 0.3
+  - name: track_ok       # |err| ≤ 3% across the band (filter-cutoff spec) — true WITH the tempco
+    expect: true

@@ -78,10 +78,17 @@ Octave ratios (value-independent — the constant cancels): for input `n` volts,
 ### Temperature compensation
 
 `V_T·ln2` is **proportional to absolute temperature** (PTAT): the mV/oct the transistor needs
-*grows* +0.33 %/°C. The fixed-ratio divider would deliver a constant mV/oct, so tracking would
-drift. Making `R_T` a +3300–3500 ppm/°C tempco part (POGO: Vishay TFPT +4110 ppm/K) raises the
-divider ratio with temperature to match — the slope trim absorbs the ~20 % TCR excess. The
-THAT340 contributes tight `V_BE` matching, **not** tempco.
+*grows* +0.33 %/°C (= +1/T ≈ +3333 ppm/K at 300 K). The fixed-ratio divider would deliver a
+constant mV/oct, so tracking would drift (±8–10 % over 0–50 °C — see block-7 `voct_tempco_tracking`).
+Making `R_T` a positive-tempco part raises the divider ratio with temperature to track it. The
+**ideal** tempco to cancel the drift through this divider is ≈ **+3394 ppm/K** (the +3333 ppm/K of
+V_T scaled by the divider factor R_fixed/(R_fixed+R_T) ≈ 0.982). POGO uses a Vishay TFPT **+4110 ppm/K**
+part, which **over-compensates** by ~21 % → a **permanent residual cutoff-tracking error of ≈ −2.1 %/+1.5 %**
+across 0–50 °C (well within a filter-cutoff spec — this tunes a *filter*, not a VCO — and far better than
+the ±8–10 % uncompensated case). **Note:** this residual is NOT removed by the slope trim — the trim is a
+one-time room-temp null and cannot correct a tempco *slope* mismatch over temperature. A ~+3300–3400 ppm/K
+tempco part would track ≈ 8× tighter (≈ ±0.25 %); the +4110 ppm/K choice trades that for a standard part.
+The THAT340 contributes tight `V_BE` matching, **not** tempco.
 
 ## Design Choices & Rationale
 
@@ -126,8 +133,8 @@ R_T = 1 kΩ → R_VOCT_total = R_T/ratio − R_T = 1000/0.01792 − 1000 = 54.80
 | Slope | 17.92 mV/oct | V_T·ln2 @ 25 °C |
 | V/oct law | f0 = f_ref·2^V | after expo, 1 V/oct |
 | Octave ratio | ×2 per +1 V | value-independent |
-| Tempco target | +3300–3500 ppm/°C | met by TFPT +4110 ppm/K shunt |
-| Slope trim range | ±10 % | RV_1VOCT 20 kΩ |
+| Tempco (ideal) | ≈ +3394 ppm/K | cancels V_T drift through the divider; POGO TFPT +4110 ppm/K over-comps ~21 % → ≈ ±2 % residual (ok for a filter) |
+| Slope trim range | ±10 % (20 kΩ); target at ~25 % travel | RV_1VOCT 20 kΩ Bourns 3224W (room-temp null only — does not correct tempco residual) |
 
 ## Known Gotchas / Assembly Notes
 

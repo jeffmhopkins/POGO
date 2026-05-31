@@ -47,14 +47,29 @@ verified. **No BASELINE blocks remain.**
 stands for the repeat. No further block-level coverage is outstanding.)
 
 ### C. Deferred / [NV] items awaiting bench measurement (cannot close in-env)
-These are documented in the relevant change files; they need real hardware/datasheet numbers before a
-deck can assert an absolute (today only trim-authority/ratio/shape is checkable):
+These need real hardware/datasheet numbers before a deck can assert an absolute. **Change 0036 converted
+three of them from "deferred" to "trim-authority / temperature verified"** — the absolute stays [NV], but
+the design is now proven *calibratable + temperature-stable* across the device-constant datasheet band:
+- [x] ✅ **block-4/6 VCA Ec+** — **0036** `vca_unity_band`: the Ec+ injection keeps ≥±0.5 dB unity-null
+      authority across the THAT2180 **6.0–6.2 mV/dB** datasheet band (worst case 6.2). Absolute mV/dB still [NV].
+- [x] ✅ **block-6 DRIVE** — **0036** `drive_db_band`: the summer+injection has ≫10× headroom for the SOFT
+      +34.75 dB target across the band (scope: knob→Ec+ full-scale is Phase-3R; reachability proven, not scaling).
+- [x] ✅ **THAT340 tempco / V/oct** — **0036** `voct_slope_band` (room-temp trim authority, 20k pot brackets
+      ±5%) + `voct_tempco_tracking` (full 0–50 °C: the +4110 ppm/K tempco holds cutoff to **≈ −2.1%/+1.5%**,
+      within a ±3% filter spec; PROVEN the tempco earns its place — remove it → ±8–10% fails). **Finding:**
+      +4110 ppm/K over-compensates V_T (ideal ≈ +3394 ppm/K); a ~+3300–3400 ppm/K part would track ≈8× tighter
+      (≈±0.25%). Acceptable for a filter cutoff; logged in aux/filter/voct-expo-divider/spec.md §Temp comp.
 - [ ] **block-7/5/8 Q-cell** — the IRES_AMP **negative-V_ires drive + clamp polarity** (R_Iabc=100k done;
-      the bias-network drive into the −10.8V window is Phase-3R; see 0020 §D, 0024).
-- [ ] **block-4/6 VCA Ec+** — the absolute **THAT2180 6.1 mV/dB** constant (only ±2dB *authority* checked).
-- [ ] **block-6 DRIVE** — the knob→Ec+ dB law + CLIP ±4V threshold trim (Phase-3R).
-- [ ] **block-7 D12 clamp** — V_ires clamp polarity is an open §D item (deck deferred until the bias redesign closes).
-- [ ] **THAT340 tempco** — external +3300ppm; the V/oct slope deck checks trim-centering, not the absolute TCR.
+      the bias-network drive into the −10.8V window is Phase-3R). **Still blocked: no trim circuit exists to
+      authority-check until the negative-drive bias network is designed.** See 0020 §D, 0024.
+- [ ] **block-7 D12 clamp** — V_ires clamp polarity; deck deferred until the Q-cell bias redesign closes.
+- [ ] **block-2 LFO rate** — absolute 0.05–20 Hz (the log-pot taper) is [NV]; endpoints/shape checked (0028).
+
+#### Outstanding follow-ups surfaced by 0036
+- [ ] **expo_voct / voct_octave decks (block-7/5/8 + aux) model the 1V/oct pot as 10k** — the sourced part
+      is **20 kΩ** (Bourns 3224W; components.yaml; block-7 spec.md:185). Those decks PASS but are *conservative*
+      (understate the trim range); 0036 corrected `voct_slope_band` to 20k. A focused cleanup should reconcile
+      the pre-existing `expo_voct`/`voct_octave` pot model to 20k (recomputes their assertion values).
 
 ### D. Known real fixes already applied (for the record)
 - ✅ **0024:** built `netlist_bind` (the gate wasn't netlist-bound); fixed stale spec.md:152 (R_Iabc 1M→100k).

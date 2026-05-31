@@ -1,0 +1,67 @@
+* aux/filter/voct-expo-divider — V/oct slope TRIM-AUTHORITY band (LIBRARY primitive mirror)
+* Generic representative values (NO netlist_bind by design — there is no netlist behind a
+* library primitive). Mirrors specs/block-7/sim/voct_slope_band.cir at the generic level.
+*
+* Claim: a 1V/oct base divider with a calibration trim of adequate range BRACKETS the
+* V_T*ln2 target (17.92 mV/oct @ 25C) across the ROOM-TEMP component/part spread (a few %),
+* i.e. the slope is calibratable to 1 V/oct regardless of room-temp tolerances — WITHOUT
+* the trim having to cover the temperature swing (that is the tempco shunt's job: a +ppm/K
+* resistor cancelling V_T's +3333ppm/K, not modeled here, by design).
+*
+* Divider: series R_VOCT into base node, trim R_TRIM (pot), shunt R_T to GND, driven by 1 V.
+* Slope = R_T/(R_VOCT+R_TRIM+R_T) * 1V (mV). POGO realizes R_VOCT~=49.9k + a Bourns 3224W
+* **20 kOhm** R_TRIM + R_T=1k. Here R_VOCT=49804 (clean generic) so the target V_T*ln2 lands at
+* R_TRIM=5000 ohm = 25% of the 20k pot (NOT mid). The slope is set by the RATIO computed from the
+* spec target (V_T*ln2), NOT pinned by the deck — change any R and mV/oct moves.
+*
+* Band basis (room-temp calibration spread, +/-5% around 17.92): R_VOCT +/-1% + R_T +/-1% +
+* expo-pair V_T spread (~+/-1%) + 25C tempco residual (~+/-1-2%) -> RSS ~+/-3%, rounded to
+* +/-5% for margin -> band 17.024 .. 18.816 mV/oct.
+*
+* Ideal model: pure resistor divider driven by 1 V — this IS the passive base divider; the
+* expo BJT just consumes the base drive, so the ratio alone sets mV/oct.
+
+Vctrl vin 0 DC 1
+
+* --- 20k trim, CCW end (R_TRIM=20k): low end of span ---
+Rva vin na 49804
+Rwa na nlo 20000
+Rta nlo 0 1000
+* --- 20k trim, target point (R_TRIM=5000): lands on V_T*ln2 = 17.92 (~25% travel) ---
+Rvb vin nb 49804
+Rwb nb ntgt 5000
+Rtb ntgt 0 1000
+* --- 20k trim, CW end (R_TRIM=0): high end of span ---
+Rvc vin nc 49804
+Rwc nc nhi 0.001
+Rtc nhi 0 1000
+
+* --- FALSIFIABILITY self-test: a too-small 2k trim, re-centered on target at mid (R_TRIM=1k),
+*     R_VOCT' = 55804-1000-1000 = 53804. Reachable span only ~17.6..18.2 -> INSIDE the band ->
+*     cannot bracket both edges -> booleans go FALSE (proves the check fails if trim too small). ---
+Rvd vin nd 53804
+Rwd nd nf2lo 2000
+Rtd nf2lo 0 1000
+Rve vin ne 53804
+Rwe ne nf2hi 0.001
+Rte nf2hi 0 1000
+
+.control
+  op
+  let mv_lo  = v(nlo)*1000
+  let mv_tgt = v(ntgt)*1000
+  let mv_hi  = v(nhi)*1000
+  let band_lo = 17.024
+  let band_hi = 18.816
+  let brackets_lo = (mv_lo le band_lo) ? 1 : 0
+  let brackets_hi = (mv_hi ge band_hi) ? 1 : 0
+  let target_reachable = ((mv_tgt gt 17.74) and (mv_tgt lt 18.10)) ? 1 : 0
+  let mv_f2lo = v(nf2lo)*1000
+  let mv_f2hi = v(nf2hi)*1000
+  let f2_brackets_lo = (mv_f2lo le band_lo) ? 1 : 0
+  let f2_brackets_hi = (mv_f2hi ge band_hi) ? 1 : 0
+  print mv_lo mv_tgt mv_hi
+  print brackets_lo brackets_hi target_reachable
+  print mv_f2lo mv_f2hi f2_brackets_lo f2_brackets_hi
+.endc
+.end

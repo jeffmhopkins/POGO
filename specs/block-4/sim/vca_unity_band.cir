@@ -1,0 +1,66 @@
+* POGO block-4 VCA — HIGH-3 Ec+ unity-trim authority ACROSS the THAT2180 mV/dB datasheet BAND
+* [NV]: the ABSOLUTE unity-null dB depends on the THAT2180 gain constant (~6.1 mV/dB nominal,
+* datasheet band {6.0, 6.1, 6.2} mV/dB). We do NOT assert the absolute; we prove the HIGH-3
+* injection trim's network-determined ±Ec+ still BRACKETS the 0 dB unity null with ≥±0.5 dB
+* margin at the WORST CASE 6.2 mV/dB (least dB per mV -> least authority).
+*
+* Network = the vca_ecplus.cir injection cell (identical topology + values):
+*   V_CTRL_BUF=0 via R_ec=10k (R235); trim wiper ±1.195V via R_inj=1M (R239); into the
+*   ~10M Ec+ port + 50nA bias. The ±1.195V wiper level is what R233/R234=11k3 actually deliver
+*   (change 0025), so R233 is bound too. Ec+ is NETWORK-DETERMINED here:
+*     wiper +1.195V -> Ec+(+) ≈ +11.33 mV ;  wiper -1.195V -> Ec+(-) ≈ -12.32 mV
+*   (matches vca_ecplus: 11.33mV/6.1 = +1.857 dB, -12.32mV/6.1 = -2.019 dB at nominal).
+* The dB conversion is done in .control by DIVIDING the network mV by each band literal — NOT
+* an alter loop, NOT a parameter sweep of the circuit; the resistors set the mV, the band sets dB.
+*
+* Ideal models (justification): Ec+ port = 10M resistor + 50nA DC bias source — stands in for the
+* THAT2180 high-Z log-port input; the trim authority under test is set by the R_ec/R_inj injection
+* ratio into that port, which an ideal R+I bias models exactly (no device dB law needed — that's
+* the [NV] we deliberately factor out into the .control divide).
+* PARALLEL instances (no alter loops): one copy for the +wiper, one for the -wiper.
+*
+* FALSIFIABILITY (self-test, confirmed by perturbation):
+*   - R_inj 1M->10M: wiper coeff drops ~10x -> Ec+ -> ~±1.2 mV -> ±0.19 dB at 6.2 ->
+*     null_margin_ok FAILS (auth_pos_6p2 ≈ 0.19 < 0.5).
+*   - ref collapse R233 11k3->45k3 (pre-0025 bug): wiper ~±0.32V -> Ec+ ~±3 mV -> ~±0.5 dB ->
+*     null_margin_ok FAILS (sits right at the 0.5 boundary, no margin).
+
+.param Rport=10meg
+.param Ibias=50n
+
+* --- (+) injection: wiper at +ref end (+1.195V), V_CTRL=0 ---
+Vbufp vcbufp 0 DC 0          ; V_CTRL = 0 (unity target)
+Recp  vcbufp ecp_p 10k       ; R_ec = R235 = 10k
+Vwp   twp 0 DC 1.195         ; trim wiper at +ref end (= R233/R234 delivered level)
+Rinjp twp ecp_p 1meg         ; R_inj = R239 = 1M
+Rpp   ecp_p 0 {Rport}
+Ibp   ecp_p 0 DC {Ibias}
+
+* --- (-) injection: wiper at -ref end (-1.195V), V_CTRL=0 ---
+Vbufn vcbufn 0 DC 0
+Recn  vcbufn ecp_n 10k       ; R_ec = R235 = 10k (mirror)
+Vwn   twn 0 DC -1.195        ; trim wiper at -ref end
+Rinjn twn ecp_n 1meg         ; R_inj = R239 = 1M (mirror)
+Rpn   ecp_n 0 {Rport}
+Ibn   ecp_n 0 DC {Ibias}
+
+.control
+  op
+  * network-determined Ec+ (volts):
+  let ecp_pos = v(ecp_p)            ; ≈ +11.33 mV
+  let ecp_neg = v(ecp_n)            ; ≈ -12.32 mV
+  * convert to dB at each datasheet band point (divide by literal, NOT alter):
+  let auth_pos_6p0 = v(ecp_p)/0.0060
+  let auth_pos_6p1 = v(ecp_p)/0.0061
+  let auth_pos_6p2 = v(ecp_p)/0.0062   ; WORST CASE (least dB per mV)
+  let auth_neg_6p0 = v(ecp_n)/0.0060
+  let auth_neg_6p1 = v(ecp_n)/0.0061
+  let auth_neg_6p2 = v(ecp_n)/0.0062
+  * worst-case null margin: trim must reach above +0.5 dB AND below -0.5 dB (brackets 0 dB):
+  let null_margin_ok = ((auth_pos_6p2 gt 0.5) and (auth_neg_6p2 lt -0.5)) ? 1 : 0
+  print ecp_pos ecp_neg
+  print auth_pos_6p0 auth_pos_6p1 auth_pos_6p2
+  print auth_neg_6p0 auth_neg_6p1 auth_neg_6p2
+  print null_margin_ok
+.endc
+.end
