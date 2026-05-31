@@ -8,7 +8,9 @@ plugin_ref: "plugin/src/dsp/VcaBlock.hpp — unity at control=1; analog Ec+ ≈ 
 #   converted through the NOMINAL 6.1mV/dB [NV]. The 50nA Ec+ bias current sinks from the node
 #   (lowers it ~0.5mV), so it rides on the injection symmetrically:
 #     wiper +1.195V: Ec+ = +11.33mV → +1.857 dB ;  wiper -1.195V: Ec+ = -12.31mV → -2.019 dB.
-#   (matches block-4 vca_ecplus.expect.yaml; the authority straddles 0 dB, ~±2 dB, as intended.)
+#   The trim wiper is now the LIVE refp/refn divider node (buffered), so an R_top regression
+#   collapses the authority too (inj_hi_dB 1.857→0.44 at R_top=45.3k) — B is coupled to A, not just
+#   R_inj. (matches block-4 vca_ecplus.expect.yaml; the authority straddles 0 dB, ~±2 dB, as intended.)
 measurements:
   - name: ref_p
     expect: 1.195
