@@ -1,0 +1,27 @@
+* POGO block-4 VCA — HIGH-3 shared +-ref divider REF_P / REF_N (change 0020 §HIGH-3)
+* CLAIM: the shared Ec+ unity-trim reference rails are set by R233/R234 (45k3) from +-12V, with
+* the four 10k unity trim pots (RV1/RV2/RV46/RV47) acting as the divider lower legs in parallel
+* between REF_P and REF_N. No active device — a passive symmetric resistor divider.
+*
+* Topology (from block-4.nets.yaml):
+*   +12V -> R233(45k3) -> REF_P ; -12V -> R234(45k3) -> REF_N ;
+*   RV1/RV2/RV46/RV47 = 10k pots top=REF_P bottom=REF_N -> four 10k end-to-end in PARALLEL
+*   = 10k/4 = 2.5k bridging REF_P<->REF_N.
+* By symmetry REF_P = -REF_N. Node eqn at REF_P: (12-x)/45.3k = 2x/2.5k.
+* This is a value-pinned divider, not [NV] — the rail level falls directly out of R233/R234.
+
+.param Rbridge=2.5k    ; four 10k pots end-to-end in parallel = 2.5k between REF_P and REF_N
+
+Vpos vpos 0 DC 12
+Vneg vneg 0 DC -12
+R233 vpos refp 45.3k    ; +ref divider top  (R233)
+R234 vneg refn 45.3k    ; -ref divider bottom (R234)
+Rbr  refp refn {Rbridge}
+
+.control
+  op
+  let ref_p = v(refp)
+  let ref_n = v(refn)
+  print ref_p ref_n
+.endc
+.end

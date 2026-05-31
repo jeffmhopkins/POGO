@@ -1,0 +1,18 @@
+deck: vctrl_buffer.cir
+description: V_CTRL unity buffer (U97-A) pass-through through R_ec into the Ec+ port — g_ctrl ~ 0.984 (HIGH-3, change 0020). Reconstructs the missing vca_ecplus_full.cir model; complements vca_ecplus.cir (injection authority) by checking the buffer pass-through it omits.
+plugin_ref: "specs/block-4/spec.md:164-167 — U97-A unity buffer -> R_ec(10k) fan-out; loaded g_ctrl 0.984"
+# NETLIST BINDING: the deck's R_ec(10k)/R_inj(1M) literals MUST equal the netlist's R235/R239.
+# If R235 reverted to the pre-0020 rheostat-class value (1M) the bind FAILS the gate — and the
+# g_ctrl measurement would also collapse (~0.57 << 0.95 floor), so the buffer being absent or
+# loaded-down is caught two ways.
+netlist_bind:
+  R_ec:  "R235=10k"
+  R_inj: "R239=1M"
+measurements:
+  # DERIVED: an ideal unity follower is EXACTLY 1.0; the small droop is the loaded divider
+  # R_ec(10k) into (10M port || 1M injection || 50nA bias). expect 0.99 with tol_abs 0.04 so the
+  # check passes the spec-stated 0.95-1.0 loaded window but FAILS if the buffer were absent /
+  # R_ec were the rheostat-class 1M (g_ctrl collapses to ~0.57).
+  - name: g_ctrl
+    expect: 0.99
+    tol_abs: 0.04
