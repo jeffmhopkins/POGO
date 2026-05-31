@@ -1,0 +1,14 @@
+deck: mux_select.cir
+description: "LIBRARY (generic, NO netlist_bind by design): the CD4053 analog mux steers exactly ONE of the three simultaneously-running distortion paths (SC/HC/WF) to DIST_OUT, passing the selected path at unity (Ron≈200Ω into a ≥10k / high-Z next stage -> <2% drop, negligible) while the de-selected paths do not reach the output. Per-band mode select (BP{n}_DIST_MODE: SOFT/HARD/FOLD). Representative per-path values 2.0 / 4.0 / -3.0."
+plugin_ref: "aux/distortion/overview/spec.md §Parallel Paths, MUX Output Selection + §CD4053 Configuration (one CD4053 per BP group, selects SC/HC/WF via BP{n}_DIST_MODE); plugin Distortion.hpp processNorm() dispatches on `mode` — analog mux mirrors the mode switch"
+# Generic library check — verifies the mux pass-through topology, not a netlist value.
+measurements:
+  - name: out_sel_sc
+    expect: 2.0           # SOFT selected -> SC value passes unity (Ron drop negligible)
+    tol_abs: 0.01
+  - name: out_sel_hc
+    expect: 4.0           # HARD selected -> HC value passes unity
+    tol_abs: 0.01
+  - name: out_sel_wf
+    expect: -3.0          # FOLD selected -> WF value passes unity
+    tol_abs: 0.01

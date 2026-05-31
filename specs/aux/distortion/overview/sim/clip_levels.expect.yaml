@@ -1,0 +1,20 @@
+deck: clip_levels.cir
+description: "LIBRARY (generic, NO netlist_bind by design): the overview-level clip LEVELS for the three parallel distortion paths. HC clamps to ±5.8 V (plugin ±1.16 normalized × 5 V; analog BZX84C5V1 5.1 V + 1N4148 Vf 0.7 V back-to-back). WF/SC passive clamp to ±1.4 V (plugin Vth 0.28 × 5 V; 2× 1N4148W per rail). Also confirms the back-conversion to the plugin normals 1.16 and 0.28. The diode/zener Vth are device constants [NV]; this library deck pins the PLUGIN's normalized design targets ×5 V."
+plugin_ref: "plugin/src/dsp/Distortion.hpp:15 (hardClip clamp ±1.16) and :24 (wavefold Vth=0.28); aux/distortion/overview/spec.md §Analog Approximations (HC ±5.8V back-to-back zener; WF/SC clamp ±1.4V)"
+# Generic library check — verifies the clip-level math (normalized target × 5 V), not a netlist value.
+measurements:
+  - name: hc_clip_v
+    expect: 5.8           # +1.16 × 5 V (Distortion.hpp:15 hardClip upper clamp)
+    tol_abs: 0.01
+  - name: hc_clip_vn
+    expect: -5.8          # negative-rail symmetric (back-to-back zener)
+    tol_abs: 0.01
+  - name: wf_clip_v
+    expect: 1.4           # +0.28 × 5 V (Distortion.hpp:24 wavefold Vth)
+    tol_abs: 0.01
+  - name: hc_norm
+    expect: 1.16          # 5.8 / 5 -> plugin hardClip normalized clamp
+    tol_abs: 0.005
+  - name: wf_norm
+    expect: 0.28          # 1.4 / 5 -> plugin wavefold normalized Vth
+    tol_abs: 0.005

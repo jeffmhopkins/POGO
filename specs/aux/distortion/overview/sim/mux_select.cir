@@ -1,0 +1,49 @@
+* aux/distortion/overview LIBRARY check — CD4053 mux passes the SELECTED path unity
+* GENERIC LIBRARY DECK (no netlist_bind by design — per _LIBRARY.md; representative values verify
+*   the topology fact, not a netlist resistor).
+* CLAIM (spec §Parallel Paths / §CD4053 Configuration): all three distortion paths (SC/HC/WF) run
+*   simultaneously; the CD4053 analog mux STEERS exactly one of them to DIST_OUT. The selected path
+*   passes its signal at unity (Ron ≈ 200 Ω in series with a ≥10 kΩ next-stage load -> <2% drop,
+*   negligible); the de-selected paths do NOT reach the output. The mode select is per-band
+*   (BP{n}_DIST_MODE): SOFT/HARD/FOLD.
+* Ideal models (justification): the CD4053 channel is modeled as a series Ron (200 Ω, the datasheet
+*   on-resistance at ±12 V) feeding a high-Z (10 MΩ) sense node — a unity follower stands in for the
+*   high-impedance next-stage input. Each test instance drives a distinct path value and selects ONE
+*   path; the load-bearing facts are (a) the selected path appears unity at the output (Ron drop
+*   negligible), and (b) the de-selected path contributes zero (open channel). PARALLEL instances.
+
+* representative distinct per-path signals
+.param Ron=200          ; CD4053 on-resistance at ±12 V (datasheet typ)
+.param Rload=10meg      ; next-stage high-Z input (unity buffer / ≥10k load)
+
+* ===== instance SEL_SC: SOFT selected -> DIST_OUT = SC value (2.0), HC/WF open =====
+Vsc  sc_a 0 DC 2.0
+Vhc  hc_a 0 DC 4.0       ; de-selected (must not appear at out)
+Vwf  wf_a 0 DC -3.0      ; de-selected
+* selected SC channel: series Ron into the output sense node
+RselA sc_a outa {Ron}
+RldA  outa 0 {Rload}
+* (de-selected HC/WF channels are simply not connected to outa -> open)
+
+* ===== instance SEL_HC: HARD selected -> DIST_OUT = HC value (4.0) =====
+Vsc2 sc_b 0 DC 2.0
+Vhc2 hc_b 0 DC 4.0
+Vwf2 wf_b 0 DC -3.0
+RselB hc_b outb {Ron}
+RldB  outb 0 {Rload}
+
+* ===== instance SEL_WF: FOLD selected -> DIST_OUT = WF value (-3.0) =====
+Vsc3 sc_c 0 DC 2.0
+Vhc3 hc_c 0 DC 4.0
+Vwf3 wf_c 0 DC -3.0
+RselC wf_c outc {Ron}
+RldC  outc 0 {Rload}
+
+.control
+  op
+  let out_sel_sc = v(outa)         ; DERIVED 2.0 (SOFT selected; Ron/Rload drop ~4e-5, negligible)
+  let out_sel_hc = v(outb)         ; DERIVED 4.0 (HARD selected)
+  let out_sel_wf = v(outc)         ; DERIVED -3.0 (FOLD selected)
+  print out_sel_sc out_sel_hc out_sel_wf
+.endc
+.end

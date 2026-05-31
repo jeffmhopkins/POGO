@@ -1,0 +1,38 @@
+* aux/vca/vca-cell LIBRARY check — transimpedance I/V gives unity (-1) at 0 dB
+* GENERIC LIBRARY DECK (no netlist_bind by design — there is no single netlist behind a
+*   library block; representative equal Rs verify the textbook ratio law per _LIBRARY.md).
+* CLAIM (spec §Transfer Function / §Schematic): the THAT2180 is current-in (pin1 Input
+*   ~ virtual ground) / current-out (pin8 Output). AUDIO_IN drives R_in into the input node
+*   (I_in = AUDIO_IN/R_in). At 0 dB the THAT2180 current gain is unity BY DEFINITION (Ec+=0),
+*   so I_out = I_in. The I/V op-amp ((+)=GND) sinks I_out through R_f: AUDIO_OUT = -I_out*R_f.
+*   Product = -(R_f/R_in) = -1.0 when R_f = R_in. [NV]-FREE: pure resistor RATIO — the THAT2180
+*   6.1 mV/dB constant CANCELS (unity current copy at 0 dB), so no device constant appears.
+* Ideal models (justification): the THAT2180 at 0 dB is an ideal current copy I_out=I_in
+*   (Gcopy VCCS senses V(audio)/R_in into the I/V summing node) — stands in for the Blackmer cell
+*   whose 0-dB current gain is unity by definition; the law under test is the R_f/R_in ratio, not
+*   the device. The I/V op-amp is an ideal high-gain VCVS (Eop) with (+)=GND, so its (-) node is a
+*   virtual ground; the input node is held near 0 by the cell's low input impedance (small Rsink).
+* Representative equal values R_in = R_f = 20k (POGO's choice; any equal pair gives -1).
+
+.param Rin=20k          ; representative R_in (V->I)
+.param Rf=20k           ; representative R_f (I/V feedback); Rf=Rin -> unity
+
+Vaudio audio 0 DC 1
+
+* R_in: AUDIO_IN -> vca_in (THAT2180 current-input node)
+Rin   audio vca_in {Rin}
+* THAT2180 input node ~ virtual ground: low input impedance to GND (translinear cell)
+Rsink vca_in 0 1
+* THAT2180 at 0 dB = ideal current copy: I_in = V(audio - vca_in)/R_in pushed into the I/V node
+Bcopy 0 ivin I = (V(audio)-V(vca_in))/{Rin}
+* I/V op-amp ((+)=GND, (-)=ivin virtual ground): AUDIO_OUT = -I_out*R_f
+Eop  out 0 0 ivin 1e6
+Rf   out ivin {Rf}
+
+.control
+  op
+  let gain       = v(out)          ; DERIVED -(R_f/R_in) = -(20k/20k) = -1.0
+  let vin_node_v = v(vca_in)       ; DERIVED ~ 0 V (current input -> virtual ground)
+  print gain vin_node_v
+.endc
+.end
