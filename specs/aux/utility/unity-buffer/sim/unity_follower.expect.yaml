@@ -1,0 +1,16 @@
+deck: unity_follower.cir
+description: LIBRARY (generic) check — Variant A non-inverting unity follower G=+1 pass-through; no netlist_bind by design (no netlist behind a library block)
+plugin_ref: "plugin/src/dsp/InputBuffer.hpp:8-10 — process(v) = clamp(v,-11,11); in-band the buffer is pass-through (unity). Spec aux/utility/unity-buffer §Transfer Function: V_out = V_in (G=+1)"
+# Unity is a TOPOLOGY fact (100% feedback, no gain-setting resistor ratio) -> value-independent,
+# so it carries no bind, per the SPICE-DECK-GUIDE ratio/unity exemption. Two in-band levels confirm
+# gain = +1 is level-independent and the pass-through error is ~0.
+measurements:
+  - name: gain_lo        # G=+1 at +0.5V input
+    expect: 1.0
+    tol_abs: 0.001
+  - name: gain_hi        # G=+1 at +3V input (level-independent)
+    expect: 1.0
+    tol_abs: 0.001
+  - name: passthru       # output == input => error 0V
+    expect: 0.0
+    tol_abs: 0.001

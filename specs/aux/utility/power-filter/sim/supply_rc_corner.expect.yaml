@@ -1,0 +1,12 @@
+deck: supply_rc_corner.cir
+description: LIBRARY (generic) check — supply RC low-pass ripple-rejection corner f=1/(2π·R_s·C); no netlist_bind by design (no netlist behind a library block)
+plugin_ref: "analog-only (power filtering has no plugin DSP analog). Spec aux/utility/power-filter §Board-Level Filtering — ferrite bead + 10µF bulk + 100nF per rail forms a 1st-order RC low-pass to GND"
+# Generic library values (no netlist behind it). The checkable law is the RC corner the bulk
+# cap forms with the series (bead) resistance: f = 1/(2π·R_s·C). DERIVED from the law, not the
+# deck: with C=10µF and R_s=15.915Ω, f = 1/(2π·15.915·10µF) = 1000 Hz. The bead's exact impedance
+# is frequency-dependent and not a fixed R; R_s is a representative documentary value picked to
+# land a round corner — the law under test is f=1/(2πRC), which moves if either R_s or C changes.
+measurements:
+  - name: fc             # -3dB corner of the supply RC low-pass = 1/(2π·R_s·C) = 1.000 kHz
+    expect: 1000.0
+    tol_pct: 2

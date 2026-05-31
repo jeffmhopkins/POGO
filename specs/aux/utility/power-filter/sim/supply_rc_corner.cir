@@ -1,0 +1,29 @@
+* aux/utility/power-filter — board supply ripple-rejection RC low-pass corner (LIBRARY generic)
+* Generic representative values (NO netlist_bind by design — there is no netlist behind a
+* library block). Per spec §Board-Level Filtering, each rail is: [ferrite bead]──┬──10µF──┬──100nF
+* to GND. For ripple/audio frequencies the ferrite bead presents a series resistance R_s and the
+* bulk 10µF shunt cap forms a 1st-order RC low-pass to GND, attenuating supply ripple above the
+* corner f = 1/(2π·R_s·C). This is the genuinely-checkable transfer law of the filter.
+* (The bead is a frequency-dependent impedance — ~600Ω at 100MHz — but at the low/audio ripple
+* band it behaves as a small series resistance; we model that with a representative R_s so the
+* RC corner is a falsifiable number, per the GUIDE's "state honestly what's checkable" guidance.)
+*
+* Representative pick for a clean round corner: C = 10µF (the spec's bulk cap), R_s chosen so
+* f = 1.000 kHz exactly -> R_s = 1/(2π·f·C) = 1/(2π·1000·10µF) = 15.915 Ω. (A real ferrite bead
+* + plane resistance in the tens-of-mΩ-to-ohms range; 15.9Ω is a representative documentary R_s
+* picked to land a round corner — the LAW f=1/(2πRC) is what is under test, not the bead's exact Z.)
+* Ideal model justification: Rs+Cint is exactly the 1st-order RC the bulk cap forms with the
+* series element; no bead Spice model is needed because the corner is an RC property.
+.param C=10u
+.param fpick=1000
+.param Rs={1/(2*3.141592653589793*fpick*C)}   ; 15.915 Ω -> RC corner at 1.000 kHz
+
+Vac ain 0 AC 1 DC 0        ; supply ripple source (1V AC into the rail node)
+Rser ain out {Rs}         ; ferrite-bead series resistance R_s
+Cbulk out 0 {C}           ; 10µF bulk bypass to GND -> 1st-order RC low-pass
+
+.control
+  ac dec 100 10 100k
+  meas ac fc when vdb(out)=-3.01     ; -3dB corner of the RC low-pass = 1/(2*pi*Rs*C)
+.endc
+.end

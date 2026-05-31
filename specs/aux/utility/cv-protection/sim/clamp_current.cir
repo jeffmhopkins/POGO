@@ -1,0 +1,33 @@
+* aux/utility/cv-protection — 100Ω series + BAT54S dual-Schottky clamp (LIBRARY generic)
+* Generic representative values (NO netlist_bind by design — there is no netlist behind a
+* library block). The standard POGO input-protection cell: a 100Ω series R (R_in) feeds the
+* BAT54S series junction (the signal node), which D1/D2 clamp to the ±12V rails. Per the spec
+* §Schematic and the BAT54S Pinout Reference, the clamp LEVEL is rail+Vf ≈ ±12.3V (Schottky
+* Vf ≈ 0.3V) — that is set by the PART [NV], documentary only. The FALSIFIABLE, R-dependent
+* fact is the CLAMP CURRENT through R_in: I = (Vin − Vclamp)/R_in. That current is what the
+* 100Ω is *for* (it protects the diode), and it genuinely depends on R_in (halve R, double I).
+* Plugin ref: InputBuffer.hpp:8-10 (the buffer it feeds is a ±11V clamp; the diode clamp at
+* the rails sits just ahead of it). Modeled the same way as block-A/sim/input_clamp.cir (0029).
+*
+* Ideal model justification: the BAT54S clamped node is a behavioral clamp B-source pinned at
+* the rail+Vf level (the diode's job); R_in is a real resistor carrying the actual clamp
+* current, so I = i(Vov) is exercised by the 100Ω value, not pinned by the model.
+.param Rprot=100          ; = R_in (100Ω series current-limit); representative library value
+
+* --- over-voltage: a representative +17V over-drive through R_in into the +12.3V clamp ---
+Vov ov 0 DC 17
+Rov ov tip {Rprot}        ; R_in — carries the clamp current I=(17-12.3)/Rprot (R-dependent)
+Bcl tip 0 V = (V(ov) > 12.3) ? 12.3 : ((V(ov) < -12.3) ? -12.3 : V(ov))  ; BAT54S node, level [NV]
+
+* --- in-band: a normal CV (+3V) passes the 100Ω into an open node unchanged (no clamping) ---
+Vin nin 0 DC 3
+Rin nin sig {Rprot}       ; in-band: no diode conducts, node follows input (topology)
+
+.control
+  op
+  let clamp_hi = v(tip)          ; protected-node level ~+12.3V = rail+Vf ([NV] documentary)
+  let clamp_i  = abs(i(Vov))     ; clamp current through R_in = (17-12.3)/Rprot; R-load-bearing
+  let inband   = v(sig) - 3.0    ; in-band pass-through error (no clamp) -> 0V
+  print clamp_hi clamp_i inband
+.endc
+.end

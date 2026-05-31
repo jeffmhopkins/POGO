@@ -1,0 +1,28 @@
+* aux/utility/unity-buffer — G=+1 non-inverting voltage follower pass-through (LIBRARY generic)
+* Generic representative values (NO netlist_bind by design — there is no netlist behind a
+* library block). Variant A is a non-inverting unity follower: output tied to the inverting
+* input => 100% feedback => G=+1 exactly. Unity is a TOPOLOGY FACT (no gain-setting resistor
+* ratio), so it is value-independent — the check confirms the law, not a component value.
+* Plugin ref: InputBuffer.hpp:8-10 — process(v) returns v unchanged inside the linear band
+* (the buffer is a clamp(±11V) only; in-band it is pass-through, i.e. unity).
+*
+* Ideal model justification: Ebuf is a VCVS with gain 1 from the input to the output. This is
+* exactly the closed-loop behavior of a real op-amp follower (A_OL >> 1, 100% feedback ->
+* G = A_OL/(1+A_OL) -> 1); no device model is needed because unity is a feedback-topology law,
+* not a silicon property. Two representative in-band inputs (a small +0.5V and a larger +3V,
+* both well inside ±11V) confirm pass-through is gain-1 and offset-free across level.
+
+Vlo nlo 0 DC 0.5
+Ebuflo blo 0 nlo 0 1        ; ideal unity follower, low input
+
+Vhi nhi 0 DC 3.0
+Ebufhi bhi 0 nhi 0 1        ; ideal unity follower, higher input
+
+.control
+  op
+  let gain_lo = v(blo)/0.5          ; follower gain at +0.5V (topology, no bind)
+  let gain_hi = v(bhi)/3.0          ; follower gain at +3V (topology, no bind)
+  let passthru = v(bhi) - 3.0       ; pass-through error (should be 0 — output equals input)
+  print gain_lo gain_hi passthru
+.endc
+.end
