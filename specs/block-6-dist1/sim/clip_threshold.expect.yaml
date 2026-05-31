@@ -1,0 +1,21 @@
+deck: clip_threshold.cir
+description: "CLIP ±4V window reference divider VREF_P4/VREF_N4 = +4.0V/-4.0V (R186/R187 + R188/R189 from ±12V) — these analog comparator thresholds must equal the plugin's 4.0f CLIP detect level."
+plugin_ref: "plugin/src/Pogo.cpp:459 — BP1_CLIP_LIGHT = (max(|distOutL|,|distOutR|) > 4.0f); VREF_P4/N4 are the comparator analog of that ±4V window"
+# NETLIST BINDING: the deck's R186-R189 literals MUST equal the netlist. If the divider ratio
+# regressed (e.g. R186 20k→10k → +6V, or R187 10k→20k → +6V) the bind/assertion FAILS.
+netlist_bind:
+  R_p_top: "R186=20k"
+  R_p_bot: "R187=10k"
+  R_n_top: "R188=20k"
+  R_n_bot: "R189=10k"
+measurements:
+  # DERIVED from the divider law + the plugin's 4.0f (NOT copied from deck output):
+  #   VREF_P4 = +12 * R187/(R186+R187) = +12 * 10k/30k = +4.0V  (= plugin 4.0f)
+  #   VREF_N4 = -12 * R189/(R188+R189) = -12 * 10k/30k = -4.0V
+  # tol_abs 0.05 ≈ ideal-divider exactness (real 1% parts give ~±40mV; trimmed in Phase-3R).
+  - name: vref_p4
+    expect: 4.0
+    tol_abs: 0.05
+  - name: vref_n4
+    expect: -4.0
+    tol_abs: 0.05
