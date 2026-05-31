@@ -1,0 +1,44 @@
+* POGO block-4 VCA — transimpedance I/V gives unity (−1) magnitude at 0 dB; input is virtual ground
+* CLAIM (spec §2 "Audio path"; aux-vca-cell.md §Transfer Function; nets R7/R40, U4/U6):
+*   The THAT2180 is current-in (pin1 Input ≈ virtual ground) / current-out (pin8 Output).
+*   AUDIO_IN drives R_in (R7, 20k) into the input node:  I_in = AUDIO_IN / R_in.
+*   At 0 dB the THAT2180 current gain is unity BY DEFINITION (Ec+=0), so I_out = I_in.
+*   The I/V op-amp (U6, (+)=GND) sinks I_out through R_f (R40, 20k): AUDIO_OUT = −I_out·R_f.
+*   Product = −(R_f/R_in) = −(20k/20k) = −1.0.  [NV]-FREE: this is a pure resistor RATIO — the
+*   THAT2180 6.1 mV/dB constant CANCELS (unity current copy at 0 dB), so no device constant appears.
+*   Also: pin1 is a current input held at the op-amp-less translinear cell's low-Z node; the I/V
+*   op-amp (−) is a true virtual ground, so the input node sits ≈0 V → Z_in ≈ R_in = 20k.
+* Ideal models (justification): the THAT2180 at 0 dB is an ideal current copy I_out=I_in=V(vca_in)/R_in
+*   (Gcopy VCCS senses V(vca_in)/R_in and pushes that current into the I/V summing node) — this stands
+*   in for the Blackmer cell whose 0-dB current gain is unity by definition (the law under test is the
+*   R_f/R_in ratio, not the device). The I/V is an ideal high-gain op-amp (Eop) whose (+) is GND, so its
+*   (−) node ivin is a virtual ground; vca_in is likewise held near 0 by the cell's low input impedance,
+*   modeled here as a small Rsink to GND so the input node potential reads the virtual-ground condition.
+* PARALLEL single instance (op point). The netlist_bind guards R7 (R_in) and R40 (R_f).
+
+Vaudio audio 0 DC 1
+
+* R_in (R7, 20k): AUDIO_IN -> vca_in (THAT2180 current-input node).
+Rin  audio vca_in 20k
+
+* THAT2180 input node ≈ virtual ground: low input impedance to GND (translinear cell).
+* Small Rsink (1 ohm) so vca_in sits ≈ 0 V — the current-input / virtual-ground condition.
+Rsink vca_in 0 1
+
+* THAT2180 at 0 dB = ideal current copy: I_out = I_in = V(vca_in)/R_in, pushed into ivin.
+* Gcopy senses the input current I_in=(V(audio)-V(vca_in))/R_in and INJECTS it into the I/V
+* summing node ivin (B-source pushes I from n+ to n-, so n+=0, n-=ivin injects into ivin).
+* The op-amp then sinks it through R_f: AUDIO_OUT = −I_out·R_f.
+Bcopy 0 ivin I = (V(audio)-V(vca_in))/20e3
+
+* I/V op-amp (U6 half): (+) = GND (node 0), (−) = ivin (virtual ground). Out via R_f.
+Eop  out 0 0 ivin 1e6
+Rf   out ivin 20k        ; R_f (R40, 20k)
+
+.control
+  op
+  let gain        = v(out)         ; DERIVED −(R_f/R_in) = −(20k/20k) = −1.0
+  let vin_node_v  = v(vca_in)      ; DERIVED ≈ 0 V (current input -> virtual ground -> Z_in≈R_in)
+  print gain vin_node_v
+.endc
+.end

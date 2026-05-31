@@ -1,0 +1,12 @@
+deck: gain_law_shape.cir
+description: "[NV] THAT2180 dB-law SHAPE only — equal Ec+ steps give equal dB steps (log-linearity) + unity anchor at Ec+=0. The load-bearing `linearity` ratio CANCELS the 6.1 mV/dB device constant; the absolute slope is unmeasurable and is NOT asserted. No netlist_bind: 6.1 mV/dB is not a netlist value and the linearity ratio is value-independent."
+plugin_ref: "plugin/src/dsp/VcaBlock.hpp:26-27 — G = 10^(2*(control-1)) = exponential gain (G_dB = 40*(control-1)); spec/block-4 §2 Gain Law; aux-vca-cell.md §THAT 2180 Gain Law"
+# netlist_bind: NONE — the linearity ratio cancels all constants (db_step2−db_step1 is independent
+# of the dB slope); the 6.1 mV/dB used to place test points is a device constant, not a netlist ref.
+measurements:
+  - name: g_unity     # DERIVED: unity anchor — Ec+=0 -> G=10^0 = 1.0 (holds for ANY dB constant)
+    expect: 1.0
+    tol_abs: 0.01
+  - name: linearity   # LOAD-BEARING. DERIVED: equal Ec+ steps -> equal dB steps -> step2−step1 = 0.0
+    expect: 0.0
+    tol_abs: 0.1      # dB; ratio cancels the constant, so this is near-exact (log-linearity)
