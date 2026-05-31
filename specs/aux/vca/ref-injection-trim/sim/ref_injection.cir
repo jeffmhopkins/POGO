@@ -14,7 +14,8 @@
 *   V_ctrl (buffered, =0 at unity target) via R_ec=10k; trim wiper (±ref) via R_inj=1M; into the
 *   ~10Meg Ec+ port + 50nA bias. The wiper coefficient = R_ec/(R_ec+R_inj) ≈ 0.0099, so the wiper
 *   swept ±1.195V injects Ec+ ≈ ±11.8mV. Convert through the NOMINAL 6.1mV/dB [NV] -> ±~1.9dB.
-*   NON-VACUOUS for the RATIO: regressing R_inj 1M->10k would jump the authority ~50×.
+*   NON-VACUOUS for the RATIO: regressing R_inj 1M->10k jumps the authority ~50×. The wiper is the
+*   LIVE refp/refn node (buffered), so an R_top regression also collapses the authority (B couples to A).
 * PARALLEL instances (no alter loops).
 
 .param Rport=10meg
@@ -29,18 +30,20 @@ R_top_n vneg refn 11.3k      ; -ref divider top
 Rbr refp refn {Rbridge}      ; pot bridge (lower leg)
 
 * --- (B) injection authority: wiper at +end and -end of the ±ref into Ec+ ---
-* (b1) wiper at +ref end (+1.195V), V_ctrl=0 -> Ec+ rises by the injected amount
+* (b1) wiper at +ref end, V_ctrl=0 -> Ec+ rises by the injected amount.
+*      The wiper voltage is the LIVE REF_P node (high-Z buffer, no extra divider load) — so a
+*      part-A R_top regression ALSO collapses the injected Ec+ here (couples B's authority to A's level).
 Vbuf_p vcbuf_p 0 DC 0        ; V_ctrl = 0 (unity target)
 Rec_p vcbuf_p ecp_p 10k
-Vwp twp 0 DC 1.195           ; trim wiper at +ref end (the level the divider delivers)
+Ewp twp 0 refp 0 1           ; trim wiper at +ref end = live REF_P (buffered, was a fixed 1.195V literal)
 Rinj_p twp ecp_p 1meg
 Rport_p ecp_p 0 {Rport}
 Ibias_p ecp_p 0 DC {Ibias}
 
-* (b2) wiper at -ref end (-1.195V)
+* (b2) wiper at -ref end = live REF_N
 Vbuf_n vcbuf_n 0 DC 0
 Rec_n vcbuf_n ecp_n 10k
-Vwn twn 0 DC -1.195
+Ewn twn 0 refn 0 1           ; trim wiper at -ref end = live REF_N (buffered)
 Rinj_n twn ecp_n 1meg
 Rport_n ecp_n 0 {Rport}
 Ibias_n ecp_n 0 DC {Ibias}
