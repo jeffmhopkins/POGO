@@ -1,0 +1,22 @@
+* aux/filter/expo-converter — V/oct base-divider slope = V_T*ln2 (LIBRARY generic check)
+* Generic representative values (NO netlist_bind — library block). The THAT340 expo pair
+* doubles I_abc per V_T*ln2 of base voltage. To map 1 V/oct (DSP f0 = f_ref*2^Vctrl,
+* HPFilter.hpp:18 / LPFilter.hpp:20) onto the transistor base, the input divider must scale
+* 1 V down to V_T*ln2 = 25.85mV*0.6931 = 17.92 mV/oct at room temp (25 C).
+*
+* Representative divider: series R_VOCT with a shunt R_T to GND, ratio R_T/(R_VOCT+R_T) =
+* 17.92mV/1V. Pick a clean R_T = 1k; then R_VOCT+R_T = 1000/0.01792 = 55804 -> R_VOCT=54804.
+* (POGO realizes this with R_VOCT≈49.9k + a trim leg; here we use the exact ratio generically.)
+* Ideal model: plain resistor divider driven by a 1 V source — this IS the base divider whose
+* ratio sets mV/oct; no active device needed to check the divider law.
+
+Vctrl vin 0 DC 1
+Rseries vin nb 54804
+Rshunt  nb 0 1000
+
+.control
+  op
+  let mv_per_oct = v(nb)*1000     ; volts at the base per 1 V input, in mV (= mV/oct)
+  print mv_per_oct
+.endc
+.end

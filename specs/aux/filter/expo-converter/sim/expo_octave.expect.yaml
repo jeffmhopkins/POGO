@@ -1,0 +1,15 @@
+deck: expo_octave.cir
+description: LIBRARY (generic) check — expo law I_abc doubles per octave (I_ref & V_T cancel in the ratio); no netlist_bind by design (value-independent ratio, no netlist behind a library block)
+plugin_ref: "plugin/src/dsp/HPFilter.hpp:18 / LPFilter.hpp:20 — f0 = f_ref*2^cutoffV; I_abc ∝ f0 so I_abc(n oct)/I_abc(0) = 2^n"
+measurements:
+  # Derived from f0 = f_ref*2^Voct (the DSP octave law), NOT deck output. The I_ref / V_T
+  # constants cancel in the ratio, so these are exact integers regardless of representative values.
+  - name: ratio_1oct
+    expect: 2.0
+    tol_pct: 1
+  - name: ratio_2oct
+    expect: 4.0
+    tol_pct: 1
+  - name: ratio_3oct
+    expect: 8.0
+    tol_pct: 1

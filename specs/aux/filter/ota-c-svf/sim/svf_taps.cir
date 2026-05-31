@@ -1,0 +1,51 @@
+* aux/filter/ota-c-svf — SVF tap topology: LP/HP/BP sign + shape (LIBRARY generic check)
+* Two-integrator state-variable loop (Simper analog prototype). Generic representative
+* values (NO netlist_bind — library block). Verifies the canonical tap behavior:
+*   HP = x - (1/Q)*BP - LP        (summing node)
+*   BP = (w0/s)*HP                 (1st integrator)
+*   LP = (w0/s)*BP                 (2nd integrator)
+* so:  at DC   -> LP = x (gain 1), HP = 0, BP = 0
+*      at HF   -> HP = x (gain 1), LP = 0, BP = 0
+*      at w0   -> BP magnitude = Q*x (peak), and LP=HP=x at the crossover.
+* Plugin ref: SVFGroup/LPFilter/HPFilter (plugin/src/dsp/*.hpp): v2=LP, v1=BP,
+*   HP=x-k*v1-v2 (HPFilter.hpp:40). The plugin LP returns v2, BP returns v1, HP returns -(...).
+*
+* Representative pick: f0 = 1.000 kHz, Q = 1 (so 1/Q = 1), C = 10 nF, gm = 2*pi*f0*C.
+* Ideal models: Esum is a VCVS forming the HP summing node (the analog SUM_AMP, idealized
+*   to its exact transfer x - k*BP - LP); Gint+Cint are the two gm-C integrators (the OTAs).
+*   These ideal parts realize exactly the loop math under test; no LM13700 model needed.
+
+.param C=10n
+.param f0=1000
+.param Q=1
+.param k={1/Q}
+.param gm={2*3.141592653589793*f0*C}
+
+Vin nin 0 AC 1 DC 0
+
+* HP summing node: HP = x - k*BP - LP.  Build via a B-source (exact analog sum).
+Bhp nhp 0 V = V(nin) - k*V(nbp) - V(nlp)
+* Integrator 1 (PURE integrator): BP = (gm/C)/s * HP.  The VCCS senses ONLY V(nhp)
+*   (the +/- pair is nhp,0 — NOT fed back to nbp), so I = gm*V(nhp) charges Ci1 ->
+*   V(nbp) = (gm/sC)*V(nhp). A self-referencing pair (nhp,nbp) would make it a lossy
+*   1st-order LP (DC gain 1) and the loop would settle at x/3 on every tap — the bug.
+Gi1 0 nbp nhp 0 {gm}
+Ci1 nbp 0 {C}
+* Integrator 2 (PURE integrator): LP = (gm/C)/s * BP
+Gi2 0 nlp nbp 0 {gm}
+Ci2 nlp 0 {C}
+
+.control
+  * --- DC / HF tap magnitudes (gain to x) ---
+  ac dec 200 1 1meg
+  * at 1 Hz (far below f0): LP ~ 1, HP ~ 0
+  let idc = 1
+  meas ac lp_dc  find vm(nlp) at=1
+  meas ac hp_dc  find vm(nhp) at=1
+  * at 1 MHz (far above f0): HP ~ 1, LP ~ 0
+  meas ac hp_hf  find vm(nhp) at=1e6
+  meas ac lp_hf  find vm(nlp) at=1e6
+  * at f0 = 1 kHz: BP peak magnitude = Q (=1 here); LP and HP both = Q at crossover too
+  meas ac bp_f0  find vm(nbp) at=1000
+.endc
+.end

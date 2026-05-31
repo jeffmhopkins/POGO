@@ -1,0 +1,9 @@
+deck: gm_c_corner.cir
+description: LIBRARY (generic) check — gm-C integrator corner f = gm/(2*pi*C); no netlist_bind by design (no netlist behind a library block)
+plugin_ref: "plugin/src/dsp/LPFilter.hpp:20-22 — f0 maps to SVF g=tan(pi*f0/fs); analog prototype ω0 = gm/C (aux/filter/ota-c-svf §Transfer Function: f0 = gm/(2π·C))"
+measurements:
+  # f = gm/(2*pi*C). With C=10nF and gm=2*pi*1000*10nF the corner is 1.000 kHz exactly.
+  # Derived from the law, not the deck: 62.832uS/(2*pi*10nF) = 1000 Hz.
+  - name: fcorner_hz
+    expect: 1000.0
+    tol_pct: 2
