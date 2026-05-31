@@ -4,7 +4,7 @@ Living status of the per-block SPICE math-validation effort. The gate
 (`tools/build_spice.py --check`, blocking since 0023) runs every deck listed here.
 Methodology + how to extend: `tools/SPICE-DECK-GUIDE.md`.
 
-**Last updated:** 2026-05-31 (change 0029) · **48 decks across 13 block dirs, all passing.**
+**Last updated:** 2026-05-31 (change 0029) · **47 decks across 13 block dirs, all passing.**
 **🎉 ALL blocks are 🟢 FULL** — every block with a netlist now has netlist-bound, adversarially-verified
 SPICE coverage (svf2/svf3 + dist2/dist3 are identical copies of svf1/dist1, covered by representative).
 

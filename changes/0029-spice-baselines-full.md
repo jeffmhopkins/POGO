@@ -70,7 +70,7 @@ math discovery. block-B's writer derives its one deck inline.)
   Q ≈ 0.74", resolving the §3-vs-§D contradiction (the q_cell deck already used the live 100k).
 - **block-6-mix** bp3_normal plugin_ref Pogo.cpp:497-499 → **501-503** (cosmetic line-range).
 - **block-8 expo** mv_lo/mv_hi annotated as geometry-derived trim-authority brackets (honesty note).
-- All 7 `--check` gates green; **48 decks total**.
+- All 7 `--check` gates green; **47 decks total**.
 
 ## Gate checklist
 - [x] Stage 1 write/retrofit (4 parallel → binds on 10 decks + 1 new block-B deck)
