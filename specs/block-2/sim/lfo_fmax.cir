@@ -1,0 +1,58 @@
+* POGO block-2 LFO oscillator — HEADLINE f_max = 20 Hz at full rate drive (.tran)
+* CLAIM (aux-lfo-core.md formula; spec block-2 §2 line 67; plugin LFO.hpp:16):
+*   The integrator + Schmitt relaxation oscillator runs at
+*     f = (R5+R7) / (4 * R7 * R_INT * C_INT)
+*   At full rate drive (rate pot wiper at the top, k=1: V_sq drives R1 directly),
+*   with R5(R_FB_SQ)=100k, R7(R_HYS)=82k, R_INT(R1)=590k, C_INT(C1)=47nF:
+*     f_max = 182k / (4 * 82k * 590k * 47nF) = 182000/9101.4 = 20.0 Hz
+*   This is the analog counterpart of plugin LFO.hpp:16  speedHz = 0.05*400^param
+*   evaluated at param=1 -> 0.05*400 = 20 Hz.  V_sat CANCELS in the formula (the
+*   Schmitt threshold V_H = V_sat*R7/(R5+R7) scales with V_sat), so f is V_sat-free.
+*
+* This deck builds a REAL hysteretic oscillator (a memoryless B-source cannot oscillate;
+* the integrator's capacitor state is what breaks the loop and sustains the triangle).
+*
+* TOPOLOGY (per spec §2 lines 106-135 / aux-lfo-core):
+*   - Integrator: ideal op-amp Eint, (+) = GND(0), (-) = nsum (virtual ground),
+*     out = nvtri (the triangle). R1 (R_INT) from the square drive to nsum; C1 (C_INT)
+*     feedback nsum -> nvtri. The inverting integrator gives nvtri = -(1/R1C1) integral(drive).
+*     To make V_sq=+Vsat ramp the triangle toward the +threshold, the drive into R1 is the
+*     INVERTED square (Bdrv = -V_sq) — equivalent to the spec's sign convention where the
+*     square reverses the ramp at each flip.
+*   - Schmitt comparator (non-inverting hysteresis, spec lines 125-133): the (+) input sees
+*     the divider nplus = V_sq*R7/(R5+R7) (R5=R_FB_SQ from the comparator OUTPUT V_sq, R7=R_HYS
+*     from nplus to GND); the (-) input follows the triangle V_tri. The comparator HOLDS state
+*     (V_sq) until the ramp crosses nplus, then flips -> the R5/R7 divider flips nplus -> the
+*     loop oscillates. Flip threshold V_tri = nplus = +/- V_sat*R7/(R5+R7) = +/-4.96 V.
+*
+* IDEAL MODELS (justification):
+*   - Eint (1e6 VCVS) stands in for the TL072 integrator half: high open-loop gain + the real
+*     R1/C1 feedback reproduce the exact virtual-ground integration law f depends on.
+*   - Bsq (rail-to-rail comparator B-source) stands in for the TL072 Schmitt half clamped to
+*     +/-Vsat: an ideal comparator preserves the flip-timing law (period = 2*V_H*R_INT*C_INT/V_sat
+*     per half); the small finite-edge error is absorbed by tol_pct 5.
+*   - Bdrv (unity inverter) realizes the integrator drive sign (square reverses the ramp).
+* KICK: .ic v(nvtri)=0.1 perturbs the integrator off the metastable 0 so it leaves DC.
+
+.param vsat=11          ; TL072 saturation on +/-12V; CANCELS in f (V_H scales with it)
+
+Bdrv ndrv 0 V = -V(vsq)                                  ; integrator drive = inverted square
+Eint nvtri 0 0 nsum 1e6                                  ; integrator op-amp (virtual ground at nsum)
+R1 ndrv nsum 590k                                        ; R_INT
+C1 nsum nvtri 47nF                                       ; C_INT (feedback)
+R5 vsq nplus 100k                                        ; R_FB_SQ: comparator out -> (+) divider top
+R7 nplus 0 82k                                           ; R_HYS: (+) divider -> GND
+Bsq vsq 0 V = (V(nplus) > V(nvtri)) ? vsat : -vsat       ; Schmitt: (+)=nplus, (-)=V_tri
+
+.ic v(nvtri)=0.1        ; kick off the metastable point
+.tran 0.1m 0.6 uic      ; >=10 periods at 20 Hz; fine step for clean edge timing
+
+.control
+  run
+  * measure one full period from the 2nd to the 3rd upward zero-crossing (skip startup)
+  meas tran t1 WHEN v(nvtri)=0 RISE=2
+  meas tran t2 WHEN v(nvtri)=0 RISE=3
+  let fhz = 1/(t2-t1)
+  print fhz
+.endc
+.end

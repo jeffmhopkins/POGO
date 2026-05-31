@@ -1,0 +1,31 @@
+* POGO block-2 LFO slow endpoint — rate-divider floor k_min (op, NOT a 21 s .tran)
+* CLAIM (spec block-2 §3 lines 226-228; aux-lfo-core lines 236):
+*   f scales linearly with the rate-pot wiper fraction k (drive-attenuator topology):
+*     f = k * f_max.
+*   The slow endpoint is set by the divider floor when the wiper is at the bottom:
+*     k_min = R_FLOOR / (RV_RATE + R_FLOOR) = R3 / (RV1 + R3)
+*           = 2.4k / (1M + 2.4k) = 2400/1002400 = 0.002394
+*   -> f_min = k_min * f_max = 0.002394 * 20 Hz = 0.0479 Hz (~= the plugin 0.05 Hz floor,
+*      LFO.hpp:16 at param=0).
+*   We check the DIVIDER RATIO directly (an `op`), avoiding a 21-second transient: the
+*   frequency-vs-k linearity is already proven by lfo_fmax (k=1) + the drive-attenuator law.
+*
+* RV1 (1 MO log rate pot, symbolic netlist value LFO1_RATE) is UNBINDABLE — 1M is a SPEC
+*   LITERAL (the pot's nominal resistance, not a value the bind mechanism can resolve from a
+*   text value). So only R_FLOOR (R3=2k4) is bound; the 1M is hardcoded per spec and commented.
+*   (Same convention as block-3 RV3.)
+*
+* IDEAL MODEL: a plain resistive divider stands in for the pot at full-CCW (wiper at the
+*   bottom tap). The full pot resistance (1M) is in series above the wiper; R3 to GND below.
+*   k_min = R3/(R_pot+R3) — exactly the slow-end divider fraction the spec derives.
+
+V1 vsq 0 DC 1                 ; unit drive into the rate divider (any DC; the RATIO is what matters)
+Rpot vsq nwiper 1MEG          ; RV1 = 1MO log rate pot (SPEC LITERAL; symbolic/unbindable)
+R3   nwiper 0 2.4k           ; R_FLOOR -> GND (sets the slow floor; 2.4k = netlist 2k4)
+
+.control
+  op
+  let k_min = v(nwiper)/1.0   ; wiper fraction = R3/(Rpot+R3)
+  print k_min
+.endc
+.end

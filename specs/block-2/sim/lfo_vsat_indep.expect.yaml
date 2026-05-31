@@ -1,0 +1,14 @@
+deck: lfo_vsat_indep.cir
+description: block-2 LFO frequency is V_sat-INDEPENDENT — two identical oscillators at Vsat=11 V and 12 V run at the same frequency (the Schmitt threshold V_H=V_sat*R7/(R5+R7) scales with V_sat, cancelling it in f). Ratio check; R1/C1/R5/R7 binds guard the shared topology.
+plugin_ref: "specs/aux/aux-lfo-core.md lines 99-102 / spec block-2 §2 lines 67-73 — f=(R5+R7)/(4*R7*R_INT*C_INT), no V_sat term"
+netlist_bind:  # shared-topology passives; a netlist drift moves f and (if asymmetric) the ratio
+  R_INT:   "R1=590k"
+  R_FB_SQ: "R5=100k"
+  R_HYS:   "R7=82k"
+  C_INT:   "C1=47nF"
+measurements:
+  # DERIVED: f has no V_sat term, so f_a/f_b = 1.0 exactly for any two V_sat values.
+  # tol_abs 0.02 covers the independent finite-step period quantization of the two copies.
+  - name: f_ratio
+    expect: 1.0
+    tol_abs: 0.02
