@@ -384,20 +384,19 @@ spawns a **separate Lane A change** — the plugin leads; the schematic never si
 
 - One change per branch/PR; the change file is committed and never deleted (abandoned → `ABANDONED`).
 - **Plugin = ground truth.** Spec and schematic follow the locked plugin; they never lead it.
-- **All six CI `--check` gates pass**: `components.py`, `fetch_datasheets.py` (datasheet-PDF integrity), `build_components.py`, `generate_schematic.py` (symbol archetype self-test incl. datasheet citation + pin⊆pad advisory, then per-block pin coverage + structural + byte-drift), `build_panel.py` (DRC), `build_netlist_viz.py` (docs/netlist.html byte-drift) — plus the `test_drc.py` pytest + `test_parity.py` Python↔JS DRC parity.
+- **All seven CI `--check` gates pass**: `components.py`, `fetch_datasheets.py` (datasheet-PDF integrity), `build_components.py`, `generate_schematic.py` (symbol archetype self-test incl. datasheet citation + pin⊆pad advisory, then per-block pin coverage + structural + byte-drift), `build_panel.py` (DRC), `build_netlist_viz.py` (docs/netlist.html byte-drift), and `build_spice.py` (per-block `sim/` ngspice decks vs `.expect.yaml` behavioral assertions — verifies analog *behavior* vs the plugin DSP; skips cleanly if ngspice absent) — plus the `test_drc.py` pytest + `test_parity.py` Python↔JS DRC parity.
 - The `.nets.yaml` is authored design (lives in `specs/<block>/`); the generated `.kicad_sch` is a build artifact (lives in `kicad/`). They are linked by `generate_schematic.py --check`, not by directory adjacency.
 - No component is used in a netlist before G6 closes (in `components.yaml` + registry + footprint + datasheet).
 - Locked files stay unchanged after lock unless G2/G3 are re-opened.
 
-> **Enforcement note (honor-system, 2026-05):** these invariants are currently enforced by
-> assistant discipline + the six artifact-level `--check` gates, which verify *artifact
+> **Enforcement note (honor-system, 2026-05):** these invariants are enforced by
+> assistant discipline + the artifact-level `--check` gates, which verify *artifact
 > self-consistency* (yaml↔sch, DRC, registry), **not** cross-layer plugin↔panel↔netlist drift
-> or lock state. Tracked follow-ups (a future change): `tools/check_locked.py` (locked blob
-> hashes unchanged), `tools/check_drift.py` (plugin enum surface ↔ panel control count ↔
-> nets/components), and a boundary-net cross-sheet consistency check. **Also planned: a SPICE
-> behavioral gate** (`tools/build_spice.py --check` over per-block `sim/` decks + `.expect.yaml`
-> assertions) to verify analog *behavior* vs the plugin DSP, not just artifact self-consistency —
-> designed in `changes/0021-spice-block-unit-tests.md` (see `tools/SPICE-PLAN.md`).
+> or lock state. The **SPICE behavioral gate** (`build_spice.py --check`, blocking since change 0023)
+> adds analog *behavior* checks vs the plugin DSP (15 per-block decks) — the first gate that verifies
+> correctness-vs-intent, not just self-consistency. Tracked follow-ups (a future change):
+> `tools/check_locked.py` (locked blob hashes unchanged), `tools/check_drift.py` (plugin enum surface ↔
+> panel control count ↔ nets/components), and a boundary-net cross-sheet consistency check.
 
 ```bash
 git checkout -b change/<slug> dev

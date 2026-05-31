@@ -1,0 +1,34 @@
+* POGO block-1 — pre-gain 5× stage (runner-ready 0023)
+* Plugin (PreGain.hpp): GAIN=5 -> V_out = clamp(5×V_in, ±10.5V). Hardware: non-inverting
+* OPA1612, G = 1 + R4/R3 = 1 + 18k/4.7k = 4.83× (~5×); clip at the op-amp rail (~±10.5V).
+* Three parallel instances (Vin = 1 / +5 / −5 V) so each output is a clean named measurement.
+
+* --- instance A: Vin=1V (small-signal gain) ---
+Vina sa 0 DC 1
+Eoa rawa 0 sa nia 1e6
+Rga nia 0 4700
+Rfa rawa nia 18000
+Bca gain 0 V = (V(rawa)>10.5)?10.5:((V(rawa)<-10.5)?-10.5:V(rawa))
+
+* --- instance B: Vin=+5V (positive clip) ---
+Vinb sb 0 DC 5
+Eob rawb 0 sb nib 1e6
+Rgb nib 0 4700
+Rfb rawb nib 18000
+Bcb clip_hi 0 V = (V(rawb)>10.5)?10.5:((V(rawb)<-10.5)?-10.5:V(rawb))
+
+* --- instance C: Vin=-5V (negative clip) ---
+Vinc sc 0 DC -5
+Eoc rawc 0 sc nic 1e6
+Rgc nic 0 4700
+Rfc rawc nic 18000
+Bcc clip_lo 0 V = (V(rawc)>10.5)?10.5:((V(rawc)<-10.5)?-10.5:V(rawc))
+
+.control
+  op
+  let gain    = v(gain)       ; 1+18k/4.7k = 4.83
+  let clip_hi = v(clip_hi)    ; +5V*4.83=24V -> clamped +10.5
+  let clip_lo = v(clip_lo)    ; -24V -> clamped -10.5
+  print gain clip_hi clip_lo
+.endc
+.end

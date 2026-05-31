@@ -1,8 +1,8 @@
 # SPICE behavioral-validation harness — plan
 
-> **Status: PLANNED (design only).** Full design + rationale live in
-> `changes/0021-spice-block-unit-tests.md`. This file is the short pointer the rest of the repo
-> links to. No runner exists yet; do not assume a `build_spice.py` gate is wired.
+> **Status: LIVE (blocking gate).** `tools/build_spice.py --check` runs 15 per-block decks against
+> `.expect.yaml` assertions and is a **blocking CI gate** (change 0023). Design rationale:
+> `changes/0021-spice-block-unit-tests.md`; runner: 0022; full coverage + blocking: 0023.
 
 ## One-paragraph summary
 
@@ -19,7 +19,8 @@ future `tools/build_spice.py --check` becomes the 7th CI gate (advisory first, t
 |---|---|---|
 | Design + convention (this doc, dir layout, `.expect.yaml` schema) | **0021** | ✅ done (merged) |
 | `tools/build_spice.py` runner + migrate `specs/sim/` → per-block `sim/`; land gate **advisory** | **0022** | ✅ done (7 decks: block-3/4/5/6-mix) |
-| Author decks for all blocks; promote gate to **blocking**; graduate 0020 `[NV]` values | 0023 (proposed) | not started |
+| Author decks for all blocks; promote gate to **blocking** | **0023** | ✅ done (15 decks; gate blocking) |
+| Graduate 0020 `[NV]` values to verified assertions once bench/datasheet numbers land | future | pending hardware |
 
 ## History (change 0020 → 0022)
 

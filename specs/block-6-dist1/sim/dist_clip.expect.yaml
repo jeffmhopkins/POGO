@@ -1,0 +1,16 @@
+deck: dist_clip.cir
+description: BP distortion clip thresholds — HC zener / WF-SC diode clamps vs plugin (change 0020)
+plugin_ref: "plugin/src/dsp/Distortion.hpp — hardClip clamp ±1.16; wavefold/softclip Vth=0.28 (×5V audio)"
+measurements:
+  - name: hc_clip_V    # HC back-to-back BZX84C5V1: ±5.8V (5.1 zener + 0.7 Vf)
+    expect: 5.8
+    tol_abs: 0.1
+  - name: wf_clip_V    # WF/SC passive clamp: ±1.4V (2× 1N4148/rail)
+    expect: 1.4
+    tol_abs: 0.05
+  - name: hc_norm      # normalized → plugin hardClip ±1.16
+    expect: 1.16
+    tol_abs: 0.02
+  - name: wf_norm      # normalized → plugin wavefold Vth 0.28
+    expect: 0.28
+    tol_abs: 0.01
