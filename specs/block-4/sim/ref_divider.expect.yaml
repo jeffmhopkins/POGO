@@ -1,23 +1,19 @@
 deck: ref_divider.cir
-description: "Shared Ec+ unity-trim +-ref rails REF_P/REF_N set by R233/R234 (45k3) from +-12V across the four parallel 10k trim pots (HIGH-3, change 0020). DIVERGENCE: spec.md:166 calls these +-1.2V, but the netlist divider math yields only +-0.32V (see comment) — expect is DERIVED FROM THE NETLIST values, not the stale spec number."
-plugin_ref: "specs/block-4/spec.md:166 — 'shared +-1.2V reference (R233/R234)'  (analog-only; no plugin DSP)"
-# NETLIST BINDING: the deck's R233/R234 = 45k3 literals MUST equal the netlist. If R233 were
-# perturbed to 4k53 (10x smaller top leg) the bind FAILS and REF_P blows to ~+9.9V.
+description: "HIGH-3 shared Ec+ unity-trim ±ref rails REF_P/REF_N = ±1.2V, set by R233/R234 from ±12V loaded by the 4 parallel 10k unity trims (2.5k bridge). change 0025 FIX: R233/R234 45k3→11k3 — the SPICE-math gate found that 45k3 gave only ±0.32V (~±0.5dB Ec+ authority) instead of the intended ±2dB, because all 4 trims load REF in parallel."
+plugin_ref: "specs/block-4/spec.md §3 HIGH-3 — shared ±1.2V reference (R233/R234); analog-only, no plugin DSP"
+# NETLIST BINDING: the deck's R233/R234 literal MUST equal the netlist. The bind pins the CORRECTED
+# 11k3 — if the netlist regressed to 45k3 (the bug) this bind FAILS, guarding the change-0025 fix.
 netlist_bind:
-  R_ref_top: "R233=45k3"
-  R_ref_bot: "R234=45k3"
+  R_ref_top: "R233=11k3"
+  R_ref_bot: "R234=11k3"
 measurements:
-  # DERIVED from the NETLIST divider, NOT the spec's '+-1.2V' line (which is STALE / inconsistent
-  # with the 45k3 + four-parallel-10k-pot values now in block-4.nets.yaml):
-  #   node eqn at REF_P (symmetry REF_P=-REF_N=x):  (12 - x)/45300 = 2x/2500
-  #   => 2500*(12-x) = 2*45300*x  => 30000 = 93100*x  => x = 0.3222 V.
-  # So the netlist's divider sets REF_P ~ +0.32V / REF_N ~ -0.32V, NOT the spec's +-1.2V.
-  # This is a real spec<->netlist divergence surfaced by the gate (reported, not papered over).
-  # tol_abs 0.15 absorbs the ideal-pot-loading model (wiper taps, pot tolerance); the 0.9V gap
-  # to the spec's 1.2V is FAR outside this band, so the assertion encodes the netlist truth.
+  # DERIVED from the corrected divider math (NOT the deck output):
+  #   node eqn at REF_P (symmetry REF_P=-REF_N=x):  (12 - x)/11300 = 2x/2500
+  #   => 2500*(12-x) = 2*11300*x  => 30000 = 25100*x  => x = 1.195 V  ≈ +1.2V (the design intent).
+  # tol_abs 0.1 absorbs ideal-pot-loading + E96 rounding (11.3k vs the exact 11.25k).
   - name: ref_p
-    expect: 0.322
-    tol_abs: 0.15
+    expect: 1.195
+    tol_abs: 0.1
   - name: ref_n
-    expect: -0.322     # symmetry: REF_N = -REF_P
-    tol_abs: 0.15
+    expect: -1.195     # symmetry: REF_N = -REF_P
+    tol_abs: 0.1

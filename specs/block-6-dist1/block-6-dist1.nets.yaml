@@ -88,8 +88,8 @@ parts:
   # HIGH-3 (change 0020): Ec+ voltage-injection trim (mirrors block-4). V_DRIVE_CTRL_1 (U91-C summer
   # out, already low-Z → no extra buffer) drives Ec+ via R_ec; trim wiper injects via R_inj across a
   # local ±1.2V ref. Replaces the useless series-rheostat-into-high-Z-Ec+ (SPICE vca_ecplus*.cir).
-  R243: { sym: r, value: 45k3 }   # ±ref divider +12V→REF_P1
-  R244: { sym: r, value: 45k3 }   # ±ref divider -12V→REF_N1
+  R243: { sym: r, value: 22k6 }   # ±ref divider +12V→REF_P1
+  R244: { sym: r, value: 22k6 }   # ±ref divider -12V→REF_N1
   R245: { sym: r, value: 10k }    # R_ec L (V_DRIVE_CTRL_1→EC_BP1_DRIVE_L)
   R246: { sym: r, value: 10k }    # R_ec R
   R247: { sym: r, value: 1M }     # R_inj L (RV51 wiper→EC_BP1_DRIVE_L)

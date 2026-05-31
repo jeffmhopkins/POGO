@@ -1,21 +1,26 @@
-* POGO block-4 VCA — HIGH-3 shared +-ref divider REF_P / REF_N (change 0020 §HIGH-3)
-* CLAIM: the shared Ec+ unity-trim reference rails are set by R233/R234 (45k3) from +-12V, with
-* the four 10k unity trim pots (RV1/RV2/RV46/RV47) acting as the divider lower legs in parallel
-* between REF_P and REF_N. No active device — a passive symmetric resistor divider.
+* POGO block-4 VCA — HIGH-3 shared +-ref divider REF_P / REF_N (change 0025 fix)
+* CLAIM: the shared Ec+ unity-trim reference rails REF_P/REF_N = +-1.2V, set by R233/R234 from
+* +-12V, loaded by the four 10k unity trim pots (RV1/RV2/RV46/RV47) acting as the divider lower
+* legs in parallel between REF_P and REF_N. Passive symmetric resistor divider.
 *
 * Topology (from block-4.nets.yaml):
-*   +12V -> R233(45k3) -> REF_P ; -12V -> R234(45k3) -> REF_N ;
+*   +12V -> R233 -> REF_P ; -12V -> R234 -> REF_N ;
 *   RV1/RV2/RV46/RV47 = 10k pots top=REF_P bottom=REF_N -> four 10k end-to-end in PARALLEL
 *   = 10k/4 = 2.5k bridging REF_P<->REF_N.
-* By symmetry REF_P = -REF_N. Node eqn at REF_P: (12-x)/45.3k = 2x/2.5k.
-* This is a value-pinned divider, not [NV] — the rail level falls directly out of R233/R234.
+* By symmetry REF_P = -REF_N = x. Node eqn at REF_P: (12-x)/R_top = 2x/2.5k.
+* For REF_P = +1.2V: R_top = 11.25k -> E96 11.3k. Value-pinned (NOT [NV]).
+*
+* change 0025: R233/R234 were 45.3k (-> only +-0.32V -> ~+-0.5dB Ec+ authority, NOT the intended
+* +-2dB). The bug: 45.3k was sized for a SINGLE 10k bridge, but all 4 trims load REF in PARALLEL
+* (2.5k). This deck + its bind now pin the corrected 11.3k. (The block-6 DRIVE refs had the same
+* bug with 2 pots each = 5k bridge -> fixed to 22.6k.) Found by the SPICE-math gate (change 0025).
 
 .param Rbridge=2.5k    ; four 10k pots end-to-end in parallel = 2.5k between REF_P and REF_N
 
 Vpos vpos 0 DC 12
 Vneg vneg 0 DC -12
-R233 vpos refp 45.3k    ; +ref divider top  (R233)
-R234 vneg refn 45.3k    ; -ref divider bottom (R234)
+R233 vpos refp 11.3k    ; +ref divider top  (netlist R233, change 0025: 45k3->11k3)
+R234 vneg refn 11.3k    ; -ref divider bottom (netlist R234)
 Rbr  refp refn {Rbridge}
 
 .control

@@ -83,8 +83,8 @@ parts:
   RV53: { sym: trimpot, part: "Bourns 3224W", value: BP2_DRIVE_UNITY_L }  # Ec+ L unity trim (HIGH-3 injection divider)
   RV54: { sym: trimpot, part: "Bourns 3224W", value: BP2_DRIVE_UNITY_R }  # Ec+ R unity trim
   # HIGH-3 (change 0020): Ec+ voltage-injection trim (mirrors dist1). See dist1 for prose.
-  R249: { sym: r, value: 45k3 }   # ±ref divider +12V→REF_P2
-  R250: { sym: r, value: 45k3 }   # ±ref divider -12V→REF_N2
+  R249: { sym: r, value: 22k6 }   # ±ref divider +12V→REF_P2
+  R250: { sym: r, value: 22k6 }   # ±ref divider -12V→REF_N2
   R251: { sym: r, value: 10k }    # R_ec L (V_DRIVE_CTRL_2→EC_BP2_DRIVE_L)
   R252: { sym: r, value: 10k }    # R_ec R
   R253: { sym: r, value: 1M }     # R_inj L (RV53 wiper→EC_BP2_DRIVE_L)

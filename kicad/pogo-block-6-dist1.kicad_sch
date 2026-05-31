@@ -1313,7 +1313,7 @@
   (uuid "f6a37046-607e-5cbe-abe5-584eb89d1b4c")
   (property "Reference" "R243" (at 43.000 1418.000 0)
     (effects (font (size 1.27 1.27)) (justify left)))
-  (property "Value" "45k3" (at 43.000 1414.500 0)
+  (property "Value" "22k6" (at 43.000 1414.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
 )
 (symbol
@@ -1325,7 +1325,7 @@
   (uuid "115e7244-c11b-558a-b0a7-493b617ff09b")
   (property "Reference" "R244" (at 103.000 1418.000 0)
     (effects (font (size 1.27 1.27)) (justify left)))
-  (property "Value" "45k3" (at 103.000 1414.500 0)
+  (property "Value" "22k6" (at 103.000 1414.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
 )
 (symbol

@@ -1,7 +1,8 @@
 # 0025 — SPICE circuit-math validation: block-4 (VCA)
 
-- **Lane:** B (tooling + test fixtures). SPICE decks only; no DSP, panel, `components.yaml`
-  connectivity, or nets change.
+- **Lane:** B (tooling + test fixtures) **+ a real netlist fix** the SPICE-math gate surfaced
+  (block-4 + block-6 DRIVE ±ref divider resistors — see "Bug found" below). Touches `nets.yaml` +
+  `components.yaml` values (no plugin/panel/connectivity change).
 - **Status:** OPEN
 - **Opened:** 2026-05-31
 - **Branch:** `change/0025-spice-math-block4` (stacked on `change/0024-spice-math-pilot` — inherits
@@ -60,6 +61,25 @@ pinouts, ALT shared-V_ctrl connectivity, sourcing/power/layout, THD/feedthrough 
   — the binds RESOLVED, so the 0023 deck's old literals did match the netlist; now bound).
 - Writers self-ran Q3 probes (R46→200k, R43→200k, R40→200k, R235→1M, R233→4k53 all fail correctly).
   8 block-4 decks pass; no netlist↔spec divergence found. Reconciles the dangling vca_ecplus_full.cir ref.
+
+## 🔴 BUG FOUND (the headline result) — HIGH-3 ±ref divider mis-sized
+
+`ref_divider.cir` (slice C) computed REF_P from the **actual netlist** and got **±0.32 V**, not the
+**±1.2 V** spec.md:166 + the 0020 HIGH-3 design claim. **Root cause (my error in change 0020):** R233/R234
+were sized **45.3 k** assuming a *single* 10 k pot bridges REF_P↔REF_N — but all **four** unity trims
+(RV1/RV2/RV46/RV47) share the rails in **parallel** = **2.5 k**, dragging REF_P to 0.32 V. So the Ec+
+injection-trim authority was only **~±0.5 dB**, not the intended **±2 dB**. The block-6 DRIVE refs had the
+**same bug** (R243/244/249/250/255/256 = 45.3 k with 2 pots each = 5 k bridge).
+
+**Fix (this change):**
+- block-4: **R233/R234 45k3 → 11k3** (→ +1.195 V with the 2.5 k load). nets + components + BOM.
+- block-6 dist1/2/3: **R243/244/249/250/255/256 45k3 → 22k6** (→ +1.2 V with the 5 k load). nets + components + BOM.
+- `ref_divider.cir`/`.expect.yaml` now pin the corrected ±1.195 V and **bind R233=11k3** — so a regression
+  back to 45k3 FAILS the gate. Verified: ref_p = 1.195 V ✓, all binds resolve, all 7 gates green.
+
+This is the second real design error the SPICE-math methodology has found (after the 0024 spec/netlist
+divergence) — and the first that corrects live netlist component values. Exactly the goal: the gate
+proves the schematic's circuit math, and caught a value that didn't deliver its stated function.
 
 ### Stage 3 — verifiers (2 parallel adversarial) — RUNNING
 Sharpest block-4 angles: (1) does gain_law_shape (NO bind, [NV]) genuinely fail when perturbed or is it

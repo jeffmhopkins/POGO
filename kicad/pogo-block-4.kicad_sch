@@ -606,7 +606,7 @@
   (uuid "7f73e540-249b-5472-862b-9bae68c4d609")
   (property "Reference" "R233" (at 163.000 538.000 0)
     (effects (font (size 1.27 1.27)) (justify left)))
-  (property "Value" "45k3" (at 163.000 534.500 0)
+  (property "Value" "11k3" (at 163.000 534.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
 )
 (symbol
@@ -618,7 +618,7 @@
   (uuid "f6853ad6-949e-54e1-8bca-aff1f22c4c4b")
   (property "Reference" "R234" (at 43.000 593.000 0)
     (effects (font (size 1.27 1.27)) (justify left)))
-  (property "Value" "45k3" (at 43.000 589.500 0)
+  (property "Value" "11k3" (at 43.000 589.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
 )
 (symbol
