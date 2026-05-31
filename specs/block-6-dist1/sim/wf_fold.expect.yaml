@@ -1,0 +1,24 @@
+deck: wf_fold.cir
+description: "WF folder reflection (the signature wavefold check): V_out = 2*V_clamp - V_fold_in via a non-inverting G=+2 stage (R25/R_f_wf = 10k, 1+R_f/R_g = 2). Below the ±1.4V clamp Vth V_clamp=V_fold_in so V_out=V_in (slope +1); above Vth V_clamp pins at +1.4 so V_out=2.8-V_in (slope -1) — TRUE slope reversal, not gain compression. The ±1.4V Vth is DOCUMENTARY/[NV] (set by the 2×1N4148W-per-rail passive clamp diode part numbers, NOT a bindable resistor) → it is NOT bound; only the folder GAIN RATIO (R25/R_f_wf) is netlist_bound, so this deck FAILS if the +2 ratio is wrong, not merely if the clamp moves."
+plugin_ref: "plugin/src/dsp/Distortion.hpp:18-25 wavefold — V_out = 2*V_clamp - V_in, Vth=0.28 (=±1.4V/5V); aux-distortion.md §WF V_out=2×V_clamp−V_in (R_g=R_f=10k → G=+2)"
+# NETLIST BINDING: the folder ratio R_g:R_f = R25_1L:R_f_wf_1L = 10k:10k pins the +2 stage.
+# If either drifted, (1+R_f/R_g) ≠ 2 and the fold reflection point moves → the assertions below fail.
+# The ±1.4V clamp Vth is set by diode PART NUMBERS (1N4148W), unbindable → NOT in netlist_bind (honest).
+netlist_bind:
+  R_g: "R25_1L=10k"        # folder (-) input (BP1_VFOLDIN_L -> BP1_WFFVG_L)
+  R_f: "R_f_wf_1L=10k"     # folder feedback   (BP1_WFFVG_L  -> BP1_WFOUT_L)
+measurements:
+  # DERIVED from the plugin/spec law V_out = 2*V_clamp - V_fold_in (NOT copied from deck output):
+  #  - wf_lin  at V_in=+0.7 (below Vth): V_clamp=0.7 -> V_out = 2*0.7 - 0.7 = +0.7  (linear pass-through).
+  - name: wf_lin
+    expect: 0.7
+    tol_abs: 0.03        # near-exact: ideal op-amp + below-clamp linear region
+  #  - wf_fold at V_in=+2.8 (above Vth): V_clamp pins +1.4 -> V_out = 2*1.4 - 2.8 = 0.0  (the reflection).
+  - name: wf_fold
+    expect: 0.0
+    tol_abs: 0.05        # near-zero: tol absorbs ideal-clamp/op-amp residue
+  #  - wf_slope_rev: above Vth, V_out=2.8-V_in DECREASES as V_in rises (2.0->2.8): out(2.0)=0.8 > out(2.8)=0.0
+  #    => slope reversed => boolean true. (A non-folding gain stage would have out INCREASE → false.)
+  - name: wf_slope_rev
+    expect: true
+    tol_abs: 0.5         # boolean 1.0/0.0

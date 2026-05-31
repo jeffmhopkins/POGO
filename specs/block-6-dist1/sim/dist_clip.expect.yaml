@@ -1,6 +1,9 @@
 deck: dist_clip.cir
-description: BP distortion clip thresholds — HC zener / WF-SC diode clamps vs plugin (change 0020)
+description: "BP distortion clip thresholds — HC zener / WF-SC diode clamps vs plugin (change 0020). [NV]: the HC ±5.8V (BZX84C5V1 zener Vz 5.1V + 1N4148W Vf 0.7V) and WF/SC ±1.4V (2×1N4148W/rail Vf) thresholds are set by DEVICE PART NUMBERS, NOT by any bindable resistor — no surrounding resistor (R21 HC feedback, R24 WF clamp series) sets the clip LEVEL. So this deck has NO netlist_bind: it is a documentary plugin-target check that the part-number-derived clamp levels match the plugin's normalized thresholds ×5V; the clamp Vf/Vz are unmeasured device constants ([NV])."
 plugin_ref: "plugin/src/dsp/Distortion.hpp — hardClip clamp ±1.16; wavefold/softclip Vth=0.28 (×5V audio)"
+# [NV] — DELIBERATELY NO netlist_bind: the clamp levels are set by diode/zener PART NUMBERS
+# (BZX84C5V1 Vz, 1N4148W Vf), not by a bindable resistor. R21 (HC fb) and R24 (WF clamp series R)
+# only set gain / current-limit, NOT the clip threshold — so no honest resistor bind exists here.
 measurements:
   - name: hc_clip_V    # HC back-to-back BZX84C5V1: ±5.8V (5.1 zener + 0.7 Vf)
     expect: 5.8

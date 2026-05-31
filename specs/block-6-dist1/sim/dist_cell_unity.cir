@@ -1,0 +1,40 @@
+* POGO block-6-dist1 — HC & SC cells are UNITY inverting gain stages (-1); clip onset is set
+*   by the DRIVE VCA AHEAD, not by these cells.
+* CLAIM: the HC gain stage (R20 in / R21 fb, BP1_DRIVEOUT_L -> BP1_HCVG_L -> BP1_HCOUT_L) and the
+*   SC gain stage (R18 in / R19 fb, BP1_DRIVEOUT_L -> BP1_SCVG_L -> BP1_SCOUT_L) are standard
+*   inverting amplifiers with R_in = R_fb = 10k -> closed-loop gain = -R_fb/R_in = -1 (unity).
+*   The diode/zener clamp shunts the feedback only ABOVE its threshold; below threshold (here +1V
+*   in, |out|=1V < the WF/SC 1.4V and HC 5.8V clamps) the cells are clean unity inverters. So the
+*   cell does not set the clip LEVEL — the DRIVE VCA ahead pushes the signal into the fixed clamp.
+*
+* IDEAL MODEL (one line): Eop* = ideal high-gain VCVS op-amp (stands for U34 HC / U34 SC halves,
+*   TL072) so the printed gain is exactly the R_fb/R_in ratio under test — the load-bearing fact.
+*   Clamp diodes omitted: at +-1V drive the output is below every clamp threshold, so the linear
+*   inverting law is exactly what governs (modelling the clamp here would not change the result).
+*
+* PARALLEL: two independent inverting stages (HC, SC), each driven +1V.
+
+.param Rhcin=10k    ; R20_1L (HC input)
+.param Rhcfb=10k    ; R21_1L (HC feedback) -> gain -Rhcfb/Rhcin = -1
+.param Rscin=10k    ; R18_1L (SC input)
+.param Rscfb=10k    ; R19_1L (SC feedback) -> gain -Rscfb/Rscin = -1
+
+* ---- HC inverting stage, +1V in ----
+Vhc hcin 0 DC 1.0
+Rih  hcin hcvg {Rhcin}
+Rfh  hcvg hcout {Rhcfb}
+Eoph hcout 0 0 hcvg 1e6     ; (+) at ground -> inverting; out = -Rfh/Rih * Vhc
+
+* ---- SC inverting stage, +1V in ----
+Vsc scin 0 DC 1.0
+Ris  scin scvg {Rscin}
+Rfs  scvg scout {Rscfb}
+Eops scout 0 0 scvg 1e6     ; (+) at ground -> inverting; out = -Rfs/Ris * Vsc
+
+.control
+  op
+  let hc_gain = v(hcout)     ; +1V in -> -1.0V out (HC unity inverter)
+  let sc_gain = v(scout)     ; +1V in -> -1.0V out (SC unity inverter)
+  print hc_gain sc_gain
+.endc
+.end

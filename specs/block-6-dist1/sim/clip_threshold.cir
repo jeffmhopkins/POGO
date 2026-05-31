@@ -1,0 +1,34 @@
+* POGO block-6-dist1 — CLIP ±4V threshold reference divider VREF_P4 / VREF_N4
+* CLAIM: the shared CLIP-window reference rails equal the plugin's ±4V detection threshold.
+*   Plugin (Pogo.cpp:459): BP1_CLIP_LIGHT = (max(|distOutL|,|distOutR|) > 4.0f).
+*   The analog comparators (U94) compare DISTOUT against VREF_P4 / VREF_N4; those rails
+*   are set by two passive +12/-12 dividers and MUST land on +4.0V / -4.0V.
+*
+* Topology (from block-6-dist1.nets.yaml):
+*   (P)  +12V -> R186 20k -> VREF_P4 -> R187 10k -> GND
+*   (N)  -12V -> R188 20k -> VREF_N4 -> R189 10k -> GND
+*   U94 comparator inputs are high-Z (no extra divider loading; in- = VREF_P4/N4 directly).
+*   Two INDEPENDENT divider sub-circuits run in PARALLEL (per the guide: no alter loop).
+*
+* DERIVED expect (NOT read from deck output):
+*   VREF_P4 = +12 * R187/(R186+R187) = +12 * 10k/30k = +4.0V
+*   VREF_N4 = -12 * R189/(R188+R189) = -12 * 10k/30k = -4.0V
+*   These equal the plugin's 4.0f CLIP threshold (Pogo.cpp:459 — confirmed).
+
+* --- (P) +4V divider: +12 -> R186 -> p4 -> R187 -> GND ---
+Vpos vpos 0 DC 12
+R186 vpos vref_p4 20k         ; netlist R186 (VREF_P4 top)
+R187 vref_p4 0 10k            ; netlist R187 (VREF_P4 bottom)
+
+* --- (N) -4V divider: -12 -> R188 -> n4 -> R189 -> GND ---
+Vneg vneg 0 DC -12
+R188 vneg vref_n4 20k         ; netlist R188 (VREF_N4 top)
+R189 vref_n4 0 10k            ; netlist R189 (VREF_N4 bottom)
+
+.control
+  op
+  let vref_p4 = v(vref_p4)    ; expect +4.0V (= plugin CLIP threshold)
+  let vref_n4 = v(vref_n4)    ; expect -4.0V (= plugin -CLIP threshold)
+  print vref_p4 vref_n4
+.endc
+.end
