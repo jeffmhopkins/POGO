@@ -1,0 +1,16 @@
+deck: hp_polarity.cir
+description: block-7 HP_OUT polarity matches the plugin (unity follower = 0018 fix); guards the regression where a G=-1 buffer double-inverts
+plugin_ref: "plugin/src/dsp/HPFilter.hpp:40 — return -(x - k*v1 - v2); spec block-7 §2 HP_out = HP_inv (unity follower, change 0018)"
+measurements:
+  # HP_OUT for x=2,v1=1,v2=0.5,k=0.5: plugin return -(x-k*v1-v2) = -(1.0) = -1.0.
+  # Derived from HPFilter.hpp:40 for the chosen vector, NOT copied from the deck.
+  - name: hp_out_v
+    expect: -1.0
+    tol_abs: 0.01
+  # HP_OUT sign == plugin-return sign (both negative for this vector) -> true.
+  - name: sign_ok
+    expect: true
+  # the pre-0018 G=-1 inverting buffer (the bug) yields the OPPOSITE sign -> true
+  # (proves the wrong-fix would be caught by this deck).
+  - name: bug_opposite
+    expect: true

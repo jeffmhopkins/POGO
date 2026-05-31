@@ -1,0 +1,60 @@
+* POGO block-7 HP — HP_OUT polarity matches the plugin (guards the change-0018 fix)
+* CLAIM (HPFilter.hpp:40  return -(x - k*v1 - v2)):
+*   The SUM_AMP (inverting summer, equal 100k Rs R30/R92/R94, block-7.nets.yaml) output
+*   node is HP_inv = -(x - k*v1 - v2). The plugin PRE-NEGATES so its return EQUALS that
+*   node. Hardware passes HP_inv through a UNITY non-inverting follower (G=+1, the 0018
+*   fix, OPA1612 half B) -> HP_OUT = HP_inv = -(x - k*v1 - v2)  == plugin return.  OK
+*   REGRESSION GUARD: the 0018 BUG was a second G=-1 inverting buffer here (R100-R103),
+*   which double-inverted -> HP_OUT phase-flipped vs the plugin. Modeled below as
+*   hp_out_bug; it must come out OPPOSITE to hp_out.
+*
+* IDEAL-MODEL JUSTIFICATION: Eop = ideal high-gain VCVS op-amp (1e6) -> real virtual
+* ground + closed-loop -(R_f/R_in) summing with the real 100k Rs. Ebuf = ideal unity
+* follower (G=+1). Ebug = ideal inverting buffer (G=-1) standing in for the removed
+* R100/R103 inverting buffer. DC op only — polarity is a sign question, not a freq one.
+*
+* TEST VECTOR (x - k*v1 - v2 clearly nonzero): x=2, v1=1, v2=0.5, k=1/Q=0.5 (Q=2)
+*   x - k*v1 - v2 = 2 - 0.5 - 0.5 = 1.0  ->  plugin return -(...) = -1.0
+*   => expected_sign(HP_OUT) = -1   (derived from HPFilter.hpp:40, NOT from the deck)
+
+.param k=0.5            ; 1/Q, Q=2
+.param x=2
+.param v1=1
+.param v2=0.5
+
+* SUM_AMP input drives: the three terms whose sum is (x - k*v1 - v2).
+* (The inverting summer's equal 100k Rs make output = -(sum of input voltages).)
+Vx   nvx  0 DC {x}        ; x term       (via R30 = 100k)
+Vq   nvq  0 DC {-k*v1}    ; -k*v1 term   (Q-cell injection, via R92-path equivalent)
+Vv2  nvv2 0 DC {-v2}      ; -v2 term     (feedback, via R94-path equivalent)
+
+* Inverting summer: equal 100k input Rs + 100k feedback (R30/R92/R94 = 100k).
+R30 nvx  nvg 100k
+R92 nvq  nvg 100k
+R94 nvv2 nvg 100k
+Rf  nvg  hpinv 100k
+Eop hpinv 0 0 nvg 1e6     ; ideal op-amp: (+)=GND, (-)=nvg virtual ground
+* -> hpinv = -(x + (-k*v1) + (-v2)) = -(x - k*v1 - v2) = HP_inv  (the HP tap)
+
+* UNITY follower (the 0018 fix): HP_OUT = HP_inv, no inversion
+Ebuf hp_out 0 hpinv 0 1
+
+* BUG (pre-0018): a second G=-1 inverting buffer -> double inversion
+Ebug hp_out_bug 0 0 hpinv 1     ; out = (0 - hpinv) = -hpinv (inverting)
+
+* Booleans are emitted via B-source nodes (ngspice `let` mangles bare >/< operators;
+* B-source ternaries with >/< are reliable — same pattern as block-A input_clamp.cir).
+* expected_sign of plugin return -(x-k*v1-v2) = -1 for this vector (HPFilter.hpp:40).
+* sign_ok: HP_OUT has the SAME sign as the plugin return (product with -1 is > 0).
+Bsok nsok 0 V = ( (V(hp_out)*(-1)) > 0 ) ? 1 : 0
+* bug_opposite: the bug buffer has the OPPOSITE sign to the correct HP_OUT.
+Bbug nbug 0 V = ( (V(hp_out_bug)*V(hp_out)) < 0 ) ? 1 : 0
+
+.control
+  op
+  let hp_out_v     = v(hp_out)
+  let sign_ok      = v(nsok)
+  let bug_opposite = v(nbug)
+  print hp_out_v sign_ok bug_opposite
+.endc
+.end

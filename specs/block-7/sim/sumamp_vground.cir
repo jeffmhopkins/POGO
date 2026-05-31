@@ -1,0 +1,35 @@
+* POGO block-7 — SVF SUM_AMP inverting virtual-ground summer (HP tap node)
+* CLAIM (aux-ota-c-svf §SUM_AMP; spec §2): the SUM_AMP is an inverting summing amp whose
+* (+) input is at GND, so its (−) node is a VIRTUAL GROUND (≈0 V), and its output is
+*   HP_inv = −(x·R_f/R_in + Qfb·R_f/R_FB)
+* With the block-7 netlist values R_in = R_FB = R_f = 100 kΩ (nets R30/R31 R_in,
+* R92/R93 R_FB, R94/R95 R_f) the weights are UNITY: HP_inv = −(x + Qfb). This proves the
+* plugin's (x − k·v1 − v2) resistor-ratio math (the SUM_AMP negation that HPFilter pre-cancels).
+* Ideal op-amp = high-gain VCVS Eop (stands in for OPA1612 half A: closed-loop gain & v-ground
+* are set entirely by the feedback resistor ratios, which is the law under test).
+* Resistor values are cited from the netlist; the −1.0 weights are DERIVED from R_f/R_in = 100k/100k.
+
+* --- instance 1: x = 1 V on R_in, feedback input = 0 -> gain_x = −R_f/R_in; ninv = virtual ground ---
+Vx1   x1 0 DC 1
+Vfb1  f1 0 DC 0
+Eop1  out1 0 0 ninv1 1e6        ; non-inv (+) tied to GND (node 0); inv (−) = ninv1
+Rin1  x1   ninv1 100k           ; R_in  (R30, 100k)
+Rfb1  f1   ninv1 100k           ; R_FB  (R92, 100k)
+Rf1   out1 ninv1 100k           ; R_f   (R94, 100k)
+
+* --- instance 2: feedback input = 1 V on R_FB, x = 0 -> gain_fb = −R_f/R_FB ---
+Vx2   x2 0 DC 0
+Vfb2  f2 0 DC 1
+Eop2  out2 0 0 ninv2 1e6
+Rin2  x2   ninv2 100k           ; R_in  (R30, 100k)
+Rfb2  f2   ninv2 100k           ; R_FB  (R92, 100k)
+Rf2   out2 ninv2 100k           ; R_f   (R94, 100k)
+
+.control
+  op
+  let gain_x     = v(out1)        ; = −R_f/R_in  = −100k/100k = −1.0
+  let gain_fb    = v(out2)        ; = −R_f/R_FB  = −100k/100k = −1.0
+  let vground_mv = v(ninv1)*1000  ; (−) node potential in mV — virtual ground ≈ 0
+  print gain_x gain_fb vground_mv
+.endc
+.end

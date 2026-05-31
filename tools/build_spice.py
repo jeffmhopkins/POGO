@@ -106,6 +106,86 @@ def run_deck(cir_path: str) -> dict:
     return out
 
 
+# ── netlist binding: assert a deck's transcribed value == the netlist's actual value ──
+# Closes the gap that makes the gate "deck-literal vs spec" instead of "netlist vs spec":
+# the .expect.yaml declares `netlist_bind: {<label>: "<REF>=<value>"}`, and the runner reads
+# specs/<block>/<block>.nets.yaml, resolves <REF>'s value, and FAILS if it != <value>. So a
+# silent netlist regression (e.g. R104 1M→100k) fails the gate even though the deck literal
+# (hand-transcribed) still passes its spec-math assertion.
+
+_SUFFIX = {"p": 1e-12, "n": 1e-9, "u": 1e-6, "µ": 1e-6, "m": 1e-3,
+           "k": 1e3, "K": 1e3, "meg": 1e6, "M": 1e6, "g": 1e9, "G": 1e9}
+
+
+def parse_value(s: str) -> float:
+    """Parse an EE value string → float. Handles 100k, 47nF, 1M, 1k, and R-notation 49k9 (=49.9k).
+    Strips a leading unit-less number's trailing unit letters (F/Ω/R) — value is magnitude only."""
+    s = str(s).strip()
+    # drop trailing unit names (F, Ω, ohm, R as a *unit*) but NOT a multiplier suffix
+    s = re.sub(r"(?i)(ohm|Ω|farad)$", "", s).strip()
+    s = re.sub(r"F$", "", s).strip()  # nF/pF/uF → the F is the unit
+    # R-notation: 49k9 → 49.9k ; 4k7 → 4.7k ; 1R0 → 1.0
+    m = re.fullmatch(r"(\d+)(p|n|u|µ|m|k|K|meg|M|g|G|R)(\d+)", s)
+    if m:
+        whole, suf, frac = m.groups()
+        mult = 1.0 if suf == "R" else _SUFFIX[suf]
+        return float(f"{whole}.{frac}") * mult
+    # standard: <number><suffix?>  e.g. 100k, 47n, 1M, 220, 4.7k
+    m = re.fullmatch(r"([0-9.]+)\s*(meg|p|n|u|µ|m|k|K|M|g|G)?", s)
+    if m:
+        num, suf = m.groups()
+        return float(num) * (_SUFFIX[suf] if suf else 1.0)
+    raise ValueError(f"cannot parse value {s!r}")
+
+
+_NETLIST_CACHE: dict = {}
+
+
+def netlist_value(block: str, ref: str):
+    """Resolve a component ref's value from specs/<block>/<block>.nets.yaml (parts: section)."""
+    if block not in _NETLIST_CACHE:
+        path = os.path.join(REPO, "specs", block, f"{block}.nets.yaml")
+        if not os.path.exists(path):
+            _NETLIST_CACHE[block] = None
+        else:
+            doc = yaml.safe_load(open(path))
+            _NETLIST_CACHE[block] = (doc or {}).get("parts", {}) or {}
+    parts = _NETLIST_CACHE[block]
+    if parts is None:
+        return None, f"netlist not found: specs/{block}/{block}.nets.yaml"
+    if ref not in parts:
+        return None, f"ref {ref} not in {block} netlist"
+    entry = parts[ref]
+    if not isinstance(entry, dict) or "value" not in entry:
+        return None, f"ref {ref} has no value in {block} netlist"
+    return entry["value"], None
+
+
+def check_netlist_binds(spec: dict, block: str) -> list[tuple[bool, str]]:
+    """For each `netlist_bind: {label: 'REF=value'}`, assert the netlist's REF value == the
+    declared value. Fails if they diverge (the deck transcribed a stale value)."""
+    out = []
+    binds = spec.get("netlist_bind", {}) or {}
+    for label, decl in binds.items():
+        m = re.fullmatch(r"\s*([A-Za-z_]\w*)\s*=\s*(.+?)\s*", str(decl))
+        if not m:
+            out.append((False, f"bind {label}: malformed '{decl}' (want 'REF=value')"))
+            continue
+        ref, declval = m.group(1), m.group(2)
+        netval, err = netlist_value(block, ref)
+        if err:
+            out.append((False, f"bind {label}: {err}"))
+            continue
+        try:
+            dv, nv = parse_value(declval), parse_value(netval)
+        except ValueError as e:
+            out.append((False, f"bind {label}: {e}"))
+            continue
+        ok = abs(dv - nv) <= abs(nv) * 1e-4 + 1e-15  # exact match (0.01%)
+        out.append((ok, f"bind {label}: deck {declval} {'==' if ok else '!='} netlist {ref}={netval}"))
+    return out
+
+
 def check_measurement(spec: dict, measured: dict) -> tuple[bool, str]:
     name = spec["name"]
     key = name.lower()
@@ -133,6 +213,10 @@ def evaluate(cir_path: str, expect_path: str) -> tuple[bool, list[str]]:
     spec = yaml.safe_load(open(expect_path))
     measured = run_deck(cir_path)
     lines, all_ok = [], True
+    # netlist binding: deck's transcribed values must equal the live netlist values
+    for ok, msg in check_netlist_binds(spec, block_of(cir_path)):
+        all_ok = all_ok and ok
+        lines.append(("  ✓ " if ok else "  ✗ ") + msg)
     for m in spec.get("measurements", []):
         ok, msg = check_measurement(m, measured)
         all_ok = all_ok and ok
