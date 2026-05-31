@@ -1,0 +1,13 @@
+deck: ires_summer.cir
+description: HP IRES_AMP (U66 half A) is an inverting summer with unity weights (R_QBIAS=R_QINV=R_f_q=100k) -> V_ires = −(V_bias + V_res); higher res-CV drives V_ires negative -> Iabc_q down -> Q up. Checks RATIO + SIGN only (absolute V_bias self-osc setpoint is [NV], §D negative-drive window)
+plugin_ref: "aux-q-control.md §IRES_AMP detail: V_ires = −(V_bias·R_f_q/R_QBIAS + V_res·R_f_q/R_QINV); plugin/src/dsp/HPFilter.hpp Q=0.5·4000^res (higher res -> higher Q)"
+measurements:
+  - name: vires_bias      # DERIVED: −R_f_q/R_QBIAS = −100k/100k = −1.0 (V_bias weight unity)
+    expect: -1.0
+    tol_abs: 0.02
+  - name: vires_res       # DERIVED: −R_f_q/R_QINV = −100k/100k = −1.0 (V_res weight unity AND inverting sign)
+    expect: -1.0
+    tol_abs: 0.02
+  - name: dvires_dvres    # DERIVED: dV_ires/dV_res = −1.0 -> higher res-CV pushes V_ires negative (-> lower Iabc_q -> higher Q)
+    expect: -1.0
+    tol_abs: 0.02

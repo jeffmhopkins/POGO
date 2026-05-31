@@ -1,0 +1,46 @@
+* POGO block-7 — IRES_AMP inverting summer (U66 half A): resonance-CV -> V_ires polarity
+* CLAIM (aux-q-control §IRES_AMP detail; spec §3 Q control): the IRES_AMP is an inverting
+* summer with (+) at GND and three 100 kΩ resistors — R_QBIAS (R106), R_QINV (R107), R_f_q
+* (R108) — so
+*   V_ires = −(V_bias·R_f_q/R_QBIAS + V_res·R_f_q/R_QINV) = −(V_bias + V_res)   (unity weights).
+* Direction: increasing the resonance CV (V_res) drives V_ires DOWN (more negative) ->
+* Iabc_q down -> Q UP (the res→Q direction). This deck verifies the unity RATIOS and the
+* SIGN/monotonicity — both NV-free.
+* NOTE: the ABSOLUTE V_bias self-oscillation setpoint is [NV] — it depends on the §D negative-
+* drive window (LM13700 Iabc pin sits ≈ −10.8 V, not GND; see q_cell.cir / change 0020 §D).
+* This deck does NOT pin that absolute; it checks the resistor-ratio + sign only.
+* Ideal op-amp = high-gain VCVS Eop (stands in for TL072 half A; the summing law is set by the
+* feedback resistor ratios). Netlist values cited; the −1.0 weights DERIVED from R_f_q/R = 100k/100k.
+
+* --- instance 1: V_bias = 1, V_res = 0 -> vires_bias = −R_f_q/R_QBIAS ---
+Vb1   b1 0 DC 1
+Vr1   r1 0 DC 0
+Eop1  vires1 0 0 nsum1 1e6
+Rqb1  b1     nsum1 100k        ; R_QBIAS (R106, 100k)
+Rqi1  r1     nsum1 100k        ; R_QINV  (R107, 100k)
+Rfq1  vires1 nsum1 100k        ; R_f_q   (R108, 100k)
+
+* --- instance 2: V_bias = 0, V_res = 1 -> vires_res = −R_f_q/R_QINV (proves ratio + sign) ---
+Vb2   b2 0 DC 0
+Vr2   r2 0 DC 1
+Eop2  vires2 0 0 nsum2 1e6
+Rqb2  b2     nsum2 100k        ; R_QBIAS (R106, 100k)
+Rqi2  r2     nsum2 100k        ; R_QINV  (R107, 100k)
+Rfq2  vires2 nsum2 100k        ; R_f_q   (R108, 100k)
+
+* --- instance 3: V_bias = 0, V_res = 0 -> V_ires baseline for the monotonicity delta ---
+Vb3   b3 0 DC 0
+Vr3   r3 0 DC 0
+Eop3  vires3 0 0 nsum3 1e6
+Rqb3  b3     nsum3 100k        ; R_QBIAS (R106, 100k)
+Rqi3  r3     nsum3 100k        ; R_QINV  (R107, 100k)
+Rfq3  vires3 nsum3 100k        ; R_f_q   (R108, 100k)
+
+.control
+  op
+  let vires_bias   = v(vires1)            ; = −R_f_q/R_QBIAS = −1.0
+  let vires_res    = v(vires2)            ; = −R_f_q/R_QINV  = −1.0
+  let dvires_dvres = v(vires2) - v(vires3) ; V_ires(V_res=1) − V_ires(V_res=0) = −1.0 (res-CV ↑ -> V_ires ↓ -> Q ↑)
+  print vires_bias vires_res dvires_dvres
+.endc
+.end
