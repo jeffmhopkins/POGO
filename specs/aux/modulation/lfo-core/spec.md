@@ -1,7 +1,7 @@
 # aux: LFO Core (Triangle Oscillator)
 
 **Type:** `modulation` · part of the [aux circuit library](../../_LIBRARY.md)
-**Composes:** [schmitt-trigger](../schmitt-trigger/spec.md) + [gm-c-integrator](../../filter/gm-c-integrator/spec.md)
+**Composes:** [schmitt-trigger](../schmitt-trigger/spec.md) — (the LFO integrator is a TL072 op-amp Miller R-C integrator, NOT the OTA gm-C primitive)
 
 > ✅ **Re-verified 2026-05-30** against the locked plugin (change 0018). Updated for: both
 > LFOs feed the MOD_SRC switch (no MOD_IN auto-normal); rate pot is a **log panel pot**

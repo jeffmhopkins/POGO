@@ -1,5 +1,5 @@
 deck: voct_octave.cir
-description: LIBRARY primitive check — base divider + expo law doubles per octave (2/4/8 at +1/+2/+3 V); value-independent ratio, no netlist_bind (I_ref and V_T cancel; isolates the divider ratio)
+description: LIBRARY primitive check — base divider + expo law doubles per octave (2/4/8 at +1/+2/+3 V); value-independent ratio, no netlist_bind (I_ref cancels in the ratio; the divider must still deliver V_T·ln2 for this V_T)
 plugin_ref: "plugin/src/dsp/LPFilter.hpp:20 / HPFilter.hpp:18 — f0 = f_ref*2^cutoffV; +1 V/oct must double f0, which requires the divider to deliver exactly V_T*ln2/oct (aux/filter/voct-expo-divider §Transfer Function)"
 measurements:
   # Derived from the law, not deck output: divider gives V_base = Vctrl*V_T*ln2, so
