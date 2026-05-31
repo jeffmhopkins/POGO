@@ -61,10 +61,21 @@ sourcing (BOM), layout/placement, power budget, mono fan-out connectivity.
 netlist R104/R105=100k + aux §D carry the fix. The `hp-qbutterworth` deck derives `expect` from the
 netlist/aux math; the stale §3 line is corrected during integration (Stage 4).
 
-### Writer slices (parallel)
-- **A:** hp-svf-hp-transfer, hp-polarity (structural + sign; most complex)
-- **B:** hp-sumamp-vground, hp-ires-summer (inverting-summer ratio checks)
-- **C:** hp-voct-octave, hp-qbutterworth (mirror), hp-iref-target (expo/Q bias)
+### Stage 2 — writers (3 parallel agents) ✅ COMPLETE — 7 new decks, all PASS
+- **A:** hp_transfer (2-pole HP: +12dB/oct, 0dB passband, corner=632Hz via arg(H)=+90° marker, peak=Q=6.02dB),
+  hp_polarity (HP_OUT sign vs HPFilter.hpp:40 + in-deck bug regression guard).
+- **B:** sumamp_vground (R_f/R_in=R_f/R_FB=−1, v(−)≈0), ires_summer (unity ratios + monotone res→Q sign).
+- **C:** voct_octave (1V/oct ratios 0.125/32, NV-free), q_cell (§D 10.8µA bug → 0.7µA fix, Q=0.74),
+  iref_target [NV] (R_total trim authority 1000/1238/1500k).
+- **Both slice C and the deriver independently confirmed the stale `spec.md:152-153` (R_Iabc=1MΩ).**
+  All 9 block-7 decks pass (2 pre-existing + 7 new); global gate green at 22 decks.
+- Author notes: ngspice-42 mangles bare `>`/`<` in `let` → booleans via B-source ternary (now in the guide).
+
+### Stage 3 — verifiers (2 parallel adversarial agents) — RUNNING
+Three killer questions per deck: (Q1) does the deck compute what it claims? (Q2) is `expect` independently
+spec-derived, not copied? (Q3) **would it FAIL if the netlist value were wrong** — i.e. is the deck bound
+to block-7's real R/C values, or a generic textbook circuit that passes vacuously? Key target: does
+`q_cell.cir` actually bind to R104/R105=100k such that it would have caught the 1M→100k regression?
 
 ## Decisions log
 - 2026-05-31: pilot scope limited to block-7 (one block) per the user; methodology proven here before
