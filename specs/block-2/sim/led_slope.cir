@@ -1,0 +1,64 @@
+* POGO block-2 LED breathing driver — I_LED slope/monotonicity over the cycle [NV: Vbe]
+* CLAIM (spec block-2 §3, lines 250-262; plugin Pogo.cpp:508-509):
+*   I_LED ~= I_E = (V_base - Vbe)/R_E rises MONOTONICALLY from ~0 at V_tri=-5 (base below
+*   the Vbe knee => Q cut off => LED dark) to ~3 mA at V_tri=+5, matching the plugin's
+*   whole-cycle brightness law (V_tri+5)/10. R_E = R9 = 470R sets the full-scale current.
+*
+*   V_base comes from the SAME 3-resistor level-shift as led_bias (R19/R20/R21):
+*     V_tri=-5/0/+5 -> V_base 0.584/1.314/2.044 V  (superposition; see led_bias.cir)
+*   With Vbe~=0.6: I_LED = max(0, V_base-0.6)/470 ->
+*     -5: 0.584<0.6 -> 0 mA ;  0: (1.314-0.6)/470=1.52 mA ;  +5: (2.044-0.6)/470=3.07 mA
+*
+* [NV] — Vbe is an unmeasured device constant (MMBT3904, ~0.6-0.7 V, temp-dependent) and
+*   real beta diverts some emitter current; so this deck checks the RANGE/SHAPE (cutoff at
+*   -5, ~3 mA at +5, monotone rising), NOT the absolute mA. The absolute is therefore given
+*   loose tolerances and the cutoff is a loose toe. The check is BOUND to R9 (R_E) and the
+*   bias resistors (R19/R20/R21) — those, not the Vbe knee, are the load-bearing values.
+*
+* IDEAL MODEL: the NPN emitter follower is modeled by a behavioral B-source enforcing
+*   V(ne)=max(0, V(base)-Vbe) (an ideal Vbe drop + active-region follower into R_E). This
+*   stands in for the MMBT3904; it preserves the law under test (I_E set by (V_base-Vbe)/R_E)
+*   while the [NV] Vbe absolute is deliberately not pinned (range check only).
+* PARALLEL instances (one per V_tri point — no alter loops).
+
+.param vbe=0.6          ; ideal Vbe knee (the [NV] device constant; range-checked, not pinned)
+
+* +12V rail (bias source) shared across instances
+V12 n12 0 DC 12
+
+* ===== V_tri = -5 V =====
+Vtm5 ntm5 0 DC -5
+Rtri_m5  ntm5 nbm5 51k
+Rbias_m5 n12  nbm5 68k
+Rgnd_m5  nbm5 0    10k
+Be_m5 nem5 0 V = (V(nbm5)>Vbe) ? (V(nbm5)-Vbe) : 0
+Re_m5 nem5 0 470R
+
+* ===== V_tri = 0 V =====
+Vt0 nt0 0 DC 0
+Rtri_0  nt0 nb0 51k
+Rbias_0 n12 nb0 68k
+Rgnd_0  nb0 0   10k
+Be_0 ne0 0 V = (V(nb0)>Vbe) ? (V(nb0)-Vbe) : 0
+Re_0 ne0 0 470R
+
+* ===== V_tri = +5 V =====
+Vtp5 ntp5 0 DC 5
+Rtri_p5  ntp5 nbp5 51k
+Rbias_p5 n12  nbp5 68k
+Rgnd_p5  nbp5 0    10k
+Be_p5 nep5 0 V = V(nbp5) > vbe ? V(nbp5)-vbe : 0
+Re_p5 nep5 0 470R
+
+.control
+  op
+  * I_LED ~= I_E = V(ne)/R_E, in mA
+  let iled_m5 = v(nem5)/470 * 1000
+  let iled_0  = v(ne0)/470  * 1000
+  let iled_p5 = v(nep5)/470 * 1000
+  * use `gt`/`and` (not `>`/`&&`): a bare `>` in a .control `let` is parsed as an
+  * output redirect ("ambiguous output redirect") and silently breaks the line.
+  let iled_mono = ((iled_p5 gt iled_0) and (iled_0 gt iled_m5)) ? 1 : 0
+  print iled_m5 iled_0 iled_p5 iled_mono
+.endc
+.end

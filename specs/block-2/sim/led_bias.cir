@@ -1,0 +1,46 @@
+* POGO block-2 LED breathing driver — base-node BIAS by 3-resistor superposition
+* CLAIM (spec block-2 §3, lines 258-262 + block-2.nets.yaml QB1 net):
+*   The NPN base sits at a level-shifted voltage set by three resistors meeting at the
+*   base node: V_tri via R_BTRI(R19=51k), +12V via R_BBIAS(R20=68k), GND via R_BGND(R21=10k).
+*   By superposition (base node OPEN — see simplification note):
+*     V_base = (V_tri/51k + 12/68k) / (1/51k + 1/68k + 1/10k)
+*   -> V_tri = -5/0/+5 V  =>  V_base = 0.584 / 1.314 / 2.044 V  (spec: 0.585/1.31/2.04)
+*   This sets the LED dark-point (Q cut off near V_tri=-5) and the breathing curve.
+*
+* SIMPLIFICATION: the base node is loaded in reality by the transistor base current
+*   (~I_E/beta). For the BIAS check we model the base OPEN — a high-beta MMBT3904 draws
+*   negligible base current vs the divider currents (~tens of uA), so the unloaded divider
+*   IS the bias point. The Vbe knee / beta [NV] effect on I_LED is checked in led_slope.cir,
+*   not here; this deck pins only the divider VOLTAGE (bound to R19/R20/R21).
+*
+* PARALLEL instances (one independent divider per V_tri point — no alter loops).
+
+* +12V rail (shared bias source for all three instances)
+V12 n12 0 DC 12
+
+* --- V_tri = -5 V ---
+Vtm5 ntm5 0 DC -5
+Rtri_m5  ntm5 nbm5 51k
+Rbias_m5 n12  nbm5 68k
+Rgnd_m5  nbm5 0    10k
+
+* --- V_tri = 0 V ---
+Vt0 nt0 0 DC 0
+Rtri_0  nt0 nb0 51k
+Rbias_0 n12 nb0 68k
+Rgnd_0  nb0 0   10k
+
+* --- V_tri = +5 V ---
+Vtp5 ntp5 0 DC 5
+Rtri_p5  ntp5 nbp5 51k
+Rbias_p5 n12  nbp5 68k
+Rgnd_p5  nbp5 0    10k
+
+.control
+  op
+  let vb_m5 = v(nbm5)
+  let vb_0  = v(nb0)
+  let vb_p5 = v(nbp5)
+  print vb_m5 vb_0 vb_p5
+.endc
+.end
