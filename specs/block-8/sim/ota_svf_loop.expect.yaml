@@ -1,6 +1,9 @@
 deck: ota_svf_loop.cir
 description: block-8 OTA-C §C state-variable tap DC offset + integrator f_ref (change 0020 §C/H5)
 plugin_ref: "plugin/src/dsp/LPFilter.hpp — Simper SVF, f_ref 632 Hz; OTA input linear range ~±30 mV"
+netlist_bind:  # deck literals must equal the live block-8 netlist values
+  C_int: "C33A=47nF"   # LP2 integrator cap (C=47n in deck) sets the gm-C corner = f_ref
+  # Vbe (2·Vbe Darlington offset) is a device constant of the LM13700, not a netlist value — no bind.
 measurements:
   - name: offset_buggy     # Darlington-buffer tap: ~2·Vbe injected into the next OTA input (the bug)
     expect: 1.26

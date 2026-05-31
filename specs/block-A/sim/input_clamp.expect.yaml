@@ -1,10 +1,21 @@
 deck: input_clamp.cir
 description: Block-A input buffer — unity follower + BAT54S over-voltage clamp
 plugin_ref: "plugin/src/dsp/InputBuffer.hpp — buffered input, ±11V clamp (op-amp swing); BAT54S to ±12V rails"
+# The unity gain (G=+1) is an IDEAL FOLLOWER (100% feedback, no resistor ratio) — value-
+# independent, so it carries no bind (per the guide's ratio/unity exemption).
+# The clamp LEVEL (~±12.3V) is the BAT54S Schottky Vf + the ±12V rail, set by the part D1/D2
+# — [NV], not resistor-set (clamp_hi is documentary). R1's load-bearing role is the CLAMP
+# CURRENT I=(Vin-Vclamp)/R1 — clamp_i is genuinely R1-dependent (perturbing R1 moves it) AND
+# bound, so this deck now exercises R1, not just pins it.
+netlist_bind:
+  R_prot: "R1=100R"   # 100Ω series protection — sets the clamp current (Rprot in the deck); R2 = matched twin
 measurements:
-  - name: unity        # OPA1612 unity follower
+  - name: unity        # OPA1612 unity follower (topology — no bind)
     expect: 1.0
     tol_abs: 0.001
-  - name: clamp_hi     # +17V over-drive → BAT54S clamps the protected node to ~+12.3V (rail+Vf)
+  - name: clamp_hi     # +17V over-drive → BAT54S clamps the protected node to ~+12.3V (rail+Vf) — [NV] documentary
     expect: 12.3
     tol_abs: 0.2
+  - name: clamp_i      # clamp current through R1 = (17-12.3)/100 = 0.047A; R1-load-bearing.
+    expect: 0.047      # tol absorbs the [NV] Vf band (12.0-12.6V → 0.044-0.050A)
+    tol_abs: 0.005

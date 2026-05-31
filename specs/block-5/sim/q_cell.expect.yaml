@@ -1,6 +1,11 @@
 deck: q_cell.cir
 description: Q-cell Iabc bias — §D/M5 R_Iabc fix accounting for the LM13700 Iabc-pin rail (change 0020)
 plugin_ref: "plugin/src/dsp/LPFilter.hpp — Q = 0.5·4000^res; Butterworth Q≈0.7 floor"
+netlist_bind:  # deck's R_Iabc literal (100k) MUST equal the netlist R57/R58 (mirrors block-7 q_cell)
+  R_Iabc_L: "R57=100k"   # V_ires -> U9 cell-A Iabc (deck FIXED 100k); change 0020 §D/M5 was 1M→100k
+  R_Iabc_R: "R58=100k"   # V_ires -> U10 cell-A Iabc
+  # NOTE: spec.md:201-202 still says R_Iabc=1MΩ / 0.74V — that is STALE (pre-0020). These expects are
+  # derived from the live 100k netlist value, NOT that stale spec line (same as block-7 q_cell precedent).
 measurements:
   - name: iabc_bug_uA    # 1M from ~0V: ~10.8µA — ~14× the ~0.74µA the old spec assumed (Q pinned)
     expect: 10.8

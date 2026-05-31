@@ -1,0 +1,24 @@
+deck: out_buffer.cir
+description: MAIN output buffer — unity follower (G=+1) + 1k series R into 100k load divider + 11V clamp [NV]
+plugin_ref: "plugin/src/Pogo.cpp:499-500 — outputs[MAIN_L/R] = clamp(LP2_out, -11V, +11V); HW = unity follower + 1k series (spec block-B §2)"
+# netlist_bind: R34 (1k MAIN_L series protection) pins the div_ratio measurement. The 100k load is
+# the standard downstream module input impedance (not a POGO part), so it is a deck constant, not bound.
+# unity_gain (topology, ideal follower, no gain-setting Rs) and clamp_hi (11V = TL072 swing, set by the
+# device on +/-12V rails, [NV] — NOT a bindable resistor value) carry no bind, per the guide.
+netlist_bind:
+  R_main_series: "R34=1k"     # 1k series protection R; sets the into-100k output divider ratio
+measurements:
+  # Topology: ideal unity voltage follower => gain exactly +1 (no gain-setting resistors => no bind).
+  - name: unity_gain
+    expect: 1.0
+    tol_abs: 0.001
+  # DERIVED from spec §"Hardware deviations": 100k/(100k+1k) = 100/101 = 0.990099x (-0.087 dB).
+  # tol covers 1% resistor tolerance on the 1k (the 100k load is a nominal standard, not a POGO part).
+  - name: div_ratio
+    expect: 0.990099
+    tol_pct: 1
+  # [NV] DOCUMENTARY: 11V ceiling is the TL072 output swing on +/-12V rails (Pogo.cpp clamp(+/-11)),
+  # a device constant — NOT bindable to any resistor. Confirms the clamp model reaches +11V, no more.
+  - name: clamp_hi
+    expect: 11.0
+    tol_abs: 0.05

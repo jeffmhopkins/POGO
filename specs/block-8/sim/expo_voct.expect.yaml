@@ -1,15 +1,22 @@
 deck: expo_voct.cir
 description: block-8 expo V/oct base-divider slope + trim authority (change 0020 §A)
 plugin_ref: "plugin/src/dsp/LPFilter.hpp — f0 = f_ref·2^cutoffV (1 V/oct); analog base needs V_T·ln2 = 17.92 mV/oct"
+netlist_bind:  # deck literals must equal the live block-8 netlist values
+  R_VOCT: "R86=49k9"     # series V/oct resistor (49900 in deck)
+  R_TEMPCO: "R230=1k"    # Vishay TFPT tempco shunt to GND (1000 in deck)
+  # RV20 (1V/oct trim) is a 10k pot swept 0/5k/10k — symbolic spec value LP2_1VOCT, not bindable.
 measurements:
   # The 1V/oct trim must span 17.92 mV/oct (V_T·ln2) with the target centered, so there is
   # authority both ways to absorb the Vishay TFPT +4110ppm tempco tolerance + component spread.
   - name: mv_mid          # RV_1VOCT mid-rotation: must land ON the V_T·ln2 target
     expect: 17.92
     tol_pct: 3            # 17.89 measured — centered
-  - name: mv_lo           # CW end: above target (trim headroom)
+  # NOTE: mv_lo/mv_hi are the divider's GEOMETRY-derived pot endpoints (not independent spec
+  # targets) — they assert the trim spans the V_T·ln2 target with authority both ways. They
+  # cannot fail independently of mv_mid + the binds (same documentary form as block-7 expo_voct).
+  - name: mv_lo           # CW end: above target (trim-authority headroom, geometry-derived)
     expect: 19.65
     tol_abs: 0.5
-  - name: mv_hi           # CCW end: below target (trim headroom)
+  - name: mv_hi           # CCW end: below target (trim-authority headroom, geometry-derived)
     expect: 16.42
     tol_abs: 0.5
