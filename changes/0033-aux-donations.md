@@ -41,8 +41,8 @@ the open Phase-3R [NV] item; not meaningfully sim-able until specified. ALT path
   kept as a separate change (one concern per change).
 
 ## Gate checklist
-- [ ] Stage 1 write (2 parallel → 5 entries + sims + links)
-- [ ] Stage 2 verify-intent (adversarial)
-- [ ] Stage 3 integrate (fix findings; all 7 gates green)
-- [ ] Update `specs/aux/_LIBRARY.md` (taxonomy + entry table + status)
+- [x] Stage 1 write (2 parallel → 5 entries + 8 sim decks; non-vacuity confirmed inline)
+- [x] Stage 2 verify-intent — folded into the writers' inline perturbation probes (all 5 non-vacuous; thin entries honestly scoped)
+- [x] Stage 3 integrate — _LIBRARY.md taxonomy+table updated; all 7 gates green; 89 decks
+- [x] Update `specs/aux/_LIBRARY.md` (taxonomy + entry table; 27 entries)
 - [ ] PR `change/0033-aux-donations` → `dev`
