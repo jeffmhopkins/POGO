@@ -4,7 +4,7 @@ Living status of the per-block SPICE math-validation effort. The gate
 (`tools/build_spice.py --check`, blocking since 0023) runs every deck listed here.
 Methodology + how to extend: `tools/SPICE-DECK-GUIDE.md`.
 
-**Last updated:** 2026-05-31 (change 0027) · **40 decks across 11 block dirs, all passing.**
+**Last updated:** 2026-05-31 (change 0028) · **46 decks across 12 block dirs, all passing.**
 
 ## Coverage levels
 - **🟢 FULL** — the multi-agent pipeline (derive → write → adversarial-verify → integrate) has been run;
@@ -25,7 +25,7 @@ Methodology + how to extend: `tools/SPICE-DECK-GUIDE.md`.
 | **block-6-svf1** | 1 | 🟡 BASELINE | bp_fref (68nF→400Hz vs 47nF trap). No binds. Representative for svf2/svf3. |
 | **block-6-dist1** | 7 | 🟢 FULL (0027) | DRIVE ref-divider (±1.2V, **closed the block-6 0025-fix gap**), DRIVE I/V + summer, wavefold G=+2 reflection (signature), HC/SC unity cells, ±4V CLIP threshold, dist_clip ([NV] clamp levels — zener/diode part#, documentary). Fixed a stale hysteresis comment. Representative for dist2/dist3. |
 | **block-6-mix** | 1 | 🟡 BASELINE | bp3_normal (§G). No binds. |
-| **block-2** LFO | 0 | ⚪ NONE | time-domain rate law (0.05–20Hz) — needs a transient deck. |
+| **block-2** LFO | 6 | 🟢 FULL (0028) | **first `.tran` decks**: f_max=20Hz oscillator (real integrator+Schmitt loop), f_min divider, V_sat-independence, Schmitt threshold ratio, LED breathing bias + slope. All binds (RV1 1M unbindable — symbolic log-pot). Established the `.tran`/`.ic`/`meas`-period pattern. |
 | **block-B** Output | 0 | ⚪ NONE | output buffers — same unity-follower physics as block-A input_clamp (low new value). |
 | block-6-svf2/svf3 | 0 | ⚪ (covered by svf1) | identical to svf1 — one representative deck stands for the repeat. |
 | block-6-dist2/dist3 | 0 | ⚪ (covered by dist1) | identical to dist1. |
@@ -46,7 +46,7 @@ stage on each:
 - [ ] **block-6-svf1 / mix** — add binds; the svf deck should bind the 68nF cap, mix the BP3 buffer Rs.
 
 ### B. New blocks (⚪ → coverage)
-- [ ] **block-2 LFO** — transient deck for the 0.05–20Hz rate law (the one time-domain block; deferred since 0023).
+- [x] ~~**block-2 LFO**~~ — ✅ FULL in 0028 (6 decks; the harness's first `.tran` decks, oscillator rate law).
 - [ ] **block-B** — only if a distinct claim beyond block-A's clamp is wanted (low priority).
 
 ### C. Deferred / [NV] items awaiting bench measurement (cannot close in-env)
@@ -70,6 +70,10 @@ deck can assert an absolute (today only trim-authority/ratio/shape is checkable)
       only block-4 got a `ref_divider` deck; block-6's copy was unchecked. Now bound (±1.195V; reverting to
       45k3 fails). Also fixed a stale netlist comment (R181 hysteresis "~50mV"→"~0.95V input-referred").
       No netlist bug found in block-6-dist (the 22k6 ref + ±4V CLIP + wavefold all verified correct).
+- ✅ **0028:** block-2 LFO → FULL (first `.tran` decks). No netlist bug found (f_max=20Hz, Schmitt ratio,
+      LED bias all verified correct). Extended `SPICE-DECK-GUIDE.md` with the `.tran`/`.ic`/`meas`-period
+      oscillator pattern + 3 new ngspice gotchas (`gt`/`and` not `>` in `let`; `2k4` misparse in `.cir`;
+      `.param` not in `.control` scope).
 
 ## How to pick the next block
 Prefer **distinct physics** + **analog-critical** + **self-contained**. Done: block-7 (filter), block-4

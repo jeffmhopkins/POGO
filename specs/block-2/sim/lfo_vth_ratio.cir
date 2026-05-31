@@ -1,0 +1,38 @@
+* POGO block-2 LFO — Schmitt threshold ratio sets the +/-5 V triangle (.tran)
+* CLAIM (spec block-2 §3 lines 238-243; aux-lfo-core lines 108-112):
+*   The triangle peak equals the Schmitt hysteresis threshold:
+*     V_H = V_sat * R7/(R5+R7) = V_sat * 82k/182k = 0.4505 * V_sat.
+*   With V_sat ~= 11 V this gives V_H = 4.96 V ~= the target +/-5 V triangle (plugin
+*   LFO.hpp:20 maps the unit triangle to +/-5 V at the output).
+*   The ABSOLUTE +/-5 V depends on V_sat [NV] (the TL072 saturation, an unmeasured device
+*   constant), so we check the RATIO V_pk/V_sat = R7/(R5+R7), which is set purely by R5,R7.
+*
+* DECK: run the same oscillator as lfo_fmax; measure the triangle peak (MAX over the run,
+*   past startup) and divide by the deck's known V_sat -> vth_ratio. The peak rides slightly
+*   below the ideal threshold (finite comparator edge + integrator overshoot timing), so a
+*   3% tolerance covers it.
+*
+* IDEAL MODELS: same as lfo_fmax (Eint integrator; Bsq rail comparator at +/-Vsat; Bdrv
+*   inverter). The comparator clamp at +/-Vsat is what makes V_H = V_sat*R7/(R5+R7) exact.
+
+.param vsat=11          ; V_sat [NV]; the ratio V_pk/V_sat is what we pin (R7/(R5+R7))
+
+Bdrv ndrv 0 V = -V(vsq)
+Eint nvtri 0 0 nsum 1e6
+R1 ndrv nsum 590k                                        ; R_INT
+C1 nsum nvtri 47nF                                       ; C_INT
+R5 vsq nplus 100k                                        ; R_FB_SQ (divider top, out -> (+))
+R7 nplus 0 82k                                           ; R_HYS  (divider -> GND)
+Bsq vsq 0 V = (V(nplus) > V(nvtri)) ? vsat : -vsat
+
+.ic v(nvtri)=0.1
+.tran 0.1m 0.6 uic
+
+.control
+  run
+  meas tran vpk MAX v(nvtri)          ; triangle positive peak over the run
+  * divide by the deck's V_sat (literal 11; a .param is not in scope as a .control vector)
+  let vth_ratio = vpk/11              ; = R7/(R5+R7), V_sat-free
+  print vth_ratio
+.endc
+.end

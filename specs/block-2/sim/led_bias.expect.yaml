@@ -1,0 +1,23 @@
+deck: led_bias.cir
+description: block-2 LED breathing driver — NPN base-node bias by 3-resistor superposition (R19/R20/R21); sets the LED dark-point + breathing curve. Bound to the live netlist resistor values.
+plugin_ref: "plugin/src/Pogo.cpp:508-509 — brightness=(lfoRaw+1)*0.5, lfoRaw=V_tri/5 => (V_tri+5)/10 over the whole cycle; spec block-2 §3 V_base 0.585/1.31/2.04 V"
+netlist_bind:  # deck literals must equal the live block-2.nets.yaml values
+  R_BTRI:  "R19=51k"
+  R_BBIAS: "R20=68k"
+  R_BGND:  "R21=10k"
+measurements:
+  # All three expects DERIVED by superposition from the netlist values, NOT copied from deck:
+  #   SumG = 1/51k + 1/68k + 1/10k = 134.314 uS
+  #   V_tri=-5: (-5/51k + 12/68k)/SumG = 78.431uA/134.314uS = 0.5840 V
+  #   V_tri= 0: (12/68k)/SumG        = 176.471uA/134.314uS = 1.3139 V
+  #   V_tri=+5: (5/51k + 12/68k)/SumG= 274.510uA/134.314uS = 2.0438 V
+  # tol_abs 0.02 V (resistor 1% spread + rounding); spec rounds to 0.585/1.31/2.04.
+  - name: vb_m5
+    expect: 0.584
+    tol_abs: 0.02     # dark-point: < Vbe(~0.6) => Q cut off => LED off
+  - name: vb_0
+    expect: 1.314
+    tol_abs: 0.02     # zero-crossing: mid breath
+  - name: vb_p5
+    expect: 2.044
+    tol_abs: 0.02     # positive peak: brightest

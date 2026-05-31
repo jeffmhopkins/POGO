@@ -1,0 +1,11 @@
+deck: lfo_fmin.cir
+description: block-2 LFO slow endpoint — the rate-divider floor k_min = R3/(RV1+R3) = 0.002394 (drive-attenuator). f_min = k_min*f_max ~= 0.0479 Hz, matching the plugin 0.05 Hz floor. Checked as an `op` divider ratio to avoid a 21 s transient. RV1 (1M log pot) is a spec literal / unbindable; only R_FLOOR (R3) is bound.
+plugin_ref: "plugin/src/dsp/LFO.hpp:16 — speedHz=0.05*400^0 = 0.05 Hz floor; analog f=k*f_max with k_min=R_FLOOR/(RV_RATE+R_FLOOR) per spec block-2 §3 line 228"
+netlist_bind:  # only R_FLOOR is bindable; RV1=1M is the unbindable symbolic log-pot value (spec literal)
+  R_FLOOR: "R3=2k4"
+measurements:
+  # DERIVED from the spec divider formula, NOT deck output:
+  #   k_min = 2400/(1000000+2400) = 0.0023943.
+  - name: k_min
+    expect: 0.002394
+    tol_pct: 3

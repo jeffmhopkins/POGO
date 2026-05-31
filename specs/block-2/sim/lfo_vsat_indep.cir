@@ -1,0 +1,52 @@
+* POGO block-2 LFO — frequency is V_sat-INDEPENDENT (.tran ratio, PARALLEL instances)
+* CLAIM (spec block-2 §2 lines 67-73; aux-lfo-core lines 99-102):
+*   f = (R5+R7)/(4*R7*R_INT*C_INT) contains NO V_sat term: the Schmitt threshold
+*     V_H = V_sat*R7/(R5+R7) scales WITH V_sat, so V_sat cancels in
+*     f = V_sat/(4*V_H*R_INT*C_INT). Hence two copies of the SAME oscillator run at the
+*     SAME frequency regardless of their rail/saturation voltage.
+*   PROOF: instantiate TWO identical oscillators (guide rule 5 — parallel, no alter loops),
+*     copy A at Vsat = 11 V (rounded +/-10.5..12 band), copy B at Vsat = 12 V; measure each
+*     period and report f_ratio = f_a/f_b. Expect 1.0 (V_sat cancels).
+*
+* This is a RATIO check (V_sat cancels), so the result is value-independent of V_sat. The
+*   R1/C1/R5/R7 binds are still declared so a NETLIST passive drift trips the gate (a wrong
+*   R7 in the shared topology would change BOTH copies' frequency, but a TYPO that hits only
+*   one copy's literal would break the ratio -> the bind + ratio together guard the topology).
+*
+* IDEAL MODELS: same as lfo_fmax (Eint integrator op-amp; Bsq rail comparator; Bdrv inverter).
+*   The comparator clamps to each copy's own +/-Vsat so the V_H-scales-with-V_sat cancellation
+*   is exercised exactly.
+
+* ===== Copy A: Vsat = 11 V =====
+Bdrva ndrva 0 V = -V(vsqa)
+Einta nvtria 0 0 nsuma 1e6
+R1a ndrva nsuma 590k
+C1a nsuma nvtria 47nF
+R5a vsqa nplusa 100k
+R7a nplusa 0 82k
+Bsqa vsqa 0 V = (V(nplusa) > V(nvtria)) ? 11 : -11
+
+* ===== Copy B: Vsat = 12 V =====
+Bdrvb ndrvb 0 V = -V(vsqb)
+Eintb nvtrib 0 0 nsumb 1e6
+R1b ndrvb nsumb 590k
+C1b nsumb nvtrib 47nF
+R5b vsqb nplusb 100k
+R7b nplusb 0 82k
+Bsqb vsqb 0 V = (V(nplusb) > V(nvtrib)) ? 12 : -12
+
+.ic v(nvtria)=0.1 v(nvtrib)=0.1
+.tran 0.1m 0.6 uic
+
+.control
+  run
+  meas tran ta1 WHEN v(nvtria)=0 RISE=2
+  meas tran ta2 WHEN v(nvtria)=0 RISE=3
+  meas tran tb1 WHEN v(nvtrib)=0 RISE=2
+  meas tran tb2 WHEN v(nvtrib)=0 RISE=3
+  let f_a = 1/(ta2-ta1)
+  let f_b = 1/(tb2-tb1)
+  let f_ratio = f_a/f_b
+  print f_ratio
+.endc
+.end

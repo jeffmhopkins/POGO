@@ -78,6 +78,38 @@ whose result is genuinely value-independent (e.g. a *ratio* check where the cons
 8. **`.param`** for shared constants; reference as `{gm}`. Keep the netlist's real values visible.
 9. Keep decks **self-contained and fast** (`op` or a bounded `ac`/`tran`; < a few seconds). No external
    models, no PDK.
+10. **Booleans/comparisons inside `.control` `let`: use `gt`/`lt`/`ge`/`le`/`and`/`or`, NOT `>`/`<`/`&&`.**
+    A bare `>` in a `let` line is parsed as a SHELL OUTPUT REDIRECT (ngspice's control language is
+    csh-like) — it silently aborts the whole `print` line ("ambiguous redirect") and leaves a stray file
+    named after the redirect target. Write `let mono = ((a gt b) and (b gt c)) ? 1 : 0`. (A B-source
+    `V = (V(a)>V(b))?1:0` is fine — the `>` trap is only in `.control` `let`/`print` lines.)
+11. **Inside a `.cir`, ngspice does NOT parse R-notation `2k4`/`4k7`** (it reads `2k4` as `2k`). Write the
+    ohmic value as `2.4k` in the SPICE element, but keep the `netlist_bind` declared as the netlist's
+    `2k4` (the *runner's* `parse_value` handles R-notation; only the ngspice deck card needs `2.4k`).
+12. **`.param` names are NOT in scope as `.control` vectors.** `.param vsat=11` then `let r = vpk/vsat`
+    fails (vsat unknown in the control vector namespace) — divide by the literal (`vpk/11`) in `.control`,
+    or only use `{vsat}` inside element cards.
+
+### Transient (`.tran`) + oscillator decks (the harness's `.tran` pattern, from block-2 LFO)
+
+For a relaxation oscillator (integrator + hysteretic comparator) or any time-domain rate law:
+- **Build a REAL stateful loop** — the cap/integrator state is what sustains oscillation. A memoryless
+  B-source comparator cannot oscillate. Working triangle-LFO core (block-2): inverting integrator
+  `Eint nvtri 0 0 nsum 1e6` + `Rint` (drive→nsum) + `Cint` (nsum→nvtri feedback); hysteretic Schmitt
+  `Bsq vsq 0 V = (V(nplus) > V(nvtri)) ? vsat : -vsat` with the `R_FB`/`R_HYS` divider forming
+  `nplus = vsq·R_HYS/(R_FB+R_HYS)`. Get the integrator SIGN right (invert the square into the drive) or
+  it latches and runs to the rail instead of oscillating.
+- **Kick it off the metastable point:** `.ic v(nvtri)=0.1` + `.tran <step> <stop> uic` (`uic` honours
+  `.ic`). Without a kick an ideal sim can sit at 0 forever.
+- **Measure the period skipping startup:** `meas tran t1 WHEN v(nvtri)=0 RISE=2` / `t2 ... RISE=3`, then
+  `let fhz = 1/(t2-t1)` (use the 2nd→3rd crossing so the first settling ramp doesn't bias it). The
+  oscillation frequency must be VALUE-derived — verify it's invariant to the `.ic` value, step, and stop
+  time, and that it MOVES when you perturb the R/C (that's the Q3 proof it's not pinned by the sim setup).
+- **Bound the run** `< ~1–2 s` of sim time. For a slow endpoint (e.g. 0.05 Hz = 21 s period), DON'T run
+  the transient — check the rate-setting **divider ratio** with an `op` deck instead (block-2 `lfo_fmin`).
+- **[NV] supply rails cancel:** if a threshold scales with the op-amp saturation `V_sat`, the oscillation
+  frequency is `V_sat`-independent — prove it with a two-`V_sat` PARALLEL ratio deck (=1.0) rather than
+  asserting an absolute that depends on the unmeasured rail.
 
 ## `.expect.yaml` schema
 

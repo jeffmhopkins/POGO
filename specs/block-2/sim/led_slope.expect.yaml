@@ -1,0 +1,22 @@
+deck: led_slope.cir
+description: block-2 LED breathing driver — I_LED rises monotonically from cutoff (V_tri=-5) to ~3 mA (V_tri=+5), matching the plugin whole-cycle brightness. [NV] Vbe absolute => range/shape check, bound to R9 (R_E) + the bias resistors.
+plugin_ref: "plugin/src/Pogo.cpp:508-509 — brightness=(lfoRaw+1)*0.5 = (V_tri+5)/10 across the whole cycle (breathing); spec block-2 §3 I_LED ~0/1.4/3.0 mA"
+netlist_bind:  # R_E sets full-scale current; the bias Rs set V_base (and thus the slope)
+  R_E:     "R9=470R"
+  R_BTRI:  "R19=51k"
+  R_BBIAS: "R20=68k"
+  R_BGND:  "R21=10k"
+measurements:
+  # Expects DERIVED from spec §3 + superposition (V_base 0.584/1.314/2.044), NOT deck output.
+  # [NV] Vbe (~0.6-0.7 V) + real beta divert current => LOOSE tolerances (shape/range, not absolute):
+  # at -5: V_base 0.584 < Vbe => cutoff ~0 mA (loose toe: exact knee is the [NV] Vbe).
+  - name: iled_m5
+    expect: 0.0
+    tol_abs: 0.3      # cutoff; loose because the exact Vbe toe is the unmeasured device constant
+  # at +5: (2.044-0.6)/470 = 3.07 mA; loose 20% — the Vbe knee + beta absorb some of the swing.
+  - name: iled_p5
+    expect: 3.0
+    tol_pct: 20       # [NV]: Vbe knee + finite beta absorb the rest; the SHAPE (~3 mA) is the claim
+  # monotone rising across the cycle (cutoff -> mid -> peak) — the breathing law's defining shape.
+  - name: iled_mono
+    expect: true
