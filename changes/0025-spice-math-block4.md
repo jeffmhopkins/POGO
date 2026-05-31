@@ -111,8 +111,15 @@ proves the schematic's circuit math, and caught a value that didn't deliver its 
   [NV] debt) — block-4 has distinct VCA physics + is self-contained + maximally exercises [NV] framing.
 
 ## Gate checklist
-- [ ] Stage 1 derive → manifest
-- [ ] Stage 2 write decks (parallel)
-- [ ] Stage 3 verify-intent (parallel, adversarial)
-- [ ] Stage 4 integrate + full gate stack green
+- [x] Stage 1 derive → manifest (11 candidates; flagged the unbound vca_ecplus + missing vca_ecplus_full.cir)
+- [x] Stage 2 write decks (3 parallel → 6 new + retrofit)
+- [x] Stage 3 verify-intent (2 adversarial → found the ref-divider bug + the cross-deck seam + 4 more)
+- [x] Stage 4 integrate (fixed the netlist bug + all 6 verifier defects; all 7 gates green)
+- [x] Coverage tracker `specs/SPICE-COVERAGE.md` created (outstanding blocks/tests/fixes)
 - [ ] PR `change/0025-spice-math-block4` → `dev`
+
+## Outstanding (tracked in `specs/SPICE-COVERAGE.md`)
+- BASELINE blocks (block-5/8/3/1/A + block-6 svf1/dist1/mix) need `netlist_bind` retrofit + adversarial
+  verify to reach FULL (they predate the 0024 binding mechanism — same gap class found here).
+- block-2 LFO has no deck (time-domain rate law). [NV] items (Q-cell negative drive, THAT2180 6.1mV/dB,
+  DRIVE law, D12 clamp) await bench measurement.
