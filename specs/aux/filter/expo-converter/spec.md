@@ -1,6 +1,7 @@
 # aux: Exponential Frequency Converter (V/Oct to Iabc)
 
 **Type:** `filter` · part of the [aux circuit library](../../_LIBRARY.md)
+**Composes:** [voct-expo-divider](../voct-expo-divider/spec.md) (the V/oct base divider — delivers V_T·ln2 = 17.92 mV/oct to the expo pair)
 
 > ✅ **Re-verified 2026-05-30** (content rewritten 2026-05-29) against the locked plugin via
 > block-5. THAT340 V/oct→Iabc converter; `f0 = f_ref·2^V` (1 V/oct). The per-channel-expo
@@ -59,7 +60,7 @@ Simplified circuit detail:
                                                        collector → I_ref node
                                                        emitter → −12V (or GND through R_E)
 
- V_ctrl ──[R_VOCT 47kΩ]──[RV_1VOCT]─────────────► base of Q_expo (THAT340 Q1)
+ V_ctrl ──[R_VOCT 49.9kΩ]──[RV_1VOCT]─────────────► base of Q_expo (THAT340 Q1)
                                                      collector → I_abc output
                                                      emitter → shared with Q_ref emitter
 
@@ -68,7 +69,7 @@ Simplified circuit detail:
  RV_REF (500kΩ rheostat in series with R_IREF_A 1MΩ): trims R_total (1000kΩ–1500kΩ,
    midpoint 1250kΩ at pot center = 250kΩ added → I_ref = 9.6µA nominal).
    All filter block calibration targets (9.21–10.78 µA) fall within 20–80% of pot travel.
- RV_1VOCT (in series with R_VOCT 47kΩ + R_E 1kΩ): at RV_1VOCT = 7.5kΩ (37.5% travel),
+ RV_1VOCT (in series with R_VOCT 49.9kΩ + R_E 1kΩ): at RV_1VOCT = 7.5kΩ (37.5% travel),
    total = 55.5kΩ → 1V/oct ratio = 1kΩ/55.5kΩ = 18.0 mV/V = V_T×ln(2) exactly.
 ```
 
@@ -164,7 +165,7 @@ Calibration procedure:
 | U_EXPO | THAT340S14-U | SOIC-14 | — | Matched NPN quad; use Q1+Q2 for expo pair |
 | R_IREF_A | Resistor | 0603 | 1 MΩ | Fixed lower bound of I_ref network; R_total at midpoint = 1250 kΩ → ~9.6 µA |
 | RV_REF | Bourns 3224W | SMD | 500 kΩ | f_ref trim rheostat; R_total range 1000 kΩ–1500 kΩ; all block targets within 20–80% travel |
-| R_VOCT | Resistor | 0603 | 47 kΩ | V/oct scaling R; with R_E=1kΩ and RV_1VOCT=7.5kΩ: ratio=18.0 mV/V = V_T×ln(2) exactly |
+| R_VOCT | Resistor | 0603 | 49.9 kΩ | V/oct scaling R (change 0020 §A; was 47k); the 1V/oct trim centres the divider on V_T×ln(2)=17.92 mV/oct |
 | RV_1VOCT | Bourns 3224W | SMD | 20 kΩ | 1V/oct tracking trim; ±10% range |
 | R_E | Resistor | 0603 | 1 kΩ | Emitter degeneration; stabilizes quiescent point |
 | C_IREF | Ceramic bypass | 0603 | 100 nF | Bypass on I_ref node to suppress HF on expo output |

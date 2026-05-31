@@ -1,0 +1,17 @@
+deck: inv_summer_unity_sum.cir
+description: >
+  Generic library check (hardcoded representative values; NO netlist_bind by design — there is
+  no netlist behind a library block). Verifies the inverting-summer unity-weight law V_out = -Σ V_in,i
+  when all R_in,i = R_f (= 100k). Two cases: a 2-input sum (-(2 - 0.5) = -1.5 V) and a 3-input
+  sum (-(2 - 0.5 + 1) = -2.5 V). The sum emerges from the modeled equal R_f/R_in ratios.
+plugin_ref: "plugin/src/dsp/ModBus.hpp:22-25 — V_bus = sourceV*gain + offset is a weighted sum; analog V_out = -Σ(R_f/R_in,i)·V_in,i per spec.md 'Transfer Function' lines 53-64 (unity = R_in,i=R_f)"
+measurements:
+  # DERIVED from the spec law (R_f=R_in -> weight 1), NOT copied from deck output:
+  #   vout2 = -(V1 + V2)      = -(2 + (-0.5))       = -1.5
+  #   vout3 = -(V1 + V2 + V3) = -(2 + (-0.5) + 1)   = -2.5
+  - name: vout2
+    expect: -1.5
+    tol_abs: 0.01
+  - name: vout3
+    expect: -2.5
+    tol_abs: 0.01

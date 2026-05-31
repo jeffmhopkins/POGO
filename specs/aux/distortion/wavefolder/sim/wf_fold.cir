@@ -1,0 +1,64 @@
+* aux/distortion/wavefolder LIBRARY check — THE SIGNATURE FOLD: V_out = 2·V_clamp − V_in (G=+2)
+* GENERIC LIBRARY DECK (no netlist_bind by design — per _LIBRARY.md a library block has no single
+*   netlist behind it; representative hardcoded values verify the transfer math / topology).
+* CLAIM (Distortion.hpp:18-25 + spec §Transfer Function):
+*   FOLD mode is the Buchla triangle fold y = Vth·asin(sin(π/2/Vth·y_pre))·2/π, Vth=0.28 (=±1.4V/5V).
+*   The analog cell realizes the first fold exactly: a passive ±1.4 V clamp feeds the (+) of a
+*   non-inverting G=+2 stage; the raw signal feeds the (−) via R_g; R_f is the feedback. The
+*   non-inverting law is  V_out = V_clamp·(1+R_f/R_g) − V_in·(R_f/R_g).
+*   With R_g = R_f -> (1+R_f/R_g)=2 and (R_f/R_g)=1  ->  V_out = 2·V_clamp − V_in.
+*     - below |V_in|<Vth: V_clamp=V_in -> V_out = 2·V_in − V_in = V_in (slope +1, linear).
+*     - above Vth: V_clamp pins +1.4 -> V_out = 2.8 − V_in (slope −1) -> TRUE slope reversal/fold.
+*
+* NON-VACUOUS GAIN: the folder gain is NOT hardcoded ×2 — it EMERGES from Rg/Rf via the real
+*   non-inverting topology (Eop + Rg/Rf divider). If Rg≠Rf the printed fold point would move and
+*   the assertions below would fail (e.g. Rf=20k -> gain 3 -> V_out(2.8)=3·1.4−2·2.8=-1.4, not 0.0).
+*
+* IDEAL MODELS (one line each):
+*  - Eop* : ideal high-gain VCVS op-amp (stands for U_WF, TL072) -> exact closed-loop ratio set by
+*           Rg/Rf, which is the load-bearing fact (the +2 folder ratio -> the reflection slope).
+*  - Bclmp*: behavioral ±1.4 V clamp standing for the passive 2×1N4148W-per-rail clamp at the (+)
+*           input (R_clamp series + diodes). The ±1.4 V Vth is DEVICE-CONSTANT/[NV] (set by diode
+*           part numbers, NOT a bindable resistor) — modeled ideally because the reflection
+*           slope-reversal under test comes from the +2 ratio acting on the clamped (+) node.
+* PARALLEL instances at three V_in points (guide rule 5): +0.7 (below Vth, linear), +2.0 and +2.8
+*   (above Vth, folded). Each instance is an independent copy.
+
+.param Rg=10k       ; R_g  (folder (−) input)
+.param Rf=10k       ; R_f  (folder feedback) -> (1+Rf/Rg)=2, (Rf/Rg)=1  (gain emerges from Rg/Rf)
+.param Vth=1.4      ; passive-clamp Vth (2×1N4148W/rail) — device constant [NV]
+
+* ---- instance A: V_in = +0.7 (below Vth -> linear pass-through, V_out=V_in) ----
+Va  ain 0 DC 0.7
+Bca acl 0 V = (V(ain)>Vth)?Vth:((V(ain)<(-Vth))?(-Vth):V(ain))
+Rga ain agm {Rg}
+Rfa agm aout {Rf}
+Eopa aout 0 acl agm 1e6                 ; non-inv: out = acl·(1+Rf/Rg) − ain·(Rf/Rg)
+
+* ---- instance B: V_in = +2.0 (above Vth -> folded, V_out = 2·1.4 − 2.0 = 0.8) ----
+Vb  bin 0 DC 2.0
+Bcb bcl 0 V = (V(bin)>Vth)?Vth:((V(bin)<(-Vth))?(-Vth):V(bin))
+Rgb bin bgm {Rg}
+Rfb bgm bout {Rf}
+Eopb bout 0 bcl bgm 1e6
+
+* ---- instance C: V_in = +2.8 (above Vth -> folded, V_out = 2·1.4 − 2.8 = 0.0; the reflection) ----
+Vc  cin 0 DC 2.8
+Bcc ccl 0 V = (V(cin)>Vth)?Vth:((V(cin)<(-Vth))?(-Vth):V(cin))
+Rgc cin cgm {Rg}
+Rfc cgm cout {Rf}
+Eopc cout 0 ccl cgm 1e6
+
+* slope reversal as a B-source (guide: booleans via B-source ternary, NOT a `let` compare).
+*   out DECREASES as input rises 2.0 -> 2.8 (0.8 -> 0.0) => out(2.0) > out(2.8) => emit 1.0
+*   (slope reversed = true fold; a non-folding gain stage would have out INCREASE => 0.0).
+Bsr srev 0 V = (V(bout)>V(cout))?1.0:0.0
+
+.control
+  op
+  let wf_lin  = v(aout)          ; +0.7 in -> +0.7 out (linear, below Vth)
+  let wf_fold = v(cout)          ; +2.8 in -> 0.0 out  (2·1.4 − 2.8, the reflection)
+  let wf_slope_rev = v(srev)     ; B-source boolean: 1.0 if out(2.0)>out(2.8) (slope reversed)
+  print wf_lin wf_fold wf_slope_rev
+.endc
+.end

@@ -1,0 +1,9 @@
+deck: voct_slope.cir
+description: LIBRARY primitive check — V/oct base divider delivers V_T*ln2 = 17.92 mV/oct; no netlist_bind by design (no netlist behind a library primitive)
+plugin_ref: "plugin/src/dsp/LPFilter.hpp:20 / HPFilter.hpp:18 — f0 = f_ref*2^cutoffV (1 V/oct); the expo transistor needs V_T*ln2 of base drive per octave (aux/filter/voct-expo-divider §Transfer Function)"
+measurements:
+  # Derived from the LAW (not deck output): V_T*ln2 @ 25 C = 0.02585*0.69315 = 17.92 mV/oct.
+  # The divider RATIO (54804/1000 series:shunt) lands on it; change either R and it moves.
+  - name: mv_per_oct
+    expect: 17.92
+    tol_pct: 1

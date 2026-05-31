@@ -1,0 +1,55 @@
+* POGO aux utility/clip-detector — ±4V window: threshold dividers + window-comparator logic
+* LIBRARY deck: hardcoded representative values, NO netlist_bind (generic cell, no netlist).
+* Ground truth (the cell's law): Pogo.cpp:459 BP1_CLIP_LIGHT = (max(|distOutL|,|distOutR|) > 4.0f).
+* The analog detector is a ±4V window: out HIGH when DISTOUT > +4 (P comp) OR DISTOUT < -4 (N comp).
+*
+* (A) Threshold dividers — the ±4V references emerge from the modeled 20k/10k from ±12V:
+*   VREF_P4 = +12 * R_bot/(R_top+R_bot) = +12 * 10k/30k = +4.0V
+*   VREF_N4 = -12 * R_bot/(R_top+R_bot) = -12 * 10k/30k = -4.0V
+*   NON-VACUOUS: perturbing R_top (20k->10k) drives VREF_P4 to +6V, failing the assertion.
+*
+* (B) Window logic — three DISTOUT test points (in-band 0V, over +5V, under -5V) fed through
+*   IDEAL comparators referenced to the SAME divider-derived VREF nodes:
+*     P comp: high when DISTOUT > VREF_P4 ;  N comp: high when DISTOUT < VREF_N4
+*     CLIP = P OR N  (diode-OR; modeled as logical max of the two comparator highs)
+*   Expect: in-band 0V -> 0 (LED off) ; +5V -> 1 (>+4) ; -5V -> 1 (<-4). |DISTOUT|>4 == plugin >4.
+* PARALLEL instances (no alter loops); the comparators reference the live divider nodes so the
+* window logic is bound to the SAME ±4V the divider produces (a divider regression also breaks B).
+
+* --- (A) ±4V threshold dividers (shared references) ---
+Vpos vpos 0 DC 12
+R_p_top vpos vref_p4 20k       ; VREF_P4 top
+R_p_bot vref_p4 0 10k          ; VREF_P4 bottom -> +4.0V
+Vneg vneg 0 DC -12
+R_n_top vneg vref_n4 20k       ; VREF_N4 top
+R_n_bot vref_n4 0 10k          ; VREF_N4 bottom -> -4.0V
+
+* --- (B) window comparator logic, 3 DISTOUT test points ---
+* in-band: DISTOUT = 0V  (should NOT trip)
+Vin_ib nib 0 DC 0
+Bp_ib  pib 0 V = (V(nib) > V(vref_p4)) ? 1 : 0
+Bn_ib  nib_n 0 V = (V(nib) < V(vref_n4)) ? 1 : 0
+Bclip_ib clip_ib 0 V = (V(pib) > V(nib_n)) ? V(pib) : V(nib_n)   ; OR (max)
+
+* over +4: DISTOUT = +5V  (P comp trips)
+Vin_hi nhi 0 DC 5
+Bp_hi  phi 0 V = (V(nhi) > V(vref_p4)) ? 1 : 0
+Bn_hi  nhi_n 0 V = (V(nhi) < V(vref_n4)) ? 1 : 0
+Bclip_hi clip_hi 0 V = (V(phi) > V(nhi_n)) ? V(phi) : V(nhi_n)
+
+* under -4: DISTOUT = -5V  (N comp trips)
+Vin_lo nlo 0 DC -5
+Bp_lo  plo 0 V = (V(nlo) > V(vref_p4)) ? 1 : 0
+Bn_lo  nlo_n 0 V = (V(nlo) < V(vref_n4)) ? 1 : 0
+Bclip_lo clip_lo 0 V = (V(plo) > V(nlo_n)) ? V(plo) : V(nlo_n)
+
+.control
+  op
+  let vref_p4  = v(vref_p4)     ; expect +4.0V (= plugin CLIP threshold)
+  let vref_n4  = v(vref_n4)     ; expect -4.0V
+  let clip_ib  = v(clip_ib)     ; in-band 0V -> 0 (LED off)
+  let clip_hi  = v(clip_hi)     ; +5V > +4 -> 1 (LED on)
+  let clip_lo  = v(clip_lo)     ; -5V < -4 -> 1 (LED on)
+  print vref_p4 vref_n4 clip_ib clip_hi clip_lo
+.endc
+.end

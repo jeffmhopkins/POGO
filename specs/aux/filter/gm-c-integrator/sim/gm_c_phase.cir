@@ -1,0 +1,24 @@
+* aux/filter/gm-c-integrator — pure integrator phase = -90 deg, unity gain at f=gm/(2*pi*C)
+* (LIBRARY primitive check). Generic representative values (NO netlist_bind — library primitive).
+* Open-loop form: the OTA drives the cap with IN- at AC ground, so V_out = (gm/sC)*V_in — an
+* ideal integrator. Two facts characterize it: (1) phase is -90 deg at ALL frequencies, and
+* (2) |H| = 1 (0 dB) exactly at the unity-gain frequency f_u = gm/(2*pi*C). We check BOTH at
+* f_u, which proves the integrator law (not just an RC roll-off). Plugin ref: the SVF state
+* variables are exactly these integrators (LPFilter.hpp:38-42 trapezoidal integration; analog
+* ω0 = gm/C). Ideal model: Gint = VCCS (OTA I=gm*Vin); Cint integrates. IN- held at 0 (open loop).
+*
+* gm and C independent literals: C=10nF, gm=62.832uS -> f_u = gm/(2*pi*C) = 1000 Hz exactly.
+
+.param C=10n
+.param gm=62.832u      ; -> unity-gain frequency 1.000 kHz
+
+Vac ain 0 AC 1 DC 0
+Gint 0 ointg ain 0 {gm}     ; open-loop integrator: I = gm*V(ain), IN- at ground
+Cint ointg 0 {C}
+
+.control
+  ac dec 200 100 10k
+  meas ac gain_at_fu find vdb(ointg) at=1000      ; |H| in dB at f_u (expect 0 dB -> unity gain)
+  meas ac phase_at_fu find vp(ointg) at=1000      ; phase at f_u; ngspice vp() is in RADIANS (-pi/2 = -90 deg)
+.endc
+.end

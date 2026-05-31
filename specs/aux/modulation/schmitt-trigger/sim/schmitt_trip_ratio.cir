@@ -1,0 +1,57 @@
+* aux/modulation/schmitt-trigger — trip-threshold ratio V_trip/V_sat = R_b/(R_a+R_b) (.tran)
+* LIBRARY CHECK (generic hardcoded representative values; NO netlist_bind by design, per
+* specs/aux/_LIBRARY.md "Library sim convention").
+*
+* CLAIM (spec.md "Transfer Function" lines 53-66):
+*   A non-inverting Schmitt trigger trips when its (-) input crosses the divided output:
+*     V_+ = V_sq · R_b/(R_a+R_b),  V_sq = ±V_sat  (bistable, positive feedback HOLDS state).
+*   So the trip thresholds are  V_trip = ± V_sat · R_b/(R_a+R_b)  and the V_sat-FREE ratio is
+*     V_trip / V_sat = R_b/(R_a+R_b).
+*   The ABSOLUTE ±V_trip depends on V_sat [NV] (op-amp saturation, unmeasured device constant),
+*   so we pin the RATIO, set purely by R_a, R_b. (Plugin LFO.hpp:19-20 maps the unit triangle to
+*   ±5 V; the analog amplitude = this Schmitt threshold window.)
+*
+* REPRESENTATIVE VALUES: R_a (= R_FB_SQ) = 100k, R_b (= R_HYS) = 82k -> ratio 82/182 = 0.4505.
+*   With V_sat = 11 V this is V_trip = 4.96 V ~= the ±5 V LFO triangle.
+*
+* DECK: build a REAL hysteretic loop so the divider HOLDS state (a memoryless comparator would
+*   chatter, not hold). Reuse the lfo-core relaxation oscillator: an inverting integrator ramps
+*   the (-) node V_tri up and down; the Schmitt's (+) sees the R_a/R_b divider off V_sq and HOLDS
+*   V_sq until V_tri crosses V_+. The triangle's POSITIVE PEAK = the rising trip threshold and its
+*   NEGATIVE TROUGH = the falling trip threshold — exactly ±V_sat·R_b/(R_a+R_b). Measuring the
+*   peak/trough on the held loop is the trip threshold measured on a real hysteretic comparator.
+*   R_INT/C_INT (100k/10nF) only set the (fast, short-run) ramp rate, not the thresholds.
+*
+* IDEAL MODELS (justification):
+*   - Eint (1e6 VCVS) + R_INT/C_INT = inverting integrator (the ramp source that walks V_tri
+*     across the window) — stands in for the TL072 integrator half.
+*   - Bsq (rail-to-rail comparator clamped to ±V_sat) stands in for the TL072 comparator half:
+*     it switches on (V_+ > V_tri) and clamps to ±V_sat, so V_+ = ±V_sat·R_b/(R_a+R_b) is exact
+*     and the loop HOLDS state between flips (positive feedback via the R_a/R_b divider).
+*   - Bdrv (unity inverter) sets the integrator drive sign (the square reverses the ramp).
+* KICK: .ic v(nvtri)=0.1 perturbs off the metastable 0 so the loop leaves DC.
+
+.param vsat=11          ; V_sat [NV]; the ratio V_trip/V_sat is what we pin (R_b/(R_a+R_b))
+
+Bdrv ndrv 0 V = -V(vsq)                                  ; integrator drive = inverted square
+Eint nvtri 0 0 nsum 1e6                                  ; integrator op-amp (virtual ground at nsum)
+Rint ndrv nsum 100k                                      ; R_INT (rate only; not under test)
+Cint nsum nvtri 10nF                                     ; C_INT (rate only)
+Ra  vsq nplus 100k                                       ; R_a = R_FB_SQ: output -> (+) divider top
+Rb  nplus 0 82k                                          ; R_b = R_HYS: (+) -> AGND
+Bsq vsq 0 V = (V(nplus) > V(nvtri)) ? vsat : -vsat       ; Schmitt: (+)=nplus (divided), (-)=V_tri
+
+.ic v(nvtri)=0.1        ; kick off the metastable point
+.tran 5u 50m uic        ; many ramps; fine step for clean peak/trough capture
+
+.control
+  run
+  meas tran vpk  MAX v(nvtri)         ; positive peak  = +rising trip = +V_sat·R_b/(R_a+R_b)
+  meas tran vtr  MIN v(nvtri)         ; negative trough = -falling trip = -V_sat·R_b/(R_a+R_b)
+  * divide by the deck's V_sat (literal 11; a .param is not in scope as a .control vector)
+  let trip_ratio = vpk/11             ; = R_b/(R_a+R_b), V_sat-free
+  let window      = vpk - vtr         ; full hysteresis window = 2·V_sat·R_b/(R_a+R_b)
+  let window_ratio = window/11        ; = 2·R_b/(R_a+R_b), V_sat-free
+  print trip_ratio window_ratio
+.endc
+.end

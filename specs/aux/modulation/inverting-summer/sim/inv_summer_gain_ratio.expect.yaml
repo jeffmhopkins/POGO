@@ -1,0 +1,17 @@
+deck: inv_summer_gain_ratio.cir
+description: >
+  Generic library check (hardcoded representative values; NO netlist_bind by design). Verifies the
+  inverting-summer gain-stage law |G| = R_f/R_in for a single non-unity leg (R_f != R_in). Two
+  ratios with R_f=100k: R_in=20k -> 5.0x (mod-bus max-gain endpoint) and R_in=250k -> 0.4x
+  (sub-unity). The gain emerges from the modeled R_f/R_in ratio; the summer inverts (magnitude taken).
+plugin_ref: "plugin/src/dsp/ModBus.hpp:19 — amountGain(p)=0.2*25^p (the SCALE leg gain = R_f/R_src); analog |G|=R_f/R_in per spec.md 'Transfer Function' gain-stage case"
+measurements:
+  # DERIVED from the spec ratio, NOT copied from deck output:
+  #   gain_a = R_f/R_in = 100k/20k  = 5.0
+  #   gain_b = R_f/R_in = 100k/250k = 0.4
+  - name: gain_a
+    expect: 5.0
+    tol_pct: 1
+  - name: gain_b
+    expect: 0.4
+    tol_pct: 1

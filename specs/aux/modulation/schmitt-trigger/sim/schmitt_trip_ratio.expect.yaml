@@ -1,0 +1,20 @@
+deck: schmitt_trip_ratio.cir
+description: >
+  Generic library check (hardcoded representative values; NO netlist_bind by design). Verifies the
+  non-inverting Schmitt trip-threshold ratio V_trip/V_sat = R_b/(R_a+R_b) = 82k/(100k+82k) = 0.4505,
+  measured on a REAL hysteretic comparator (the R_a/R_b divider HOLDS state; the integrator ramp
+  walks the input across the window so the triangle peak = +trip, trough = -trip). Also checks the
+  full hysteresis window ratio = 2·R_b/(R_a+R_b) = 0.9011 (the rising vs falling trip span). The
+  absolute ±V_trip is [NV] (depends on op-amp V_sat); the V_sat-free ratios are pinned by R_a, R_b.
+plugin_ref: "plugin/src/dsp/LFO.hpp:19-20 — unit triangle mapped to ±5 V; analog amplitude = Schmitt window V_trip = V_sat·R_b/(R_a+R_b) per spec.md 'Transfer Function' lines 53-66"
+measurements:
+  # DERIVED from the divider, NOT deck output:
+  #   trip_ratio   = R_b/(R_a+R_b)     = 82000/182000  = 0.45055
+  #   window_ratio = 2·R_b/(R_a+R_b)   = 2·0.45055     = 0.90110
+  # tol_pct 3 covers the peak/trough riding just under the ideal threshold (finite comparator edge).
+  - name: trip_ratio
+    expect: 0.4505
+    tol_pct: 3
+  - name: window_ratio
+    expect: 0.9011
+    tol_pct: 3

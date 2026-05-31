@@ -1,0 +1,21 @@
+deck: clip_window.cir
+description: "LIBRARY (generic) check — ±4V window clip detector: 20k/10k threshold dividers (→ ±4.0V, NON-VACUOUS) + window-comparator logic (|DISTOUT|>4 ⇒ LED on). No netlist_bind (no netlist behind a library cell)."
+plugin_ref: "plugin/src/Pogo.cpp:459 — BP1_CLIP_LIGHT = (max(|distOutL|,|distOutR|) > 4.0f); VREF_P4/N4 are the analog ±4V window the comparators trip on"
+# Thresholds DERIVED from the divider law (NOT copied from deck output):
+#   VREF_P4 = +12·10k/30k = +4.0V ;  VREF_N4 = -12·10k/30k = -4.0V  (= plugin 4.0f)
+# NON-VACUOUS: the window comparators reference the live divider nodes, so a divider regression
+# (R_top 20k->10k → ±6V) both moves the threshold AND shifts which inputs trip.
+measurements:
+  - name: vref_p4
+    expect: 4.0
+    tol_abs: 0.05
+  - name: vref_n4
+    expect: -4.0
+    tol_abs: 0.05
+  # Window logic (booleans: deck prints 1.0/0.0):
+  - name: clip_ib       # DISTOUT 0V is inside ±4 -> LED off
+    expect: false
+  - name: clip_hi       # DISTOUT +5V > +4 -> LED on
+    expect: true
+  - name: clip_lo       # DISTOUT -5V < -4 -> LED on
+    expect: true

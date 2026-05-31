@@ -2,6 +2,8 @@
 
 **Type:** `distortion` · part of the [aux circuit library](../../_LIBRARY.md)
 
+**Composes:** [soft-clip](../soft-clip/spec.md) · [hard-clip](../hard-clip/spec.md) · [wavefolder](../wavefolder/spec.md)
+
 > ✅ **Re-verified 2026-05-30** against the locked plugin (change 0018). Corrected for: distortion
 > runs **BEFORE** the bandpass SVF (per band); **per-band** mode select (BP1/2/3_DIST_MODE), not
 > global; DRIVE is a **THAT2180 VCA** per band (not a passive pot); no oversampling.

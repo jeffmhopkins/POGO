@@ -1,0 +1,56 @@
+* aux/distortion/soft-clip LIBRARY check — soft-clip S-curve ceiling at ±Vth ≈ ±1.4 V (tanh approx)
+* GENERIC LIBRARY DECK (no netlist_bind by design — per _LIBRARY.md a library block has no single
+*   netlist behind it; representative hardcoded values verify the transfer math / topology).
+* CLAIM (Distortion.hpp:33-37 + spec §Transfer Function):
+*   SOFT mode is  y = Vth·tanh(G·v/Vth), Vth=0.28 (= 1.4 V / 5 V at the ×5 audio scaling).
+*   The analog cell = unity gain stage (R_f=R_in) + 2×1N4148W-per-rail diode soft-clip:
+*     - below the knee the output is LINEAR (follows the gain law);
+*     - above it the output asymptotes to ±Vth·5 = ±1.4 V (the tanh ceiling).
+*   This deck reproduces the PLUGIN's tanh S-curve in the ×5 V domain (Vth_V = 1.4 V) and reads
+*   the output at three drive points, confirming the linear region and the soft ceiling.
+*
+* IDEAL MODELS (one line each):
+*  - Eop : ideal high-gain VCVS op-amp (stands for U_SC, TL072) -> exact closed-loop ratio R_f/R_in
+*          (=unity), the load-bearing cell-gain fact.
+*  - Bsc : behavioral tanh soft-clip standing for the 2×1N4148W-per-rail diode network. The Vth_V
+*          ceiling (1.4 V) is the device-constant [NV] the diodes set; here the deck checks the
+*          PLUGIN's design-intent law y = Vth·tanh(in/Vth) in the ×5 V domain — modeled with the
+*          exact tanh so the S-curve under test IS the plugin's, not a different knee.
+* PARALLEL instances at three drive points (guide rule 5): one well below Vth (linear), one well
+*   above (+ rail, soft ceiling), one well below on the − rail (symmetric soft ceiling).
+
+.param Rin=10k          ; R_SC_in  (input)
+.param Rf=10k           ; R_SC_f   (feedback) -> cell gain -R_f/R_in = -1 (unity)
+.param VthV=1.4         ; soft-clip ceiling in volts = plugin Vth 0.28 × 5 V (2×1N4148W/rail) [NV]
+
+* ---- instance A: small input +0.5 V -> below knee, linear unity-inverter -> tanh ~ argument ----
+* unity inverting stage: out_clean = -Rf/Rin * Va = -0.5 V; tanh soft-clip preserves it (|−0.5|<1.4)
+Va  ain 0 DC 0.5
+Ria ain agm {Rin}
+Rfa agm aclean {Rf}
+Eopa aclean 0 0 agm 1e6                 ; (+) at ground -> inverting; aclean = -Rf/Rin * Va
+Bsa aout 0 V = VthV*tanh(V(aclean)/VthV)  ; plugin S-curve in ×5 V domain
+
+* ---- instance B: large input -8 V -> stage out_clean=+8 V, far past knee -> soft ceiling +1.4 V ----
+Vb  bin 0 DC -8
+Rib bin bgm {Rin}
+Rfb bgm bclean {Rf}
+Eopb bclean 0 0 bgm 1e6                 ; bclean = -Rf/Rin * (-8) = +8 V
+Bsb bout 0 V = VthV*tanh(V(bclean)/VthV)  ; tanh(8/1.4)=~1.0 -> +1.4 V ceiling
+
+* ---- instance C: large input +8 V -> stage out_clean=-8 V -> soft ceiling -1.4 V (symmetric) ----
+Vc  cin 0 DC 8
+Ric cin cgm {Rin}
+Rfc cgm cclean {Rf}
+Eopc cclean 0 0 cgm 1e6                 ; cclean = -8 V
+Bsc cout 0 V = VthV*tanh(V(cclean)/VthV)  ; -> -1.4 V ceiling
+
+.control
+  op
+  let sc_linear   = v(aout)        ; +0.5 in -> stage -0.5 -> |−0.5|<1.4 -> ~ -0.5 V (linear region)
+  let sc_ceil_pos = v(bout)        ; DERIVED +1.4 V soft ceiling (plugin Vth 0.28 × 5 V)
+  let sc_ceil_neg = v(cout)        ; DERIVED -1.4 V soft ceiling (symmetric)
+  let sc_ceil_norm = v(bout)/5.0   ; DERIVED -> 0.28 (plugin wavefold/softclip Vth, Distortion.hpp:33)
+  print sc_linear sc_ceil_pos sc_ceil_neg sc_ceil_norm
+.endc
+.end

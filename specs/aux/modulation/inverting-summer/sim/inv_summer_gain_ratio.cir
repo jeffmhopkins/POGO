@@ -1,0 +1,40 @@
+* aux/modulation/inverting-summer — gain-ratio leg |G| = R_f/R_in (R_f/R_in != 1) (LIBRARY generic)
+* LIBRARY CHECK (generic hardcoded representative values; NO netlist_bind by design, per
+* specs/aux/_LIBRARY.md "Library sim convention").
+*
+* CLAIM (spec.md "Transfer Function" lines 53-64, "Special cases" gain stage):
+*   A single-input inverting summer with R_f != R_in is a gain inverter:
+*     V_out = -(R_f/R_in)·V_in,  so |G| = R_f/R_in.
+*   This is the same law that realizes the mod-bus SCALE leg gain = R_f/R_src (ModBus.hpp:19
+*   amountGain endpoints 0.2x..5x). Here we exercise a non-unity ratio so the gain is NOT 1 and
+*   the R_f/R_in dependence is genuinely tested (non-vacuous): change R_in and |G| changes.
+*
+* REPRESENTATIVE VALUES (R_f = 100k family value, two non-unity ratios bracketing the SCALE range):
+*     leg A: R_in = 20k  -> |G| = 100k/20k  = 5.0   (mod-bus max-gain endpoint, amountGain(1)=5)
+*     leg B: R_in = 250k -> |G| = 100k/250k = 0.4   (a sub-unity ratio, != 1)
+*   Input V_in = +1 V -> V_out_A = -5.0 V (full inversion), V_out_B = -0.4 V.
+*   The gain EMERGES from the modeled R_f/R_in; set R_in to R_f and it would collapse to -1.
+*
+* IDEAL MODEL (justification): Eop (1e6 VCVS) stands in for the op-amp section; the inverting
+*   closed-loop gain is set entirely by R_f/R_in at the virtual ground — the law under test.
+*   PARALLEL instances (one per ratio), no alter.
+
+Vin vin 0 DC 1
+
+* --- leg A: R_in = 20k -> |G| = 5.0 ---
+EA  outa 0 0 sna 1e6          ; (+) at GND, (-)=sna virtual ground
+RinA vin sna 20k             ; R_in (gain leg)
+RfA  outa sna 100k           ; R_f
+
+* --- leg B: R_in = 250k -> |G| = 0.4 ---
+EB  outb 0 0 snb 1e6
+RinB vin snb 250k            ; R_in (sub-unity leg)
+RfB  outb snb 100k           ; R_f
+
+.control
+  op
+  let gain_a = -v(outa)/1.0   ; DERIVED |G| = R_f/R_in = 100k/20k  = 5.0
+  let gain_b = -v(outb)/1.0   ; DERIVED |G| = R_f/R_in = 100k/250k = 0.4
+  print gain_a gain_b
+.endc
+.end

@@ -1,0 +1,47 @@
+* aux/modulation/inverting-summer — unity-weight summation V_out = -Σ V_in,i (LIBRARY generic)
+* LIBRARY CHECK (generic hardcoded representative values; NO netlist_bind by design — there is
+* no netlist behind a library block, per specs/aux/_LIBRARY.md "Library sim convention").
+*
+* CLAIM (spec.md "Transfer Function" lines 53-64):
+*   For an inverting summer with all R_in,i = R_f, every input weight is R_f/R_in,i = 1, so
+*     V_out = -Σ_i V_in,i.
+*   This is the unity-weight specialization; the SUM emerges from the virtual-ground KCL with
+*   equal resistors. (Plugin: the mod-bus law sourceV*gain + offset is a 2-input weighted sum,
+*   ModBus.hpp:22-25; unity weights are the R_f = R_in,i case.)
+*
+* REPRESENTATIVE VALUES: R_f = R_in,1 = R_in,2 = R_in,3 = 100k (the mod-bus family value).
+*   Inputs chosen so the sum is non-trivial and the cancellation is genuine:
+*     2-input: V1 = +2 V, V2 = -0.5 V  -> V_out2 = -(2 + (-0.5)) = -1.5 V
+*     3-input: V1 = +2 V, V2 = -0.5 V, V3 = +1 V -> V_out3 = -(2 - 0.5 + 1) = -2.5 V
+*   The weights (and thus the sum) EMERGE from the modeled R_f/R_in ratios — set any R_in to
+*   a non-100k value and that input's term scales, breaking the expected sum (non-vacuous).
+*
+* IDEAL MODEL (justification): Eop (1e6 VCVS) stands in for the TL074 half. The inverting
+*   summer's per-input gain is set entirely by R_f/R_in,i at the virtual-ground (-) node — the
+*   law under test — so no device model is needed. PARALLEL instances (one per case), no alter.
+
+* shared inputs
+V1 v1 0 DC 2
+V2 v2 0 DC -0.5
+V3 v3 0 DC 1
+
+* --- 2-input unity summer: V_out2 = -(V1 + V2) = -1.5 ---
+E2  out2 0 0 sn2 1e6          ; (+) at GND, (-)=sn2 virtual ground
+R12 v1 sn2 100k               ; R_in,1
+R22 v2 sn2 100k               ; R_in,2
+Rf2 out2 sn2 100k             ; R_f (= R_in,i -> unity weights)
+
+* --- 3-input unity summer: V_out3 = -(V1 + V2 + V3) = -2.5 ---
+E3  out3 0 0 sn3 1e6
+R13 v1 sn3 100k               ; R_in,1
+R23 v2 sn3 100k               ; R_in,2
+R33 v3 sn3 100k               ; R_in,3
+Rf3 out3 sn3 100k             ; R_f (= R_in,i -> unity weights)
+
+.control
+  op
+  let vout2 = v(out2)         ; DERIVED -(V1+V2)        = -(2-0.5)     = -1.5
+  let vout3 = v(out3)         ; DERIVED -(V1+V2+V3)     = -(2-0.5+1)   = -2.5
+  print vout2 vout3
+.endc
+.end
