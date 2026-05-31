@@ -60,12 +60,44 @@ Group A (attenuverter + depth): mb-dest-inv-unity, mb-bipolar-attenuverter, mb-d
   checkable remaining block (NV-safe absolutes everywhere), and self-contained; block-6-dist is sprawling
   with the most [NV] debt (clip/fold laws are Phase-3R). Done so far: block-7 (filter), block-4 (VCA).
 
+## Stage 2 — writers (2 parallel) ✅ — 6 new decks + depth retrofit, all PASS
+- **Group P (processor):** mb_offset_level (binds R13/R15/R16 — the §M2 ±5V guard; models the bug too),
+  mb_gain_max (binds R13/R14 → 4.545×), mb_gain_min (binds R13/R14; RV3 470k unbound spec literal),
+  mb_polarity_unity (binds R16_1/R16_2 → −1). No netlist↔spec divergence.
+- **Group A (attenuverter + depth):** att_inverter (binds R_INV_IN_1/R_INV_FB_1 → −1), att_bipolar
+  (no bind — value-independent topology check), modbus_depth retrofit (binds R37_1=100R).
+
+## 🟡 TOOLING GAP FOUND — `parse_value()` couldn't read bare-`R` ohms notation
+Group A's depth retrofit surfaced it: the runner's value parser handled `100k`/`47nF`/`1R0`/`4k7`/`49k9`
+but **not bare `100R`/`47R`** (R as a plain ohms suffix with no fractional digit). block-3 authors ALL its
+100Ω protection resistors as `100R` (R37_1…R37_18, R99), and this was the **first netlist_bind to use that
+notation** — so the gap was previously unexercised. **Fix:** added a trailing-`R` strip to `parse_value`
+(after R-notation is ruled out). Verified non-regressing across `100R/47R/1R0/4k7/49k9/1M/220/4.7k/47nF/
+10R5/2R2`. **Proven:** perturbing R37_1 100R→1k now trips the bind. (No block-3 *netlist* bug — the §M2
+offset and §H depth fixes both verified correct.)
+
+## Stage 3 — verifiers (2 parallel adversarial) ✅ — ran live ngspice perturbation probes
+- **Group P: all 4 SOUND, no defects.** Every bind proven load-bearing (R15/R14/R16_2 perturbations fail
+  correctly). RV3=470k is an acknowledged Q3 hole (symbolic netlist pot value, unbindable) — honestly
+  disclosed in deck + expect. Ratio-symmetry limits (coordinated both-ref change) disclosed.
+- **Group A: 2 SOUND + parser SOUND; 1 LOW/advisory.** att_inverter bind proven; att_bipolar's no-bind
+  justification validated by the GND-miswire perturbation (att_noon→+2.5, att_ccw→0 → FAIL, as intended).
+  Parser fix probed against all notations — no regression. **Advisory:** modbus_depth's R37_1=100R bind
+  guarded only the (small-contribution) protection R; the depth *headline* was anchored to deck literals.
+
+## Stage 4 — integrate ✅ (advisory fixed; gates green)
+- **Closed the depth advisory:** decomposed the deck's "16.3k fixed load" into its real constituents —
+  the §H-raised `R_INV_IN_1=47k` inverter input (now **bound** as `R_INV_LOAD`) ∥ the ~25k pot leg
+  (documentary, symbolic pot). **Proven:** reverting R_INV_IN_1 47k→10k (the pre-§H value) now FAILS
+  modbus_depth (and att_inverter) — the §H hi-Z-load change is netlist-anchored, not cosmetic.
+- All 7 `--check` gates green; 7 block-3 decks pass (34 decks total).
+
 ## Gate checklist
-- [ ] Stage 1 derive → manifest
-- [ ] Stage 2 write decks (parallel)
-- [ ] Stage 3 verify-intent (parallel adversarial)
-- [ ] Stage 4 integrate (fix findings; all 7 gates green)
-- [ ] Update `specs/SPICE-COVERAGE.md` (block-3 BASELINE → FULL)
+- [x] Stage 1 derive → manifest (6 checks + retrofit; dropped vacuous clamp; RV3 bind-gap escalated)
+- [x] Stage 2 write decks (2 parallel → 6 new + retrofit)
+- [x] Stage 3 verify-intent (2 adversarial → all SOUND; 1 advisory; found the parser gap was real+fixed)
+- [x] Stage 4 integrate (closed the depth advisory; fixed `parse_value` `100R`; all 7 gates green)
+- [x] Update `specs/SPICE-COVERAGE.md` (block-3 BASELINE → FULL)
 - [ ] PR `change/0026-spice-math-block3` → `dev`
 
 ## Outstanding (tracked in `specs/SPICE-COVERAGE.md`)
