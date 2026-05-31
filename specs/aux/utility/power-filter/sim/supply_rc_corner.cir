@@ -14,9 +14,11 @@
 * picked to land a round corner — the LAW f=1/(2πRC) is what is under test, not the bead's exact Z.)
 * Ideal model justification: Rs+Cint is exactly the 1st-order RC the bulk cap forms with the
 * series element; no bead Spice model is needed because the corner is an RC property.
-.param C=10u
-.param fpick=1000
-.param Rs={1/(2*3.141592653589793*fpick*C)}   ; 15.915 Ω -> RC corner at 1.000 kHz
+* C and R_s are INDEPENDENT representative literals (NOT derived from the target frequency),
+* so the measured corner genuinely MOVES if either changes — f is computed by ngspice from the
+* real RC, not assumed. (Earlier form derived R_s from fpick+C, pinning f tautologically.)
+.param C=10u           ; bulk bypass cap (the spec's 10µF)
+.param Rs=15.915       ; representative bead/plane series R (documentary, fixed) -> corner 1.000 kHz
 
 Vac ain 0 AC 1 DC 0        ; supply ripple source (1V AC into the rail node)
 Rser ain out {Rs}         ; ferrite-bead series resistance R_s

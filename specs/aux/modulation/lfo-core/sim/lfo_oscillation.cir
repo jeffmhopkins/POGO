@@ -14,7 +14,7 @@
 *   NOT the block-2 production R/C of 590k/47nF which give the 0.05-20 Hz panel range):
 *     R_FB_SQ = 100k, R_HYS = 82k (the production threshold pair -> +/-5 V triangle),
 *     R_INT = 100k, C_INT = 10nF
-*   DERIVED: f = 182000 / (4 * 82000 * 100000 * 10e-9) = 182000/327.84 = 554.9 Hz.
+*   DERIVED: f = 182000 / (4 * 82000 * 100000 * 10e-9) = 182000/328.0 = 554.9 Hz.
 *
 * This deck builds a REAL hysteretic oscillator (a memoryless B-source cannot oscillate; the
 * integrator's capacitor STATE is what breaks the loop and sustains the triangle).
