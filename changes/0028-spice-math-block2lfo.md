@@ -25,17 +25,41 @@ source maps V_tri∈[−5,+5] → I_LED ∝ (V_tri+5)/10.
 Plugin ground truth (`LFO.hpp`): `f = 0.05·400^param` (0.05 Hz @ 0, ~20 Hz @ 1, exponential); triangle
 ±1 → ±5V; one-pole LP at 10× rate models Schmitt/integrator rounding.
 
-## Candidate claims (pre-derive sketch — the deriver produces the authoritative manifest)
-- **lfo-freq-max / -min** — oscillation frequency f = 1/(4·R_INT·C·β), β=R7/R5 (Schmitt trip ratio),
-  measured by a TRANSIENT sim (count the period). f_max at full wiper (R1=590k, C1=47nF), f_min bounded
-  by R_FLOOR (R3=2k4). Endpoints bindable (R1/R3/R5/R7/C1); the log-pot taper midpoint is [NV] (symbolic
-  RV1 value). The exponential 0.05·400^param law itself is set by the log pot → only endpoints checkable.
-- **lfo-triangle-amplitude** — triangle peak = β·V_sat = (R7/R5)·V_sat sets the ±5V swing (vs the rails).
-  Bind R5, R7. [NV] on V_sat (op-amp output saturation ≈ ±10.5V) — check the RATIO/shape.
-- **schmitt-thresholds** — comparator trip points ±V_sat·R7/(R5+R7) (or the relevant divider). Bind R5, R7.
-- **led-breathing-bias** — NPN level-shift: V_tri (R19=51k) + 12V bias (R20=68k) + GND (R21=10k) → base;
-  emitter R_E (R9=470R) → I_LED ∝ (V_tri+5). Check the bias maps V_tri=−5→I≈0 and V_tri=+5→I_max
-  (matches plugin (V_tri+5)/10). Bind R19/R20/R21/R9.
+## Manifest (Stage 1) ✅ — arithmetic verified independently; frequency formula derived
+
+Oscillator: **f = (R5+R7)/(4·R7·R_INT·C_INT)** (integrator + non-inverting Schmitt; V_sat CANCELS).
+
+| id | claim (computed) | netlist refs (bind) | nv | shortlist |
+|---|---|---|---|---|
+| **lfo-fmax** | full drive: f = (R5+R7)/(4·R7·R1·C1) = 182k/(4·82k·590k·47nF) = **20.0 Hz** (`.tran`) | R1=590k, R5=100k, R7=82k, C1=47nF | NO (V_sat cancels) | **#1 (headline)** |
+| **lfo-fmin** | floor: k_min = R3/(RV1+R3) = 2k4/(1M+2k4) = 0.00239 → f_min ≈ **0.0479 Hz** (`op` ratio, not a 21s tran) | R3=2k4 (RV1=1M spec literal) | NO | #2 |
+| **lfo-vsat-independence** | f is V_sat-INDEPENDENT (threshold scales with V_sat → cancels); ratio f(V_sat_a)/f(V_sat_b) = **1.0** | (shared topology) | NO (proves the [NV] drops out) | #3 |
+| **lfo-vth-ratio** | Schmitt threshold V_H = V_sat·R7/(R5+R7) = **0.4505·V_sat** (sets the ±5V triangle peak) | R5=100k, R7=82k | abs [NV] (V_sat); ratio NO | #4 |
+| **led-bias-superposition** | NPN base = (V_tri/R19 + 12/R20)/(ΣG) → **0.584 / 1.314 / 2.044 V** at V_tri=−5/0/+5 | R19=51k, R20=68k, R21=10k | NO | #5 |
+| **led-slope-monotone** | I_LED = (V_base−Vbe)/R9 rises 0→~3mA as V_tri −5→+5 (R9=470R) | R9=470R | **YES** (Vbe) | #6 |
+| ~~lfo-rout-scaling~~ | R11/R12=1k series into hi-Z jack (unity) | — (value-independent) | NO | **dropped (vacuous)** |
+
+**Key derivations confirmed:** f_max=20.0 Hz ✓ (plugin 20 Hz), f_min=0.0479 Hz ✓ (plugin 0.05 Hz), LED
+bias 0.584/1.314/2.044V ✓ (spec). **V_sat cancels in f** — so the headline rate law is NOT [NV] despite
+the op-amp saturation being unmeasured; `lfo-vsat-independence` proves it cheaply.
+
+**First `.tran` deck — new ngspice mechanics for writers (deriver-supplied):**
+1. `.tran <step> <stop>` bounded < ~1–2s sim time → run at 20 Hz (~0.6s), NEVER the real 0.05 Hz (21s) —
+   use the `op` divider-ratio for f_min.
+2. The oscillator needs a KICK (`.ic v(vtri)=0` + offset, or a t=0 PULSE on V_sq) — ideal sim sits at the
+   metastable point otherwise.
+3. Skip startup: measure the period on the 2nd–3rd zero-crossings (`meas tran ... RISE=2`/`RISE=3`).
+4. The Schmitt comparator must HOLD state between thresholds (hysteresis) — a memoryless B-source won't
+   oscillate; use the R5/R7 divider on a real (+) node feeding a high-gain comparator.
+
+**Escalations:** RV1/RV2 are symbolic log-pot values (`LFO1_RATE`) → unbindable (like block-3 RV3);
+1M stays a spec literal in lfo-fmin. V_sat / Vbe are [NV] — checked via ratios / base-voltage, not absolutes.
+
+**NOT spice-able:** the exponential taper mid-curve (log pot, symbolic), the one-pole rounding LP (DSP
+artifact), LED Vf/brightness/beta, MOD_SRC tap, pinouts, output normalling, sourcing/power/decoupling.
+
+**Writer slices:** Group OSC (lfo-fmax, -fmin, -vsat-independence, -vth-ratio — owns the first `.tran`
++ period-meas + `.ic` pattern); Group LED (led-bias-superposition, led-slope-monotone — pure `op`).
 
 ## Pipeline (per the guide)
 1. **Derive** [1 agent] — structured manifest; ESPECIALLY work out the exact analog oscillation-frequency
