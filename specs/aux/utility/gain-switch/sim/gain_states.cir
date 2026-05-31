@@ -1,0 +1,48 @@
+* aux/utility/gain-switch — LIBRARY primitive: 1× bypass vs 5× non-inverting amp (G=1+R_f/R_g).
+* Generic hardcoded values (NO netlist_bind — no netlist behind a library primitive).
+* Adapted from block-1 pregain.cir, generalized to the library 1×/5× form.
+* Ideal op-amp Eop out 0 (+) (−) 1e6 with R_g (−→GND) and R_f (out→−) → closed-loop G=1+R_f/R_g
+* (the real OPA1612/TL072 non-inverting gain). 1× = path-select bypass (raw V_in). Clip = B-source
+* rail clamp standing in for the op-amp ±10.5 V output swing.
+* Parallel instances (rule 5): one copy per test condition, each printed as a named node.
+*
+* POGO ships R_f/R_g = 18k/4.7k → 4.83×. We model exactly those values; expect derives 1+18/4.7.
+
+.param RF=18000     ; feedback
+.param RG=4700      ; (−)-to-GND leg → G = 1 + 18/4.7 = 4.83
+.param VRAIL=10.5   ; OPA1612 output swing (device limit, not resistor-set)
+
+* ---- 5× state, Vin = 1 V (small-signal gain) ----
+Vin5 s5 0 DC 1
+Eop5 raw5 0 s5 ni5 1e6
+Rg5 ni5 0 {RG}
+Rf5 raw5 ni5 {RF}
+Bc5 g5 0 V = (V(raw5)>10.5)?10.5:((V(raw5)<-10.5)?-10.5:V(raw5))
+
+* ---- 1× state, Vin = 1 V (bypass path-select: V_out = V_in unchanged) ----
+Vin1 s1 0 DC 1
+Eby1 g1 0 s1 0 1        ; unity follower stands in for the raw-input path-select bypass
+
+* ---- 5× clip, Vin = +5 V (5*4.83=24 V → clamp +10.5) ----
+Vinh sh 0 DC 5
+Eoph rawh 0 sh nih 1e6
+Rgh nih 0 {RG}
+Rfh rawh nih {RF}
+Bch ghi 0 V = (V(rawh)>10.5)?10.5:((V(rawh)<-10.5)?-10.5:V(rawh))
+
+* ---- 5× clip, Vin = −5 V (→ clamp −10.5) ----
+Vinl sl 0 DC -5
+Eopl rawl 0 sl nil 1e6
+Rgl nil 0 {RG}
+Rfl rawl nil {RF}
+Bcl glo 0 V = (V(rawl)>10.5)?10.5:((V(rawl)<-10.5)?-10.5:V(rawl))
+
+.control
+  op
+  let gain5 = v(g5)      ; 1 + 18k/4.7k = 4.83  (small-signal, no clip)
+  let gain1 = v(g1)      ; bypass → 1.0
+  let clip_hi = v(ghi)   ; +5V*4.83 → clamp +10.5
+  let clip_lo = v(glo)   ; −5V → clamp −10.5
+  print gain5 gain1 clip_hi clip_lo
+.endc
+.end

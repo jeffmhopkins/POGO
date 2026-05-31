@@ -1,0 +1,21 @@
+deck: gain_states.cir
+description: LIBRARY primitive — 1× bypass and 5× (G=1+R_f/R_g) gain states + rail clip. No netlist_bind by design (no netlist behind a library primitive).
+plugin_ref: "plugin/src/dsp/PreGain.hpp:9-13 — gainParam<0.5 → v (1×); else clamp(5·v, ±10.5) (5×)"
+measurements:
+  # 5× state: G = 1 + R_f/R_g = 1 + 18k/4.7k = 4.8298…  ← DERIVED from the law, not deck output.
+  # Both R legs are load-bearing; moves if either R is wrong (see gain_perturb.cir for the proof).
+  - name: gain5
+    expect: 4.83
+    tol_abs: 0.05
+  # 1× bypass: V_out = V_in → gain exactly 1.0 (op-amp out of the path).
+  - name: gain1
+    expect: 1.0
+    tol_abs: 0.01
+  # +5 V in at 5× = 24 V → clamped at the +10.5 V op-amp rail (device limit, [NV]).
+  - name: clip_hi
+    expect: 10.5
+    tol_abs: 0.1
+  # −5 V in at 5× = −24 V → clamped at the −10.5 V rail.
+  - name: clip_lo
+    expect: -10.5
+    tol_abs: 0.1

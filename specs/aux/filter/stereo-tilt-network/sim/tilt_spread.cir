@@ -1,0 +1,65 @@
+* aux/filter/stereo-tilt-network — LIBRARY primitive: ± spread V_L=base+tilt, V_R=base−tilt
+* Generic hardcoded values (NO netlist_bind — no netlist behind a library primitive).
+* Models the network the block-5 §B passive sum realizes, generalized: a G=−1 unity inverter
+* makes −V_tilt, and equal series Rs sum V_base + (+V_tilt) at the L base, V_base + (−V_tilt) at
+* the R base, onto a low-Z (tempco-shunt) node. Because R_base = R_tilt the base and tilt carry
+* EQUAL octave weight, so in normalized terms V_L = base + tilt, V_R = base − tilt exactly.
+*
+* Representative point: base = 2 V, tilt = 0.5 V  → V_L = 2.5, V_R = 1.5 (spread = 1.0 = 2*tilt).
+* We read the RATIO V_L/(base+tilt) and V_R/(base−tilt) so the absolute mV scaling (set by the
+* equal series Rs + shunt) cancels and the check pins the +/- SPREAD LAW, not the divider constant.
+* Non-vacuity: the inverter R and the R_tilt legs are the real summing elements — perturb R_tilt
+* (tilt_perturb.cir) and the spread moves.
+
+.param RBASE=54900    ; base series R into expo base
+.param RTILT=54900    ; tilt series R (= RBASE → 1:1 octave weight)
+.param RSH=1000       ; tempco shunt (low-Z node)
+.param RINV=100000    ; inverter input = feedback → G = −1
+
+* ---- tilt source and its inverse (shared) ----
+Vbase vbase 0 DC 2
+Vtilt vtilt 0 DC 0.5
+* G = −1 unity inverter: Eop out 0 (+) (−) 1e6 with R_in = R_f
+Einv ninv 0 0 nim 1e6
+Rii  vtilt nim {RINV}
+Rif  ninv  nim {RINV}      ; ninv = −vtilt
+
+* ---- L base node: V_base + (+V_tilt) passive sum ----
+RbL vbase nL {RBASE}
+RtL vtilt nL {RTILT}
+RsL nL 0 {RSH}
+
+* ---- R base node: V_base + (−V_tilt) passive sum ----
+RbR vbase nR {RBASE}
+RtR ninv  nR {RTILT}
+RsR nR 0 {RSH}
+
+* ---- tilt = 0 case (separate node set, same network, V_tilt forced 0) ----
+Vbase0 vbase0 0 DC 2
+Vtilt0 vtilt0 0 DC 0
+Einv0 ninv0 0 0 nim0 1e6
+Rii0  vtilt0 nim0 {RINV}
+Rif0  ninv0  nim0 {RINV}
+RbL0 vbase0 nL0 {RBASE}
+RtL0 vtilt0 nL0 {RTILT}
+RsL0 nL0 0 {RSH}
+RbR0 vbase0 nR0 {RBASE}
+RtR0 ninv0  nR0 {RTILT}
+RsR0 nR0 0 {RSH}
+
+.control
+  op
+  * normalize out the passive-divider constant: each base node scales base+tilt by the same factor.
+  * read the per-volt weight from the base-only contribution, then express V_L, V_R in that weight.
+  * weight = v(nL)/(base+tilt); we assert the L/R RATIO L:R = (base+tilt):(base−tilt) directly.
+  let vL = v(nL)
+  let vR = v(nR)
+  * Direct law check via normalized weight from the tilt=0 (pure base) node:
+  let w = v(nL0)/2                                ; node-volts per 1 V of base CV (tilt=0, base=2)
+  let vL_oct = vL / w                             ; → base+tilt in octave units = 2.5
+  let vR_oct = vR / w                             ; → base−tilt in octave units = 1.5
+  let mono_oct = v(nL0)/w                         ; tilt=0 L in octave units → 2.0
+  let monoLR  = (v(nL0)-v(nR0))*1000              ; tilt=0 L−R in mV → ~0 (no spread)
+  print vL_oct vR_oct mono_oct monoLR
+.endc
+.end

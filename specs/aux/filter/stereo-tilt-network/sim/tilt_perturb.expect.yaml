@@ -1,0 +1,17 @@
+deck: tilt_perturb.cir
+description: LIBRARY primitive NON-VACUITY — the ± spread emerges from the summing Rs; doubling R_tilt under-weights the tilt and moves V_R. No netlist_bind (library primitive).
+plugin_ref: "plugin/src/Pogo.cpp:403/467 — R = base − tilt depends on tilt-leg weight = R_base/R_tilt"
+measurements:
+  # Correct R_tilt = R_base → V_R = base − tilt = 1.5 (octave units, base=2 tilt=0.5).
+  - name: vR_ok
+    expect: 1.5
+    tol_abs: 0.01
+  # Perturbed R_tilt = 2·R_base → tilt carries half weight → V_R ≈ base − tilt/2 = 1.75.
+  # (Equal series Rs onto a low-Z shunt → contribution ∝ 1/R, so 2× R halves the tilt addend.)
+  - name: vR_bad
+    expect: 1.75
+    tol_abs: 0.02
+  # The spread MOVED by ~0.25 octave when the summing R was perturbed → non-vacuous (must be > 0).
+  - name: moved
+    expect: 0.25
+    tol_abs: 0.03

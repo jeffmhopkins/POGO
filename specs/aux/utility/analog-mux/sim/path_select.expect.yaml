@@ -1,0 +1,11 @@
+deck: path_select.cir
+description: "LIBRARY (generic, NO netlist_bind by design): verifies the CD4053 2:1 analog-mux PATH-STEERING topology — the SELECTED of two always-running parallel paths reaches OUT at ~unity (Ron≈200Ω into high-Z, <2% drop), the DE-SELECTED path is an open channel and does not appear. Both select states (S=0/S=1) checked. Generalized from distortion/overview/sim/mux_select.cir; routing/topology check, not a precision-Ron check."
+plugin_ref: "specs/block-6/spec.md §CD4053 Mux Wiring (one CD4053 per BP group, 2:1 cells select SC/HC/WF + BP3 input LP1 vs ALT-VCA); plugin Pogo.cpp:412-415 per-band mode dispatch — analog mux mirrors the mode/path select. aux/distortion/overview COMPOSES this primitive."
+# Generic library check — verifies the mux path-steering topology, not a netlist value.
+measurements:
+  - name: out_sel0
+    expect: 3.0           # S=0 selects PATH_0 (de-selected PATH_1 must NOT appear)
+    tol_abs: 0.01
+  - name: out_sel1
+    expect: -2.0          # S=1 selects PATH_1
+    tol_abs: 0.01

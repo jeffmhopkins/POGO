@@ -1,0 +1,43 @@
+* aux/filter/stereo-tilt-network — NON-VACUITY proof: the spread EMERGES from the summing Rs.
+* Two parallel copies of the R-channel base sum at base=2, tilt=0.5:
+*   A (correct): R_tilt = R_base = 54.9k → V_R weight = base − tilt = 1.5 octave units.
+*   B (perturbed): R_tilt' = 2·R_base = 109.8k → the tilt leg carries HALF the octave weight,
+*       so the R channel drops by only HALF a tilt → V_R' ≈ base − tilt/2 = 1.75 octave units.
+* The measurable spread MOVES when the summing R is perturbed → the deck is bound to the real
+* network values, not a textbook identity. (No netlist_bind: library primitive, generic values.)
+
+.param RBASE=54900
+.param RSH=1000
+.param RINV=100000
+
+Vbase vbase 0 DC 2
+Vtilt vtilt 0 DC 0.5
+Einv ninv 0 0 nim 1e6
+Rii vtilt nim {RINV}
+Rif ninv  nim {RINV}
+
+* correct R-leg: R_tilt = R_base
+RbA vbase nA {RBASE}
+RtA ninv  nA {RBASE}
+RsA nA 0 {RSH}
+
+* perturbed R-leg: R_tilt = 2·R_base = 109.8k (tilt under-weighted)
+RbB vbase nB {RBASE}
+RtB ninv  nB 109800
+RsB nB 0 {RSH}
+
+* pure-base weight reference (tilt=0)
+Vb0 vb0 0 DC 2
+Rb0 vb0 n0 {RBASE}
+Rt0 0   n0 {RBASE}
+Rs0 n0 0 {RSH}
+
+.control
+  op
+  let w = v(n0)/2            ; node-volts per 1 V base CV
+  let vR_ok   = v(nA)/w      ; correct → 1.5
+  let vR_bad  = v(nB)/w      ; perturbed → ~1.75 (tilt under-weighted)
+  let moved = abs(vR_bad - vR_ok)   ; must be clearly > 0
+  print vR_ok vR_bad moved
+.endc
+.end

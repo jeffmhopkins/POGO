@@ -1,0 +1,12 @@
+deck: fanout_depth.cir
+description: Buffered low-Z rail passes ~unity to a low-Z destination; un-buffered 100k series-R normal throttles depth to ~3% (block-3 §H before/after).
+plugin_ref: "plugin/src/Pogo.cpp:373 — busV read undivided by every destination (analog-only loss-free fan-out); block-3 spec §H + specs/block-3/sim/modbus_depth.cir (the change-0020 depth fix)"
+measurements:
+  - name: depth_unbuf
+    # DERIVED from spec divider law: 100·R_dest/(R_series+R_dest) = 100·3300/(100000+3300) = 3.195 %
+    expect: 3.195
+    tol_pct: 2          # ideal resistive divider; tol covers literal rounding
+  - name: depth_buf
+    # DERIVED: buffered rail through 47Ω share into 3.3k: 100·3300/(3300+47) = 98.60 %
+    expect: 98.60
+    tol_pct: 2

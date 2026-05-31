@@ -22,11 +22,11 @@ primitives together and sim only the composition behavior, referencing their pri
 
 | Type | Entries | Role |
 |---|---|---|
-| **filter** | gm-c-integrator·, voct-expo-divider·, ota-c-svf, expo-converter, q-control | OTA-C SVF + V/oct + resonance |
+| **filter** | gm-c-integrator·, voct-expo-divider·, ota-c-svf, expo-converter, q-control, stereo-tilt-network | OTA-C SVF + V/oct + resonance + stereo spread |
 | **vca** | vca-cell, ref-injection-trim | THAT2180 dB-law VCA + Ec+ trim |
 | **distortion** | overview, soft-clip, hard-clip, wavefolder | per-band SC/HC/WF + CD4053 mux |
-| **modulation** | inverting-summer·, schmitt-trigger·, lfo-core, mod-bus-core, attenuverter | LFO, mod bus, attenuverters |
-| **utility** | unity-buffer, cv-protection, power-filter, output-buffer, clip-detector | buffers, protection, power, I/O, CLIP |
+| **modulation** | inverting-summer·, schmitt-trigger·, lfo-core, mod-bus-core, attenuverter, source-selector | LFO, mod bus, attenuverters, source select |
+| **utility** | unity-buffer, cv-protection, power-filter, output-buffer, clip-detector, gain-switch, distribution-buffer, analog-mux | buffers, protection, power, I/O, CLIP, gain, fan-out, mux |
 | **led** | led-breathing | NPN current-source brightness driver |
 
 `·` = primitive. Entries without `·` are composed cells (or self-contained).
@@ -64,6 +64,11 @@ primitives together and sim only the composition behavior, referencing their pri
 | utility/power-filter | existing | ✅ 0031 | board power filtering |
 | utility/output-buffer | **NEW 0032** | ✅ 0032 | buffer + 1k series + ±11V clamp (block-B) |
 | utility/clip-detector | **NEW 0032** | ✅ 0032 | window comparator + hysteresis + diode-OR (block-6) |
+| filter/stereo-tilt-network | **NEW 0033** | ✅ 0033 | L=base+tilt / R=base−tilt stereo spread (block-5/6) |
+| utility/gain-switch | **NEW 0033** | ✅ 0033 | 1×/5× selectable-gain stage (block-1/6) |
+| utility/distribution-buffer | **NEW 0033** | ✅ 0033 | paralleled-buffer fan-out to N loads (block-3 §H) |
+| modulation/source-selector | **NEW 0033** | ✅ 0033 | 3-way DPDT analog source select (block-3/6) |
+| utility/analog-mux | **NEW 0033** | ✅ 0033 | CD4053 glitch-free 2:1 path-select (block-6) |
 | led/led-breathing | **NEW 0032** | ✅ 0032 | NPN level-shift current source (block-2) |
 
 ## How to add a library block
