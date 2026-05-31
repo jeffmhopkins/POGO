@@ -1,0 +1,30 @@
+deck: voct_slope_band.cir
+description: block-7 V/oct slope TRIM-AUTHORITY band — the RV_1VOCT (RV17) 10k trim span brackets the V_T*ln2 room-temp calibration band (+/-5% around 17.92 mV/oct); NOT the temperature swing (that is tempco R229's job). [NV] trim-range check.
+plugin_ref: "plugin/src/dsp/HPFilter.hpp:18 / LPFilter.hpp:20 — f0 = f_ref*2^cutoffV (1 V/oct); analog expo base needs V_T*ln2 = 25.852mV*0.69315 = 17.92 mV/oct @ 25C"
+netlist_bind:  # deck literals must equal the live netlist; RV17 is symbolic (HP_1VOCT) -> UNBINDABLE, its 10k stays a documented literal
+  R_VOCT: "R110=49k9"
+  R_TEMPCO: "R229=1k"
+measurements:
+  # All DERIVED from divider ratio R_T/(R_VOCT+RV+R_T)*1V (mV) + target V_T*ln2=17.92 mV/oct.
+  # Span of the 10k netlist pot (R_VOCT=49.9k fixed, R_T=1k shunt):
+  - name: mv_lo           # CCW end (RV=10k): below band -> 1000/60900 = 16.420
+    expect: 16.420
+    tol_abs: 0.05
+  - name: mv_mid          # mid (RV=5k): on target -> 1000/55900 = 17.889
+    expect: 17.889
+    tol_abs: 0.05
+  - name: mv_hi           # CW end (RV=0): above band -> 1000/50900 = 19.646
+    expect: 19.646
+    tol_abs: 0.05
+  # Band edges = 17.92 +/-5% = 17.024 .. 18.816 (R_VOCT +/-1% + R_T tol + V_T pair spread +
+  # 25C tempco residual, RSS ~+/-3% rounded to +/-5% margin). Trim must reach beyond BOTH edges:
+  - name: brackets_lo     # mv_lo (16.42) <= band_lo (17.024) -> TRUE
+    expect: true
+  - name: brackets_hi     # mv_hi (19.65) >= band_hi (18.816) -> TRUE
+    expect: true
+  # FALSIFIABILITY (documents the fail-mode; proves the check is non-vacuous): a too-small 2k
+  # pot re-centered on target reaches only 17.60..18.25 -> INSIDE the band -> brackets BOTH false.
+  - name: f2_brackets_lo  # 17.604 <= 17.024 -> FALSE (2k pot too small to reach below band)
+    expect: false
+  - name: f2_brackets_hi  # 18.247 >= 18.816 -> FALSE (2k pot too small to reach above band)
+    expect: false
