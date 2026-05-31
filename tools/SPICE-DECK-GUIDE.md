@@ -116,3 +116,81 @@ For each math claim in the spec/netlist, classify and check:
 ## Naming
 `specs/<block>/sim/<subcircuit>.cir` + `<subcircuit>.expect.yaml`. One deck per coherent sub-circuit
 or law; a deck may carry several `measurements`. Keep names matching the spec's vocabulary.
+
+---
+
+# Multi-agent authoring pipeline (how to build out a block's checks at scale)
+
+Proven on block-7 (change 0024). Use this when authoring a full block's worth of checks. The stages
+are **sequential** (each depends on the prior); parallelism lives *within* a stage. The orchestrator
+(you) runs the stages, commits per slice, and integrates.
+
+> **Why a verify stage exists:** a passing deck is NOT a good check. On the block-7 pilot the verify
+> stage found that the runner didn't actually read `nets.yaml` — the gate was *deck-literal-vs-spec*,
+> not *netlist-vs-spec* (a silent R104 1M→100k would have passed green). That finding — not the decks —
+> was the pilot's real product, and it produced the `netlist_bind` mechanism. **Do not skip verify, and
+> make its hardest question load-bearing.**
+
+## Stage 1 — DERIVE (1 agent; gates everything downstream)
+
+Reads spec + netlist + plugin DSP + aux; emits a **structured manifest** (one row per math claim), not
+prose. Required fields per candidate: `id`, `claim` (one sentence), `source` (file:line for the spec
+formula AND the netlist refs/values it depends on), `plugin_ref` (DSP line or "analog-only"),
+`spice_able` (YES/NO/PARTIAL), `nv` (YES/NO — depends on an unmeasured device constant?),
+`proposed_check` (model + named measurements + how `expect` is DERIVED FROM THE SPEC + tolerance),
+`already_covered`. End with: a **prioritized shortlist** of the highest-value NEW checks, and an
+explicit list of claims that are **NOT spice-able** (pinouts, sourcing, layout, power, fan-out) so
+they're acknowledged out of scope.
+
+The deriver MUST read this guide — the manifest is the spec the writers build from.
+
+## Stage 2 — WRITE (N parallel agents; one slice of the shortlist each)
+
+Split the shortlist into balanced slices (group by type: structural/transfer vs ratio-summers vs
+expo/bias). Each writer: reads this guide + the relevant spec/netlist/plugin, authors its `.cir` +
+`.expect.yaml` per the conventions, adds `netlist_bind` for every value-pinning literal, and **runs
+`build_spice.py --run <block>` to confirm its decks PASS before reporting.** Writers touch ONLY their
+own new files — no netlist/spec/other-deck edits. They report each deck's content + measured values +
+PASS confirmation, and **escalate (not paper over) any case where a netlist-derived value did not land
+on the spec-derived expect** — that is a real divergence finding.
+
+Orchestrator: commit each writer's decks as a slice once it reports PASS (verify in isolation first;
+in-flight agents may leave half-written files — never commit a failing/partial deck).
+
+## Stage 3 — VERIFY-INTENT (N parallel adversarial agents)
+
+The job is to find checks that are **WRONG, WEAK, or VACUOUS** — not to confirm they pass. Each
+reviewer runs ngspice + **perturbation probes** and judges every deck on three killer questions:
+
+- **Q1 — does the deck COMPUTE what its assertion claims?** (recompute the math by hand; check sample
+  points, unit conversions, that the printed measurement equals the named quantity)
+- **Q2 — is `expect` INDEPENDENTLY spec-derived, not reverse-engineered from deck output?** (derive each
+  expect yourself; verify the cited `plugin_ref` actually says what's claimed)
+- **Q3 — THE KEY TEST: would the check FAIL if the netlist value were WRONG?** Actually perturb it:
+  flip the tap (HP→LP), invert the follower (the bug), set Rf=200k, revert R104→1M — and confirm the
+  assertion fails. **The deepest risk: a deck that models the ideal circuit on BOTH sides proves
+  nothing.** Confirm each deck is bound to the real netlist values (via `netlist_bind`), not just
+  hardcoded literals that happen to match.
+
+Reviewers report a verdict (SOUND / WEAK / BROKEN) per question with line numbers; prioritize Q3.
+
+## Stage 4 — INTEGRATE (orchestrator)
+
+Reconcile verifier findings: fix BROKEN/WEAK decks, add missing `netlist_bind`, close coverage seams,
+correct any spec/netlist bug the process surfaced (the gate exists to find these — fix them, don't
+suppress them). Run the full gate stack; commit. If a finding is architectural (like the missing
+netlist binding), fix the *mechanism*, not just the symptom, and **prove the fix** (e.g. perturb the
+netlist and confirm the gate now fails).
+
+## Prompt-writing lessons (what made this work)
+
+- **A shared guide doc every agent reads** (this file) eliminates repeated rediscovery of the ngspice
+  traps (parallel-instances, node names, the `print` contract, boolean-via-B-source).
+- **Structured manifest, not prose** — makes Stage 2 parallelizable and Stage 3 checkable.
+- **Name the priority explicitly.** "Review the decks" finds nothing; "would it fail if the netlist
+  were wrong, and is the deck bound to nets.yaml or a textbook circuit?" found the architectural flaw.
+- **Give writers the escalation instruction** ("flag any netlist↔spec divergence; don't paper over") —
+  this is how the stale spec line surfaced three independent times.
+- **Tell agents to touch only their own files** and to **self-verify via the runner** before reporting.
+- Frame the pilot's deliverable as **the methodology + findings**, not the artifact count — the verify
+  stage earning a real architectural fix is worth more than N green decks.
