@@ -77,13 +77,41 @@ spec-derived, not copied? (Q3) **would it FAIL if the netlist value were wrong**
 to block-7's real R/C values, or a generic textbook circuit that passes vacuously? Key target: does
 `q_cell.cir` actually bind to R104/R105=100k such that it would have caught the 1M→100k regression?
 
+### Stage 3 — verifiers (2 adversarial agents) ✅ — FOUND AN ARCHITECTURAL FLAW
+The verify stage is the headline result. Both agents ran ngspice + perturbation probes (Q3):
+- **SOUND for the defect they guard:** hp_polarity (inverting follower → fails), hp_transfer (LP/BP
+  mistap → fails), sumamp_vground (Rf=200k → gain −2 fails), ires_summer. Genuinely non-vacuous.
+- **🔴 ARCHITECTURAL FINDING (both agents, confirmed in code):** **decks hand-transcribe netlist values
+  as literals; `build_spice.py` never read `nets.yaml`** — so the gate was *deck-literal-vs-spec*, NOT
+  *netlist-vs-spec*. A silent regression (R104 100k→1M) would PASS GREEN. The two decks whose sole job
+  was pinning a netlist resistor (q_cell, iref_target) pinned a hardcoded literal — the guide's core
+  premise was *architecturally unmet*. This is the real product of the pilot: the multi-agent verify
+  stage caught a design flaw in the gate itself.
+- Minor: hp_transfer `peak_db` is a vacuous topology discriminator (LP/BP/HP all = Q at f0); ires_summer
+  prose over-claims "→ Q↑" (the [NV] link). Noted.
+
+### Stage 4 — integrate ✅
+1. **Closed the binding gap (the fix):** added **`netlist_bind`** to `build_spice.py` + a netlist-value
+   parser (handles `100k`/`47nF`/`1M`/R-notation `49k9`). An `.expect.yaml` now declares
+   `netlist_bind: {R_Iabc_L: "R104=100k"}`; the runner resolves the ref from `nets.yaml` and **FAILS if
+   the deck's literal ≠ the netlist's value.** Added binds to all value-pinning decks (q_cell,
+   iref_target, expo_voct, ota_svf_loop, sumamp_vground, ires_summer, hp_transfer).
+   **PROVEN:** temporarily reverting R104→1M in the netlist now **FAILS** q_cell's bind (the exact
+   regression the verifier said passes green); restoring it passes. Guide updated to require `netlist_bind`.
+2. **Fixed the spec bug the methodology found:** `spec.md:152-153` R_Iabc 1MΩ→**100kΩ** + the −10.8 V
+   Iabc-pin model (the first concrete defect this SPICE-math process surfaced + corrected).
+3. Full gate stack green (all 7 `--check` + parity, 0 schematic FAILs; 22 SPICE decks).
+
 ## Decisions log
 - 2026-05-31: pilot scope limited to block-7 (one block) per the user; methodology proven here before
   generalizing. Stacked on 0023 so the gate infra is present; 0023 (#53) merges independently.
+- 2026-05-31: **headline = the methodology + the architectural finding**, not the 7 decks (user). The
+  verify stage proved its worth by finding that the gate wasn't actually netlist-bound; the fix
+  (`netlist_bind`) makes the harness deliver on its premise.
 
 ## Gate checklist
-- [ ] Stage 1 derive → manifest
-- [ ] Stage 2 write decks (parallel)
-- [ ] Stage 3 verify-intent (parallel, adversarial)
-- [ ] Stage 4 integrate + full gate stack green
+- [x] Stage 1 derive → manifest (caught the stale spec line pre-emptively)
+- [x] Stage 2 write decks (3 parallel agents → 7 decks, all PASS)
+- [x] Stage 3 verify-intent (2 adversarial agents → found the netlist-binding architectural flaw)
+- [x] Stage 4 integrate (built `netlist_bind`, proved the regression now fails, fixed the spec bug)
 - [ ] PR `change/0024-spice-math-pilot` → `dev`

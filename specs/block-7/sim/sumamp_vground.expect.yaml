@@ -1,6 +1,10 @@
 deck: sumamp_vground.cir
 description: HP SVF SUM_AMP is an inverting virtual-ground summer with unity weights (R_in=R_FB=R_f=100k) -> HP_inv = −(x + Qfb), proving the (x − k·v1 − v2) resistor-ratio math
 plugin_ref: "plugin/src/dsp/HPFilter.hpp:40 — return -(x - k*v1 - v2); aux-ota-c-svf.md §SUM_AMP Inversion (HP_inv = −(x·R_f/R_in + Qfb·R_f/R_FB))"
+netlist_bind:  # change 0024 — deck literals must equal the live netlist values
+  R_in: "R30=100k"
+  R_FB: "R92=100k"
+  R_f: "R94=100k"
 measurements:
   - name: gain_x       # DERIVED: −R_f/R_in = −100k/100k = −1.0 (x weight is unity)
     expect: -1.0

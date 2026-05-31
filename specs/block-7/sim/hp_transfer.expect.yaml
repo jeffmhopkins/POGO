@@ -1,6 +1,8 @@
 deck: hp_transfer.cir
 description: block-7 HP — two-integrator OTA-C loop realizes a 2-pole HIGHPASS (12 dB/oct, 0 dB passband, peak=Q at f0); structural proof it is HP not LP/BP
 plugin_ref: "plugin/src/dsp/HPFilter.hpp:32-40 — Simper SVF, HP tap return -(x - k*v1 - v2); spec block-7 §2 H_HP(s)=s^2/(s^2+(w0/Q)s+w0^2), f_ref=632 Hz, k=1/Q"
+netlist_bind:  # change 0024 — deck literals must equal the live netlist values
+  C_int: "C29A=47nF"
 measurements:
   # passband well above f0 -> unity gain. H_HP(s->inf) = 1 => 0 dB.
   - name: pass_db

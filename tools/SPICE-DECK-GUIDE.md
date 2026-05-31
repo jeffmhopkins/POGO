@@ -20,6 +20,25 @@ spec formula independently; let the deck's netlist values land on it (within tol
 
 Each assertion SHOULD cite its `plugin_ref` (the DSP file/line or spec formula it pins).
 
+### `netlist_bind` — REQUIRED for any deck that pins a netlist component value
+
+A deck hand-transcribes netlist values as literals (e.g. `Rfix nfix pinf 100k`). On its own that makes
+the gate a *deck-literal-vs-spec* check, NOT *netlist-vs-spec* — if the netlist silently drifts
+(R104 100k→1M) the deck literal still passes. **`netlist_bind` closes that gap:** declare which netlist
+ref each load-bearing literal must equal, and the runner reads `specs/<block>/<block>.nets.yaml`,
+resolves the ref's value, and **FAILS if the deck's value ≠ the netlist's value.**
+
+```yaml
+netlist_bind:                 # label: "REF=value"  (value uses netlist notation: 100k, 47nF, 49k9, 1M)
+  R_Iabc_L: "R104=100k"
+  C_int:    "C29A=47nF"
+```
+
+Rule: **any value your deck uses to pin a circuit fact MUST appear in `netlist_bind`** keyed to its
+netlist ref. (Value parser handles `100k`, `47nF`, `1M`, `1k`, and R-notation `49k9`/`4k7`.) Decks
+whose result is genuinely value-independent (e.g. a *ratio* check where the constant cancels — like
+`voct_octave`'s 2^ΔV octave ratios) need no bind, but say so in the description.
+
 ## ngspice mechanics (hard-won — follow these or decks silently misbehave)
 
 1. **First line is a TITLE/comment.** ngspice eats line 1. Always start with a `* comment` line so no

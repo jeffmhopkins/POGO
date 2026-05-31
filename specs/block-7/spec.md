@@ -149,8 +149,11 @@ C0G/NP0 mandatory for pitch-stable self-oscillation.
 
 **Linearizing resistors R_LIN_A, R_LIN_B:** 1 kΩ per OTA cell per channel.
 
-**Q control resistor R_Iabc (per channel):** 1 MΩ — converts V_ires to I_abc_q.
-At V_ires = 0.74 V: I_abc_q = 0.74 µA → Q = 0.70 (Butterworth).
+**Q control resistor R_Iabc (per channel):** **100 kΩ** (R104/R105) — converts V_ires to I_abc_q.
+The LM13700 Iabc pin sits ≈ 2·V_BE above V− (≈ −10.8 V, NOT GND), so I_abc_q = (V_ires − V_pin)/R_Iabc.
+At the Butterworth setpoint V_ires ≈ −10.73 V: I_abc_q ≈ 0.7 µA → Q ≈ 0.74. (Changed from the original
+1 MΩ in change 0020 §D/M5 — the old 1 MΩ-from-~0 V assumption gave ~14× too much I_abc; see
+`specs/block-7/sim/q_cell.cir` which now binds this value to the netlist.)
 
 **HP output buffer:** unity-gain **non-inverting follower** (OPA1612 half B; out→in−, SUM_AMP
 node→in+). No resistors — it isolates the SUM_AMP node from the LP2 input load without changing
