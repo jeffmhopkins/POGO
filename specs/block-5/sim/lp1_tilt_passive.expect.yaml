@@ -1,6 +1,13 @@
 deck: lp1_tilt_passive.cir
 description: LP1 §B passive tilt sum — tilt octave-weight matches freq (change 0020 §B; saved a TL072)
 plugin_ref: "plugin/src/Pogo.cpp — lp1TiltV = LP1_TILT×5; L=base+tilt, R=base−tilt sum 1:1 with V_freq"
+netlist_bind:  # deck literals must equal the live block-5.nets.yaml values
+  R_VOCT: "R63=49k9"     # series R_VOCT_L (deck literal 49900)
+  R_TILT: "R55=54k9"     # tilt series R, L expo base (deck literal 54900); =R_VOCT+RV_mid for 1:1 octave sum
+  R_TEMPCO: "R231=1k"    # Vishay TFPT tempco shunt L (deck literal 1000)
+  # RV_1VOCT (RV4) mid (5k) is the trimpot's mechanical travel (symbolic netlist value LP1_1VOCT_L) —
+  # an unbindable spec literal. The absolute base mV IS value-dependent (R_VOCT/R_TILT/R_TEMPCO set it),
+  # so those three are load-bearing binds; the freq==tilt equality is the 1:1-octave ratio claim.
 measurements:
   - name: freq_mv       # base mV per 1V V_freq
     expect: 17.57
