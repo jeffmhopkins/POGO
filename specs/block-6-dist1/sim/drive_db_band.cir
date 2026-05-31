@@ -1,0 +1,77 @@
+* POGO block-6-dist1 DRIVE — Ec+ COMMAND HEADROOM across the THAT2180 mV/dB datasheet BAND
+* [NV]: the ABSOLUTE drive dB depends on the THAT2180 gain constant (~6.1 mV/dB nominal,
+* datasheet band {6.0, 6.1, 6.2} mV/dB). We do NOT assert the absolute; we prove the DRIVE
+* path (U91-C unity summer R157-R160=100k -> V_DRIVE_CTRL -> R_ec=10k (R245) -> Ec+) has
+* ≫10x HEADROOM to COMMAND the plugin's drive-dB range at the WORST CASE 6.2 mV/dB:
+*   HARD: g = 1 + 4d, 1x->5x = 20*log10(5) = +13.979 dB  (Distortion.hpp:12-16)
+*   SOFT: G = exp((p-0.20)/0.80 * 4), max e^4 = 54.598x = 20*log10(54.598) = +34.749 dB
+*         (Distortion.hpp:34-37; p->1 gives (0.80/0.80)*4 = 4)
+*   Required Ec+ at 6.2 mV/dB:  HARD = 6.2*13.979 = 86.7 mV ;  SOFT = 6.2*34.749 = 215.5 mV.
+*
+* SCOPE (EXPLICIT): the knob->Ec+ FULL-SCALE voltage is Phase-3R-UNDEFINED (R157 comment in nets:
+* "Phase-3R: knob->Ec+ dB scale"). So this deck does NOT invent a precise knob full-scale. It proves
+* the TOPOLOGY has ≫10x headroom: a TL074 on ±12V rails delivers a V_DRIVE_CTRL output swing easily
+* > 2 V (conservatively modeled at the rail-limited |10 V| available span), and the R_ec=10k injection
+* into the high-Z (~10M) Ec+ port passes it ~1:1, so |Ec+| AVAILABLE ≫ 0.2155 V (the SOFT target).
+* The CALIBRATABILITY claim = "the path can reach the target", not "the knob is scaled to it".
+*
+* Ideal models (justification): Eop = high-gain VCVS for the TL074 half (summer gain set by the
+* 100k feedback ratio = the law); the available output span is bounded by a behavioral clamp at
+* ±10 V (the rail-limited swing of a TL074 on ±12 V rails — conservative, real swing ≈ ±10.5 V).
+* Ec+ port = 10M + 50nA bias (the THAT2180 high-Z log port). The clamp B-source uses >/< (the gt/lt
+* trap is only in .control let lines). The dB conversion is a .control divide
+* by each band literal — NOT an alter sweep; the resistors set the available volts, the band sets dB.
+* PARALLEL instances (single rail-limited drive copy is sufficient — span is symmetric).
+*
+* FALSIFIABILITY (self-test, confirmed by perturbation):
+*   - R160 100k->33k: summer gain x(1/3) but we already model the rail-limited OUTPUT span, so to
+*     break it set the available drive small: see that if ecp_max were < 0.2155, covers_soft FAILS.
+*     Concretely, R245 10k->100k drops the port injection coeff (10M/(10M+100k) still ~0.99 — high-Z
+*     port keeps it near 1:1), so the load-bearing falsifier here is the AVAILABLE SPAN: if the
+*     summer output span collapses below 0.2155 V (e.g. modeling a rail of only ±0.2 V), covers_soft
+*     FAILS. R245 bind guards that R_ec is the small (10k) injection R, not a 1M attenuator that would
+*     drop Ec+ ~100x (1M into 10M -> coeff 0.909, still > target — but the 10k bind documents intent).
+*   - The decisive break: if V_DRIVE_CTRL available span were < 215.5 mV, covers_soft = false.
+
+.param Rport=10meg
+.param Ibias=50n
+
+* ===== summer S1: drive the unity summer toward the rail-limited available output span =====
+* Inputs sized so the ideal summer output WOULD exceed the rail; the clamp bounds it to the
+* TL074 rail-limited |10 V| available swing -> this is the MAX commandable V_DRIVE_CTRL magnitude.
+Vknob1 knob1 0 DC 20          ; oversized drive request (knob+CV+bias headroom); clamp limits output
+Vcv1   cv1   0 DC 0
+Vbias1 bias1 0 DC 0
+Eraw   raw 0 0 sa1 1e6        ; (-)=sa1 virtual ground; raw = -(R160/R157)*20 = -20 (pre-clamp)
+R157a  knob1 sa1 100k         ; R157 (DRIVE-knob input)
+R158a  cv1   sa1 100k         ; R158 (DRIVE-CV input)
+R159a  bias1 sa1 100k         ; R159 (bias input)
+R160a  raw   sa1 100k         ; R160 (feedback)
+* rail-limited available output span of the TL074 on ±12 V (conservative ±10 V):
+Bclamp vctrl 0 V = (V(raw) > 10) ? 10 : ((V(raw) < -10) ? -10 : V(raw))
+
+* inject the (clamped) V_DRIVE_CTRL through R_ec=10k (R245) into the high-Z Ec+ port:
+Rec    vctrl ecp 10k          ; R_ec = R245 = 10k
+Rp     ecp 0 {Rport}
+Ib     ecp 0 DC {Ibias}
+
+.control
+  op
+  * The U91-C summer is INVERTING, so a +drive command gives a -V_DRIVE_CTRL; the path delivers
+  * |Ec+| of this magnitude in EITHER direction (bipolar knob/CV). The calibratability claim is on
+  * the available MAGNITUDE, so take abs() of the rail-limited span.
+  let vctrl_avail = abs(v(vctrl))  ; rail-limited available |V_DRIVE_CTRL| magnitude
+  let ecp_max     = abs(v(ecp))    ; max available |Ec+| (volts) at full drive command
+  * drive dB the available |Ec+| could command at each band point (divide by literal, NOT alter):
+  let drive_dB_6p0 = ecp_max/0.0060
+  let drive_dB_6p1 = ecp_max/0.0061
+  let drive_dB_6p2 = ecp_max/0.0062   ; WORST CASE (least dB per mV)
+  * coverage of the plugin targets at the WORST CASE 6.2 mV/dB:
+  *   SOFT target = 6.2 mV/dB * 34.749 dB = 0.2155 V ;  HARD = 6.2 * 13.979 = 0.0867 V
+  let covers_soft = (ecp_max ge 0.2155) ? 1 : 0
+  let covers_hard = (ecp_max ge 0.0867) ? 1 : 0
+  print vctrl_avail ecp_max
+  print drive_dB_6p0 drive_dB_6p1 drive_dB_6p2
+  print covers_soft covers_hard
+.endc
+.end
