@@ -1,6 +1,6 @@
 deck: bp3_normal.cir
 description: BP3 R→L output normal — §G fix (change 0020 M1)
-plugin_ref: "plugin/src/Pogo.cpp:497-499 — BP3_R unpatched outputs bp3OutL (clean L), L jack undisturbed"
+plugin_ref: "plugin/src/Pogo.cpp:501-503 — BP3_R unpatched outputs bp3OutL (clean L), L jack undisturbed"
 # netlist_bind: NONE (topology / ratio facts where the only load-bearing values CANCEL, per the
 # SPICE-DECK-GUIDE "ratio check" exception — and what values exist are NOT in this block's netlist):
 #   - j28_fixed=3.0: J28 switch lug taps the STIFF buffer node (BP3_L_BUF, pre-1k); the series R

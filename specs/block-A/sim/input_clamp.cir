@@ -1,24 +1,27 @@
-* POGO block-A — input buffer clamp + unity follower (runner-ready 0023)
-* Plugin (InputBuffer.hpp / Pogo.cpp): input buffered, clamp ±11V. Hardware: OPA1612 unity
-* follower; 100Ω series + BAT54S dual Schottky to the ±12V rails clamps an over-voltage input
-* to ~±(12+0.3)=±12.3V at the protected node (the buffer output then swings to ~±11V rail).
-* This deck checks: (1) unity gain in-band; (2) BAT54S clamp level on an over-driven input.
+* POGO block-A — input buffer: unity follower + BAT54S clamp + R1 clamp-current
+* Plugin (InputBuffer.hpp / Pogo.cpp): buffered input, ±11V clamp. Hardware: OPA1612 unity
+* follower; 100Ω series (R1) + BAT54S dual Schottky to the ±12V rails. The clamp LEVEL
+* (~±12.3V = rail+Vf) is set by the BAT54S part [NV]; R1's real job is to set the CLAMP
+* CURRENT I=(Vin-Vclamp)/R1 (it protects the diode) — that current is the R1-load-bearing,
+* netlist-bound fact. (clamp_hi stays documentary [NV]; clamp_i is the falsifiable check.)
+.param Rprot=100          ; = R1 (100Ω series protection); netlist-bound below
 
-* --- (1) unity follower, in-band (Vin=3V) ---
+* --- (1) unity follower, in-band (Vin=3V); R1 into open buffer output is value-independent ---
 Vsig sa 0 DC 3
 Ebuf bufa 0 sa 0 1        ; ideal unity follower
-Rsa bufa outa 100         ; 100Ω series (negligible into open output)
+Rsa bufa outa {Rprot}     ; series R into open output (unity unaffected — topology fact)
 
-* --- (2) over-voltage clamp: Vin=+17V through 100Ω into BAT54S-to-+12V ---
+* --- (2) over-voltage: Vin=+17V through R1 into the BAT54S clamp held at +12.3 ([NV] level).
+*     The clamp node is pinned by the diode (level [NV]); R1 carries I=(17-12.3)/R1.
 Vov ov 0 DC 17
-Rov ov tip 100
-* BAT54S: tip clamps to +12.3 (D to +12V) / -12.3 (D to -12V); model as behavioral clamp
-Bcl tipc 0 V = (V(ov) > 12.3) ? 12.3 : ((V(ov) < -12.3) ? -12.3 : V(ov))
+Rov ov tip {Rprot}        ; R1 — carries the clamp current (load-bearing: i depends on Rprot)
+Bcl tip 0 V = (V(ov) > 12.3) ? 12.3 : ((V(ov) < -12.3) ? -12.3 : V(ov))  ; clamp node (level [NV])
 
 .control
   op
-  let unity = v(bufa)/3.0        ; unity follower gain = 1
-  let clamp_hi = v(tipc)         ; +17V in -> clamped ~+12.3V at the protected node
-  print unity clamp_hi
+  let unity = v(bufa)/3.0        ; unity follower gain = 1 (topology, no bind)
+  let clamp_hi = v(tip)          ; protected-node level ~+12.3V ([NV], BAT54S Vf + rail)
+  let clamp_i = abs(i(Vov))      ; clamp current through R1 = (17-12.3)/Rprot; R1-load-bearing
+  print unity clamp_hi clamp_i
 .endc
 .end

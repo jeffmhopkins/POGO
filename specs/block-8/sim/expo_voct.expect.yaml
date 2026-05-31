@@ -11,9 +11,12 @@ measurements:
   - name: mv_mid          # RV_1VOCT mid-rotation: must land ON the V_T·ln2 target
     expect: 17.92
     tol_pct: 3            # 17.89 measured — centered
-  - name: mv_lo           # CW end: above target (trim headroom)
+  # NOTE: mv_lo/mv_hi are the divider's GEOMETRY-derived pot endpoints (not independent spec
+  # targets) — they assert the trim spans the V_T·ln2 target with authority both ways. They
+  # cannot fail independently of mv_mid + the binds (same documentary form as block-7 expo_voct).
+  - name: mv_lo           # CW end: above target (trim-authority headroom, geometry-derived)
     expect: 19.65
     tol_abs: 0.5
-  - name: mv_hi           # CCW end: below target (trim headroom)
+  - name: mv_hi           # CCW end: below target (trim-authority headroom, geometry-derived)
     expect: 16.42
     tol_abs: 0.5

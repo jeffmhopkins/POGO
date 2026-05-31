@@ -198,8 +198,10 @@ gives R_total 1000 kΩ–1500 kΩ, midpoint 1250 kΩ at pot center → I_ref ≈
 Calibration target 9.69 µA requires R_total = 1238 kΩ → RV_REF ≈ 238 kΩ (47.6% of travel).
 Covers worst-case component stack (R_IREF_A ±5% + C_int ±5%) within pot range. See aux-expo-converter.md.
 
-**Q control resistors R_Iabc:** 1 MΩ per channel — converts V_ires (from IRES_AMP) to I_abc_q.
-At V_ires = 0.74 V: I_abc_q = 0.74 µA → Q = 0.70 (Butterworth).
+**Q control resistors R_Iabc:** 100 kΩ per channel (R57/R58; change 0020 §D/M5, was 1 MΩ) —
+converts the IRES_AMP output into I_abc_q across the LM13700 I_abc pin (≈ −10.8 V). With the
+IRES_AMP output ≈ 70 mV above the pin, I_abc_q ≈ 0.7 µA → Q ≈ 0.74 (near-Butterworth). The SPICE
+`q_cell.cir` deck derives Q from the live 100 kΩ netlist value (binds R57/R58), not this prose.
 
 **Tilt summer resistors (R_TILT_SUM_L, R_TILT_SUM_R, R_TILT_INV):** 100 kΩ each — the tilt
 pot wiper (+V_tilt) feeds L expo summer directly. The inverting half of TL072 (G = −1) generates

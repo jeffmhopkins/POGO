@@ -44,11 +44,39 @@ math discovery. block-B's writer derives its one deck inline.)
   W1=block-5 (resonant filter, 4 decks); W2=block-8 + block-6-svf1 (filter f_ref/OTA); W3=block-1 + block-A
   (gain/clamp); W4=block-6-mix + block-B (mix normal + new output buffer).
 
+## Stage 1 — write/retrofit (4 parallel) ✅ — 10 decks bound + 1 new (block-B), all PASS
+- **W1 block-5:** expo (R63/R231), ota_svf (C11), q_cell (R57/R58=100k), tilt (R63/R55/R231). No `.cir` change.
+- **W2 block-8 + svf1:** block-8 expo (R86/R230) + ota_svf (C33A); svf1 bp_fref (C15=68nF; 47nF trap unbound).
+- **W3 block-1 + block-A:** pregain (R3L/R4L → 4.83×; clip [NV]); input_clamp (R1=100R; clamp [NV]).
+- **W4 block-6-mix + block-B:** mix bp3_normal (honest no-bind — load-bearing Rs live in block-B);
+  block-B out_buffer NEW (div_ratio bound to R34=1k; unity topology; clamp [NV]).
+- No netlist↔spec divergences found (all baseline values already correct).
+
+## Stage 2 — verify-intent (4 parallel adversarial, isolated worktrees) ✅
+- **V1 block-5:** all 4 SOUND, all 6 binds load-bearing (tilt deck is bind+topology). Flagged stale spec.md §3.
+- **V2 block-8 + svf1:** all 3 SOUND; bp_fref bound-68nF/unbound-47nF structure confirmed honest.
+  (Optional note: block-8 expo mv_lo/mv_hi are geometry-derived brackets — same as block-7 precedent.)
+- **V3 block-1 + block-A:** block-1 fully SOUND. **block-A WEAK — 2 real defects:** the R1 bind was
+  vacuous (no measurement depended on R1 — series Rs fed dangling nodes) and clamp_hi was circular.
+- **V4 block-6-mix + block-B:** both SOUND. block-6-mix no-bind verified honest (cross-block bind
+  unsupported; falsifiable on wiring + match). block-B div_ratio genuinely bound to R34, clamp [NV] honest.
+  Cosmetic: bp3_normal plugin_ref line range.
+
+## Stage 3 — integrate ✅ (defects fixed; gates green)
+- **block-A `input_clamp` REWORKED** (the substantive fix): added a `clamp_i` measurement = clamp current
+  through R1 = (17−12.3)/R1. **Proven R1-load-bearing:** perturbing Rprot 100→1k moves clamp_i 0.047→0.0047
+  (was: nothing moved). The vacuous bind + circular clamp_hi are resolved — R1 now genuinely exercised.
+- **block-5 spec.md §3:** stale R_Iabc "1 MΩ … 0.74 µA → Q 0.70" → "100 kΩ (R57/R58, change 0020 §D) …
+  Q ≈ 0.74", resolving the §3-vs-§D contradiction (the q_cell deck already used the live 100k).
+- **block-6-mix** bp3_normal plugin_ref Pogo.cpp:497-499 → **501-503** (cosmetic line-range).
+- **block-8 expo** mv_lo/mv_hi annotated as geometry-derived trim-authority brackets (honesty note).
+- All 7 `--check` gates green; **48 decks total**.
+
 ## Gate checklist
-- [ ] Stage 1 write/retrofit (4 parallel → binds on 10 decks + 1 new block-B deck)
-- [ ] Stage 2 verify-intent (parallel adversarial)
-- [ ] Stage 3 integrate (fix findings; all 7 gates green)
-- [ ] Update `specs/SPICE-COVERAGE.md` (all remaining → FULL; the tracker's outstanding list cleared)
+- [x] Stage 1 write/retrofit (4 parallel → binds on 10 decks + 1 new block-B deck)
+- [x] Stage 2 verify-intent (4 parallel adversarial → block-A WEAK found + fixed; rest SOUND)
+- [x] Stage 3 integrate (reworked block-A; fixed stale spec.md + cosmetics; all 7 gates green)
+- [x] Update `specs/SPICE-COVERAGE.md` (ALL blocks → FULL; outstanding list cleared; status COMPLETE)
 - [ ] PR `change/0029-spice-baselines-full` → `dev`
 
 ## Outstanding after this change
