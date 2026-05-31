@@ -3,7 +3,7 @@
 > ✅ **Re-verified 2026-05-30** (content rewritten 2026-05-29) against the locked plugin via
 > block-5. THAT340 V/oct→Iabc converter; `f0 = f_ref·2^V` (1 V/oct). The per-channel-expo
 > decision (one THAT340 per channel for true stereo tilt) is current. Shared by LP1/LP2/HP/BP.
-> 🔧 **Change 0020:** added the missing **V/oct base divider** — series R_VOCT (≈49.9k) + a **Vishay TFPT 1k +4110ppm/K tempco** shunt to GND (the THAT340 has NO internal tempco). Without it the base saw full V/oct and railed. Tilt (LP1/BP) sums passively at this node via an equal series R. SPICE: specs/sim/expo_voct.cir, lp1_tilt_passive.cir.
+> 🔧 **Change 0020:** added the missing **V/oct base divider** — series R_VOCT (≈49.9k) + a **Vishay TFPT 1k +4110ppm/K tempco** shunt to GND (the THAT340 has NO internal tempco). Without it the base saw full V/oct and railed. Tilt (LP1/BP) sums passively at this node via an equal series R. SPICE: specs/block-5/sim/expo_voct.cir, lp1_tilt_passive.cir.
 
 Design status: [x] draft → [ ] reviewed → [ ] validated on prototype
 

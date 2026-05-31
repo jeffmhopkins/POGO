@@ -4,7 +4,7 @@
 > block-5 (LP1) and block-6 (BP). The 2-pole OTA-C SVF core matches the plugin's Simper 2-pole
 > SVF. The BP-bank "4-pole-vs-2-pole" question is **RESOLVED: 2-pole** (the plugin BP is a single
 > 2-pole SVFGroup; the old 4-pole claim was wrong — see below). Shared by LP1/LP2/HP/BP.
-> 🔧 **Change 0020 §C:** the SVF state variables v1/v2 must tap the **unbuffered LM13700 OTA outputs (pins 5/12)**, NOT the on-chip Darlington buffers (8/9) — the buffer sits ~1.26V (temp-dependent) below the integrator node and that DC corrupts the next OTA's ±30mV input. Buffer emitter-pulldowns removed; buffers unused. SPICE: specs/sim/ota_svf_loop.cir.
+> 🔧 **Change 0020 §C:** the SVF state variables v1/v2 must tap the **unbuffered LM13700 OTA outputs (pins 5/12)**, NOT the on-chip Darlington buffers (8/9) — the buffer sits ~1.26V (temp-dependent) below the integrator node and that DC corrupts the next OTA's ±30mV input. Buffer emitter-pulldowns removed; buffers unused. SPICE: specs/block-5/sim/ota_svf_loop.cir.
 
 Design status: [x] draft → [ ] reviewed → [ ] validated on prototype
 

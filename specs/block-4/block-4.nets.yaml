@@ -59,12 +59,12 @@ parts:
   # The unity trims were series rheostats into the high-Z Ec+ port (couldn't set an offset; SPICE
   # vca_ecplus.cir: ~0.004 dB). Replaced by: V_CTRL buffered (U97-A) then per-cell R_ec(10k)→Ec+,
   # with the trim pot now a divider across a shared ±1.2V ref (REF_P/REF_N), wiper→R_inj(1M)→Ec+
-  # → ±~2 dB unity-null authority (SPICE vca_ecplus_full.cir: g_ctrl 0.984, −2.1..+1.9 dB).
+  # → ±~2 dB unity-null authority (SPICE sim/vca_ecplus.cir + vctrl_buffer.cir + ref_divider.cir; ref fixed 45k3→11k3 change 0025).
   U97: { sym: opamp2, part: TL072CDT, value: TL072 }   # A = V_CTRL unity buffer (B spare/ALT use)
   C117: { sym: c, value: 100nF }   # U97 +12 decoupling
   C118: { sym: c, value: 100nF }   # U97 -12 decoupling
-  R233: { sym: r, value: 45k3 }    # ±ref divider: +12V → REF_P
-  R234: { sym: r, value: 45k3 }    # ±ref divider: -12V → REF_N
+  R233: { sym: r, value: 11k3 }    # ±ref divider: +12V → REF_P (change 0025: 45k3→11k3, the 4 parallel trim pots load it to ~+1.2V)
+  R234: { sym: r, value: 11k3 }    # ±ref divider: -12V → REF_N (change 0025: 45k3→11k3)
   R235: { sym: r, value: 10k }     # R_ec main-L (V_CTRL_BUF → EC_L)
   R236: { sym: r, value: 10k }     # R_ec main-R
   R237: { sym: r, value: 10k }     # R_ec ALT-L

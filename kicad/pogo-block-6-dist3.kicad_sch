@@ -1375,7 +1375,7 @@
   (uuid "ed4781f0-4af4-51ff-b7e0-a752e71a1f97")
   (property "Reference" "R255" (at 163.000 1473.000 0)
     (effects (font (size 1.27 1.27)) (justify left)))
-  (property "Value" "45k3" (at 163.000 1469.500 0)
+  (property "Value" "22k6" (at 163.000 1469.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
 )
 (symbol
@@ -1387,7 +1387,7 @@
   (uuid "c79a42bd-433b-5c82-af22-aa86804bde99")
   (property "Reference" "R256" (at 43.000 1528.000 0)
     (effects (font (size 1.27 1.27)) (justify left)))
-  (property "Value" "45k3" (at 43.000 1524.500 0)
+  (property "Value" "22k6" (at 43.000 1524.500 0)
     (effects (font (size 1.016 1.016)) (justify left) (hide yes)))
 )
 (symbol

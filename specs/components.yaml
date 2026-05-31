@@ -62,8 +62,8 @@ components:
   - { ref: U79,  board: audio,   block: block-4, part: THAT2180,   pkg: SIP-8,    fn: "ALT-R dB-law VCA (current-in/out) → BP3; 8-pin SIP (THT)" }
   - { ref: U80,  board: audio,   block: block-4, part: TL072CDT,   pkg: SOIC-8,   fn: "ALT I/V transimpedance converters (ALT-L=A, ALT-R=B)" }
   - { ref: U97,  board: audio,   block: block-4, part: TL072CDT,   pkg: SOIC-8,   fn: "HIGH-3 (change 0020): A = V_CTRL unity buffer (decouples the 4 Ec+ trims); B spare" }
-  - { ref: R233, board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "45.3kΩ", fn: "HIGH-3 ±ref divider: +12V→REF_P (≈+1.2V) for the 4 Ec+ injection trims" }
-  - { ref: R234, board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "45.3kΩ", fn: "HIGH-3 ±ref divider: -12V→REF_N (≈-1.2V)" }
+  - { ref: R233, board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "11.3kΩ", fn: "HIGH-3 ±ref divider: +12V→REF_P (≈+1.2V) — sized for the 4 parallel trim pots (2.5k bridge); change 0025 45k3→11k3" }
+  - { ref: R234, board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "11.3kΩ", fn: "HIGH-3 ±ref divider: -12V→REF_N (≈-1.2V); change 0025 45k3→11k3" }
   - { ref: R235, board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "HIGH-3 R_ec main-L: V_CTRL_BUF→EC_L" }
   - { ref: R236, board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "HIGH-3 R_ec main-R: V_CTRL_BUF→EC_R" }
   - { ref: R237, board: audio,   block: block-4, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "HIGH-3 R_ec ALT-L: V_CTRL_BUF→EC_ALT_L" }
@@ -248,24 +248,24 @@ components:
   # block-6: per-band DRIVE VCA Ec+ unity trims (rheostat; mirrors block-4 RV1/RV2)
   - { ref: RV51, board: audio,   block: block-6-dist1, part: "Bourns 3224W", pkg: SMD,  val: "10kΩ",   fn: "BP1 DRIVE VCA L unity trim (HIGH-3: ±1.2V-ref divider, wiper→R_inj→Ec+; ±2dB)" }
   - { ref: RV52, board: audio,   block: block-6-dist1, part: "Bourns 3224W", pkg: SMD,  val: "10kΩ",   fn: "BP1 DRIVE VCA R unity trim (HIGH-3: ±2dB Ec+ injection)" }
-  - { ref: R243, board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "45.3kΩ", fn: "HIGH-3 ±ref divider: +12V→REF_P1 (BP1 DRIVE Ec+ trims)" }
-  - { ref: R244, board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "45.3kΩ", fn: "HIGH-3 ±ref divider: -12V→REF_N1" }
+  - { ref: R243, board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "22.6kΩ", fn: "HIGH-3 ±ref divider (2 pots, 5k bridge; change 0025 45k3→22k6): +12V→REF_P1 (BP1 DRIVE Ec+ trims)" }
+  - { ref: R244, board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "22.6kΩ", fn: "HIGH-3 ±ref divider (change 0025 45k3→22k6): -12V→REF_N1" }
   - { ref: R245, board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "HIGH-3 R_ec L: V_DRIVE_CTRL_1→EC_BP1_DRIVE_L" }
   - { ref: R246, board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "HIGH-3 R_ec R: V_DRIVE_CTRL_1→EC_BP1_DRIVE_R" }
   - { ref: R247, board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "1MΩ",    fn: "HIGH-3 R_inj L: RV51 wiper→EC_BP1_DRIVE_L" }
   - { ref: R248, board: audio,   block: block-6-dist1, part: ~,          pkg: "0603",   val: "1MΩ",    fn: "HIGH-3 R_inj R: RV52 wiper→EC_BP1_DRIVE_R" }
   - { ref: RV53, board: audio,   block: block-6-dist2, part: "Bourns 3224W", pkg: SMD,  val: "10kΩ",   fn: "BP2 DRIVE VCA L unity trim (HIGH-3: ±2dB Ec+ injection)" }
   - { ref: RV54, board: audio,   block: block-6-dist2, part: "Bourns 3224W", pkg: SMD,  val: "10kΩ",   fn: "BP2 DRIVE VCA R unity trim (HIGH-3: ±2dB Ec+ injection)" }
-  - { ref: R249, board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "45.3kΩ", fn: "HIGH-3 ±ref divider: +12V→REF_P2 (BP2 DRIVE Ec+ trims)" }
-  - { ref: R250, board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "45.3kΩ", fn: "HIGH-3 ±ref divider: -12V→REF_N2" }
+  - { ref: R249, board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "22.6kΩ", fn: "HIGH-3 ±ref divider (2 pots, 5k bridge; change 0025 45k3→22k6): +12V→REF_P2 (BP2 DRIVE Ec+ trims)" }
+  - { ref: R250, board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "22.6kΩ", fn: "HIGH-3 ±ref divider (change 0025 45k3→22k6): -12V→REF_N2" }
   - { ref: R251, board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "HIGH-3 R_ec L: V_DRIVE_CTRL_2→EC_BP2_DRIVE_L" }
   - { ref: R252, board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "HIGH-3 R_ec R: V_DRIVE_CTRL_2→EC_BP2_DRIVE_R" }
   - { ref: R253, board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "1MΩ",    fn: "HIGH-3 R_inj L: RV53 wiper→EC_BP2_DRIVE_L" }
   - { ref: R254, board: audio,   block: block-6-dist2, part: ~,          pkg: "0603",   val: "1MΩ",    fn: "HIGH-3 R_inj R: RV54 wiper→EC_BP2_DRIVE_R" }
   - { ref: RV55, board: audio,   block: block-6-dist3, part: "Bourns 3224W", pkg: SMD,  val: "10kΩ",   fn: "BP3 DRIVE VCA L unity trim (HIGH-3: ±2dB Ec+ injection)" }
   - { ref: RV56, board: audio,   block: block-6-dist3, part: "Bourns 3224W", pkg: SMD,  val: "10kΩ",   fn: "BP3 DRIVE VCA R unity trim (HIGH-3: ±2dB Ec+ injection)" }
-  - { ref: R255, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "45.3kΩ", fn: "HIGH-3 ±ref divider: +12V→REF_P3 (BP3 DRIVE Ec+ trims)" }
-  - { ref: R256, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "45.3kΩ", fn: "HIGH-3 ±ref divider: -12V→REF_N3" }
+  - { ref: R255, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "22.6kΩ", fn: "HIGH-3 ±ref divider (2 pots, 5k bridge; change 0025 45k3→22k6): +12V→REF_P3 (BP3 DRIVE Ec+ trims)" }
+  - { ref: R256, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "22.6kΩ", fn: "HIGH-3 ±ref divider (change 0025 45k3→22k6): -12V→REF_N3" }
   - { ref: R257, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "HIGH-3 R_ec L: V_DRIVE_CTRL_3→EC_BP3_DRIVE_L" }
   - { ref: R258, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "10kΩ",   fn: "HIGH-3 R_ec R: V_DRIVE_CTRL_3→EC_BP3_DRIVE_R" }
   - { ref: R259, board: audio,   block: block-6-dist3, part: ~,          pkg: "0603",   val: "1MΩ",    fn: "HIGH-3 R_inj L: RV55 wiper→EC_BP3_DRIVE_L" }

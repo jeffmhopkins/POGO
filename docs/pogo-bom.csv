@@ -30,8 +30,8 @@ audio,U78,IC,1,THAT2180AL08-U,,SIP-8,POGO_Package_SIP:SIP-8_2.54mm,THAT Corporat
 audio,U79,IC,1,THAT2180AL08-U,,SIP-8,POGO_Package_SIP:SIP-8_2.54mm,THAT Corporation,,https://www.thatcorp.com/datashts/THAT_2180-Series_Datasheet.pdf,block-4,ALT-R dB-law VCA (current-in/out) → BP3; 8-pin SIP (THT)
 audio,U80,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-4,"ALT I/V transimpedance converters (ALT-L=A, ALT-R=B)"
 audio,U97,IC,1,TL072CDT,,SOIC-8,POGO_Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl072.pdf,block-4,HIGH-3 (change 0020): A = V_CTRL unity buffer (decouples the 4 Ec+ trims); B spare
-audio,R233,Resistor,1,,45.3kΩ,0603,,,,,block-4,HIGH-3 ±ref divider: +12V→REF_P (≈+1.2V) for the 4 Ec+ injection trims
-audio,R234,Resistor,1,,45.3kΩ,0603,,,,,block-4,HIGH-3 ±ref divider: -12V→REF_N (≈-1.2V)
+audio,R233,Resistor,1,,11.3kΩ,0603,,,,,block-4,HIGH-3 ±ref divider: +12V→REF_P (≈+1.2V) — sized for the 4 parallel trim pots (2.5k bridge); change 0025 45k3→11k3
+audio,R234,Resistor,1,,11.3kΩ,0603,,,,,block-4,HIGH-3 ±ref divider: -12V→REF_N (≈-1.2V); change 0025 45k3→11k3
 audio,R235,Resistor,1,,10kΩ,0603,,,,,block-4,HIGH-3 R_ec main-L: V_CTRL_BUF→EC_L
 audio,R236,Resistor,1,,10kΩ,0603,,,,,block-4,HIGH-3 R_ec main-R: V_CTRL_BUF→EC_R
 audio,R237,Resistor,1,,10kΩ,0603,,,,,block-4,HIGH-3 R_ec ALT-L: V_CTRL_BUF→EC_ALT_L
@@ -193,24 +193,24 @@ audio,U92,IC,1,TL074CDT,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,Texas
 audio,U93,IC,1,TL074CDT,,SOIC-14,POGO_Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,Texas Instruments,,https://www.ti.com/lit/ds/symlink/tl074.pdf,block-6-dist3,"BP3 DRIVE support: A=L I/V, B=R I/V, C=drive-control summer, D=spare unity buffer"
 audio,RV51,Trimpot/Pot,1,3224W-1-xxx,10kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-dist1,"BP1 DRIVE VCA L unity trim (HIGH-3: ±1.2V-ref divider, wiper→R_inj→Ec+; ±2dB)"
 audio,RV52,Trimpot/Pot,1,3224W-1-xxx,10kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-dist1,BP1 DRIVE VCA R unity trim (HIGH-3: ±2dB Ec+ injection)
-audio,R243,Resistor,1,,45.3kΩ,0603,,,,,block-6-dist1,HIGH-3 ±ref divider: +12V→REF_P1 (BP1 DRIVE Ec+ trims)
-audio,R244,Resistor,1,,45.3kΩ,0603,,,,,block-6-dist1,HIGH-3 ±ref divider: -12V→REF_N1
+audio,R243,Resistor,1,,22.6kΩ,0603,,,,,block-6-dist1,"HIGH-3 ±ref divider (2 pots, 5k bridge; change 0025 45k3→22k6): +12V→REF_P1 (BP1 DRIVE Ec+ trims)"
+audio,R244,Resistor,1,,22.6kΩ,0603,,,,,block-6-dist1,HIGH-3 ±ref divider (change 0025 45k3→22k6): -12V→REF_N1
 audio,R245,Resistor,1,,10kΩ,0603,,,,,block-6-dist1,HIGH-3 R_ec L: V_DRIVE_CTRL_1→EC_BP1_DRIVE_L
 audio,R246,Resistor,1,,10kΩ,0603,,,,,block-6-dist1,HIGH-3 R_ec R: V_DRIVE_CTRL_1→EC_BP1_DRIVE_R
 audio,R247,Resistor,1,,1MΩ,0603,,,,,block-6-dist1,HIGH-3 R_inj L: RV51 wiper→EC_BP1_DRIVE_L
 audio,R248,Resistor,1,,1MΩ,0603,,,,,block-6-dist1,HIGH-3 R_inj R: RV52 wiper→EC_BP1_DRIVE_R
 audio,RV53,Trimpot/Pot,1,3224W-1-xxx,10kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-dist2,BP2 DRIVE VCA L unity trim (HIGH-3: ±2dB Ec+ injection)
 audio,RV54,Trimpot/Pot,1,3224W-1-xxx,10kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-dist2,BP2 DRIVE VCA R unity trim (HIGH-3: ±2dB Ec+ injection)
-audio,R249,Resistor,1,,45.3kΩ,0603,,,,,block-6-dist2,HIGH-3 ±ref divider: +12V→REF_P2 (BP2 DRIVE Ec+ trims)
-audio,R250,Resistor,1,,45.3kΩ,0603,,,,,block-6-dist2,HIGH-3 ±ref divider: -12V→REF_N2
+audio,R249,Resistor,1,,22.6kΩ,0603,,,,,block-6-dist2,"HIGH-3 ±ref divider (2 pots, 5k bridge; change 0025 45k3→22k6): +12V→REF_P2 (BP2 DRIVE Ec+ trims)"
+audio,R250,Resistor,1,,22.6kΩ,0603,,,,,block-6-dist2,HIGH-3 ±ref divider (change 0025 45k3→22k6): -12V→REF_N2
 audio,R251,Resistor,1,,10kΩ,0603,,,,,block-6-dist2,HIGH-3 R_ec L: V_DRIVE_CTRL_2→EC_BP2_DRIVE_L
 audio,R252,Resistor,1,,10kΩ,0603,,,,,block-6-dist2,HIGH-3 R_ec R: V_DRIVE_CTRL_2→EC_BP2_DRIVE_R
 audio,R253,Resistor,1,,1MΩ,0603,,,,,block-6-dist2,HIGH-3 R_inj L: RV53 wiper→EC_BP2_DRIVE_L
 audio,R254,Resistor,1,,1MΩ,0603,,,,,block-6-dist2,HIGH-3 R_inj R: RV54 wiper→EC_BP2_DRIVE_R
 audio,RV55,Trimpot/Pot,1,3224W-1-xxx,10kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-dist3,BP3 DRIVE VCA L unity trim (HIGH-3: ±2dB Ec+ injection)
 audio,RV56,Trimpot/Pot,1,3224W-1-xxx,10kΩ,SMD,POGO_Potentiometer_SMD:Potentiometer_Bourns_3224W,Bourns,,https://www.bourns.com/docs/Product-Datasheets/3224.pdf,block-6-dist3,BP3 DRIVE VCA R unity trim (HIGH-3: ±2dB Ec+ injection)
-audio,R255,Resistor,1,,45.3kΩ,0603,,,,,block-6-dist3,HIGH-3 ±ref divider: +12V→REF_P3 (BP3 DRIVE Ec+ trims)
-audio,R256,Resistor,1,,45.3kΩ,0603,,,,,block-6-dist3,HIGH-3 ±ref divider: -12V→REF_N3
+audio,R255,Resistor,1,,22.6kΩ,0603,,,,,block-6-dist3,"HIGH-3 ±ref divider (2 pots, 5k bridge; change 0025 45k3→22k6): +12V→REF_P3 (BP3 DRIVE Ec+ trims)"
+audio,R256,Resistor,1,,22.6kΩ,0603,,,,,block-6-dist3,HIGH-3 ±ref divider (change 0025 45k3→22k6): -12V→REF_N3
 audio,R257,Resistor,1,,10kΩ,0603,,,,,block-6-dist3,HIGH-3 R_ec L: V_DRIVE_CTRL_3→EC_BP3_DRIVE_L
 audio,R258,Resistor,1,,10kΩ,0603,,,,,block-6-dist3,HIGH-3 R_ec R: V_DRIVE_CTRL_3→EC_BP3_DRIVE_R
 audio,R259,Resistor,1,,1MΩ,0603,,,,,block-6-dist3,HIGH-3 R_inj L: RV55 wiper→EC_BP3_DRIVE_L

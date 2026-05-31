@@ -203,7 +203,7 @@ DSP and hardware are aligned on all BP signal-processing behaviors:
 > - **HIGH-3 DRIVE-VCA Ec+ trims:** the 6 per-band DRIVE unity trims (RV51–56) were useless series
 >   rheostats into the high-Z Ec+ port → replaced with **voltage-injection trims** (RV→10k divider
 >   across a local ±1.2 V ref; wiper→R_inj 1M→Ec+; V_DRIVE_CTRL→R_ec 10k→Ec+). ±~2 dB authority
->   (SPICE `vca_ecplus_full.cir`). V_DRIVE_CTRL is already an op-amp output (low-Z) so no extra buffer.
+>   (SPICE `block-6-dist1/sim/dist_clip.cir` etc.; mirrors block-4 vca_ecplus.cir). V_DRIVE_CTRL is already an op-amp output (low-Z) so no extra buffer.
 >   Mirrors block-4 HIGH-3. (dist1/2/3: R243–260, REF_P/N 1/2/3.)
 
 ### OTA-C SVF instances

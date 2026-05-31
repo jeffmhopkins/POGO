@@ -1,0 +1,19 @@
+deck: ref_divider.cir
+description: "HIGH-3 shared Ec+ unity-trim ±ref rails REF_P/REF_N = ±1.2V, set by R233/R234 from ±12V loaded by the 4 parallel 10k unity trims (2.5k bridge). change 0025 FIX: R233/R234 45k3→11k3 — the SPICE-math gate found that 45k3 gave only ±0.32V (~±0.5dB Ec+ authority) instead of the intended ±2dB, because all 4 trims load REF in parallel."
+plugin_ref: "specs/block-4/spec.md §3 HIGH-3 — shared ±1.2V reference (R233/R234); analog-only, no plugin DSP"
+# NETLIST BINDING: the deck's R233/R234 literal MUST equal the netlist. The bind pins the CORRECTED
+# 11k3 — if the netlist regressed to 45k3 (the bug) this bind FAILS, guarding the change-0025 fix.
+netlist_bind:
+  R_ref_top: "R233=11k3"
+  R_ref_bot: "R234=11k3"
+measurements:
+  # DERIVED from the corrected divider math (NOT the deck output):
+  #   node eqn at REF_P (symmetry REF_P=-REF_N=x):  (12 - x)/11300 = 2x/2500
+  #   => 2500*(12-x) = 2*11300*x  => 30000 = 25100*x  => x = 1.195 V  ≈ +1.2V (the design intent).
+  # tol_abs 0.1 absorbs ideal-pot-loading + E96 rounding (11.3k vs the exact 11.25k).
+  - name: ref_p
+    expect: 1.195
+    tol_abs: 0.1
+  - name: ref_n
+    expect: -1.195     # symmetry: REF_N = -REF_P
+    tol_abs: 0.1

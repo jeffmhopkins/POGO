@@ -22,6 +22,15 @@ future `tools/build_spice.py --check` becomes the 7th CI gate (advisory first, t
 | Author decks for all blocks; promote gate to **blocking** | **0023** | ✅ done (15 decks; gate blocking) |
 | Graduate 0020 `[NV]` values to verified assertions once bench/datasheet numbers land | future | pending hardware |
 
+## Per-block coverage + outstanding work
+See **`specs/SPICE-COVERAGE.md`** — the living tracker of which blocks are FULL (multi-agent pipeline +
+`netlist_bind` + adversarial-verify) vs BASELINE (decks but no binds/verify) vs none, plus the
+prioritized TODO (promote baselines, new blocks, deferred [NV] items) and the real bugs found+fixed.
+
+## Multi-agent authoring pipeline
+See `tools/SPICE-DECK-GUIDE.md` Part 2 — the derive→write→verify→integrate pipeline (run on block-7 in
+change 0024, block-4 in 0025; each found a real design defect).
+
 ## History (change 0020 → 0022)
 
 0020 validated its CV-conditioning fixes with ad-hoc decks under a flat `specs/sim/` scratch dir

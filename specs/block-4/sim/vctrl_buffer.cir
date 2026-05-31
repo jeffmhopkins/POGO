@@ -1,0 +1,32 @@
+* POGO block-4 VCA — HIGH-3 V_CTRL unity buffer pass-through (change 0020 §HIGH-3)
+* CLAIM: U97-A is a unity buffer (V_CTRL_BUF = V_CTRL, out tied to in-) that decouples the
+* four Ec+ cells before the R_ec (10k) fan-out. The LOADED control pass-through into the Ec+
+* port is g_ctrl ~ 0.984 (spec.md:167). The vca_ecplus.cir deck checks the trim INJECTION
+* authority but NOT this buffer-through-R_ec pass-through — this deck fills that seam.
+* NOTE: spec.md:167 cites a `vca_ecplus_full.cir` model that does NOT exist in the repo; this
+* deck effectively reconstructs that g_ctrl-0.984 pass-through model.
+*
+* Ideal models: `Ebuf` is the ideal unity follower standing in for U97-A (TL072, out=in-);
+* a real op-amp follower is exactly unity in-band, so the *only* droop seen here is the loaded
+* resistive divider R_ec(10k) feeding the Ec+ port (10M to GND || 1M injection || 50nA bias) —
+* which is precisely the buffer-loading fact under test. THAT2180 Ec+ port modeled (as in
+* vca_ecplus.cir) as 10M to GND + 50nA bias.
+
+.param Rport=10meg
+.param Ibias=50n
+
+* --- buffered V_CTRL via R_ec(10k, R235) into the Ec+ node; injection wiper = 0 (centered) ---
+Vctrl  vctrl 0 DC -0.244       ; representative control level (a small Ec+ unity offset)
+Ebuf   vbuf 0 vctrl 0 1        ; U97-A ideal unity follower: V_CTRL_BUF = V_CTRL
+Rec    vbuf ecnode 10k         ; R_ec = R235 (V_CTRL_BUF -> Ec+)
+Vwp    twp 0 DC 0              ; trim wiper at REF mid (0 V) for this pass-through test
+Rinj   twp ecnode 1meg        ; R_inj = R239 (trim wiper -> Ec+)
+Rport  ecnode 0 {Rport}       ; THAT2180 Ec+ port high-Z load to GND
+Ibias  ecnode 0 DC {Ibias}    ; THAT2180 Ec+ port bias current
+
+.control
+  op
+  let g_ctrl = v(ecnode)/v(vctrl)   ; loaded control pass-through (ideal follower=1; droop=loading)
+  print g_ctrl v(ecnode)
+.endc
+.end

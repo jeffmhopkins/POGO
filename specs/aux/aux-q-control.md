@@ -3,7 +3,7 @@
 > ✅ **Re-verified 2026-05-30** (content rewritten 2026-05-29) against the locked plugin via
 > block-5. LM13700 Q-cell reaches self-oscillation (Q → ∞ as Iabc_q → 0), matching the plugin's
 > `Q = 0.5·4000^res`; Q_min ≈ 0.70 (Butterworth) is an accepted analog floor. Shared by LP1/LP2/HP.
-> 🔧 **Change 0020 §D/M5:** R_Iabc **1M→100k** — the LM13700 amplifier-bias (Iabc) pin sits ~2·V_BE above V− (≈ −10.8V at −12V rails), NOT GND, so Iabc=(V_ires−V_pin)/R_Iabc. The old 1M-from-~0V delivered ~14× too much Iabc (Q pinned at min). The IRES_AMP must drive V_ires into the ~−10.0..−10.8V window (steep ~0.8V control band → fine/multi-turn V_bias trim); that negative-drive bias network + clamp polarity is a Phase-3R bring-up item. SPICE: specs/sim/q_cell.cir.
+> 🔧 **Change 0020 §D/M5:** R_Iabc **1M→100k** — the LM13700 amplifier-bias (Iabc) pin sits ~2·V_BE above V− (≈ −10.8V at −12V rails), NOT GND, so Iabc=(V_ires−V_pin)/R_Iabc. The old 1M-from-~0V delivered ~14× too much Iabc (Q pinned at min). The IRES_AMP must drive V_ires into the ~−10.0..−10.8V window (steep ~0.8V control band → fine/multi-turn V_bias trim); that negative-drive bias network + clamp polarity is a Phase-3R bring-up item. SPICE: specs/block-5/sim/q_cell.cir + specs/block-7/sim/q_cell.cir.
 
 Design status: [x] draft → [ ] reviewed → [ ] validated on prototype
 
