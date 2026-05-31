@@ -163,9 +163,15 @@ VCA I/V outputs (op-amp, <100 Ω) drive LP1 / BP3 input resistors — negligible
 > ~0.004 dB authority). Replaced with a **voltage-injection trim**: the AMT wiper is now buffered
 > (**new U97-A** TL072 unity buffer → `V_CTRL_BUF`, decoupling the 4 cells, which the old unbuffered
 > wiper coupled) and drives each Ec+ via `R_ec` (10k, R235–R238); each trim (now **10k**) is a divider
-> across a shared **±1.2 V reference** (R233/R234), wiper → `R_inj` (1M, R239–R242) → Ec+. Gives ±~2 dB
-> unity authority and nulls the port's bias-current offset (SPICE `vca_ecplus_full.cir`: g_ctrl 0.984).
-> The same fix is applied to the block-6 per-band DRIVE VCAs (RV51–56).
+> across a shared **±1.2 V reference** (R233/R234 = **11.3 k**, sized for the 4 parallel trim loads —
+> change 0025 fix; 45.3 k was wrong, see below), wiper → `R_inj` (1M, R239–R242) → Ec+. Gives ±~2 dB
+> unity authority and nulls the port's bias-current offset (SPICE: `sim/vca_ecplus.cir` authority +
+> `sim/vctrl_buffer.cir` g_ctrl≈0.98 + `sim/ref_divider.cir` ±1.195 V ref). The same fix is applied to
+> the block-6 per-band DRIVE VCAs (RV51–56; ref R243…R256 = **22.6 k** for their 2-trim loads).
+>
+> **Change 0025 — ref divider corrected:** R233/R234 were originally 45.3 k, which (with all four
+> unity trims loading REF_P↔REF_N in parallel = 2.5 k) set the reference to only ±0.32 V → ~±0.5 dB
+> Ec+ authority, not the intended ±2 dB. Resized to 11.3 k (→ ±1.195 V). Found by the SPICE-math gate.
 
 **Board assignment:** Audio board (carries audio-frequency signal; THAT 2180 and CV
 conditioning are co-located with the signal path). The VCA_AMT/OFS pots are on the control board.

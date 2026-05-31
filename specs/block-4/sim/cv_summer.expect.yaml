@@ -1,6 +1,6 @@
 deck: cv_summer.cir
 description: U63A is a UNITY inverting CV+OFS summer (NEFFCV = -(CVP+OFS), R42=R43=R45=100k) and U63B a unity inverter (PEFFCV = +(CVP+OFS), R44=R46=100k); proves OFS enters at unity summing weight ahead of the AMT pot
-plugin_ref: "plugin/src/dsp/VcaBlock.hpp:19 — vcaCV = raw + OFS*5 (OFS at unity CV weight before the AMT law); spec/block-4/spec.md §2 (U63A summer / U63B inverter, all 100k)"
+plugin_ref: "plugin/src/Pogo.cpp:389 — vcaCV = clamp(vcaCVraw + OFS*5) (OFS at unity CV weight before the AMT law); spec/block-4/spec.md §2 (U63A summer / U63B inverter, all 100k)"
 netlist_bind:  # deck literals must equal live block-4.nets.yaml values
   R42: "R42=100k"   # U63A CV input
   R43: "R43=100k"   # U63A feedback

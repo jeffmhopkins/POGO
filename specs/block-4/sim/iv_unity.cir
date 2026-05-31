@@ -15,25 +15,30 @@
 *   (−) node ivin is a virtual ground; vca_in is likewise held near 0 by the cell's low input impedance,
 *   modeled here as a small Rsink to GND so the input node potential reads the virtual-ground condition.
 * PARALLEL single instance (op point). The netlist_bind guards R7 (R_in) and R40 (R_f).
+* R_in and R_f are single .param symbols used by BOTH the resistor element AND the current-copy
+* B-source, so the deck's internal physics tracks one value (a Rin perturbation actually moves the
+* gain — fixing the earlier "faked R_in" where Bcopy hardcoded /20e3 independent of the Rin element).
+
+.param Rin=20k          ; R7 (must equal netlist R7 via the bind below)
+.param Rf=20k           ; R40
 
 Vaudio audio 0 DC 1
 
-* R_in (R7, 20k): AUDIO_IN -> vca_in (THAT2180 current-input node).
-Rin  audio vca_in 20k
+* R_in (R7): AUDIO_IN -> vca_in (THAT2180 current-input node).
+Rin  audio vca_in {Rin}
 
 * THAT2180 input node ≈ virtual ground: low input impedance to GND (translinear cell).
 * Small Rsink (1 ohm) so vca_in sits ≈ 0 V — the current-input / virtual-ground condition.
 Rsink vca_in 0 1
 
 * THAT2180 at 0 dB = ideal current copy: I_out = I_in = V(vca_in)/R_in, pushed into ivin.
-* Gcopy senses the input current I_in=(V(audio)-V(vca_in))/R_in and INJECTS it into the I/V
-* summing node ivin (B-source pushes I from n+ to n-, so n+=0, n-=ivin injects into ivin).
-* The op-amp then sinks it through R_f: AUDIO_OUT = −I_out·R_f.
-Bcopy 0 ivin I = (V(audio)-V(vca_in))/20e3
+* Gcopy senses the input current I_in=(V(audio)-V(vca_in))/Rin and INJECTS it into the I/V
+* summing node ivin. The op-amp then sinks it through R_f: AUDIO_OUT = −I_out·R_f.
+Bcopy 0 ivin I = (V(audio)-V(vca_in))/{Rin}
 
 * I/V op-amp (U6 half): (+) = GND (node 0), (−) = ivin (virtual ground). Out via R_f.
 Eop  out 0 0 ivin 1e6
-Rf   out ivin 20k        ; R_f (R40, 20k)
+Rf   out ivin {Rf}       ; R_f (R40)
 
 .control
   op

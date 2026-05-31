@@ -3,7 +3,7 @@
 > ✅ **Re-verified 2026-05-30** against the locked plugin (change 0018). Source is the MOD_SRC
 > 3-way switch (LFO1 / LFO2 / External), not an LFO1 auto-normal; the 3 MOD indicator LEDs are
 > removed (no plugin/panel backing); distribution feeds **18** attenuverter destinations.
-> 🔧 **Change 0020 §H:** destinations must normal **low-Z directly** to the bus (jack tip-switch breaks it) — a series R_SRC_NORM into the ~few-k destination node throttled mod depth to ~3%. The single MB_INV output cannot drive all destinations; use a (paralleled) **distribution buffer**, and/or raise destination input impedance to cut the load. OFFSET scaled to ±5V (plugin). SPICE: specs/sim/modbus_depth.cir, modbus_load.cir.
+> 🔧 **Change 0020 §H:** destinations must normal **low-Z directly** to the bus (jack tip-switch breaks it) — a series R_SRC_NORM into the ~few-k destination node throttled mod depth to ~3%. The single MB_INV output cannot drive all destinations; use a (paralleled) **distribution buffer**, and/or raise destination input impedance to cut the load. OFFSET scaled to ±5V (plugin). SPICE: specs/block-3/sim/modbus_depth.cir.
 
 Design status: [x] draft → [ ] reviewed → [ ] validated on prototype
 

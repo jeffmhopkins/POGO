@@ -81,10 +81,30 @@ This is the second real design error the SPICE-math methodology has found (after
 divergence) — and the first that corrects live netlist component values. Exactly the goal: the gate
 proves the schematic's circuit math, and caught a value that didn't deliver its stated function.
 
-### Stage 3 — verifiers (2 parallel adversarial) — RUNNING
-Sharpest block-4 angles: (1) does gain_law_shape (NO bind, [NV]) genuinely fail when perturbed or is it
-vacuous? (2) is vctrl_buffer's tolerance hiding a buffer-absent case? (3) does amt_symmetric's
-value-independent ofs0 instance weaken the OFS-fix claim (the load-bearing one is ofs2)?
+### Stage 3 — verifiers (2 parallel adversarial) ✅ — ran ngspice perturbation probes, found 6 defects
+1. **🔴 Cross-deck seam:** vca_ecplus hardcoded ±1.23V **unbound to R233/R234** — the ref→authority chain
+   was guarded ONLY by ref_divider's bind, never by the authority deck. A ref regression would leave
+   vca_ecplus passing at +1.91dB while real authority collapsed. **Probed + confirmed.**
+2. **gain_law_shape is a near-tautology** — no bind, single exp() form → `linearity≡0` is a property of
+   exp(), would pass for ANY VCA. Honest [NV] but the description overstated "validates THAT2180 dB-law."
+3. **amt_symmetric `ofs0` is dead weight** — passes for any R values (zero input → both ±effCV=0); the
+   load-bearing OFS-independence proof is entirely `ofs2`.
+4. **iv_unity R_in faked** — `Bcopy` hardcoded `/20e3` independent of the `Rin` element; perturbing Rin
+   didn't move the gain.
+5. **cv_summer wrong plugin_ref** — cited VcaBlock.hpp:19; the OFS law is at Pogo.cpp:389.
+6. **Two stale comments** I introduced: vca_ecplus's pre-fix "±0.32V divergence" text; vctrl_buffer's
+   false "caught two ways" (it's bind-only — the measurement is value-blind).
+   (ref_divider's bug-fix bind-guard was independently CONFIRMED working.)
+
+### Stage 4 — integrate ✅ (all 6 fixed; gates green)
+- **Closed the seam:** vca_ecplus now uses the corrected ±1.195V wiper (→ +1.857/−2.019 dB) AND **binds
+  R233=11k3**. **PROVEN:** reverting R233→45k3 now FAILS BOTH ref_divider and vca_ecplus (was only ref_divider).
+- gain_law_shape relabeled "INTENT/MODELING check (not a netlist check)"; amt_symmetric `ofs0` marked
+  cosmetic; iv_unity R_in parameterized (`.param Rin` shared by resistor + B-source); cv_summer plugin_ref
+  → Pogo.cpp:389; both stale comments corrected.
+- Reconciled the dangling `vca_ecplus_full.cir` citations (spec.md:167, aux:6, nets, block-6) → the real
+  per-block decks; also fixed pre-existing stale `specs/sim/<deck>` aux paths (decks moved to per-block in 0022).
+- All 7 `--check` gates green; 8 block-4 decks pass.
 
 ## Decisions log
 - 2026-05-31: picked block-4 over block-5 (filter sibling, low new value) and block-6 (sprawling, most

@@ -3,7 +3,7 @@
 > ✅ **CORRECTED 2026-05-29** — Topology fixed to the real THAT2180 current-in/current-out
 > device (was wrongly modelled as a differential voltage VCA with no output op-amp).
 > Pinout from datasheet Doc 600029 Rev 02 Table 1. Verified in `specs/block-4/block-4.nets.yaml`.
-> 🔧 **Change 0020 HIGH-3:** the Ec+ unity trim must be a **voltage-injection** trim (trim pot as a divider across a small ±ref, wiper→R_inj→Ec+, with V_ctrl→R_ec→Ec+), NOT a series rheostat into the high-Z Ec+ port (a series R there sets ~0.004dB — useless). Buffer the shared V_ctrl before fanning out to multiple cells. ±~2dB unity authority. SPICE: specs/sim/vca_ecplus.cir, vca_ecplus_full.cir.
+> 🔧 **Change 0020 HIGH-3:** the Ec+ unity trim must be a **voltage-injection** trim (trim pot as a divider across a small ±ref, wiper→R_inj→Ec+, with V_ctrl→R_ec→Ec+), NOT a series rheostat into the high-Z Ec+ port (a series R there sets ~0.004dB — useless). Buffer the shared V_ctrl before fanning out to multiple cells. ±~2dB unity authority. SPICE: `specs/block-4/sim/vca_ecplus.cir` (authority), `vctrl_buffer.cir` (buffer g_ctrl), `ref_divider.cir` (±1.195V ref; change 0025 fixed the ref divider 45k3→11k3).
 
 Design status: [ ] draft → [ ] reviewed → [ ] validated on prototype
 

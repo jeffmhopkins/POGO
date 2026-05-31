@@ -13,17 +13,17 @@ Rrheo vca ecpa 500
 Rpa ecpa 0 {Rport}
 Iba ecpa 0 DC {Ibias}
 
-* --- (b) FIXED injection: buffered V_CTRL via R_ec; trim wiper (±1.23V) via R_inj ---
+* --- (b) FIXED injection: buffered V_CTRL via R_ec; trim wiper (±1.195V = the corrected REF_P/N, change 0025) via R_inj ---
 Vbuf vcbuf 0 DC 0          ; V_CTRL=0 (unity target)
 Rec vcbuf ecpb 10k
-Vwp twp 0 DC 1.23         ; trim wiper at +ref end
+Vwp twp 0 DC 1.195         ; trim wiper at +ref end
 Rinjp twp ecpb 1meg
 Rpb ecpb 0 {Rport}
 Ibb ecpb 0 DC {Ibias}
 
 Vbuf2 vcbuf2 0 DC 0
 Rec2 vcbuf2 ecpc 10k
-Vwn twn 0 DC -1.23        ; trim wiper at -ref end
+Vwn twn 0 DC -1.195        ; trim wiper at -ref end
 Rinjn twn ecpc 1meg
 Rpc ecpc 0 {Rport}
 Ibc ecpc 0 DC {Ibias}

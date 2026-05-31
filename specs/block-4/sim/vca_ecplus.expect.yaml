@@ -1,31 +1,33 @@
 deck: vca_ecplus.cir
-description: VCA Ec+ unity trim — series rheostat (useless) vs §HIGH-3 voltage injection (change 0020)
+description: VCA Ec+ unity trim — series rheostat (useless) vs §HIGH-3 voltage injection (change 0020; ref fixed change 0025)
 plugin_ref: "plugin/src/dsp/VcaBlock.hpp — unity at control=1; THAT2180 Ec+ ≈ +6.1 mV/dB"
-# NETLIST BINDING (retrofit): the deck hand-transcribes the HIGH-3 injection-network values as
-# literals (Rec/Rec2 = 10k, Rinjp/Rinjn = 1meg). Without these binds the gate is deck-literal-vs-
-# spec, not netlist-vs-spec — a silent R235 10k->1M regression would still pass. These bind the
-# load-bearing literals to their netlist refs so a drift FAILS the gate.
-#   - R_ec  = R235/R236 = 10k  (V_CTRL_BUF -> Ec+)
-#   - R_inj = R239/R240 = 1M   (trim wiper -> Ec+)
-# NOT BOUND (and why): the 500Ω `Rrheo` is the documented PRE-0020 series-rheostat BUG value, not a
-# current netlist part (the rheostat was removed) — it has no netlist ref to bind to. The unity
-# trims RV1/RV2 carry SYMBOLIC value fields ("VCA_UNITY_L/R"), not an ohmic value, so the runner
-# cannot resolve them to a number — they are deliberately left unbound (binding them would crash the
-# value parser). The deck's ±1.23 V wiper literal models the OLD ±ref level and is left as-is per
-# the retrofit instruction (do not change deck math); see ref_divider.expect.yaml for the divergence
-# finding that the live netlist divider actually sets ±0.32 V, not the spec's ±1.2 V.
+# NETLIST BINDING: the deck hand-transcribes the HIGH-3 injection-network values as literals.
+# These binds make a netlist drift FAIL the gate:
+#   - R_ec  = R235/R236 = 10k   (V_CTRL_BUF -> Ec+)
+#   - R_inj = R239/R240 = 1M    (trim wiper -> Ec+)
+#   - R_ref = R233 = 11k3       (the ±ref divider top — closes the cross-deck seam: the deck's ±1.195V
+#     wiper level is the level R233/R234 actually deliver, so a ref regression (R233->45k3) FAILS this
+#     deck's bind too, not only ref_divider's. Before change 0025 the ref was mis-sized 45k3 -> ±0.32V;
+#     fixed to 11k3 -> ±1.195V, which is the wiper value this deck now models.)
+# NOT BOUND (and why): the 500Ω `Rrheo` is the documented PRE-0020 series-rheostat BUG value (the
+# rheostat was removed — no netlist ref). RV1/RV2 carry SYMBOLIC value fields ("VCA_UNITY_L/R"), not
+# an ohmic number, so the runner cannot resolve them — deliberately unbound.
 netlist_bind:
   R_ec_L:  "R235=10k"
   R_ec_R:  "R236=10k"
   R_inj_L: "R239=1M"
   R_inj_R: "R240=1M"
+  R_ref:   "R233=11k3"
 measurements:
+  # Authority DERIVED from Ec+/6.1mV at the corrected ±1.195V ref (change 0025), not deck output:
+  #   Ec+(+1.195V wiper) = +11.33mV -> +1.857 dB ;  Ec+(-1.195V) = -12.32mV -> -2.019 dB.
+  # The trim crosses 0 dB (rheostat ~0) -> the ±~2dB unity-null authority is intact after the ref fix.
   - name: rheo_dB        # series rheostat into the high-Z Ec+ port: ~0 dB authority (the bug)
     expect: 0.0
     tol_abs: 0.05
-  - name: inj_hi_dB      # injection trim, wiper +end: ~+1.9 dB
-    expect: 1.91
-    tol_abs: 0.3
-  - name: inj_lo_dB      # injection trim, wiper -end: ~-2.1 dB (so the trim crosses 0 dB)
-    expect: -2.08
-    tol_abs: 0.3
+  - name: inj_hi_dB      # injection trim, wiper +end: +1.86 dB at the corrected +1.195V ref
+    expect: 1.857
+    tol_abs: 0.15
+  - name: inj_lo_dB      # injection trim, wiper -end: -2.02 dB (trim crosses 0 dB)
+    expect: -2.019
+    tol_abs: 0.15
