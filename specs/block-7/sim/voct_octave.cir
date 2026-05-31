@@ -1,0 +1,54 @@
+* POGO block-7 HP — end-to-end 1 V/oct expo tracking (HPFilter.hpp:18 f0=632*2^cutoffV)
+* Validates that the SVF cutoff f0 DOUBLES per +1V of HP V/oct CV through the full
+*   expo -> gm-C integrator chain, by checking the f0 RATIOS at CV = -3 / 0 / +5 V:
+*   2^-3 : 2^0 : 2^+5  =  1/8 : 1 : 32.
+*
+* Ideal-expo stand-in: there is no THAT340 SPICE model in-env, so the matched-pair
+*   expo is modelled as the IDEAL exponential current Iabc = Iref*exp(Vbase/V_T)
+*   (V_T = 25.85mV) — exactly the law the THAT340 + the §A V/oct base divider are built
+*   to realise (aux-expo-converter §"Analog Exponential Core"). The base voltage is the
+*   CV scaled by the V_T*ln2 = 17.92 mV/oct slope (Vbase = CV*0.01792), so each +1V of CV
+*   adds one octave: exp(0.01792/0.02585) = 2.000. Because each instance's gm is a fixed
+*   DC-determined constant, the expo current is folded into the per-instance gm via a
+*   .param exp() — keeping the netlist's real Iref/C/slope visible.
+*
+* gm-C integrator = LM13700 OTA-C integrator: Gint 0 out in out {gm} + Cint {C}, a 1st-
+*   order LP whose -3dB corner f0 = gm/(2*pi*C) is the SVF cutoff. gm = Iabc/0.052
+*   (V_T_diff = 52mV, aux-q-control Q-denominator), C = 47n (C29A/C29B C0G integrator cap).
+*
+* The assertions are the RATIOS only (NV-free: the absolute Iref cancels). Iref = 9.70µA
+*   is set so f0(0V) ~= 632Hz purely for transparency (printed f0_0v).
+
+.param VT=0.02585          ; thermal voltage (expo core)
+.param Iref=9.70u          ; sets f0(0V)~632Hz (transparency only; cancels in the ratios)
+.param C=47n               ; C29A/C29B integrator cap (C0G)
+.param slope=0.01792       ; V_T*ln2 = 17.92 mV/oct  (1 V/oct base-divider slope)
+
+* per-instance gm = (Iref*exp(CV*slope/V_T)) / 0.052
+.param gm_m3={(Iref*exp((-3*slope)/VT))/0.052}   ; CV = -3 V
+.param gm_0 ={(Iref*exp(( 0*slope)/VT))/0.052}   ; CV =  0 V
+.param gm_p5={(Iref*exp(( 5*slope)/VT))/0.052}   ; CV = +5 V
+
+* ===== three PARALLEL gm-C integrator instances (one per CV) =====
+Vacm3 am3 0 AC 1 DC 0
+Gm3 0 om3 am3 om3 {gm_m3}
+Cm3 om3 0 {C}
+
+Vac0  a0 0 AC 1 DC 0
+G0 0 o0 a0 o0 {gm_0}
+C0 o0 0 {C}
+
+Vacp5 ap5 0 AC 1 DC 0
+Gp5 0 op5 ap5 op5 {gm_p5}
+Cp5 op5 0 {C}
+
+.control
+  ac dec 100 1 200k
+  meas ac f0_m3 when vdb(om3)=-3.01
+  meas ac f0_0v when vdb(o0)=-3.01
+  meas ac f0_p5 when vdb(op5)=-3.01
+  let ratio_m3 = f0_m3/f0_0v        ; -> 2^-3 = 0.125
+  let ratio_p5 = f0_p5/f0_0v        ; -> 2^+5 = 32
+  print ratio_m3 ratio_p5 f0_0v
+.endc
+.end

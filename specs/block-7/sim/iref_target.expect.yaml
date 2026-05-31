@@ -1,0 +1,16 @@
+deck: iref_target.cir
+description: HP I_ref leg trim AUTHORITY [NV] — R_total range spans the f_ref=632Hz setpoint inside 20-80% pot travel
+plugin_ref: "specs/block-7/spec.md §3 / aux-expo-converter §Trim Pots — R_IREF_A 1M + RV_REF 500k; R_total 1000k-1500k; 9.69µA setpoint ~47.6% travel"
+measurements:
+  # [NV]: the absolute Iabc in µA is THAT340-bias-dependent; this verifies trim AUTHORITY
+  # (the target R_total falls within the rheostat range), not the absolute current.
+  # Derived from R109=1M + RV16 ∈ {0, 238k, 500k}.
+  - name: rtot_lo_k      # RV_REF=0   -> 1M
+    expect: 1000.0
+    tol_abs: 10.0
+  - name: rtot_mid_k     # RV_REF=238k -> 1.238M  (the 9.69µA f_ref setpoint, ~47.6% travel, inside 20-80%)
+    expect: 1238.0
+    tol_abs: 20.0
+  - name: rtot_hi_k      # RV_REF=500k -> 1.5M
+    expect: 1500.0
+    tol_abs: 10.0

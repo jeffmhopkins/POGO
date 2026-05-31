@@ -1,0 +1,16 @@
+deck: q_cell.cir
+description: HP Q-cell Iabc bias — R104/R105 R_Iabc=100k fix vs the LM13700 Iabc-pin rail (change 0020 §D/M5)
+plugin_ref: "plugin/src/dsp/HPFilter.hpp:21 — Q = 0.5*pow(4000,res); Butterworth Q≈0.7 floor at res=0"
+measurements:
+  # Derived from the NETLIST (R104/R105 = 100k) + aux-q-control §D math (Iabc=(V_ires-V_pin)/R_Iabc,
+  # Q=52mV/(Iabc*100k)). NOTE: spec.md:152-153 still says R_Iabc=1MΩ / 0.74V — that line is STALE
+  # (pre-0020); these expects are derived from the 100k netlist value, NOT that stale spec line.
+  - name: iabc_bug_uA    # 1M from ~0V: ~10.8µA — ~14x the ~0.74µA the stale spec assumed (Q pinned)
+    expect: 10.8
+    tol_abs: 0.3
+  - name: iabc_fix_uA    # 100k, V_ires=-10.73V: ~0.7µA (controllable)
+    expect: 0.7
+    tol_abs: 0.1
+  - name: q_fix          # resulting Q at the Butterworth setpoint
+    expect: 0.74
+    tol_abs: 0.05

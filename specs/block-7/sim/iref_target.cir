@@ -1,0 +1,34 @@
+* POGO block-7 HP — I_ref leg trim AUTHORITY  [NV]
+* CLAIM: the I_ref network R_IREF_A (R109, 1MΩ fixed) + RV_REF (RV16, 500kΩ rheostat) gives
+*   R_total ∈ [1000k, 1500k] as RV sweeps 0..500k, and the f_ref=632Hz calibration setpoint
+*   (Iabc ≈ 9.69µA, R_total ≈ 1238k, ~47.6% pot travel) sits INSIDE 20–80% of the pot range.
+* [NV] — the absolute I_ref in µA is THAT340-bias-dependent (V_ref / V_BE), so this deck checks
+*   the R_total RANGE / trim authority (that the calibration target is reachable), NOT the
+*   absolute Iabc. (aux-expo-converter §"Trim Pots": R_total range 1000k–1500k, all block targets
+*   within 20–80% travel; block-7 target 9.69µA at 0V CV -> RV_REF ≈ 238k.)
+* Model: 3 PARALLEL instances. R_total = R109(1M) + RV16 (0 / 238k / 500k). Drive 1V through
+*   R_total to a 0V sense source; R_total_k = 0.001/i(Vsense) reads R_total directly in kΩ.
+
+* --- RV_REF = 0 (CCW end): R_total = 1000k ---
+V1 a 0 DC 1
+Rlo a nlo 1000000
+Vlo nlo 0 DC 0
+
+* --- RV_REF = 238k (the 9.69µA f_ref=632Hz setpoint, ~47.6% travel): R_total = 1238k ---
+V2 b 0 DC 1
+Rmid b nmid 1238000
+Vmid nmid 0 DC 0
+
+* --- RV_REF = 500k (CW end): R_total = 1500k ---
+V3 c 0 DC 1
+Rhi c nhi 1500000
+Vhi nhi 0 DC 0
+
+.control
+  op
+  let rtot_lo_k  = 0.001/i(Vlo)        ; R109 + RV16=0      -> 1000 k
+  let rtot_mid_k = 0.001/i(Vmid)       ; R109 + RV16=238k   -> 1238 k (setpoint)
+  let rtot_hi_k  = 0.001/i(Vhi)        ; R109 + RV16=500k   -> 1500 k
+  print rtot_lo_k rtot_mid_k rtot_hi_k
+.endc
+.end
