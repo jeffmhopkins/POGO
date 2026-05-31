@@ -4,7 +4,7 @@ Living status of the per-block SPICE math-validation effort. The gate
 (`tools/build_spice.py --check`, blocking since 0023) runs every deck listed here.
 Methodology + how to extend: `tools/SPICE-DECK-GUIDE.md`.
 
-**Last updated:** 2026-05-31 (change 0026) · **34 decks across 11 block dirs, all passing.**
+**Last updated:** 2026-05-31 (change 0027) · **40 decks across 11 block dirs, all passing.**
 
 ## Coverage levels
 - **🟢 FULL** — the multi-agent pipeline (derive → write → adversarial-verify → integrate) has been run;
@@ -23,7 +23,7 @@ Methodology + how to extend: `tools/SPICE-DECK-GUIDE.md`.
 | **block-A** Input | 1 | 🟡 BASELINE | input_clamp (unity + BAT54S). No binds. |
 | **block-1** Pre-Gain | 1 | 🟡 BASELINE | pregain (5× + clip). No binds. |
 | **block-6-svf1** | 1 | 🟡 BASELINE | bp_fref (68nF→400Hz vs 47nF trap). No binds. Representative for svf2/svf3. |
-| **block-6-dist1** | 1 | 🟡 BASELINE | dist_clip (HC/WF/SC thresholds). No binds. Representative for dist2/dist3. |
+| **block-6-dist1** | 7 | 🟢 FULL (0027) | DRIVE ref-divider (±1.2V, **closed the block-6 0025-fix gap**), DRIVE I/V + summer, wavefold G=+2 reflection (signature), HC/SC unity cells, ±4V CLIP threshold, dist_clip ([NV] clamp levels — zener/diode part#, documentary). Fixed a stale hysteresis comment. Representative for dist2/dist3. |
 | **block-6-mix** | 1 | 🟡 BASELINE | bp3_normal (§G). No binds. |
 | **block-2** LFO | 0 | ⚪ NONE | time-domain rate law (0.05–20Hz) — needs a transient deck. |
 | **block-B** Output | 0 | ⚪ NONE | output buffers — same unity-follower physics as block-A input_clamp (low new value). |
@@ -41,8 +41,9 @@ stage on each:
 - [x] ~~**block-3** (Mod Bus)~~ — ✅ promoted to FULL in 0026 (6 new decks + depth retrofit; found the `100R` parser gap).
 - [ ] **block-8** (LP2) — 2 decks.
 - [ ] **block-1, block-A** — 1 deck each (add binds: pregain R3/R4; input_clamp R-prot).
-- [ ] **block-6-svf1 / dist1 / mix** — add binds; the svf/dist decks should bind the 68nF cap, the
-      zener/diode thresholds, the BP3 buffer Rs.
+- [x] ~~**block-6-dist1**~~ — ✅ promoted to FULL in 0027 (6 new decks + dist_clip [NV] note; closed the
+      block-6 DRIVE ref-divider gap left by 0025). dist2/dist3 are identical copies (one representative).
+- [ ] **block-6-svf1 / mix** — add binds; the svf deck should bind the 68nF cap, mix the BP3 buffer Rs.
 
 ### B. New blocks (⚪ → coverage)
 - [ ] **block-2 LFO** — transient deck for the 0.05–20Hz rate law (the one time-domain block; deferred since 0023).
@@ -65,6 +66,10 @@ deck can assert an absolute (today only trim-authority/ratio/shape is checkable)
 - ✅ **0026:** fixed `parse_value()` in `build_spice.py` — it couldn't read bare-`R` ohms notation
       (`100R`/`47R`, only `1R0`/`4k7`); block-3's protection resistors use it and this was the first bind
       to exercise it. No netlist bug found in block-3 (the §M2 offset + §H depth fixes verified correct).
+- ✅ **0027:** closed the **block-6 DRIVE ref-divider coverage gap** — 0025 fixed R243/R244 45k3→22k6 but
+      only block-4 got a `ref_divider` deck; block-6's copy was unchecked. Now bound (±1.195V; reverting to
+      45k3 fails). Also fixed a stale netlist comment (R181 hysteresis "~50mV"→"~0.95V input-referred").
+      No netlist bug found in block-6-dist (the 22k6 ref + ±4V CLIP + wavefold all verified correct).
 
 ## How to pick the next block
 Prefer **distinct physics** + **analog-critical** + **self-contained**. Done: block-7 (filter), block-4

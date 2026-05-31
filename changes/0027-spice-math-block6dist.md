@@ -69,12 +69,44 @@ Group C (CLIP): L1 (+ investigate the R181 ~50mV comment).
   distinct nonlinear physics (wavefold/clip), highest new-bug yield, and it closes the block-6
   HIGH-3 ref-divider coverage gap left by 0025. dist1 is representative; dist2/dist3 are identical.
 
+## Stage 2 — writers (3 parallel) ✅ — 6 new decks + dist_clip [NV] note, all PASS
+- **Group A (DRIVE chain):** drive_ref_divider (binds R243/R244=22k6 → ±1.195V — the 0025-fix gap),
+  drive_iv_unity (binds R153/R155=20k → −1; parameterized so both Rs move the gain — avoids block-4's
+  faked-ratio bug), drive_summer (binds R157–R160=100k → −1 each).
+- **Group B (dist cells):** wf_fold (binds R25/R_f_wf=10k → V_out=2·V_clamp−V_in slope reversal),
+  dist_cell_unity (binds R18–R21=10k → −1), dist_clip [NV] note (clamp levels in zener/diode part#).
+- **Group C (CLIP):** clip_threshold (binds R186–R189 → ±4.0V vs plugin `>4.0f`). Plus the hysteresis
+  investigation that flagged the stale R181 comment.
+- Cleaned a stray `v(cout))` shell-redirect artifact (×2). No netlist↔spec divergence found.
+
+## Stage 3 — verifiers (3 parallel adversarial) ✅ — live ngspice perturbation probes; ALL SOUND
+- **Group A: all 3 SOUND, no defects.** drive_ref_divider guard CONFIRMED (R243→45k3 trips the bind —
+  block-6 now has the regression guard block-4 got in 0025). drive_iv_unity does NOT inherit block-4's
+  faked-`/20e3` bug (both R_in and R_f move the measurement).
+- **Group B: all 3 SOUND, no defects.** wf_fold is the gold standard — the ×2 folder gain is genuinely
+  realized from R25/R_f_wf (perturbation moves the fold AND trips the bind), disproving the
+  "ideal-clamp + hardcoded ×2 = vacuous" risk. dist_clip's [NV] no-bind justification verified honest.
+- **Group C: SOUND, all 4 binds load-bearing.** Independently confirmed the R181 "~50mV" comment is
+  stale (real ≈0.95V input-referred @ 21Vpp = R177/R181·ΔVout, ~19× off). Used an isolated git worktree.
+- **Coordination note:** the 3 verifiers shared one checkout and cross-restored each other's nets.yaml
+  probes; final tree verified CLEAN at baseline + full gate re-run green before integrating. (Future:
+  give concurrent perturbation reviewers separate worktrees.)
+
+## Stage 4 — integrate ✅ (one finding fixed; gates green)
+- **Fixed the stale comment:** R181 `~50mV @ ±12 swing` → `~0.95V input-referred @ ±10.5V/21Vpp =
+  R177/R181·ΔVout` (dist2/dist3 carry no numeric, so only dist1 needed it). The 2.2M value is correct —
+  only the comment was wrong.
+- No netlist bug found in block-6-dist (unlike 0024/0025) — the 22k6 ref (the 0025 fix), the ±4V CLIP
+  threshold, and the wavefold all verified correct. The run's products: the math-proof coverage + closing
+  the block-6 ref-divider gap + the stale-comment fix.
+- All 7 `--check` gates green; 7 block-6-dist1 decks pass (40 decks total).
+
 ## Gate checklist
-- [ ] Stage 1 derive → manifest
-- [ ] Stage 2 write decks (parallel)
-- [ ] Stage 3 verify-intent (parallel adversarial)
-- [ ] Stage 4 integrate (fix findings; all 7 gates green)
-- [ ] Update `specs/SPICE-COVERAGE.md` (block-6-dist1 BASELINE → FULL)
+- [x] Stage 1 derive → manifest (6 checks + dist_clip note; top = block-6 ref-divider gap)
+- [x] Stage 2 write decks (3 parallel → 6 new + [NV] note)
+- [x] Stage 3 verify-intent (3 adversarial → ALL SOUND; confirmed the stale hysteresis comment)
+- [x] Stage 4 integrate (fixed the stale comment; all 7 gates green)
+- [x] Update `specs/SPICE-COVERAGE.md` (block-6-dist1 BASELINE → FULL)
 - [ ] PR `change/0027-spice-math-block6dist` → `dev`
 
 ## Outstanding (tracked in `specs/SPICE-COVERAGE.md`)

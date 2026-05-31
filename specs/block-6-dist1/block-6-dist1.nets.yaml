@@ -116,7 +116,7 @@ parts:
   R178: { sym: r, value: 100k }   # CLIP comp B in (DISTOUT_L -> in-, <-4 detect)
   R179: { sym: r, value: 100k }   # CLIP comp C in (DISTOUT_R -> in+, >+4 detect)
   R180: { sym: r, value: 100k }   # CLIP comp D in (DISTOUT_R -> in-, <-4 detect)
-  R181: { sym: r, value: 2.2M }   # CLIP comp A hysteresis fb (out -> in+; ~50mV @ ±12 swing)
+  R181: { sym: r, value: 2.2M }   # CLIP comp A hysteresis fb (out -> in+; ~0.95V input-referred @ ±10.5V/21Vpp swing = R177/R181·ΔVout; SPICE clip_threshold investigation, change 0027)
   R182: { sym: r, value: 2.2M }   # CLIP comp B hysteresis fb (out -> in+)
   R183: { sym: r, value: 2.2M }   # CLIP comp C hysteresis fb (out -> in+)
   R184: { sym: r, value: 2.2M }   # CLIP comp D hysteresis fb (out -> in+)
