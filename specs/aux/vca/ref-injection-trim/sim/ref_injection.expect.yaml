@@ -1,0 +1,26 @@
+deck: ref_injection.cir
+description: "LIBRARY (generic) check — HIGH-3 ±ref divider (R_top vs parallel pot bridge → ±1.195V, NON-VACUOUS) + Ec+ voltage-injection authority (R_ec/R_inj = 10k/1M → ±~2dB). [NV] on the THAT2180 dB conversion. No netlist_bind (no netlist behind a library cell)."
+plugin_ref: "plugin/src/dsp/VcaBlock.hpp — unity at control=1; analog Ec+ ≈ 6.1 mV/dB [NV]; aux/vca/ref-injection-trim §Transfer Function"
+# (A) ±ref level DERIVED from the divider math (NOT deck output):
+#   node eqn (12-x)/11.3k = 2x/2.5k → x = 30000/25100 = 1.195V. NON-VACUOUS: R_top 11.3k->45.3k
+#   (pre-0025 bug) collapses x to ~0.32V, failing the assertion.
+# (B) injection authority DERIVED from the R_ec/R_inj network at the 10Meg Ec+ port + 50nA bias,
+#   converted through the NOMINAL 6.1mV/dB [NV]. The 50nA Ec+ bias current sinks from the node
+#   (lowers it ~0.5mV), so it rides on the injection symmetrically:
+#     wiper +1.195V: Ec+ = +11.33mV → +1.857 dB ;  wiper -1.195V: Ec+ = -12.31mV → -2.019 dB.
+#   (matches block-4 vca_ecplus.expect.yaml; the authority straddles 0 dB, ~±2 dB, as intended.)
+measurements:
+  - name: ref_p
+    expect: 1.195
+    tol_abs: 0.1       # absorbs ideal-pot-loading + E96 rounding (11.3k vs exact 11.25k)
+  - name: ref_n
+    expect: -1.195     # symmetry: REF_N = -REF_P
+    tol_abs: 0.1
+  # [NV] dB: loose tol — the 6.1mV/dB conversion is the unmeasured THAT2180 constant; the load-
+  # bearing claim is the ±~2dB authority RANGE (set by R_ec/R_inj), straddling 0 dB.
+  - name: inj_hi_dB
+    expect: 1.857
+    tol_abs: 0.15
+  - name: inj_lo_dB
+    expect: -2.019
+    tol_abs: 0.15

@@ -1,0 +1,21 @@
+deck: out_buffer.cir
+description: "LIBRARY (generic) check — output stage: unity follower G=+1 + R_ser-into-100k divider (0.990×) + ±11V clamp [NV]. No netlist_bind (no netlist behind a library cell)."
+plugin_ref: "plugin/src/Pogo.cpp:499-500 — outputs[MAIN/BP3] = clamp(out, -11.f, 11.f); HW = unity follower + 1k series (aux/utility/output-buffer §Transfer Function)"
+# Unity is a topology fact (100% feedback, no gain-setting ratio) -> value-independent, no bind.
+# div_ratio is computed from the modeled R_ser/R_load network (NON-VACUOUS: perturbing R_ser
+# 1k->10k drives it to 0.909, failing the assertion). clamp_hi is [NV] (TL072 swing on +/-12V).
+measurements:
+  # Topology: ideal unity follower => gain exactly +1 (no gain-setting resistors).
+  - name: unity_gain
+    expect: 1.0
+    tol_abs: 0.001
+  # DERIVED from the divider law: R_load/(R_load+R_ser) = 100k/101k = 0.990099 (-0.087 dB).
+  # tol covers 1% tolerance on the representative R_ser.
+  - name: div_ratio
+    expect: 0.990099
+    tol_pct: 1
+  # [NV] DOCUMENTARY: +11V ceiling = TL072 output swing on ±12V rails (= plugin clamp(±11)),
+  # a device constant, NOT a bindable resistor. Confirms the clamp reaches +11V (no more).
+  - name: clamp_hi
+    expect: 11.0
+    tol_abs: 0.05

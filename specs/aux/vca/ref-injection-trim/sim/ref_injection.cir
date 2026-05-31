@@ -1,0 +1,57 @@
+* POGO aux vca/ref-injection-trim — HIGH-3 ±ref divider + Ec+ voltage-injection authority
+* LIBRARY deck: hardcoded representative values, NO netlist_bind (generic cell, no netlist).
+* Ground truth: VcaBlock.hpp unity@control=1; the analog Ec+ trim must give ±~2dB unity authority.
+* [NV] on the THAT2180 dB conversion (~6.1mV/dB device constant) — we check the ±ref LEVEL and the
+* injection AUTHORITY/RATIO (set by Rs), NOT the absolute dB.
+*
+* (A) ±ref level — emerges from R_top against the modeled trim-pot bridge (NON-VACUOUS):
+*   symmetric REF_P = -REF_N = x; bridge R_bridge = N×10k pots end-to-end in parallel.
+*   node eqn at REF_P:  (12 - x)/R_top = 2x/R_bridge
+*   representative R_top=11.3k, R_bridge=2.5k (four 10k pots ∥):  x = 30000/25100 = 1.195V.
+*   NON-VACUOUS: regressing R_top 11.3k->45.3k (the pre-0025 bug) collapses x to ~0.32V, failing.
+*
+* (B) injection authority — emerges from the R_ec/R_inj ratio at the high-Z Ec+ port.
+*   V_ctrl (buffered, =0 at unity target) via R_ec=10k; trim wiper (±ref) via R_inj=1M; into the
+*   ~10Meg Ec+ port + 50nA bias. The wiper coefficient = R_ec/(R_ec+R_inj) ≈ 0.0099, so the wiper
+*   swept ±1.195V injects Ec+ ≈ ±11.8mV. Convert through the NOMINAL 6.1mV/dB [NV] -> ±~1.9dB.
+*   NON-VACUOUS for the RATIO: regressing R_inj 1M->10k would jump the authority ~50×.
+* PARALLEL instances (no alter loops).
+
+.param Rport=10meg
+.param Ibias=50n
+
+* --- (A) ±ref divider: ±12 -> R_top -> REF_P/REF_N, bridged by the parallel pots (2.5k) ---
+.param Rbridge=2.5k          ; four 10k pots end-to-end in parallel between REF_P and REF_N
+Vpos vpos 0 DC 12
+Vneg vneg 0 DC -12
+R_top_p vpos refp 11.3k      ; +ref divider top
+R_top_n vneg refn 11.3k      ; -ref divider top
+Rbr refp refn {Rbridge}      ; pot bridge (lower leg)
+
+* --- (B) injection authority: wiper at +end and -end of the ±ref into Ec+ ---
+* (b1) wiper at +ref end (+1.195V), V_ctrl=0 -> Ec+ rises by the injected amount
+Vbuf_p vcbuf_p 0 DC 0        ; V_ctrl = 0 (unity target)
+Rec_p vcbuf_p ecp_p 10k
+Vwp twp 0 DC 1.195           ; trim wiper at +ref end (the level the divider delivers)
+Rinj_p twp ecp_p 1meg
+Rport_p ecp_p 0 {Rport}
+Ibias_p ecp_p 0 DC {Ibias}
+
+* (b2) wiper at -ref end (-1.195V)
+Vbuf_n vcbuf_n 0 DC 0
+Rec_n vcbuf_n ecp_n 10k
+Vwn twn 0 DC -1.195
+Rinj_n twn ecp_n 1meg
+Rport_n ecp_n 0 {Rport}
+Ibias_n ecp_n 0 DC {Ibias}
+
+.control
+  op
+  let ref_p = v(refp)              ; expect +1.195V
+  let ref_n = v(refn)              ; expect -1.195V (symmetry)
+  * injection authority in dB via the NOMINAL 6.1mV/dB [NV]:
+  let inj_hi_dB = v(ecp_p)/0.0061  ; wiper +end -> +~1.9 dB
+  let inj_lo_dB = v(ecp_n)/0.0061  ; wiper -end -> -~2.0 dB (crosses 0 dB)
+  print ref_p ref_n inj_hi_dB inj_lo_dB
+.endc
+.end

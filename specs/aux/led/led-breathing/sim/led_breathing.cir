@@ -1,0 +1,62 @@
+* POGO aux led/led-breathing — NPN level-shift current source: base superposition + I_LED shape
+* LIBRARY deck: hardcoded representative values, NO netlist_bind (generic cell, no netlist).
+* Ground truth: Pogo.cpp:508-509 brightness=(lfoRaw+1)*0.5, lfoRaw=V_tri/5 => (V_tri+5)/10 over
+* the WHOLE cycle (breathing). The analog driver level-shifts V_tri onto the NPN base and the LED
+* current rises monotonically from cutoff (V_tri=-5) to ~3mA (V_tri=+5).
+*
+* (A) Base voltage by 3-resistor superposition (base node ≈ open; high-β draws negligible Ib):
+*   V_base = (V_tri/R_BTRI + 12/R_BBIAS) / (1/R_BTRI + 1/R_BBIAS + 1/R_BGND)
+*   R_BTRI=51k, R_BBIAS=68k, R_BGND=10k -> SumG=134.31uS:
+*     V_tri=-5 -> 0.584V ;  0 -> 1.314V ;  +5 -> 2.044V   (spec 0.585/1.31/2.04)
+*   NON-VACUOUS: the base voltage emerges from R_BTRI/R_BBIAS/R_BGND — perturb any and V_base moves.
+*
+* (B) I_LED = I_E = max(0, V_base - Vbe)/R_E, R_E=470R, Vbe≈0.6 [NV]:
+*     -5: 0.584<0.6 -> ~0mA (cutoff) ; 0: 1.52mA ; +5: 3.07mA ; monotone rising.
+*   [NV] Vbe (device constant) + real β -> RANGE/SHAPE check (cutoff toe, ~3mA peak, monotone),
+*   NOT the absolute mA. The IDEAL NPN is a B-source enforcing V(ne)=max(0,V_base-Vbe) into R_E.
+* PARALLEL instances (one per V_tri point — no alter loops).
+
+.param vbe=0.6              ; ideal Vbe knee (the [NV] device constant; range-checked, not pinned)
+
+* +12V rail (shared bias source for all instances)
+V12 n12 0 DC 12
+
+* ===== V_tri = -5 V =====
+Vtm5 ntm5 0 DC -5
+Rtri_m5  ntm5 nbm5 51k
+Rbias_m5 n12  nbm5 68k
+Rgnd_m5  nbm5 0    10k
+Be_m5 nem5 0 V = (V(nbm5) > vbe) ? (V(nbm5)-vbe) : 0
+Re_m5 nem5 0 470R
+
+* ===== V_tri = 0 V =====
+Vt0 nt0 0 DC 0
+Rtri_0  nt0 nb0 51k
+Rbias_0 n12 nb0 68k
+Rgnd_0  nb0 0   10k
+Be_0 ne0 0 V = (V(nb0) > vbe) ? (V(nb0)-vbe) : 0
+Re_0 ne0 0 470R
+
+* ===== V_tri = +5 V =====
+Vtp5 ntp5 0 DC 5
+Rtri_p5  ntp5 nbp5 51k
+Rbias_p5 n12  nbp5 68k
+Rgnd_p5  nbp5 0    10k
+Be_p5 nep5 0 V = (V(nbp5) > vbe) ? (V(nbp5)-vbe) : 0
+Re_p5 nep5 0 470R
+
+.control
+  op
+  * (A) base voltages (bound to R_BTRI/R_BBIAS/R_BGND superposition)
+  let vb_m5 = v(nbm5)
+  let vb_0  = v(nb0)
+  let vb_p5 = v(nbp5)
+  * (B) I_LED ≈ I_E = V(ne)/R_E, in mA
+  let iled_m5 = v(nem5)/470 * 1000
+  let iled_0  = v(ne0)/470  * 1000
+  let iled_p5 = v(nep5)/470 * 1000
+  * monotone rising across the cycle — use gt/and (a bare `>` in a .control let is a redirect trap)
+  let iled_mono = ((iled_p5 gt iled_0) and (iled_0 gt iled_m5)) ? 1 : 0
+  print vb_m5 vb_0 vb_p5 iled_m5 iled_0 iled_p5 iled_mono
+.endc
+.end

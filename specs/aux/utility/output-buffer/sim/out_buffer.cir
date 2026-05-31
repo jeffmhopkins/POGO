@@ -1,0 +1,41 @@
+* POGO aux utility/output-buffer — unity follower + R_ser-into-load divider + 11V clamp
+* LIBRARY deck: hardcoded representative values, NO netlist_bind (generic cell, no netlist).
+* Ground truth (the cell's law): Pogo.cpp:499-500 MAIN_L/R = clamp(V, -11, +11); the analog
+* output stage is a non-inverting unity follower (G=+1) -> R_ser series -> jack into a
+* downstream ~100k module input -> divider R_load/(R_load+R_ser).
+*
+* Ideal models (per SPICE-DECK-GUIDE): the op-amp is an Ebuf unity follower (0-ohm out) —
+* its real Zout (<<1 ohm for TL072 at audio) is negligible vs R_ser, so the follower+series
+* divider law is preserved. The 11V ceiling is the TL072 swing on +/-12V rails, a device
+* constant set by NO resistor -> modeled as a behavioral clamp [NV] (range check, not pinned).
+*
+* DERIVED expects (independent of deck output):
+*   unity_gain = 1.0                                   (topology, ideal follower)
+*   div_ratio  = R_load/(R_load+R_ser) = 100k/101k = 0.99010   (emerges from the modeled R_ser)
+*   clamp_hi   = +11V                                  (drive +17V -> clamps to +11 [NV])
+* NON-VACUOUS: div_ratio is computed from the actual R_ser/R_load network, not asserted —
+* perturbing R_ser (1k->10k) drives the ratio to 0.909, failing the assertion.
+
+.param RSER=1k          ; representative output series-protection R (the cell's 1k)
+.param RLOAD=100k       ; standard downstream module input impedance
+
+* --- (1) unity follower in-band: G=+1 (Vin=5V) ---
+Vsig nin 0 DC 5.0
+Ebuf nbuf 0 nin 0 1          ; ideal unity follower (out tied to In- in HW)
+
+* --- (2) R_ser into a 100k downstream load -> output divider ---
+Rser nbuf nout {RSER}        ; series output-protection R (sets the load divider)
+Rload nout 0 {RLOAD}         ; downstream module input impedance
+
+* --- (3) over-rail clamp: drive past +/-11V, confirm the +11V ceiling [NV] ---
+Vov nov 0 DC 17
+Bclamp nclamp 0 V = (V(nov) > 11) ? 11 : ((V(nov) < -11) ? -11 : V(nov))
+
+.control
+  op
+  let unity_gain = v(nbuf)/5.0          ; follower gain = +1 (topology)
+  let div_ratio  = v(nout)/v(nbuf)      ; R_ser-into-100k divider = 0.99010 (emerges from RSER)
+  let clamp_hi   = v(nclamp)            ; +17V driven -> clamped to +11V [NV]
+  print unity_gain div_ratio clamp_hi
+.endc
+.end

@@ -1,6 +1,7 @@
 # aux: VCA Cell (THAT 2180 Exponential VCA)
 
 **Type:** `vca` · part of the [aux circuit library](../../_LIBRARY.md)
+**Composes:** [ref-injection-trim](../ref-injection-trim/spec.md) (the VCA's Ec+ HIGH-3 trim)
 
 > ✅ **CORRECTED 2026-05-29** — Topology fixed to the real THAT2180 current-in/current-out
 > device (was wrongly modelled as a differential voltage VCA with no output op-amp).
