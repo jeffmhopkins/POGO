@@ -1,5 +1,5 @@
 * POGO block-7 — SVF SUM_AMP inverting virtual-ground summer (HP tap node)
-* CLAIM (aux-ota-c-svf §SUM_AMP; spec §2): the SUM_AMP is an inverting summing amp whose
+* CLAIM (aux/filter/ota-c-svf §SUM_AMP; spec §2): the SUM_AMP is an inverting summing amp whose
 * (+) input is at GND, so its (−) node is a VIRTUAL GROUND (≈0 V), and its output is
 *   HP_inv = −(x·R_f/R_in + Qfb·R_f/R_FB)
 * With the block-7 netlist values R_in = R_FB = R_f = 100 kΩ (nets R30/R31 R_in,

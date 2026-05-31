@@ -99,19 +99,18 @@ POGO/
 │   ├── module-overview.md        ← Signal chain, power budget, quick reference
 │   ├── components.yaml           ← Per-ref DESIGN manifest (ref → block → board → part → fn)
 │   │
-│   ├── aux/                      ← Circuit design library (shared building blocks)
-│   │   ├── aux-ota-c-svf.md       ← OTA-C SVF core (LP, HP, BP)
-│   │   ├── aux-expo-converter.md  ← THAT340 V/oct expo converter
-│   │   ├── aux-q-control.md       ← LM13700 Iabc resonance control
-│   │   ├── aux-vca-cell.md        ← THAT 2180 VCA cell
-│   │   ├── aux-unity-buffer.md    ← TL072/LM4562 unity-gain buffer
-│   │   ├── aux-distortion.md      ← SC/HC/WF cells + CD4053 mux
-│   │   ├── aux-attenuverter.md    ← Bipolar pot + inverter
-│   │   ├── aux-mod-bus-core.md    ← Inverting summer + inverter
-│   │   ├── aux-lfo-core.md        ← Triangle oscillator core
-│   │   ├── aux-cv-protection.md   ← 100Ω + BAT54S clamp
-│   │   └── aux-power-filter.md    ← Board power filtering
-│   │   (ASCII schematics in each .md; no SVG files)
+│   ├── aux/                      ← Circuit design LIBRARY (typed, sim-verified building blocks)
+│   │   ├── _LIBRARY.md           ← index: taxonomy + layering (primitive→composed) + how to add
+│   │   ├── filter/               ← gm-c-integrator, voct-expo-divider (primitives);
+│   │   │                            ota-c-svf, expo-converter, q-control (composed)
+│   │   ├── vca/                  ← vca-cell, ref-injection-trim
+│   │   ├── distortion/           ← overview (parallel paths + CD4053 mux); soft-clip, hard-clip, wavefolder
+│   │   ├── modulation/           ← inverting-summer, schmitt-trigger (primitives);
+│   │   │                            lfo-core, mod-bus-core, attenuverter (composed)
+│   │   ├── utility/              ← unity-buffer, cv-protection, power-filter, output-buffer, clip-detector
+│   │   └── led/                  ← led-breathing (NPN current-source brightness driver)
+│   │   (each aux = <type>/<name>/spec.md + sim/*.cir + sim/*.expect.yaml; ASCII schematics, no SVG.
+│   │    sim decks are hardcoded-value library checks — no netlist_bind — run by build_spice.py --check.)
 │   │
 │   ├── block-A/spec.md           ← Input Buffers (OPA1612, BAT54S clamp)
 │   ├── block-1/spec.md           ← Pre-Gain (OPA1612, 1×/5× switch + ALT path)
@@ -260,7 +259,7 @@ Pointer only — do NOT hand-maintain a table here. The component set is the gen
 `specs/STATUS.md`. (Refs are authored in `specs/components.yaml`, globally unique within board.)
 ```
 
-## aux/ Library Template (`specs/aux/aux-name.md`)
+## aux/ Library Template (`specs/aux/<type>/<name>/spec.md`)
 
 ```markdown
 # aux: [Circuit Name]

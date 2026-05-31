@@ -1,5 +1,7 @@
 # aux: Bandpass Distortion Circuit (SC / HC / WF)
 
+**Type:** `distortion` · part of the [aux circuit library](../../_LIBRARY.md)
+
 > ✅ **Re-verified 2026-05-30** against the locked plugin (change 0018). Corrected for: distortion
 > runs **BEFORE** the bandpass SVF (per band); **per-band** mode select (BP1/2/3_DIST_MODE), not
 > global; DRIVE is a **THAT2180 VCA** per band (not a passive pot); no oversampling.
@@ -9,7 +11,7 @@ Design status: [ ] draft → [ ] reviewed → [ ] validated on prototype
 ## Overview
 
 Per BP group, the band signal passes through a variable **DRIVE VCA** (THAT2180, see
-aux-vca-cell) into three parallel distortion sub-circuits — soft clip (SC), hard clip (HC),
+aux/vca/vca-cell) into three parallel distortion sub-circuits — soft clip (SC), hard clip (HC),
 and wavefold (WF) — with a CD4053 analog multiplexer selecting the active mode. The distortion
 sits **before** the bandpass SVF (the plugin reorders distortion ahead of the resonator, change
 0017/0018), so each band distorts its drive signal and the SVF then filters the result. All
@@ -181,7 +183,7 @@ range.
 
 Because distortion now runs **before** the SVF, the BP3_L/R_OUT jacks tap the **post-SVF**
 band-3 output (the v1/bandpass node, after DIST3→SVF3), pre output-mix — matching the plugin's
-`bandpassL/R.prevOut[2]`. Route a buffered tap (aux-unity-buffer, G=+1) from band 3's SVF
+`bandpassL/R.prevOut[2]`. Route a buffered tap (aux/utility/unity-buffer, G=+1) from band 3's SVF
 output to the BP3_OUT jacks; the BP3_R jack normals to BP3_L when unpatched.
 
 ## Component Values (POGO-specific)
@@ -203,7 +205,7 @@ output to the BP3_OUT jacks; the BP3_R jack normals to BP3_L when unpatched.
 | R_g | Resistor | 0603 | 10 kΩ | WF folder (−) input R |
 | R_f | Resistor | 0603 | 10 kΩ | WF folder feedback R; R_g = R_f for G=+2 |
 | D_WF_1..4 | 1N4148W | SOD-123 | — | WF clamp diodes: 4 per path (2 per polarity → Vth = ±1.4V) |
-| U_DRIVE_VCA | THAT2180 (SIP-8) | — | — | Per-band DRIVE VCA (one stereo cell per group; see aux-vca-cell). 2/band → 6 total (U85–U90) |
+| U_DRIVE_VCA | THAT2180 (SIP-8) | — | — | Per-band DRIVE VCA (one stereo cell per group; see aux/vca/vca-cell). 2/band → 6 total (U85–U90) |
 | U_DRIVE_IV | TL074 | SOIC-14 | — | DRIVE VCA I/V converter + summer (U91–U93, one per band) |
 | RV_DRIVE_OFS | Bourns 3224W | SMD | 500 Ω | DRIVE VCA Ec+ unity-gain offset trim (per channel: RV51–RV56) |
 | C_VCC, C_VEE | Ceramic bypass | 0603 | 100 nF | Per CD4053 and op-amp supply pin |

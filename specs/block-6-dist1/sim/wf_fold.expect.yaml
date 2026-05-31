@@ -1,6 +1,6 @@
 deck: wf_fold.cir
 description: "WF folder reflection (the signature wavefold check): V_out = 2*V_clamp - V_fold_in via a non-inverting G=+2 stage (R25/R_f_wf = 10k, 1+R_f/R_g = 2). Below the ±1.4V clamp Vth V_clamp=V_fold_in so V_out=V_in (slope +1); above Vth V_clamp pins at +1.4 so V_out=2.8-V_in (slope -1) — TRUE slope reversal, not gain compression. The ±1.4V Vth is DOCUMENTARY/[NV] (set by the 2×1N4148W-per-rail passive clamp diode part numbers, NOT a bindable resistor) → it is NOT bound; only the folder GAIN RATIO (R25/R_f_wf) is netlist_bound, so this deck FAILS if the +2 ratio is wrong, not merely if the clamp moves."
-plugin_ref: "plugin/src/dsp/Distortion.hpp:18-25 wavefold — V_out = 2*V_clamp - V_in, Vth=0.28 (=±1.4V/5V); aux-distortion.md §WF V_out=2×V_clamp−V_in (R_g=R_f=10k → G=+2)"
+plugin_ref: "plugin/src/dsp/Distortion.hpp:18-25 wavefold — V_out = 2*V_clamp - V_in, Vth=0.28 (=±1.4V/5V); aux/distortion/overview/spec.md §WF V_out=2×V_clamp−V_in (R_g=R_f=10k → G=+2)"
 # NETLIST BINDING: the folder ratio R_g:R_f = R25_1L:R_f_wf_1L = 10k:10k pins the +2 stage.
 # If either drifted, (1+R_f/R_g) ≠ 2 and the fold reflection point moves → the assertions below fail.
 # The ±1.4V clamp Vth is set by diode PART NUMBERS (1N4148W), unbindable → NOT in netlist_bind (honest).

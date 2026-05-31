@@ -1,5 +1,7 @@
 # aux: Mod Bus Core (Processor: Scale + Offset + Clamp)
 
+**Type:** `modulation` · part of the [aux circuit library](../../_LIBRARY.md)
+
 > ✅ **Re-verified 2026-05-30** against the locked plugin (change 0018). Source is the MOD_SRC
 > 3-way switch (LFO1 / LFO2 / External), not an LFO1 auto-normal; the 3 MOD indicator LEDs are
 > removed (no plugin/panel backing); distribution feeds **18** attenuverter destinations.

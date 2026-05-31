@@ -1,5 +1,5 @@
 * POGO block-4 VCA — THAT2180 dB-law SHAPE: equal Ec+ steps -> equal dB steps, unity at Ec+=0
-* CLAIM (spec §2 Gain Law; aux-vca-cell.md §THAT 2180 Gain Law; VcaBlock.hpp:26-27):
+* CLAIM (spec §2 Gain Law; aux/vca/vca-cell/spec.md §THAT 2180 Gain Law; VcaBlock.hpp:26-27):
 *   The plugin gain index is exponential: G = 10^(2*(control-1)) = G_dB = 40*(control-1).
 *   The hardware THAT2180 realizes this as a true dB-law: G_dB = Ec+/(6.1 mV/dB), i.e. equal
 *   Ec+ voltage steps produce EQUAL dB output steps (log-linearity), anchored to UNITY at Ec+=0.

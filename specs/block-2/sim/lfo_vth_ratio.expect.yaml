@@ -1,6 +1,6 @@
 deck: lfo_vth_ratio.cir
 description: block-2 LFO triangle peak — V_pk/V_sat = R7/(R5+R7) = 82/182 = 0.4505 (the Schmitt hysteresis threshold sets the triangle amplitude). With V_sat~=11 V this is V_H=4.96 V ~= the +/-5 V triangle. Absolute +/-5 V is [NV] (depends on V_sat); the RATIO is pinned by R5,R7.
-plugin_ref: "plugin/src/dsp/LFO.hpp:20 — unit triangle -> +/-5 V output; analog V_H=V_sat*R7/(R5+R7) per spec block-2 §3 line 239 / aux-lfo-core lines 108-112"
+plugin_ref: "plugin/src/dsp/LFO.hpp:20 — unit triangle -> +/-5 V output; analog V_H=V_sat*R7/(R5+R7) per spec block-2 §3 line 239 / aux/modulation/lfo-core lines 108-112"
 netlist_bind:  # the threshold ratio is set entirely by the Schmitt divider R5/R7
   R_FB_SQ: "R5=100k"
   R_HYS:   "R7=82k"

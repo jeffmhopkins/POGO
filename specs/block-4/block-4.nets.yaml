@@ -3,7 +3,7 @@
 # Source of truth, transcribed from:
 #   specs/components.yaml  (block-4 rows; BOM authoritative)
 #   components/parts/that2180/datasheet.pdf (Doc 600029 Rev 02, Table 1 pinout)
-#   specs/aux/aux-vca-cell.md, specs/block-4/spec.md
+#   specs/aux/vca/vca-cell/spec.md, specs/block-4/spec.md
 #   plugin/src/dsp/VcaBlock.hpp  (G = 10^(2*(control-1)); control from AMT + CV + OFS)
 #   plugin/src/Pogo.cpp:387-389 (main VCA), :439-441 (ALT VCA -> BP3)
 #

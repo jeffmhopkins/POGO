@@ -1,5 +1,7 @@
 # aux: OTA-C State Variable Filter (2-Pole)
 
+**Type:** `filter` · part of the [aux circuit library](../../_LIBRARY.md)
+
 > ✅ **Re-verified 2026-05-30** (content rewritten 2026-05-29) against the locked plugin via
 > block-5 (LP1) and block-6 (BP). The 2-pole OTA-C SVF core matches the plugin's Simper 2-pole
 > SVF. The BP-bank "4-pole-vs-2-pole" question is **RESOLVED: 2-pole** (the plugin BP is a single
@@ -67,7 +69,7 @@ Normalized second-order SVF (s-domain, continuous-time analog prototype):
 
 ```
 ω₀ = g_m / C        (integrator unity-gain frequency)
-Q  = 52mV / (Iabc_q × R_in)   (see aux-q-control)
+Q  = 52mV / (Iabc_q × R_in)   (see aux/filter/q-control)
 
 H_LP(s) =        ω₀²
           ──────────────────────

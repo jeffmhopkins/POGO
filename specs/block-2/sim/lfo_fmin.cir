@@ -1,5 +1,5 @@
 * POGO block-2 LFO slow endpoint — rate-divider floor k_min (op, NOT a 21 s .tran)
-* CLAIM (spec block-2 §3 lines 226-228; aux-lfo-core lines 236):
+* CLAIM (spec block-2 §3 lines 226-228; aux/modulation/lfo-core lines 236):
 *   f scales linearly with the rate-pot wiper fraction k (drive-attenuator topology):
 *     f = k * f_max.
 *   The slow endpoint is set by the divider floor when the wiper is at the bottom:

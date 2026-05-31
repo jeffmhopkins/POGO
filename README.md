@@ -115,17 +115,17 @@ POGO/
 │   ├── analog-design-review.md    ← Trim pots, parts availability, noise analysis
 │   │
 │   ├── aux/                       ← Circuit design library (shared building blocks)
-│   │   ├── aux-ota-c-svf.md       ← OTA-C SVF (LM13700M + OPA1612 SUM_AMP)
-│   │   ├── aux-expo-converter.md  ← THAT340S14-U V/oct expo converter
-│   │   ├── aux-q-control.md       ← LM13700 resonance control
-│   │   ├── aux-vca-cell.md        ← THAT 2180 VCA cell
-│   │   ├── aux-unity-buffer.md    ← Unity-gain buffer
-│   │   ├── aux-distortion.md      ← SC/HC/WF cells + CD4053 mux
-│   │   ├── aux-attenuverter.md    ← Bipolar pot + inverter (mod bus destinations)
-│   │   ├── aux-mod-bus-core.md    ← Inverting summer + distribution buffer
-│   │   ├── aux-lfo-core.md        ← Triangle oscillator core
-│   │   ├── aux-cv-protection.md   ← 100Ω + BAT54S clamp
-│   │   └── aux-power-filter.md    ← Board power filtering
+│   │   ├── aux/filter/ota-c-svf/spec.md       ← OTA-C SVF (LM13700M + OPA1612 SUM_AMP)
+│   │   ├── aux/filter/expo-converter/spec.md  ← THAT340S14-U V/oct expo converter
+│   │   ├── aux/filter/q-control/spec.md       ← LM13700 resonance control
+│   │   ├── aux/vca/vca-cell/spec.md        ← THAT 2180 VCA cell
+│   │   ├── aux/utility/unity-buffer/spec.md    ← Unity-gain buffer
+│   │   ├── aux/distortion/overview/spec.md      ← SC/HC/WF cells + CD4053 mux
+│   │   ├── aux/modulation/attenuverter/spec.md    ← Bipolar pot + inverter (mod bus destinations)
+│   │   ├── aux/modulation/mod-bus-core/spec.md    ← Inverting summer + distribution buffer
+│   │   ├── aux/modulation/lfo-core/spec.md        ← Triangle oscillator core
+│   │   ├── aux/utility/cv-protection/spec.md   ← 100Ω + BAT54S clamp
+│   │   └── aux/utility/power-filter/spec.md    ← Board power filtering
 │   │
 │   ├── block-A/spec.md            ← Input Buffers (OPA1612, BAT54S clamp)
 │   ├── block-1/spec.md            ← Pre-Gain (OPA1612, 1×/5× switch + ALT path)

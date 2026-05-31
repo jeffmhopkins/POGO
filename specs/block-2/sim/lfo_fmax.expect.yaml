@@ -1,6 +1,6 @@
 deck: lfo_fmax.cir
 description: block-2 LFO HEADLINE — the integrator+Schmitt relaxation oscillator runs at f_max = 20 Hz at full rate drive (k=1), matching plugin speedHz=0.05*400^1. Real hysteretic .tran osc; period measured between zero-crossings. V_sat cancels (V_H scales with it).
-plugin_ref: "plugin/src/dsp/LFO.hpp:16 — speedHz=0.05*400^param -> 20 Hz at param=1; analog f=(R5+R7)/(4*R7*R_INT*C_INT) per specs/aux/aux-lfo-core.md + spec block-2 §2 line 67"
+plugin_ref: "plugin/src/dsp/LFO.hpp:16 — speedHz=0.05*400^param -> 20 Hz at param=1; analog f=(R5+R7)/(4*R7*R_INT*C_INT) per specs/aux/modulation/lfo-core/spec.md + spec block-2 §2 line 67"
 netlist_bind:  # f_max is pinned by all four passives; any drift moves f outside 5%
   R_INT:   "R1=590k"
   R_FB_SQ: "R5=100k"

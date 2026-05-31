@@ -2,8 +2,8 @@
 #
 # Source of truth for connectivity, transcribed from:
 #   specs/block-A/spec.md        (signal routing, protection network, R normalling)
-#   specs/aux/aux-unity-buffer.md (Variant A non-inverting follower, OPA1612)
-#   specs/aux/aux-cv-protection.md (100Ω + BAT54S clamp; CRITICAL pin orientation)
+#   specs/aux/utility/unity-buffer/spec.md (Variant A non-inverting follower, OPA1612)
+#   specs/aux/utility/cv-protection/spec.md (100Ω + BAT54S clamp; CRITICAL pin orientation)
 #
 # Consumed by tools/generate_schematic.py -> kicad/pogo-block-A.kicad_sch
 # Connectivity is name-based: each net lists REF.PIN connection points; the

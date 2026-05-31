@@ -1,5 +1,7 @@
 # Standard CV / Audio Input Protection Circuit
 
+**Type:** `utility` · part of the [aux circuit library](../../_LIBRARY.md)
+
 > ✅ **Re-verified 2026-05-30** (change 0018). 100Ω + BAT54S clamp; tip-switch normalling pattern.
 
 Applied to **every** jack input on POGO (audio in, CV in, override jacks, mod source jack).

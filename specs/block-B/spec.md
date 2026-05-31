@@ -86,7 +86,7 @@ with the input impedance of the downstream module (typically 100 kΩ), resulting
 a −0.087 dB attenuation (100k/(100k+1k) = 0.990×), negligible in practice. The DSP clamp at ±11 V maps cleanly
 to the TL072 output swing.
 
-→ References `aux/aux-unity-buffer.md`
+→ References `aux/utility/unity-buffer/spec.md`
 
 ---
 
@@ -151,7 +151,7 @@ near the LFO output stage, but are logically Block B's responsibility.
 - 2× TL072CDT (U_MAIN, U_BP3, dual SOIC-8): ~2.6 mA each = ~5 mA  (TI: 1.3 mA/ch × 2 at ±12V)
 - **+12V: ~5 mA | −12V: ~5 mA**
 
-→ References `aux/aux-unity-buffer.md` for the op-amp follower ASCII schematic (no SVGs in aux/).
+→ References `aux/utility/unity-buffer/spec.md` for the op-amp follower ASCII schematic (no SVGs in aux/).
 
 ---
 

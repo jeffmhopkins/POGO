@@ -1,6 +1,6 @@
 deck: iv_unity.cir
 description: "[NV-free] VCA transimpedance I/V is unity (−1) at 0 dB — pure resistor ratio −(R_f/R_in)=−(20k/20k); THAT2180 0-dB current gain is unity by definition so the 6.1 mV/dB constant cancels. Also pins the current-input/virtual-ground (Z_in≈R_in=20k)."
-plugin_ref: "plugin/src/dsp/VcaBlock.hpp:28 — return v*G (G=1 at control=1, 0 dB); spec/block-4 §2 Audio path: AUDIO_OUT=−I_out·R_f, R_f=R_in → −1; aux-vca-cell.md §Transfer Function"
+plugin_ref: "plugin/src/dsp/VcaBlock.hpp:28 — return v*G (G=1 at control=1, 0 dB); spec/block-4 §2 Audio path: AUDIO_OUT=−I_out·R_f, R_f=R_in → −1; aux/vca/vca-cell/spec.md §Transfer Function"
 netlist_bind:  # deck literals must equal the live block-4.nets.yaml values
   R_in: "R7=20k"
   R_f: "R40=20k"

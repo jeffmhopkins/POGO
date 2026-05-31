@@ -191,7 +191,7 @@ Items 1 and 3 below are intentional DSP advantages kept by design. Item 2 is now
    pot position. No calibration trimmer is specified in Phase 3R for LFO rate — this is
    to be confirmed in Phase 3R design review.
 
-→ References `aux/aux-lfo-core.md`
+→ References `aux/modulation/lfo-core/spec.md`
 
 ---
 
@@ -302,7 +302,7 @@ low-noise audio board ground plane. Rate pots and LEDs are on the control/panel 
 LFO output series resistors (R_LFO1, R_LFO2, 1 kΩ) logically belong to Block B's
 output protection but are physically placed on the utility board near the LFO outputs.
 
-→ References `aux/aux-lfo-core.md` for detailed integrator + Schmitt trigger schematic.
+→ References `aux/modulation/lfo-core/spec.md` for detailed integrator + Schmitt trigger schematic.
 
 ---
 

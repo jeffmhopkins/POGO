@@ -65,7 +65,7 @@ LP1 is swept above LP2.
 
 ### Transfer function (analog prototype)
 
-Identical to LP1 (see `aux/aux-ota-c-svf.md`):
+Identical to LP1 (see `aux/filter/ota-c-svf/spec.md`):
 
 ```
 H_LP(s) =        ω₀²
@@ -82,7 +82,7 @@ I_abc_q → 0       → Q → ∞    (self-oscillation)
 ```
 
 **Accepted Q_min deviation:** DSP Q_min = 0.5 at resParam = 0; hardware Q_min = 0.70 (Butterworth).
-See LP1 and `aux/aux-q-control.md` §Q_min deviation for full discussion.
+See LP1 and `aux/filter/q-control/spec.md` §Q_min deviation for full discussion.
 
 ### Cascaded response (LP1 + HP + LP2)
 
@@ -101,7 +101,7 @@ passband. This is a useful configuration for narrow-band spectral shaping downst
 LP2 Q uses cell B of U9/U10 — the same LM13700 packages whose cell A provides LP1 Q.
 This means LP1 and LP2 Q cells are on the same die; their I_abc_q signals are independently
 driven by separate IRES_AMP circuits. Thermal coupling between cells A and B is negligible at the
-operating Iabc (<1 µA, <10 µW per cell). See `aux/aux-q-control.md` §LM13700 Cell Sharing.
+operating Iabc (<1 µA, <10 µW per cell). See `aux/filter/q-control/spec.md` §LM13700 Cell Sharing.
 
 ### Independent EXPO_LP2 converter
 
@@ -110,7 +110,7 @@ is required because LP2's default +2V offset means that the two filters are typi
 at different points on the expo curve simultaneously. If they shared an expo converter, trimming
 RV_REF for one would detune the other.
 
-See `aux/aux-expo-converter.md` for full EXPO topology and calibration procedure.
+See `aux/filter/expo-converter/spec.md` for full EXPO topology and calibration procedure.
 
 ### No stereo tilt
 

@@ -2,7 +2,7 @@
 #
 # Source of truth, transcribed from:
 #   specs/components.yaml (block-8 rows; BOM authoritative, refs exact)
-#   specs/block-8/spec.md (§2-§4) ; aux-ota-c-svf / aux-q-control / aux-expo-converter
+#   specs/block-8/spec.md (§2-§4) ; aux/filter/ota-c-svf / aux/filter/q-control / aux/filter/expo-converter
 #   datasheet-corrected pinouts: kicad_common.py sym_lm13700 / sym_that340 / sym_opa1612
 #
 # Structure = LP1 (block-5) MINUS the stereo tilt: a SINGLE shared expo (U60) drives

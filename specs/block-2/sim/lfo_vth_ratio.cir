@@ -1,5 +1,5 @@
 * POGO block-2 LFO — Schmitt threshold ratio sets the +/-5 V triangle (.tran)
-* CLAIM (spec block-2 §3 lines 238-243; aux-lfo-core lines 108-112):
+* CLAIM (spec block-2 §3 lines 238-243; aux/modulation/lfo-core lines 108-112):
 *   The triangle peak equals the Schmitt hysteresis threshold:
 *     V_H = V_sat * R7/(R5+R7) = V_sat * 82k/182k = 0.4505 * V_sat.
 *   With V_sat ~= 11 V this gives V_H = 4.96 V ~= the target +/-5 V triangle (plugin

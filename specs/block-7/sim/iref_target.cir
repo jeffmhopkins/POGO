@@ -4,7 +4,7 @@
 *   (Iabc ≈ 9.69µA, R_total ≈ 1238k, ~47.6% pot travel) sits INSIDE 20–80% of the pot range.
 * [NV] — the absolute I_ref in µA is THAT340-bias-dependent (V_ref / V_BE), so this deck checks
 *   the R_total RANGE / trim authority (that the calibration target is reachable), NOT the
-*   absolute Iabc. (aux-expo-converter §"Trim Pots": R_total range 1000k–1500k, all block targets
+*   absolute Iabc. (aux/filter/expo-converter §"Trim Pots": R_total range 1000k–1500k, all block targets
 *   within 20–80% travel; block-7 target 9.69µA at 0V CV -> RV_REF ≈ 238k.)
 * Model: 3 PARALLEL instances. R_total = R109(1M) + RV16 (0 / 238k / 500k). Drive 1V through
 *   R_total to a 0V sense source; R_total_k = 0.001/i(Vsense) reads R_total directly in kΩ.

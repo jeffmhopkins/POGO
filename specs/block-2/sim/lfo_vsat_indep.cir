@@ -1,5 +1,5 @@
 * POGO block-2 LFO — frequency is V_sat-INDEPENDENT (.tran ratio, PARALLEL instances)
-* CLAIM (spec block-2 §2 lines 67-73; aux-lfo-core lines 99-102):
+* CLAIM (spec block-2 §2 lines 67-73; aux/modulation/lfo-core lines 99-102):
 *   f = (R5+R7)/(4*R7*R_INT*C_INT) contains NO V_sat term: the Schmitt threshold
 *     V_H = V_sat*R7/(R5+R7) scales WITH V_sat, so V_sat cancels in
 *     f = V_sat/(4*V_H*R_INT*C_INT). Hence two copies of the SAME oscillator run at the

@@ -3,7 +3,7 @@
 # Source of truth, transcribed from:
 #   specs/components.yaml  (block-1 rows; BOM authoritative)
 #   specs/block-1/spec.md §1 (panel-verified intent) + §3 (path-select topology)
-#   specs/aux/aux-unity-buffer.md, specs/aux/aux-cv-protection.md
+#   specs/aux/utility/unity-buffer/spec.md, specs/aux/utility/cv-protection/spec.md
 #   plugin/src/dsp/PreGain.hpp, Pogo.cpp (1x = bypass; 5x = clamp(5*Vin))
 #
 # Topology: non-inverting amp, G = 1 + R_f/R_g = 1 + 18k/4.7k = 4.83x (~5x).
@@ -18,7 +18,7 @@
 # Reconciliations applied to components.yaml (BOM truth) alongside this netlist:
 #  - R3-R6 given qty:2 (were unqty'd despite "x2 ch" fn + §4 Qty=2).
 #  - ALT inputs J3/J4 now get block-A-style protection (R38/R39 100Ω + D8/D9
-#    BAT54S), per aux-cv-protection "every jack input". (User-approved.)
+#    BAT54S), per aux/utility/cv-protection "every jack input". (User-approved.)
 
 block: block-1
 board: audio

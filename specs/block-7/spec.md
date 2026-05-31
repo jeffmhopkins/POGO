@@ -56,7 +56,7 @@ DSP return value:      -(x - k*v1 - v2)         = HP_inv   ✓ same polarity
 This mirrors LP1 exactly: there `LPFilter` returns un-negated `+v2` and the hardware uses a unity
 follower on v2. (An earlier HP revision used a G=−1 *inverting* buffer here, which double-inverted
 and made HP_OUT phase-opposite the plugin — corrected in change 0018; R100–R103 removed.) See
-`aux/aux-ota-c-svf.md` §SUM_AMP Inversion and HP Polarity.
+`aux/filter/ota-c-svf/spec.md` §SUM_AMP Inversion and HP Polarity.
 
 ### Transfer function (analog prototype)
 
@@ -115,7 +115,7 @@ The plugin pre-negates so its return equals the SUM_AMP output node; the unity f
 that node through unchanged → hardware HP_OUT matches the plugin exactly. (No second inversion —
 the earlier G=−1 buffer was a double-inversion bug, fixed in change 0018.)
 
-See `aux/aux-ota-c-svf.md`, `aux/aux-expo-converter.md`, `aux/aux-q-control.md`.
+See `aux/filter/ota-c-svf/spec.md`, `aux/filter/expo-converter/spec.md`, `aux/filter/q-control/spec.md`.
 
 ---
 

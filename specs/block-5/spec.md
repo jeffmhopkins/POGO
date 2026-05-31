@@ -60,7 +60,7 @@ I_abc_ref = g_m_ref × 2·V_T = 186.3µS × 52mV = 9.69 µA
 
 ### Transfer function (analog prototype)
 
-Second-order lowpass (see `aux/aux-ota-c-svf.md`):
+Second-order lowpass (see `aux/filter/ota-c-svf/spec.md`):
 
 ```
 H_LP(s) =        ω₀²
@@ -91,7 +91,7 @@ I_abc_q → 0       → Q → ∞   (self-oscillation)
 - Q_max: the plugin self-oscillates (Q → 2000, a playable 1 V/oct-tracking sine — see §1).
   Hardware **must reach self-oscillation to match the plugin**: as V_res rises, Iabc_q → 0
   and Q → ∞. The "~50" figure is the Q at the *onset* of sustained oscillation (Iabc_q
-  < 0.01 µA, aux-q-control.md), **not** a ceiling. `RV5` (RV_QMAX) trims V_bias so that
+  < 0.01 µA, aux/filter/q-control/spec.md), **not** a ceiling. `RV5` (RV_QMAX) trims V_bias so that
   full-CW RES lands just past the self-oscillation onset (clean, stable sine). There is
   **no intentional Q cap** — an earlier "Q limited to ~50 for stability" note was wrong
   and is superseded; capping at Q≈50 would be a real behavioral divergence from the plugin.
@@ -135,13 +135,13 @@ expo base receives V_freq − V_tilt → `f_L`/`f_R` diverge by ±V_tilt octaves
 accurate). `RV6` (RV_LP1_TILT_NULL) nulls the center-detent L/R mismatch. The earlier
 "single shared THAT340 with per-channel V_ctrl summers" description was electrically
 impossible (one transistor base cannot hold two control voltages) and is superseded;
-`aux/aux-expo-converter.md` flagged this as the Phase-3R decision, now resolved.
+`aux/filter/expo-converter/spec.md` flagged this as the Phase-3R decision, now resolved.
 
 Note: the LM13700 integrator Darlington output buffers (used as the v1/v2 state-variable
 outputs) require emitter pulldown resistors to V− (R68–R71, 10 kΩ) — added 2026-05-29; the
 prior spec/BOM omitted them, which would have left the buffers unable to sink current.
 
-See `aux/aux-ota-c-svf.md`, `aux/aux-expo-converter.md`, `aux/aux-q-control.md`.
+See `aux/filter/ota-c-svf/spec.md`, `aux/filter/expo-converter/spec.md`, `aux/filter/q-control/spec.md`.
 
 ### ALT path bypass
 
@@ -196,7 +196,7 @@ linear range from ±26 mV to ±(26mV + I_abc × 1kΩ/2) ≈ ±31 mV at 10 µA.
 **I_ref network R_IREF_A + RV_REF:** 1 MΩ (R_IREF_A, fixed 0603) in series with 500 kΩ (RV_REF, rheostat)
 gives R_total 1000 kΩ–1500 kΩ, midpoint 1250 kΩ at pot center → I_ref ≈ 9.6 µA.
 Calibration target 9.69 µA requires R_total = 1238 kΩ → RV_REF ≈ 238 kΩ (47.6% of travel).
-Covers worst-case component stack (R_IREF_A ±5% + C_int ±5%) within pot range. See aux-expo-converter.md.
+Covers worst-case component stack (R_IREF_A ±5% + C_int ±5%) within pot range. See aux/filter/expo-converter/spec.md.
 
 **Q control resistors R_Iabc:** 100 kΩ per channel (R57/R58; change 0020 §D/M5, was 1 MΩ) —
 converts the IRES_AMP output into I_abc_q across the LM13700 I_abc pin (≈ −10.8 V). With the
