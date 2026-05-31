@@ -1,0 +1,13 @@
+deck: vca_ecplus.cir
+description: VCA Ec+ unity trim — series rheostat (useless) vs §HIGH-3 voltage injection (change 0020)
+plugin_ref: "plugin/src/dsp/VcaBlock.hpp — unity at control=1; THAT2180 Ec+ ≈ +6.1 mV/dB"
+measurements:
+  - name: rheo_dB        # series rheostat into the high-Z Ec+ port: ~0 dB authority (the bug)
+    expect: 0.0
+    tol_abs: 0.05
+  - name: inj_hi_dB      # injection trim, wiper +end: ~+1.9 dB
+    expect: 1.91
+    tol_abs: 0.3
+  - name: inj_lo_dB      # injection trim, wiper -end: ~-2.1 dB (so the trim crosses 0 dB)
+    expect: -2.08
+    tol_abs: 0.3

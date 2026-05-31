@@ -17,19 +17,19 @@ future `tools/build_spice.py --check` becomes the 7th CI gate (advisory first, t
 
 | Stage | Change | State |
 |---|---|---|
-| Design + convention (this doc, dir layout, `.expect.yaml` schema) | **0021** | in progress |
-| `tools/build_spice.py` runner + migrate `specs/sim/` → per-block `sim/`; land gate **advisory** | 0022 (proposed) | not started |
+| Design + convention (this doc, dir layout, `.expect.yaml` schema) | **0021** | ✅ done (merged) |
+| `tools/build_spice.py` runner + migrate `specs/sim/` → per-block `sim/`; land gate **advisory** | **0022** | ✅ done (7 decks: block-3/4/5/6-mix) |
 | Author decks for all blocks; promote gate to **blocking**; graduate 0020 `[NV]` values | 0023 (proposed) | not started |
 
-## Meanwhile (interim, change 0020)
+## History (change 0020 → 0022)
 
-0020 validates its CV-conditioning fixes with **ad-hoc decks under `specs/sim/`** (flat scratch dir),
-run by hand with `ngspice -b`. These are the seed decks the 0022 runner will migrate into per-block
-`sim/` folders and wrap with `.expect.yaml` assertions. Already proved value: the first deck
-(`specs/sim/expo_voct.cir`) caught a 2.1× error in a proposed expo-divider value before it reached
-any netlist.
+0020 validated its CV-conditioning fixes with ad-hoc decks under a flat `specs/sim/` scratch dir
+(the first deck caught a 2.1× expo-divider value error before it reached any netlist — and SPICE went
+on to catch 5 bad values across the change). **Change 0022 migrated the keeper decks into per-block
+`sim/` folders with `.expect.yaml` assertions and landed the advisory `build_spice.py --check` gate;
+the flat scratch dir is gone.**
 
-## Convention (target)
+## Convention (now live)
 
 ```
 specs/block-N/sim/

@@ -1,0 +1,27 @@
+* POGO block-3 mod-bus — §H depth fix (change 0020; runner-ready 0022)
+* C2: the 100k R_SRC_NORM into the ~3.3k destination node throttled an unpatched
+* destination to ~3% of the bus. §H drops it -> jacks normal low-Z directly -> ~98%.
+* Honest before/after: the BUG existed with the ORIGINAL 10k attenuverters (V_src load ≈ 3.3k =
+* R_INV_IN 10k || pot-to-(-Vsrc) ~5k) and the 100k R_SRC_NORM -> ~3% depth. The §H FIX removes the
+* norm (low-Z normal) so depth is ~99% regardless of load (here shown with the ×5 hi-Z 16.3k load).
+
+.param Rprot=100
+
+Vbus bus 0 DC 5
+
+* --- BUGGY: 100k R_SRC_NORM into the ORIGINAL 3.3k destination load ---
+Rnorm bus nb 100k
+Rpb   nb vb {Rprot}
+Rlb   vb 0 3300
+
+* --- FIXED (§H): low-Z normal (no R_SRC_NORM) into the ×5 hi-Z 16.3k load ---
+Rpf bus vf {Rprot}
+Rlf vf 0 16300
+
+.control
+  op
+  let depth_bug = v(vb)/5.0 * 100      ; % of bus reaching an unpatched destination (buggy)
+  let depth_fix = v(vf)/5.0 * 100      ; % (fixed low-Z normal)
+  print depth_bug depth_fix
+.endc
+.end

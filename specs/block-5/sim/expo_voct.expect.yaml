@@ -1,0 +1,15 @@
+deck: expo_voct.cir
+description: LP1 expo V/oct base-divider slope + trim authority (change 0020 §A)
+plugin_ref: "plugin/src/dsp/LPFilter.hpp — f0 = f_ref·2^cutoffV (1 V/oct); analog base needs V_T·ln2 = 17.92 mV/oct"
+measurements:
+  # The 1V/oct trim must span 17.92 mV/oct (V_T·ln2) with the target centered, so there is
+  # authority both ways to absorb the Vishay TFPT +4110ppm tempco tolerance + component spread.
+  - name: mv_mid          # RV_1VOCT mid-rotation: must land ON the V_T·ln2 target
+    expect: 17.92
+    tol_pct: 3            # 17.89 measured — centered
+  - name: mv_lo           # CW end: above target (trim headroom)
+    expect: 19.65
+    tol_abs: 0.5
+  - name: mv_hi           # CCW end: below target (trim headroom)
+    expect: 16.42
+    tol_abs: 0.5

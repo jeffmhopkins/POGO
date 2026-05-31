@@ -1,0 +1,10 @@
+deck: modbus_depth.cir
+description: Mod-bus depth at an unpatched destination — §H fix (change 0020 C2)
+plugin_ref: "plugin/src/dsp/ModBus.hpp — applyDestination: source*att at full scale (~100% expected)"
+measurements:
+  - name: depth_bug      # 100k R_SRC_NORM into the original 3.3k node: ~3% (the C2 bug)
+    expect: 3.2
+    tol_abs: 0.5
+  - name: depth_fix      # §H low-Z normal: ~99% (near-full depth restored)
+    expect: 99.4
+    tol_abs: 1.0

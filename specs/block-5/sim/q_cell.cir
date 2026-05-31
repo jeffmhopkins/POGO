@@ -1,0 +1,27 @@
+* POGO Q-cell Iabc bias — §D/M5 (change 0020; runner-ready 0022)
+* The LM13700 amplifier-bias (Iabc) pin sits ~2·Vbe above V− (≈ −10.8V), NOT GND. So
+* Iabc = (V_ires − V_pin)/R_Iabc. BUG: R_Iabc=1M from ~0V → ~10.8µA (≈14× the ~0.74µA
+* the old spec assumed → Q pinned at min). FIX: R_Iabc=100k, V_ires driven negative near
+* the pin → controllable Iabc. Iabc is just the resistor current (no LM13700 model needed).
+* Applies to LP1 (block-5) cell A + LP2 cell B; mirrored in HP (block-7).
+
+.param Vpin=-10.8
+
+* --- BUGGY: 1M from V_ires=0 ---
+Vir_b nbug 0 DC 0
+Rbug nbug pinb 1e6
+Vpb pinb 0 DC {Vpin}
+
+* --- FIXED: 100k from V_ires=-10.73 (the Q≈0.7 Butterworth setpoint) ---
+Vir_f nfix 0 DC -10.73
+Rfix nfix pinf 100k
+Vpf pinf 0 DC {Vpin}
+
+.control
+  op
+  let iabc_bug_uA = i(Vpb)*1e6        ; buggy Iabc (µA) — should be ~10.8 (not the claimed 0.74)
+  let iabc_fix_uA = i(Vpf)*1e6        ; fixed Iabc (µA) at V_ires=-10.73 -> ~0.7µA
+  let q_fix = 0.052/(i(Vpf)*1e5)      ; resulting Q (R_in=100k): ~0.74 (Butterworth)
+  print iabc_bug_uA iabc_fix_uA q_fix
+.endc
+.end
