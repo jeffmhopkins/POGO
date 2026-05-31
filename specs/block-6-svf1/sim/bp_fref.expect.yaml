@@ -1,0 +1,10 @@
+deck: bp_fref.cir
+description: BP integrator f_ref — confirms the 68nF cap gives 400Hz (not a copied 47nF → ~582Hz)
+plugin_ref: "plugin/src/dsp/BandpassSVF.hpp:42 — F_REF = {400,400,400} Hz (all 3 bands)"
+measurements:
+  - name: fref_hz       # 68nF (the actual BP cap) → ~400 Hz, matching the plugin
+    expect: 400.0
+    tol_pct: 2
+  - name: f_if_47n      # contrast: a copied 47nF would mistune to ~582 Hz (the trap the review checked)
+    expect: 582.0
+    tol_pct: 3

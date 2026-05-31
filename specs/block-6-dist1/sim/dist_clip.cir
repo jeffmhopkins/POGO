@@ -1,0 +1,27 @@
+* POGO block-6-dist1 — distortion clip thresholds (runner-ready 0023)
+* Plugin (Distortion.hpp): HC clamp ±1.16 (normalized) = ±5.8V at the ×5 audio scaling
+*   (BZX84C5V1 5.1V + 1N4148 Vf 0.7V); WF/SC passive clamp Vth=0.28 = ±1.4V (2×1N4148/rail).
+* This deck drives each clamp hard and reads the clamped output voltage, confirming the analog
+* clamp levels match the plugin's normalized thresholds × 5V. Diodes ideal (Vf in the clamp B-source).
+
+* --- HC: back-to-back zeners, ±5.8V (= 5.1 zener + 0.7 fwd) ---
+Vhc hin 0 DC 10              ; drive well past clip
+Rhc hin hnode 1k
+Bhc hclip 0 V = (V(hnode)>5.8)?5.8:((V(hnode)<-5.8)?-5.8:V(hnode))
+Rhx hnode hclip 0.001        ; tie (ideal clamp output = limited node)
+
+* --- WF/SC: 2×1N4148 per rail, ±1.4V ---
+Vwf win 0 DC 10
+Rwf win wnode 1k
+Bwf wclip 0 V = (V(wnode)>1.4)?1.4:((V(wnode)<-1.4)?-1.4:V(wnode))
+Rwx wnode wclip 0.001
+
+.control
+  op
+  let hc_clip_V  = v(hclip)            ; ±5.8V expected (plugin ±1.16 × 5V)
+  let wf_clip_V  = v(wclip)            ; ±1.4V expected (plugin Vth 0.28 × 5V)
+  let hc_norm = v(hclip)/5.0           ; -> 1.16 (plugin hardClip clamp)
+  let wf_norm = v(wclip)/5.0           ; -> 0.28 (plugin wavefold Vth)
+  print hc_clip_V wf_clip_V hc_norm wf_norm
+.endc
+.end

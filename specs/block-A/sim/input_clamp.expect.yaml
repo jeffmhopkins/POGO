@@ -1,0 +1,10 @@
+deck: input_clamp.cir
+description: Block-A input buffer — unity follower + BAT54S over-voltage clamp
+plugin_ref: "plugin/src/dsp/InputBuffer.hpp — buffered input, ±11V clamp (op-amp swing); BAT54S to ±12V rails"
+measurements:
+  - name: unity        # OPA1612 unity follower
+    expect: 1.0
+    tol_abs: 0.001
+  - name: clamp_hi     # +17V over-drive → BAT54S clamps the protected node to ~+12.3V (rail+Vf)
+    expect: 12.3
+    tol_abs: 0.2

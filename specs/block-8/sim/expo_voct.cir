@@ -1,0 +1,29 @@
+* POGO block-8 — expo V/oct base-divider (change 0020 §A; runner-ready 0022)
+* Validates the V/oct base divider: series R_VOCT(49.9k) + RV_1VOCT(0..10k) wiper + Vishay
+* TFPT 1k tempco shunt to GND turns 1 V at the CV input into ~17.92 mV/oct (V_T·ln2) at the
+* THAT340 Q1 base, with the target centered mid-trim (±10% authority both sides).
+* Three parallel divider instances model RV at 0 / 5k / 10k; each base node is a named
+* measurement the runner reads via `print` ("<name> = value").
+
+Vf vin 0 DC 1
+* --- RV_1VOCT = 0 (CW end) ---
+Rva vin na 49900
+Rwa na nlo 0.001
+Rta nlo 0 1000
+* --- RV_1VOCT = 5k (mid) ---
+Rvb vin nb 49900
+Rwb nb nmid 5000
+Rtb nmid 0 1000
+* --- RV_1VOCT = 10k (CCW end) ---
+Rvc vin nc 49900
+Rwc nc nhi 10000
+Rtc nhi 0 1000
+
+.control
+  op
+  let mv_lo  = v(nlo)*1000
+  let mv_mid = v(nmid)*1000
+  let mv_hi  = v(nhi)*1000
+  print mv_lo mv_mid mv_hi
+.endc
+.end
