@@ -1,0 +1,33 @@
+* POGO block-5 LP1 — §B passive tilt sum at the expo base (change 0020; runner-ready 0022)
+* Once §A's tempco shunt makes the base low-Z, V_freq and ±V_tilt sum PASSIVELY at the base
+* through equal series Rs. With R_TILT = R_VOCT+RV_mid (54.9k) the tilt octave-weight matches
+* the freq octave-weight (≈17.57 mV/V each) -> NO op-amp summer needed. SPICE confirms freq-only
+* and tilt-only base sensitivities are equal; combined sums correctly.
+
+.param RVOCT=54900    ; R_VOCT(49.9k) + RV_1VOCT mid (5k)
+.param RTILT=54900
+.param RSH=1000       ; tempco shunt
+
+* freq-only: V_freq=1, V_tilt=0
+Vf1 vf1 0 DC 1
+Rvf1 vf1 bf 49900
+Rwf1 bf bfb 5000
+Rtf1 vt1 bfb 54900      ; tilt source (=0) path
+Vt1 vt1 0 DC 0
+Rshf bfb 0 1000
+
+* tilt-only: V_freq=0, V_tilt=1
+Vf2 vf2 0 DC 0
+Rvf2 vf2 bt 49900
+Rwf2 bt btb 5000
+Rtf2 vt2 btb 54900
+Vt2 vt2 0 DC 1
+Rsht btb 0 1000
+
+.control
+  op
+  let freq_mv = v(bfb)*1000      ; base mV per 1V of V_freq
+  let tilt_mv = v(btb)*1000      ; base mV per 1V of V_tilt — must ≈ freq_mv (1:1 octave weight)
+  print freq_mv tilt_mv
+.endc
+.end

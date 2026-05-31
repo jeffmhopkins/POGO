@@ -1,0 +1,13 @@
+deck: pregain.cir
+description: Block-1 pre-gain 5× stage — gain network + clip rail
+plugin_ref: "plugin/src/dsp/PreGain.hpp — GAIN=5: clamp(5×Vin, ±10.5V)"
+measurements:
+  - name: gain        # 1 + 18k/4.7k = 4.83× (≈5×; within tolerance of the plugin's 5×)
+    expect: 4.83
+    tol_abs: 0.05
+  - name: clip_hi     # +5V in → clamped at the +10.5V op-amp rail
+    expect: 10.5
+    tol_abs: 0.1
+  - name: clip_lo     # −5V in → clamped at the −10.5V rail
+    expect: -10.5
+    tol_abs: 0.1

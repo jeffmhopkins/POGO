@@ -1,0 +1,15 @@
+deck: voct_octave.cir
+description: HP end-to-end 1 V/oct expo tracking — f0 doubles per +1V CV (ratios at -3/0/+5 V)
+plugin_ref: "plugin/src/dsp/HPFilter.hpp:18 — f0 = F_REF*pow(2,cutoffV), F_REF=632; 1 V/oct"
+measurements:
+  # Ratios are NV-free (absolute Iref cancels), so DERIVED straight from 2^cutoffV.
+  - name: ratio_m3       # f0(-3V)/f0(0V) = 2^-3
+    expect: 0.125
+    tol_pct: 3
+  - name: ratio_p5       # f0(+5V)/f0(0V) = 2^+5
+    expect: 32.0
+    tol_pct: 3
+  # f0(0V) is printed for transparency only (depends on Iref); not load-bearing, loose tol.
+  - name: f0_0v          # 632*2^0 = 632 Hz at the chosen Iref
+    expect: 632.0
+    tol_pct: 5

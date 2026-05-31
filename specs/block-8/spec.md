@@ -1,7 +1,7 @@
 # Block 8: LP Filter 2
 Second independent 2-pole lowpass filter, after HP, for stacked or layered LP filtering with separate CV.
 
-DSP source: `plugin/src/dsp/LPFilter.hpp`, `plugin/src/Pogo.cpp` (lines 485–491)
+DSP source: `plugin/src/dsp/LPFilter.hpp`, `plugin/src/Pogo.cpp` (lines 486–492)
 
 ---
 
@@ -33,9 +33,11 @@ LP2's output feeds Block B (output buffers → MAIN_L/R jacks) directly.
 
 ## 2. Theoretical Design and Topology
 
-> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
-> It has not been verified against the current panel control set. Do not use for circuit
-> construction until re-verified. See `specs/STATUS.md` for current phase status.
+> ✅ **Re-verified 2026-05-30** against the locked plugin (change 0018). LP2 mirrors LP1
+> minus tilt: 2-pole Simper SVF, 632 Hz V/oct, self-oscillation, mono cutoff (single shared
+> expo). Output buffer is a **non-inverting** unity follower (matches LP2's un-negated v2 — no
+> polarity flip, unlike HP). Q via the shared U9/U10 cell B (hosted on block-5); boundary nets
+> pin-verified. No behavioral edits.
 
 ### DSP-to-analog mapping
 
@@ -94,9 +96,9 @@ When HP is active between LP1 and LP2, the combined LP1 + HP + LP2 response is a
 envelope: HP sets a lower cutoff; LP2 sets an upper cutoff; LP1 shapes the overall entry into the
 passband. This is a useful configuration for narrow-band spectral shaping downstream of the BP formant section.
 
-### IC_Q_AB sharing with LP1
+### Shared Q-VCAs (U9/U10) — sharing with LP1
 
-LP2 Q uses cell B of IC_Q_AB — the same LM13700 SOIC-16 package whose cell A provides LP1 Q.
+LP2 Q uses cell B of U9/U10 — the same LM13700 packages whose cell A provides LP1 Q.
 This means LP1 and LP2 Q cells are on the same die; their I_abc_q signals are independently
 driven by separate IRES_AMP circuits. Thermal coupling between cells A and B is negligible at the
 operating Iabc (<1 µA, <10 µW per cell). See `aux/aux-q-control.md` §LM13700 Cell Sharing.
@@ -120,9 +122,15 @@ output — identical to HP, simpler than LP1.
 
 ## 3. Physical Design
 
-> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
-> It has not been verified against the current panel control set. Do not use for circuit
-> construction until re-verified. See `specs/STATUS.md` for current phase status.
+> ✅ **Re-verified 2026-05-30** against the locked plugin (change 0018). Component values,
+> the shared U9/U10 cell-B Q boundary (hosted on block-5), the own IRES_AMP (U65), and the
+> non-inverting LP output follower verified consistent with §2 and the plugin. Doc-only pass.
+
+> 🔧 **Change 0020 (CV-conditioning fixes):** mirrors block-7 §A/§C/§D.
+> - **§A:** `R86` R_VOCT **47k→49.9k** + **Vishay TFPT 1k tempco** shunt (R230) LP2_EXPO_BASE→GND.
+> - **§C:** v1/v2 tap the **unbuffered** OTA outputs (pins 5/12); v2 drives the LP output buffer +
+>   R_FB from the clean cap node. Pulldowns R88–R91 removed.
+> - **§D:** `R80/R81` R_Iabc **1M→100k** (Iabc pin ≈ −10.8 V). IRES_AMP negative-drive = Phase-3R trim.
 
 ### Component derivations
 
@@ -139,9 +147,10 @@ At default +2V CV: I_abc = 9.69µA × 2² = 38.8 µA → f₀ = 2528 Hz ✓. C0G
 **Input resistors, SUM_AMP feedback, linearizing resistors, Q control:** Identical values to LP1
 (100 kΩ, 100 kΩ, 1 kΩ, 1 MΩ respectively). See LP1 derivations in block-5/spec.md §3.
 
-**LP2 does not produce an HP output used downstream** (output goes directly to Block B, LP output
-only). The SUM_AMP HP_inv output is unused; the G = −1 HP buffer can be omitted or left
-unpopulated on LP2. The TL072 half can be repurposed as an additional buffer or left spare.
+**LP2 does not expose an HP output** (output goes directly to Block B, LP output only — the
+plugin LP2 returns `v2`/LP only). The SUM_AMP's HP-tap node is used internally by the SVF loop
+but not routed anywhere; LP2 therefore has no HP output buffer at all (U58/U59 half B is the LP
+output follower). This matches the plugin.
 
 ### Calibration trim pots
 
@@ -163,20 +172,20 @@ Block HP out R  →  LP2_R SVF (SUM_AMP + OTA-B1 + OTA-B2)  →  LP2 out R  → 
 LP2_FREQ_PARAM (−5 to +5 V, default +2V) + LP2_FREQ_INPUT (attenuated by LP2_FREQ_ATT_PARAM)
   →  V_ctrl  →  EXPO_LP2  →  I_abc (shared L+R)
 
-LP2_RES_PARAM (0 to 1, default 0) + LP2_RES_INPUT / 10  →  IRES_AMP_LP2  →  I_abc_q via IC_Q_AB cell B
+LP2_RES_PARAM (0 to 1, default 0) + LP2_RES_INPUT / 10  →  IRES_AMP_LP2  →  I_abc_q via U9/U10 cell B
 ```
 
 ### Board assignment
 
 Audio board. LP2 should be placed between the HP output nodes and Block B. EXPO_LP2 (THAT340)
 is a separate IC from EXPO_LP1, placed adjacent to LP2's V_ctrl summing network.
-IC_Q_AB is shared with LP1 and should be placed between the two filter sections so traces to
+U9/U10 are shared with LP1 and should be placed between the two filter sections so traces to
 both cell A (LP1 Q) and cell B (LP2 Q) are of comparable length.
 
 ### Power Draw Estimate
 
 - 2× LM13700M (LP2 L/R integrators): ~4 mA × 2 = 8 mA  (TI: 4 mA typ per package)
-- (IC_Q_AB shared with block-5 — counted in block-5 power estimate, not here)
+- (U9/U10 shared with block-5 — counted in block-5's power estimate, not here)
 - 2× OPA1612 (SUM_AMP L/R, dual SOIC-8): 5.5 mA × 2 = 11 mA  (Iq = 2.75 mA/channel × 2 ch/IC)
 - 1× TL072CDT (IRES_AMP): ~3 mA  (TI: 1.4 mA/ch × 2 = 2.8 mA)
 - 1× THAT340S14-U (EXPO_LP2): ~1 mA
@@ -186,44 +195,10 @@ both cell A (LP1 Q) and cell B (LP2 Q) are of comparable length.
 
 ## 4. Component Requirements
 
-> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
-> It has not been verified against the current panel control set. Do not use for circuit
-> construction until re-verified. See `specs/STATUS.md` for current phase status.
+Component set: see the generated BOM `kicad/pogo-bom.csv` (rows with `Block = block-8`),
+sourced from `specs/components.yaml` (the per-ref design manifest) and enriched by the
+`components/` registry (MPN, footprint, datasheet). Verification status: `specs/STATUS.md`.
 
-| Ref | Part | Package | Value | Qty | Board | Block | Function |
-|---|---|---|---|---|---|---|---|
-| U_OTA_LP2_L | LM13700M | SOIC-16 | — | 1 | audio | block-8 | LP2 L-channel integrators (cells A+B = OTA-A1+OTA-A2) |
-| U_OTA_LP2_R | LM13700M | SOIC-16 | — | 1 | audio | block-8 | LP2 R-channel integrators (cells A+B = OTA-B1+OTA-B2) |
-| IC_Q_AB | LM13700M | SOIC-16 | — | (shared with block-5) | audio | block-5/8 | Q VCA shared: cell A = LP1 Q (L+R), cell B = LP2 Q (L+R) |
-| U_SUM_LP2_L | OPA1612 | SOIC-8 | — | 1 | audio | block-8 | L-ch: half A = SUM_AMP, half B = LP output buffer; 1.1 nV/√Hz |
-| U_SUM_LP2_R | OPA1612 | SOIC-8 | — | 1 | audio | block-8 | R-ch: half A = SUM_AMP, half B = LP output buffer; pin-compatible with TL072CDT |
-| U_IRES_LP2 | TL072CDT | SOIC-8 | — | 1 | audio | block-8 | Half A = IRES_AMP (Q control); half B = spare / utility |
-| EXPO_LP2 | THAT340S14-U | SOIC-14 | — | 1 | audio | block-8 | Expo V/oct converter; f_ref = 632 Hz; drives LP2 L+R Iabc; independent of EXPO_LP1 |
-| C1_L, C2_L | C0G cap | 0603 | 47 nF | 2 | audio | block-8 | LP2 L integrator caps (C0G/NP0 mandatory) |
-| C1_R, C2_R | C0G cap | 0603 | 47 nF | 2 | audio | block-8 | LP2 R integrator caps (C0G/NP0 mandatory) |
-| R_IN_L, R_IN_R | resistor | 0603 | 100 kΩ | 2 | audio | block-8 | SUM_AMP input resistors |
-| R_FB_L, R_FB_R | resistor | 0603 | 100 kΩ | 2 | audio | block-8 | SUM_AMP feedback / Q feedback input resistors |
-| R_LIN_A_L, R_LIN_B_L | resistor | 0603 | 1 kΩ | 2 | audio | block-8 | L-ch OTA linearizing resistors |
-| R_LIN_A_R, R_LIN_B_R | resistor | 0603 | 1 kΩ | 2 | audio | block-8 | R-ch OTA linearizing resistors |
-| R_f_L, R_f_R | resistor | 0603 | 100 kΩ | 2 | audio | block-8 | SUM_AMP feedback resistors |
-| R_Iabc_L | resistor | 0603 | 1 MΩ | 1 | audio | block-8 | Q VCA V→I: L-ch V_ires to IC_Q_AB cell-B Iabc |
-| R_Iabc_R | resistor | 0603 | 1 MΩ | 1 | audio | block-8 | Q VCA V→I: R-ch V_ires to IC_Q_AB cell-B Iabc |
-| R_QBIAS | resistor | 0603 | 100 kΩ | 1 | audio | block-8 | IRES_AMP_LP2 bias input (sets Butterworth Iabc) |
-| R_QINV | resistor | 0603 | 100 kΩ | 1 | audio | block-8 | IRES_AMP_LP2 resonance CV input resistor |
-| R_f_q | resistor | 0603 | 100 kΩ | 1 | audio | block-8 | IRES_AMP_LP2 feedback resistor |
-| R_IREF_A | resistor | 0603 | 1 MΩ | 1 | audio | block-8 | EXPO_LP2 fixed I_ref network R; in series with RV_REF; R_total at midpoint = 1250 kΩ → 9.6 µA |
-| R_VOCT | resistor | 0603 | 47 kΩ | 1 | audio | block-8 | EXPO_LP2 V/oct scaling R (1% tolerance); with R_E=1kΩ and RV_1VOCT≈7.5kΩ → 18.0 mV/V 1V/oct ratio |
-| R_E | resistor | 0603 | 1 kΩ | 1 | audio | block-8 | EXPO_LP2 emitter degeneration |
-| RV_REF | Bourns 3224W | SMD | 500 kΩ | 1 | audio | block-8 | EXPO_LP2 f_ref trim rheostat; in series with R_IREF_A; range ±25% |
-| RV_1VOCT | Bourns 3224W | SMD | 20 kΩ | 1 | audio | block-8 | EXPO_LP2 1V/oct tracking trim; ±10% range |
-| RV_QMAX | Bourns 3224W | SMD | 100 kΩ | 1 | audio | block-8 | LP2 Q max / self-oscillation onset trim |
-| D_IRES | BAT54 | SOT-23 | — | 1 | audio | block-8 | Clamp V_ires ≥ 0 (prevents reverse Iabc into IC_Q_AB cell B) |
-| C_IREF | C0G cap | 0603 | 100 nF | 1 | audio | block-8 | EXPO_LP2 I_ref node bypass |
-| C_IABC_L, C_IABC_R | C0G cap | 0402 | 10 nF | 2 | audio | block-8 | Integrator OTA Iabc pin bypass (HF noise filter) |
-| C_IABC_Q_L, C_IABC_Q_R | C0G cap | 0402 | 10 nF | 2 | audio | block-8 | IC_Q_AB cell-B Iabc pin bypass |
-| C_VCC_OTA_L, C_VEE_OTA_L | cap, X7R | 0603 | 100 nF | 2 | audio | block-8 | U_OTA_LP2_L supply decoupling |
-| C_VCC_OTA_R, C_VEE_OTA_R | cap, X7R | 0603 | 100 nF | 2 | audio | block-8 | U_OTA_LP2_R supply decoupling |
-| C_VCC_SUM_L, C_VEE_SUM_L | cap, X7R | 0603 | 100 nF | 2 | audio | block-8 | U_SUM_LP2_L supply decoupling |
-| C_VCC_SUM_R, C_VEE_SUM_R | cap, X7R | 0603 | 100 nF | 2 | audio | block-8 | U_SUM_LP2_R supply decoupling |
-| C_VCC_IRES, C_VEE_IRES | cap, X7R | 0603 | 100 nF | 2 | audio | block-8 | U_IRES_LP2 supply decoupling |
-| C_VCC_EXPO, C_VEE_EXPO | cap, X7R | 0603 | 100 nF | 2 | audio | block-8 | EXPO_LP2 THAT340 supply decoupling |
+**Shared resource:** LP2's Q uses **cell B** of the shared Q-VCAs `U9`/`U10`, which are **hosted
+on block-5** (`components.yaml`: `block: [block-5, block-8]`, `shared: true`). block-8 reaches them via
+boundary nets `LP2_V1/SUMINV/QIABC_*`.

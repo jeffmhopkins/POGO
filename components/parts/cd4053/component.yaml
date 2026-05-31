@@ -4,6 +4,7 @@ mpn: CD4053BM
 manufacturer: Texas Instruments
 supplier: '~'
 package: SOIC-16
+symbol: cd4053
 matches:
 - CD4053
 footprint:

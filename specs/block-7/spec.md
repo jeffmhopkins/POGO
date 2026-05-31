@@ -26,9 +26,11 @@ summer or inverting buffer).
 
 ## 2. Theoretical Design and Topology
 
-> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
-> It has not been verified against the current panel control set. Do not use for circuit
-> construction until re-verified. See `specs/STATUS.md` for current phase status.
+> ✅ **Re-verified 2026-05-30** against the locked plugin (change 0018). Topology matches LP1
+> (2-pole Simper SVF, V/oct, self-oscillation). **Polarity bug fixed:** the HP output is now a
+> unity non-inverting follower on the SUM_AMP node (was a spurious G=−1 inverting buffer that
+> phase-flipped HP_OUT vs the plugin). **Q collapsed to one LM13700** (cell A=L, cell B=R) per
+> the LP1/LP2 precedent (was two ICs).
 
 ### DSP-to-analog mapping
 
@@ -39,23 +41,21 @@ HPFilter.hpp uses the identical Simper trapezoidal SVF state update as LPFilter.
 return -(x - k * v1 - v2);   // HP = −(x − k·v1 − v2), negated
 ```
 
-The negation compensates for the hardware SUM_AMP inversion. The standard SVF produces:
+The negation is deliberate: the hardware SUM_AMP (inverting summing configuration) computes
+`HP_inv = −(x − k·v₁ − v₂)` at its **output node**, and the plugin pre-negates so its return value
+**equals that node directly**. The intended HP tap is therefore the SUM_AMP output node itself —
+taken through a **unity non-inverting follower** (OPA1612 half B) purely for drive isolation, with
+**no further inversion**:
 
 ```
-HP = x − (1/Q)·v₁ − v₂
+SUM_AMP output node:   HP_inv = −(x − k·v₁ − v₂)
+HP output follower:    HP_out = HP_inv          (G = +1, unity)
+DSP return value:      -(x - k*v1 - v2)         = HP_inv   ✓ same polarity
 ```
 
-The SUM_AMP (inverting summing configuration) computes −HP. A G = −1 inverting unity-gain
-buffer on the HP output node restores polarity. Two inversions cancel:
-
-```
-SUM_AMP output:   HP_inv = −(x − k·v₁ − v₂)
-HP output buffer: HP_out = −HP_inv = +(x − k·v₁ − v₂)
-DSP return value: -(x - k*v1 - v2) = −(x − k·v₁ − v₂)
-```
-
-The DSP negation models the SUM_AMP inversion before the correcting buffer is applied. In practice
-the DSP and hardware outputs have the same polarity — no phase discrepancy. See
+This mirrors LP1 exactly: there `LPFilter` returns un-negated `+v2` and the hardware uses a unity
+follower on v2. (An earlier HP revision used a G=−1 *inverting* buffer here, which double-inverted
+and made HP_OUT phase-opposite the plugin — corrected in change 0018; R100–R103 removed.) See
 `aux/aux-ota-c-svf.md` §SUM_AMP Inversion and HP Polarity.
 
 ### Transfer function (analog prototype)
@@ -99,20 +99,21 @@ parallel. Both channels always share the same f₀ and the same Q. This is consi
 DSP: hpOutL and hpOutR are computed with the same `hpFreqCv` and `hpResCv` (Pogo.cpp lines
 482–483).
 
-### HP output polarity and the double-inversion
+### HP output polarity
 
 ```
 Signal flow (hardware, one channel):
-  x  →  R_IN_SUM (100kΩ)  →  SUM_AMP (−)  →  HP_inv = −(x − k·v₁ − v₂)
-  HP_inv  →  G=−1 inv buffer  →  HP_out = +(x − k·v₁ − v₂)
+  x  →  R_IN_SUM (100kΩ)  →  SUM_AMP (−)  →  HP_inv = −(x − k·v₁ − v₂)   ← HP tap node
+  HP_inv  →  unity follower (G=+1)  →  HP_out = HP_inv = −(x − k·v₁ − v₂)
   HP_out  →  Block LP2 input
 
 DSP (software):
-  return -(x - k * v1 - v2)   ← sign matches SUM_AMP output, before buffer correction
+  return -(x - k * v1 - v2)   = HP_inv   ← identical to the hardware HP tap node ✓
 ```
 
-The DSP negation is deliberate: it models the intermediate SUM_AMP state. The hardware G = −1
-buffer corrects it. Net output polarity is non-inverted relative to the input in both domains.
+The plugin pre-negates so its return equals the SUM_AMP output node; the unity follower passes
+that node through unchanged → hardware HP_OUT matches the plugin exactly. (No second inversion —
+the earlier G=−1 buffer was a double-inversion bug, fixed in change 0018.)
 
 See `aux/aux-ota-c-svf.md`, `aux/aux-expo-converter.md`, `aux/aux-q-control.md`.
 
@@ -120,9 +121,17 @@ See `aux/aux-ota-c-svf.md`, `aux/aux-expo-converter.md`, `aux/aux-q-control.md`.
 
 ## 3. Physical Design
 
-> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
-> It has not been verified against the current panel control set. Do not use for circuit
-> construction until re-verified. See `specs/STATUS.md` for current phase status.
+> ✅ **Re-verified 2026-05-30** against the locked plugin (change 0018). Values verified vs
+> the §2 model; HP output buffer corrected to a unity follower (R100–R103 removed); HP Q
+> collapsed to one LM13700 (U51 cell A=L, cell B=R; U52 removed); RV18 (Q_max) = 100 kΩ.
+
+> 🔧 **Change 0020 (CV-conditioning fixes):**
+> - **§A Expo V/oct divider (C1):** `R110` R_VOCT **47k→49.9k** + **Vishay TFPT 1k tempco** shunt
+>   (R229) HP_EXPO_BASE→GND. Centers 17.92 mV/oct at mid-trim (was railed — no shunt).
+> - **§C OTA tap (H5):** v1/v2 tap the **unbuffered** OTA outputs (pins 5/12), not the Darlington
+>   buffers; pulldowns R112–R115 removed.
+> - **§D Q-cell R_Iabc (M5):** `R104/R105` **1M→100k** (Iabc pin ≈ −10.8 V, not GND). IRES_AMP
+>   negative-V_ires drive + clamp is a Phase-3R trim item.
 
 ### Component derivations
 
@@ -140,11 +149,16 @@ C0G/NP0 mandatory for pitch-stable self-oscillation.
 
 **Linearizing resistors R_LIN_A, R_LIN_B:** 1 kΩ per OTA cell per channel.
 
-**Q control resistor R_Iabc (per channel):** 1 MΩ — converts V_ires to I_abc_q.
-At V_ires = 0.74 V: I_abc_q = 0.74 µA → Q = 0.70 (Butterworth).
+**Q control resistor R_Iabc (per channel):** **100 kΩ** (R104/R105) — converts V_ires to I_abc_q.
+The LM13700 Iabc pin sits ≈ 2·V_BE above V− (≈ −10.8 V, NOT GND), so I_abc_q = (V_ires − V_pin)/R_Iabc.
+At the Butterworth setpoint V_ires ≈ −10.73 V: I_abc_q ≈ 0.7 µA → Q ≈ 0.74. (Changed from the original
+1 MΩ in change 0020 §D/M5 — the old 1 MΩ-from-~0 V assumption gave ~14× too much I_abc; see
+`specs/block-7/sim/q_cell.cir` which now binds this value to the netlist.)
 
-**HP output buffer resistors R_HP_IN, R_HP_FB:** 100 kΩ each — unity-gain inverting buffer
-(R_in = R_f = 100 kΩ). Places the HP output at low impedance with correct polarity for LP2 input.
+**HP output buffer:** unity-gain **non-inverting follower** (OPA1612 half B; out→in−, SUM_AMP
+node→in+). No resistors — it isolates the SUM_AMP node from the LP2 input load without changing
+polarity (the SUM_AMP node is already the correct HP tap; see §2). *(Was an inverting buffer with
+R_HP_IN/R_HP_FB = 100 kΩ — removed in change 0018; that double-inverted vs the plugin.)*
 
 **EXPO_HP I_ref network R_IREF_A + RV_REF:** R_IREF_A = 1 MΩ (fixed 0603) in series with RV_REF = 500 kΩ
 (rheostat), midpoint R_total = 1250 kΩ at pot center → I_ref ≈ 9.6 µA. Calibration target: 9.69 µA
@@ -153,19 +167,15 @@ With V_ctrl = −3V at default: I_abc = 9.69µA × 2^(−3) = 1.21 µA → f₀ 
 
 ### Q control IC sharing
 
-IC_Q_C (LM13700, SOIC-16): cell A = HP Q cell. Cell B is spare (unused by HP; available for
-utility functions or future use). The HP Q cell drives both L and R channel I_abc_q pins in
-parallel — one IRES_AMP output sets both channels' Q simultaneously.
+One LM13700 (U51, SOIC-16) provides both channels' Q: **cell A = L Q, cell B = R Q**. Since HP
+resonance is mono (same resParam both channels), one IRES_AMP output (V_ires) drives both cells'
+I_abc_q in parallel (via R104/R105) — both channels' Q track together. *(Change 0018: was two
+LM13700s, U51/U52, each using only cell A; collapsed to one IC matching the LP1/LP2 shared-Q
+precedent — U52 removed.)*
 
-**Spare cell termination (CRITICAL — both U51 and U52):** Each LM13700 Q VCA IC has an
-unused cell B. Floating inputs create substrate noise that couples into cell A. Required
-termination for each spare cell:
-- IN+ (pin 9): connect to AGND
-- IN− (pin 10): connect to AGND
-- Iabc (pin 1): 100 kΩ to GND (sets ~0.1 µA quiescent bias; prevents rail floating)
-- OUT (pin 14): 1 kΩ to GND
-
-This applies to both U51 (HP Q VCA L) and U52 (HP Q VCA R) cell B.
+**No spare Q cell:** both cells of U51 are now active (cell A = L Q, cell B = R Q), so no
+spare-cell termination is needed (change 0018). The only unused U51 pins are the Darlington
+buffer / diode-bias pins (per the OTA-C SVF convention), left as no-connects.
 
 ### Calibration trim pots
 
@@ -178,8 +188,8 @@ This applies to both U51 (HP Q VCA L) and U52 (HP Q VCA R) cell B.
 ### Signal routing
 
 ```
-Block BP out L  →  HP_L SVF (SUM_AMP + OTA-A1 + OTA-A2 + HP inv buffer)  →  HP out L  →  Block LP2 in L
-Block BP out R  →  HP_R SVF (SUM_AMP + OTA-B1 + OTA-B2 + HP inv buffer)  →  HP out R  →  Block LP2 in R
+Block BP out L  →  HP_L SVF (SUM_AMP + OTA1 + OTA2 + HP follower)  →  HP out L  →  Block LP2 in L
+Block BP out R  →  HP_R SVF (SUM_AMP + OTA1 + OTA2 + HP follower)  →  HP out R  →  Block LP2 in R
 
 HP_FREQ_PARAM (−5 to +5 V, default −3V) + HP_FREQ_INPUT (attenuated by HP_FREQ_ATT_PARAM)
   →  V_ctrl  →  EXPO_HP  →  I_abc (shared L+R)
@@ -190,9 +200,9 @@ HP_RES_PARAM (0 to 1, default 0) + HP_RES_INPUT / 10  →  IRES_AMP  →  I_abc_
 ### Board assignment
 
 Audio board. Place HP_L and HP_R SVF circuits between the BP output nodes and the LP2 input nodes.
-EXPO_HP (THAT340) placed centrally; IC_Q_C adjacent to HP OTA sections. The HP inv buffer
-(G = −1 TL072 half) should be close to the SUM_AMP to minimize trace capacitance on the
-HP_inv node.
+EXPO_HP (THAT340) placed centrally; U51 (Q) adjacent to HP OTA sections. The HP follower
+(G = +1 unity, OPA1612 half B) should be close to the SUM_AMP to minimize trace capacitance on
+the HP_inv node.
 
 ### Power Draw Estimate
 
@@ -207,49 +217,6 @@ HP_inv node.
 
 ## 4. Component Requirements
 
-> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
-> It has not been verified against the current panel control set. Do not use for circuit
-> construction until re-verified. See `specs/STATUS.md` for current phase status.
-
-| Ref | Part | Package | Value | Qty | Board | Block | Function |
-|---|---|---|---|---|---|---|---|
-| U_OTA_HP_L | LM13700M | SOIC-16 | — | 1 | audio | block-7 | HP L-channel integrators (cells A+B = OTA-A1+OTA-A2) |
-| U_OTA_HP_R | LM13700M | SOIC-16 | — | 1 | audio | block-7 | HP R-channel integrators (cells A+B = OTA-B1+OTA-B2) |
-| U51 (IC_Q_C_L) | LM13700M | SOIC-16 | — | 1 | audio | block-7 | Q VCA L: cell A = HP Q; cell B spare (see termination note) |
-| U52 (IC_Q_C_R) | LM13700M | SOIC-16 | — | 1 | audio | block-7 | Q VCA R: cell A = HP Q; cell B spare (see termination note) |
-| R_QB_IABC_L, R_QB_IABC_R | resistor | 0603 | 100 kΩ | 2 | audio | block-7 | U51/U52 cell B Iabc termination (100 kΩ to GND each) |
-| R_QB_OUT_L, R_QB_OUT_R | resistor | 0603 | 1 kΩ | 2 | audio | block-7 | U51/U52 cell B output termination (1 kΩ to GND each) |
-| U_SUM_HP_L | OPA1612 | SOIC-8 | — | 1 | audio | block-7 | L-ch: half A = SUM_AMP, half B = HP inverting output buffer; 1.1 nV/√Hz |
-| U_SUM_HP_R | OPA1612 | SOIC-8 | — | 1 | audio | block-7 | R-ch: half A = SUM_AMP, half B = HP inverting output buffer; pin-compatible with TL072CDT |
-| U_IRES_HP | TL072CDT | SOIC-8 | — | 1 | audio | block-7 | Half A = IRES_AMP (Q control); half B = spare / utility |
-| EXPO_HP | THAT340S14-U | SOIC-14 | — | 1 | audio | block-7 | Expo V/oct converter; f_ref = 632 Hz; drives HP L+R Iabc |
-| C1_L, C2_L | C0G cap | 0603 | 47 nF | 2 | audio | block-7 | HP L integrator caps (C0G/NP0 mandatory) |
-| C1_R, C2_R | C0G cap | 0603 | 47 nF | 2 | audio | block-7 | HP R integrator caps (C0G/NP0 mandatory) |
-| R_IN_L, R_IN_R | resistor | 0603 | 100 kΩ | 2 | audio | block-7 | SUM_AMP input resistors |
-| R_FB_L, R_FB_R | resistor | 0603 | 100 kΩ | 2 | audio | block-7 | SUM_AMP feedback / Q feedback input resistors |
-| R_LIN_A_L, R_LIN_B_L | resistor | 0603 | 1 kΩ | 2 | audio | block-7 | L-ch OTA linearizing resistors |
-| R_LIN_A_R, R_LIN_B_R | resistor | 0603 | 1 kΩ | 2 | audio | block-7 | R-ch OTA linearizing resistors |
-| R_f_L, R_f_R | resistor | 0603 | 100 kΩ | 2 | audio | block-7 | SUM_AMP feedback resistors |
-| R_HP_IN_L, R_HP_IN_R | resistor | 0603 | 100 kΩ | 2 | audio | block-7 | HP output inverting buffer R_in (R_in = R_f = 100kΩ) |
-| R_HP_FB_L, R_HP_FB_R | resistor | 0603 | 100 kΩ | 2 | audio | block-7 | HP output inverting buffer R_f |
-| R_Iabc_L | resistor | 0603 | 1 MΩ | 1 | audio | block-7 | Q VCA V→I: L-ch V_ires to IC_Q_C cell-A Iabc |
-| R_Iabc_R | resistor | 0603 | 1 MΩ | 1 | audio | block-7 | Q VCA V→I: R-ch V_ires to IC_Q_C cell-A Iabc |
-| R_QBIAS | resistor | 0603 | 100 kΩ | 1 | audio | block-7 | IRES_AMP bias input (sets Butterworth Iabc) |
-| R_QINV | resistor | 0603 | 100 kΩ | 1 | audio | block-7 | IRES_AMP resonance CV input resistor |
-| R_f_q | resistor | 0603 | 100 kΩ | 1 | audio | block-7 | IRES_AMP feedback resistor |
-| R_IREF_A | resistor | 0603 | 1 MΩ | 1 | audio | block-7 | EXPO_HP fixed I_ref network R; in series with RV_REF; R_total at midpoint = 1250 kΩ → 9.6 µA |
-| R_VOCT | resistor | 0603 | 47 kΩ | 1 | audio | block-7 | EXPO_HP V/oct scaling R (1% tolerance); with R_E=1kΩ and RV_1VOCT≈7.5kΩ → 18.0 mV/V 1V/oct ratio |
-| R_E | resistor | 0603 | 1 kΩ | 1 | audio | block-7 | EXPO_HP emitter degeneration |
-| RV_REF | Bourns 3224W | SMD | 500 kΩ | 1 | audio | block-7 | EXPO_HP f_ref trim rheostat; in series with R_IREF_A; range ±25% |
-| RV_1VOCT | Bourns 3224W | SMD | 20 kΩ | 1 | audio | block-7 | EXPO_HP 1V/oct tracking trim; ±10% range |
-| RV_QMAX | Bourns 3224W | SMD | 100 kΩ | 1 | audio | block-7 | HP Q max / self-oscillation onset trim |
-| D_IRES | BAT54 | SOT-23 | — | 1 | audio | block-7 | Clamp V_ires ≥ 0 (prevents reverse Iabc into IC_Q_C) |
-| C_IREF | C0G cap | 0603 | 100 nF | 1 | audio | block-7 | EXPO_HP I_ref node bypass |
-| C_IABC_L, C_IABC_R | C0G cap | 0402 | 10 nF | 2 | audio | block-7 | Integrator OTA Iabc pin bypass (HF noise filter) |
-| C_IABC_Q | C0G cap | 0402 | 10 nF | 1 | audio | block-7 | IC_Q_C cell-A Iabc pin bypass |
-| C_VCC_OTA_L, C_VEE_OTA_L | cap, X7R | 0603 | 100 nF | 2 | audio | block-7 | U_OTA_HP_L supply decoupling |
-| C_VCC_OTA_R, C_VEE_OTA_R | cap, X7R | 0603 | 100 nF | 2 | audio | block-7 | U_OTA_HP_R supply decoupling |
-| C_VCC_SUM_L, C_VEE_SUM_L | cap, X7R | 0603 | 100 nF | 2 | audio | block-7 | U_SUM_HP_L supply decoupling |
-| C_VCC_SUM_R, C_VEE_SUM_R | cap, X7R | 0603 | 100 nF | 2 | audio | block-7 | U_SUM_HP_R supply decoupling |
-| C_VCC_IRES, C_VEE_IRES | cap, X7R | 0603 | 100 nF | 2 | audio | block-7 | U_IRES_HP supply decoupling |
-| C_VCC_EXPO, C_VEE_EXPO | cap, X7R | 0603 | 100 nF | 2 | audio | block-7 | EXPO_HP THAT340 supply decoupling |
+Component set: see the generated BOM `kicad/pogo-bom.csv` (rows with `Block = block-7`),
+sourced from `specs/components.yaml` (the per-ref design manifest) and enriched by the
+`components/` registry (MPN, footprint, datasheet). Verification status: `specs/STATUS.md`.

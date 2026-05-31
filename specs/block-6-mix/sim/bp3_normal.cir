@@ -1,0 +1,30 @@
+* POGO block-6-mix — §G BP3 R→L output normal (change 0020; runner-ready 0022)
+* BUG: J28 switch lug tied to the L node AFTER its 1k series R -> unpatched R jack ties two
+* post-1k buffer outputs -> reads (L+R)/2, and corrupts the L jack (J27). FIX: J28 switch lug
+* taps the L buffer's STIFF op-amp output (pre-1k, BP3_L_BUF) -> unpatched R reads clean L.
+* Op-amps = ideal followers (0Ω out) driving 1k series Rs. Test with L=3V, R=1V.
+
+.param VL=3.0
+.param VR=1.0
+
+* stiff buffer outputs
+Vl lbuf 0 DC {VL}
+Vr rbuf 0 DC {VR}
+Rl lbuf lout 1k       ; R36
+Rr rbuf rout 1k       ; R224
+
+* --- BUGGY: J28 tip(rout) shorted to switch lug = lout (post-1k L) ---
+Rsh_bug rout lout 0.001
+
+* --- FIXED: J28 tip(rout_f) shorted to switch lug = lbuf (stiff, pre-1k) ---
+Vr2 rbuf2 0 DC {VR}
+Rr2 rbuf2 rout_f 1k
+Rsh_fix rout_f lbuf 0.001
+
+.control
+  op
+  let j28_buggy = v(rout)      ; unpatched R-jack tip, buggy wiring -> ~(L+R)/2 = 2.0
+  let j28_fixed = v(rout_f)    ; unpatched R-jack tip, fixed wiring -> clean L = 3.0
+  print j28_buggy j28_fixed
+.endc
+.end

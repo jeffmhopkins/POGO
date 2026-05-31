@@ -4,6 +4,7 @@ mpn: DW3 (2M DPDT ON-ON)
 manufacturer: Dailywell
 supplier: Thonk
 package: sub-mini toggle 2M
+symbol: dw3
 matches:
 - Dailywell DW3 (2M DPDT ON-ON)
 footprint:

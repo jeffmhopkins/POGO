@@ -1,0 +1,26 @@
+# songhuei_r0904n — POGO sourced component (hand-maintained)
+slug: songhuei_r0904n
+mpn: R0904N
+manufacturer: Song Huei (Taiwan)
+supplier: Thonk
+package: 9mm
+symbol: trimpot
+matches:
+- lin pot
+- log pot
+- bipolar pot
+footprint:
+  lib: Potentiometer_THT
+  name: Potentiometer_Songhuei_9mm_TallTrimmer_Vertical
+datasheet:
+  url: https://www.thonk.co.uk/shop/9mm-tall-trimmers/
+  version: supplier page
+panel_types:
+- trimpot
+tapers:
+- lin
+- log
+- bipolar
+notes: 9mm finger-adjustable snap-in "tall trimmer" panel pot (9.7mm square body, centred
+  shaft, 3 signal pins one edge / 2 snap-in legs the opposite edge). Taper chosen per
+  placement — centre-detent (bipolar) for the attenuverters, lin/log otherwise.

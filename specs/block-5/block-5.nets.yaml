@@ -1,0 +1,285 @@
+# POGO Block 5 — LP Filter 1 (stereo 2-pole OTA-C SVF, lowpass, stereo tilt)
+#
+# Source of truth, transcribed from:
+#   specs/components.yaml  (block-5 rows incl. the shared Q-VCAs U9/U10; refs exact)
+#   specs/block-5/spec.md  (§2 topology, §3 physical, §4 component table)
+#   specs/aux/aux-ota-c-svf.md / aux-q-control.md / aux-expo-converter.md
+#   datasheet-corrected pinouts: kicad_common.py sym_lm13700 / sym_that340 / sym_opa1612
+#
+# Built by dual derivation (independent agent draft + my net-by-net review). Two
+# changes from the agent draft, both decided/found 2026-05-29:
+#   1. PER-CHANNEL EXPO (true stereo tilt): U14 = L expo, U64 = R expo, each fed
+#      V_freq ± V_tilt → separate Iabc per channel (LP1_IABC_L → U7, LP1_IABC_R → U8).
+#      (The shared-single-expo draft could not produce L≠R cutoff.)
+#   2. LM13700 integrator Darlington-buffer emitter PULLDOWNS to V- (R68-R71): the
+#      buffers are used as the v1/v2 state-variable outputs and require an emitter-
+#      follower pulldown the spec/BOM had omitted.
+#
+# TOPOLOGY (per channel; L = U7+U11A/B+U14, R = U8+U12A/B+U64).
+#   SUM_AMP (OPA1612 half A, inverting summer @ virtual-ground LP1_SUMINV): sums
+#     x (R_in 100k) + v2/LP feedback (R_FB 100k) + Q-feedback current (from the
+#     shared Q-VCA cell OUT, injected at the same virtual ground), R_f 100k fb.
+#     Out = HP node (loop sign restored through the two integrators).
+#   OTA1 (LM13700 cell A): Out(5) charges C1 to GND + drives BufIn(7); BufOut(8)=v1(BP).
+#   OTA2 (LM13700 cell B): Out(12) charges C2 to GND + drives BufIn(10); BufOut(9)=v2(LP).
+#   LP buffer (OPA1612 half B): unity follower on v2 → LP1_OUT.
+#   EXPO (THAT340): Q1=expo (collector=Iabc), Q2=diode-connected reference.
+#     +12V→R_IREF→RV_REF→I_ref node (Q2 C+B)+C_IREF; V_freq→R_VOCT→RV_1VOCT→Q1 base
+#     (with ±V_tilt summed in); Q1+Q2 emitters→R_E→-12V. SUB(4,11)→-12V.
+#   IRES_AMP (TL072 U13 half B): V_ires = V_bias(RV5) − V_res(LP1_RES), clamped ≥0
+#     by D10; → R_Iabc L/R (R57/R58) → shared Q-VCA Iabc (U9/U10 on this sheet).
+#   TILT_INV (TL072 U13 half A): G=-1 → -V_tilt for the R expo; +V_tilt → L expo.
+#   RV6 = tilt center-null trim (Phase-3R: needs a series/scaling R; see note).
+
+block: block-5
+board: audio
+title: POGO Block 5 - LP Filter 1 (OTA-C SVF, stereo tilt)
+
+parts:
+  # --- integrator OTAs (cell A = OTA1/BP/v1, cell B = OTA2/LP/v2) ---
+  U7:  { sym: ota, part: LM13700M, value: LM13700 }   # LP1 integrators L
+  U8:  { sym: ota, part: LM13700M, value: LM13700 }   # LP1 integrators R
+  # --- SUM_AMP + LP output buffer (half A = SUM_AMP, half B = LP buffer) ---
+  U11: { sym: opamp2, part: OPA1612, value: OPA1612 } # L: A=SUM_AMP, B=LP buffer
+  U12: { sym: opamp2, part: OPA1612, value: OPA1612 } # R: A=SUM_AMP, B=LP buffer
+  # --- TL072: A = tilt inverter (G=-1), B = IRES_AMP (Q driver) ---
+  U13: { sym: opamp2, part: TL072CDT, value: TL072 }
+  # --- THAT340 expo converters: U14 = L, U64 = R (per-channel for true tilt) ---
+  U14: { sym: expo, part: THAT340S14-U, value: THAT340 }
+  U64: { sym: expo, part: THAT340S14-U, value: THAT340 }
+
+  # --- integrator caps (C0G/NP0) ---
+  C11: { sym: c, value: 47nF }    # C1 L (v1 node)
+  C12: { sym: c, value: 47nF }    # C2 L (v2 node)
+  C13: { sym: c, value: 47nF }    # C1 R
+  C14: { sym: c, value: 47nF }    # C2 R
+
+  # --- SUM_AMP resistors ---
+  R10: { sym: r, value: 100k }    # R_in L (signal x)
+  R11: { sym: r, value: 100k }    # R_in R
+  R47: { sym: r, value: 100k }    # R_FB L (v2/LP feedback)
+  R48: { sym: r, value: 100k }    # R_FB R
+  R53: { sym: r, value: 100k }    # R_f L (SUM_AMP feedback)
+  R54: { sym: r, value: 100k }    # R_f R
+
+  # --- OTA linearizing resistors (1k from each OTA In- to GND) ---
+  R49: { sym: r, value: 1k }      # R_LIN OTA1 L
+  R50: { sym: r, value: 1k }      # R_LIN OTA2 L
+  R51: { sym: r, value: 1k }      # R_LIN OTA1 R
+  R52: { sym: r, value: 1k }      # R_LIN OTA2 R
+
+  # R68-R71 (Darlington-buffer pulldowns) removed — change 0020 §C: state vars tap unbuffered pins 5/12.
+
+  # --- tilt: passively summed at the expo base with V_freq (change 0020 §B) ---
+  # With the §A tempco shunt making the base low-Z, tilt is fed through a series R EQUAL to the
+  # V_freq series (R_VOCT+RV_mid ≈ 54.9k) so it sums 1:1 in octaves at the base (SPICE
+  # lp1_tilt_passive.cir: freq 17.57 / tilt 17.57 mV/V). No op-amp summer needed.
+  R55: { sym: r, value: 54k9 }            # tilt series R, L expo base (+V_tilt); =R_VOCT+RV_mid for 1:1 octave sum
+  R56: { sym: r, value: 54k9 }            # tilt series R, R expo base (-V_tilt)
+  R_TILT_INV_IN: { sym: r, value: 100k }  # tilt inverter input R (U13-A makes -V_tilt for R channel)
+  R_TILT_INV_FB: { sym: r, value: 100k }  # tilt inverter feedback R
+
+  # --- Q V->I and IRES_AMP resistors ---
+  R57: { sym: r, value: 100k }    # R_Iabc L (V_ires -> U9 cellA Iabc, boundary); change 0020 §D/M5: 1M→100k (Iabc pin ~−10.8V)
+  R58: { sym: r, value: 100k }    # R_Iabc R (V_ires -> U10 cellA Iabc, boundary); change 0020 §D/M5: 1M→100k
+  R59: { sym: r, value: 100k }    # R_QBIAS (IRES_AMP V_bias in)
+  R60: { sym: r, value: 100k }    # R_QINV (IRES_AMP resonance CV in)
+  R61: { sym: r, value: 100k }    # R_f_q (IRES_AMP feedback)
+
+  # --- expo converter resistors (L = R62/R63/R64; R = R65/R66/R67) ---
+  R62: { sym: r, value: 1M }      # R_IREF_A L
+  R63: { sym: r, value: 49k9 }    # R_VOCT L (change 0020 §A: 47k→49.9k centers 17.92mV/oct at mid-trim)
+  R64: { sym: r, value: 1k }      # R_E L (emitter degeneration to -12V)
+  R65: { sym: r, value: 1M }      # R_IREF_A R
+  R66: { sym: r, value: 49k9 }    # R_VOCT R (change 0020 §A)
+  R67: { sym: r, value: 1k }      # R_E R
+  R231: { sym: r, part: "Vishay TFPT", value: 1k }  # tempco shunt L (change 0020 §A): LP1_EXPO_BASE_L→GND
+  R232: { sym: r, part: "Vishay TFPT", value: 1k }  # tempco shunt R (change 0020 §A): LP1_EXPO_BASE_R→GND
+
+  # --- trim pots (L = RV3/RV4; R = RV22/RV23) ---
+  RV3:  { sym: trimpot, part: "Bourns 3224W", value: LP1_FREF_L }
+  RV4:  { sym: trimpot, part: "Bourns 3224W", value: LP1_1VOCT_L }
+  RV22: { sym: trimpot, part: "Bourns 3224W", value: LP1_FREF_R }
+  RV23: { sym: trimpot, part: "Bourns 3224W", value: LP1_1VOCT_R }
+  RV5:  { sym: trimpot, part: "Bourns 3224W", value: LP1_QMAX }      # Q_max / V_bias divider
+  RV6:  { sym: trimpot, part: "Bourns 3224W", value: LP1_TILTNULL }  # tilt null divider
+
+  # --- Q clamp diode (V_ires >= 0): anode GND, cathode V_ires ---
+  D10: { sym: diode, part: 1N4148W, value: 1N4148W }
+
+  # --- bypass / Iabc caps ---
+  C45: { sym: c, value: 100nF }   # C_IREF L
+  C66: { sym: c, value: 100nF }   # C_IREF R
+  C46: { sym: c, value: 10nF }    # C_IABC L
+  C47: { sym: c, value: 10nF }    # C_IABC R
+  C50: { sym: c, value: 100nF }   # U7 V+
+  C51: { sym: c, value: 100nF }   # U7 V-
+  C52: { sym: c, value: 100nF }   # U8 V+
+  C53: { sym: c, value: 100nF }   # U8 V-
+  C58: { sym: c, value: 100nF }   # U11 V+
+  C59: { sym: c, value: 100nF }   # U11 V-
+  C60: { sym: c, value: 100nF }   # U12 V+
+  C61: { sym: c, value: 100nF }   # U12 V-
+  C62: { sym: c, value: 100nF }   # U13 V+
+  C63: { sym: c, value: 100nF }   # U13 V-
+  C64: { sym: c, value: 100nF }   # U14 +12V rail bypass (THAT340 has no Vcc pin)
+  C65: { sym: c, value: 100nF }   # U14 -12V rail bypass
+  C67: { sym: c, value: 100nF }   # U64 +12V rail bypass
+  C68: { sym: c, value: 100nF }   # U64 -12V rail bypass
+  # --- shared LP1/LP2 Q-VCAs (U9 L, U10 R) — co-owned by block-8 (was the shared-q sheet) ---
+  U9:  { sym: ota, part: LM13700M, value: LM13700 }   # L Q VCA: cell A=LP1 Q, cell B=LP2 Q
+  U10: { sym: ota, part: LM13700M, value: LM13700 }   # R Q VCA: cell A=LP1 Q, cell B=LP2 Q
+  C48: { sym: c, value: 10nF }    # LP1 Q-cell Iabc bypass L
+  C49: { sym: c, value: 10nF }    # LP1 Q-cell Iabc bypass R
+  C54: { sym: c, value: 100nF }   # U9 V+
+  C55: { sym: c, value: 100nF }   # U9 V-
+  C56: { sym: c, value: 100nF }   # U10 V+
+  C57: { sym: c, value: 100nF }   # U10 V-
+  C84: { sym: c, value: 10nF }    # LP2 Q-cell Iabc bypass L (U9 cellB)
+  C85: { sym: c, value: 10nF }    # LP2 Q-cell Iabc bypass R (U10 cellB)
+
+nets:
+  # ---- power ----
+  # LM13700: V+ = 11, V- = 6.  OPA1612/TL072: V+ = 8, V- = 4.
+  # THAT340 has no Vcc/Vee — only SUB(4,11) -> -12V (most-negative rail).
+  "+12V":
+    [U7.11, U8.11, U11.8, U12.8, U13.8,
+     R62.1, R65.1, RV5.3, RV6.3,
+     C50.1, C52.1, C58.1, C60.1, C62.1, C64.1, C67.1,
+     U9.11, U10.11, C54.1, C56.1]   # + shared Q-VCAs
+  "-12V":
+    [U7.6, U8.6, U11.4, U12.4, U13.4,
+     U14.4, U14.11, U64.4, U64.11, R64.2, R67.2, RV6.1,
+     C51.1, C53.1, C59.1, C61.1, C63.1, C65.1, C68.1,
+     U9.6, U10.6, C55.1, C57.1]   # + shared Q-VCAs (R68-71 pulldowns removed, §C)
+  GND:
+    [U11.3, U12.3, U13.5, U13.3,          # SUM_AMP / IRES_AMP / tilt-inv non-inv inputs
+     RV5.1,                                # V_bias divider bottom
+     R49.2, R50.2, R51.2, R52.2,          # OTA In- linearizing R to GND
+     C11.2, C12.2, C13.2, C14.2,          # integrator cap returns
+     D10.A,                                # clamp anode to GND
+     C45.2, C66.2, C46.2, C47.2,
+     C50.2, C51.2, C52.2, C53.2, C58.2, C59.2,
+     C60.2, C61.2, C62.2, C63.2, C64.2, C65.2, C67.2, C68.2,
+     C48.2, C49.2, C54.2, C55.2, C56.2, C57.2, C84.2, C85.2,   # + shared Q-VCAs
+     R231.2, R232.2]   # expo tempco shunts → GND (§A)
+
+  # ---- L channel SVF ----
+  VCA_OUT_L:    [R10.1]                       # <- block-4 VCA out L (boundary, inverted)
+  LP1_SUMINV_L: [U11.2, R10.2, R47.2, R53.1, U9.4, U9.5]  # SUM_AMP v-ground + Q-cell A In-/Out
+  LP1_HP_L:     [U11.1, R53.2, U7.3]          # SUM_AMP out (HP) -> OTA1 In+
+  # §C (change 0020): tap v1/v2 from the UNBUFFERED OTA outputs (pins 5/12), not the Darlington
+  # buffers (8/9, ~1.26V offset → next OTA; SPICE ota_svf_loop.cir). Buffers 7/8/9/10 unused; pulldowns gone.
+  LP1_V1_L:     [U7.5, C11.1, U7.14, U9.3]    # v1 (BP) = OTA1 unbuffered out (pin5) + cap -> OTA2 In+ + Q-cell A In+
+  LP1_V2_L:     [U7.12, C12.1, U11.5, R47.1]  # v2 (LP) = OTA2 unbuffered out (pin12) + cap -> LP buffer In+ + R_FB
+  LP1_OUT_L:    [U11.7, U11.6]                # LP buffer out (unity) -> block BP (boundary)
+
+  # ---- R channel SVF ----
+  VCA_OUT_R:    [R11.1]                        # <- block-4 VCA out R (boundary, inverted)
+  LP1_SUMINV_R: [U12.2, R11.2, R48.2, R54.1, U10.4, U10.5]  # SUM_AMP v-ground + Q-cell A In-/Out
+  LP1_HP_R:     [U12.1, R54.2, U8.3]          # SUM_AMP out (HP) -> OTA1 In+
+  LP1_V1_R:     [U8.5, C13.1, U8.14, U10.3]   # v1 (BP) = OTA1 unbuffered out (pin5) + cap -> OTA2 In+ + Q-cell A In+ (§C)
+  LP1_V2_R:     [U8.12, C14.1, U12.5, R48.1]  # v2 (LP) = OTA2 unbuffered out (pin12) + cap -> LP buffer In+ + R_FB (§C)
+  LP1_OUT_R:    [U12.7, U12.6]                # -> block BP (boundary)
+
+  # ---- OTA linearizing R (In- pins) ----
+  LP1_LIN_A_L:  [U7.4, R49.1]
+  LP1_LIN_B_L:  [U7.13, R50.1]
+  LP1_LIN_A_R:  [U8.4, R51.1]
+  LP1_LIN_B_R:  [U8.13, R52.1]
+
+  # ---- expo converters (per channel) ----
+  LP1_VCTRL:     [R63.1, R66.1]                # <- V/oct control voltage in (boundary; to both expos)
+  # L expo (U14) -> U7 Iabc
+  LP1_VOCT_TR_L: [R63.2, RV4.1, RV4.2]          # R_VOCT_L -> RV4 (rheostat)
+  LP1_EXPO_BASE_L: [U14.2, RV4.3, R55.2, R231.1]  # Q1 base L: V/oct(R63+RV4) + V_tilt(R55) passively summed; tempco R231 shunt→GND (§A/§B)
+  LP1_IABC_L:    [U14.1, U7.1, U7.16, C46.1]    # L Iabc -> OTA1+OTA2 L
+  LP1_EXPO_EMIT_L: [U14.3, U14.12, R64.1]       # Q1+Q2 emitters L -> R_E -> -12V
+  LP1_IREF_L:    [U14.14, U14.13, RV3.3, C45.1] # Q2 collector+base (diode-conn ref) + bypass
+  LP1_IREF_TR_L: [R62.2, RV3.1, RV3.2]          # +12V -> R_IREF_L -> RV3 (rheostat)
+  # R expo (U64) -> U8 Iabc
+  LP1_VOCT_TR_R: [R66.2, RV23.1, RV23.2]
+  LP1_EXPO_BASE_R: [U64.2, RV23.3, R56.2, RV6.2, R232.1]  # Q1 base R: V/oct(R66+RV23) + -V_tilt(R56) + null trim(RV6); tempco R232 shunt→GND (§A/§B)
+  LP1_IABC_R:    [U64.1, U8.1, U8.16, C47.1]
+  LP1_EXPO_EMIT_R: [U64.3, U64.12, R67.1]
+  LP1_IREF_R:    [U64.14, U64.13, RV22.3, C66.1]
+  LP1_IREF_TR_R: [R65.2, RV22.1, RV22.2]
+
+  # ---- tilt ----
+  LP1_TILT:      [R55.1, R_TILT_INV_IN.1]       # tilt CV in (boundary): +V_tilt + inv input
+  LP1_TILT_INVN: [U13.2, R_TILT_INV_IN.2, R_TILT_INV_FB.1]  # tilt inverter (-) virtual ground
+  LP1_NTILT:     [U13.1, R_TILT_INV_FB.2, R56.1]            # -V_tilt -> R-channel tilt summer
+
+  # ---- IRES_AMP / Q driver ----
+  LP1_VBIAS:     [RV5.2, R59.1]                 # RV5 wiper = V_bias -> R_QBIAS
+  LP1_RES:       [R60.1]                        # resonance CV in (boundary)
+  LP1_IRES_SUM:  [U13.6, R59.2, R60.2, R61.1]   # IRES_AMP virtual ground
+  LP1_VIRES:     [U13.7, R61.2, D10.K, R57.1, R58.1]  # V_ires (>=0 by D10) -> R_Iabc L+R
+  LP1_QIABC_L:   [R57.2, U9.1, C48.1]            # V_ires -> U9 cell-A Iabc + bypass
+  LP1_QIABC_R:   [R58.2, U10.1, C49.1]           # V_ires -> U10 cell-A Iabc + bypass
+
+  # ---- shared Q-VCA cell B -> block-8 (LP2): boundary nets to block-8 ----
+  LP2_V1_L:      [U9.14]                         # In+_B <- LP2 v1/BP (boundary)
+  LP2_SUMINV_L:  [U9.13, U9.12]                  # In-_B + Out_B -> LP2 SUM_AMP v-ground (boundary)
+  LP2_QIABC_L:   [U9.16, C84.1]                  # Iabc_B <- LP2 V_ires (boundary) + bypass
+  LP2_V1_R:      [U10.14]
+  LP2_SUMINV_R:  [U10.13, U10.12]
+  LP2_QIABC_R:   [U10.16, C85.1]
+
+no_connect:
+  # LM13700 linearizing-diode bias pins unused (R_LIN input degeneration used).
+  - U7.2
+  - U7.15
+  - U8.2
+  - U8.15
+  # §C (change 0020): integrator Darlington buffers unused (state vars tap unbuffered pins 5/12).
+  - U7.7
+  - U7.8
+  - U7.9
+  - U7.10
+  - U8.7
+  - U8.8
+  - U8.9
+  - U8.10
+  # THAT340 PNP transistors Q3 (5,6,7) and Q4 (8,9,10) unused, both expos.
+  - U14.5
+  - U14.6
+  - U14.7
+  - U14.8
+  - U14.9
+  - U14.10
+  - U64.5
+  - U64.6
+  - U64.7
+  - U64.8
+  - U64.9
+  - U64.10
+  # shared Q-VCA Darlington buffers (7-10) + diode-bias (2,15) unused, both cells.
+  - U9.7
+  - U9.8
+  - U9.9
+  - U9.10
+  - U9.2
+  - U9.15
+  - U10.7
+  - U10.8
+  - U10.9
+  - U10.10
+  - U10.2
+  - U10.15
+
+boundary:
+  - VCA_OUT_L     # <- block-4 (LP1 input L)
+  - VCA_OUT_R     # <- block-4 (LP1 input R)
+  - LP1_OUT_L     # -> block BP (LP1 output L)
+  - LP1_OUT_R     # -> block BP (LP1 output R)
+  - LP1_VCTRL     # <- control: LP1 V/oct frequency CV
+  - LP1_TILT      # <- control/mod: LP1 tilt CV
+  - LP1_RES       # <- control/mod: LP1 resonance CV
+  # shared Q-VCAs (U9/U10) now live on this sheet; cell B feeds block-8 (LP2):
+  - LP2_V1_L      # -> block-8 (Q-cell B In+, L)
+  - LP2_V1_R      # -> block-8 (Q-cell B In+, R)
+  - LP2_SUMINV_L  # <-> block-8 (Q-cell B In- and Out, L)
+  - LP2_SUMINV_R  # <-> block-8 (Q-cell B In- and Out, R)
+  - LP2_QIABC_L   # -> block-8 (Q-cell B Iabc, L)
+  - LP2_QIABC_R   # -> block-8 (Q-cell B Iabc, R)

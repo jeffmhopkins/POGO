@@ -41,22 +41,37 @@ jobs:
           python3 tools/components.py --check
           python3 tools/fetch_datasheets.py --check
           python3 tools/build_components.py --check
-          python3 kicad/generate_schematic.py --check
+          python3 tools/generate_schematic.py --check
+          # DRC-logic unit tests + Python↔JS editor parity (OS-independent → Linux only;
+          # run before the panel-layout DRC so the logic is validated independently).
+          python3 -m pip install --quiet pytest 2>/dev/null || apt-get install -y -qq python3-pytest
+          python3 -m pytest tools/test_drc.py -q
+          apt-get install -y -qq nodejs >/dev/null 2>&1 || true
+          python3 tools/test_parity.py
           python3 tools/build_panel.py --check
+          # Netlist visualizer: drift gate — the committed docs/netlist.html (served by
+          # Pages) must byte-match a fresh render of the nets, same as the BOM artifacts.
+          python3 tools/build_netlist_viz.py --check
+          # SPICE behavioral gate (change 0022; promoted to BLOCKING in 0023): per-block sim/ decks
+          # + .expect.yaml assertions verify analog behavior vs the plugin DSP. 15 decks across
+          # blocks A/1/3/4/5/6/7/8. Skips cleanly (exit 0) if ngspice is unavailable.
+          apt-get install -y -qq ngspice >/dev/null 2>&1 || true
+          python3 tools/build_spice.py --check
           # Regenerate plugin/res/Pogo-source.svg (source) AND plugin/res/Pogo.svg
           # (Inkscape text-to-path, loaded by VCV Rack) from panel-data.yaml.
           python3 tools/build_panel.py --resource --mfr
 
       # Publish the hardware outputs (committed + freshly generated) as a downloadable
       # bundle. These are validated by the --check gates above. Done once, from Linux
-      # (OS-independent). Excludes the STALE 40HP board schematics.
+      # (OS-independent). Bundles the per-block schematics.
       - name: Stage hardware artifact (schematics + BOM + panel)
         run: |
           mkdir -p /tmp/hw
-          cp kicad/pogo-block-*.kicad_sch kicad/pogo-shared-q.kicad_sch /tmp/hw/
+          cp kicad/pogo-block-*.kicad_sch /tmp/hw/
           cp kicad/pogo-bom.csv /tmp/hw/
           cp plugin/res/Pogo.svg /tmp/hw/ 2>/dev/null || true
-          cp design/panel-debug.html /tmp/hw/ 2>/dev/null || true
+          cp docs/panel-debug.html /tmp/hw/ 2>/dev/null || true
+          cp docs/netlist.html /tmp/hw/ 2>/dev/null || true
 
       - name: Upload hardware artifact
         uses: actions/upload-artifact@v7
@@ -104,8 +119,9 @@ jobs:
           python3 tools/components.py --check
           python3 tools/fetch_datasheets.py --check
           python3 tools/build_components.py --check
-          python3 kicad/generate_schematic.py --check
+          python3 tools/generate_schematic.py --check
           python3 tools/build_panel.py --check
+          python3 tools/build_netlist_viz.py --check
           # Regenerate Pogo-source.svg + Pogo.svg (Inkscape text-to-path) from the YAML.
           python3 tools/build_panel.py --resource --mfr
 
@@ -166,8 +182,9 @@ jobs:
           python3 tools/components.py --check
           python3 tools/fetch_datasheets.py --check
           python3 tools/build_components.py --check
-          python3 kicad/generate_schematic.py --check
+          python3 tools/generate_schematic.py --check
           python3 tools/build_panel.py --check
+          python3 tools/build_netlist_viz.py --check
           # Regenerate Pogo-source.svg + Pogo.svg (Inkscape text-to-path) from the YAML.
           python3 tools/build_panel.py --resource --mfr
 
@@ -191,40 +208,3 @@ jobs:
           path: artifact
           if-no-files-found: warn
           retention-days: 30
-
-  # ─── KiCad schematic generation + validation ──────────────────────────────
-  # DISABLED: generators are 40HP-era (see kicad/README-STALE.md).
-  # Will be re-enabled when 48HP KiCad generators are written (after Phase 3R complete).
-  #
-  # kicad-build:
-  #   name: KiCad · Generate & Validate
-  #   runs-on: ubuntu-latest
-  #
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v6
-  #
-  #     - name: Install kiutils
-  #       run: pip install kiutils
-  #
-  #     - name: Generate control board schematic
-  #       run: python3 kicad/generate_control_board.py
-  #
-  #     - name: Validate control board (9 checks, 326 pin assignments)
-  #       run: python3 kicad/validate_schematic.py kicad/pogo-control-board.kicad_sch
-  #
-  #     - name: Generate utility board schematic
-  #       run: python3 kicad/generate_utility_board.py
-  #
-  #     - name: Validate utility board (7 checks, 477 coordinate-verified pin assignments)
-  #       run: python3 kicad/validate_utility_board.py kicad/pogo-utility-board.kicad_sch
-  #
-  #     - name: Upload schematic artifact
-  #       uses: actions/upload-artifact@v7
-  #       with:
-  #         name: POGO-kicad-${{ github.run_number }}
-  #         path: |
-  #           kicad/*.kicad_sch
-  #           kicad/*.kicad_pro
-  #         if-no-files-found: error
-  #         retention-days: 30

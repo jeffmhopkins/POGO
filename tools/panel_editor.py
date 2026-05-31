@@ -1,6 +1,6 @@
 """panel_editor.py — builds the interactive panel editor HTML.
 
-The editor (`design/panel-editor.html`) is a single static HTML+JS file generated
+The editor (`docs/panel-editor.html`) is a single static HTML+JS file generated
 from `tools/panel-data.yaml`.  It lets you drag / rotate / add / delete components,
 change panel HP, add dividers, toggle layers, see live DRC, and export a
 comment-preserving YAML you can paste back over `tools/panel-data.yaml`.
@@ -26,6 +26,7 @@ from panel_rules import DesignRules
 
 _HERE = Path(__file__).resolve().parent
 _EDITOR_JS = _HERE / "editor" / "editor.js"
+_DRC_JS = _HERE / "editor" / "drc.js"
 _EDITOR_CSS = _HERE / "editor" / "editor.css"
 
 
@@ -43,6 +44,13 @@ def _export_rules_constants(rules: DesignRules) -> dict[str, Any]:
             "LED_CY":         list(rules_mod.LED_CY),
             "SLIDER_V45_CY":  list(rules_mod.SLIDER_V45_CY),
         },
+        # Real keepout geometry per type {body, pads, legs} + copper clearance — the DRC
+        # overlap check uses these so the live editor matches panel_rules._check_pcb_overlaps.
+        "shapes": {
+            t: {k: [list(r) for r in v] for k, v in kicad_mod.footprint_shapes(t).items()}
+            for t in kicad_mod._FOOTPRINT_MAP
+        },
+        "pad_clearance_mm": rules_mod.PCB_PAD_CLEARANCE_MM,
         # Panel-face nut / hole radii
         "panel_r": {
             "jack":        rules.jack_nut_r,
@@ -123,7 +131,7 @@ def build_editor_html(data: dict, rules: DesignRules, yaml_text: str) -> str:
     }
     payload_json = json.dumps(payload, ensure_ascii=False)
 
-    js  = _EDITOR_JS.read_text(encoding="utf-8")
+    js  = _DRC_JS.read_text(encoding="utf-8") + "\n" + _EDITOR_JS.read_text(encoding="utf-8")
     css = _EDITOR_CSS.read_text(encoding="utf-8")
 
     return f"""<!DOCTYPE html>

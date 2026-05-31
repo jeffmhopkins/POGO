@@ -213,13 +213,13 @@ zones:
     col_pitch: 11.43
     cols: 3
     components:
-      # PLANNED control — not yet implemented in the plugin (no MOD_SRC_PARAM); shown
-      # on the panel but intentionally has no cpp_param link until the DSP exists.
+      # 3-way mod-source select: LFO1 / LFO2 / EXT (MOD_IN jack). DW5 = 3-position.
       - id: MOD_SRC_SW
         type: toggle_dw5
         col: 0
         cy: 89.5
         label: "MOD SRC"
+        cpp_param: "MOD_SRC_PARAM"
       - id: SCALE
         type: trimpot
         col: 1
@@ -291,18 +291,18 @@ zones:
       # ── Attenuverters — compact pot (Bourns PTV09A style), no label ──────────
       - id: LP1_FREQ_ATT
         type: trimpot
-        col: 0
-        cy: 100.0
+        cx: 39.88
+        cy: 98.996
         cpp_param: "LP1_FREQ_ATT_PARAM"
       - id: LP1_TILT_ATT
         type: trimpot
-        col: 1
-        cy: 100.0
+        cx: 51.435
+        cy: 99.5
         cpp_param: "LP1_TILT_ATT_PARAM"
       - id: LP1_RES_ATT
         type: trimpot
-        col: 2
-        cy: 100.0
+        cx: 62.865
+        cy: 99.5
         cpp_param: "LP1_RES_ATT_PARAM"
       # ── CV input jacks (cy=112.0 matches section-0 bottom row) ───────────────
       - id: LP1_FREQ_IN
@@ -363,13 +363,13 @@ zones:
       # ── CV attenuverter trim pots ────────────────────────────────────────────
       - id: BP_FREQ_ATT
         type: trimpot
-        col: 0
-        cy: 100.0
+        cx: 74.295
+        cy: 99.5
         cpp_param: "BP_FREQ_ATT_PARAM"
       - id: BP_TILT_ATT
         type: trimpot
-        col: 1
-        cy: 100.0
+        cx: 85.725
+        cy: 99.5
         cpp_param: "BP_TILT_ATT_PARAM"
       # ── CV input jacks ───────────────────────────────────────────────────────
       - id: BP_FREQ_IN
@@ -437,18 +437,18 @@ zones:
         cpp_id: "BP1_CLIP_LIGHT"
       - id: BP1_FREQ_ATT
         type: trimpot
-        col: 0
-        cy: 100.0
+        cx: 97.155
+        cy: 99.5
         cpp_param: "BP1_FREQ_ATT_PARAM"
       - id: BP1_TILT_ATT
         type: trimpot
-        col: 1
-        cy: 100.0
+        cx: 108.585
+        cy: 99.5
         cpp_param: "BP1_TILT_ATT_PARAM"
       - id: BP1_DIST_ATT
         type: trimpot
-        col: 2
-        cy: 100.0
+        cx: 120.015
+        cy: 99.5
         cpp_param: "BP1_DIST_ATT_PARAM"
       - id: BP1_FREQ_IN
         type: jack_input
@@ -521,18 +521,18 @@ zones:
         cpp_id: "BP2_CLIP_LIGHT"
       - id: BP2_FREQ_ATT
         type: trimpot
-        col: 0
-        cy: 100.0
+        cx: 131.445
+        cy: 99.5
         cpp_param: "BP2_FREQ_ATT_PARAM"
       - id: BP2_TILT_ATT
         type: trimpot
-        col: 1
-        cy: 100.0
+        cx: 142.875
+        cy: 99.5
         cpp_param: "BP2_TILT_ATT_PARAM"
       - id: BP2_DIST_ATT
         type: trimpot
-        col: 2
-        cy: 100.0
+        cx: 154.305
+        cy: 99.5
         cpp_param: "BP2_DIST_ATT_PARAM"
       - id: BP2_FREQ_IN
         type: jack_input
@@ -605,18 +605,18 @@ zones:
         cpp_id: "BP3_CLIP_LIGHT"
       - id: BP3_FREQ_ATT
         type: trimpot
-        col: 0
-        cy: 100.0
+        cx: 165.735
+        cy: 99.5
         cpp_param: "BP3_FREQ_ATT_PARAM"
       - id: BP3_TILT_ATT
         type: trimpot
-        col: 1
-        cy: 100.0
+        cx: 177.165
+        cy: 99.5
         cpp_param: "BP3_TILT_ATT_PARAM"
       - id: BP3_DIST_ATT
         type: trimpot
-        col: 2
-        cy: 100.0
+        cx: 188.595
+        cy: 99.5
         cpp_param: "BP3_DIST_ATT_PARAM"
       - id: BP3_FREQ_IN
         type: jack_input
@@ -684,13 +684,13 @@ zones:
         cpp_param: "HP_RES_PARAM"
       - id: HP_FREQ_ATT
         type: trimpot
-        col: 0
-        cy: 100.0
+        cx: 200.025
+        cy: 99.5
         cpp_param: "HP_FREQ_ATT_PARAM"
       - id: HP_RES_ATT
         type: trimpot
-        col: 1
-        cy: 100.0
+        cx: 211.455
+        cy: 99.5
         cpp_param: "HP_RES_ATT_PARAM"
       - id: HP_FREQ_IN
         type: jack_input
@@ -752,13 +752,13 @@ zones:
         cpp_param: "LP2_RES_PARAM"
       - id: LP2_FREQ_ATT
         type: trimpot
-        col: 0
-        cy: 100.0
+        cx: 222.885
+        cy: 99.5
         cpp_param: "LP2_FREQ_ATT_PARAM"
       - id: LP2_RES_ATT
         type: trimpot
-        col: 1
-        cy: 100.0
+        cx: 234.315
+        cy: 99.5
         cpp_param: "LP2_RES_ATT_PARAM"
       - id: LP2_FREQ_IN
         type: jack_input

@@ -1,24 +1,24 @@
 # aux: Mod Bus Core (Processor: Scale + Offset + Clamp)
 
-> ⚠️ **STALE** — Circuit library entry pending re-verification against current panel design (2026-05-28).
+> ✅ **Re-verified 2026-05-30** against the locked plugin (change 0018). Source is the MOD_SRC
+> 3-way switch (LFO1 / LFO2 / External), not an LFO1 auto-normal; the 3 MOD indicator LEDs are
+> removed (no plugin/panel backing); distribution feeds **18** attenuverter destinations.
+> 🔧 **Change 0020 §H:** destinations must normal **low-Z directly** to the bus (jack tip-switch breaks it) — a series R_SRC_NORM into the ~few-k destination node throttled mod depth to ~3%. The single MB_INV output cannot drive all destinations; use a (paralleled) **distribution buffer**, and/or raise destination input impedance to cut the load. OFFSET scaled to ±5V (plugin). SPICE: specs/block-3/sim/modbus_depth.cir.
 
-Design status: [ ] draft → [ ] reviewed → [ ] validated on prototype
+Design status: [x] draft → [ ] reviewed → [ ] validated on prototype
 
 ## Overview
 
-Analog implementation of the DSP ModBusProcessor. Takes the module's primary modulation
-source (LFO1 when unpatched; external CV when MOD_INPUT is patched), applies an
-exponential-taper gain (0.2×–5×) and a bipolar offset (±5V), then clamps the output
-to ±10V. Drives the mod bus distribution rail that feeds all 19 attenuverter destinations.
-
-Also drives three indicator LEDs: MOD_CLIP (|V_bus| ≥ 9.9V), MOD_POS (V_bus > 0),
-MOD_NEG (V_bus < 0).
+Analog implementation of the DSP ModBusProcessor. The modulation source is chosen by the
+MOD_SRC 3-way switch — LFO1 / LFO2 / External(MOD_IN) — ahead of this core (`Pogo.cpp:363–366`).
+The core applies an exponential-taper gain (0.2×–5×) and a bipolar offset (±5V), then clamps
+the output to ±10V, driving the mod bus distribution rail that feeds all **18** attenuverter
+destinations (plus a raw VCA normal handled in block 4).
 
 Chosen because:
 - Inverting summing amplifier (MB_AMP) followed by an inverter (MB_INV) is the standard
   analog summing architecture: transparent, low-noise, DC-accurate
-- Two TL074 halves handle MB_AMP and MB_INV; remaining two halves are available for
-  LED drivers or utility functions
+- Two TL074 halves handle MB_AMP and MB_INV; the remaining two halves are spare
 - A single TL074 (SOIC-14) for the entire mod bus processor is IC-count efficient
 - ±10V output clamp uses back-to-back zener diodes or a TL431-based precision clamp
 
@@ -28,11 +28,9 @@ Chosen because:
 ASCII fallback:
 
 ```
- LFO1_OUT ──(normally closed via J_MOD_IN tip switch)─────────────────┐
-                                                                        │
- MOD_IN jack ────────────────────────────────────────────────────────► │
-                                                                        │
- [100Ω] + [BAT54S] protection ─────────────────────────────────────► V_src
+ LFO1 ──► SW7 A1(1) ┐
+ LFO2 ──► SW7 B1(4) ├─ MOD_SRC (DW5, COMs bridged) ─► A_COM(2) ─────► V_src
+ MOD_IN ─[100Ω]+[BAT54S]─► SW7 B2(6) (EXT) ┘
                                                                         │
                          R_src (AMOUNT pot + end resistors)             │
  V_src ──────────────────[─────────────────────]───┐
@@ -54,20 +52,14 @@ ASCII fallback:
                                                          │
                                                     V_modbus (correct polarity)
                                                          │
-                                              ┌──────────┴──────────┐
-                                              │                      │
-                                         [LED drivers]         MOD_BUS RAIL
-                                         (MOD_POS, MOD_NEG,    → all attenuverters
-                                          MOD_CLIP)
+                                                         │
+                                                   MOD_BUS RAIL
+                                                   → 18 attenuverters
+                                                     (+ raw VCA normal, block 4)
 ```
 
-LED driver detail:
-
-```
- V_modbus ──[R_LED_P]──► LED_POS (green)  + comparator ref = 0V → lights when V > 0
- V_modbus ──[R_LED_N]──► LED_NEG (red)    + comparator ref = 0V → lights when V < 0
- |V_modbus| ──[comparator at 9.9V ref]──► LED_CLIP (yellow/amber) → lights when |V| ≥ 9.9V
-```
+*(No MOD_POS/NEG/CLIP indicator LEDs: the plugin drives none and the locked panel has no
+footprints for them — removed, change 0018.)*
 
 ## Transfer Function
 
@@ -131,36 +123,32 @@ Option B: external BAT54 diode clamp to ±10V reference (TL431-based)
 Recommended: Option A (simpler) with BZX84-C10 10V zeners (SOT-23) in the MB_INV
 feedback loop, back-to-back.
 
-At clamp onset (|V| ≥ 9.9V due to zener tolerance), MOD_CLIP LED activates.
+At clamp onset (|V| ≥ 9.9V due to zener tolerance), the zeners conduct and hold the output.
 ```
 
-### MOD_CLIP Threshold
+### MOD_CLIP / clamp behavior
 
-DSP: `|busV| ≥ 9.9V`. Hardware: zener knee typically 9.9–10.1V. The LED is driven
-by a comparator with a 9.9V reference (two equal resistors from 10V zener node to GND,
-midpoint = 5V; then voltage divider from V_modbus compared against 9.9V reference).
-Alternatively: the MOD_CLIP LED turns on when the zener clamps (zener current ≥ LED
-threshold current) — simple and self-indicating.
+DSP: `|busV| ≥ 10V` hard clamp. Hardware: back-to-back BZX84C10 zeners in the MB_INV
+feedback path; zener knee typically 9.9–10.1V (±5% tolerance → 9.5–10.5V onset). There is
+no MOD_CLIP indicator LED (the plugin drives none; the locked panel has no footprint).
 
 ## Design Choices & Rationale
 
 ### TL074 for Entire Processor
 
-MB_AMP (half A) + MB_INV (half B) + LED comparator (half C) + spare (half D):
-All four functions fit in one TL074CDT (SOIC-14). This is compact and keeps the
-mod bus processor as a single IC plus passives on a small board section.
+MB_AMP (half A) + MB_INV (half B); halves C and D spare. The whole mod bus processor is one
+TL074CDT (SOIC-14) plus passives on a small board section.
 
 ### Mod Bus Distribution
 
-V_modbus drives 19 attenuverter inputs in parallel. Each attenuverter pot is 10 kΩ
-wired across V_modbus and −V_modbus (bipolar). Total load on V_modbus:
-  19 × 10 kΩ in parallel = 10 kΩ / 19 ≈ 526 Ω
+V_modbus drives 18 per-destination R_SRC_NORM resistors (100 kΩ each) — the bus normals into
+each override jack through its 100 kΩ. Total load on V_modbus:
+  18 × 100 kΩ in parallel ≈ 5.6 kΩ
 
-At V_modbus = ±10 V and 526 Ω load: I = ±19 mA — marginal for a single TL074 output.
-To achieve reliable ±10 V swing, MB_PROC_A uses both spare sections (halves C and D)
-paralleled as the distribution buffer (each carries ~9.5 mA). A 47 Ω series resistor
-on each output before the join prevents oscillation. This is entirely within the four
-sections of MB_PROC_A; no additional IC is needed. See block-3/spec.md for details.
+At V_modbus = ±10 V and 5.6 kΩ load: I ≈ ±1.8 mA — easily driven by the MB_INV output (U3.7)
+directly; **no distribution buffer is needed** (halves C+D stay spare). The attenuverter pot
+for each destination sits on the destination's V_src node (bus-via-R_SRC_NORM when unpatched,
+or the override jack when patched), not directly across the bus rail.
 
 ### Offset Reference
 
@@ -173,12 +161,10 @@ is consistent with the mod bus gain calibration.
 
 | Ref (generic) | Part | Package | Value | Notes |
 |---|---|---|---|---|
-| MB_PROC_A | TL074CDT | SOIC-14 | — | Half A = MB_AMP, Half B = MB_INV, Halves C+D = distribution buffer (paralleled) |
-| MB_PROC_B | TL074CDT | SOIC-14 | — | Halves A/B/C = LED comparators (POS, NEG, CLIP); half D spare |
+| MB_PROC_A | TL074CDT | SOIC-14 | — | Half A = MB_AMP, Half B = MB_INV; halves C+D spare |
 | R_f | Resistor | 0603 | 100 kΩ | MB_AMP feedback; sets gain denominator |
 | R_src | Pot + end R | Panel | 492 kΩ total | AMOUNT pot: 470 kΩ log taper + 22 kΩ floor resistor; sets 0.2×–4.55× (≈0.2×–5×) range |
 | R_src_floor | Resistor | 0603 | 22 kΩ | Floor input resistor in series with pot; limits max gain to 100/22 = 4.55× |
-| R_47k | Resistor | 0603 | 47 Ω | Series resistor on each paralleled buffer output (×2) before joining; prevents oscillation |
 | R_off | Resistor | 0603 | 100 kΩ | Offset input resistor; R_f/R_off = 1 → ±5V offset |
 | R_inv_in | Resistor | 0603 | 100 kΩ | MB_INV input resistor |
 | R_inv_f | Resistor | 0603 | 100 kΩ | MB_INV feedback; 1% tolerance |
@@ -187,10 +173,7 @@ is consistent with the mod bus gain calibration.
 | RV_MB_AMOUNT_MAX | Bourns 3224W | SMD | 10 kΩ | 5× gain calibration trim in R_src leg |
 | R_cv_in | Resistor | 0603 | 100 Ω | MOD_IN jack series protection |
 | D_cv_in | BAT54S | SOT-23 | — | MOD_IN input clamp |
-| R_LED_P, R_LED_N | Resistor | 0603 | 10 kΩ | MOD_POS/NEG LED current limiting |
-| LED_POS | LED | 0603 | green | MOD_POS indicator |
-| LED_NEG | LED | 0603 | red | MOD_NEG indicator |
-| LED_CLIP | LED | 0603 | amber/yellow | MOD_CLIP indicator |
+| SW_MOD_SRC | Dailywell DW5 | sub-mini toggle | — | 3-way source select LFO1/LFO2/EXT (COMs bridged) |
 | C_VCC, C_VEE | Ceramic bypass | 0603 | 100 nF | Per IC supply pin |
 
 ## Performance Characteristics
@@ -201,10 +184,10 @@ is consistent with the mod bus gain calibration.
 | Gain taper | ~log (perceptual) | Log-taper pot |
 | Offset range | ±5V | OFFSET pot full sweep |
 | Output clamp | ±10V | BZX84-C10 zeners |
-| MOD_CLIP threshold | ±9.9V (±10V nominal) | Zener knee |
+| Clamp onset | ±9.9V (±10V nominal) | Zener knee |
 | Bandwidth | >100 kHz | TL074; not audio-critical |
 | Offset null | <10 mV | After RV_MB_ZERO trim |
-| Output drive | 22 mA (buffered) | 22 attenuverter loads |
+| Output drive | ~1.8 mA | 18 × 100 kΩ R_SRC_NORM loads (direct, no buffer) |
 
 ## Known Gotchas / Assembly Notes
 
@@ -218,19 +201,15 @@ is consistent with the mod bus gain calibration.
   V_modbus = 0V (null the op-amp input offset voltage)
 - RV_MB_AMOUNT_MAX trim: apply a reference signal (e.g. 1V DC), set AMOUNT
   to max CW, trim until V_modbus = 5× input (5V DC)
-- Mod bus distribution buffer: essential given the 455 Ω combined load from
-  22 attenuverters; without it, TL074 half B is dissipating up to 220 mW (!!!)
-  at maximum V_modbus — add the buffer, it is not optional
-- MOD_IN jack normalling: LFO1_OUT connects to the NC contact of J_MOD_IN;
-  when unpatched, LFO1 feeds the mod bus; when patched, external CV takes over.
-  LFO1_OUT still outputs its signal independently (LFO1 jack is a separate output)
-- LED polarity indicators (MOD_POS green, MOD_NEG red): use a simple diode bridge
-  or zero-crossing comparator (TL074 half C) to drive each LED only when V > 0
-  or V < 0 respectively; current limit 1-2 mA for 0603 LEDs
+- No distribution buffer needed: the bus drives 18 × 100 kΩ R_SRC_NORM resistors (~5.6 kΩ,
+  ~1.8 mA), well within the MB_INV output (U3.7). Halves C+D of MB_PROC_A stay spare.
+- MOD_SRC select: the bus source is the DW5 3-way switch (LFO1 / LFO2 / External), with the
+  DPDT commons bridged (see Schematic). MOD_IN feeds only the EXT throw — no auto-normal.
+  Both LFO outputs remain live at their own jacks regardless of switch position.
 
 ## Used By
 
 | Block | Instance | Board | Notes |
 |---|---|---|---|
-| block-3 | MB_PROC | Control | Single instance; feeds all 22 attenuverters |
-| block-2 | LFO1 normalized in | Control | LFO1_OUT → NC contact of J_MOD_IN |
+| block-3 | MB_PROC | utility | Single instance; feeds 18 attenuverters + raw VCA normal |
+| block-3 | MOD_SRC (SW7, DW5) | control | 3-way select LFO1/LFO2/EXT → V_src (COMs bridged) |

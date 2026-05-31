@@ -1,0 +1,10 @@
+deck: bp3_normal.cir
+description: BP3 R→L output normal — §G fix (change 0020 M1)
+plugin_ref: "plugin/src/Pogo.cpp:497-499 — BP3_R unpatched outputs bp3OutL (clean L), L jack undisturbed"
+measurements:
+  - name: j28_buggy     # old wiring: two post-1k outputs tied -> (L+R)/2 = 2.0 (the bug)
+    expect: 2.0
+    tol_abs: 0.02
+  - name: j28_fixed     # §G: switch lug taps the stiff L buffer -> clean L = 3.0
+    expect: 3.0
+    tol_abs: 0.02

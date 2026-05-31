@@ -1,0 +1,10 @@
+deck: lp1_tilt_passive.cir
+description: LP1 §B passive tilt sum — tilt octave-weight matches freq (change 0020 §B; saved a TL072)
+plugin_ref: "plugin/src/Pogo.cpp — lp1TiltV = LP1_TILT×5; L=base+tilt, R=base−tilt sum 1:1 with V_freq"
+measurements:
+  - name: freq_mv       # base mV per 1V V_freq
+    expect: 17.57
+    tol_abs: 0.3
+  - name: tilt_mv       # base mV per 1V V_tilt — must equal freq (1:1 octave weight, R_TILT=R_VOCT+RV_mid)
+    expect: 17.57
+    tol_abs: 0.3

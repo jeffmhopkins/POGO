@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POGO — Front Panel</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; background: #0d0d0d; color: #ccc;
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; padding: 24px;
+    }
+    .wrap { width: min(1100px, 100%); margin: 0 auto; }
+    a { color: #7fe7ff; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    h1 { color: #00d4ff; letter-spacing: .08em; margin: 0 0 2px; font-size: 20px; }
+    h1 .dot { color: #ff8800; }
+    .sub { color: #4a6070; margin: 0 0 18px; letter-spacing: .1em; font-size: 12px; }
+    .frame {
+      background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; padding: 18px;
+      overflow: auto;
+    }
+    .frame object { display: block; width: 100%; height: auto; }
+    .bar { margin: 14px 0 0; font-size: 12px; color: #4a6070; display: flex; gap: 16px; flex-wrap: wrap; }
+    footer { color: #3a3a3a; font-size: 11px; margin-top: 22px; }
+    footer a { color: #4a6070; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>POGO <span class="dot">·</span> FRONT PANEL</h1>
+    <p class="sub"><a href="index.html">&larr; docs</a> &nbsp;·&nbsp; 48HP faceplate, generated from <code>tools/panel-data.yaml</code></p>
+
+    <div class="frame">
+      <object type="image/svg+xml" data="Pogo.svg" aria-label="POGO 48HP front panel">
+        Your browser can't display the embedded SVG —
+        <a href="Pogo.svg">open it directly</a>.
+      </object>
+    </div>
+
+    <div class="bar">
+      <a href="Pogo.svg" target="_blank" rel="noopener">Open SVG &nearr;</a>
+      <a href="panel-editor.html">Interactive Panel Editor &rarr;</a>
+      <a href="https://github.com/jeffmhopkins/POGO/blob/main/tools/panel-data.yaml" target="_blank" rel="noopener">panel-data.yaml (source) &nearr;</a>
+    </div>
+
+    <footer><a href="https://github.com/jeffmhopkins/POGO" target="_blank" rel="noopener">github.com/jeffmhopkins/POGO</a></footer>
+  </div>
+</body>
+</html>

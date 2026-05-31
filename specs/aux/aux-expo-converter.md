@@ -1,8 +1,11 @@
 # aux: Exponential Frequency Converter (V/Oct to Iabc)
 
-> ⚠️ **STALE** — Circuit library entry pending re-verification against current panel design (2026-05-28).
+> ✅ **Re-verified 2026-05-30** (content rewritten 2026-05-29) against the locked plugin via
+> block-5. THAT340 V/oct→Iabc converter; `f0 = f_ref·2^V` (1 V/oct). The per-channel-expo
+> decision (one THAT340 per channel for true stereo tilt) is current. Shared by LP1/LP2/HP/BP.
+> 🔧 **Change 0020:** added the missing **V/oct base divider** — series R_VOCT (≈49.9k) + a **Vishay TFPT 1k +4110ppm/K tempco** shunt to GND (the THAT340 has NO internal tempco). Without it the base saw full V/oct and railed. Tilt (LP1/BP) sums passively at this node via an equal series R. SPICE: specs/block-5/sim/expo_voct.cir, lp1_tilt_passive.cir.
 
-Design status: [ ] draft → [ ] reviewed → [ ] validated on prototype
+Design status: [x] draft → [ ] reviewed → [ ] validated on prototype
 
 ## Overview
 
@@ -31,7 +34,7 @@ ASCII fallback:
                                                            ▼
                                                ┌──────────────────────┐
   RV_1VOCT ──[R_VOCT]──────────────────────►  │   THAT340 (U_EXPO)   │
-                                               │   SOIC-8             │
+                                               │   SOIC-14             │
   RV_REF ──[R_REF]──[I_ref source]──────────► │                      │
                                                │  Q1: expo transistor │
                                                │  Q2: tempco sensor   │
@@ -100,10 +103,12 @@ Since V_ctrl steps 1V per octave, the scaling network divides V_ctrl by:
 
 ### Temperature Compensation
 
-THAT340 integrates a PTAT bias network. As temperature rises, V_T increases, which
-would reduce g_m and flatten tracking. The PTAT current increases proportionally with
-temperature, maintaining constant V_be_diff / V_T across temperature. No external
-tempco resistor is needed.
+⚠️ **Corrected (change 0020):** the THAT340 is a plain matched-NPN/PNP array — it does **NOT** have an
+internal PTAT/tempco network (the claim above is wrong). The −1/T drift of V_BE/V_T in the V/oct
+divider must be compensated by an **external +3300–3500 ppm/°C tempco resistor**; POGO uses a **Vishay
+TFPT (+4110 ppm/K)** as the divider's shunt leg (the trimmable V/oct slope absorbs the ~20% TCR excess).
+The THAT340's value is its tight **V_BE matching** (low offset between the expo and reference
+transistors), not temperature compensation.
 
 ## Design Choices & Rationale
 
@@ -115,7 +120,7 @@ achieves comparable accuracy but requires:
 - More board area
 - Additional trimming for initial matching
 
-THAT340 solves all three issues on-chip. SOIC-8 footprint is compact.
+THAT340 solves all three issues on-chip. SOIC-14 footprint is compact.
 
 ### One Expo Converter per Filter Block (Shared L/R)
 
@@ -154,7 +159,7 @@ Calibration procedure:
 
 | Ref (generic) | Part | Package | Value | Notes |
 |---|---|---|---|---|
-| U_EXPO | THAT340S14-U | SOIC-8 | — | Matched NPN quad; use Q1+Q2 for expo pair |
+| U_EXPO | THAT340S14-U | SOIC-14 | — | Matched NPN quad; use Q1+Q2 for expo pair |
 | R_IREF_A | Resistor | 0603 | 1 MΩ | Fixed lower bound of I_ref network; R_total at midpoint = 1250 kΩ → ~9.6 µA |
 | RV_REF | Bourns 3224W | SMD | 500 kΩ | f_ref trim rheostat; R_total range 1000 kΩ–1500 kΩ; all block targets within 20–80% travel |
 | R_VOCT | Resistor | 0603 | 47 kΩ | V/oct scaling R; with R_E=1kΩ and RV_1VOCT=7.5kΩ: ratio=18.0 mV/V = V_T×ln(2) exactly |
@@ -170,9 +175,9 @@ Calibration procedure:
 | block-5 LP1 | 632 Hz  | 47 nF  | 9.69 µA  |
 | block-8 LP2 | 632 Hz  | 47 nF  | 9.69 µA  |
 | block-7 HP  | 632 Hz  | 47 nF  | 9.69 µA  |
-| block-6 BP1 | 200 Hz  | 150 nF | 9.80 µA  |
-| block-6 BP2 | 1500 Hz | 22 nF  | 10.78 µA |
-| block-6 BP3 | 6000 Hz | 4.7 nF | 9.21 µA  |
+| block-6 BP1 | 400 Hz | 68 nF | 8.89 µA |
+| block-6 BP2 | 400 Hz | 68 nF | 8.89 µA |
+| block-6 BP3 | 400 Hz | 68 nF | 8.89 µA |
 
 I_abc_ref = f_ref × 2π × C_int × 52mV  (C_int varies per block; see block spec)
 All blocks target I_abc_ref ≈ 9–11 µA — C_int is chosen to achieve this consistent operating range.
@@ -202,9 +207,9 @@ For BP blocks the same expo architecture applies; only RV_REF trim setpoint diff
   the panel pot wiper directly (use a TL072 voltage follower)
 - Iabc output traces to OTA Iabc pins should be short; Iabc is a current, so some
   length is tolerable, but keep trace capacitance <10 pF to avoid HF on bias
-- One THAT340 per filter block means 5 THAT340 ICs total (LP1, LP2, HP, BP1, BP2/BP3
-  could share if f_ref is similar — but BP1/BP2/BP3 have different f_ref values,
-  so each needs its own converter; total = 5 expo converters for 5 filter blocks)
+- All three BP bands share f_ref = 400 Hz (change 0018); per-band tilt is realized with a
+  **per-channel** L/R expo (2 THAT340/band) rather than one shared converter, so the THAT340
+  count is higher than one-per-block — see the generated BOM for the exact count.
 - Tilt CV (LP1_TILT, BP_TILT) requires per-channel frequency offset; if using a
   single shared expo, tilt must be implemented as a summing offset at the expo
   input before the Q1 base — document this as an open item in Phase 3R
@@ -216,6 +221,6 @@ For BP blocks the same expo architecture applies; only RV_REF trim setpoint diff
 | block-5 | EXPO_LP1 | Control | f_ref = 632 Hz; drives LP1_L and LP1_R OTA Iabc |
 | block-8 | EXPO_LP2 | Control | f_ref = 632 Hz; drives LP2_L and LP2_R OTA Iabc |
 | block-7 | EXPO_HP | Control | f_ref = 632 Hz; drives HP_L and HP_R OTA Iabc |
-| block-6 | EXPO_BP1 | Control | f_ref = 200 Hz; drives BP1_L and BP1_R OTA Iabc |
-| block-6 | EXPO_BP2 | Control | f_ref = 1500 Hz; drives BP2_L and BP2_R OTA Iabc |
-| block-6 | EXPO_BP3 | Control | f_ref = 6000 Hz; drives BP3_L and BP3_R OTA Iabc |
+| block-6 | EXPO_BP1 | Control | f_ref = 400 Hz; per-channel L/R expo (true BP tilt) → BP1 OTA Iabc |
+| block-6 | EXPO_BP2 | Control | f_ref = 400 Hz; per-channel L/R expo (true BP tilt) → BP2 OTA Iabc |
+| block-6 | EXPO_BP3 | Control | f_ref = 400 Hz; per-channel L/R expo (true BP tilt) → BP3 OTA Iabc |

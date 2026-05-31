@@ -4,7 +4,7 @@
 Usage (run from repo root):
     python3 tools/build_panel.py              # --resource + --mfr + --design (default)
     python3 tools/build_panel.py --resource   # writes plugin/res/Pogo-source.svg only
-    python3 tools/build_panel.py --design     # writes design/panel-debug.html only
+    python3 tools/build_panel.py --design     # writes docs/panel-debug.html only
     python3 tools/build_panel.py --mfr        # writes plugin/res/Pogo.svg via inkscape
     python3 tools/build_panel.py --cpp        # prints C++ stubs to stdout
     python3 tools/build_panel.py --check      # DRC only; exit 1 on violations
@@ -28,8 +28,7 @@ import yaml  # PyYAML
 REPO_ROOT   = Path(__file__).resolve().parent.parent
 SVG_SOURCE  = REPO_ROOT / "plugin" / "res" / "Pogo-source.svg"
 SVG_MFR     = REPO_ROOT / "plugin" / "res" / "Pogo.svg"
-HTML_DEBUG  = REPO_ROOT / "design" / "panel-debug.html"
-HTML_EDITOR = REPO_ROOT / "design" / "panel-editor.html"
+HTML_DEBUG  = REPO_ROOT / "docs" / "panel-debug.html"
 DOCS_EDITOR = REPO_ROOT / "docs" / "panel-editor.html"   # GitHub Pages deploy copy
 DATA_FILE   = REPO_ROOT / "tools" / "panel-data.yaml"
 
@@ -1331,8 +1330,8 @@ Query commands (no files written):
 """,
     )
     parser.add_argument("--resource",  action="store_true", help="Write plugin/res/Pogo-source.svg")
-    parser.add_argument("--design",    action="store_true", help="Write design/panel-debug.html")
-    parser.add_argument("--editor",    action="store_true", help="Write design/panel-editor.html (interactive editor)")
+    parser.add_argument("--design",    action="store_true", help="Write docs/panel-debug.html")
+    parser.add_argument("--editor",    action="store_true", help="Write docs/panel-editor.html (interactive editor)")
     parser.add_argument("--mfr",       action="store_true", help="Write plugin/res/Pogo.svg via inkscape (included in default build)")
     parser.add_argument("--cpp",       action="store_true", help="Print C++ stubs to stdout")
     parser.add_argument("--check",     action="store_true", help="DRC only; exit 1 on violations")
@@ -1461,10 +1460,6 @@ Query commands (no files written):
     if args.editor:
         yaml_text     = DATA_FILE.read_text(encoding="utf-8")
         editor_html   = build_editor_html(data, rules, yaml_text)
-        HTML_EDITOR.parent.mkdir(parents=True, exist_ok=True)
-        HTML_EDITOR.write_text(editor_html, encoding="utf-8")
-        print(f"Wrote {HTML_EDITOR.relative_to(REPO_ROOT)}")
-        # Keep the GitHub Pages deploy copy in sync (self-contained single file).
         DOCS_EDITOR.parent.mkdir(parents=True, exist_ok=True)
         DOCS_EDITOR.write_text(editor_html, encoding="utf-8")
         print(f"Wrote {DOCS_EDITOR.relative_to(REPO_ROOT)}")

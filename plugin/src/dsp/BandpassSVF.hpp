@@ -31,23 +31,21 @@ struct TripleBandpass {
 	SVFGroup groups[3];
 	float prevOut[3] = {};
 
-	// x:      main input for BP1 + BP2
-	// bp3x:   input for BP3 (ALT path when patched; else same as x)
+	// xin:    per-band input [3] — each group gets its own (already-distorted) feed.
+	//         Distortion now sits BEFORE the bandpass, so BP1/BP2 take the distorted
+	//         LP1 path and BP3 takes the distorted main/ALT path; the caller builds these.
 	// tiltV:  per-group stereo tilt [V/oct] — caller passes (globalTilt + groupTilt) for L,
 	//         or -(globalTilt + groupTilt) for R so each group can have independent spread
-	float process(float x, float bp3x, float freqV[3], float qParam[3],
-	              float tiltV[3], float sampleRate) {
+	// Results land in prevOut[3]; the caller sums/mixes them.
+	void process(const float xin[3], float freqV[3], float qParam[3],
+	             float tiltV[3], float sampleRate) {
 		constexpr float F_REF[3] = {400.f, 400.f, 400.f};
-		float sum = 0.f;
 		for (int i = 0; i < 3; i++) {
 			float f0 = F_REF[i] * std::pow(2.f, freqV[i] + tiltV[i]);
 			f0 = clamp(f0, 10.f, sampleRate * 0.48f);
 			float Q  = 0.5f * std::pow(400.f, qParam[i]);
-			float y  = groups[i].process((i == 2) ? bp3x : x, f0, Q, sampleRate);
-			prevOut[i] = y;
-			sum += y;
+			prevOut[i] = groups[i].process(xin[i], f0, Q, sampleRate);
 		}
-		return sum;
 	}
 
 	void reset() {

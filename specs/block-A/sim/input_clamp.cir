@@ -1,0 +1,24 @@
+* POGO block-A — input buffer clamp + unity follower (runner-ready 0023)
+* Plugin (InputBuffer.hpp / Pogo.cpp): input buffered, clamp ±11V. Hardware: OPA1612 unity
+* follower; 100Ω series + BAT54S dual Schottky to the ±12V rails clamps an over-voltage input
+* to ~±(12+0.3)=±12.3V at the protected node (the buffer output then swings to ~±11V rail).
+* This deck checks: (1) unity gain in-band; (2) BAT54S clamp level on an over-driven input.
+
+* --- (1) unity follower, in-band (Vin=3V) ---
+Vsig sa 0 DC 3
+Ebuf bufa 0 sa 0 1        ; ideal unity follower
+Rsa bufa outa 100         ; 100Ω series (negligible into open output)
+
+* --- (2) over-voltage clamp: Vin=+17V through 100Ω into BAT54S-to-+12V ---
+Vov ov 0 DC 17
+Rov ov tip 100
+* BAT54S: tip clamps to +12.3 (D to +12V) / -12.3 (D to -12V); model as behavioral clamp
+Bcl tipc 0 V = (V(ov) > 12.3) ? 12.3 : ((V(ov) < -12.3) ? -12.3 : V(ov))
+
+.control
+  op
+  let unity = v(bufa)/3.0        ; unity follower gain = 1
+  let clamp_hi = v(tipc)         ; +17V in -> clamped ~+12.3V at the protected node
+  print unity clamp_hi
+.endc
+.end

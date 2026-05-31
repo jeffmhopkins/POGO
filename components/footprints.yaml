@@ -2,15 +2,15 @@
 #
 # Maps each SEMANTIC panel component type to its KiCad footprint + the panel-anchor
 # offset (ox, oy) = footprint origin relative to the panel hole/anchor centre.
-#   rel path consumed by tools = "<lib>.pretty/<name>.kicad_mod"  (under kicad/footprints/)
+#   rel path consumed by tools = "<lib>.pretty/<name>.kicad_mod"  (under components/footprints/)
 #
 # ORDER IS SIGNIFICANT: tools/panel_kicad.py builds _FOOTPRINT_MAP from this list and
-# panel_editor.py serialises it into the git-tracked design/*.html editor payload, so a
+# panel_editor.py serialises it into the git-tracked docs/panel-editor.html editor payload, so a
 # reordering would churn those files. Keep this order identical to the historical map.
 footprints:
   - { type: jack_input,  lib: Connector_Audio,   name: Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles, ox: 0.0, oy: 6.48 }
   - { type: jack_output, lib: Connector_Audio,   name: Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles, ox: 0.0, oy: 6.48 }
-  - { type: trimpot,     lib: Potentiometer_THT, name: Potentiometer_Bourns_3296W_Vertical,                   ox: 0.0, oy: 2.5 }
+  - { type: trimpot,     lib: Potentiometer_THT, name: Potentiometer_Songhuei_9mm_TallTrimmer_Vertical,        ox: 0.0, oy: 0.0 }
   - { type: knob,        lib: Potentiometer_THT, name: Potentiometer_Alpha_RD901F-40-00D_Single_Vertical_CircularHoles, ox: 7.5, oy: 2.5 }
   - { type: slider_V45,  lib: Potentiometer_THT, name: Potentiometer_Slider_45mm_Vertical,                    ox: 0.0, oy: 0.0 }
   - { type: led,         lib: LED_THT,           name: LED_D3.0mm,                                            ox: 0.0, oy: 0.0 }

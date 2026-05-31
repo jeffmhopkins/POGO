@@ -1,0 +1,28 @@
+deck: amt_symmetric.cir
+description: AMT pot RV44 is symmetric across ±effCV (CW=PEFFCV via RV44.3, CCW=NEFFCV via RV44.1, wiper=V_CTRL); at AMT center V_CTRL=(PEFFCV+NEFFCV)/2=0 -> unity REGARDLESS OF OFS (the 0018 OFS-placement fix), matching VcaBlock control=1-AMT*(1-normCV) with AMT=0 => unity
+plugin_ref: "plugin/src/dsp/VcaBlock.hpp:21-24 — control = 1 - amtParam*(1-normCV); AMT=0 => control=1 => unity. spec/block-4/spec.md §2 step 4 + aux-vca-cell.md §Schematic (symmetric AMT, OFS summed BEFORE the pot)"
+netlist_bind:  # deck literals must equal live block-4.nets.yaml values
+  R_sum_cv: "R42=100k"    # U63A CV input
+  R_sum_fb: "R43=100k"    # U63A feedback
+  R_ofs:    "R45=100k"    # U63A OFS input
+  R_inv_in: "R44=100k"    # U63B inverter input
+  R_inv_fb: "R46=100k"    # U63B inverter feedback
+measurements:
+  # DERIVED from PEFFCV = -NEFFCV (R46/R44=1 inversion): at alpha=0.5 wiper = (PEFFCV+NEFFCV)/2 = 0
+  # NOTE (verify stage): ofs0 (CVP=OFS=0) is COSMETIC — with zero input both ±effCV=0 for ANY resistor
+  # values, so it passes regardless and discriminates nothing. The load-bearing OFS-independence proof
+  # is vctrl_center_ofs2 (nonzero OFS); cw/ccw pin the summer ratios. ofs0 kept only as a labeled anchor.
+  - name: vctrl_center_ofs0   # OFS=0, alpha=0.5 -> 0 V (cosmetic anchor; not a discriminating check)
+    expect: 0.0
+    tol_abs: 0.01
+  - name: vctrl_center_ofs2   # OFS=2, alpha=0.5 -> STILL 0 V — THE load-bearing OFS-independence (0018 fix)
+    expect: 0.0
+    tol_abs: 0.01
+  # DERIVED full CW: V_CTRL = PEFFCV = +(R43/R42·CVP + R43/R45·OFS) = +(1+0) = +1.0
+  - name: vctrl_cw            # alpha=1, CVP=1, OFS=0
+    expect: 1.0
+    tol_abs: 0.01
+  # DERIVED full CCW: V_CTRL = NEFFCV = -(CVP+OFS) = -(1+0) = -1.0
+  - name: vctrl_ccw           # alpha=0, CVP=1, OFS=0
+    expect: -1.0
+    tol_abs: 0.01

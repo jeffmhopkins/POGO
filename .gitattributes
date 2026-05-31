@@ -1,0 +1,25 @@
+# Generated artifacts — flagged so GitHub collapses them in diffs and excludes them
+# from language stats. Never hand-edit these; regenerate from source. The full build
+# graph (artifact ← generator ← source) is in GENERATED.md.
+# Explicit paths only (never *.svg etc.) so authored files are never hidden.
+
+kicad/fp-lib-table              linguist-generated=true
+kicad/pogo-bom.csv              linguist-generated=true
+kicad/pogo-block-1.kicad_sch    linguist-generated=true
+kicad/pogo-block-2.kicad_sch    linguist-generated=true
+kicad/pogo-block-3.kicad_sch    linguist-generated=true
+kicad/pogo-block-4.kicad_sch    linguist-generated=true
+kicad/pogo-block-5.kicad_sch    linguist-generated=true
+kicad/pogo-block-6.kicad_sch    linguist-generated=true
+kicad/pogo-block-7.kicad_sch    linguist-generated=true
+kicad/pogo-block-8.kicad_sch    linguist-generated=true
+kicad/pogo-block-A.kicad_sch    linguist-generated=true
+kicad/pogo-block-B.kicad_sch    linguist-generated=true
+kicad/pogo-shared-q.kicad_sch   linguist-generated=true
+docs/pogo-bom.csv               linguist-generated=true
+docs/Pogo.svg                   linguist-generated=true
+docs/footprints/*.svg           linguist-generated=true
+plugin/res/Pogo.svg             linguist-generated=true
+plugin/res/Pogo-source.svg      linguist-generated=true
+docs/panel-debug.html           linguist-generated=true
+docs/panel-editor.html          linguist-generated=true

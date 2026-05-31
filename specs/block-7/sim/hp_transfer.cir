@@ -1,0 +1,57 @@
+* POGO block-7 HP — 2-pole HIGHPASS transfer of the OTA-C two-integrator loop
+* CLAIM (HPFilter.hpp:32-40, Simper SVF; HP tap = x - k*v1 - v2):
+*   H_HP(s) = s^2 / (s^2 + (w0/Q)*s + w0^2)
+*   => +12 dB/oct LF asymptote, 0 dB passband well above f0, |H(jw0)| = Q,
+*      and the f0 marker is the phase = +90 deg crossing (exact for any Q).
+* This is THE structural proof that block-7 is a HIGHPASS (not LP/BP): the HP
+* tap forms (x - k*v1 - v2); the two integrators provide v1=(w0/s)*hp, v2=(w0/s)*v1.
+*
+* IDEAL-MODEL JUSTIFICATION: the loop stands in for two LM13700 gm-C integrators
+* (Gi1/Gi2 = the OTA transconductances, Ci1/Ci2 = the 47nF C0G caps) plus the
+* OPA1612 SUM_AMP that forms (x - k*v1 - v2) (here a behavioral B-source — an
+* ideal high-gain inverting summer at the virtual ground). The ideal forms preserve
+* the law under test (the transfer function) while dropping device second-order
+* effects irrelevant to "is this a 12 dB/oct highpass peaking Q at f0?".
+*
+* NETLIST values encoded here (block-7.nets.yaml): C29A..D = 47nF integrator caps;
+* gm derived so the integrator corner gm/(2*pi*C) = f0 (the f_ref=632Hz law). k=1/Q
+* is the damping (HPFilter.hpp: k = 1/Q). A clear resonant case Q=2 is chosen.
+
+.param f0=632                 ; spec f_ref (632 Hz) — the test f0
+.param Q=2                    ; clear resonant case (k=1/Q=0.5)
+.param k={1/Q}                ; damping, HPFilter.hpp: k = 1/Q
+.param C=47n                  ; C29A..C29D integrator caps (block-7.nets.yaml)
+.param gm={2*3.141592653589793*f0*C}   ; gm so integrator corner gm/(2*pi*C) = f0
+
+Vin nx 0 AC 1 DC 0
+
+* HP tap (SUM_AMP virtual-ground node): hp = x - k*v1 - v2  (HPFilter.hpp:32/40)
+Bhp nhp 0 V = V(nx) - k*V(nv1) - V(nv2)
+
+* integrator 1: v1 = (gm/sC)*hp   (gm-C, non-inverting) -> w0 = gm/C
+Gi1 0 nv1 nhp 0 {gm}
+Ci1 nv1 0 {C}
+
+* integrator 2: v2 = (gm/sC)*v1
+Gi2 0 nv2 nv1 0 {gm}
+Ci2 nv2 0 {C}
+
+.control
+  ac dec 500 1 200k
+  * passband: gain at 100*f0 (well above corner) -> unity (0 dB)
+  meas ac pass_db   find vdb(nhp) at=63200
+  * LF asymptote slope: gain difference over one decade (f0/10 vs f0/100),
+  * deep in the +12 dB/oct region; *0.30103 converts dB/decade -> dB/octave.
+  meas ac g_dec1    find vdb(nhp) at=63.2
+  meas ac g_dec2    find vdb(nhp) at=6.32
+  let slope_db_oct = (g_dec1 - g_dec2)*0.3010299957
+  * f0 corner: the EXACT Q-independent f0 marker is arg(H_HP)=+90deg
+  * (H_HP(jw0)=jQ, purely imaginary). NB: the -3dB-relative point is Q-dependent
+  * (~426 Hz at Q=2, NOT f0) for a resonant HP, so phase=90deg is the correct corner
+  * marker. ngspice vp() is in radians -> pi/2 = 1.5707963.
+  meas ac fcorner_hz when vp(nhp)=1.5707963
+  * resonant peak: |H(jw0)| = Q -> 20log10(Q) dB, evaluated AT f0
+  meas ac peak_db   find vdb(nhp) at=632
+  print pass_db slope_db_oct fcorner_hz peak_db
+.endc
+.end

@@ -1,23 +1,28 @@
 # aux: Bandpass Distortion Circuit (SC / HC / WF)
 
-> ⚠️ **STALE** — Circuit library entry pending re-verification against current panel design (2026-05-28).
+> ✅ **Re-verified 2026-05-30** against the locked plugin (change 0018). Corrected for: distortion
+> runs **BEFORE** the bandpass SVF (per band); **per-band** mode select (BP1/2/3_DIST_MODE), not
+> global; DRIVE is a **THAT2180 VCA** per band (not a passive pot); no oversampling.
 
 Design status: [ ] draft → [ ] reviewed → [ ] validated on prototype
 
 ## Overview
 
-Three parallel distortion sub-circuits — soft clip (SC), hard clip (HC), and wavefold
-(WF) — with a CD4053 analog multiplexer selecting the active mode. All three circuits
-run simultaneously; the CD4053 simply steers the selected output. Mode selection is
-global across all three BP groups, controlled by the BP_DIST switch on the panel.
+Per BP group, the band signal passes through a variable **DRIVE VCA** (THAT2180, see
+aux-vca-cell) into three parallel distortion sub-circuits — soft clip (SC), hard clip (HC),
+and wavefold (WF) — with a CD4053 analog multiplexer selecting the active mode. The distortion
+sits **before** the bandpass SVF (the plugin reorders distortion ahead of the resonator, change
+0017/0018), so each band distorts its drive signal and the SVF then filters the result. All
+three distortion circuits run simultaneously; the CD4053 steers the selected one. **Mode is
+per-band** — each group has its own `BP{n}_DIST_MODE` 3-position switch (BP1/BP2/BP3 are
+independent), and its own DRIVE knob+CV.
 
 Chosen because:
 - Parallel pre-built paths eliminate mode-switch glitches (no transient when switching)
 - CD4053 (triple 2-channel CMOS analog mux) is widely available in SOIC-16 and handles
-  ±5V audio signals from a ±12V (or split ±5V virtual ground) supply
+  ±5V audio signals from a ±12V supply
 - Three independent distortion modes closely mirror the DSP Distortion.hpp modes
-- One CD4053 per BP SVF group (3 total) allows independent per-group distortion levels
-  while sharing a single mode-select control
+- One CD4053 per BP group (3 total) gives independent per-group mode + drive
 
 ## Schematic
 
@@ -25,38 +30,37 @@ Chosen because:
 ASCII fallback (one BP group, one channel shown):
 
 ```
- BP_SVF_OUT ──────────────┬──────────────────────────────────────────────┐
-                           │                                              │
-                    [DRIVE POT/CV]                                        │
-                           │                                              │
-           ┌───────────────┼───────────────────┐                         │
-           │               │                   │                         │
-           ▼               ▼                   ▼                         │
-    ┌─────────────┐ ┌─────────────┐ ┌─────────────────┐                  │
-    │  SOFT CLIP  │ │  HARD CLIP  │ │    WAVEFOLD     │                  │
-    │  (SC path)  │ │  (HC path)  │ │    (WF path)    │                  │
-    │ tanh approx │ │ Schottky    │ │  op-amp fold    │                  │
-    │ diode chain │ │ back-to-back│ │  network        │                  │
-    └──────┬──────┘ └──────┬──────┘ └────────┬────────┘                  │
-           │               │                  │                          │
-           ▼               ▼                  ▼                          │
-         Y_SC            Y_HC               Y_WF                         │
-           │               │                  │                          │
-           └───────────────┴──────────────────┘                          │
-                                │                                        │
-                     ┌──────────▼──────────┐                             │
-                     │     CD4053 MUX      │                             │
-                     │  (one per group)    │◄── BP_DIST switch           │
-                     │  CH A: SC/HC select │    (2 control lines)        │
-                     │  CH B: _/WF select  │                             │
-                     │  CH C: spare        │                             │
-                     └──────────┬──────────┘                             │
-                                │                                        │
-                          DIST_OUT ──────────────────────────────────────┘
-                                                                         │
-                                                                    (→ BP_MIX)
-                                                                    (→ BP3_L/R_OUT tap)
+ BAND_IN (pre-SVF drive signal: LP1 band, or ALT-VCA for BP3)
+       │
+ [DRIVE VCA — THAT2180]  ◄── DRIVE knob + BP{n}_DIST CV → Ec+   (variable gain)
+       │  V_drive
+       ├───────────────────┬───────────────────┐
+       ▼                   ▼                   ▼
+ ┌─────────────┐   ┌─────────────┐   ┌─────────────────┐
+ │  SOFT CLIP  │   │  HARD CLIP  │   │    WAVEFOLD     │
+ │  (SC path)  │   │  (HC path)  │   │    (WF path)    │
+ │ tanh approx │   │ zener clamp │   │  op-amp fold    │
+ │ diode chain │   │ back-to-back│   │  network        │
+ └──────┬──────┘   └──────┬──────┘   └────────┬────────┘
+        │                 │                   │
+        ▼                 ▼                   ▼
+      Y_SC              Y_HC                Y_WF
+        └─────────────────┴───────────────────┘
+                          │
+               ┌──────────▼──────────┐
+               │     CD4053 MUX      │ ◄── BP{n}_DIST_MODE switch (per band)
+               │  (one per group)    │     (2 control lines, per group)
+               │  SC / HC / WF       │
+               └──────────┬──────────┘
+                          │
+                     DIST_OUT  ──────►  BANDPASS SVF (this group)  ──►  band output
+                                                                        │
+                                            BP3 group only: post-SVF v1 → BP3_L/R_OUT tap
 ```
+
+Note the ordering: **DRIVE VCA → distortion cells → MUX → SVF**. The bandpass filters the
+*already-distorted* signal (matching the plugin's DIST-before-SVF reorder). The BP3_L/R_OUT
+jack taps the **post-SVF** band (band 3's v1), pre output-mix.
 
 ## Transfer Function
 
@@ -100,12 +104,13 @@ Approximate circuit transfer:
 ```
 
 **HC (Hard Clip):**
-Schottky diodes (BAT54S) back-to-back between output and GND (or between ±reference
-voltages) hard-limit the output after an op-amp gain stage. Schottky V_f ≈ 0.3V;
-two in series = ±0.6V clip threshold. Combined with scaling, maps to DSP ±1 range.
+The plugin `hardClip` clamps to **±1.16 normalized** (`clamp((1+4d)·v, ±1.16)`), i.e. **±5.8 V**
+at the ×5 audio scaling. The netlist realizes this with **two BZX84C5V1 zeners back-to-back**
+(anode-to-anode), giving V_Z + V_F ≈ 5.1 V + 0.7 V ≈ **±5.8 V** — matching the plugin. (Schottky
+diodes, ~±0.6 V, would clip far too early; zeners are used precisely to reach ±5.8 V.)
 
 ```
-V_in → [R_in] → op-amp (+gain stage) → [BAT54S back-to-back clamp] → V_out
+V_in → [R_in] → op-amp (+gain stage) → [BZX84C5V1 back-to-back, ±5.8V] → V_out
 ```
 
 **WF (Wavefold):**
@@ -144,12 +149,13 @@ CD4053 (triple 2-channel analog MUX, SOIC-16):
 - Three independent 2:1 multiplexer channels (A, B, C)
 - Control pins S_A, S_B, S_C; INHIBIT pin (active low, tie to GND for always-on)
 - With a 3-position switch and 2 digital control lines:
-  - S_A selects SC vs HC (for channels A)
+  - S_A selects SC vs HC (for channel A)
   - S_B selects fold-path enable/disable (for channel B)
-  - All three CD4053 ICs (one per BP group) have S_A and S_B tied together →
-    mode selection is global across BP1, BP2, BP3 simultaneously
+  - Each BP group has its **own** CD4053 with its **own** `BP{n}_DIST_MODE` switch →
+    mode is **per-band** (BP1, BP2, BP3 are independent; matches the plugin's three
+    separate `BP1/BP2/BP3_DIST_MODE_PARAM`).
 
-BP_DIST switch: 3-position, produces 2 binary control lines:
+BP{n}_DIST_MODE switch (one per band): 3-position, 2 binary control lines:
   - Position 1 (SOFT): S_A=0, S_B=0
   - Position 2 (HARD): S_A=1, S_B=0
   - Position 3 (FOLD): S_A=0, S_B=1
@@ -163,20 +169,20 @@ without signal-dependent Ron distortion, Vcc/Vee must bracket the signal range:
   regulated rail or resistor divider from +12V with zener clamp
 - INHIBIT pin tied to GND (active-low, so GND = not inhibited = MUX active)
 
-### Oversampled Loop Context
+### Bandwidth (no oversampling)
 
-The DSP runs the bandpass section at 2× oversampling. The distortion runs inside the
-oversampled loop, meaning in hardware the distortion must operate at full signal bandwidth
-(the oversampling is a DSP artifact to reduce aliasing from nonlinear operations).
-Hardware naturally operates at continuous time, so no special bandwidth consideration
-is needed beyond ensuring each distortion sub-circuit bandwidth exceeds 100 kHz.
+The plugin runs at the host sample rate with **no oversampling** (the earlier 2× scheme was
+removed). Hardware operates in continuous time, so the only requirement is that each
+distortion sub-circuit's bandwidth comfortably exceeds the audio band — design for >100 kHz
+small-signal bandwidth so the nonlinearity's harmonics are not bandwidth-limited in the audio
+range.
 
 ### BP3_L/R_OUT Tap
 
-The DSP taps the distortion output (before BP_MIX blend) for the BP3_L/R_OUT jacks.
-In hardware, this tap point is at the CD4053 output node, before the BP_MIX summing
-network. Route a buffered tap from each CD4053 output to the BP3_OUT jacks via a
-unity-gain buffer (aux-unity-buffer, Variant A).
+Because distortion now runs **before** the SVF, the BP3_L/R_OUT jacks tap the **post-SVF**
+band-3 output (the v1/bandpass node, after DIST3→SVF3), pre output-mix — matching the plugin's
+`bandpassL/R.prevOut[2]`. Route a buffered tap (aux-unity-buffer, G=+1) from band 3's SVF
+output to the BP3_OUT jacks; the BP3_R jack normals to BP3_L when unpatched.
 
 ## Component Values (POGO-specific)
 
@@ -188,7 +194,7 @@ unity-gain buffer (aux-unity-buffer, Variant A).
 | U_SC | TL072CDT | SOIC-8 | — | SC path gain + diode network op-amp |
 | U_HC | TL072CDT | SOIC-8 | — | HC path gain stage |
 | U_WF | TL072CDT | SOIC-8 | — | WF fold op-amp |
-| D_HC_P, D_HC_N | BAT54S | SOT-23 | — | HC back-to-back Schottky clamp |
+| D_HC_P, D_HC_N | BZX84C5V1 | SOT-23 | — | HC back-to-back zener clamp (±5.8V) |
 | D_SC_1..4 | 1N4148W | SOD-123 | — | SC diode string (2 per rail, 4 total) |
 | R_SC_in | Resistor | 0603 | 10 kΩ | SC input resistor |
 | R_HC_in | Resistor | 0603 | 10 kΩ | HC input resistor |
@@ -197,17 +203,26 @@ unity-gain buffer (aux-unity-buffer, Variant A).
 | R_g | Resistor | 0603 | 10 kΩ | WF folder (−) input R |
 | R_f | Resistor | 0603 | 10 kΩ | WF folder feedback R; R_g = R_f for G=+2 |
 | D_WF_1..4 | 1N4148W | SOD-123 | — | WF clamp diodes: 4 per path (2 per polarity → Vth = ±1.4V) |
-| R_DRIVE | Pot + CV | — | 47 kΩ (HC) / 470 kΩ (SC) | Drive control per group (panel pot + CV sum) |
+| U_DRIVE_VCA | THAT2180 (SIP-8) | — | — | Per-band DRIVE VCA (one stereo cell per group; see aux-vca-cell). 2/band → 6 total (U85–U90) |
+| U_DRIVE_IV | TL074 | SOIC-14 | — | DRIVE VCA I/V converter + summer (U91–U93, one per band) |
+| RV_DRIVE_OFS | Bourns 3224W | SMD | 500 Ω | DRIVE VCA Ec+ unity-gain offset trim (per channel: RV51–RV56) |
 | C_VCC, C_VEE | Ceramic bypass | 0603 | 100 nF | Per CD4053 and op-amp supply pin |
 
 ### Drive Gain Mapping
 
-```
-DSP: drive = exp(d × 4) − 1 → max = exp(4) − 1 ≈ 53.6×
+DRIVE is implemented as a **THAT2180 dB-law VCA** per band (not a fixed gain stage), mirroring
+the block-4 VCA cell. The DRIVE knob + `BP{n}_DIST` CV sum into the VCA's Ec+ control port; the
+VCA's variable gain feeds the distortion cells.
 
-Hardware SC gain: set by R_in and R_f of gain stage.
-At max drive: gain ≈ 50× → R_f / R_in = 50 → R_in = 10kΩ, R_f = 470kΩ (with switch
-  or pot to vary gain from 1× to 50×; pot in feedback path sets variable gain)
+```
+DSP per-mode drive (Distortion.hpp):
+  SOFT: drive = exp(d×4) − 1 → up to ≈ 53.6×
+  HARD: g = 1 + d×4          → up to 5×
+  FOLD: fold gain 1× → 5×
+
+Hardware: a single shared dB-law VCA per band approximates these per-mode laws — the exact
+knob→Ec+ dB mapping (and the knob≈0.20 ⇒ unity-gain bias) is a Phase-3R bring-up calibration
+(same status as the block-4 Ec+ trim). The VCA replaces the earlier passive R_in/R_f drive pot.
 ```
 
 ## Performance Characteristics
@@ -233,14 +248,15 @@ At max drive: gain ≈ 50× → R_f / R_in = 50 → R_in = 10kΩ, R_f = 470kΩ (
 - SC diode string: 1N4148W forward voltage varies with current; actual clipping
   threshold will be drive-dependent (diode V_f increases at higher current).
   This is part of the soft-clip character and is desirable.
-- HC path: BAT54S forward voltage ~0.3V → clip at ~0.6V differential. With a 5V
-  audio signal and gain = 5×, output clips at 0.6V/5 = 0.12V_in → severe clipping
-  at moderate signal levels. This is correct behavior for hard clip mode.
+- HC path: BZX84C5V1 back-to-back clamp at ±5.8V (V_Z 5.1V + V_F 0.7V), matching the
+  plugin's ±1.16 normalized hard-clip. The DRIVE VCA ahead of the cell sets how hard the
+  signal is pushed into this fixed threshold (so drive, not the clamp, controls clip onset).
 - WF path: the folder op-amp (Stage 2) is in standard G=+2 non-inverting configuration
   (V_clamp at (+), R_g/R_f divider at (−)). The passive diode clamp at (+) has no active
   elements and does not affect loop stability. No prototype stability verification required.
-- BP3_L/R_OUT tap buffer: the unity buffer must be placed after the CD4053 output
-  to ensure it taps the selected (post-distortion) signal, not the raw SVF output
+- BP3_L/R_OUT tap buffer: since distortion is now before the SVF, the unity buffer taps the
+  **post-SVF** band-3 output (the filtered, already-distorted signal), matching the plugin's
+  `prevOut[2]`; the BP3_R jack normals to BP3_L when unpatched
 
 ## Used By
 

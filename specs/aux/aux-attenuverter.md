@@ -1,16 +1,18 @@
 # aux: Attenuverter (Bipolar Modulation Scaling)
 
-> ⚠️ **STALE** — Circuit library entry pending re-verification against current panel design (2026-05-28).
+> ✅ **Re-verified 2026-05-30** against the locked plugin (change 0018). Used at **18**
+> attenuverter destinations (the VCA is a raw bus normal, not an attenuverter; per-band BP CV
+> is TILT, not FOCUS).
 
-Design status: [ ] draft → [ ] reviewed → [ ] validated on prototype
+Design status: [x] draft → [ ] reviewed → [ ] validated on prototype
 
 ## Overview
 
 Bipolar attenuator that scales an input signal from −1× (full CCW) through 0 (center)
-to +1× (full CW). Used at all 19 modulation destinations. An inverting unity-gain op-amp
-half generates the negative voltage rail needed by the pot wiper sweep. A tip-switching
-override jack replaces the mod bus input when patched, allowing per-destination CV
-injection directly at any mod point.
+to +1× (full CW). Used at all **18** attenuverter modulation destinations. An inverting
+unity-gain op-amp half generates the negative voltage rail needed by the pot wiper sweep. A
+tip-switching override jack replaces the mod bus input when patched, allowing per-destination
+CV injection directly at any mod point.
 
 Chosen because:
 - Single pot + one op-amp inverter is the minimal bipolar attenuator topology
@@ -18,7 +20,7 @@ Chosen because:
 - Override jack with tip-switching is standard Eurorack practice; when unpatched
   the normalled signal (mod bus) flows; when patched the incoming CV takes over
 - TL074CDT (quad op-amp SOIC-14) allows 4 attenuverter inverters per IC, making the
-  19-destination count feasible with 5 TL074 ICs (4 inverters per IC)
+  18-destination count feasible with 5 TL074 ICs (4 inverters per IC; 2 sections spare)
 
 ## Schematic
 
@@ -94,9 +96,9 @@ Use 1% resistors for this pair.
 
 ### TL074 for Inverters
 
-19 mod destinations × 1 inverter each = 19 op-amp halves needed.
+18 attenuverter destinations × 1 inverter each = 18 op-amp halves needed.
 TL074CDT (quad op-amp, SOIC-14) provides 4 halves per IC.
-19 / 4 = 4.75 → 5 TL074 ICs (MB_INV_1–5), providing 1 spare half for utility functions.
+18 / 4 = 4.5 → 5 TL074 ICs (MB_INV_1–5), with 2 spare halves.
 
 These inverter op-amps can be grouped on a dedicated "modulation distribution" portion
 of the control board rather than distributed among individual block sub-circuits.
@@ -118,15 +120,15 @@ Both the mod bus path and the override jack path have:
 - 100 Ω series resistor: limits short-circuit current
 - BAT54S Schottky clamp: clamps to ±(Vcc + 0.3V) ≈ ±12.3V
 
-This protects the TL074 inverter input from overvoltage. Two BAT54S devices are used
-per destination (one per input path), for 19 × 2 = 38 BAT54S total in the mod bus
-section. These are 0603-compatible in SOT-23; manageable board area.
+This protects the TL074 inverter input from overvoltage. One BAT54S (dual Schottky) per
+destination clamps the shared V_src node, for 18 BAT54S total in the mod bus section (D3_1..18),
+plus D4 on the MOD_IN jack. These are SOT-23; manageable board area.
 
 ## Component Values (POGO-specific)
 
 | Ref (generic) | Part | Package | Value | Notes |
 |---|---|---|---|---|
-| U_ATT_1..5 | TL074CDT | SOIC-14 | — | Quad op-amp; 4 inverters per IC; 5 ICs for 19 dest (MB_INV_1–5 per block-3/spec.md) |
+| U_ATT_1..5 | TL074CDT | SOIC-14 | — | Quad op-amp; 4 inverters per IC; 5 ICs for 18 dest (MB_INV_1–5 per block-3/spec.md; 2 spare) |
 | R_inv_in | Resistor | 0603 | 10 kΩ | Inverter input resistor; 1% tolerance |
 | R_inv_f | Resistor | 0603 | 10 kΩ | Inverter feedback resistor; 1% tolerance; must match R_inv_in |
 | RV_ATT | Pot | 9mm T18 | 10 kΩ | Panel attenuverter pot; linear taper with center detent; 2.5 kΩ max wiper impedance (= 10 kΩ/4 at center travel) |
@@ -141,15 +143,16 @@ section. These are 0603-compatible in SOT-23; manageable board area.
 
 | Category | Destinations | Override Jacks |
 |---|---|---|
-| VCA CV input | 1 | 1 |
 | LP1 (FREQ, TILT, RES) | 3 | 3 |
 | BP master (FREQ, TILT) | 2 | 2 |
-| BP1 (FREQ, FOCUS, DIST) | 3 | 3 |
-| BP2 (FREQ, FOCUS, DIST) | 3 | 3 |
-| BP3 (FREQ, FOCUS, DIST) | 3 | 3 |
+| BP1 (FREQ, TILT, DIST) | 3 | 3 |
+| BP2 (FREQ, TILT, DIST) | 3 | 3 |
+| BP3 (FREQ, TILT, DIST) | 3 | 3 |
 | HP (FREQ, RES) | 2 | 2 |
 | LP2 (FREQ, RES) | 2 | 2 |
-| **Total** | **19** | **19** |
+| **Total** | **18** | **18** |
+
+*(The VCA bus tap is a raw normal into VCA_INPUT, not an attenuverter — handled in block 4.)*
 
 ## Performance Characteristics
 
@@ -170,7 +173,7 @@ section. These are 0603-compatible in SOT-23; manageable board area.
 - The tip-switching jack normalling contact can add a small resistance (~50–200 Ω)
   in series with the mod bus path; this is negligible given source impedance of the
   mod bus processor output (~50 Ω from op-amp)
-- All 19 attenuverter pots are linear taper (not audio/log); the human perception of
+- All 18 attenuverter pots are linear taper (not audio/log); the human perception of
   modulation depth is roughly linear in most synthesis contexts
 - TL074 common-mode input range: same caveat as TL072 — inputs must remain above
   the negative supply minus ~1V; all mod bus signals are within ±10V on ±12V supply
@@ -183,4 +186,4 @@ section. These are 0603-compatible in SOT-23; manageable board area.
 
 | Block | Instance | Board | Notes |
 |---|---|---|---|
-| block-3 | RV_ATT_1..19 | Control | All 19 mod bus destinations (see block-3/spec.md destination list) |
+| block-3 | RV6..RV23 (18 pots) | control | All 18 attenuverter mod bus destinations (see block-3/spec.md destination list) |

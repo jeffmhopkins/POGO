@@ -4,6 +4,7 @@ mpn: 3224W-1-xxx
 manufacturer: Bourns
 supplier: '~'
 package: SMD
+symbol: trimpot
 matches:
 - Bourns 3224W
 footprint:
@@ -11,7 +12,7 @@ footprint:
   name: Potentiometer_Bourns_3224W
 datasheet:
   url: https://www.bourns.com/docs/Product-Datasheets/3224.pdf
-  version: rev 2024
+  version: REV. 07/24
   sha256: 6913966a4c1b5a7e8a9d2517ac2720943b07dd919b1e21d57f6335015636a233
   bytes: 167852
 notes: SMD multiturn trimmer; audio-board bias trims.

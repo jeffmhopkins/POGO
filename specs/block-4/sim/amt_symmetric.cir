@@ -1,0 +1,79 @@
+* POGO block-4 VCA — symmetric AMT attenuverter: AMT center = unity regardless of OFS (0018 fix)
+* CLAIM (spec §2 step 4; aux-vca-cell.md §Schematic; nets U63A_SUM/NEFFCV/U63B_INV/PEFFCV/V_CTRL):
+*   U63A is an inverting CV+OFS summer:  NEFFCV = −(R43/R42·CVP + R43/R45·OFS) = −(CVP+OFS)
+*   U63B is a unity inverter:            PEFFCV = −(R46/R44)·NEFFCV = +(CVP+OFS) = −NEFFCV
+*   The AMT pot RV44 sits SYMMETRICALLY across ±effCV: top (RV44.3)=PEFFCV, bottom (RV44.1)=NEFFCV,
+*   wiper V_CTRL = NEFFCV + α·(PEFFCV−NEFFCV).  Because PEFFCV = −NEFFCV (symmetry), at α=0.5
+*   V_CTRL = (NEFFCV+PEFFCV)/2 = 0 → unity, for ANY OFS. This is the 0018 OFS-placement fix and
+*   matches VcaBlock.hpp:21-24 (control = 1−AMT·(1−normCV); AMT=0 ⇒ control=1 ⇒ unity).
+* Ideal op-amps (Eop high-gain VCVS) stand in for the TL072 halves: the inverting-summer/inverter
+* laws are set entirely by the feedback resistor ratios (R42..R46), which is the topology under test.
+* RV44 wiper modeled as two equal pot-half resistors (5k each) meeting at the wiper for α=0.5; the
+* end taps (α=1, α=0) tie the wiper directly to the pot end. Pot total value cancels (divider ratio).
+* PARALLEL instances per condition (no alter-loops). Sign/symmetry check; the bind guards R42..R46.
+
+* ============ instance C0: AMT center (α=0.5), OFS=0, CVP=0  -> V_CTRL must be 0 ============
+Vcvp0  cvp0 0 DC 0
+Vofs0  ofs0 0 DC 0
+* U63A summer: (+) at GND, (−)=sa0 virtual ground; out=neff0 = −(cvp0+ofs0)
+Esa0   neff0 0 0 sa0 1e6
+R42a   cvp0  sa0 100k        ; R42 (CV input)
+R45a   ofs0  sa0 100k        ; R45 (OFS input)
+R43a   neff0 sa0 100k        ; R43 (feedback)
+* U63B inverter: (−)=sb0 virtual ground; out=peff0 = −neff0
+Esb0   peff0 0 0 sb0 1e6
+R44a   neff0 sb0 100k        ; R44 (inverter input)
+R46a   peff0 sb0 100k        ; R46 (inverter feedback)
+* RV44 divider, wiper at α=0.5: two 5k halves from peff0(top) and neff0(bottom)
+Rtop0  peff0 vc0 5k
+Rbot0  neff0 vc0 5k
+
+* ============ instance C2: AMT center (α=0.5), OFS=2, CVP=0  -> V_CTRL must STILL be 0 ============
+Vcvp2  cvp2 0 DC 0
+Vofs2  ofs2 0 DC 2
+Esa2   neff2 0 0 sa2 1e6
+R42b   cvp2  sa2 100k
+R45b   ofs2  sa2 100k
+R43b   neff2 sa2 100k
+Esb2   peff2 0 0 sb2 1e6
+R44b   neff2 sb2 100k
+R46b   peff2 sb2 100k
+Rtop2  peff2 vc2 5k
+Rbot2  neff2 vc2 5k
+
+* ============ instance CW: AMT full CW (α=1), OFS=0, CVP=1  -> V_CTRL = +effCV = +(1+0) = +1 ====
+Vcvpw  cvpw 0 DC 1
+Vofsw  ofsw 0 DC 0
+Esaw   neffw 0 0 saw 1e6
+R42c   cvpw  saw 100k
+R45c   ofsw  saw 100k
+R43c   neffw saw 100k
+Esbw   peffw 0 0 sbw 1e6
+R44c   neffw sbw 100k
+R46c   peffw sbw 100k
+* wiper at top end (α=1): V_CTRL = PEFFCV
+Rcww   peffw vcw 1
+* (high-Z sense; tie wiper to peffw via 1ohm — no current path so vcw = peffw)
+
+* ============ instance CCW: AMT full CCW (α=0), OFS=0, CVP=1  -> V_CTRL = −effCV = −1 ===========
+Vcvpx  cvpx 0 DC 1
+Vofsx  ofsx 0 DC 0
+Esax   neffx 0 0 sax 1e6
+R42d   cvpx  sax 100k
+R45d   ofsx  sax 100k
+R43d   neffx sax 100k
+Esbx   peffx 0 0 sbx 1e6
+R44d   neffx sbx 100k
+R46d   peffx sbx 100k
+* wiper at bottom end (α=0): V_CTRL = NEFFCV
+Rccwx  neffx vcx 1
+
+.control
+  op
+  let vctrl_center_ofs0 = v(vc0)   ; DERIVED (PEFFCV+NEFFCV)/2 = 0
+  let vctrl_center_ofs2 = v(vc2)   ; DERIVED still 0 — OFS-independent unity (0018 fix)
+  let vctrl_cw          = v(vcw)   ; DERIVED +effCV = +(CVP+OFS) = +(1+0) = +1.0
+  let vctrl_ccw         = v(vcx)   ; DERIVED −effCV = −(CVP+OFS) = −(1+0) = −1.0
+  print vctrl_center_ofs0 vctrl_center_ofs2 vctrl_cw vctrl_ccw
+.endc
+.end

@@ -1,0 +1,33 @@
+* POGO block-7 HP — Q-cell Iabc bias (§D/M5; R104/R105 R_Iabc 1M->100k, change 0020)
+* Mirror of block-5/sim/q_cell.cir — block-7's Q cell (U51, cell A=L cell B=R) has the
+*   identical R_Iabc math; this deck is the block-7-local copy.
+* The LM13700 amplifier-bias (Iabc) pin sits ~2*Vbe above V- (≈ -10.8V at -12V rails),
+*   NOT GND. So Iabc = (V_ires - V_pin)/R_Iabc — it is just the resistor current, no
+*   LM13700 model needed (Iabc pin modelled as a fixed DC potential, read i(Vsrc)).
+* BUG (stale spec, see report): R_Iabc=1M from V_ires~0 -> ~10.8µA (≈14x the ~0.74µA the
+*   old spec assumed) -> Q pinned at min.
+* FIX (netlist R104/R105 = 100k): V_ires driven negative to ~-10.73V near the pin ->
+*   Iabc ~0.7µA -> Q ~0.74 (Butterworth). Q = V_T_diff/(Iabc*R_in), V_T_diff=52mV,
+*   R_in=100k (aux-q-control §"Q Formula"; HPFilter.hpp:21 Q=0.5*pow(4000,res) -> Butterworth
+*   floor ~0.7 at res=0).
+
+.param Vpin=-10.8          ; LM13700 Iabc pin ≈ 2*Vbe above -12V rail
+
+* --- BUGGY: 1M from V_ires = 0 (the stale spec.md:152 "R_Iabc=1MΩ / 0.74V" assumption) ---
+Vir_b nbug 0 DC 0
+Rbug nbug pinb 1e6
+Vpb pinb 0 DC {Vpin}
+
+* --- FIXED: 100k (R104/R105) from V_ires = -10.73 (the Q≈0.7 Butterworth setpoint) ---
+Vir_f nfix 0 DC -10.73
+Rfix nfix pinf 100k
+Vpf pinf 0 DC {Vpin}
+
+.control
+  op
+  let iabc_bug_uA = i(Vpb)*1e6        ; buggy Iabc (µA) -> ~10.8 (NOT the claimed 0.74)
+  let iabc_fix_uA = i(Vpf)*1e6        ; fixed Iabc (µA) at V_ires=-10.73 -> ~0.7µA
+  let q_fix = 0.052/(i(Vpf)*1e5)      ; resulting Q (R_in=100k): ~0.74 (Butterworth)
+  print iabc_bug_uA iabc_fix_uA q_fix
+.endc
+.end

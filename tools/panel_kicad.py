@@ -27,7 +27,7 @@ from typing import Any
 # ── Repo-relative paths ────────────────────────────────────────────────────────
 
 _REPO = Path(__file__).resolve().parent.parent
-_FP_ROOT = _REPO / "kicad" / "footprints"
+_FP_ROOT = _REPO / "components" / "footprints"
 
 # Map component type → (relative footprint path, origin_offset_x, origin_offset_y)
 # origin_offset is the footprint's origin relative to the component's "panel anchor".
@@ -96,10 +96,11 @@ def _parse_footprint(text: str) -> list[dict]:
         r = math.sqrt((ex - cx) ** 2 + (ey - cy) ** 2)
         prims.append({"t": "circle", "cx": cx, "cy": cy, "r": r, "layer": m[5]})
 
-    # pad (at x y [rot])
+    # pad (at x y [rot]) (size w h)
     for m in re.finditer(
         r'\(pad\s+("[^"]*"|[^\s)]+)\s+([^\s)]+)\s+([^\s)]+)\s+'
-        r'\(at\s+([-\d.]+)\s+([-\d.]+)(?:\s+[-\d.]+)?\)',
+        r'\(at\s+([-\d.]+)\s+([-\d.]+)(?:\s+([-\d.]+))?\)'
+        r'(?:\s+\(size\s+([-\d.]+)\s+([-\d.]+)\))?',
         text,
     ):
         prims.append({
@@ -109,9 +110,59 @@ def _parse_footprint(text: str) -> list[dict]:
             "shape": m[3],
             "x": float(m[4]),
             "y": float(m[5]),
+            "rot": float(m[6]) if m[6] else 0.0,
+            "w": float(m[7]) if m[7] else 0.0,
+            "h": float(m[8]) if m[8] else 0.0,
         })
 
     return prims
+
+
+def footprint_shapes(ctype: str) -> dict:
+    """Real keepout geometry for a component type, anchor-relative, as three classes:
+
+        {"body": [(x1,y1,x2,y2), ...],   # F.Fab outline — placement keepout (no overlap)
+         "pads": [(x1,y1,x2,y2), ...],   # ELECTRICAL (named) pads at real copper size
+         "legs": [(x1,y1,x2,y2), ...]}   # structural mounting tabs (unnamed pads)
+
+    Matches real PCB DRC: bodies (cans) must not overlap; copper must keep
+    panel_rules.PCB_PAD_CLEARANCE_MM. Mounting legs (unnamed pads — a 9mm pot's two case
+    tabs) carry no signal, so leg-vs-leg is NOT a violation, but a leg intersecting a
+    neighbour's SIGNAL pad still is (that's a real short/overlap). The check enforces
+    clearance on every copper pair EXCEPT leg-vs-leg. Body = whole F.Fab outline (the
+    ~9.7mm round can for pots, centred on the shaft).
+    """
+    entry = _FOOTPRINT_MAP.get(ctype)
+    if entry is None:
+        return {"body": [], "pads": [], "legs": []}
+    rel_path, ox, oy = entry
+    prims = _load_footprint(rel_path)
+
+    pads: list[tuple[float, float, float, float]] = []
+    legs: list[tuple[float, float, float, float]] = []
+    for p in prims:
+        if p.get("t") != "pad":
+            continue
+        w, h = p.get("w", 0.0), p.get("h", 0.0)
+        if w <= 0 or h <= 0:
+            continue
+        if int(p.get("rot", 0)) % 180 == 90:
+            w, h = h, w
+        rect = (p["x"] - w / 2 - ox, p["y"] - h / 2 - oy,
+                p["x"] + w / 2 - ox, p["y"] + h / 2 - oy)
+        (legs if (p.get("name") or "").strip('"') == "" else pads).append(rect)
+
+    xs, ys = [], []
+    for p in prims:
+        if "Fab" not in p.get("layer", ""):
+            continue
+        if p.get("t") == "line":
+            xs += [p["x1"], p["x2"]]; ys += [p["y1"], p["y2"]]
+        elif p.get("t") == "circle":
+            xs += [p["cx"] - p["r"], p["cx"] + p["r"]]; ys += [p["cy"] - p["r"], p["cy"] + p["r"]]
+    body = [(min(xs) - ox, min(ys) - oy, max(xs) - ox, max(ys) - oy)] if xs else []
+
+    return {"body": body, "pads": pads, "legs": legs}
 
 
 # Cache parsed footprints so each file is read only once per build
@@ -198,11 +249,27 @@ def _prims_to_svg(
                 f' stroke="{st["stroke"]}" stroke-width="{st["sw"]}" fill="{st["fill"]}"{dash_attr}/>'
             )
         elif p["t"] == "pad":
+            # Draw the pad at its REAL copper size so the editor shows the actual land
+            # pattern. Structural mounting legs (unnamed) are drawn fainter to flag that
+            # they're exempt from leg-vs-leg clearance (see footprint_shapes).
             s = _PAD_STYLE
-            parts.append(
-                f'  <circle cx="{p["x"]}" cy="{p["y"]}" r="{_PAD_RADIUS}"'
-                f' stroke="{s["stroke"]}" stroke-width="{s["sw"]}" fill="{s["fill"]}"/>'
-            )
+            w, h = p.get("w", 0.0), p.get("h", 0.0)
+            if int(p.get("rot", 0)) % 180 == 90:
+                w, h = h, w
+            leg = (p.get("name") or "").strip('"') == ""
+            fill = "rgba(255,68,255,0.12)" if leg else s["fill"]
+            if w > 0 and h > 0 and p.get("shape") != "circle":
+                rx = min(w, h) * (0.5 if p.get("shape") == "oval" else 0.18)
+                parts.append(
+                    f'  <rect x="{p["x"]-w/2:.3f}" y="{p["y"]-h/2:.3f}" width="{w:.3f}" height="{h:.3f}"'
+                    f' rx="{rx:.3f}" stroke="{s["stroke"]}" stroke-width="{s["sw"]}" fill="{fill}"/>'
+                )
+            else:
+                r = (max(w, h) / 2) if (w > 0 or h > 0) else _PAD_RADIUS
+                parts.append(
+                    f'  <circle cx="{p["x"]}" cy="{p["y"]}" r="{r:.3f}"'
+                    f' stroke="{s["stroke"]}" stroke-width="{s["sw"]}" fill="{fill}"/>'
+                )
 
     parts.append("</g>")
     return "\n".join(parts)

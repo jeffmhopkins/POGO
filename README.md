@@ -11,36 +11,46 @@ and ground truth. Analog hardware design is reverse-engineered from it.
 POGO routes stereo audio through a deeply modulated filter bank: a pre-gain stage, a
 voltage-controlled VCA, a stereo LP filter with tilt (LP1), three independent bandpass
 resonators (BP1/BP2/BP3) with per-group distortion, a HP filter, and a final LP filter (LP2).
-A dual triangle LFO feeds a central mod bus with 19 CV destinations — every key parameter
-is voltage-controllable.
+A dual triangle LFO feeds a central mod bus with 18 attenuverter CV destinations (plus a raw
+VCA normal) — every key parameter is voltage-controllable.
 
 **Signal chain (48HP topology):**
 
 ```
-Stereo In → Input Buffer → Pre-Gain (1×/5×)
-                                  ↓
-                             Pre-LP1 VCA   ← mod bus, VCA_OFS floor
-                                  ↓
-                            LP Filter 1    ← FREQ, TILT (stereo spread), RES
-                                  ↓
-               ┌──────────────────────────────────────┐
-               │        Triple Bandpass Filter Bank    │
-               │  BP1 / BP2 / BP3 — 40 Hz – 4 kHz     │
-               │  per-group: FREQ / FOCUS / DIST       │
-               │  global: OFFSET / TILT / MIX          │
-               │  BP3_L/R ──────────────────────────► BP3 out jacks
-               └──────────────────────────────────────┘
-                                  ↓
-                             HP Filter     ← FREQ, RES
-                                  ↓
-                            LP Filter 2   ← FREQ, RES
-                                  ↓
-                           Output Buffer
-                                  ↓
-                             Stereo Out
+   IN  (L / R)
+    │
+    ▼
+   Input Buffer
+    │
+    ▼
+   Pre-Gain         ──  1× / 5× switch
+    │
+    ▼
+   Pre-LP1 VCA      ──  mod bus · VCA_OFS floor
+    │
+    ▼
+   LP Filter 1      ──  FREQ · TILT (stereo spread) · RES
+    │
+    ▼
+   Triple Bandpass  ──  BP1 · BP2 · BP3   (each ~50 Hz – 3.2 kHz, F_REF 400 Hz)
+    │                   per-group : FREQ · FOCUS (Q) · DIST (drive)
+    ├───────────────►   BP3_L / BP3_R out jacks   (pre-mix tap)
+    │                   global    : OFFSET · TILT · MIX
+    ▼
+   HP Filter        ──  FREQ · RES
+    │
+    ▼
+   LP Filter 2      ──  FREQ · RES
+    │
+    ▼
+   Output Buffer
+    │
+    ▼
+   OUT (L / R)
 
-LFO1 / LFO2  →  ±5V triangle, 0.05–20Hz
-Mod Bus      →  19 CV destinations (each: override jack + attenuverter)
+   ── modulation (parallel to the signal path) ──────────────────────────
+   LFO1 / LFO2   →   ±5 V triangle, 0.05–20 Hz   (LFO1 normals into the mod bus)
+   Mod Bus       →   18 attenuverter destinations (override jack + attenuverter) + VCA raw normal
 ```
 
 **Hardware target:** 48HP, ±12V Eurorack. Power budget ~190 mA per rail (estimate; under
@@ -52,19 +62,19 @@ revision as block-level estimates are refined).
 
 The plugin and panel are complete and CI-passing. Circuit design (Phase 3R) is complete
 for all blocks, and **per-block KiCad schematics are transcribed and CI-gated for all 10
-blocks + the shared-Q sheet** (data-driven generator, see below). Board layout (Phase 5R)
+blocks** (data-driven generator, see below). Board layout (Phase 5R)
 is in progress.
 
 | Phase | Description | Status |
 |---|---|---|
 | Phase 1R | Extract functional spec from plugin code (all blocks) | ✅ Complete |
 | Phase 2R | Analog behavior model (bilinear transform inverse) | ✅ Complete |
-| Phase 3R | Circuit design + per-block KiCad schematics — 10/10 blocks + shared-Q; `components.yaml` finalized | ✅ Complete |
+| Phase 3R | Circuit design + per-block KiCad schematics — 10/10 blocks; `components.yaml` finalized | ✅ Complete |
 | Phase 4R | Panel — 48HP, DRC-clean, CI-verified | ✅ Complete |
 | Phase 5R | Board layout — 48HP, architecture under review | 🔄 In Progress |
 | Phase 6R | Code validation — CI green, signal-path smoke tests | ✅ Complete |
 
-See `specs/STATUS.md` for per-block detail, and `kicad/SCHEMATIC-GEN-PLAN.md` for the
+See `specs/STATUS.md` for per-block detail, and `tools/SCHEMATIC-GEN-PLAN.md` for the
 schematic rollout.
 
 ---
@@ -81,19 +91,27 @@ POGO/
 │   └── res/
 │       └── Pogo.svg               ← Panel SVG (generated — do not hand-edit)
 │
-├── tools/                         ← Panel build system
+├── tools/                         ← Build scripts (panel + components + schematic)
 │   ├── panel-data.yaml            ← SOURCE OF TRUTH for all panel positions
-│   ├── build_panel.py             ← CLI: --check --resource --design --cpp --list
-│   ├── panel_svg.py / panel_rules.py / panel_cpp.py
+│   ├── build_panel.py             ← panel CLI: --check/--resource/--design/--cpp/--mfr
+│   ├── panel_svg.py · panel_rules.py · panel_cpp.py · panel_editor.py · panel_kicad.py
+│   ├── components.py · build_components.py · footprint_svg.py · fetch_datasheets.py  ← components/BOM
+│   ├── generate_schematic.py     ← schematic generator (nets → .kicad_sch)
+│   ├── symbols.py · kicad_common.py  ← symbol loader/emitter + generic s-expr primitives
+│   ├── SCHEMATIC-GEN-PLAN.md      ← schematic rollout plan / gate doc
 │   └── panel-tool-guide.md
 │
-├── docs/
-│   └── plugin-topology.md         ← Authoritative 48HP plugin spec
+├── docs/                          ← GitHub Pages site + generated viewers
+│   ├── plugin-topology.md         ← Authoritative 48HP plugin spec
+│   ├── index.html · panel.html · bom.html · ci.html · change-process.html  ← site pages
+│   ├── netlist.html               ← Interactive netlist viewer (generated; drift-gated)
+│   ├── panel-debug.html           ← Interactive panel layer viewer (generated)
+│   └── panel-editor.html          ← Interactive panel layout editor
 │
 ├── specs/                         ← Hardware design documentation
 │   ├── STATUS.md                  ← Phase completion checklist
 │   ├── module-overview.md         ← Signal chain, power budget
-│   ├── components.yaml            ← Global component registry (476 entries)
+│   ├── components.yaml            ← Per-ref design manifest (700+ rows; block→ref→part)
 │   ├── analog-design-review.md    ← Trim pots, parts availability, noise analysis
 │   │
 │   ├── aux/                       ← Circuit design library (shared building blocks)
@@ -124,26 +142,23 @@ POGO/
 │   ├── board-layout/layout-notes.md
 │   └── archive/40hp-era-2026-05/  ← Superseded 40HP specs
 │
-├── components/                    ← Canonical component registry + datasheet cache
-│   ├── *.yaml                     ← Per-part records (footprint, MPN, datasheet metadata)
+├── components/                    ← Component SOURCING (catalog + footprints + symbols + datasheets)
+│   ├── parts/<slug>/              ← Per-part: component.yaml (selects symbol + footprint primitive,
+│   │                                MPN, datasheet) + datasheet.pdf
+│   ├── footprints/*.pretty        ← Vendored KiCad footprint primitives (resolve as POGO_*)
+│   ├── footprints.yaml            ← panel-type → footprint binding
+│   ├── symbols/<token>.yaml       ← Authored KiCad symbol primitives (one file per nets `sym:` token)
 │   └── README.md
 │
-├── kicad/                         ← KiCad schematics — data-driven, per block
-│   ├── generate_schematic.py      ← nets/*.yaml → .kicad_sch (--check: coverage + structural + drift)
-│   ├── gen_block6.py              ← Block-6 netlist generator (3-group repetition)
-│   ├── kicad_common.py            ← Symbol library + pin helpers (datasheet-verified)
-│   ├── nets/*.nets.yaml           ← Per-block netlists (10 blocks + shared-q)
-│   ├── pogo-block-*.kicad_sch     ← Generated schematics (one per block)
+├── kicad/                         ← Generated KiCad artifacts (output only; generators in tools/)
+│   ├── pogo-block-*.kicad_sch     ← Generated schematics (per block; block-6 split into 7 sections)
 │   ├── pogo-bom.csv               ← Manufacturing BOM
-│   ├── SCHEMATIC-GEN-PLAN.md      ← Schematic rollout plan / per-block gate doc
-│   └── README-STALE.md            ← Legacy 40HP board generators (generate_*_board.py) — STALE
+│   ├── fp-lib-table               ← Generated; maps POGO_* → components/footprints/
+│   └── pogo.kicad_pro             ← KiCad project (placeholder root; real board = Phase 5R)
 │
 ├── changes/                       ← Per-change records (changes/NNNN-<slug>.md) + _TEMPLATE.md
 │
-├── design/
-│   └── panel-debug.html           ← Interactive panel layer viewer (keepouts, DRC)
-│
-└── .github/workflows/build.yml    ← CI: Linux/Win/macOS .vcvplugin builds + 5 --check gates
+└── .github/workflows/build.yml    ← CI: Linux/Win/macOS .vcvplugin builds + 6 --check gates
 ```
 
 ---
@@ -166,37 +181,42 @@ python3 tools/build_panel.py --check
 python3 tools/build_panel.py --cpp
 
 # Interactive layer viewer (keepouts, footprints, DRC overlays)
-open design/panel-debug.html
+open docs/panel-debug.html
 ```
 
 ---
 
 ## KiCad Schematic Generation
 
-Schematics are **data-driven and generated per block**. Each block has a netlist
-(`kicad/nets/<block>.nets.yaml`) listing parts and name-based nets;
-`kicad/generate_schematic.py` emits a byte-stable `kicad/pogo-<block>.kicad_sch`. All 10
-blocks + the shared-Q sheet are transcribed and verified.
+Schematics are **data-driven and generated per block**. Each block's netlist source lives
+with its spec (`specs/<block>/<block>.nets.yaml`) listing parts and name-based nets;
+`tools/generate_schematic.py` emits a byte-stable `kicad/pogo-<block>.kicad_sch`. All 10
+blocks (A, B, 1–8) are transcribed and verified; block-6 (triple BP + distortion) is split
+into 7 section sheets (`block-6-{svf1,svf2,svf3,dist1,dist2,dist3,mix}`), and the shared
+Q-VCAs (U9/U10) are hosted on block-5's sheet (dual-owned by block-5/block-8, no separate
+sheet). (Authored netlist in `specs/`, generated schematic in `kicad/` — linked by `--check`,
+not by directory adjacency.)
 
 ```bash
 # Regenerate all block schematics
-python3 kicad/generate_schematic.py
+python3 tools/generate_schematic.py
 
 # CI gate: validate (pin coverage + structural re-parse + short detection + byte drift)
-python3 kicad/generate_schematic.py --check
+python3 tools/generate_schematic.py --check
 
-# Regenerate one block
-python3 kicad/generate_schematic.py --block block-6
+# Regenerate one block (block-6 sections are addressed individually)
+python3 tools/generate_schematic.py --block block-6-mix
 ```
 
 Connectivity is by net name, so per-block sheets merge at board level by matching boundary
-nets. Symbols/pinouts in `kicad/kicad_common.py` are datasheet-verified. The manufacturing
-BOM (`kicad/pogo-bom.csv`) is generated from `specs/components.yaml` + the `components/`
-registry. See `kicad/SCHEMATIC-GEN-PLAN.md` for the rollout and per-block notes.
+nets. Symbols/pinouts are authored per-token in `components/symbols/<token>.yaml` and emitted by
+`tools/symbols.py` (datasheet-cited; `--check` self-tests them). Vendored footprints
+live in `components/footprints/*.pretty` (resolved via the generated `kicad/fp-lib-table`). The
+manufacturing BOM (`kicad/pogo-bom.csv`) is generated from `specs/components.yaml` + the
+`components/` registry. See `tools/SCHEMATIC-GEN-PLAN.md` for the rollout and per-block notes.
 
-> The **legacy 40HP board generators** (`generate_control_board.py`, `generate_utility_board.py`,
-> `validate_*.py`) are superseded and remain **STALE** — see `kicad/README-STALE.md`. They are
-> unrelated to the per-block generator above.
+> The 40HP-era board generators and validators have been removed (the data-driven per-block
+> generator above supersedes them). A real board-level KiCad project is Phase 5R.
 
 ---
 
@@ -205,8 +225,9 @@ registry. See `kicad/SCHEMATIC-GEN-PLAN.md` for the rollout and per-block notes.
 ### Via GitHub Actions (recommended — no local setup)
 
 Every push to `main`, `dev`, or a `change/**` / `claude/**` branch (and every PR) triggers
-Linux x64 + Windows x64 + macOS builds plus the five `--check` gates (`components.py`,
-`fetch_datasheets.py`, `build_components.py`, `generate_schematic.py`, `build_panel.py`).
+Linux x64 + Windows x64 + macOS builds plus the six `--check` gates (`components.py`,
+`fetch_datasheets.py`, `build_components.py`, `generate_schematic.py`, `build_panel.py`,
+`build_netlist_viz.py`) and the Python↔JS DRC parity test.
 
 1. Go to **Actions → Build VCV Rack Plugin**
 2. Click the latest run → scroll to **Artifacts**

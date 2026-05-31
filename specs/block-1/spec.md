@@ -1,7 +1,7 @@
 # Block 1: Pre-Gain
 Switched 1×/5× gain boost with hard clipping, plus an independent ALT path to the BP block.
 
-DSP source: `plugin/src/dsp/PreGain.hpp`, `plugin/src/Pogo.cpp` (lines 350–362)
+DSP source: `plugin/src/dsp/PreGain.hpp`, `plugin/src/Pogo.cpp` (main 341–342; ALT 344–352; ALT→VCA→BP3 routing 439–441)
 
 ---
 
@@ -13,17 +13,25 @@ downstream filters harder, pushing them into self-oscillation more easily and ge
 audible harmonic content when signals exceed the downstream clipping ceiling. The
 clipping at ±10.5 V is not a safety measure — it is a deliberate tonal tool. A second
 independent gain switch (GAIN_BP3) applies the same 1×/5× choice to the ALT path, which
-feeds the Triple Bandpass block directly, bypassing the VCA and LP1 entirely. This lets
-the player inject a separate source (e.g., a raw synth voice) into the BP formant section
-without touching the main signal path.
+injects a separate source (e.g., a raw synth voice) into **BP3 only** — the third bandpass
+voice — replacing that voice's normal feed. Per the locked plugin (`Pogo.cpp:440–441`) the
+ALT signal still passes **through the VCA** (driven by the same VCA amount/CV as the main
+path) before reaching BP3; it bypasses **LP1 only**, not the VCA. BP1 and BP2 are untouched
+by the ALT path and always take the main post-VCA/LP1 band. When the ALT jacks are unpatched,
+BP3 falls back to the main band, so the ALT path is inaudible until patched.
 
 ---
 
 ## 2. Theoretical Design and Topology
 
-> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
-> It has not been verified against the current panel control set. Do not use for circuit
-> construction until re-verified. See `specs/STATUS.md` for current phase status.
+> ✅ **Re-verified 2026-05-30** against the locked plugin (change 0018, 0017 follow-up).
+> The gain-stage math/topology and the ALT-path *gain stage* match the plugin. The ALT
+> path's downstream destination description was **corrected**: ALT goes through the VCA
+> (shared control) and feeds **BP3 only**, bypassing LP1 (not the VCA). The hardware that
+> realizes that downstream path — an ALT VCA cell and the BP3 input selector — is specced
+> in **block-4** (2nd THAT2180 on the shared control, G5/G6) and **block-6** (BP3 input
+> selector + LP1 normal), and is tracked there, not here. Block 1 builds only the ALT
+> *gain stage* and emits `ALT_OUT_L/R`.
 
 ### DSP-to-analog mapping
 
@@ -72,17 +80,22 @@ The bypass (1×) path routes around the op-amp entirely via the switch, presenti
 input directly to the next stage. This avoids any gain-of-1 op-amp buffer in the
 bypass path that could add its own noise floor.
 
-**Gain switch:** A Dailywell DW3 (2M-series DPDT ON-ON) sub-mini toggle shorts R_g to
-ground (feedback to inverting input) in the gain position, or opens the feedback network
-to connect the op-amp output directly back to the inverting input (unity-gain follower).
-Alternatively — and simpler for layout — the switch selects between two signal paths: the
-gain stage output vs. the input passed through directly. The DPDT routes both L and R
-channels simultaneously with a single toggle actuator (one pole per channel).
+**Gain switch:** A Dailywell DW3 (2M-series DPDT ON-ON) sub-mini toggle implemented as a
+**path-select** (the netlist-locked choice): the toggle common picks either the 5× amp
+output or the raw input passed through directly. This faithfully matches the plugin's true
+bypass at 1× (`PreGain.hpp:10–11` returns `v` unchanged), with the op-amp entirely out of
+the 1× path so it adds no noise. The DPDT routes both L and R channels simultaneously with
+a single toggle actuator (one pole per channel).
 
-**ALT path (GAIN_BP3):** An identical stage (second OPA1612) handles ALT_BP_L and
-ALT_BP_R. When neither ALT_BP_L nor ALT_BP_R is patched, the alt path outputs 0 V
-and the BP block ignores it (falls back to LP1 output). R normalling on the ALT path
-mirrors Block A: if only ALT_BP_L is patched, ALT_BP_R is normalized to ALT_BP_L.
+**ALT path (GAIN_BP3):** An identical gain stage (second OPA1612, U3) handles ALT_BP_L and
+ALT_BP_R. When neither ALT_BP jack is patched, the ALT gain stage outputs 0 V and BP3 falls
+back to the main band (the BP3 input selector, in block-6, holds on the main feed). R
+normalling on the ALT path mirrors Block A: if only ALT_BP_L is patched, ALT_BP_R is
+normalized to ALT_BP_L. **Asymmetric edge case** (`Pogo.cpp:440–441`): if *only* ALT_BP_R is
+patched (L unpatched), BP3's left channel stays on the main band while its right channel
+takes the ALT source — so the two BP3 channels can be driven from different sources. The BP3
+input selector must therefore be **per-channel**, gated by each channel's ALT-connected
+state, not a single stereo switch.
 
 ### IC selection: OPA1612 vs. TL072
 
@@ -101,15 +114,16 @@ switch produces a transient click (charge redistribution on the feedback network
 hardware-only consideration. The clip level varies slightly with temperature and load;
 the DSP specifies ±10.5 V as nominal, consistent with OPA1612 datasheet typical figures.
 
-→ References `aux/unity-buffer.md`
+→ References `aux/aux-unity-buffer.md`
 
 ---
 
 ## 3. Physical Design
 
-> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
-> It has not been verified against the current panel control set. Do not use for circuit
-> construction until re-verified. See `specs/STATUS.md` for current phase status.
+> ✅ **Re-verified 2026-05-30** against the locked plugin (change 0018). Gain-stage
+> component values, switch (path-select), ALT gain stage, and protection match the §2
+> model. ALT downstream routing (VCA + BP3 selector) is realized in block-4 / block-6 and
+> tracked there. Documentation-only corrections applied here (ALT destination, aux refs).
 
 ### Component values and derivations
 
@@ -150,13 +164,14 @@ pgL/pgR → Block VCA
 
 ALT path:
 ```
-J_ALT_L → R38 (100 Ω) → D8 clamp → U3A(+) non-inverting amp → SW2 → altL
-J_ALT_R → R39 (100 Ω) → D9 clamp → U3B(+) non-inverting amp → SW2 → altR
-altL/altR → Block BP (direct input, bypassing VCA and LP1)
+J_ALT_L → R38 (100 Ω) → D8 clamp → U3A(+) non-inverting amp → SW2 → ALT_OUT_L
+J_ALT_R → R39 (100 Ω) → D9 clamp → U3B(+) non-inverting amp → SW2 → ALT_OUT_R
+ALT_OUT_L/R → [block-4 ALT VCA cell, shared control] → [block-6 BP3 per-channel
+              input selector] → BP3 only.  Bypasses LP1, NOT the VCA.
 ```
 
 ALT inputs carry the standard POGO jack protection (100 Ω series + BAT54S clamp to
-±12 V, per `aux/cv-protection.md` — every jack input). J4 (ALT_BP_R) tip-switch
+±12 V, per `aux/aux-cv-protection.md` — every jack input). J4 (ALT_BP_R) tip-switch
 normalls to the protected ALT_L input node so an unpatched R channel duplicates L
 through R's own identical gain stage and the shared toggle (added 2026-05-29).
 
@@ -180,30 +195,13 @@ length carrying unshielded pre-gain signals.
 - 2× OPA1612 (U2, U3, dual SOIC-8): ~5.5 mA each = ~11 mA  (Iq = 2.75 mA/ch × 2)
 - **+12V: ~11 mA | −12V: ~11 mA**
 
-→ References `aux/unity-buffer.svg` for op-amp gain stage schematic primitive.
+→ References `aux/aux-unity-buffer.md` for the op-amp gain-stage ASCII schematic primitive.
+(The aux/ library is ASCII-only — there are no SVG schematic files.)
 
 ---
 
 ## 4. Component Requirements
 
-> ⚠️ **STALE** — This section reflects the pre-panel-redesign analog design (2026-05-27).
-> It has not been verified against the current panel control set. Do not use for circuit
-> construction until re-verified. See `specs/STATUS.md` for current phase status.
-
-| Ref | Part | Package | Value | Qty | Board | Block | Function |
-|---|---|---|---|---|---|---|---|
-| U2 | OPA1612 | SOIC-8 | — | 1 | audio | block-1 | Main gain amp, L+R channels; 1.1 nV/√Hz |
-| U3 | OPA1612 | SOIC-8 | — | 1 | audio | block-1 | ALT BP gain amp, L+R channels; 1.1 nV/√Hz |
-| R3 | resistor 1% | 0603 | 4.7 kΩ | 2 | audio | block-1 | R_g main gain stage (×2 ch); 1% for L/R match + low i_n×R noise |
-| R4 | resistor 1% | 0603 | 18 kΩ | 2 | audio | block-1 | R_f main gain stage (×2 ch); G = 4.83× ≈ 5× |
-| R5 | resistor 1% | 0603 | 4.7 kΩ | 2 | audio | block-1 | R_g ALT gain stage (×2 ch) |
-| R6 | resistor 1% | 0603 | 18 kΩ | 2 | audio | block-1 | R_f ALT gain stage (×2 ch) |
-| SW1 | Dailywell DW3 | sub-mini toggle 2M | DPDT ON-ON | 1 | panel | block-1 | GAIN_MAIN 1×/5× |
-| SW2 | Dailywell DW3 | sub-mini toggle 2M | DPDT ON-ON | 1 | panel | block-1 | GAIN_BP3 1×/5× (ALT path) |
-| R38 | resistor | 0603 | 100 Ω | 1 | audio | block-1 | ALT_BP_L series input protection |
-| R39 | resistor | 0603 | 100 Ω | 1 | audio | block-1 | ALT_BP_R series input protection |
-| D8 | BAT54S | SOT-23 | — | 1 | audio | block-1 | ALT_BP_L input clamp ±12 V |
-| D9 | BAT54S | SOT-23 | — | 1 | audio | block-1 | ALT_BP_R input clamp ±12 V |
-| C2 | cap, X7R | 0603 | 100 nF | 4 | audio | block-1 | OPA1612 supply decoupling (2 ICs × 2 pins) |
-| J3 | PJ301M-12 | panel | — | 1 | panel | block-1 | ALT_BP_L input jack |
-| J4 | PJ301M-12 | panel | — | 1 | panel | block-1 | ALT_BP_R input jack (normalled to ALT_BP_L) |
+Component set: see the generated BOM `kicad/pogo-bom.csv` (rows with `Block = block-1`),
+sourced from `specs/components.yaml` (the per-ref design manifest) and enriched by the
+`components/` registry (MPN, footprint, datasheet). Verification status: `specs/STATUS.md`.

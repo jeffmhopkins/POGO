@@ -2,7 +2,8 @@
 
 > ✅ **CORRECTED 2026-05-29** — Topology fixed to the real THAT2180 current-in/current-out
 > device (was wrongly modelled as a differential voltage VCA with no output op-amp).
-> Pinout from datasheet Doc 600029 Rev 02 Table 1. Verified in `kicad/nets/block-4.nets.yaml`.
+> Pinout from datasheet Doc 600029 Rev 02 Table 1. Verified in `specs/block-4/block-4.nets.yaml`.
+> 🔧 **Change 0020 HIGH-3:** the Ec+ unity trim must be a **voltage-injection** trim (trim pot as a divider across a small ±ref, wiper→R_inj→Ec+, with V_ctrl→R_ec→Ec+), NOT a series rheostat into the high-Z Ec+ port (a series R there sets ~0.004dB — useless). Buffer the shared V_ctrl before fanning out to multiple cells. ±~2dB unity authority. SPICE: `specs/block-4/sim/vca_ecplus.cir` (authority), `vctrl_buffer.cir` (buffer g_ctrl), `ref_divider.cir` (±1.195V ref; change 0025 fixed the ref divider 45k3→11k3).
 
 Design status: [ ] draft → [ ] reviewed → [ ] validated on prototype
 
@@ -16,9 +17,10 @@ the DSP models a linear VCA — this is an intentional deviation for more musica
 Chosen because:
 - THAT 2180 is the industry-standard Eurorack/professional audio VCA IC
 - Exponential (dB) response is more musical than linear for manual gain riding
-- SOIC-8 footprint is compact; consumes ~2.5 mA per device
-- Differential input rejects common-mode noise on the audio path
-- True stereo: two separate THAT 2180 ICs (one per channel) for independent L/R gain
+- 8-pin SIP (THT — no SMD variant); consumes ≈ 4 mA per device (datasheet Icc typ)
+- Current-in / current-out (Blackmer) — R_in V→I in, transimpedance I→V out
+- True stereo: one THAT 2180 per channel for independent L/R gain. POGO uses **four** cells:
+  main L/R (U4/U5) + ALT-BP L/R (U78/U79), all sharing one V_ctrl (change 0018).
 
 ## Schematic
 
@@ -27,7 +29,7 @@ ASCII fallback (one channel; THAT2180 is current-in / current-out — datasheet 
 Input=1, Ec+=2, Ec−=3, Sym=4, V−=5, Gnd=6, V+=7, Output=8):
 
 ```
-              R_in 20k        THAT 2180 (SOIC-8)            I/V op-amp (TL072 half)
+              R_in 20k        THAT 2180 (SIP-8)            I/V op-amp (TL072 half)
  AUDIO_IN ───[====]──► Input(1)              Output(8) ──┬──(−)──┐
                                                           │  R_f 20k │
                                               V+(7)=+12V  │  [====]  ├── AUDIO_OUT
@@ -41,19 +43,21 @@ Input=1, Ec+=2, Ec−=3, Sym=4, V−=5, Gnd=6, V+=7, Output=8):
  With R_f = R_in, gain = −1 at 0 dB (single inversion; LP1's inverting SUM_AMP
  downstream restores polarity). Gain set by Ec+: G_dB = Ec+ / 6.1mV.
 
- Control chain (V_ctrl, shared by both channels' Ec+):
-   VCA_IN jack ──[100Ω]──[BAT54S clamp]── CVP ──┬──► AMT attenuverter (RV_AMT bipolar
-                                                │      pot + inverter for −CVP) → AMT·CVP
-   VCA_OFS pot wiper ───────────────────────────┼──► CV summer (TL072 half) ──► V_ctrl
-                                                │      (scaled toward 6.1 mV/dB)
-                                          AMT·CVP┘                    │
-                                                          per-channel RV_VCA_UNITY
-                                                          trim → Ec+ (pin 2)
+ Control chain (V_ctrl, shared by ALL four cells' Ec+) — OFS summed BEFORE the AMT pot:
+   VCA_IN ─[100Ω]─[BAT54S]─ CVP ─┐
+                                 ├─► CV+OFS summer (TL072 U63A) ─► −effCV ─► inverter (U63B) ─► +effCV
+   VCA_OFS pot wiper ────────────┘
+   AMT pot sits SYMMETRICALLY across ±effCV (CW=+effCV, CCW=−effCV); wiper = V_ctrl = AMT·effCV.
+   → AMT = 0 (center) ⇒ V_ctrl = 0 ⇒ unity, regardless of OFS (matches the plugin).
+   V_ctrl ─► per-cell RV_VCA_UNITY trim ─► Ec+ (pin 2) of each THAT 2180 (main L/R + ALT L/R).
 ```
 
-VCA_AMT attenuverter uses the aux-attenuverter topology (bipolar pot + inverter) to
-produce AMT·CVP before the summer. Target: Ec+ = 244 mV·(control−1) where control is the
-DSP gain index (1 = unity/0 dB, 0 = −40 dB); exact summer/Ec scaling is a Phase-3R trim.
+The plugin adds OFS to the CV *before* the AMT gain law (`vcaCV = clamp(raw + OFS·5)`, then
+`control = 1 − AMT·(1 − normCV)`). The analog mirrors that: OFS is summed into the CV ahead of
+the **symmetric** AMT attenuverter, so the AMT center detent gives unity for any OFS. Target:
+Ec+ = 244 mV·(control−1); exact summer/Ec scaling, the effCV−5 V pivot, and any V_ctrl wiper
+buffer are Phase-3R trims. *(An earlier version summed OFS after the AMT stage — wrong: it
+shifted gain at the AMT detent.)*
 
 ## Transfer Function
 
@@ -98,7 +102,9 @@ control (DSP index) → Ec+ = 244 mV × (control − 1):
 ```
 
 The RV_VCA_UNITY trim adjusts the per-channel Ec+ offset so Ec+ = 0 ⇒ exactly 0 dB.
-Nominal small trim range → 500 Ω trimpot adequate.
+**Change 0020 (HIGH-3):** this is realized as a **voltage-injection** trim, not a series rheostat —
+RV_VCA_UNITY is a **10 kΩ** divider across a shared ±1.2 V reference, wiper → R_inj (1 MΩ) → Ec+,
+with V_ctrl → R_ec (10 kΩ) → Ec+; ±~2 dB authority (see the §3 / block-4 note).
 
 ## Design Choices & Rationale
 
@@ -116,7 +122,7 @@ VCA behavior from hardware synthesizers.
 THAT2180 Input (pin 1) is a current input; R_in sets V→I (I_in = AUDIO_IN / R_in).
 Output (pin 8) is a current output into an I/V op-amp; AUDIO_OUT = −I_out · R_f.
 R_f = R_in = 20 kΩ → unity (−1) at 0 dB; ~20 kΩ input impedance.
-RV_VCA_UNITY (500 Ω SMD trimpot) provides ±3.3% trim range around nominal.
+RV_VCA_UNITY (change 0020: **10 kΩ** SMD trimpot, voltage-injection divider — not a series rheostat).
 ```
 
 ### Input Protection (VCA_IN jack)
@@ -144,12 +150,12 @@ is confirmed in the datasheet, with slightly reduced headroom. Audio headroom wi
 
 | Ref (generic) | Part | Package | Value | Notes |
 |---|---|---|---|---|
-| U_VCA_L/R | THAT2180LD | SOIC-8 | — | Per-channel VCA (current-in/out) |
-| U_IV | TL072CDT | SOIC-8 | — | I/V transimpedance converters (one half per channel) |
-| U_CV | TL072CDT | SOIC-8 | — | CV conditioning: AMT inverter + CV/OFS summer |
+| U_VCA (×4) | THAT2180 | SIP-8 (THT) | — | Per-channel VCA (current-in/out): main L/R + ALT L/R |
+| U_IV (×2) | TL072CDT | SOIC-8 | — | I/V transimpedance (main U6 + ALT U80; one half per channel) |
+| U_CV | TL072CDT | SOIC-8 | — | CV conditioning: CV+OFS summer (A) + effCV inverter (B) |
 | R_in | Resistor | 0603 | 20 kΩ | Audio V→I into Input (pin 1); 1% |
 | R_f | Resistor | 0603 | 20 kΩ | I/V transimpedance feedback (unity @0 dB); 1% |
-| RV_VCA_UNITY | Bourns 3224W | SMD | 500 Ω | Per-channel unity-gain trim at Ec+ |
+| RV_VCA_UNITY | Bourns 3224W | SMD | 10 kΩ | Per-channel unity trim (change 0020: voltage-injection divider across ±1.2V ref, not series rheostat) |
 | R_cv_in | Resistor | 0603 | 100 Ω | CV input protection series resistor |
 | D_cv_in | BAT54S | SOT-23 | — | Dual Schottky clamp at CV input |
 | C_VCC, C_VEE | Ceramic bypass | 0603 | 100 nF | Per supply pin (THAT2180 ×2 + each TL072) |
@@ -158,10 +164,9 @@ is confirmed in the datasheet, with slightly reduced headroom. Audio headroom wi
 
 | Item | +12V | −12V |
 |---|---|---|
-| THAT 2180 L | ~2.5 mA | ~2.5 mA |
-| THAT 2180 R | ~2.5 mA | ~2.5 mA |
-| TL072 summers | ~1.5 mA | ~1.5 mA |
-| **Total (VCA block)** | **~6.5 mA** | **~6.5 mA** |
+| 4× THAT 2180 (main L/R + ALT L/R) | ~16 mA | ~16 mA |
+| 3× TL072 (2 I/V + 1 CV) | ~8.5 mA | ~8.5 mA |
+| **Total (VCA block)** | **~25 mA** | **~25 mA** |
 
 ## Performance Characteristics
 
@@ -172,7 +177,7 @@ is confirmed in the datasheet, with slightly reduced headroom. Audio headroom wi
 | Audio bandwidth | >100 kHz | THAT 2180 specification |
 | THD+N | <0.01% | Unity gain, 1 kHz, ±5V input |
 | Dynamic range | >100 dB | THAT 2180 specification |
-| Audio input impedance (IN+) | ~20 kΩ | Small-signal; THAT 2180A14-U translinear cell |
+| Audio input impedance (IN+) | ~20 kΩ | Small-signal; THAT 2180 (SIP-8) translinear cell |
 | Audio output impedance (OUT+) | <100 Ω | Low-Z transimpedance output stage |
 | Input range | ±11V | Clamped at input buffer |
 | Output range | ±11V | ±12V supply |
@@ -195,8 +200,10 @@ is confirmed in the datasheet, with slightly reduced headroom. Audio headroom wi
 - BAT54S anode must connect to GND (not to signal ground return) — use analog GND star
   connection to avoid injecting clamp current into signal path
 - VCA_OFS (floor offset) sets a minimum gain floor so the signal is never fully muted
-  even at CV=0; this maps to the DSP `VCA_OFS` parameter. Hardware implementation is
-  a bias voltage added at the CV summer (U63-B) before the Ec+ scaling.
+  even at CV=0; this maps to the DSP `VCA_OFS` parameter. Hardware: OFS is summed into the
+  CV at the CV+OFS summer (U63-A) **before** the AMT attenuverter — matching the plugin order
+  (`vcaCV = clamp(raw+OFS·5)` then the AMT law). Summing OFS after AMT would wrongly shift
+  gain at the AMT detent.
 - Two THAT 2180 supply rails must be decoupled independently; shared decoupling cap
   can allow L/R crosstalk through the supply impedance
 
@@ -204,4 +211,5 @@ is confirmed in the datasheet, with slightly reduced headroom. Audio headroom wi
 
 | Block | Instance | Board | Notes |
 |---|---|---|---|
-| block-4 | VCA_L, VCA_R | Control | Pre-LP1 VCA; true stereo pair |
+| block-4 | VCA main L/R (U4/U5) | audio | Pre-LP1 VCA; stereo pair |
+| block-4 | VCA ALT L/R (U78/U79) | audio | ALT-BP voice VCA → BP3; shares V_ctrl (change 0018) |

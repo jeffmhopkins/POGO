@@ -123,6 +123,7 @@ struct Pogo : Module {
 		LFO1_RATE_PARAM,
 		LFO2_RATE_PARAM,
 		// Zone 0c — MOD BUS / VCA
+		MOD_SRC_PARAM,          // switch 0/1/2: LFO1 / LFO2 / EXT (MOD_IN jack)
 		MOD_SCALE_PARAM,        // trimpot 0–1 → 0.2×–5×
 		MOD_OFFSET_PARAM,       // trimpot −1–1 → ±5 V
 		VCA_AMT_PARAM,          // trimpot −1–1 (bipolar attenuverter)
@@ -159,7 +160,7 @@ struct Pogo : Module {
 		// LP2
 		LP2_FREQ_PARAM, LP2_RES_PARAM,
 		LP2_FREQ_ATT_PARAM, LP2_RES_ATT_PARAM,
-		NUM_PARAMS   // 52
+		NUM_PARAMS   // 53
 	};
 
 	enum InputId {
@@ -201,6 +202,7 @@ struct Pogo : Module {
 		configParam(LFO2_RATE_PARAM, 0.f, 1.f, 0.3f, "LFO 2 Rate");
 
 		// Zone 0c
+		configSwitch(MOD_SRC_PARAM, 0.f, 2.f, 0.f, "Mod Source", {"LFO 1", "LFO 2", "External"});
 		configParam(MOD_SCALE_PARAM,  0.f,  1.f, 0.5f, "Mod Scale");
 		configParam(MOD_OFFSET_PARAM, -1.f, 1.f, 0.f,  "Mod Offset");
 		configParam(VCA_AMT_PARAM,    -1.f, 1.f, 0.f,  "VCA Depth");
@@ -307,8 +309,6 @@ struct Pogo : Module {
 	// ── DSP state ────────────────────────────────────────────────────────────
 	LFO lfo1, lfo2;
 	TripleBandpass bandpassL, bandpassR;
-	// Distortion taps — post-SVF per-group distorted outputs
-	float distTapL[3] = {}, distTapR[3] = {};
 	LPFilter lp1L, lp1R;
 	LPFilter lp2L, lp2R;
 	HPFilter hpL, hpR;
@@ -316,7 +316,6 @@ struct Pogo : Module {
 	void onReset() override {
 		lfo1.reset(); lfo2.reset();
 		bandpassL.reset(); bandpassR.reset();
-		for (int i = 0; i < 3; i++) distTapL[i] = distTapR[i] = 0.f;
 		lp1L.reset(); lp1R.reset();
 		lp2L.reset(); lp2R.reset();
 		hpL.reset();  hpR.reset();
@@ -342,7 +341,10 @@ struct Pogo : Module {
 		float pgL = PreGain::process(inL, params[GAIN_PARAM].getValue());
 		float pgR = PreGain::process(inR, params[GAIN_PARAM].getValue());
 
-		// ALT path: ALT_BP_L/R → GAIN_BP3 → bypasses VCA+LP1, feeds BP directly
+		// ALT path: ALT_BP_L/R → GAIN_BP3 → bypasses VCA+LP1, feeds BP directly.
+		// L and R are fully INDEPENDENT (change 0020): each ALT input gates its own BP3
+		// channel; no R→L normal (lets the hardware use two standard single-switch jacks,
+		// each self-detecting via its own switch lug — no dual-switch jack / panel break).
 		bool altLConn = inputs[ALT_BP_L_INPUT].isConnected();
 		bool altRConn = inputs[ALT_BP_R_INPUT].isConnected();
 		float altL = altLConn
@@ -350,7 +352,7 @@ struct Pogo : Module {
 		    : 0.f;
 		float altR = altRConn
 		    ? PreGain::process(inputs[ALT_BP_R_INPUT].getVoltage(), params[ALT_GAIN_PARAM].getValue())
-		    : (altLConn ? altL : 0.f); // normalise R to L alt if only L patched
+		    : 0.f;
 
 		// ── LFOs ─────────────────────────────────────────────────────────────
 		float lfo1Raw = lfo1.process(params[LFO1_RATE_PARAM].getValue(), dt);
@@ -359,10 +361,12 @@ struct Pogo : Module {
 		float lfo2V   = lfo2Raw * 5.f;   // ±5 V
 
 		// ── Mod bus ───────────────────────────────────────────────────────────
-		// LFO1 normalises to mod bus; MOD_INPUT jack overrides when patched
-		float modSrcV = inputs[MOD_INPUT].isConnected()
-		                ? inputs[MOD_INPUT].getVoltage()
-		                : lfo1V;
+		// MOD SRC switch selects the bus source: 0 = LFO1, 1 = LFO2,
+		// 2 = EXT (MOD_INPUT jack only; 0 V if unpatched — jack is ignored otherwise).
+		int   modSrc  = (int)std::round(params[MOD_SRC_PARAM].getValue());
+		float modSrcV = (modSrc == 0) ? lfo1V
+		              : (modSrc == 1) ? lfo2V
+		              : (inputs[MOD_INPUT].isConnected() ? inputs[MOD_INPUT].getVoltage() : 0.f);
 
 		float busV = ModBusProcessor::process(modSrcV,
 		                                      params[MOD_SCALE_PARAM].getValue(),
@@ -435,33 +439,42 @@ struct Pogo : Module {
 			clamp(params[BP3_DIST_PARAM].getValue() + modDest(BP3_DIST_INPUT, BP3_DIST_ATT_PARAM), 0.f, 1.f),
 		};
 
-		// ALT path feeds BP3 only (VCA-applied); BP1+BP2 always use LP1 output
+		// ALT path feeds BP3 only (VCA-applied); BP1+BP2 always use LP1 output.
+		// Independent per-channel gating (change 0020): R gates on its own ALT_R, not L||R.
 		float bp3InL = altLConn ? VcaBlock::process(altL, vcaAmt, vcaCV) : bandL;
-		float bp3InR = (altLConn || altRConn) ? VcaBlock::process(altR, vcaAmt, vcaCV) : bandR;
+		float bp3InR = altRConn ? VcaBlock::process(altR, vcaAmt, vcaCV) : bandR;
+
+		// ── Distortion BEFORE the bandpass (per band: x → DISTn → BPn) ───────
+		// Each band distorts its own feed first, then the SVF filters it.
+		// BP1/BP2 distort the LP1 output; BP3 distorts the main/ALT feed.
+		float distInL[3] = { bandL, bandL, bp3InL };
+		float distInR[3] = { bandR, bandR, bp3InR };
+		float bpInL[3], bpInR[3];
+		for (int i = 0; i < 3; i++) {
+			bpInL[i] = Distortion::process(distInL[i], driveCv[i], distMode[i]);
+			bpInR[i] = Distortion::process(distInR[i], driveCv[i], distMode[i]);
+		}
+		// CLIP LEDs monitor the distortion stage output (now pre-filter).
+		lights[BP1_CLIP_LIGHT].setBrightness(
+			(std::max(std::abs(bpInL[0]), std::abs(bpInR[0])) > 4.0f) ? 1.f : 0.f);
+		lights[BP2_CLIP_LIGHT].setBrightness(
+			(std::max(std::abs(bpInL[1]), std::abs(bpInR[1])) > 4.0f) ? 1.f : 0.f);
+		lights[BP3_CLIP_LIGHT].setBrightness(
+			(std::max(std::abs(bpInL[2]), std::abs(bpInR[2])) > 4.0f) ? 1.f : 0.f);
 
 		// Per-group tilt: global bpTiltCv + per-band groupTiltV; L gets +, R gets −
 		float tiltL[3] = { bpTiltCv + groupTiltV[0], bpTiltCv + groupTiltV[1], bpTiltCv + groupTiltV[2] };
 		float tiltR[3] = { -(bpTiltCv + groupTiltV[0]), -(bpTiltCv + groupTiltV[1]), -(bpTiltCv + groupTiltV[2]) };
-		bandpassL.process(bandL, bp3InL, freqV, focusCv, tiltL, fs);
-		bandpassR.process(bandR, bp3InR, freqV, focusCv, tiltR, fs);
+		bandpassL.process(bpInL, freqV, focusCv, tiltL, fs);
+		bandpassR.process(bpInR, freqV, focusCv, tiltR, fs);
 
-		float dSumL = 0.f, dSumR = 0.f;
-		for (int i = 0; i < 3; i++) {
-			distTapL[i] = Distortion::process(bandpassL.prevOut[i], driveCv[i], distMode[i]);
-			distTapR[i] = Distortion::process(bandpassR.prevOut[i], driveCv[i], distMode[i]);
-			dSumL += distTapL[i];
-			dSumR += distTapR[i];
-		}
-		lights[BP1_CLIP_LIGHT].setBrightness(
-			(std::max(std::abs(distTapL[0]), std::abs(distTapR[0])) > 4.0f) ? 1.f : 0.f);
-		lights[BP2_CLIP_LIGHT].setBrightness(
-			(std::max(std::abs(distTapL[1]), std::abs(distTapR[1])) > 4.0f) ? 1.f : 0.f);
-		lights[BP3_CLIP_LIGHT].setBrightness(
-			(std::max(std::abs(distTapL[2]), std::abs(distTapR[2])) > 4.0f) ? 1.f : 0.f);
+		// Sum the three filtered bands; BP3 OUT taps the post-BP3 band (pre-mix).
+		float dSumL = bandpassL.prevOut[0] + bandpassL.prevOut[1] + bandpassL.prevOut[2];
+		float dSumR = bandpassR.prevOut[0] + bandpassR.prevOut[1] + bandpassR.prevOut[2];
 		float wetL    = clamp(dSumL, -10.5f, 10.5f);
 		float wetR    = clamp(dSumR, -10.5f, 10.5f);
-		float bp3OutL = distTapL[2];
-		float bp3OutR = distTapR[2];
+		float bp3OutL = bandpassL.prevOut[2];
+		float bp3OutR = bandpassR.prevOut[2];
 
 		float bpOutL = clamp(bandL * bypass + wetL * wet, -12.f, 12.f);
 		float bpOutR = clamp(bandR * bypass + wetR * wet, -12.f, 12.f);
@@ -521,20 +534,21 @@ struct PogoWidget : ModuleWidget {
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(30.48f, 65.90f)), module, Pogo::LFO2_RATE_PARAM));
 
 		// ── Zone 0c — MOD BUS / VCA ────────────────────────────────────
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(7.62f, 83.00f)), module, Pogo::MOD_SCALE_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(30.48f, 83.00f)), module, Pogo::VCA_AMT_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(7.62f, 96.34f)), module, Pogo::MOD_OFFSET_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(30.48f, 96.34f)), module, Pogo::VCA_OFS_PARAM));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.62f, 112.00f)), module, Pogo::MOD_INPUT));
+		addParam(createParamCentered<PogoToggle3>(mm2px(Vec(7.62f, 89.50f)), module, Pogo::MOD_SRC_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(19.05f, 83.75f)), module, Pogo::MOD_SCALE_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(30.48f, 83.75f)), module, Pogo::VCA_AMT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(19.05f, 95.25f)), module, Pogo::MOD_OFFSET_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(30.48f, 95.25f)), module, Pogo::VCA_OFS_PARAM));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(19.05f, 112.00f)), module, Pogo::MOD_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(30.48f, 112.00f)), module, Pogo::VCA_INPUT));
 
 		// ── Zone — LP1 Low-Pass Filter ─────────────────────────────────
 		addParam(createParamCentered<RoundHugeBlackKnob>(mm2px(Vec(53.34f, 24.80f)), module, Pogo::LP1_FREQ_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(53.34f, 52.40f)), module, Pogo::LP1_TILT_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(53.34f, 78.00f)), module, Pogo::LP1_RES_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(41.91f, 100.00f)), module, Pogo::LP1_FREQ_ATT_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(53.34f, 100.00f)), module, Pogo::LP1_TILT_ATT_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(64.77f, 100.00f)), module, Pogo::LP1_RES_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(41.79f, 99.00f)), module, Pogo::LP1_FREQ_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(53.34f, 99.50f)), module, Pogo::LP1_TILT_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(64.77f, 99.50f)), module, Pogo::LP1_RES_ATT_PARAM));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(41.91f, 112.00f)), module, Pogo::LP1_FREQ_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(53.34f, 112.00f)), module, Pogo::LP1_TILT_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(64.77f, 112.00f)), module, Pogo::LP1_RES_INPUT));
@@ -544,8 +558,8 @@ struct PogoWidget : ModuleWidget {
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(81.915f, 43.20f)), module, Pogo::BP_TILT_PARAM));
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(81.915f, 61.60f)), module, Pogo::BP_BYPASS_PARAM));
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(81.915f, 80.00f)), module, Pogo::BP_WET_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(76.200f, 100.00f)), module, Pogo::BP_FREQ_ATT_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(87.630f, 100.00f)), module, Pogo::BP_TILT_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(76.200f, 99.50f)), module, Pogo::BP_FREQ_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(87.630f, 99.50f)), module, Pogo::BP_TILT_ATT_PARAM));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(76.200f, 112.00f)), module, Pogo::BP_FREQ_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(87.630f, 112.00f)), module, Pogo::BP_TILT_INPUT));
 
@@ -556,9 +570,9 @@ struct PogoWidget : ModuleWidget {
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(118.635f, 63.85f)), module, Pogo::BP1_TILT_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(102.345f, 80.00f)), module, Pogo::BP1_DIST_PARAM));
 		addChild(createLightCentered<SmallLight<RedLight>>(mm2px(Vec(118.490f, 83.00f)), module, Pogo::BP1_CLIP_LIGHT));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(99.06f, 100.00f)), module, Pogo::BP1_FREQ_ATT_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(110.49f, 100.00f)), module, Pogo::BP1_TILT_ATT_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(121.92f, 100.00f)), module, Pogo::BP1_DIST_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(99.06f, 99.50f)), module, Pogo::BP1_FREQ_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(110.49f, 99.50f)), module, Pogo::BP1_TILT_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(121.92f, 99.50f)), module, Pogo::BP1_DIST_ATT_PARAM));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(99.06f, 112.00f)), module, Pogo::BP1_FREQ_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(110.49f, 112.00f)), module, Pogo::BP1_TILT_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(121.92f, 112.00f)), module, Pogo::BP1_DIST_INPUT));
@@ -570,9 +584,9 @@ struct PogoWidget : ModuleWidget {
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(152.925f, 63.85f)), module, Pogo::BP2_TILT_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(136.635f, 80.00f)), module, Pogo::BP2_DIST_PARAM));
 		addChild(createLightCentered<SmallLight<RedLight>>(mm2px(Vec(152.780f, 83.00f)), module, Pogo::BP2_CLIP_LIGHT));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(133.35f, 100.00f)), module, Pogo::BP2_FREQ_ATT_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(144.78f, 100.00f)), module, Pogo::BP2_TILT_ATT_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(156.21f, 100.00f)), module, Pogo::BP2_DIST_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(133.35f, 99.50f)), module, Pogo::BP2_FREQ_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(144.78f, 99.50f)), module, Pogo::BP2_TILT_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(156.21f, 99.50f)), module, Pogo::BP2_DIST_ATT_PARAM));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(133.35f, 112.00f)), module, Pogo::BP2_FREQ_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(144.78f, 112.00f)), module, Pogo::BP2_TILT_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(156.21f, 112.00f)), module, Pogo::BP2_DIST_INPUT));
@@ -584,9 +598,9 @@ struct PogoWidget : ModuleWidget {
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(187.215f, 63.85f)), module, Pogo::BP3_TILT_PARAM));
 		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(170.925f, 80.00f)), module, Pogo::BP3_DIST_PARAM));
 		addChild(createLightCentered<SmallLight<RedLight>>(mm2px(Vec(187.070f, 83.00f)), module, Pogo::BP3_CLIP_LIGHT));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(167.64f, 100.00f)), module, Pogo::BP3_FREQ_ATT_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(179.07f, 100.00f)), module, Pogo::BP3_TILT_ATT_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(190.50f, 100.00f)), module, Pogo::BP3_DIST_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(167.64f, 99.50f)), module, Pogo::BP3_FREQ_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(179.07f, 99.50f)), module, Pogo::BP3_TILT_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(190.50f, 99.50f)), module, Pogo::BP3_DIST_ATT_PARAM));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(167.64f, 112.00f)), module, Pogo::BP3_FREQ_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(179.07f, 112.00f)), module, Pogo::BP3_TILT_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(190.50f, 112.00f)), module, Pogo::BP3_DIST_INPUT));
@@ -598,8 +612,8 @@ struct PogoWidget : ModuleWidget {
 		// ── Zone — HP ──────────────────────────────────────────────────
 		addParam(createParamCentered<PogoSlider>(mm2px(Vec(207.65f, 54.00f)), module, Pogo::HP_FREQ_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(207.645f, 87.00f)), module, Pogo::HP_RES_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(201.93f, 100.00f)), module, Pogo::HP_FREQ_ATT_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(213.36f, 100.00f)), module, Pogo::HP_RES_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(201.93f, 99.50f)), module, Pogo::HP_FREQ_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(213.36f, 99.50f)), module, Pogo::HP_RES_ATT_PARAM));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(201.93f, 112.00f)), module, Pogo::HP_FREQ_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(213.36f, 112.00f)), module, Pogo::HP_RES_INPUT));
 
@@ -610,8 +624,8 @@ struct PogoWidget : ModuleWidget {
 		// ── Zone — LP2 ─────────────────────────────────────────────────
 		addParam(createParamCentered<PogoSlider>(mm2px(Vec(230.50f, 54.00f)), module, Pogo::LP2_FREQ_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(230.505f, 87.00f)), module, Pogo::LP2_RES_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(224.79f, 100.00f)), module, Pogo::LP2_FREQ_ATT_PARAM));
-		addParam(createParamCentered<Trimpot>(mm2px(Vec(236.22f, 100.00f)), module, Pogo::LP2_RES_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(224.79f, 99.50f)), module, Pogo::LP2_FREQ_ATT_PARAM));
+		addParam(createParamCentered<Trimpot>(mm2px(Vec(236.22f, 99.50f)), module, Pogo::LP2_RES_ATT_PARAM));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(224.79f, 112.00f)), module, Pogo::LP2_FREQ_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(236.22f, 112.00f)), module, Pogo::LP2_RES_INPUT));
 	}

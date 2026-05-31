@@ -1,0 +1,13 @@
+deck: ota_svf_loop.cir
+description: LP1 OTA-C §C state-variable tap DC offset + integrator f_ref (change 0020 §C/H5)
+plugin_ref: "plugin/src/dsp/LPFilter.hpp — Simper SVF, f_ref 632 Hz; OTA input linear range ~±30 mV"
+measurements:
+  - name: offset_buggy     # Darlington-buffer tap: ~2·Vbe injected into the next OTA input (the bug)
+    expect: 1.26
+    tol_abs: 0.05
+  - name: offset_fixed     # §C unbuffered tap: zero offset (the fix)
+    expect: 0.0
+    tol_abs: 0.01
+  - name: fref_hz          # gm-C integrator corner — re-tap must leave f_ref ≈ 632 Hz
+    expect: 632.0
+    tol_pct: 1

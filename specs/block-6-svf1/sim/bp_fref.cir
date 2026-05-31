@@ -1,0 +1,25 @@
+* POGO block-6-svf1 — BP integrator f_ref (runner-ready 0023)
+* Plugin (BandpassSVF.hpp): F_REF = 400 Hz for ALL 3 bands (line 42). The BP integrator cap is
+* 68nF (NOT the 47nF used by LP1/HP/LP2 at 632Hz) — a copied 47nF would mistune the band to ~575Hz.
+* This deck re-derives the gm-C corner with the BP's 68nF and confirms f0 ≈ 400 Hz at the trim Iabc.
+* (The adversarial review's highest-value check: verify the cap value, not a copy.)
+
+.param VT=0.02585
+.param Iabc=8.89u          ; BP trim target (400Hz)
+.param gm={Iabc/(2*VT)}    ; ~172 uS
+.param C=68n               ; BP integrator cap (C0G) — the value under test
+
+* gm-C integrator as a 1st-order LP; corner = gm/(2*pi*C)
+Vac ain 0 AC 1 DC 0
+Gint 0 obp ain obp {gm}
+Cint obp 0 {C}
+* control deck: also compute what 47nF (the trap) would give, for contrast
+Gint2 0 obp2 ain obp2 {gm}
+Cint2 obp2 0 47n
+
+.control
+  ac dec 100 50 5k
+  meas ac fref_hz   when vdb(obp)=-3.01
+  meas ac f_if_47n  when vdb(obp2)=-3.01
+.endc
+.end

@@ -1,0 +1,211 @@
+# components/symbols/opamp4.yaml — AUTHORED symbol primitive (the nets `sym:` token = filename).
+# Pin `at` is the connection point; one source drives both the emitted symbol and the pin map.
+# Loaded dynamically by tools/symbols.py (globs components/symbols/*.yaml).
+lib_id: Amplifier_Operational:TL074
+properties:
+- key: Reference
+  val: U
+  at: [5.08, 5.08, 0.0]
+  font: [1.27, 1.27]
+- key: Value
+  val: TL074
+  at: [5.08, -5.08, 0.0]
+  font: [1.27, 1.27]
+units:
+- unit: 0
+  style: 1
+  graphics:
+  - kind: rectangle
+    width: 0.0
+    fill: none
+    start: [-1.0, -1.0]
+    end: [1.0, 1.0]
+  pins: []
+- unit: 1
+  style: 1
+  graphics:
+  - kind: polyline
+    width: 0.254
+    fill: background
+    pts:
+    - [-5.08, -5.08]
+    - [-5.08, 5.08]
+    - [5.08, 0.0]
+    - [-5.08, -5.08]
+  pins:
+  - type: input
+    style: line
+    at: [-7.62, 2.54]
+    angle: 0.0
+    len: 2.54
+    name: In-
+    number: '2'
+    name_font: [1.27, 1.27]
+    num_font: [1.27, 1.27]
+  - type: input
+    style: line
+    at: [-7.62, -2.54]
+    angle: 0.0
+    len: 2.54
+    name: In+
+    number: '3'
+    name_font: [1.27, 1.27]
+    num_font: [1.27, 1.27]
+  - type: output
+    style: line
+    at: [7.62, 0.0]
+    angle: 180.0
+    len: 2.54
+    name: Out
+    number: '1'
+    name_font: [1.27, 1.27]
+    num_font: [1.27, 1.27]
+- unit: 2
+  style: 1
+  graphics:
+  - kind: polyline
+    width: 0.254
+    fill: background
+    pts:
+    - [-5.08, -5.08]
+    - [-5.08, 5.08]
+    - [5.08, 0.0]
+    - [-5.08, -5.08]
+  pins:
+  - type: input
+    style: line
+    at: [-7.62, 2.54]
+    angle: 0.0
+    len: 2.54
+    name: In-
+    number: '6'
+    name_font: [1.27, 1.27]
+    num_font: [1.27, 1.27]
+  - type: input
+    style: line
+    at: [-7.62, -2.54]
+    angle: 0.0
+    len: 2.54
+    name: In+
+    number: '5'
+    name_font: [1.27, 1.27]
+    num_font: [1.27, 1.27]
+  - type: output
+    style: line
+    at: [7.62, 0.0]
+    angle: 180.0
+    len: 2.54
+    name: Out
+    number: '7'
+    name_font: [1.27, 1.27]
+    num_font: [1.27, 1.27]
+- unit: 3
+  style: 1
+  graphics:
+  - kind: polyline
+    width: 0.254
+    fill: background
+    pts:
+    - [-5.08, -5.08]
+    - [-5.08, 5.08]
+    - [5.08, 0.0]
+    - [-5.08, -5.08]
+  pins:
+  - type: input
+    style: line
+    at: [-7.62, 2.54]
+    angle: 0.0
+    len: 2.54
+    name: In-
+    number: '9'
+    name_font: [1.27, 1.27]
+    num_font: [1.27, 1.27]
+  - type: input
+    style: line
+    at: [-7.62, -2.54]
+    angle: 0.0
+    len: 2.54
+    name: In+
+    number: '10'
+    name_font: [1.27, 1.27]
+    num_font: [1.27, 1.27]
+  - type: output
+    style: line
+    at: [7.62, 0.0]
+    angle: 180.0
+    len: 2.54
+    name: Out
+    number: '8'
+    name_font: [1.27, 1.27]
+    num_font: [1.27, 1.27]
+- unit: 4
+  style: 1
+  graphics:
+  - kind: polyline
+    width: 0.254
+    fill: background
+    pts:
+    - [-5.08, -5.08]
+    - [-5.08, 5.08]
+    - [5.08, 0.0]
+    - [-5.08, -5.08]
+  pins:
+  - type: input
+    style: line
+    at: [-7.62, 2.54]
+    angle: 0.0
+    len: 2.54
+    name: In-
+    number: '13'
+    name_font: [1.27, 1.27]
+    num_font: [1.27, 1.27]
+  - type: input
+    style: line
+    at: [-7.62, -2.54]
+    angle: 0.0
+    len: 2.54
+    name: In+
+    number: '12'
+    name_font: [1.27, 1.27]
+    num_font: [1.27, 1.27]
+  - type: output
+    style: line
+    at: [7.62, 0.0]
+    angle: 180.0
+    len: 2.54
+    name: Out
+    number: '14'
+    name_font: [1.27, 1.27]
+    num_font: [1.27, 1.27]
+- unit: 5
+  style: 1
+  graphics: []
+  pins:
+  - type: power_in
+    style: line
+    at: [0.0, 3.81]
+    angle: 270.0
+    len: 1.27
+    name: V+
+    number: '4'
+    name_font: [1.27, 1.27]
+    num_font: [1.27, 1.27]
+  - type: power_in
+    style: line
+    at: [0.0, -3.81]
+    angle: 90.0
+    len: 1.27
+    name: V-
+    number: '11'
+    name_font: [1.27, 1.27]
+    num_font: [1.27, 1.27]
+pin_names: {offset: 0.254, hide: true}
+pin_numbers_hide: true
+name: TL074
+placement:
+- {unit: 1, dx: 0.0, dy: 0.0}
+- {unit: 2, dx: 18.0, dy: 0.0}
+- {unit: 3, dx: 36.0, dy: 0.0}
+- {unit: 4, dx: 0.0, dy: 22.0}
+- {unit: 5, dx: 18.0, dy: 22.0}
+pinout_datasheet: TI TL074 (SLOS080) Pin Configuration

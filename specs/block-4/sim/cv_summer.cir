@@ -1,0 +1,37 @@
+* POGO block-4 VCA — U63A unity CV+OFS summer + U63B unity inverter (NV-free ratio check)
+* CLAIM (spec §2; nets U63A_SUM/NEFFCV/U63B_INV/PEFFCV):
+*   U63A inverting summer:  NEFFCV = −(R43/R42)·CVP − (R43/R45)·OFS = −(CVP+OFS)  [R42=R43=R45=100k]
+*   U63B unity inverter:    PEFFCV = −(R46/R44)·NEFFCV = +(CVP+OFS)               [R44=R46=100k]
+*   Proves OFS enters the CV at UNITY weight (R43/R45 = 1) ahead of the AMT pot, and the inverter
+*   is unity (R46/R44 = 1). Ideal op-amps (Eop high-gain VCVS) stand in for the TL072 halves: the
+*   summer/inverter gains are set entirely by the feedback resistor ratios — the law under test.
+* PARALLEL instances (no alter-loops). The bind guards R42..R46; e.g. R43→200k must double the sum.
+
+* ===== instance S1: CVP=1, OFS=0  -> NEFFCV = −(R43/R42)·1 = −1.0 =====
+Vcvp1  cvp1 0 DC 1
+Vofs1  ofs1 0 DC 0
+Esa1   neff1 0 0 sa1 1e6        ; (+) at GND, (−)=sa1 virtual ground
+R42a   cvp1  sa1 100k           ; R42 (CV input)
+R45a   ofs1  sa1 100k           ; R45 (OFS input)
+R43a   neff1 sa1 100k           ; R43 (feedback)
+
+* ===== instance S3: CVP=1, OFS=2  -> NEFFCV = −(1+2) = −3.0 ; PEFFCV = +3.0 (U63B unity invert) =
+Vcvp3  cvp3 0 DC 1
+Vofs3  ofs3 0 DC 2
+Esa3   neff3 0 0 sa3 1e6
+R42b   cvp3  sa3 100k
+R45b   ofs3  sa3 100k
+R43b   neff3 sa3 100k
+* U63B inverter on neff3: (−)=sb3 virtual ground; out=peff3 = −(R46/R44)·neff3
+Esb3   peff3 0 0 sb3 1e6
+R44b   neff3 sb3 100k           ; R44 (inverter input)
+R46b   peff3 sb3 100k           ; R46 (inverter feedback)
+
+.control
+  op
+  let neffcv     = v(neff1)   ; DERIVED −R43/R42 = −100k/100k = −1.0
+  let neffcv_sum = v(neff3)   ; DERIVED −(R43/R42·1 + R43/R45·2) = −(1+2) = −3.0
+  let peffcv     = v(peff3)   ; DERIVED −(R46/R44)·neff3 = −1·(−3) = +3.0
+  print neffcv neffcv_sum peffcv
+.endc
+.end

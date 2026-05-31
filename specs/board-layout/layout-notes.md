@@ -34,8 +34,8 @@ Breakdown by type (from `tools/panel-data.yaml`):
 - Large knobs: ~12
 - Sliders (V45°): 2 (HP_FREQ, LP2_FREQ)
 - Trimpots: ~10
-- DW3 toggles (2-pos): 2 (GAIN_MAIN, GAIN_BP3)
-- DW5 toggles (3-pos): 3 active (BP1/2/3_DIST_MODE) + MOD_SRC (planned, not yet in plugin)
+- DW3 toggles (2-pos): 2 (GAIN main 1×/5×, ALT_GAIN BP3 1×/5×)
+- DW5 toggles (3-pos): 4 (BP1/2/3_DIST_MODE + MOD_SRC LFO1/LFO2/External — all in plugin)
 
 > **Panel hardware — toggles vs pots.** All toggles are Thonk-sourced Dailywell 2M
 > sub-mini units (DW3/DW5) with a **10-48 UNS bushing (Ø6.00mm) through a Ø4.95mm
@@ -60,7 +60,7 @@ Control board: ~244mm × 80mm (full 48HP width)
   - Connects to utility board via IDC ribbon cables
 
 Utility board: ~244mm × 80mm
-  - Mod bus processor, 22 attenuverter circuits, expo converters
+  - Mod bus processor, 18 attenuverter circuits (+ VCA raw normal), expo converters
   - Receives control voltages from control board via IDC ribbon
   - Connects to audio board via stacking headers
 

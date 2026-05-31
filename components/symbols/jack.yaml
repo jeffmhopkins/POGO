@@ -1,0 +1,70 @@
+# components/symbols/jack.yaml — AUTHORED symbol primitive (the nets `sym:` token = filename).
+# Pin `at` is the connection point; one source drives both the emitted symbol and the pin map.
+# Loaded dynamically by tools/symbols.py (globs components/symbols/*.yaml).
+lib_id: Device:Audio_Jack_3.5mm_SwitchT
+properties:
+- key: Reference
+  val: J
+  at: [0.0, 5.08, 0.0]
+  font: [1.27, 1.27]
+- key: Value
+  val: Audio_Jack_3.5mm_SwitchT
+  at: [0.0, -7.62, 0.0]
+  font: [1.27, 1.27]
+units:
+- unit: 0
+  style: 1
+  graphics:
+  - kind: circle
+    width: 0.254
+    fill: none
+    center: [0.0, 0.0]
+    radius: 2.159
+  - kind: polyline
+    width: 0.254
+    fill: none
+    pts:
+    - [-2.159, 0.0]
+    - [-3.175, 0.0]
+  - kind: polyline
+    width: 0.254
+    fill: none
+    pts:
+    - [2.159, 0.0]
+    - [3.175, 0.0]
+  pins: []
+- unit: 1
+  style: 1
+  graphics: []
+  pins:
+  - type: passive
+    style: line
+    at: [-5.08, 0.0]
+    angle: 0.0
+    len: 1.905
+    name: T
+    number: '1'
+    name_font: [1.27, 1.27]
+    num_font: [1.27, 1.27]
+  - type: passive
+    style: line
+    at: [5.08, 0.0]
+    angle: 180.0
+    len: 1.905
+    name: S
+    number: '2'
+    name_font: [1.27, 1.27]
+    num_font: [1.27, 1.27]
+  - type: passive
+    style: line
+    at: [0.0, -5.08]
+    angle: 90.0
+    len: 1.905
+    name: SW
+    number: '3'
+    name_font: [1.27, 1.27]
+    num_font: [1.27, 1.27]
+pin_names: {offset: 1.016, hide: true}
+pin_numbers_hide: true
+name: Audio_Jack_3.5mm_SwitchT
+primitive: true
