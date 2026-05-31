@@ -1,0 +1,42 @@
+* aux/modulation/attenuverter — bipolar pot law (V_att <-> wiper <-> -V_att) (LIBRARY generic)
+* LIBRARY CHECK (generic hardcoded representative values; NO netlist_bind by design — there is
+* no netlist behind a library block, per specs/aux/_LIBRARY.md "Library sim convention").
+*
+* CLAIM (spec.md "Transfer Function" lines 62-74):
+*   The attenuverter pot bridges +V_att (one lug) and -V_att (other lug); the wiper is the
+*   attenuated CV V_mod_out = theta*V_att, theta in [-1,+1]:
+*     full CW  (theta=+1) -> wiper = +V_att
+*     center   (theta= 0) -> wiper = 0          (the +V_att and -V_att halves cancel)
+*     full CCW (theta=-1) -> wiper = -V_att
+*   This is the analog of plugin applyDestination = source*att, att in [-1,+1] (ModBus.hpp:32).
+*   FALSIFIABLE FACT: the bottom lug ties to -V_att (BIPOLAR), NOT GND. A unipolar V_att<->GND
+*   miswire would give center=+V_att/2 and CCW=0 -> the assertions below FAIL.
+*
+* REPRESENTATIVE VALUES (generic library): V_att = +5, -V_att = -5 (the -5 STANDS FOR the
+*   unity-inverter output, att_inverter.cir). The pot is modelled as two resistors R_top
+*   (V_att->wiper) + R_bot (wiper->-V_att); the pot value CANCELS (a ratio/topology check).
+* PARALLEL instances (no alter-loops): one independent divider per wiper position.
+
+Vatt  vatt  0 DC  5            ; +V_att (protected destination node / mod-bus tap)
+Vnatt nvatt 0 DC -5            ; -V_att = unity-inverter output
+
+* --- full CW: wiper at top lug, R_top -> 0 ---  wiper = +V_att = +5
+Rtcw vatt  ncw   1m
+Rbcw ncw   nvatt 10k
+
+* --- center: R_top = R_bot = 5k ---  wiper = (+5 + -5)/2 = 0
+Rtnn vatt  ncen  5k
+Rbnn ncen  nvatt 5k
+
+* --- full CCW: wiper at bottom lug, R_bot -> 0 ---  wiper = -V_att = -5
+Rtcc vatt  ncc   10k
+Rbcc ncc   nvatt 1m
+
+.control
+  op
+  let att_cw     = v(ncw)        ; DERIVED +V_att = +5.0
+  let att_center = v(ncen)       ; DERIVED 0.0 (bipolar; would be +2.5 if bottom lug were GND)
+  let att_ccw    = v(ncc)        ; DERIVED -V_att = -5.0 (would be 0 if bottom lug were GND)
+  print att_cw att_center att_ccw
+.endc
+.end

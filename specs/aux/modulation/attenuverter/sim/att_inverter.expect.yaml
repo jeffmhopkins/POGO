@@ -1,0 +1,12 @@
+deck: att_inverter.cir
+description: >
+  Generic library check (hardcoded representative values; NO netlist_bind by design). Verifies
+  the -V_att rail is a UNITY inverter, gain = -(R_inv_f/R_inv_in) = -(10k/10k) = -1, which sets
+  the att=-1 end of the bipolar span and the exact center null. Catches single-ref drift (one
+  resistor mismatched) but not a coordinated change of both refs (ratio survives) — acknowledged.
+plugin_ref: "plugin/src/dsp/ModBus.hpp:32 — applyDestination=source*att, att in [-1,+1]; the -V_att rail (=-1*V_att) sets the att=-1 end. spec.md 'Pot Wiper Between +V and -V' lines 82-88"
+measurements:
+  # DERIVED: nvatt = -(R_inv_f/R_inv_in)*V_att = -(10k/10k)*1 = -1.0  (NOT deck output)
+  - name: g_inv
+    expect: -1.0
+    tol_abs: 0.01

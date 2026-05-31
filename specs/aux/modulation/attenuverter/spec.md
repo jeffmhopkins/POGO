@@ -131,9 +131,9 @@ plus D4 on the MOD_IN jack. These are SOT-23; manageable board area.
 | Ref (generic) | Part | Package | Value | Notes |
 |---|---|---|---|---|
 | U_ATT_1..5 | TL074CDT | SOIC-14 | — | Quad op-amp; 4 inverters per IC; 5 ICs for 18 dest (MB_INV_1–5 per block-3/spec.md; 2 spare) |
-| R_inv_in | Resistor | 0603 | 10 kΩ | Inverter input resistor; 1% tolerance |
-| R_inv_f | Resistor | 0603 | 10 kΩ | Inverter feedback resistor; 1% tolerance; must match R_inv_in |
-| RV_ATT | Pot | 9mm T18 | 10 kΩ | Panel attenuverter pot; linear taper with center detent; 2.5 kΩ max wiper impedance (= 10 kΩ/4 at center travel) |
+| R_inv_in | Resistor | 0603 | 47 kΩ | Inverter input resistor; 1% tolerance (raised 10k→47k in change 0020 §H to cut mod-bus load) |
+| R_inv_f | Resistor | 0603 | 47 kΩ | Inverter feedback resistor; 1% tolerance; must match R_inv_in (10k→47k, change 0020 §H) |
+| RV_ATT | Pot | 9mm T18 | 50 kΩ | Panel attenuverter pot; linear taper with center detent (raised 10k→50k in change 0020 §H for hi-Z bus load); ~12.5 kΩ max wiper impedance (= 50 kΩ/4 at center travel) |
 | R_cv_mb | Resistor | 0603 | 100 Ω | Mod bus path series protection |
 | R_cv_ov | Resistor | 0603 | 100 Ω | Override jack path series protection |
 | D_mb | BAT54S | SOT-23 | — | Mod bus input clamp |

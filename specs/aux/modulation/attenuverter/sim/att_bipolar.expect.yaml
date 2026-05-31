@@ -1,0 +1,20 @@
+deck: att_bipolar.cir
+description: >
+  Generic library check (hardcoded representative values; NO netlist_bind by design — value-
+  independent divider RATIO / TOPOLOGY check, the pot resistance cancels). Verifies the bipolar
+  pot law V_mod_out=theta*V_att: wiper spans [+V_att, 0, -V_att] across CW/center/CCW (V_att=+5,
+  -V_att=-5). Falsifies a unipolar V_att<->GND miswire (which would give center=+2.5, CCW=0).
+plugin_ref: "plugin/src/dsp/ModBus.hpp:32 — applyDestination=source*att, att in [-1,+1]; spec.md 'Transfer Function' lines 62-74 (CW=+V_att, center=0, CCW=-V_att)"
+measurements:
+  # DERIVED: full CW -> wiper at top lug -> +V_att = +5.0
+  - name: att_cw
+    expect: 5.0
+    tol_pct: 1
+  # DERIVED: center -> (+V_att + -V_att)/2 = 0.0 (THE bipolar assertion; GND-miswire -> +2.5)
+  - name: att_center
+    expect: 0.0
+    tol_abs: 0.05
+  # DERIVED: full CCW -> wiper at bottom lug -> -V_att = -5.0 (GND-miswire -> 0)
+  - name: att_ccw
+    expect: -5.0
+    tol_pct: 1

@@ -1,0 +1,17 @@
+deck: mb_summer_gain.cir
+description: >
+  Generic library check (hardcoded representative values; NO netlist_bind by design — there is
+  no netlist behind a library block). Verifies the inverting-summer SCALE gain law |G|=R_f/R_src
+  at both DSP endpoints: R_src=20k -> 5x (amountGain(1)) and R_src=500k -> 0.2x (amountGain(0)),
+  with R_f=100k. The summer inverts; magnitude is taken.
+plugin_ref: "plugin/src/dsp/ModBus.hpp:19 — amountGain(p)=0.2*25^p -> 0.2x..5x; analog |G|=R_f/R_src per spec.md 'Hardware Summing Amplifier' lines 82-90"
+measurements:
+  # DERIVED from the spec ratio, NOT copied from deck output:
+  #   g_max = R_f/R_src = 100k/20k  = 5.0   (= amountGain(1))
+  #   g_min = R_f/R_src = 100k/500k = 0.2   (= amountGain(0))
+  - name: g_max
+    expect: 5.0
+    tol_pct: 1
+  - name: g_min
+    expect: 0.2
+    tol_pct: 1

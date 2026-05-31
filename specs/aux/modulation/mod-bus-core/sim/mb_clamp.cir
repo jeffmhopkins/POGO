@@ -1,0 +1,42 @@
+* aux/modulation/mod-bus-core — output +-10V CLAMP (LIBRARY generic)
+* LIBRARY CHECK (generic hardcoded representative values; NO netlist_bind by design, per
+* specs/aux/_LIBRARY.md "Library sim convention").
+*
+* CLAIM (spec.md "Clamp Implementation" lines 114-129, "DSP Reference" line 77):
+*   The processor output is hard-clamped to +-10V: V_bus = clamp(V_src*gain+offset, -10, +10)
+*   (ModBus.hpp:25). Hardware: back-to-back 10V zeners (BZX84-C10) in the MB_INV feedback path.
+*   Behaviorally the limit is the +-10V clamp threshold itself.
+*
+* REPRESENTATIVE VALUES (generic library): clamp limits +-10V (the spec/plugin value). Three
+*   probe inputs exercise the law: well inside (+7 -> pass), above (+15 -> clamp +10), and below
+*   (-15 -> clamp -10).
+*
+* IDEAL MODEL (justification): the clamp is the only nonlinearity under test, so a behavioral
+*   B-source clamp V=(V(in)>Hi)?Hi:((V(in)<Lo)?Lo:V(in)) stands in for the zener-limited MB_INV
+*   feedback. A B-source clamp may use '>' / '<' (the guide's '>'-trap is only in .control let/print).
+*   The exact zener knee softness/tolerance is a prototype-trim item (spec lines 127-135); the LAW
+*   under test is the +-10V limit. PARALLEL instances (one per probe), no alter.
+
+.param hi=10
+.param lo=-10
+
+* --- inside the band: +7 passes unchanged ---
+Vin1 nin1 0 DC 7
+Bc1  out1 0 V = (V(nin1)>hi)?hi:((V(nin1)<lo)?lo:V(nin1))
+
+* --- above: +15 clamps to +10 ---
+Vin2 nin2 0 DC 15
+Bc2  out2 0 V = (V(nin2)>hi)?hi:((V(nin2)<lo)?lo:V(nin2))
+
+* --- below: -15 clamps to -10 ---
+Vin3 nin3 0 DC -15
+Bc3  out3 0 V = (V(nin3)>hi)?hi:((V(nin3)<lo)?lo:V(nin3))
+
+.control
+  op
+  let pass_in  = v(out1)         ; DERIVED 7 in band -> 7.0
+  let clamp_hi = v(out2)         ; DERIVED 15 -> +10.0
+  let clamp_lo = v(out3)         ; DERIVED -15 -> -10.0
+  print pass_in clamp_hi clamp_lo
+.endc
+.end

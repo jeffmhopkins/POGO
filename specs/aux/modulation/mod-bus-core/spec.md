@@ -89,6 +89,14 @@ With R_f = 100 kΩ:
                   → offset contribution = −(V_off × 1) → ±5V offset range at output
 ```
 
+> **Block-3 instance note (change 0020 §M2):** the live block-3 implementation does NOT use
+> dedicated ±5 V references; instead the OFFSET pot wiper swings across the raw **±12 V** rails
+> into **R_off = R15 = 240 kΩ** (not 100 kΩ), so the contribution is −(V_w × R_f/R_off) =
+> −(±12 × 100/240) = ∓5 V → the same ±5 V offset range, by a different source. Both realizations
+> satisfy the plugin's offset = offsetParam × 5 V; the library sim (`sim/mb_offset_polarity.cir`)
+> checks the ±5 V-reference / R_f=R_off=1 form documented here. See `specs/block-3/sim/mb_offset_level.cir`
+> for the ±12 V-rail / R15=240 kΩ form.
+
 Note: MB_AMP inverts polarity; MB_INV restores it. The double inversion means
 V_modbus has the same polarity as the expected DSP output.
 
@@ -143,14 +151,21 @@ TL074CDT (SOIC-14) plus passives on a small board section.
 
 ### Mod Bus Distribution
 
-V_modbus drives 18 per-destination R_SRC_NORM resistors (100 kΩ each) — the bus normals into
-each override jack through its 100 kΩ. Total load on V_modbus:
-  18 × 100 kΩ in parallel ≈ 5.6 kΩ
+> 🔧 **Updated to change 0020 §H** (the earlier "100 kΩ R_SRC_NORM, no buffer" scheme below was
+> superseded — it throttled mod depth to ~3% because a 100 kΩ series R fed each ~3.3 kΩ destination
+> node). The current design: each destination's override-jack switch lug normals **low-Z directly**
+> to the bus (the override plug breaks the normal); the 18× R_SRC_NORM are removed.
 
-At V_modbus = ±10 V and 5.6 kΩ load: I ≈ ±1.8 mA — easily driven by the MB_INV output (U3.7)
-directly; **no distribution buffer is needed** (halves C+D stay spare). The attenuverter pot
-for each destination sits on the destination's V_src node (bus-via-R_SRC_NORM when unpatched,
-or the override jack when patched), not directly across the bus rail.
+V_modbus drives 18 attenuverter pots (50 kΩ each, change 0020 §H — was 10 kΩ) in parallel plus the
+raw VCA normal:
+  18 × 50 kΩ in parallel ≈ 2.8 kΩ → at ±10 V, ~3.6 mA pot load (the original 10 kΩ pots gave
+  ~556 Ω ≈ 18 mA, which is why the pots were raised ×5 to ~11 mA total bus load).
+
+This load is **driven by a distribution buffer**, not the MB_INV output directly: MB_PROC_A's two
+otherwise-spare halves (C + D) are wired in **parallel as a unity-gain buffer** (each ~half the
+current; 47 Ω series share resistors before the join prevent oscillation from unequal saturation).
+The attenuverter pot for each destination sits across the bus rail (top lug → bus / −V_src, wiper →
+destination), with the override jack switching the pot input from bus to patched CV when plugged.
 
 ### Offset Reference
 
@@ -189,7 +204,7 @@ is consistent with the mod bus gain calibration.
 | Clamp onset | ±9.9V (±10V nominal) | Zener knee |
 | Bandwidth | >100 kHz | TL074; not audio-critical |
 | Offset null | <10 mV | After RV_MB_ZERO trim |
-| Output drive | ~1.8 mA | 18 × 100 kΩ R_SRC_NORM loads (direct, no buffer) |
+| Output drive | ~11 mA | 18 × 50 kΩ pots (change 0020 §H); driven by C+D paralleled distribution buffer |
 
 ## Known Gotchas / Assembly Notes
 
@@ -203,8 +218,10 @@ is consistent with the mod bus gain calibration.
   V_modbus = 0V (null the op-amp input offset voltage)
 - RV_MB_AMOUNT_MAX trim: apply a reference signal (e.g. 1V DC), set AMOUNT
   to max CW, trim until V_modbus = 5× input (5V DC)
-- No distribution buffer needed: the bus drives 18 × 100 kΩ R_SRC_NORM resistors (~5.6 kΩ,
-  ~1.8 mA), well within the MB_INV output (U3.7). Halves C+D of MB_PROC_A stay spare.
+- Distribution buffer required (change 0020 §H): the bus drives 18 × 50 kΩ pots directly (~2.8 kΩ,
+  ~11 mA at ±10 V), too heavy for the MB_INV output alone. MB_PROC_A halves C+D are re-enabled as a
+  paralleled unity buffer (47 Ω series share). The earlier "no buffer / 100 kΩ R_SRC_NORM" note was
+  superseded — that series-R scheme throttled mod depth to ~3%.
 - MOD_SRC select: the bus source is the DW5 3-way switch (LFO1 / LFO2 / External), with the
   DPDT commons bridged (see Schematic). MOD_IN feeds only the EXT throw — no auto-normal.
   Both LFO outputs remain live at their own jacks regardless of switch position.

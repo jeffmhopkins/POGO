@@ -1,0 +1,43 @@
+* aux/modulation/lfo-core — Schmitt threshold ratio sets the triangle amplitude (.tran)
+* LIBRARY CHECK (generic hardcoded values; NO netlist_bind by design, per specs/aux/_LIBRARY.md).
+*
+* CLAIM (spec.md "Transfer Function" lines 94-114, "Component Values Derivation" 242-246):
+*   The triangle peak equals the Schmitt hysteresis threshold:
+*     V_H = V_sat * R_HYS/(R_FB_SQ+R_HYS) = V_sat * 82k/182k = 0.4505 * V_sat.
+*   With V_sat ~= 11 V this gives V_H = 4.96 V ~= the target +/-5 V triangle (plugin LFO.hpp:20
+*   maps the unit triangle to +/-5 V at the output).
+*   The ABSOLUTE +/-5 V depends on V_sat [NV] (op-amp saturation, an unmeasured device constant),
+*   so we pin the RATIO V_pk/V_sat = R_HYS/(R_FB_SQ+R_HYS), set purely by R_HYS,R_FB_SQ.
+*
+* REPRESENTATIVE VALUES: same threshold pair as the production design (R_FB_SQ=100k, R_HYS=82k);
+*   R_INT/C_INT (100k/10nF) only set the rate (~555 Hz, short run), not the amplitude.
+*   DERIVED ratio = 82k/(100k+82k) = 0.4505.
+*
+* DECK: same oscillator as lfo_oscillation; measure the triangle peak (MAX past startup) and
+*   divide by the deck's known V_sat -> vth_ratio. The peak rides slightly below the ideal
+*   threshold (finite comparator edge + integrator overshoot timing) -> 3% tolerance.
+*
+* IDEAL MODELS: same as lfo_oscillation (Eint integrator; Bsq rail comparator at +/-Vsat; Bdrv
+*   inverter). The comparator clamp at +/-Vsat is what makes V_H = V_sat*R_HYS/(R_FB_SQ+R_HYS) exact.
+
+.param vsat=11          ; V_sat [NV]; the ratio V_pk/V_sat is what we pin (R_HYS/(R_FB_SQ+R_HYS))
+
+Bdrv ndrv 0 V = -V(vsq)
+Eint nvtri 0 0 nsum 1e6
+Rint ndrv nsum 100k                                      ; R_INT
+Cint nsum nvtri 10nF                                     ; C_INT
+Rfb  vsq nplus 100k                                      ; R_FB_SQ (divider top, out -> (+))
+Rhys nplus 0 82k                                         ; R_HYS  (divider -> GND)
+Bsq  vsq 0 V = (V(nplus) > V(nvtri)) ? vsat : -vsat
+
+.ic v(nvtri)=0.1
+.tran 5u 50m uic
+
+.control
+  run
+  meas tran vpk MAX v(nvtri)          ; triangle positive peak over the run
+  * divide by the deck's V_sat (literal 11; a .param is not in scope as a .control vector)
+  let vth_ratio = vpk/11              ; = R_HYS/(R_FB_SQ+R_HYS), V_sat-free
+  print vth_ratio
+.endc
+.end

@@ -1,0 +1,17 @@
+deck: mb_offset_polarity.cir
+description: >
+  Generic library check (hardcoded representative values; NO netlist_bind by design). Verifies
+  (1) the OFFSET contribution magnitude R_f/R_off = 1 -> a +-5V reference gives a +-5V offset, and
+  (2) the double-inversion polarity (inverting summer + unity MB_INV) restores the offset sign so
+  the bus follows the NON-inverted plugin sum offset=offsetParam*5. V_src grounded to isolate the
+  offset path. R_f=R_off=100k, R_inv_in=R_inv_f=100k.
+plugin_ref: "plugin/src/dsp/ModBus.hpp:24-25 — offset=offsetParam*5 (+-5V), bus=clamp(sourceV*gain+offset,...) is NON-inverted -> the 2nd analog stage must invert; spec.md lines 82-101"
+measurements:
+  # DERIVED from the spec: summer out = -(R_f/R_off)*V_off = -V_off; MB_INV (-1) -> +V_off.
+  #   offset_pos = +5.0 (V_off=+5), offset_neg = -5.0 (V_off=-5). NOT copied from deck output.
+  - name: offset_pos
+    expect: 5.0
+    tol_abs: 0.05
+  - name: offset_neg
+    expect: -5.0
+    tol_abs: 0.05
