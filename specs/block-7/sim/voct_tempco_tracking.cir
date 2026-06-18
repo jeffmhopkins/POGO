@@ -1,0 +1,40 @@
+* POGO block-7 — V/oct CUTOFF-slope tracking over the FULL synth-cabinet temperature band.
+* Modules heat up in a cabinet, so this checks the realistic condition: the 1V/oct trim is set ONCE
+* at calibration (~300K), then the Vishay TFPT tempco shunt R_T (+4110 ppm/K, R229) compensates V_T's
+* +3333 ppm/K drift so the FILTER-CUTOFF slope stays near V_T·ln2 across 0–50 °C. This is a TEMPERATURE-
+* TRACKING check (does it STAY calibrated when hot), distinct from voct_slope_band (room-temp trim authority).
+*
+* Target slope V_T·ln2(T) = (k·ln2/q)·T = 0.059732 mV/K · T_K :
+*   0 °C (273.15K)=16.315   calib (300K)=17.919   50 °C (323.15K)=19.302  mV/oct.
+* Divider: R_VOCT(R110=49.9k)+RV(trim) = R_fixed=54806 (trimmed so slope(300K)=17.919);
+*   R_T(R229=1k nominal) with Vishay TFPT +4110 ppm/K -> R_T(T)=1000·(1+4110e-6·(T-300K)):
+*   0 °C: 889.65   calib: 1000   50 °C: 1095.15.  slope(T)=R_T(T)/(R_fixed+R_T(T))·1V.
+* Filter-cutoff V/oct spec: |err| <= 3% over 0–50 °C (a filter cutoff is NOT a VCO pitch ref; ±3% =
+*   ±0.5 semitone at the extreme is sonically fine; the UNcompensated drift would be ±8–10% — see falsifier).
+* [NV] note: the +4110 ppm/K is the Vishay TFPT datasheet tempco (part property, not a netlist numeric);
+*   R_T nominal (1k) is netlist-bound. PARALLEL instances, no alter loops.
+.param Rfixed=54806
+
+* --- cold: 0 °C, R_T=889.65 ---
+Vc nc_in 0 DC 1
+Rfc nc_in nc {Rfixed}
+Rtc nc 0 889.65
+* --- calib: ~300K, R_T=1000 ---
+Vn nn_in 0 DC 1
+Rfn nn_in nn {Rfixed}
+Rtn nn 0 1000
+* --- hot: 50 °C, R_T=1095.15 ---
+Vh nh_in 0 DC 1
+Rfh nh_in nh {Rfixed}
+Rth nh 0 1095.15
+
+.control
+  op
+  let slope_cold = v(nc)*1000        ; mV/oct at 0 °C
+  let slope_hot  = v(nh)*1000        ; mV/oct at 50 °C
+  let err_cold = (slope_cold - 16.315)/16.315 * 100    ; % vs V_T·ln2(0C)
+  let err_hot  = (slope_hot  - 19.302)/19.302 * 100     ; % vs V_T·ln2(50C)
+  let track_ok = ((err_cold gt -3) and (err_cold lt 3) and (err_hot gt -3) and (err_hot lt 3)) ? 1 : 0
+  print slope_cold slope_hot err_cold err_hot track_ok
+.endc
+.end

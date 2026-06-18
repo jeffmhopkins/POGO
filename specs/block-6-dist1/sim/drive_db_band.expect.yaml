@@ -1,0 +1,26 @@
+deck: drive_db_band.cir
+description: "[NV] BP1 DRIVE Ec+ command HEADROOM across the THAT2180 datasheet band {6.0,6.1,6.2 mV/dB}. The absolute drive dB is [NV]; the knob->Ec+ full-scale is Phase-3R-UNDEFINED. SCOPE: this proves the DRIVE topology (U91-C unity summer R157-R160 -> R_ec=10k R245 -> high-Z Ec+ port) has ≫10x HEADROOM to COMMAND the plugin's worst-case (6.2 mV/dB) SOFT +34.75 dB (215.5 mV) and HARD +13.98 dB (86.7 mV) targets — a calibratability claim, NOT a precise knob scaling. dB derived by dividing the rail-limited available Ec+ by each band literal in .control."
+plugin_ref: "plugin/src/dsp/Distortion.hpp:12-16 (HARD g=1+4d, 1x->5x = +13.979 dB) + Distortion.hpp:34-37 (SOFT G=exp((p-0.20)/0.80*4), max e^4=54.598x = +34.749 dB). THAT2180 ~6.1 mV/dB nominal, datasheet band 6.0-6.2 mV/dB."
+# NETLIST BINDING: deck literals must equal the live block-6-dist1.nets.yaml values; drift FAILS the gate.
+#   R157/R158/R159 = summer inputs (100k); R160 = feedback (100k) -> unity inverting summer.
+#   R245 = R_ec = 10k (V_DRIVE_CTRL -> Ec+ injection; the small R that keeps Ec+ ≈ V_DRIVE_CTRL into the high-Z port).
+netlist_bind:
+  R_knob: "R157=100k"
+  R_cv:   "R158=100k"
+  R_bias: "R159=100k"
+  R_fb:   "R160=100k"
+  R_ec:   "R245=10k"
+measurements:
+  # SCOPE/[NV]: ecp_max is the RAIL-LIMITED available Ec+ (≈ +9.99 V: ±10 V TL074 swing passed ~1:1
+  # through R_ec=10k into the 10M port). It is NOT a calibrated knob endpoint — it is the headroom the
+  # topology makes available. The two coverage booleans are the load-bearing assertions; the dB
+  # readouts are transparency only (loose tol).
+  - name: covers_soft     # available Ec+ >= 0.2155 V (= 6.2 mV/dB * 34.749 dB, the SOFT target). DERIVED.
+    expect: true
+  - name: covers_hard     # available Ec+ >= 0.0867 V (= 6.2 mV/dB * 13.979 dB, the HARD target). DERIVED.
+    expect: true
+  # Transparency: available command dB at worst-case 6.2 mV/dB = 9.99V / 0.0062 ≈ 1611 dB
+  # (i.e. the ±10 V rail-limited span dwarfs the 34.75 dB SOFT target by >40x -> ample headroom).
+  - name: drive_db_6p2
+    expect: 1611.0
+    tol_pct: 5            # transparency readout; bounded by the modeled ±10 V rail span, not a calibrated target

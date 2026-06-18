@@ -1,0 +1,27 @@
+deck: vca_unity_band.cir
+description: "[NV] VCA HIGH-3 Ec+ unity-trim authority across the THAT2180 datasheet band {6.0,6.1,6.2 mV/dB}. The absolute unity-null dB is [NV] (depends on the device gain constant); this proves the network-determined ±Ec+ still brackets the 0 dB null with ≥±0.5 dB margin at the WORST CASE 6.2 mV/dB (least dB per mV). dB derived by dividing the network mV by each band literal in .control — not an alter sweep."
+plugin_ref: "plugin/src/dsp/VcaBlock.hpp:26-28 — G=10^(2*(control-1)), unity at control=1; trim must null to 0 dB. THAT2180 ~6.1 mV/dB nominal, datasheet band 6.0-6.2 mV/dB."
+# NETLIST BINDING: same injection cell as vca_ecplus.cir; binds make a netlist drift FAIL the gate.
+#   R_ec  = R235 = 10k   (V_CTRL_BUF -> Ec+)
+#   R_inj = R239 = 1M    (trim wiper -> Ec+)
+#   R_ref = R233 = 11k3  (±ref divider top — the ±1.195V wiper level this deck models; a ref
+#     regression R233->45k3 collapses authority and FAILS null_margin_ok).
+netlist_bind:
+  R_ec:  "R235=10k"
+  R_inj: "R239=1M"
+  R_ref: "R233=11k3"
+measurements:
+  # Network-determined Ec+ (independent of the band): +1.195V wiper -> +11.33 mV; -1.195V -> -12.32 mV.
+  # DERIVED dB at the WORST CASE 6.2 mV/dB:
+  #   auth_pos_6p2 = 11.33 mV / 6.2 mV/dB = +1.827 dB
+  #   auth_neg_6p2 = -12.32 mV / 6.2 mV/dB = -1.987 dB
+  - name: auth_pos_6p2     # +Ec+ authority in dB at worst-case 6.2 mV/dB
+    expect: 1.827
+    tol_abs: 0.1           # network tolerance + the ±0.005mV bias term; well inside the 0.5 margin
+  - name: auth_neg_6p2     # -Ec+ authority in dB at worst-case 6.2 mV/dB
+    expect: -1.987
+    tol_abs: 0.1
+  # Worst-case null margin: trim reaches > +0.5 dB AND < -0.5 dB -> brackets the 0 dB unity null
+  # with ≥±0.5 dB authority even at the least-authority band point.
+  - name: null_margin_ok
+    expect: true
